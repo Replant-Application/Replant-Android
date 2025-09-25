@@ -1,0 +1,302 @@
+[
+  {
+    "id": 1,
+    "mission_id": "sm1",
+    "title": "매일 아침 8시 전에 기상 기록",
+    "description": "규칙적인 생활 패턴을 위해 매일 아침 8시 전에 기상하고 기록하세요",
+    "emoji": "⏰",
+    "difficulty": "easy",
+    "experience": 50,
+    "category_id": "self_management"
+  },
+  {
+    "id": 2,
+    "mission_id": "sm2",
+    "title": "정장/단정한 복장 착용 후 사진 기록",
+    "description": "면접을 위한 정장이나 단정한 복장을 착용하고 사진을 찍어 기록하세요",
+    "emoji": "👔",
+    "difficulty": "easy",
+    "experience": 40,
+    "category_id": "self_management"
+  },
+  {
+    "id": 3,
+    "mission_id": "sm3",
+    "title": "30초 자기소개 영상 셀프 촬영",
+    "description": "면접을 위한 30초 자기소개 영상을 셀프로 촬영해보세요",
+    "emoji": "📹",
+    "difficulty": "medium",
+    "experience": 60,
+    "category_id": "self_management"
+  },
+  {
+    "id": 4,
+    "mission_id": "sm4",
+    "title": "거울 앞에서 면접 답변 3문장 낭독",
+    "description": "거울을 보며 면접 답변을 3문장으로 낭독하며 연습하세요",
+    "emoji": "🗣️",
+    "difficulty": "easy",
+    "experience": 45,
+    "category_id": "self_management"
+  },
+  {
+    "id": 5,
+    "mission_id": "sm5",
+    "title": "주 3회 20분 이상 걷기/스트레칭",
+    "description": "건강 관리를 위해 주 3회 이상 20분씩 걷기나 스트레칭을 하세요",
+    "emoji": "🚶",
+    "difficulty": "medium",
+    "experience": 55,
+    "category_id": "self_management"
+  },
+  {
+    "id": 6,
+    "mission_id": "sm6",
+    "title": "졸업증명서·자격증 사본 등 체크리스트 작성",
+    "description": "취업 서류 준비를 위해 필요한 증명서와 자격증 사본을 체크리스트로 작성하세요",
+    "emoji": "📋",
+    "difficulty": "easy",
+    "experience": 40,
+    "category_id": "self_management"
+  },
+  {
+    "id": 7,
+    "mission_id": "sm7",
+    "title": "자연스러운 면접 미소 연습",
+    "description": "면접에서 자연스러운 미소를 연습해보세요",
+    "emoji": "😊",
+    "difficulty": "easy",
+    "experience": 35,
+    "category_id": "self_management"
+  },
+  {
+    "id": 8,
+    "mission_id": "sm8",
+    "title": "1분 자기소개 영상 3회 반복 녹화 및 비교",
+    "description": "1분 자기소개 영상을 3번 녹화하고 비교 분석해보세요",
+    "emoji": "🎬",
+    "difficulty": "medium",
+    "experience": 65,
+    "category_id": "self_management"
+  },
+  {
+    "id": 9,
+    "mission_id": "sm9",
+    "title": "면접 예상질문 리스트 5개 작성",
+    "description": "면접 준비를 위해 예상질문 5개를 미리 작성해보세요",
+    "emoji": "❓",
+    "difficulty": "medium",
+    "experience": 55,
+    "category_id": "self_management"
+  },
+  {
+    "id": 10,
+    "mission_id": "sm10",
+    "title": "하루 학습시간 1시간 기록",
+    "description": "자기계발을 위해 하루 1시간씩 학습하고 시간을 기록하세요",
+    "emoji": "📚",
+    "difficulty": "medium",
+    "experience": 60,
+    "category_id": "self_management"
+  },
+  {
+    "id": 11,
+    "mission_id": "cm1",
+    "title": "가족·친구에게 안부 메시지 1회 전송",
+    "description": "기본적인 소통 연습을 위해 가족이나 친구에게 안부 메시지를 보내보세요",
+    "emoji": "💬",
+    "difficulty": "easy",
+    "experience": 30,
+    "category_id": "communication"
+  },
+  {
+    "id": 12,
+    "mission_id": "cm2",
+    "title": "커뮤니티 글/댓글 1개 작성",
+    "description": "온라인 소통 연습을 위해 커뮤니티에 글이나 댓글을 1개 작성해보세요",
+    "emoji": "📝",
+    "difficulty": "easy",
+    "experience": 35,
+    "category_id": "communication"
+  },
+  {
+    "id": 13,
+    "mission_id": "cm3",
+    "title": "지인과 10분 이상 전화 통화",
+    "description": "대화 연습을 위해 지인과 10분 이상 전화 통화를 해보세요",
+    "emoji": "📞",
+    "difficulty": "medium",
+    "experience": 50,
+    "category_id": "communication"
+  },
+  {
+    "id": 14,
+    "mission_id": "cm4",
+    "title": "온라인 그룹/오픈채팅방에서 자기소개 1줄 남기기",
+    "description": "자기소개 연습을 위해 온라인 그룹에서 자기소개를 1줄 남겨보세요",
+    "emoji": "👋",
+    "difficulty": "easy",
+    "experience": 40,
+    "category_id": "communication"
+  },
+  {
+    "id": 15,
+    "mission_id": "cm5",
+    "title": "자기소개 영상 업로드 후 피드백 요청",
+    "description": "피드백을 받기 위해 자기소개 영상을 업로드하고 피드백을 요청해보세요",
+    "emoji": "📹",
+    "difficulty": "medium",
+    "experience": 60,
+    "category_id": "communication"
+  },
+  {
+    "id": 16,
+    "mission_id": "cm6",
+    "title": "친구/멘토와 예상 질문 1개 주고받기",
+    "description": "면접 질문 연습을 위해 친구나 멘토와 예상 질문을 주고받아보세요",
+    "emoji": "❓",
+    "difficulty": "medium",
+    "experience": 55,
+    "category_id": "communication"
+  },
+  {
+    "id": 17,
+    "mission_id": "cm7",
+    "title": "면접 빈출 질문 1개 선택 → 소리 내어 답변",
+    "description": "면접 연습을 위해 빈출 질문 1개를 선택하고 소리 내어 답변해보세요",
+    "emoji": "🗣️",
+    "difficulty": "medium",
+    "experience": 50,
+    "category_id": "communication"
+  },
+  {
+    "id": 18,
+    "mission_id": "cm8",
+    "title": "멘토/교수님께 이메일로 질문 1개 보내기",
+    "description": "전문가와 소통하기 위해 멘토나 교수님께 이메일로 질문을 보내보세요",
+    "emoji": "📧",
+    "difficulty": "medium",
+    "experience": 45,
+    "category_id": "communication"
+  },
+  {
+    "id": 19,
+    "mission_id": "cm9",
+    "title": "가상 면접 파트너와 5분 대화 연습",
+    "description": "면접 대화 연습을 위해 가상 면접 파트너와 5분간 대화해보세요",
+    "emoji": "💻",
+    "difficulty": "medium",
+    "experience": 65,
+    "category_id": "communication"
+  },
+  {
+    "id": 20,
+    "mission_id": "cm10",
+    "title": "면접 스터디 그룹 참여 신청",
+    "description": "그룹 활동 참여를 위해 면접 스터디 그룹에 참여 신청을 해보세요",
+    "emoji": "👥",
+    "difficulty": "medium",
+    "experience": 55,
+    "category_id": "communication"
+  },
+  {
+    "id": 21,
+    "mission_id": "cr1",
+    "title": "관심 직무·기업 키워드 3개 검색 후 정리",
+    "description": "기본적인 직무 이해를 위해 관심 직무와 기업 키워드 3개를 검색하고 정리해보세요",
+    "emoji": "🔍",
+    "difficulty": "easy",
+    "experience": 40,
+    "category_id": "career"
+  },
+  {
+    "id": 22,
+    "mission_id": "cr2",
+    "title": "채용 사이트에서 공고 1개 저장",
+    "description": "취업 정보 수집을 위해 채용 사이트에서 관심 있는 공고 1개를 저장해보세요",
+    "emoji": "💼",
+    "difficulty": "easy",
+    "experience": 35,
+    "category_id": "career"
+  },
+  {
+    "id": 23,
+    "mission_id": "cr3",
+    "title": "자기소개서 문장 3줄 작성",
+    "description": "자기소개서 작성 연습을 위해 문장 3줄을 작성해보세요",
+    "emoji": "📝",
+    "difficulty": "medium",
+    "experience": 55,
+    "category_id": "career"
+  },
+  {
+    "id": 24,
+    "mission_id": "cr4",
+    "title": "나의 강점 키워드 3개 적기",
+    "description": "자기 분석을 위해 나의 강점을 키워드 3개로 정리해보세요",
+    "emoji": "💪",
+    "difficulty": "easy",
+    "experience": 45,
+    "category_id": "career"
+  },
+  {
+    "id": 25,
+    "mission_id": "cr5",
+    "title": "이력서 기본 항목(학력·경력·자격증) 채우기",
+    "description": "이력서 작성을 위해 학력, 경력, 자격증 등 기본 항목을 채워보세요",
+    "emoji": "📄",
+    "difficulty": "medium",
+    "experience": 60,
+    "category_id": "career"
+  },
+  {
+    "id": 26,
+    "mission_id": "cr6",
+    "title": "직무 관련 유튜브 강의/기사 1개 보고 요약",
+    "description": "직무 학습을 위해 관련 강의나 기사를 보고 요약해보세요",
+    "emoji": "📺",
+    "difficulty": "medium",
+    "experience": 50,
+    "category_id": "career"
+  },
+  {
+    "id": 27,
+    "mission_id": "cr7",
+    "title": "예상 질문 1개에 답변 작성 후 낭독",
+    "description": "면접 준비를 위해 예상 질문 1개에 답변을 작성하고 낭독해보세요",
+    "emoji": "🗣️",
+    "difficulty": "medium",
+    "experience": 55,
+    "category_id": "career"
+  },
+  {
+    "id": 28,
+    "mission_id": "cr8",
+    "title": "관심 기업 1곳 홈페이지 탐색 후 비전·가치 정리",
+    "description": "기업 분석을 위해 관심 기업의 홈페이지를 탐색하고 비전과 가치를 정리해보세요",
+    "emoji": "🏢",
+    "difficulty": "medium",
+    "experience": 50,
+    "category_id": "career"
+  },
+  {
+    "id": 29,
+    "mission_id": "cr9",
+    "title": "3개월 내 취업 준비 목표 3가지 작성",
+    "description": "목표 설정을 위해 3개월 내 취업 준비 목표 3가지를 작성해보세요",
+    "emoji": "🎯",
+    "difficulty": "easy",
+    "experience": 45,
+    "category_id": "career"
+  },
+  {
+    "id": 30,
+    "mission_id": "cr10",
+    "title": "나의 경험 중 직무와 연결 가능한 사례 1개 정리",
+    "description": "경험 정리를 위해 나의 경험 중 직무와 연결 가능한 사례 1개를 정리해보세요",
+    "emoji": "📋",
+    "difficulty": "medium",
+    "experience": 55,
+    "category_id": "career"
+  }
+]

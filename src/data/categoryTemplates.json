@@ -1,0 +1,23 @@
+[
+  {
+    "id": "self_management",
+    "name": "자기관리",
+    "emoji": "🧘",
+    "color": "#22c55e",
+    "description": "자신을 돌보고 관리하는 활동"
+  },
+  {
+    "id": "communication",
+    "name": "소통관리",
+    "emoji": "🏃‍♂️",
+    "color": "#ef4444",
+    "description": "건강한 몸과 마음을 위한 운동 활동"
+  },
+  {
+    "id": "career",
+    "name": "커리어관리",
+    "emoji": "📚",
+    "color": "#3b82f6",
+    "description": "지식과 전문성을 기르는 활동"
+  }
+]
