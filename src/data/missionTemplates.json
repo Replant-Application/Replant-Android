@@ -298,5 +298,125 @@
     "difficulty": "medium",
     "experience": 55,
     "category_id": "career"
+  },
+  {
+    "id": 31,
+    "mission_id": "sm11",
+    "title": "면접용 헤어스타일·메이크업 시뮬레이션",
+    "description": "면접을 위한 적절한 헤어스타일과 메이크업을 연습해보세요",
+    "emoji": "💄",
+    "difficulty": "easy",
+    "experience": 40,
+    "category_id": "self_management"
+  },
+  {
+    "id": 32,
+    "mission_id": "sm12",
+    "title": "취업 관련 기사 읽고 인상 깊은 문장 1줄 기록",
+    "description": "취업 정보 습득을 위해 관련 기사를 읽고 인상 깊은 문장을 기록하세요",
+    "emoji": "📰",
+    "difficulty": "easy",
+    "experience": 35,
+    "category_id": "self_management"
+  },
+  {
+    "id": 33,
+    "mission_id": "sm13",
+    "title": "정장 착용 후 증명사진 스타일 촬영",
+    "description": "이력서용 증명사진을 위해 정장을 착용하고 촬영해보세요",
+    "emoji": "📸",
+    "difficulty": "easy",
+    "experience": 45,
+    "category_id": "self_management"
+  },
+  {
+    "id": 34,
+    "mission_id": "sm14",
+    "title": "면접 시뮬레이션 앱/도구 활용 후 소감 작성",
+    "description": "면접 연습을 위해 시뮬레이션 앱이나 도구를 활용하고 소감을 작성하세요",
+    "emoji": "📱",
+    "difficulty": "medium",
+    "experience": 50,
+    "category_id": "self_management"
+  },
+  {
+    "id": 35,
+    "mission_id": "sm15",
+    "title": "일주일간 수면시간 기록 및 개선점 찾기",
+    "description": "건강한 생활을 위해 일주일간 수면시간을 기록하고 개선점을 찾아보세요",
+    "emoji": "😴",
+    "difficulty": "medium",
+    "experience": 55,
+    "category_id": "self_management"
+  },
+  {
+    "id": 36,
+    "mission_id": "sm16",
+    "title": "복장/헤어스타일 관련 멘토 피드백 요청",
+    "description": "면접 준비를 위해 멘토에게 복장이나 헤어스타일에 대한 피드백을 요청하세요",
+    "emoji": "👔",
+    "difficulty": "medium",
+    "experience": 60,
+    "category_id": "self_management"
+  },
+  {
+    "id": 37,
+    "mission_id": "sm17",
+    "title": "아침 기상 후 5분 스트레칭 루틴 실천",
+    "description": "건강한 하루를 위해 아침 기상 후 5분 스트레칭 루틴을 실천하세요",
+    "emoji": "🧘",
+    "difficulty": "easy",
+    "experience": 40,
+    "category_id": "self_management"
+  },
+  {
+    "id": 38,
+    "mission_id": "sm18",
+    "title": "매일 물 2리터 마시기 체크",
+    "description": "건강 관리를 위해 매일 물 2리터를 마시고 체크하세요",
+    "emoji": "💧",
+    "difficulty": "easy",
+    "experience": 35,
+    "category_id": "self_management"
+  },
+  {
+    "id": 39,
+    "mission_id": "sm19",
+    "title": "주간 자기관리 목표 3가지 기록",
+    "description": "체계적인 자기관리를 위해 주간 목표 3가지를 기록하세요",
+    "emoji": "📝",
+    "difficulty": "easy",
+    "experience": 45,
+    "category_id": "self_management"
+  },
+  {
+    "id": 40,
+    "mission_id": "sm20",
+    "title": "건강 검진 항목 확인 및 예약",
+    "description": "건강 관리를 위해 건강 검진 항목을 확인하고 예약하세요",
+    "emoji": "🏥",
+    "difficulty": "medium",
+    "experience": 50,
+    "category_id": "self_management"
+  },
+  {
+    "id": 41,
+    "mission_id": "sm21",
+    "title": "면접용 자기소개 암기 점검",
+    "description": "면접 준비를 위해 자기소개를 암기하고 점검해보세요",
+    "emoji": "🗣️",
+    "difficulty": "easy",
+    "experience": 40,
+    "category_id": "self_management"
+  },
+  {
+    "id": 42,
+    "mission_id": "sm22",
+    "title": "취업용 이메일 계정 정리 및 서명 등록",
+    "description": "전문적인 소통을 위해 취업용 이메일 계정을 정리하고 서명을 등록하세요",
+    "emoji": "📧",
+    "difficulty": "easy",
+    "experience": 35,
+    "category_id": "self_management"
   }
 ]
