@@ -157,8 +157,8 @@ const CharacterDetailScreen: React.FC<CharacterDetailScreenProps> = ({ route, na
             <ProgressBar
               current={(character.experience || 0) % 100}
               max={100}
-              showPercentage={true}
-              showRemaining={true}
+              showPercentage={false}
+              showRemaining={false}
               color={colors.primary[500]}
               height={12}
             />
