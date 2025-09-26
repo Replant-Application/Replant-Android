@@ -11,6 +11,7 @@ export const SCREEN_NAMES = {
   HOME: 'Home',
   DIARY: 'Diary',
   MISSION: 'Mission',
+  CUSTOM_MISSION_CREATE: 'CustomMissionCreate',
   CHARACTER_GUIDE: 'CharacterGuide',
   CHARACTER_DETAIL: 'CharacterDetail',
   SETTINGS: 'Settings',
