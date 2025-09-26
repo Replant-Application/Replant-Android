@@ -5,6 +5,7 @@ import { colors, spacing, typography, borderRadius, shadows } from '../utils/des
 import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../types/navigation';
 import { Character } from '../types';
+import { ProgressBar } from '../components/ui';
 
 interface CharacterDetailScreenProps {
   route: RouteProp<RootStackParamList, 'CharacterDetail'>;
@@ -128,45 +129,42 @@ const CharacterDetailScreen: React.FC<CharacterDetailScreenProps> = ({ route, na
           </View>
         </View>
 
-        {/* 캐릭터 정보 섹션 */}
+        {/* 캐릭터 정보 섹션 - 4개 항목으로 단순화 */}
         <View style={styles.infoSection}>
-          <View style={styles.characterInfo}>
+          {/* 1. 캐릭터 이름 */}
+          <View style={styles.characterNameSection}>
             <Text style={styles.characterName}>{character.name}</Text>
-            <Text style={styles.characterTitle}>{character.title}</Text>
-            <View style={styles.categoryContainer}>
-              <Text style={styles.categoryIcon}>
-                {getCategoryIcon(character.category_id)}
-              </Text>
-              <Text style={styles.categoryName}>
-                {getCategoryName(character.category_id)}
-              </Text>
-            </View>
           </View>
 
-          <View style={styles.levelInfo}>
+          {/* 2. 레벨 정보 */}
+          <View style={styles.levelSection}>
             <Text style={styles.levelText}>Lv.{character.level || 1}</Text>
             <Text style={styles.levelName}>{getLevelName(character.level || 1)}</Text>
           </View>
-        </View>
 
-        {/* 경험치 정보 */}
-        <View style={styles.statsSection}>
-          <Text style={styles.sectionTitle}>📊 성장 정보</Text>
-          <View style={styles.statItem}>
-            <Text style={styles.statLabel}>현재 경험치</Text>
-            <Text style={styles.statValue}>{character.experience || 0} EXP</Text>
-          </View>
-          <View style={styles.statItem}>
-            <Text style={styles.statLabel}>다음 레벨까지</Text>
-            <Text style={styles.statValue}>
-              {100 - ((character.experience || 0) % 100)} EXP
+          {/* 3. 카테고리 정보 */}
+          <View style={styles.categorySection}>
+            <Text style={styles.categoryIcon}>
+              {getCategoryIcon(character.category_id)}
+            </Text>
+            <Text style={styles.categoryName}>
+              {getCategoryName(character.category_id)}
             </Text>
           </View>
-          <View style={styles.statItem}>
-            <Text style={styles.statLabel}>총 미션 완료</Text>
-            <Text style={styles.statValue}>{character.completed_missions || 0}개</Text>
+
+          {/* 4. 경험치 바 */}
+          <View style={styles.experienceSection}>
+            <ProgressBar
+              current={character.experience || 0}
+              max={100}
+              showPercentage={true}
+              showRemaining={true}
+              color={colors.primary[500]}
+              height={12}
+            />
           </View>
         </View>
+
 
         {/* 캐릭터 설명 */}
         <View style={styles.descriptionSection}>
@@ -300,83 +298,61 @@ const styles = StyleSheet.create({
     fontWeight: typography.fontWeight.bold,
   },
   infoSection: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
     marginBottom: spacing[8],
     padding: spacing[5],
     backgroundColor: colors.background.primary,
     borderRadius: borderRadius.lg,
     ...shadows.base,
   },
-  characterInfo: {
-    flex: 1,
+  characterNameSection: {
+    alignItems: 'center',
+    marginBottom: spacing[4],
   },
   characterName: {
-    fontSize: typography.fontSize.xl,
+    fontSize: typography.fontSize['2xl'],
     fontWeight: typography.fontWeight.bold,
     color: colors.text.primary,
-    marginBottom: spacing[1],
   },
-  characterTitle: {
-    fontSize: typography.fontSize.base,
-    color: colors.text.secondary,
-    marginBottom: spacing[2],
-  },
-  categoryContainer: {
+  levelSection: {
     flexDirection: 'row',
+    justifyContent: 'center',
     alignItems: 'center',
+    marginBottom: spacing[4],
+    gap: spacing[3],
+  },
+  levelText: {
+    fontSize: typography.fontSize.xl,
+    fontWeight: typography.fontWeight.bold,
+    color: colors.primary[500],
+  },
+  levelName: {
+    fontSize: typography.fontSize.lg,
+    color: colors.text.secondary,
+    fontWeight: typography.fontWeight.medium,
+  },
+  categorySection: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: spacing[4],
+    gap: spacing[2],
   },
   categoryIcon: {
     fontSize: typography.fontSize.lg,
-    marginRight: spacing[2],
   },
   categoryName: {
     fontSize: typography.fontSize.base,
     color: colors.primary[600],
     fontWeight: typography.fontWeight.medium,
   },
-  levelInfo: {
-    alignItems: 'flex-end',
-  },
-  levelText: {
-    fontSize: typography.fontSize['2xl'],
-    fontWeight: typography.fontWeight.bold,
-    color: colors.primary[500],
-  },
-  levelName: {
-    fontSize: typography.fontSize.base,
-    color: colors.text.secondary,
-  },
-  statsSection: {
-    marginBottom: spacing[8],
-    padding: spacing[5],
-    backgroundColor: colors.background.primary,
-    borderRadius: borderRadius.lg,
-    ...shadows.base,
+  experienceSection: {
+    width: '100%',
   },
   sectionTitle: {
     fontSize: typography.fontSize.lg,
     fontWeight: typography.fontWeight.bold,
     color: colors.text.primary,
     marginBottom: spacing[4],
-  },
-  statItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: spacing[3],
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border.light,
-  },
-  statLabel: {
-    fontSize: typography.fontSize.base,
-    color: colors.text.secondary,
-  },
-  statValue: {
-    fontSize: typography.fontSize.base,
-    fontWeight: typography.fontWeight.medium,
-    color: colors.text.primary,
   },
   descriptionSection: {
     marginBottom: spacing[8],
