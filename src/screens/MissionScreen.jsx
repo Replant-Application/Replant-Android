@@ -135,7 +135,9 @@ const MissionScreen = ({ navigation }) => {
         <View style={styles.missionSection}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>
-              {selectedCategory === 'all' ? '전체 미션' : `${MISSION_CATEGORIES.find(c => c.id === selectedCategory)?.name} 미션`}
+              {selectedCategory === 'all' ? '전체 미션' : 
+               selectedCategory === 'custom' ? '나만의 미션' : 
+               `${MISSION_CATEGORIES.find(c => c.id === selectedCategory)?.name} 미션`}
             </Text>
             {selectedCategory === 'custom' && (
               <Button
