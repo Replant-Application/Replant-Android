@@ -59,6 +59,19 @@ const CharacterDetailScreen: React.FC<CharacterDetailScreenProps> = ({ route, na
     return '씨앗';
   };
 
+  const getCategoryDescription = (categoryId: string): string => {
+    switch (categoryId) {
+      case 'self_management':
+        return '매일 조금씩 성장하며 나만의 길을 찾아가요';
+      case 'communication':
+        return '따뜻한 대화로 세상을 더 아름답게 만들어가요';
+      case 'career':
+        return '꿈을 현실로 만드는 과정을 즐기고 있어요';
+      default:
+        return '꾸준한 성장을 통해 더욱 빛나고 있어요';
+    }
+  };
+
   // 카테고리 이름 변환
   const getCategoryName = (categoryId: string): string => {
     const categoryNames: Record<string, string> = {
@@ -172,10 +185,7 @@ const CharacterDetailScreen: React.FC<CharacterDetailScreenProps> = ({ route, na
         <View style={styles.descriptionSection}>
           <Text style={styles.sectionTitle}>🌱 캐릭터 소개</Text>
           <Text style={styles.description}>
-            {character.description ||
-              `${getCategoryName(character.category_id)} 영역에서 성장하고 있는 캐릭터입니다. ` +
-              `미션을 완료할 때마다 경험치를 얻고 레벨업할 수 있어요!`
-            }
+            {character.description || getCategoryDescription(character.category_id)}
           </Text>
         </View>
 
