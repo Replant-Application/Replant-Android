@@ -76,7 +76,7 @@
     "description": "1분 자기소개 영상 3회 녹화 및 비교 분석",
     "emoji": "🎬",
     "difficulty": "medium",
-    "experience": 65,
+    "experience": 100,
     "category_id": "self_management"
   },
   {
@@ -186,7 +186,7 @@
     "description": "가상 면접 파트너와 5분 대화 연습",
     "emoji": "💻",
     "difficulty": "medium",
-    "experience": 65,
+    "experience": 100,
     "category_id": "communication"
   },
   {
@@ -286,7 +286,7 @@
     "description": "3개월 내 취업 준비 목표 3가지 작성",
     "emoji": "🎯",
     "difficulty": "easy",
-    "experience": 45,
+    "experience": 100,
     "category_id": "career"
   },
   {
