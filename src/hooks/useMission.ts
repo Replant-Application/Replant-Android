@@ -19,7 +19,7 @@ import { logError } from '../utils/logger';
 import { Mission, MissionData, UseMissionReturn, MissionCompletionResult, ServiceResult, ExperienceResult, MissionCategory } from '../types';
 
 export const useMission = (
-  addExperienceByCategory?: (category: MissionCategory, experience: number) => Promise<ExperienceResult>
+  addExperienceByCategory?: (categoryId: MissionCategory, experience: number) => Promise<ExperienceResult>
 ): UseMissionReturn => {
   const { currentNickname } = useUser();
   const [missions, setMissions] = useState<Mission[]>([]);

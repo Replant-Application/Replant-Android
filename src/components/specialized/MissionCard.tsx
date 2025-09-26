@@ -23,24 +23,24 @@ const MissionCard: React.FC<MissionCardProps> = ({
 }) => {
   if (!mission) return null;
 
-  const getCategoryEmoji = (category: string): string => {
+  const getCategoryEmoji = (categoryId: string): string => {
     const emojiMap: Record<string, string> = {
       self_management: '🧘',
       communication: '💬',
       career: '📚',
       custom: '✨',
     };
-    return emojiMap[category] || '🎯';
+    return emojiMap[categoryId] || '🎯';
   };
 
-  const getCategoryName = (category: string): string => {
+  const getCategoryName = (categoryId: string): string => {
     const nameMap: Record<string, string> = {
       self_management: '자기관리',
       communication: '소통관리',
       career: '커리어관리',
       custom: '나만의 미션',
     };
-    return nameMap[category] || category;
+    return nameMap[categoryId] || categoryId;
   };
 
   const handleToggleComplete = (): void => {
