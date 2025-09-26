@@ -32,8 +32,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
         'career': 3             // 커리어관리 (세번째)
       };
 
-      const priorityA = categoryPriority[a.category as keyof typeof categoryPriority] || 999;
-      const priorityB = categoryPriority[b.category as keyof typeof categoryPriority] || 999;
+      const priorityA = categoryPriority[a.category_id as keyof typeof categoryPriority] || 999;
+      const priorityB = categoryPriority[b.category_id as keyof typeof categoryPriority] || 999;
 
       // 카테고리 우선순위로 정렬
       if (priorityA !== priorityB) {

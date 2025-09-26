@@ -56,10 +56,10 @@ const MissionCard: React.FC<MissionCardProps> = ({
       <View style={styles.header}>
         <View style={styles.categoryInfo}>
           <Text style={styles.categoryEmoji}>
-            {getCategoryEmoji(mission.category_id || mission.category || '')}
+            {getCategoryEmoji(mission.category_id || '')}
           </Text>
           <Text style={styles.categoryName}>
-            {getCategoryName(mission.category_id || mission.category || '')}
+            {getCategoryName(mission.category_id || '')}
           </Text>
         </View>
         <View style={styles.statusContainer}>

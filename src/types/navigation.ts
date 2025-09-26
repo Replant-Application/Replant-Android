@@ -2,21 +2,7 @@
  * 네비게이션 관련 타입 정의
  */
 
-import { Character } from './index';
-
-// 화면 이름 enum
-export enum ScreenNames {
-  START = 'Start',
-  NICKNAME = 'Nickname',
-  HOME = 'Home',
-  DIARY = 'Diary',
-  MISSION = 'Mission',
-  CUSTOM_MISSION_CREATE = 'CustomMissionCreate',
-  CHATBOT = 'ChatBot',
-  CHARACTER_GUIDE = 'CharacterGuide',
-  CHARACTER_DETAIL = 'CharacterDetail',
-  SETTINGS = 'Settings',
-}
+import { Character, ScreenNames } from './index';
 
 // React Navigation용 RootStackParamList
 export type RootStackParamList = {
@@ -45,7 +31,7 @@ export interface NavigationParams {
   [ScreenNames.CHATBOT]: undefined;
   [ScreenNames.CHARACTER_GUIDE]: undefined;
   [ScreenNames.CHARACTER_DETAIL]: {
-    characterId: string;
+    character: Character;
   };
   [ScreenNames.SETTINGS]: undefined;
 }

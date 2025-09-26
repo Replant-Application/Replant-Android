@@ -68,9 +68,9 @@ export const addData = async <T extends { id?: number }>(
   }
 };
 
-export const updateData = async <T extends { id: number }>(
+export const updateData = async <T extends { id: string | number }>(
   key: string,
-  id: number,
+  id: string | number,
   updates: Partial<T>
 ): Promise<T | undefined> => {
   try {
@@ -86,9 +86,9 @@ export const updateData = async <T extends { id: number }>(
   }
 };
 
-export const deleteData = async <T extends { id: number }>(
+export const deleteData = async <T extends { id: string | number }>(
   key: string,
-  id: number
+  id: string | number
 ): Promise<boolean> => {
   try {
     const existingData: T[] = await getData(key) || [];

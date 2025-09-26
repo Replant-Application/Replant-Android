@@ -1,18 +1,11 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ViewStyle } from 'react-native';
 import { colors, spacing, typography, borderRadius, shadows } from '../../utils/designTokens';
-import { Diary } from '../../types';
-
-interface SimpleDiary {
-  id: string;
-  content: string;
-  emotion: string;
-  date: string;
-}
+import { Diary, SimpleDiaryData } from '../../types';
 
 interface DiaryCardProps {
-  diary: SimpleDiary;
-  onEdit?: (diary: SimpleDiary) => void;
+  diary: SimpleDiaryData & { id: string };
+  onEdit?: (diary: SimpleDiaryData & { id: string }) => void;
   onDelete?: (diaryId: string) => void;
   style?: ViewStyle;
 }

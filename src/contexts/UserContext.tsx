@@ -4,12 +4,7 @@ import { getStorageKeys, initializeUserData } from '../services';
 import { getDeviceId } from '../services/storage';
 import { logError, logInfo, logUserAction } from '../utils/logger';
 import { executeWithErrorHandling } from '../utils/errorHandler';
-
-// 간단한 사용자 타입 정의
-interface User {
-  nickname: string;
-  id: string;
-}
+import { User } from '../types';
 
 // UserContext 타입 정의
 interface UserContextType {

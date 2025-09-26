@@ -31,7 +31,7 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation }) => {
     ? missions
     : selectedCategory === 'custom'
     ? missions.filter(mission => mission.is_custom)
-    : missions.filter(mission => mission.category === selectedCategory);
+    : missions.filter(mission => mission.category_id === selectedCategory);
 
   // 카테고리별 미션 수 계산
   const getCategoryMissionCount = (categoryId: string) => {
@@ -40,7 +40,7 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation }) => {
     } else if (categoryId === 'custom') {
       return missions.filter(mission => mission.is_custom).length;
     } else {
-      return missions.filter(mission => mission.category === categoryId).length;
+      return missions.filter(mission => mission.category_id === categoryId).length;
     }
   };
 

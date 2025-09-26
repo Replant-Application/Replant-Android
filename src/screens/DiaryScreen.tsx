@@ -9,7 +9,7 @@ import { Diary, SimpleDiaryData } from '../types';
 const DiaryScreen: React.FC = () => {
   const { diaries, loading, error, saveDiary, updateDiary, deleteDiary } = useDiary();
   const [showForm, setShowForm] = useState(false);
-  const [editingDiary, setEditingDiary] = useState<{ id: string; content: string; emotion: string; date: string } | null>(null);
+  const [editingDiary, setEditingDiary] = useState<(SimpleDiaryData & { id: string }) | null>(null);
   const [selectedEmotion, setSelectedEmotion] = useState('');
   const [diaryContent, setDiaryContent] = useState('');
 
@@ -48,7 +48,7 @@ const DiaryScreen: React.FC = () => {
     }
   };
 
-  const handleEditDiary = (diary: { id: string; content: string; emotion: string; date: string }) => {
+  const handleEditDiary = (diary: SimpleDiaryData & { id: string }) => {
     setEditingDiary(diary);
     setSelectedEmotion(diary.emotion);
     setDiaryContent(diary.content);

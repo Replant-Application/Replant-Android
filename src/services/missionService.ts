@@ -38,7 +38,6 @@ export const createCustomMission = async (
       emoji: missionData.emoji,
       difficulty: missionData.difficulty,
       experience: missionData.experience,
-      category: 'custom', // 기존 필터링 로직과 호환
       category_id: 'custom',
       is_custom: true,
       created_by: nickname,

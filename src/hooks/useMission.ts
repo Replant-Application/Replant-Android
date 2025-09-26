@@ -93,8 +93,8 @@ export const useMission = (
 
       // 경험치 추가 (캐릭터 시스템과 연동)
       let experienceResult: ExperienceResult | null = null;
-      if (addExperienceByCategory && mission.category) {
-        experienceResult = await addExperienceByCategory(mission.category, mission.experience || 50);
+      if (addExperienceByCategory && mission.category_id) {
+        experienceResult = await addExperienceByCategory(mission.category_id, mission.experience || 50);
       }
 
       return {

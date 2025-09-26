@@ -79,8 +79,8 @@ export const useDiary = (): UseDiaryReturn => {
       setLoading(true);
 
       const storageKeys = getStorageKeys(currentNickname!);
-      const updatedDiary: Diary = await updateData(storageKeys.DIARIES, parseInt(diaryId), {
-        id: parseInt(diaryId),
+      const updatedDiary: Diary = await updateData(storageKeys.DIARIES, diaryId, {
+        id: diaryId,
         ...diaryData
       }) as unknown as Diary;
 
@@ -106,7 +106,7 @@ export const useDiary = (): UseDiaryReturn => {
       setLoading(true);
 
       const storageKeys = getStorageKeys(currentNickname!);
-      await deleteData(storageKeys.DIARIES, parseInt(diaryId));
+      await deleteData(storageKeys.DIARIES, diaryId);
 
       // 로컬 상태 업데이트
       setDiaries(prev => prev.filter(diary => diary.id !== diaryId));
@@ -145,8 +145,8 @@ export const useDiary = (): UseDiaryReturn => {
     loading,
     error,
     loadDiaries,
-    saveDiary: saveDiary as (data: any) => Promise<any>,
-    updateDiary: updateDiary as (id: string, data: any) => Promise<any>,
+    saveDiary,
+    updateDiary,
     deleteDiary,
   };
 };

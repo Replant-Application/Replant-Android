@@ -73,7 +73,6 @@ export interface Mission {
   completed: boolean;
   completed_at?: string | undefined;
   photo_url?: string | undefined;
-  category?: MissionCategory; // 하위 호환성을 위해
 }
 
 export interface MissionData {
@@ -215,9 +214,9 @@ export interface UseDiaryReturn {
   loading: boolean;
   error: string | null;
   loadDiaries: () => Promise<void>;
-  saveDiary: (diaryData: DiaryData) => Promise<ServiceResult>;
-  updateDiary: (diaryId: string, diaryData: DiaryData) => Promise<ServiceResult>;
-  deleteDiary: (diaryId: string) => Promise<ServiceResult>;
+  saveDiary: (diaryData: SimpleDiaryData) => Promise<ServiceResult<Diary>>;
+  updateDiary: (diaryId: string, diaryData: SimpleDiaryData) => Promise<ServiceResult<Diary>>;
+  deleteDiary: (diaryId: string) => Promise<ServiceResult<void>>;
 }
 
 // Screen Names 타입
