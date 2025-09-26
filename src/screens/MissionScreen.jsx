@@ -120,34 +120,25 @@ const MissionScreen = ({ navigation }) => {
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={styles.categoryList}
           >
-            {MISSION_CATEGORIES.map((category) => {
-              const missionCount = getCategoryMissionCount(category.id);
-              return (
-                <TouchableOpacity
-                  key={category.id}
-                  style={[
-                    styles.categoryButton,
-                    selectedCategory === category.id && styles.selectedCategory
-                  ]}
-                  onPress={() => setSelectedCategory(category.id)}
-                  activeOpacity={0.7}
-                >
-                  <Text style={styles.categoryEmoji}>{category.emoji}</Text>
-                  <Text style={[
-                    styles.categoryName,
-                    selectedCategory === category.id && styles.selectedCategoryText
-                  ]}>
-                    {category.name}
-                  </Text>
-                  <Text style={[
-                    styles.categoryCount,
-                    selectedCategory === category.id && styles.selectedCategoryCount
-                  ]}>
-                    ({missionCount}개)
-                  </Text>
-                </TouchableOpacity>
-              );
-            })}
+            {MISSION_CATEGORIES.map((category) => (
+              <TouchableOpacity
+                key={category.id}
+                style={[
+                  styles.categoryButton,
+                  selectedCategory === category.id && styles.selectedCategory
+                ]}
+                onPress={() => setSelectedCategory(category.id)}
+                activeOpacity={0.7}
+              >
+                <Text style={styles.categoryEmoji}>{category.emoji}</Text>
+                <Text style={[
+                  styles.categoryName,
+                  selectedCategory === category.id && styles.selectedCategoryText
+                ]}>
+                  {category.name}
+                </Text>
+              </TouchableOpacity>
+            ))}
           </ScrollView>
         </View>
 
@@ -156,8 +147,11 @@ const MissionScreen = ({ navigation }) => {
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>
               {selectedCategory === 'all' ? '전체 미션' : 
-               selectedCategory === 'custom' ? '나만의 미션' : 
+               selectedCategory === 'custom' ? '나만의 미션' :
                `${MISSION_CATEGORIES.find(c => c.id === selectedCategory)?.name} 미션`}
+              <Text style={styles.missionCount}>
+                ({filteredMissions.length}개)
+              </Text>
             </Text>
             {selectedCategory === 'custom' && (
               <Button
@@ -279,6 +273,11 @@ const styles = StyleSheet.create({
     color: colors.text.primary,
     marginBottom: spacing[3],
   },
+  missionCount: {
+    fontSize: typography.fontSize.lg,
+    fontWeight: typography.fontWeight.medium,
+    color: colors.text.secondary,
+  },
   categoryList: {
     paddingHorizontal: spacing[1],
   },
@@ -309,16 +308,6 @@ const styles = StyleSheet.create({
   selectedCategoryText: {
     color: colors.primary[500],
     fontWeight: typography.fontWeight.semibold,
-  },
-  categoryCount: {
-    fontSize: typography.fontSize.xs,
-    color: colors.text.tertiary,
-    marginTop: spacing[1],
-    textAlign: 'center',
-  },
-  selectedCategoryCount: {
-    color: colors.primary[400],
-    fontWeight: typography.fontWeight.medium,
   },
   missionSection: {
     marginBottom: spacing[6],
