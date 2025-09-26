@@ -21,10 +21,6 @@ const StartScreen: React.FC<StartScreenProps> = ({ onNavigate }) => {
       <View style={styles.content}>
         <Text style={styles.title}>🌱 Replant</Text>
         <Text style={styles.subtitle}>사회로의 첫 걸음</Text>
-        <Text style={styles.description}>
-          작은 변화로 큰 성장을 만들어보세요{'\n'}
-          외출부터 취업까지, 함께 성장해요
-        </Text>
       </View>
 
       <View style={styles.buttonContainer}>
@@ -61,13 +57,6 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize['2xl'],
     fontWeight: typography.fontWeight.semibold,
     color: colors.text.primary,
-    marginBottom: spacing[6],
-  },
-  description: {
-    fontSize: typography.fontSize.base,
-    color: colors.text.secondary,
-    textAlign: 'center',
-    lineHeight: typography.lineHeight.relaxed * typography.fontSize.base,
   },
   buttonContainer: {
     paddingBottom: spacing[10],
