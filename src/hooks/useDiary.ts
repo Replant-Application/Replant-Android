@@ -2,14 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { getData, addData, updateData, deleteData, getStorageKeys } from '../services';
 import { useUser } from '../contexts/UserContext';
 import { logError } from '../utils/logger';
-import { Diary, UseDiaryReturn, DiaryData, ServiceResult } from '../types';
-
-// 간단한 일기 데이터 타입
-interface SimpleDiaryData {
-  date: string;
-  emotion: string;
-  content: string;
-}
+import { Diary, UseDiaryReturn, DiaryData, ServiceResult, SimpleDiaryData } from '../types';
 
 export const useDiary = (): UseDiaryReturn => {
   const { currentNickname } = useUser();

@@ -2,16 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, ViewStyle } from 'react-native';
 import { colors, spacing, typography, borderRadius, shadows } from '../../utils/designTokens';
 
-interface Mission {
-  mission_id: string;
-  title: string;
-  description?: string;
-  category_id?: string;
-  category?: string;
-  completed: boolean;
-  experience: number;
-  photo_url?: string;
-}
+import { Mission } from '../../types';
 
 interface MissionCardProps {
   mission: Mission;

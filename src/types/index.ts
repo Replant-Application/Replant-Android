@@ -148,12 +148,10 @@ export interface LevelUpResult {
   error?: string;
 }
 
-// User 관련 타입
+// User 관련 타입 (UserContext와 일치)
 export interface User {
   id: string;
   nickname: string;
-  created_at?: string;
-  updated_at?: string;
 }
 
 // Diary 관련 타입
@@ -179,6 +177,13 @@ export interface DiaryData {
   location?: string;
   photos?: string[];
   is_private?: boolean;
+}
+
+// 간단한 일기 데이터 타입 (중복 제거용)
+export interface SimpleDiaryData {
+  date: string;
+  emotion: string;
+  content: string;
 }
 
 // Hooks 반환 타입

@@ -2,7 +2,7 @@
  * 네비게이션 관련 타입 정의
  */
 
-import { Character } from './character';
+import { Character } from './index';
 
 // 화면 이름 enum
 export enum ScreenNames {

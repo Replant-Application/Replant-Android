@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ViewStyle } from 'react-native';
 import { colors, spacing, typography, borderRadius, shadows } from '../../utils/designTokens';
-import { Diary } from '../../types/diary';
+import { Diary } from '../../types';
 
 interface SimpleDiary {
   id: string;

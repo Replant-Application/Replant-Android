@@ -4,13 +4,7 @@ import { useDiary } from '../hooks/useDiary';
 import { DiaryCard, EmotionSelector } from '../components/specialized';
 import { Button, Card, Loading, ErrorBoundary } from '../components/ui';
 import { colors, spacing, typography, borderRadius } from '../utils/designTokens';
-import { Diary } from '../types/diary';
-// 간단한 일기 데이터 타입
-interface SimpleDiaryData {
-  date: string;
-  emotion: string;
-  content: string;
-}
+import { Diary, SimpleDiaryData } from '../types';
 
 const DiaryScreen: React.FC = () => {
   const { diaries, loading, error, saveDiary, updateDiary, deleteDiary } = useDiary();
