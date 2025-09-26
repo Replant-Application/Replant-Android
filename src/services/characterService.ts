@@ -80,7 +80,6 @@ export const createCharacter = async (
       total_experience: 0,
       max_experience: 100,
       unlocked: false,
-      category: characterData.category || '',
       category_id: characterData.category_id,
       completed_missions: 0,
       created_at: new Date().toISOString(),

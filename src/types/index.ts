@@ -110,7 +110,6 @@ export interface Character {
   max_experience: number;
   unlocked: boolean;
   unlocked_date?: string;
-  category: string;
   category_id: string;
   completed_missions: number;
   created_at?: string;
