@@ -24,7 +24,7 @@ const DIFFICULTY_OPTIONS = [
 const EMOJI_OPTIONS = [
   '🎯', '✨', '🔥', '💪', '🌟', '🎉', '💡', '🚀',
   '📚', '🏃‍♂️', '🧘', '💬', '🎵', '🎨', '🍎', '☕',
-  '🌱', '🎪', '🎭', '🎪', '🎨', '🎵', '🎪', '🎭'
+  '🌱', '🎪', '🎭', '🎨', '🎵', '🎪', '🎭', '🎪'
 ];
 
 const CustomMissionCreateScreen = ({ navigation }) => {
@@ -94,6 +94,18 @@ const CustomMissionCreateScreen = ({ navigation }) => {
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
+      {/* 헤더 */}
+      <View style={styles.header}>
+        <TouchableOpacity 
+          style={styles.backButton}
+          onPress={() => navigation.goBack()}
+        >
+          <Text style={styles.backButtonText}>←</Text>
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>나만의 미션 만들기</Text>
+        <View style={styles.headerSpacer} />
+      </View>
+
       <ScrollView style={styles.content}>
         <Card style={styles.formCard}>
           <Text style={styles.sectionTitle}>미션 제목</Text>
@@ -119,23 +131,6 @@ const CustomMissionCreateScreen = ({ navigation }) => {
           />
         </Card>
 
-        <Card style={styles.formCard}>
-          <Text style={styles.sectionTitle}>이모지 선택</Text>
-          <View style={styles.emojiGrid}>
-            {EMOJI_OPTIONS.map((emoji) => (
-              <TouchableOpacity
-                key={emoji}
-                style={[
-                  styles.emojiButton,
-                  selectedEmoji === emoji && styles.selectedEmoji
-                ]}
-                onPress={() => setSelectedEmoji(emoji)}
-              >
-                <Text style={styles.emojiText}>{emoji}</Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </Card>
 
         <Card style={styles.formCard}>
           <Text style={styles.sectionTitle}>난이도 선택</Text>
@@ -205,6 +200,32 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background.secondary,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: spacing[5],
+    paddingVertical: spacing[4],
+    backgroundColor: colors.background.primary,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border.light,
+  },
+  backButton: {
+    padding: spacing[2],
+  },
+  backButtonText: {
+    fontSize: typography.fontSize.xl,
+    color: colors.text.primary,
+    fontWeight: typography.fontWeight.bold,
+  },
+  headerTitle: {
+    fontSize: typography.fontSize.lg,
+    fontWeight: typography.fontWeight.bold,
+    color: colors.text.primary,
+  },
+  headerSpacer: {
+    width: 40, // 뒤로가기 버튼과 같은 너비로 균형 맞춤
   },
   content: {
     flex: 1,
