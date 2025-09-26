@@ -10,7 +10,6 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
 import { Card, Button } from '../components/ui';
 import { colors, spacing, typography, borderRadius } from '../utils/designTokens';
 import { createCustomMission } from '../services/missionService';
@@ -28,8 +27,7 @@ const EMOJI_OPTIONS = [
   '🌱', '🎪', '🎭', '🎪', '🎨', '🎵', '🎪', '🎭'
 ];
 
-const CustomMissionCreateScreen = () => {
-  const navigation = useNavigation();
+const CustomMissionCreateScreen = ({ navigation }) => {
   const { currentNickname } = useUser();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');

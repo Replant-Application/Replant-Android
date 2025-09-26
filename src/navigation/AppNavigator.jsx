@@ -10,6 +10,7 @@ import NicknameScreen from '../screens/NicknameScreen';
 import HomeScreen from '../screens/HomeScreen';
 import DiaryScreen from '../screens/DiaryScreen';
 import MissionScreen from '../screens/MissionScreen';
+import CustomMissionCreateScreen from '../screens/CustomMissionCreateScreen';
 import CharacterGuideScreen from '../screens/CharacterGuideScreen';
 import CharacterDetailScreen from '../screens/CharacterDetailScreen';
 import SettingsScreen from '../screens/SettingsScreen';
@@ -74,6 +75,8 @@ const AppNavigator = () => {
         return <DiaryScreen navigation={navigation} />;
       case SCREEN_NAMES.MISSION:
         return <MissionScreen navigation={navigation} />;
+      case SCREEN_NAMES.CUSTOM_MISSION_CREATE:
+        return <CustomMissionCreateScreen navigation={navigation} />;
       case SCREEN_NAMES.CHARACTER_GUIDE:
         return <CharacterGuideScreen navigation={navigation} />;
       case SCREEN_NAMES.CHARACTER_DETAIL:

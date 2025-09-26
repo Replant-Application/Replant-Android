@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import { SCREEN_NAMES } from '../utils/constants';
 import { useMission } from '../hooks/useMission';
 import { useCharacter } from '../hooks/useCharacter';
 import { MissionCard } from '../components/specialized';
-import { Card, Loading, ErrorBoundary } from '../components/ui';
+import { Card, Loading, ErrorBoundary, Button } from '../components/ui';
 import { colors, spacing, typography, borderRadius } from '../utils/designTokens';
 
 const MISSION_CATEGORIES = [
@@ -14,7 +15,7 @@ const MISSION_CATEGORIES = [
   { id: 'custom', name: '나만의 미션', emoji: '✨' },
 ];
 
-const MissionScreen = () => {
+const MissionScreen = ({ navigation }) => {
   const { addExperienceByCategory } = useCharacter();
   const { missions, loading, error, completeMissionWithPhoto, uncompleteMission } = useMission(addExperienceByCategory);
   const [selectedCategory, setSelectedCategory] = useState('all');
@@ -139,7 +140,7 @@ const MissionScreen = () => {
             {selectedCategory === 'custom' && (
               <Button
                 title="+ 새 미션"
-                onPress={() => Alert.alert('알림', '나만의 미션 생성 기능은 준비 중입니다!')}
+                onPress={() => navigation.navigate(SCREEN_NAMES.CUSTOM_MISSION_CREATE)}
                 style={styles.addButton}
                 textStyle={styles.addButtonText}
               />
@@ -168,7 +169,7 @@ const MissionScreen = () => {
               {selectedCategory === 'custom' && (
                 <Button
                   title="미션 만들기"
-                  onPress={() => Alert.alert('알림', '나만의 미션 생성 기능은 준비 중입니다!')}
+                  onPress={() => navigation.navigate(SCREEN_NAMES.CUSTOM_MISSION_CREATE)}
                   style={styles.createButton}
                 />
               )}
