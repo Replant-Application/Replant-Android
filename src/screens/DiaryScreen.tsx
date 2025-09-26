@@ -4,6 +4,7 @@ import { useDiary } from '../hooks/useDiary';
 import { DiaryCard, EmotionSelector } from '../components/specialized';
 import { Button, Card, Loading, ErrorBoundary } from '../components/ui';
 import { colors, spacing, typography, borderRadius } from '../utils/designTokens';
+import { Diary } from '../types/diary';
 // 간단한 일기 데이터 타입
 interface SimpleDiaryData {
   date: string;
@@ -14,7 +15,7 @@ interface SimpleDiaryData {
 const DiaryScreen: React.FC = () => {
   const { diaries, loading, error, saveDiary, updateDiary, deleteDiary } = useDiary();
   const [showForm, setShowForm] = useState(false);
-  const [editingDiary, setEditingDiary] = useState<any>(null);
+  const [editingDiary, setEditingDiary] = useState<{ id: string; content: string; emotion: string; date: string } | null>(null);
   const [selectedEmotion, setSelectedEmotion] = useState('');
   const [diaryContent, setDiaryContent] = useState('');
 
@@ -53,7 +54,7 @@ const DiaryScreen: React.FC = () => {
     }
   };
 
-  const handleEditDiary = (diary: any) => {
+  const handleEditDiary = (diary: { id: string; content: string; emotion: string; date: string }) => {
     setEditingDiary(diary);
     setSelectedEmotion(diary.emotion);
     setDiaryContent(diary.content);
@@ -159,7 +160,12 @@ const DiaryScreen: React.FC = () => {
                 {diaries.map((diary) => (
                   <DiaryCard
                     key={diary.id}
-                    diary={diary}
+                    diary={{
+                      id: diary.id,
+                      content: diary.content,
+                      emotion: diary.emotion,
+                      date: diary.date
+                    }}
                     onEdit={handleEditDiary}
                     onDelete={handleDeleteDiary}
                     style={styles.diaryCard}

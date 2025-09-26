@@ -16,10 +16,10 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { getData, updateData, getStorageKeys } from '../services';
 import { useUser } from '../contexts/UserContext';
 import { logError } from '../utils/logger';
-import { Mission, MissionData, UseMissionReturn, MissionCompletionResult, ServiceResult } from '../types';
+import { Mission, MissionData, UseMissionReturn, MissionCompletionResult, ServiceResult, ExperienceResult } from '../types';
 
 export const useMission = (
-  addExperienceByCategory?: any
+  addExperienceByCategory?: (category: string, experience: number) => Promise<ExperienceResult>
 ): UseMissionReturn => {
   const { currentNickname } = useUser();
   const [missions, setMissions] = useState<Mission[]>([]);
@@ -92,7 +92,7 @@ export const useMission = (
       );
 
       // 경험치 추가 (캐릭터 시스템과 연동)
-      let experienceResult: any = null;
+      let experienceResult: ExperienceResult | null = null;
       if (addExperienceByCategory && mission.category) {
         experienceResult = await addExperienceByCategory(mission.category, mission.experience || 50);
       }

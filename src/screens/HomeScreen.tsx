@@ -10,13 +10,13 @@ import { executeWithErrorHandling } from '../utils/errorHandler';
 import { SCREEN_NAMES } from '../utils/constants';
 
 interface HomeScreenProps {
-  navigation: any;
+  navigation: NavigationProp<RootStackParamList>;
 }
 
 const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const { user } = useUser();
   const { representativeCharacter, loading: characterLoading, error: characterError, addExperienceByCategory } = useCharacter();
-  const { missions, loading: missionLoading, error: missionError, completeMissionWithPhoto, uncompleteMission } = useMission(addExperienceByCategory as any);
+  const { missions, loading: missionLoading, error: missionError, completeMissionWithPhoto, uncompleteMission } = useMission(addExperienceByCategory);
 
 
   // 추천 미션 (카테고리 우선순위: 자기관리 → 소통관리 → 커리어관리)
