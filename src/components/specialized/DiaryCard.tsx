@@ -1,8 +1,9 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ViewStyle } from 'react-native';
 import { colors, spacing, typography, borderRadius, shadows } from '../../utils/designTokens';
+import { Diary } from '../../types/diary';
 
-interface Diary {
+interface SimpleDiary {
   id: string;
   content: string;
   emotion: string;
@@ -10,8 +11,8 @@ interface Diary {
 }
 
 interface DiaryCardProps {
-  diary: Diary;
-  onEdit?: (diary: Diary) => void;
+  diary: SimpleDiary;
+  onEdit?: (diary: SimpleDiary) => void;
   onDelete?: (diaryId: string) => void;
   style?: ViewStyle;
 }
