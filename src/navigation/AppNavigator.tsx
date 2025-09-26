@@ -84,7 +84,7 @@ const AppNavigator = () => {
       case SCREEN_NAMES.DIARY:
         return <DiaryScreen />;
       case SCREEN_NAMES.MISSION:
-        return <MissionScreen />;
+        return <MissionScreen navigation={navigation} />;
       case SCREEN_NAMES.CUSTOM_MISSION_CREATE:
         return <CustomMissionCreateScreen navigation={navigation} />;
       case SCREEN_NAMES.CHATBOT:
