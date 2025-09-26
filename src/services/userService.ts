@@ -4,6 +4,20 @@ import { logError } from '../utils/logger';
 import { ServiceResult, User, Character } from '../types';
 import { generateUserCharacterName } from '../utils/characterNameGenerator';
 
+// 카테고리별 캐릭터 설명
+const getCategoryDescription = (categoryId: string): string => {
+  switch (categoryId) {
+    case 'self_management':
+      return '매일 조금씩 성장하며 나만의 길을 찾아가요';
+    case 'communication':
+      return '따뜻한 대화로 세상을 더 아름답게 만들어가요';
+    case 'career':
+      return '꿈을 현실로 만드는 과정을 즐기고 있어요';
+    default:
+      return '꾸준한 성장을 통해 더욱 빛나고 있어요';
+  }
+};
+
 // 닉네임 중복 확인
 export const checkNicknameDuplicate = async (nickname: string): Promise<boolean> => {
   try {
@@ -152,7 +166,7 @@ export const initializeUserData = async (
           user_id: userId,
           name: generateUserCharacterName(userId, 'self_management'),
           title: characterTemplates[0].title,
-          description: characterTemplates[0].description || '',
+          description: getCategoryDescription('self_management'),
           emoji: characterTemplates[0].emoji || '🌱',
           level: 1,
           experience: 0,
@@ -171,7 +185,7 @@ export const initializeUserData = async (
           user_id: userId,
           name: generateUserCharacterName(userId, 'communication'),
           title: characterTemplates[0].title,
-          description: characterTemplates[0].description || '',
+          description: getCategoryDescription('communication'),
           emoji: characterTemplates[0].emoji || '🌱',
           level: 1,
           experience: 0,
@@ -190,7 +204,7 @@ export const initializeUserData = async (
           user_id: userId,
           name: generateUserCharacterName(userId, 'career'),
           title: characterTemplates[0].title,
-          description: characterTemplates[0].description || '',
+          description: getCategoryDescription('career'),
           emoji: characterTemplates[0].emoji || '🌱',
           level: 1,
           experience: 0,
