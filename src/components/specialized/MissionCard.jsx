@@ -15,7 +15,7 @@ const MissionCard = ({
   const getCategoryEmoji = (category) => {
     const emojiMap = {
       self_management: '🧘',
-      communication: '🏃‍♂️',
+      communication: '💬',
       career: '📚',
       custom: '✨',
     };

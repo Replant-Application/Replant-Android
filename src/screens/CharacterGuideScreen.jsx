@@ -43,7 +43,7 @@ const CharacterGuideScreen = ({ navigation }) => {
   const getCategoryIcon = (categoryId) => {
     const categoryIcons = {
       'self_management': '🧘',
-      'communication': '🏃',
+      'communication': '💬',
       'career': '📚'
     };
     return categoryIcons[categoryId] || '❓';
