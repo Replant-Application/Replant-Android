@@ -12,6 +12,7 @@ export const SCREEN_NAMES = {
   DIARY: 'Diary',
   MISSION: 'Mission',
   CUSTOM_MISSION_CREATE: 'CustomMissionCreate',
+  CHATBOT: 'ChatBot',
   CHARACTER_GUIDE: 'CharacterGuide',
   CHARACTER_DETAIL: 'CharacterDetail',
   SETTINGS: 'Settings',
