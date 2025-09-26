@@ -16,6 +16,7 @@ const MissionCard = ({
       self_management: '🧘',
       communication: '🏃‍♂️',
       career: '📚',
+      custom: '✨',
     };
     return emojiMap[category] || '🎯';
   };
@@ -25,6 +26,7 @@ const MissionCard = ({
       self_management: '자기관리',
       communication: '소통관리',
       career: '커리어관리',
+      custom: '나만의 미션',
     };
     return nameMap[category] || category;
   };
