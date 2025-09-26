@@ -16,15 +16,18 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { getData, updateData, getStorageKeys } from '../services';
 import { useUser } from '../contexts/UserContext';
 import { logError } from '../utils/logger';
+import { Mission, UseMissionReturn, MissionCompletionResult, ServiceResult } from '../types';
 
-export const useMission = (addExperienceByCategory) => {
+export const useMission = (
+  addExperienceByCategory?: (category: string, experience: number) => Promise<any>
+): UseMissionReturn => {
   const { currentNickname } = useUser();
-  const [missions, setMissions] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [missions, setMissions] = useState<Mission[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
   // 미션 데이터 로드
-  const loadMissions = useCallback(async () => {
+  const loadMissions = useCallback(async (): Promise<void> => {
     if (!currentNickname) return;
     
     try {
@@ -32,21 +35,21 @@ export const useMission = (addExperienceByCategory) => {
       setError(null);
 
       const storageKeys = getStorageKeys(currentNickname);
-      const missionsData = await getData(storageKeys.MISSIONS);
+      const missionsData: Mission[] = await getData(storageKeys.MISSIONS) || [];
       
       // 중복 제거 (mission_id 기준)
-      const uniqueMissions = missionsData.filter((mission, index, self) => 
+      const uniqueMissions: Mission[] = missionsData.filter((mission, index, self) => 
         index === self.findIndex(m => m.mission_id === mission.mission_id)
       );
       
-      const sortedMissions = uniqueMissions.sort((a, b) => 
+      const sortedMissions: Mission[] = uniqueMissions.sort((a, b) => 
         a.title.localeCompare(b.title)
       );
 
       setMissions(sortedMissions);
     } catch (loadError) {
-      logError('미션 로드 실패', loadError, { currentNickname });
-      setError(loadError.message);
+      logError('미션 로드 실패', loadError as Error, { currentNickname });
+      setError((loadError as Error).message);
     } finally {
       setLoading(false);
     }
@@ -58,22 +61,25 @@ export const useMission = (addExperienceByCategory) => {
   }, [loadMissions]);
 
   // 미션 완료 (사진 포함)
-  const completeMissionWithPhoto = useCallback(async (missionId, photoUrl) => {
+  const completeMissionWithPhoto = useCallback(async (
+    missionId: string, 
+    photoUrl: string | null
+  ): Promise<MissionCompletionResult> => {
     try {
-      const mission = missions.find(m => m.mission_id === missionId);
+      const mission: Mission | undefined = missions.find(m => m.mission_id === missionId);
       if (!mission) {
         throw new Error('미션을 찾을 수 없습니다.');
       }
 
       // 미션 완료 상태 업데이트
-      const updatedMission = {
+      const updatedMission: Mission = {
         ...mission,
         completed: true,
         completed_at: new Date().toISOString(),
         photo_url: photoUrl
       };
 
-      const storageKeys = getStorageKeys(currentNickname);
+      const storageKeys = getStorageKeys(currentNickname!);
       await updateData(storageKeys.MISSIONS, mission.id, updatedMission);
 
       // 로컬 상태 업데이트
@@ -86,7 +92,7 @@ export const useMission = (addExperienceByCategory) => {
       );
 
       // 경험치 추가 (캐릭터 시스템과 연동)
-      let experienceResult = null;
+      let experienceResult: any = null;
       if (addExperienceByCategory && mission.category) {
         experienceResult = await addExperienceByCategory(mission.category, mission.experience || 50);
       }
@@ -99,27 +105,27 @@ export const useMission = (addExperienceByCategory) => {
         unlocked: false // 나중에 캐릭터 해제 로직 추가
       };
     } catch (completeError) {
-      logError('미션 완료 실패', completeError, { missionId, photoUrl });
-      return { success: false, error: completeError.message };
+      logError('미션 완료 실패', completeError as Error, { missionId, photoUrl });
+      return { success: false, error: (completeError as Error).message };
     }
   }, [missions, addExperienceByCategory, currentNickname]);
 
   // 미션 완료 취소
-  const uncompleteMission = useCallback(async (missionId) => {
+  const uncompleteMission = useCallback(async (missionId: string): Promise<ServiceResult<void>> => {
     try {
-      const mission = missions.find(m => m.mission_id === missionId);
+      const mission: Mission | undefined = missions.find(m => m.mission_id === missionId);
       if (!mission) {
         throw new Error('미션을 찾을 수 없습니다.');
       }
 
-      const updatedMission = {
+      const updatedMission: Mission = {
         ...mission,
         completed: false,
         completed_at: null,
         photo_url: null
       };
 
-      const storageKeys = getStorageKeys(currentNickname);
+      const storageKeys = getStorageKeys(currentNickname!);
       await updateData(storageKeys.MISSIONS, mission.id, updatedMission);
 
       // 로컬 상태 업데이트
@@ -133,8 +139,8 @@ export const useMission = (addExperienceByCategory) => {
 
       return { success: true };
     } catch (uncompleteError) {
-      logError('미션 완료 취소 실패', uncompleteError, { missionId });
-      return { success: false, error: uncompleteError.message };
+      logError('미션 완료 취소 실패', uncompleteError as Error, { missionId });
+      return { success: false, error: (uncompleteError as Error).message };
     }
   }, [missions, currentNickname]);
 
@@ -155,4 +161,3 @@ export const useMission = (addExperienceByCategory) => {
     uncompleteMission,
   ]);
 };
-

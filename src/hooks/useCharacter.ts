@@ -18,17 +18,18 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { getData, getStorageKeys, autoLevelupCharacter, setData } from '../services';
 import { useUser } from '../contexts/UserContext';
 import { logError } from '../utils/logger';
+import { Character, UseCharacterReturn, ExperienceResult, ServiceResult } from '../types';
 
-export const useCharacter = () => {
+export const useCharacter = (): UseCharacterReturn => {
   const { currentNickname } = useUser();
-  const [characters, setCharacters] = useState([]);
-  const [selectedCharacter, setSelectedCharacter] = useState(null);
-  const [representativeCharacter, setRepresentativeCharacter] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [characters, setCharacters] = useState<Character[]>([]);
+  const [selectedCharacter, setSelectedCharacter] = useState<Character | null>(null);
+  const [representativeCharacter, setRepresentativeCharacter] = useState<Character | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
   // 캐릭터 데이터 로드
-  const loadCharacters = useCallback(async () => {
+  const loadCharacters = useCallback(async (): Promise<void> => {
     if (!currentNickname) return;
     
     try {
@@ -36,10 +37,10 @@ export const useCharacter = () => {
       setError(null);
 
       const storageKeys = getStorageKeys(currentNickname);
-      const charactersData = await getData(storageKeys.CHARACTERS);
+      const charactersData: Character[] = await getData(storageKeys.CHARACTERS) || [];
       
       // 해제일이 없는 캐릭터들에 대해 현재 시간으로 설정
-      const updatedCharacters = charactersData.map(character => {
+      const updatedCharacters: Character[] = charactersData.map(character => {
         if (!character.unlocked_date) {
           return {
             ...character,
@@ -49,7 +50,7 @@ export const useCharacter = () => {
         return character;
       });
       
-      const sortedCharacters = updatedCharacters.sort((a, b) => a.level - b.level);
+      const sortedCharacters: Character[] = updatedCharacters.sort((a, b) => a.level - b.level);
 
       // 업데이트된 캐릭터 데이터가 있으면 저장소에 저장
       if (updatedCharacters.some((char, index) => char !== charactersData[index])) {
@@ -57,16 +58,17 @@ export const useCharacter = () => {
       }
 
       // 대표 캐릭터 로드
-      let representativeCategory = 'self_management'; // 기본값
+      let representativeCategory: string = 'self_management'; // 기본값
       try {
-        const storedCategory = await getData(storageKeys.REPRESENTATIVE_CHARACTER);
+        const storedCategory: string = await getData(storageKeys.REPRESENTATIVE_CHARACTER) || '';
         if (storedCategory) {
           representativeCategory = storedCategory; // JSON.parse 제거 - 문자열이므로
         }
       } catch (error) {
+        // 에러 무시
       }
       
-      const representativeChar = sortedCharacters.find(char => 
+      const representativeChar: Character | undefined = sortedCharacters.find(char => 
         char.category_id === representativeCategory
       );
       
@@ -93,8 +95,8 @@ export const useCharacter = () => {
       // 모든 설정이 완료된 후 로딩 종료
       setLoading(false);
     } catch (loadError) {
-      logError('캐릭터 로드 실패', loadError, { currentNickname });
-      setError(loadError.message);
+      logError('캐릭터 로드 실패', loadError as Error, { currentNickname });
+      setError((loadError as Error).message);
       setLoading(false);
     }
   }, [selectedCharacter, currentNickname]);
@@ -105,58 +107,61 @@ export const useCharacter = () => {
   }, [loadCharacters]);
 
   // 경험치 추가 (카테고리별)
-  const addExperienceByCategory = useCallback(async (categoryId, experience) => {
+  const addExperienceByCategory = useCallback(async (
+    categoryId: string, 
+    experience: number
+  ): Promise<ExperienceResult> => {
     try {
       // 해당 카테고리의 캐릭터 찾기
-      const character = characters.find(char => char.category_id === categoryId);
+      const character: Character | undefined = characters.find(char => char.category_id === categoryId);
       if (!character) return { success: false, error: '캐릭터를 찾을 수 없습니다.' };
 
       // autoLevelupCharacter 함수 사용
-      const result = await autoLevelupCharacter(character.id, experience, currentNickname);
+      const result = await autoLevelupCharacter(character.id, experience, currentNickname!);
       
       if (result.success) {
         // 로컬 상태 업데이트
         setCharacters(prev => 
           prev.map(char => 
             char.id === character.id 
-              ? result.character
+              ? result.character!
               : char
           )
         );
 
         // 선택된 캐릭터도 업데이트
         if (selectedCharacter && selectedCharacter.id === character.id) {
-          setSelectedCharacter(result.character);
+          setSelectedCharacter(result.character!);
         }
       }
 
       return result;
     } catch (expError) {
-      logError('경험치 추가 실패', expError, { categoryId, experience });
-      return { success: false, error: expError.message };
+      logError('경험치 추가 실패', expError as Error, { categoryId, experience });
+      return { success: false, error: (expError as Error).message };
     }
   }, [characters, selectedCharacter, currentNickname]);
 
   // 캐릭터 선택
-  const selectCharacter = useCallback((character) => {
+  const selectCharacter = useCallback((character: Character): void => {
     setSelectedCharacter(character);
   }, []);
 
   // 대표 캐릭터 설정
-  const setRepresentative = useCallback(async (categoryId) => {
+  const setRepresentative = useCallback(async (categoryId: string): Promise<ServiceResult<void>> => {
     try {
-      const storageKeys = getStorageKeys(currentNickname);
+      const storageKeys = getStorageKeys(currentNickname!);
       await setData(storageKeys.REPRESENTATIVE_CHARACTER, categoryId);
       
-      const representativeChar = characters.find(char => char.category_id === categoryId);
+      const representativeChar: Character | undefined = characters.find(char => char.category_id === categoryId);
       if (representativeChar) {
         setRepresentativeCharacter(representativeChar);
       }
       
       return { success: true };
     } catch (error) {
-      logError('대표 캐릭터 설정 실패', error, { categoryId });
-      return { success: false, error: error.message };
+      logError('대표 캐릭터 설정 실패', error as Error, { categoryId });
+      return { success: false, error: (error as Error).message };
     }
   }, [characters, currentNickname]);
 
@@ -183,4 +188,3 @@ export const useCharacter = () => {
     setRepresentative,
   ]);
 };
-
