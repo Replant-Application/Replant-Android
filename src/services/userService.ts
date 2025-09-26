@@ -89,7 +89,7 @@ export const migrateUserData = async (
     const validCategories: string[] = ['self_management', 'communication', 'career'];
     const migratedMissions = existingMissions.map(mission => ({
       ...mission,
-      category: validCategories.includes(mission.category) ? mission.category : 'career'
+      category_id: validCategories.includes(mission.category_id) ? mission.category_id : 'career'
     }));
 
     await setData(storageKeys.MISSIONS, migratedMissions);

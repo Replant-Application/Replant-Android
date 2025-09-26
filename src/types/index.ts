@@ -124,7 +124,6 @@ export interface CharacterData {
   category_id: MissionCategory;
   description?: string;
   emoji?: string;
-  category?: string;
 }
 
 export interface ExperienceResult {
@@ -201,7 +200,7 @@ export interface UseCharacterReturn {
   representativeCharacter: Character | null;
   loading: boolean;
   error: string | null;
-  addExperienceByCategory: (category: MissionCategory, experience: number) => Promise<ExperienceResult>;
+  addExperienceByCategory: (categoryId: MissionCategory, experience: number) => Promise<ExperienceResult>;
   setRepresentative: (characterId: string) => Promise<ServiceResult>;
   createCharacter: (characterData: CharacterData) => Promise<ServiceResult>;
   updateCharacter: (characterId: string, characterData: CharacterData) => Promise<ServiceResult>;
