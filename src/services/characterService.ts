@@ -29,7 +29,7 @@ export const autoLevelupCharacter = async (
       ...character,
       experience: newExperience,
       level: newLevel,
-      total_experience: (character.total_experience || 0) + experienceGained
+      total_experience: newExperience  // total_experience는 전체 누적 경험치
     };
 
     // Character의 id는 string이므로 직접 배열을 업데이트

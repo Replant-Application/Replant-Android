@@ -152,7 +152,7 @@ const CharacterGuideScreen: React.FC<CharacterGuideScreenProps> = ({ navigation 
                   <View style={styles.statRow}>
                     <Text style={[styles.characterStatLabel, { color: colors.text.secondary }]}>현재 경험치</Text>
                     <Text style={[styles.statValue, { color: colors.text.primary }]}>
-                      {(character.experience || 0).toLocaleString()} EXP
+                      {((character.experience || 0) % 100).toLocaleString()} EXP
                     </Text>
                   </View>
                   <View style={styles.statRow}>
