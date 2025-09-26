@@ -106,14 +106,7 @@ const ChatBotScreen: React.FC<ChatBotScreenProps> = ({ navigation }) => {
     >
       {/* 헤더 */}
       <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => navigation.goBack()}
-        >
-          <Text style={styles.backButtonText}>←</Text>
-        </TouchableOpacity>
         <Text style={styles.headerTitle}>심리상담 챗봇</Text>
-        <View style={styles.headerSpacer} />
       </View>
 
       {/* 메시지 목록 */}
@@ -237,28 +230,18 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    justifyContent: 'center',
     paddingHorizontal: spacing[5],
-    paddingVertical: spacing[4],
+    paddingTop: spacing[20],
+    paddingBottom: spacing[6],
     backgroundColor: colors.background.primary,
     borderBottomWidth: 1,
     borderBottomColor: colors.border.light,
-  },
-  backButton: {
-    padding: spacing[2],
-  },
-  backButtonText: {
-    fontSize: typography.fontSize.xl,
-    color: colors.text.primary,
-    fontWeight: typography.fontWeight.bold,
   },
   headerTitle: {
     fontSize: typography.fontSize.lg,
     fontWeight: typography.fontWeight.bold,
     color: colors.text.primary,
-  },
-  headerSpacer: {
-    width: 40,
   },
   messagesContainer: {
     flex: 1,
