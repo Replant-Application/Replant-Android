@@ -1,8 +1,22 @@
 import React, { useState } from 'react';
-import { TextInput, View, Text, StyleSheet } from 'react-native';
+import { TextInput, View, Text, StyleSheet, ViewStyle, TextStyle } from 'react-native';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
 
-const Input = ({ 
+interface InputProps {
+  label?: string;
+  placeholder?: string;
+  value?: string;
+  onChangeText?: (text: string) => void;
+  error?: string;
+  size?: 'sm' | 'base' | 'lg';
+  multiline?: boolean;
+  numberOfLines?: number;
+  style?: ViewStyle;
+  inputStyle?: TextStyle;
+  [key: string]: any;
+}
+
+const Input: React.FC<InputProps> = ({ 
   label,
   placeholder,
   value,
@@ -15,7 +29,7 @@ const Input = ({
   inputStyle,
   ...props 
 }) => {
-  const [isFocused, setIsFocused] = useState(false);
+  const [isFocused, setIsFocused] = useState<boolean>(false);
 
   const containerStyle = [
     styles.container,
@@ -110,4 +124,3 @@ const styles = StyleSheet.create({
 });
 
 export default Input;
-

@@ -1,8 +1,22 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, ViewStyle } from 'react-native';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
 
-const EMOTIONS = [
+interface Emotion {
+  id: string;
+  label: string;
+  emoji: string;
+  color: string;
+}
+
+interface EmotionSelectorProps {
+  selectedEmotion?: string | string[];
+  onSelect: (emotion: string | string[]) => void;
+  multiple?: boolean;
+  style?: ViewStyle;
+}
+
+const EMOTIONS: Emotion[] = [
   { id: 'happy', label: '행복', emoji: '😊', color: colors.emotions.happy },
   { id: 'excited', label: '신남', emoji: '🤩', color: colors.emotions.excited },
   { id: 'calm', label: '평온', emoji: '😌', color: colors.emotions.calm },
@@ -13,15 +27,15 @@ const EMOTIONS = [
   { id: 'tired', label: '피곤', emoji: '😴', color: colors.emotions.tired },
 ];
 
-const EmotionSelector = ({ 
+const EmotionSelector: React.FC<EmotionSelectorProps> = ({ 
   selectedEmotion, 
   onSelect, 
   multiple = false,
   style 
 }) => {
-  const [selected, setSelected] = useState(selectedEmotion || []);
+  const [selected, setSelected] = useState<string[]>(Array.isArray(selectedEmotion) ? selectedEmotion : selectedEmotion ? [selectedEmotion] : []);
 
-  const handleSelect = (emotion) => {
+  const handleSelect = (emotion: Emotion): void => {
     if (multiple) {
       const newSelected = selected.includes(emotion.id)
         ? selected.filter(id => id !== emotion.id)
@@ -34,7 +48,7 @@ const EmotionSelector = ({
     }
   };
 
-  const isSelected = (emotionId) => {
+  const isSelected = (emotionId: string): boolean => {
     return multiple ? selected.includes(emotionId) : selected.includes(emotionId);
   };
 
@@ -123,4 +137,3 @@ const styles = StyleSheet.create({
 });
 
 export default EmotionSelector;
-

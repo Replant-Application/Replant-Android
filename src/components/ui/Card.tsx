@@ -1,8 +1,16 @@
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, ViewStyle } from 'react-native';
 import { colors, spacing, borderRadius, shadows } from '../../utils/designTokens';
 
-const Card = ({ 
+interface CardProps {
+  children: React.ReactNode;
+  variant?: 'base' | 'elevated' | 'flat';
+  padding?: 'sm' | 'base' | 'lg';
+  style?: ViewStyle;
+  [key: string]: any;
+}
+
+const Card: React.FC<CardProps> = ({ 
   children, 
   variant = 'base', 
   padding = 'base',
@@ -52,4 +60,3 @@ const styles = StyleSheet.create({
 });
 
 export default Card;
-

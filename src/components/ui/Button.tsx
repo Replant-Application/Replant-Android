@@ -14,10 +14,22 @@
  */
 
 import React from 'react';
-import { TouchableOpacity, Text, StyleSheet, ActivityIndicator } from 'react-native';
+import { TouchableOpacity, Text, StyleSheet, ActivityIndicator, ViewStyle, TextStyle } from 'react-native';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
 
-const Button = ({ 
+interface ButtonProps {
+  title: string;
+  onPress: () => void;
+  variant?: 'primary' | 'secondary' | 'outline' | 'ghost';
+  size?: 'sm' | 'base' | 'lg';
+  disabled?: boolean;
+  loading?: boolean;
+  style?: ViewStyle;
+  textStyle?: TextStyle;
+  [key: string]: any;
+}
+
+const Button: React.FC<ButtonProps> = ({ 
   title, 
   onPress, 
   variant = 'primary', 
@@ -142,4 +154,3 @@ const styles = StyleSheet.create({
 });
 
 export default Button;
-

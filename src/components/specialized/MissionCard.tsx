@@ -1,8 +1,28 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, ViewStyle } from 'react-native';
 import { colors, spacing, typography, borderRadius, shadows } from '../../utils/designTokens';
 
-const MissionCard = ({ 
+interface Mission {
+  mission_id: string;
+  title: string;
+  description?: string;
+  category_id?: string;
+  category?: string;
+  completed: boolean;
+  experience: number;
+  photo_url?: string;
+}
+
+interface MissionCardProps {
+  mission: Mission;
+  onComplete?: (missionId: string) => void;
+  onUncomplete?: (missionId: string) => void;
+  loading?: boolean;
+  disabled?: boolean;
+  style?: ViewStyle;
+}
+
+const MissionCard: React.FC<MissionCardProps> = ({ 
   mission, 
   onComplete,
   onUncomplete,
@@ -12,8 +32,8 @@ const MissionCard = ({
 }) => {
   if (!mission) return null;
 
-  const getCategoryEmoji = (category) => {
-    const emojiMap = {
+  const getCategoryEmoji = (category: string): string => {
+    const emojiMap: Record<string, string> = {
       self_management: '🧘',
       communication: '💬',
       career: '📚',
@@ -22,8 +42,8 @@ const MissionCard = ({
     return emojiMap[category] || '🎯';
   };
 
-  const getCategoryName = (category) => {
-    const nameMap = {
+  const getCategoryName = (category: string): string => {
+    const nameMap: Record<string, string> = {
       self_management: '자기관리',
       communication: '소통관리',
       career: '커리어관리',
@@ -32,7 +52,7 @@ const MissionCard = ({
     return nameMap[category] || category;
   };
 
-  const handleToggleComplete = () => {
+  const handleToggleComplete = (): void => {
     if (mission.completed) {
       onUncomplete?.(mission.mission_id);
     } else {
@@ -45,10 +65,10 @@ const MissionCard = ({
       <View style={styles.header}>
         <View style={styles.categoryInfo}>
           <Text style={styles.categoryEmoji}>
-            {getCategoryEmoji(mission.category_id || mission.category)}
+            {getCategoryEmoji(mission.category_id || mission.category || '')}
           </Text>
           <Text style={styles.categoryName}>
-            {getCategoryName(mission.category_id || mission.category)}
+            {getCategoryName(mission.category_id || mission.category || '')}
           </Text>
         </View>
         <View style={styles.statusContainer}>
@@ -88,7 +108,7 @@ const MissionCard = ({
             mission.completed ? styles.uncompleteButton : styles.completeButton,
             disabled && styles.disabledButton
           ]}
-          onPress={disabled ? null : handleToggleComplete}
+          onPress={disabled ? undefined : handleToggleComplete}
           disabled={loading || disabled}
           activeOpacity={disabled ? 1 : 0.7}
         >
@@ -236,4 +256,3 @@ const styles = StyleSheet.create({
 });
 
 export default MissionCard;
-

@@ -1,8 +1,22 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ViewStyle } from 'react-native';
 import { colors, spacing, typography, borderRadius, shadows } from '../../utils/designTokens';
 
-const DiaryCard = ({ 
+interface Diary {
+  id: string;
+  content: string;
+  emotion: string;
+  date: string;
+}
+
+interface DiaryCardProps {
+  diary: Diary;
+  onEdit?: (diary: Diary) => void;
+  onDelete?: (diaryId: string) => void;
+  style?: ViewStyle;
+}
+
+const DiaryCard: React.FC<DiaryCardProps> = ({ 
   diary, 
   onEdit,
   onDelete,
@@ -10,8 +24,8 @@ const DiaryCard = ({
 }) => {
   if (!diary) return null;
 
-  const getEmotionEmoji = (emotion) => {
-    const emojiMap = {
+  const getEmotionEmoji = (emotion: string): string => {
+    const emojiMap: Record<string, string> = {
       happy: '😊',
       excited: '🤩',
       calm: '😌',
@@ -24,8 +38,8 @@ const DiaryCard = ({
     return emojiMap[emotion] || '😊';
   };
 
-  const getEmotionName = (emotion) => {
-    const nameMap = {
+  const getEmotionName = (emotion: string): string => {
+    const nameMap: Record<string, string> = {
       happy: '행복',
       excited: '신남',
       calm: '평온',
@@ -38,7 +52,7 @@ const DiaryCard = ({
     return nameMap[emotion] || emotion;
   };
 
-  const formatDate = (dateString) => {
+  const formatDate = (dateString: string): string => {
     const date = new Date(dateString);
     return date.toLocaleDateString('ko-KR', {
       year: 'numeric',
@@ -173,4 +187,3 @@ const styles = StyleSheet.create({
 });
 
 export default DiaryCard;
-

@@ -1,8 +1,16 @@
 import React from 'react';
-import { View, Text, ActivityIndicator, StyleSheet } from 'react-native';
+import { View, Text, ActivityIndicator, StyleSheet, ViewStyle, TextStyle } from 'react-native';
 import { colors, spacing, typography } from '../../utils/designTokens';
 
-const Loading = ({ 
+interface LoadingProps {
+  text?: string;
+  size?: 'small' | 'large';
+  color?: string;
+  style?: ViewStyle;
+  textStyle?: TextStyle;
+}
+
+const Loading: React.FC<LoadingProps> = ({ 
   text = '로딩 중...', 
   size = 'large', 
   color = colors.primary[500],
@@ -34,4 +42,3 @@ const styles = StyleSheet.create({
 });
 
 export default Loading;
-

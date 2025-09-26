@@ -1,8 +1,23 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, ViewStyle } from 'react-native';
 import { colors, spacing, typography, borderRadius, shadows } from '../../utils/designTokens';
 
-const CharacterCard = ({ 
+interface Character {
+  id: string;
+  name: string;
+  level: number;
+  experience: number;
+  category_id: string;
+}
+
+interface CharacterCardProps {
+  character: Character;
+  onPress: (character: Character) => void;
+  selected?: boolean;
+  style?: ViewStyle;
+}
+
+const CharacterCard: React.FC<CharacterCardProps> = ({ 
   character, 
   onPress,
   selected = false,
@@ -10,8 +25,7 @@ const CharacterCard = ({
 }) => {
   if (!character) return null;
 
-
-  const getLevelName = (level) => {
+  const getLevelName = (level: number): string => {
     if (level >= 10) return '성숙한 나무';
     if (level >= 7) return '자라는 나무';
     if (level >= 4) return '새싹';
@@ -29,9 +43,9 @@ const CharacterCard = ({
   };
 
   // 캐릭터 이미지 경로 생성
-  const getCharacterImage = (level) => {
+  const getCharacterImage = (level: number) => {
     const levelKey = `level${Math.min(level, 6)}`;
-    return characterImages[levelKey] || characterImages.level1;
+    return characterImages[levelKey as keyof typeof characterImages] || characterImages.level1;
   };
 
   const experienceProgress = (character.experience || 0) % 100;
@@ -44,7 +58,7 @@ const CharacterCard = ({
         selected && styles.selected,
         style
       ]}
-      onPress={onPress}
+      onPress={() => onPress(character)}
       activeOpacity={0.7}
     >
       <View style={styles.header}>
@@ -180,4 +194,3 @@ const styles = StyleSheet.create({
 });
 
 export default CharacterCard;
-

@@ -1,19 +1,27 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ViewStyle } from 'react-native';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
 
-const ErrorBoundary = ({ 
+interface ErrorBoundaryProps {
+  error?: string | Error;
+  onRetry?: () => void;
+  style?: ViewStyle;
+}
+
+const ErrorBoundary: React.FC<ErrorBoundaryProps> = ({ 
   error, 
   onRetry, 
   style 
 }) => {
   if (!error) return null;
 
+  const errorMessage = typeof error === 'string' ? error : error.message;
+
   return (
     <View style={[styles.container, style]}>
       <Text style={styles.icon}>⚠️</Text>
       <Text style={styles.title}>오류가 발생했습니다</Text>
-      <Text style={styles.message}>{error}</Text>
+      <Text style={styles.message}>{errorMessage}</Text>
       {onRetry && (
         <TouchableOpacity style={styles.retryButton} onPress={onRetry}>
           <Text style={styles.retryText}>다시 시도</Text>
@@ -68,4 +76,3 @@ const styles = StyleSheet.create({
 });
 
 export default ErrorBoundary;
-
