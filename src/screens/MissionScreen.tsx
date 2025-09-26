@@ -17,7 +17,11 @@ const MISSION_CATEGORIES = [
   { id: 'custom', name: '나만의 미션', emoji: '✨' },
 ];
 
-const MissionScreen: React.FC = () => {
+interface MissionScreenProps {
+  navigation: NavigationProp<RootStackParamList>;
+}
+
+const MissionScreen: React.FC<MissionScreenProps> = ({ navigation }) => {
   const { addExperienceByCategory } = useCharacter();
   const { missions, loading, error, completeMissionWithPhoto, uncompleteMission } = useMission(addExperienceByCategory);
   const [selectedCategory, setSelectedCategory] = useState('all');
@@ -187,7 +191,7 @@ const MissionScreen: React.FC = () => {
               {selectedCategory === 'custom' && (
                 <Button
                   title="미션 만들기"
-                  onPress={() => {}}
+                  onPress={() => navigation.navigate('CustomMissionCreate')}
                   style={styles.createButton}
                   textStyle={{ color: colors.white }}
                 />
