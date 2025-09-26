@@ -25,8 +25,15 @@ const DiaryScreen: React.FC = () => {
     }
 
     try {
+      // 한국 시간대 기준으로 날짜 생성 (YYYY-MM-DD 형식)
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+      const dateString = `${year}-${month}-${day}`;
+      
       const diaryData: SimpleDiaryData = {
-        date: new Date().toISOString().split('T')[0] || '',
+        date: dateString,
         emotion: selectedEmotion,
         content: diaryContent.trim(),
       };
