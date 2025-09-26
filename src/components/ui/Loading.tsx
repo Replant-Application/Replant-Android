@@ -10,12 +10,12 @@ interface LoadingProps {
   textStyle?: TextStyle;
 }
 
-const Loading: React.FC<LoadingProps> = ({ 
-  text = '로딩 중...', 
-  size = 'large', 
+const Loading: React.FC<LoadingProps> = ({
+  text = '로딩 중...',
+  size = 'large',
   color = colors.primary[500],
   style,
-  textStyle 
+  textStyle
 }) => {
   return (
     <View style={[styles.container, style]}>
@@ -32,7 +32,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: spacing[6],
   },
-  
+
   text: {
     marginTop: spacing[3],
     fontSize: typography.fontSize.base,

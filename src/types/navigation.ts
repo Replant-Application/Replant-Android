@@ -81,7 +81,7 @@ export interface NavigationState {
 }
 
 // 네비게이션 액션 타입
-export type NavigationAction = 
+export type NavigationAction =
   | { type: 'NAVIGATE'; payload: { screen: keyof NavigationParams; params?: any } }
   | { type: 'GO_BACK' }
   | { type: 'RESET'; payload: { screen: keyof NavigationParams } };

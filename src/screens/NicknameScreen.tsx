@@ -19,19 +19,19 @@ const NicknameScreen: React.FC<NicknameScreenProps> = ({ onNavigate }) => {
       Alert.alert('오류', '닉네임을 입력해주세요.');
       return;
     }
-    
+
     if (nickname.length < 2) {
       Alert.alert('오류', '닉네임은 2글자 이상 입력해주세요.');
       return;
     }
-    
+
     if (nickname.length > 20) {
       Alert.alert('오류', '닉네임은 20글자 이하로 입력해주세요.');
       return;
     }
 
     setIsLoading(true);
-    
+
     try {
       // 간단한 로그인 처리 (인증 없이)
       await login(nickname);
@@ -51,7 +51,7 @@ const NicknameScreen: React.FC<NicknameScreenProps> = ({ onNavigate }) => {
           다른 사용자들과 구분할 수 있는{'\n'}
           고유한 닉네임을 설정해주세요
         </Text>
-        
+
         <Input
           placeholder="닉네임을 입력하세요"
           value={nickname}
@@ -63,7 +63,7 @@ const NicknameScreen: React.FC<NicknameScreenProps> = ({ onNavigate }) => {
           style={styles.input}
         />
       </View>
-      
+
       <View style={styles.buttonContainer}>
         <Button
           title={isLoading ? '처리 중...' : '완료'}

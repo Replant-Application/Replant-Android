@@ -68,11 +68,11 @@ const AppNavigator = () => {
 
   // 로그인한 경우 - 간단한 탭 네비게이션
   const renderScreen = () => {
-    const navigation: NavigationProp<RootStackParamList> = { 
-      navigate: navigate as any, 
-      goBack 
+    const navigation: NavigationProp<RootStackParamList> = {
+      navigate: navigate as any,
+      goBack
     } as any;
-    const route: RouteProp<RootStackParamList, 'CharacterDetail'> = { 
+    const route: RouteProp<RootStackParamList, 'CharacterDetail'> = {
       params: navigationParams,
       key: 'CharacterDetail',
       name: 'CharacterDetail'
@@ -106,50 +106,50 @@ const AppNavigator = () => {
       <View style={styles.screenContainer}>
         {renderScreen()}
       </View>
-      
+
       {/* 하단 탭 네비게이션 */}
       <View style={styles.tabBar}>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={[styles.tab, currentScreen === SCREEN_NAMES.HOME && styles.activeTab]}
           onPress={() => setCurrentScreen(SCREEN_NAMES.HOME)}
         >
           <Text style={styles.tabIcon}>🏠</Text>
           <Text style={styles.tabLabel}>홈</Text>
         </TouchableOpacity>
-        
-        <TouchableOpacity 
+
+        <TouchableOpacity
           style={[styles.tab, currentScreen === SCREEN_NAMES.DIARY && styles.activeTab]}
           onPress={() => setCurrentScreen(SCREEN_NAMES.DIARY)}
         >
           <Text style={styles.tabIcon}>📝</Text>
           <Text style={styles.tabLabel}>다이어리</Text>
         </TouchableOpacity>
-        
-        <TouchableOpacity 
+
+        <TouchableOpacity
           style={[styles.tab, currentScreen === SCREEN_NAMES.MISSION && styles.activeTab]}
           onPress={() => setCurrentScreen(SCREEN_NAMES.MISSION)}
         >
           <Text style={styles.tabIcon}>🎯</Text>
           <Text style={styles.tabLabel}>미션</Text>
         </TouchableOpacity>
-        
-        <TouchableOpacity 
+
+        <TouchableOpacity
           style={[styles.tab, currentScreen === SCREEN_NAMES.CHATBOT && styles.activeTab]}
           onPress={() => setCurrentScreen(SCREEN_NAMES.CHATBOT)}
         >
           <Text style={styles.tabIcon}>🤖</Text>
           <Text style={styles.tabLabel}>상담</Text>
         </TouchableOpacity>
-        
-        <TouchableOpacity 
+
+        <TouchableOpacity
           style={[styles.tab, currentScreen === SCREEN_NAMES.CHARACTER_GUIDE && styles.activeTab]}
           onPress={() => setCurrentScreen(SCREEN_NAMES.CHARACTER_GUIDE)}
         >
           <Text style={styles.tabIcon}>📚</Text>
           <Text style={styles.tabLabel}>도감</Text>
         </TouchableOpacity>
-        
-        <TouchableOpacity 
+
+        <TouchableOpacity
           style={[styles.tab, currentScreen === SCREEN_NAMES.SETTINGS && styles.activeTab]}
           onPress={() => setCurrentScreen(SCREEN_NAMES.SETTINGS)}
         >

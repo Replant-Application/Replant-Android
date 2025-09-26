@@ -53,7 +53,7 @@ const styles = StyleSheet.create({
 ```javascript
 /**
  * 훅 설명
- * 
+ *
  * @param {Type} param - 매개변수 설명
  * @returns {Object} 반환값 설명
  */
@@ -63,12 +63,12 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 export const useCustomHook = (param) => {
   // 상태 정의
   const [state, setState] = useState(initialValue);
-  
+
   // 함수 정의 (useCallback으로 최적화)
   const handleAction = useCallback(async () => {
     // 로직 구현
   }, [dependencies]);
-  
+
   // 반환값 (useMemo로 최적화)
   return useMemo(() => ({
     state,
@@ -119,7 +119,7 @@ logUserAction('button_click', { buttonName: 'submit' });
 ```javascript
 /**
  * 컴포넌트 설명
- * 
+ *
  * @param {string} title - 제목
  * @param {Function} onPress - 클릭 핸들러
  * @param {Object} style - 추가 스타일
@@ -162,13 +162,13 @@ const MyContext = createContext();
 // Provider 컴포넌트
 export const MyProvider = ({ children }) => {
   const [state, setState] = useState(initialValue);
-  
+
   // 메모이제이션된 값
   const value = useMemo(() => ({
     state,
     setState,
   }), [state]);
-  
+
   return (
     <MyContext.Provider value={value}>
       {children}

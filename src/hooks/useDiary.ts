@@ -20,14 +20,14 @@ export const useDiary = (): UseDiaryReturn => {
   // 다이어리 데이터 로드
   const loadDiaries = useCallback(async (): Promise<void> => {
     if (!currentNickname) return;
-    
+
     try {
       setLoading(true);
       setError(null);
 
       const storageKeys = getStorageKeys(currentNickname);
       const diariesData: Diary[] = await getData(storageKeys.DIARIES) || [];
-      const sortedDiaries: Diary[] = diariesData.sort((a, b) => 
+      const sortedDiaries: Diary[] = diariesData.sort((a, b) =>
         new Date(b.created_at || '').getTime() - new Date(a.created_at || '').getTime()
       );
 
@@ -79,7 +79,7 @@ export const useDiary = (): UseDiaryReturn => {
 
   // 다이어리 수정
   const updateDiary = useCallback(async (
-    diaryId: string, 
+    diaryId: string,
     diaryData: SimpleDiaryData
   ): Promise<ServiceResult<Diary>> => {
     try {
@@ -92,8 +92,8 @@ export const useDiary = (): UseDiaryReturn => {
       }) as unknown as Diary;
 
       // 로컬 상태 업데이트
-      setDiaries(prev => 
-        prev.map(diary => 
+      setDiaries(prev =>
+        prev.map(diary =>
           diary.id === diaryId ? updatedDiary : diary
         )
       );

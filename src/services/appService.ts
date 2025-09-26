@@ -13,11 +13,11 @@ export const initializeApp = async (): Promise<ServiceResult<{
   try {
     // 템플릿 데이터 로드
     const templateResult = await loadTemplates();
-    
+
     if (!templateResult.success) {
       throw new Error(templateResult.error);
     }
-    
+
     return {
       success: true,
       data: {
@@ -41,17 +41,17 @@ export const initializeApp = async (): Promise<ServiceResult<{
 export const resetAppData = async (): Promise<ServiceResult<{ message: string }>> => {
   try {
     const AsyncStorage = require('@react-native-async-storage/async-storage').default;
-    
+
     // 모든 데이터 삭제
     await AsyncStorage.multiRemove([
       'missions',
-      'diaries', 
+      'diaries',
       'characters',
       'userNickname',
       'mission_templates',
       'character_templates'
     ]);
-    
+
     return {
       success: true,
       data: {

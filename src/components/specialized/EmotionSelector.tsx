@@ -27,11 +27,11 @@ const EMOTIONS: Emotion[] = [
   { id: 'tired', label: '피곤', emoji: '😴', color: colors.emotions.tired },
 ];
 
-const EmotionSelector: React.FC<EmotionSelectorProps> = ({ 
-  selectedEmotion, 
-  onSelect, 
+const EmotionSelector: React.FC<EmotionSelectorProps> = ({
+  selectedEmotion,
+  onSelect,
   multiple = false,
-  style 
+  style
 }) => {
   const [selected, setSelected] = useState<string[]>(Array.isArray(selectedEmotion) ? selectedEmotion : selectedEmotion ? [selectedEmotion] : []);
 
@@ -55,8 +55,8 @@ const EmotionSelector: React.FC<EmotionSelectorProps> = ({
   return (
     <View style={[styles.container, style]}>
       <Text style={styles.title}>오늘의 감정을 선택해주세요</Text>
-      <ScrollView 
-        horizontal 
+      <ScrollView
+        horizontal
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
@@ -89,7 +89,7 @@ const styles = StyleSheet.create({
   container: {
     marginVertical: spacing[4],
   },
-  
+
   title: {
     fontSize: typography.fontSize.lg,
     fontWeight: typography.fontWeight.semibold,
@@ -97,11 +97,11 @@ const styles = StyleSheet.create({
     marginBottom: spacing[3],
     textAlign: 'center',
   },
-  
+
   scrollContent: {
     paddingHorizontal: spacing[2],
   },
-  
+
   emotionButton: {
     alignItems: 'center',
     padding: spacing[3],
@@ -112,24 +112,24 @@ const styles = StyleSheet.create({
     borderColor: colors.border.light,
     minWidth: 80,
   },
-  
+
   selectedButton: {
     borderColor: colors.primary[500],
     borderWidth: 2,
   },
-  
+
   emoji: {
     fontSize: typography.fontSize['2xl'],
     marginBottom: spacing[1],
   },
-  
+
   label: {
     fontSize: typography.fontSize.sm,
     fontWeight: typography.fontWeight.medium,
     color: colors.text.secondary,
     textAlign: 'center',
   },
-  
+
   selectedLabel: {
     color: colors.primary[500],
     fontWeight: typography.fontWeight.semibold,

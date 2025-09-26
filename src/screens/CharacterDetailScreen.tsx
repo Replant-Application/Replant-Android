@@ -4,7 +4,7 @@ import { useCharacter } from '../hooks/useCharacter';
 import { colors, spacing, typography, borderRadius, shadows } from '../utils/designTokens';
 import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../types/navigation';
-import { Character } from '../types/character';
+import { Character } from '../types';
 
 interface CharacterDetailScreenProps {
   route: RouteProp<RootStackParamList, 'CharacterDetail'>;
@@ -14,36 +14,36 @@ interface CharacterDetailScreenProps {
 const CharacterDetailScreen: React.FC<CharacterDetailScreenProps> = ({ route, navigation }) => {
   const { character } = route.params;
   const [currentEmotion, setCurrentEmotion] = useState<string>('default');
-  
+
   // 레벨별 캐릭터 이미지
   const getCharacterImage = (level: number, emotion: string = 'default') => {
     const levelFolder = `level${Math.min(level, 6)}`;
     switch (levelFolder) {
-      case 'level1': 
+      case 'level1':
         return emotion === 'happy' ? require('../assets/images/characters/level1/happy.png') :
                emotion === 'waving' ? require('../assets/images/characters/level1/waving.png') :
                require('../assets/images/characters/level1/default.png');
-      case 'level2': 
+      case 'level2':
         return emotion === 'happy' ? require('../assets/images/characters/level2/happy.png') :
                emotion === 'waving' ? require('../assets/images/characters/level2/waving.png') :
                require('../assets/images/characters/level2/default.png');
-      case 'level3': 
+      case 'level3':
         return emotion === 'happy' ? require('../assets/images/characters/level3/happy.png') :
                emotion === 'waving' ? require('../assets/images/characters/level3/waving.png') :
                require('../assets/images/characters/level3/default.png');
-      case 'level4': 
+      case 'level4':
         return emotion === 'happy' ? require('../assets/images/characters/level4/happy.png') :
                emotion === 'waving' ? require('../assets/images/characters/level4/waving.png') :
                require('../assets/images/characters/level4/default.png');
-      case 'level5': 
+      case 'level5':
         return emotion === 'happy' ? require('../assets/images/characters/level5/happy.png') :
                emotion === 'waving' ? require('../assets/images/characters/level5/waving.png') :
                require('../assets/images/characters/level5/default.png');
-      case 'level6': 
+      case 'level6':
         return emotion === 'happy' ? require('../assets/images/characters/level6/happy.png') :
                emotion === 'waving' ? require('../assets/images/characters/level6/waving.png') :
                require('../assets/images/characters/level6/default.png');
-      default: 
+      default:
         return require('../assets/images/characters/level1/default.png');
     }
   };
@@ -86,7 +86,7 @@ const CharacterDetailScreen: React.FC<CharacterDetailScreenProps> = ({ route, na
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.backButton}
           onPress={() => navigation.goBack()}
         >
@@ -98,13 +98,13 @@ const CharacterDetailScreen: React.FC<CharacterDetailScreenProps> = ({ route, na
         {/* 캐릭터 이미지 섹션 */}
         <View style={styles.characterSection}>
           <View style={styles.characterImageContainer}>
-            <Image 
+            <Image
               source={getCharacterImage(character.level || 1, currentEmotion)}
               style={styles.characterImage}
               resizeMode="contain"
             />
           </View>
-          
+
           {/* 감정 표현 버튼들 */}
           <View style={styles.emotionButtons}>
             {emotionButtons.map((emotion) => (
@@ -172,7 +172,7 @@ const CharacterDetailScreen: React.FC<CharacterDetailScreenProps> = ({ route, na
         <View style={styles.descriptionSection}>
           <Text style={styles.sectionTitle}>🌱 캐릭터 소개</Text>
           <Text style={styles.description}>
-            {character.description || 
+            {character.description ||
               `${getCategoryName(character.category_id)} 영역에서 성장하고 있는 캐릭터입니다. ` +
               `미션을 완료할 때마다 경험치를 얻고 레벨업할 수 있어요!`
             }

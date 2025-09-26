@@ -16,7 +16,7 @@ interface InputProps {
   [key: string]: any;
 }
 
-const Input: React.FC<InputProps> = ({ 
+const Input: React.FC<InputProps> = ({
   label,
   placeholder,
   value,
@@ -27,7 +27,7 @@ const Input: React.FC<InputProps> = ({
   numberOfLines = 1,
   style,
   inputStyle,
-  ...props 
+  ...props
 }) => {
   const [isFocused, setIsFocused] = useState<boolean>(false);
 
@@ -69,14 +69,14 @@ const styles = StyleSheet.create({
   container: {
     marginBottom: spacing[4],
   },
-  
+
   label: {
     fontSize: typography.fontSize.sm,
     fontWeight: typography.fontWeight.medium,
     color: colors.text.primary,
     marginBottom: spacing[1],
   },
-  
+
   input: {
     borderWidth: 1,
     borderColor: colors.border.medium,
@@ -86,7 +86,7 @@ const styles = StyleSheet.create({
     color: colors.text.primary,
     fontSize: typography.fontSize.base,
   },
-  
+
   // Sizes
   sm: {
     height: 32,
@@ -100,22 +100,22 @@ const styles = StyleSheet.create({
     height: 48,
     paddingVertical: spacing[3],
   },
-  
+
   // States
   focused: {
     borderColor: colors.primary[500],
   },
-  
+
   error: {
     borderColor: colors.error,
   },
-  
+
   multiline: {
     height: 'auto',
     minHeight: 40,
     textAlignVertical: 'top',
   },
-  
+
   errorText: {
     fontSize: typography.fontSize.sm,
     color: colors.error,

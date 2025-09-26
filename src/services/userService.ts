@@ -17,7 +17,7 @@ export const checkNicknameDuplicate = async (nickname: string): Promise<boolean>
 
 // 닉네임으로 사용자 생성
 export const createUserWithNickname = async (
-  nickname: string, 
+  nickname: string,
   deviceId: string
 ): Promise<ServiceResult<{ userId: string; nickname: string }>> => {
   try {
@@ -26,15 +26,15 @@ export const createUserWithNickname = async (
     if (isDuplicate) {
       throw new Error('이미 사용 중인 닉네임입니다.');
     }
-    
+
     // 닉네임 저장
     const storageKeys = getStorageKeys(nickname);
     await AsyncStorage.setItem(storageKeys.USER_NICKNAME, nickname);
-    
+
     // 사용자 데이터 초기화
     const userId: string = `user_${Date.now()}`;
     await initializeUserData(userId, nickname);
-    
+
     return {
       success: true,
       data: {
@@ -72,30 +72,30 @@ export const migrateUserData = async (
 ): Promise<ServiceResult<{ message: string; migratedMissions: number }>> => {
   try {
     const storageKeys = getStorageKeys(nickname);
-    
+
     // 기존 미션 데이터 가져오기
     const existingMissions: any[] = await getData(storageKeys.MISSIONS) || [];
     if (existingMissions.length === 0) {
-      return { 
-        success: true, 
-        data: { 
+      return {
+        success: true,
+        data: {
           message: '마이그레이션할 데이터가 없습니다.',
           migratedMissions: 0
         }
       };
     }
-    
+
     // 유효한 카테고리만 유지 (self_management, communication, career)
     const validCategories: string[] = ['self_management', 'communication', 'career'];
     const migratedMissions = existingMissions.map(mission => ({
       ...mission,
       category: validCategories.includes(mission.category) ? mission.category : 'career'
     }));
-    
+
     await setData(storageKeys.MISSIONS, migratedMissions);
-    
+
     // 캐릭터 데이터는 레벨 기반이므로 변경 없음
-    
+
     return {
       success: true,
       data: {
@@ -114,13 +114,13 @@ export const migrateUserData = async (
 
 // 사용자 데이터 초기화
 export const initializeUserData = async (
-  userId: string, 
+  userId: string,
   nickname: string
 ): Promise<ServiceResult<{ message: string }>> => {
   try {
     // 미션 템플릿에서 초기 미션 생성
     const storageKeys = getStorageKeys(nickname);
-    
+
     // 항상 JSON 파일에서 최신 템플릿 로드
     const missionTemplates = require('../data/missionTemplates.json');
     // 템플릿에서 미션 생성 (전체 템플릿 데이터 사용)
@@ -136,7 +136,7 @@ export const initializeUserData = async (
       completed: false
     }));
     await setData(storageKeys.MISSIONS, missions);
-    
+
     // 캐릭터 템플릿에서 초기 캐릭터 생성
     // 항상 JSON 파일에서 최신 템플릿 로드
     const characterTemplatesData = require('../data/characterTemplates.json');
@@ -151,13 +151,17 @@ export const initializeUserData = async (
           user_id: userId,
           name: characterTemplates[0].name,
           title: characterTemplates[0].title,
+          description: characterTemplates[0].description || '',
+          emoji: characterTemplates[0].emoji || '🌱',
           level: 1,
           experience: 0,
           max_experience: 100,
           total_experience: 0,
           unlocked: true,
           unlocked_date: new Date().toISOString(),
+          category: 'self_management',
           category_id: 'self_management',
+          completed_missions: 0,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
         },
@@ -167,13 +171,17 @@ export const initializeUserData = async (
           user_id: userId,
           name: characterTemplates[0].name,
           title: characterTemplates[0].title,
+          description: characterTemplates[0].description || '',
+          emoji: characterTemplates[0].emoji || '🌱',
           level: 1,
           experience: 0,
           max_experience: 100,
           total_experience: 0,
           unlocked: true,
           unlocked_date: new Date().toISOString(),
+          category: 'communication',
           category_id: 'communication',
+          completed_missions: 0,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
         },
@@ -183,23 +191,27 @@ export const initializeUserData = async (
           user_id: userId,
           name: characterTemplates[0].name,
           title: characterTemplates[0].title,
+          description: characterTemplates[0].description || '',
+          emoji: characterTemplates[0].emoji || '🌱',
           level: 1,
           experience: 0,
           max_experience: 100,
           total_experience: 0,
           unlocked: true,
           unlocked_date: new Date().toISOString(),
+          category: 'career',
           category_id: 'career',
+          completed_missions: 0,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
         }
       ];
       await setData(storageKeys.CHARACTERS, initialCharacters);
     }
-    
+
     // 다이어리는 빈 배열로 시작
     await setData(storageKeys.DIARIES, []);
-    
+
     // 대표 캐릭터 설정 (초기에는 자기관리 캐릭터)
     await setData(storageKeys.REPRESENTATIVE_CHARACTER, 'self_management');
     return {

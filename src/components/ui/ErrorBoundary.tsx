@@ -8,10 +8,10 @@ interface ErrorBoundaryProps {
   style?: ViewStyle;
 }
 
-const ErrorBoundary: React.FC<ErrorBoundaryProps> = ({ 
-  error, 
-  onRetry, 
-  style 
+const ErrorBoundary: React.FC<ErrorBoundaryProps> = ({
+  error,
+  onRetry,
+  style
 }) => {
   if (!error) return null;
 
@@ -39,12 +39,12 @@ const styles = StyleSheet.create({
     padding: spacing[6],
     backgroundColor: colors.background.secondary,
   },
-  
+
   icon: {
     fontSize: typography.fontSize['4xl'],
     marginBottom: spacing[4],
   },
-  
+
   title: {
     fontSize: typography.fontSize.xl,
     fontWeight: typography.fontWeight.bold,
@@ -52,7 +52,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing[2],
     textAlign: 'center',
   },
-  
+
   message: {
     fontSize: typography.fontSize.base,
     color: colors.text.secondary,
@@ -60,14 +60,14 @@ const styles = StyleSheet.create({
     marginBottom: spacing[6],
     lineHeight: typography.lineHeight.relaxed * typography.fontSize.base,
   },
-  
+
   retryButton: {
     backgroundColor: colors.primary[500],
     paddingHorizontal: spacing[5],
     paddingVertical: spacing[3],
     borderRadius: borderRadius.base,
   },
-  
+
   retryText: {
     color: colors.text.inverse,
     fontSize: typography.fontSize.base,

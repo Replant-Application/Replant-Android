@@ -10,12 +10,12 @@ interface CardProps {
   [key: string]: any;
 }
 
-const Card: React.FC<CardProps> = ({ 
-  children, 
-  variant = 'base', 
+const Card: React.FC<CardProps> = ({
+  children,
+  variant = 'base',
   padding = 'base',
   style,
-  ...props 
+  ...props
 }) => {
       const cardStyle = [
         styles.base,
@@ -37,7 +37,7 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.lg,
     ...shadows.base,
   },
-  
+
   // Variants
   elevated: {
     ...shadows.lg,
@@ -46,7 +46,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border.light,
   },
-  
+
   // Padding variants
   paddingSm: {
     padding: spacing[3],

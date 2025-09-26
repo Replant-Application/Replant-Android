@@ -35,7 +35,7 @@ export const loadTemplates = async (): Promise<ServiceResult<{
   try {
     const missionTemplates: Mission[] = await loadMissionTemplates();
     const characterTemplates: Character[] = await loadCharacterTemplates();
-    
+
     return {
       success: true,
       data: {

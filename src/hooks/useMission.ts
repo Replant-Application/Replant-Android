@@ -1,7 +1,7 @@
 /**
  * 미션 관리 Hook
  * 미션 데이터 로드, 미션 완료/취소 등의 기능을 제공
- * 
+ *
  * @param {Function} addExperienceByCategory - 카테고리별 경험치 추가 함수
  * @returns {Object} 미션 관련 상태와 함수들
  * @returns {Array} missions - 미션 목록
@@ -29,20 +29,20 @@ export const useMission = (
   // 미션 데이터 로드
   const loadMissions = useCallback(async (): Promise<void> => {
     if (!currentNickname) return;
-    
+
     try {
       setLoading(true);
       setError(null);
 
       const storageKeys = getStorageKeys(currentNickname);
       const missionsData: Mission[] = await getData(storageKeys.MISSIONS) || [];
-      
+
       // 중복 제거 (mission_id 기준)
-      const uniqueMissions: Mission[] = missionsData.filter((mission, index, self) => 
+      const uniqueMissions: Mission[] = missionsData.filter((mission, index, self) =>
         index === self.findIndex(m => m.mission_id === mission.mission_id)
       );
-      
-      const sortedMissions: Mission[] = uniqueMissions.sort((a, b) => 
+
+      const sortedMissions: Mission[] = uniqueMissions.sort((a, b) =>
         a.title.localeCompare(b.title)
       );
 
@@ -62,7 +62,7 @@ export const useMission = (
 
   // 미션 완료 (사진 포함)
   const completeMissionWithPhoto = useCallback(async (
-    missionId: string, 
+    missionId: string,
     photoUrl: string | null
   ): Promise<MissionCompletionResult> => {
     try {
@@ -83,9 +83,9 @@ export const useMission = (
       await updateData(storageKeys.MISSIONS, mission.id, updatedMission);
 
       // 로컬 상태 업데이트
-      setMissions(prev => 
-        prev.map(m => 
-          m.mission_id === missionId 
+      setMissions(prev =>
+        prev.map(m =>
+          m.mission_id === missionId
             ? updatedMission
             : m
         )
@@ -100,8 +100,7 @@ export const useMission = (
       return {
         success: true,
         experienceGained: experienceResult?.experienceGained || mission.experience || 50,
-        experience: experienceResult?.experience,
-        levelUp: experienceResult?.levelUp,
+        levelUp: experienceResult?.levelUp || false,
         newLevel: experienceResult?.newLevel,
         unlocked: false // 나중에 캐릭터 해제 로직 추가
       };
@@ -130,9 +129,9 @@ export const useMission = (
       await updateData(storageKeys.MISSIONS, mission.id, updatedMission);
 
       // 로컬 상태 업데이트
-      setMissions(prev => 
-        prev.map(m => 
-          m.mission_id === missionId 
+      setMissions(prev =>
+        prev.map(m =>
+          m.mission_id === missionId
             ? updatedMission
             : m
         )

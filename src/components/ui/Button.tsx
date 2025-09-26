@@ -1,7 +1,7 @@
 /**
  * 재사용 가능한 버튼 컴포넌트
  * 다양한 스타일과 크기를 지원하는 버튼
- * 
+ *
  * @param {string} title - 버튼 텍스트
  * @param {Function} onPress - 클릭 이벤트 핸들러
  * @param {string} variant - 버튼 스타일 ('primary' | 'secondary' | 'outline')
@@ -29,16 +29,16 @@ interface ButtonProps {
   [key: string]: any;
 }
 
-const Button: React.FC<ButtonProps> = ({ 
-  title, 
-  onPress, 
-  variant = 'primary', 
-  size = 'base', 
-  disabled = false, 
+const Button: React.FC<ButtonProps> = ({
+  title,
+  onPress,
+  variant = 'primary',
+  size = 'base',
+  disabled = false,
   loading = false,
   style,
   textStyle,
-  ...props 
+  ...props
 }) => {
   const buttonStyle = [
     styles.base,
@@ -65,9 +65,9 @@ const Button: React.FC<ButtonProps> = ({
       {...props}
     >
       {loading ? (
-        <ActivityIndicator 
-          color={variant === 'primary' ? colors.text.inverse : colors.primary[500]} 
-          size="small" 
+        <ActivityIndicator
+          color={variant === 'primary' ? colors.text.inverse : colors.primary[500]}
+          size="small"
         />
       ) : (
         <Text style={textStyleCombined}>{title}</Text>
@@ -83,7 +83,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     flexDirection: 'row',
   },
-  
+
   // Variants
   primary: {
     backgroundColor: colors.primary[500],
@@ -99,7 +99,7 @@ const styles = StyleSheet.create({
   ghost: {
     backgroundColor: 'transparent',
   },
-  
+
   // Sizes
   sm: {
     height: 32,
@@ -113,13 +113,13 @@ const styles = StyleSheet.create({
     height: 48,
     paddingHorizontal: spacing[5],
   },
-  
+
   // States
   disabled: {
     backgroundColor: colors.gray[300],
     borderColor: colors.gray[300],
   },
-  
+
   // Text styles
   text: {
     fontWeight: typography.fontWeight.medium,
@@ -136,7 +136,7 @@ const styles = StyleSheet.create({
   ghostText: {
     color: colors.primary[500],
   },
-  
+
   // Text sizes
   smText: {
     fontSize: typography.fontSize.sm,
@@ -147,7 +147,7 @@ const styles = StyleSheet.create({
   lgText: {
     fontSize: typography.fontSize.lg,
   },
-  
+
   disabledText: {
     color: colors.text.tertiary,
   },

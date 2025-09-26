@@ -53,7 +53,7 @@ export const setData: SetData = async <T = any>(key: string, data: T): Promise<v
 };
 
 export const addData = async <T extends { id?: number }>(
-  key: string, 
+  key: string,
   item: Omit<T, 'id'>
 ): Promise<T> => {
   try {
@@ -69,13 +69,13 @@ export const addData = async <T extends { id?: number }>(
 };
 
 export const updateData = async <T extends { id: number }>(
-  key: string, 
-  id: number, 
+  key: string,
+  id: number,
   updates: Partial<T>
 ): Promise<T | undefined> => {
   try {
     const existingData: T[] = await getData(key) || [];
-    const updatedData: T[] = existingData.map(item => 
+    const updatedData: T[] = existingData.map(item =>
       item.id === id ? { ...item, ...updates } : item
     );
     await setData(key, updatedData);
@@ -87,7 +87,7 @@ export const updateData = async <T extends { id: number }>(
 };
 
 export const deleteData = async <T extends { id: number }>(
-  key: string, 
+  key: string,
   id: number
 ): Promise<boolean> => {
   try {
@@ -111,11 +111,11 @@ export const clearDeviceBasedData = async (): Promise<void> => {
       `characters_${deviceId}`,
       `userNickname_${deviceId}`,
     ];
-    
+
     for (const key of keysToRemove) {
       await AsyncStorage.removeItem(key);
     }
-    
+
   } catch (error) {
     logError('기기별 데이터 삭제 실패', error as Error);
   }

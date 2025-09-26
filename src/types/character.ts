@@ -4,8 +4,9 @@
 
 import { BaseEntity, Emotion, ServiceResult } from './index';
 
-// 캐릭터 엔티티
-export interface Character extends BaseEntity {
+// 캐릭터 엔티티 (src/types/index.ts와 동일)
+export interface Character {
+  id: string;
   character_id: string;
   name: string;
   title: string;
@@ -20,6 +21,9 @@ export interface Character extends BaseEntity {
   category: string;
   category_id: string;
   completed_missions: number;
+  created_at?: string;
+  updated_at?: string;
+  user_id?: string;
 }
 
 // 캐릭터 생성 데이터

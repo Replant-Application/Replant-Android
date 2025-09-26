@@ -27,8 +27,8 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation }) => {
   const [selectedCategory, setSelectedCategory] = useState('all');
 
   // 필터링된 미션 목록
-  const filteredMissions = selectedCategory === 'all' 
-    ? missions 
+  const filteredMissions = selectedCategory === 'all'
+    ? missions
     : selectedCategory === 'custom'
     ? missions.filter(mission => mission.is_custom)
     : missions.filter(mission => mission.category === selectedCategory);
@@ -53,7 +53,7 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation }) => {
     try {
       // 사진 없이 미션 완료 (Phase 4 상태)
       const result = await completeMissionWithPhoto(missionId, null);
-      
+
       if (result && result.success) {
         if (result.levelUp) {
           Alert.alert(
@@ -93,7 +93,7 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <View style={styles.header} />
-      
+
       <ScrollView style={styles.content}>
         {/* 진행률 표시 */}
         {totalMissions > 0 && (
@@ -108,11 +108,11 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation }) => {
               </Text>
             </View>
             <View style={styles.progressBar}>
-              <View 
+              <View
                 style={[
-                  styles.progressFill, 
+                  styles.progressFill,
                   { width: `${progressPercentage}%` }
-                ]} 
+                ]}
               />
             </View>
           </Card>
@@ -121,8 +121,8 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation }) => {
         {/* 카테고리 필터 */}
         <View style={styles.categorySection}>
           <Text style={styles.sectionTitle}>카테고리</Text>
-          <ScrollView 
-            horizontal 
+          <ScrollView
+            horizontal
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={styles.categoryList}
           >
@@ -152,7 +152,7 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation }) => {
         <View style={styles.missionSection}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>
-              {selectedCategory === 'all' ? '전체 미션' : 
+              {selectedCategory === 'all' ? '전체 미션' :
                selectedCategory === 'custom' ? '나만의 미션' :
                `${MISSION_CATEGORIES.find(c => c.id === selectedCategory)?.name} 미션`}
               <Text style={styles.missionCount}>
@@ -168,15 +168,15 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation }) => {
               />
             )}
           </View>
-          
+
           {filteredMissions.length === 0 ? (
             <Card style={styles.emptyCard}>
               <Text style={styles.emptyIcon}>
                 {selectedCategory === 'all' ? '🎯' : selectedCategory === 'custom' ? '✨' : '📚'}
               </Text>
               <Text style={styles.emptyTitle}>
-                {selectedCategory === 'all' 
-                  ? '아직 미션이 없어요' 
+                {selectedCategory === 'all'
+                  ? '아직 미션이 없어요'
                   : selectedCategory === 'custom'
                   ? '나만의 미션이 없어요'
                   : '이 카테고리의 미션이 없어요'}

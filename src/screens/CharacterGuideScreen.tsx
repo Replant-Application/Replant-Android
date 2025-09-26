@@ -99,7 +99,7 @@ const CharacterGuideScreen: React.FC<CharacterGuideScreenProps> = ({ navigation 
   return (
     <View style={[styles.container, { backgroundColor: colors.background.secondary }]}>
       <View style={[styles.header, { backgroundColor: colors.background.primary, borderBottomColor: colors.border.light }]} />
-      
+
       <ScrollView style={styles.content}>
 
         {/* 캐릭터 목록 */}
@@ -121,15 +121,15 @@ const CharacterGuideScreen: React.FC<CharacterGuideScreenProps> = ({ navigation 
                 return 0;
               })
               .map((character) => (
-              <TouchableOpacity 
-                key={character.id} 
+              <TouchableOpacity
+                key={character.id}
                 style={[styles.characterCard, { backgroundColor: colors.background.primary, borderColor: colors.border.light }]}
                 onPress={() => handleCharacterPress(character)}
                 activeOpacity={0.7}
               >
                 <View style={styles.characterHeader}>
                   <View style={styles.characterImageContainer}>
-                    <Image 
+                    <Image
                       source={getCharacterImage(character.level || 1)}
                       style={styles.characterImage}
                       resizeMode="contain"
@@ -147,7 +147,7 @@ const CharacterGuideScreen: React.FC<CharacterGuideScreenProps> = ({ navigation 
                     <Text style={[styles.levelName, { color: colors.text.secondary }]}>{getLevelName(character.level || 1)}</Text>
                   </View>
                 </View>
-                
+
                 <View style={styles.characterStats}>
                   <View style={styles.statRow}>
                     <Text style={[styles.characterStatLabel, { color: colors.text.secondary }]}>현재 경험치</Text>
@@ -168,14 +168,14 @@ const CharacterGuideScreen: React.FC<CharacterGuideScreenProps> = ({ navigation 
                     </Text>
                   </View>
                 </View>
-                
+
                 <View style={styles.progressContainer}>
                   <View style={[styles.progressBar, { backgroundColor: colors.background.secondary }]}>
-                    <View 
+                    <View
                       style={[
-                        styles.progressFill, 
+                        styles.progressFill,
                         { backgroundColor: colors.primary[500], width: `${((character.experience || 0) % 100)}%` }
-                      ]} 
+                      ]}
                     />
                   </View>
                   <Text style={[styles.progressText, { color: colors.text.tertiary }]}>

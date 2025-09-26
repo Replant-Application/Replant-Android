@@ -100,19 +100,23 @@ export interface MissionCompletionResult {
 // Character 관련 타입
 export interface Character {
   id: string;
+  character_id: string;
   name: string;
+  title: string;
+  description: string;
+  emoji: string;
   level: number;
   experience: number;
-  category_id: MissionCategory;
+  total_experience: number;
+  max_experience: number;
+  unlocked: boolean;
+  unlocked_date?: string;
+  category: string;
+  category_id: string;
+  completed_missions: number;
   created_at?: string;
   updated_at?: string;
-  unlocked_date?: string;
-  character_id?: string;
-  total_experience?: number;
   user_id?: string;
-  title?: string;
-  max_experience?: number;
-  unlocked?: boolean;
 }
 
 export interface CharacterData {
@@ -194,7 +198,7 @@ export interface UseCharacterReturn {
   representativeCharacter: Character | null;
   loading: boolean;
   error: string | null;
-  addExperienceByCategory: (category: MissionCategory, experience: number) => Promise<ExperienceResult>;
+  addExperienceByCategory: (category: string, experience: number) => Promise<ExperienceResult>;
   setRepresentative: (characterId: string) => Promise<ServiceResult>;
   createCharacter: (characterData: CharacterData) => Promise<ServiceResult>;
   updateCharacter: (characterId: string, characterData: CharacterData) => Promise<ServiceResult>;

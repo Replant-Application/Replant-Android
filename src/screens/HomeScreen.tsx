@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { NavigationProp } from '@react-navigation/native';
 import { useUser } from '../contexts/UserContext';
 import { useCharacter } from '../hooks/useCharacter';
 import { useMission } from '../hooks/useMission';
@@ -8,6 +9,7 @@ import { Card, Loading, ErrorBoundary } from '../components/ui';
 import { colors, spacing, typography } from '../utils/designTokens';
 import { executeWithErrorHandling } from '../utils/errorHandler';
 import { SCREEN_NAMES } from '../utils/constants';
+import { RootStackParamList } from '../types/navigation';
 
 interface HomeScreenProps {
   navigation: NavigationProp<RootStackParamList>;
@@ -29,15 +31,15 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
         'communication': 2,      // 소통관리 (두번째)
         'career': 3             // 커리어관리 (세번째)
       };
-      
+
       const priorityA = categoryPriority[a.category as keyof typeof categoryPriority] || 999;
       const priorityB = categoryPriority[b.category as keyof typeof categoryPriority] || 999;
-      
+
       // 카테고리 우선순위로 정렬
       if (priorityA !== priorityB) {
         return priorityA - priorityB;
       }
-      
+
       // 같은 카테고리 내에서는 제목 순으로 정렬
       return a.title.localeCompare(b.title);
     })
@@ -49,7 +51,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
       () => completeMissionWithPhoto(missionId, null),
       '미션 완료'
     );
-    
+
     if (result.success) {
       // 성공 시 추가 처리 (예: 토스트 메시지)
     }
@@ -61,7 +63,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
       () => uncompleteMission(missionId),
       '미션 완료 취소'
     );
-    
+
     if (result.success) {
       // 성공 시 추가 처리
     }
@@ -91,13 +93,16 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
         <View style={styles.header}>
           <Text style={styles.greeting}>안녕하세요, {user?.nickname}님!</Text>
         </View>
-        
+
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>나의 캐릭터</Text>
           </View>
           {representativeCharacter ? (
-            <CharacterCard character={representativeCharacter} onPress={() => {}} />
+            <CharacterCard
+              character={representativeCharacter}
+              onPress={handleCharacterPress}
+            />
           ) : (
             <View style={styles.emptyCharacterCard}>
               <Text style={styles.emptyCharacterText}>캐릭터를 불러올 수 없습니다.</Text>
@@ -122,9 +127,9 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
           안녕하세요, {user?.nickname || '사용자'}님!
         </Text>
       </View>
-      
+
       <View style={styles.content}>
-        
+
         {/* 메인 캐릭터 표시 */}
         <View style={styles.characterSection}>
           <Text style={styles.sectionTitle}>🌱 나의 캐릭터</Text>
@@ -135,7 +140,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
               </Text>
             </Card>
           ) : representativeCharacter ? (
-            <CharacterCard 
+            <CharacterCard
               character={representativeCharacter}
               onPress={handleCharacterPress}
               style={styles.characterCard}
@@ -148,7 +153,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
             </Card>
           )}
         </View>
-        
+
         {/* 추천 미션 */}
         <View style={styles.missionSection}>
           <Text style={styles.sectionTitle}>🎯 추천 미션</Text>

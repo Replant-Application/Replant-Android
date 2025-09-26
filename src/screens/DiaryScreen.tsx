@@ -32,7 +32,7 @@ const DiaryScreen: React.FC = () => {
       const month = String(now.getMonth() + 1).padStart(2, '0');
       const day = String(now.getDate()).padStart(2, '0');
       const dateString = `${year}-${month}-${day}`;
-      
+
       const diaryData: SimpleDiaryData = {
         date: dateString,
         emotion: selectedEmotion,
@@ -45,7 +45,7 @@ const DiaryScreen: React.FC = () => {
       } else {
         await saveDiary(diaryData as any);
       }
-      
+
       setShowForm(false);
       setSelectedEmotion('');
       setDiaryContent('');
@@ -67,8 +67,8 @@ const DiaryScreen: React.FC = () => {
       '정말로 이 일기를 삭제하시겠습니까?',
       [
         { text: '취소', style: 'cancel' },
-        { 
-          text: '삭제', 
+        {
+          text: '삭제',
           style: 'destructive',
           onPress: async () => {
             try {
@@ -100,21 +100,21 @@ const DiaryScreen: React.FC = () => {
   return (
     <View style={styles.container}>
       <View style={styles.header} />
-      
+
       <ScrollView style={styles.content}>
-        
+
         {showForm ? (
           <Card style={styles.formCard}>
             <Text style={styles.formTitle}>
               {editingDiary ? '✏️ 일기 수정' : '✏️ 일기 작성'}
             </Text>
-            
+
             <EmotionSelector
               selectedEmotion={selectedEmotion}
               onSelect={setSelectedEmotion}
               style={styles.emotionSelector}
             />
-            
+
             <View style={styles.contentInput}>
               <Text style={styles.contentLabel}>오늘의 이야기</Text>
               <TextInput
@@ -131,7 +131,7 @@ const DiaryScreen: React.FC = () => {
                 {diaryContent.length}/1000
               </Text>
             </View>
-            
+
             <View style={styles.formActions}>
               <Button
                 title="취소"
@@ -176,7 +176,7 @@ const DiaryScreen: React.FC = () => {
           </>
         )}
       </ScrollView>
-      
+
       {/* 플로팅 액션 버튼 */}
       {!showForm && (
         <TouchableOpacity

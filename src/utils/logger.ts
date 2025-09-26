@@ -66,19 +66,19 @@ interface ApiCallData {
  * 로그 포맷터
  */
 const formatLogMessage = (
-  level: string, 
-  message: string, 
+  level: string,
+  message: string,
   data: LogData | null = null
 ): string => {
   const timestamp: string = new Date().toISOString();
   const platform: string = Platform.OS;
-  
+
   const baseMessage: string = `[${timestamp}] [${platform}] [${level}] ${message}`;
-  
+
   if (data) {
     return `${baseMessage}\nData: ${JSON.stringify(data, null, 2)}`;
   }
-  
+
   return baseMessage;
 };
 
@@ -86,14 +86,14 @@ const formatLogMessage = (
  * 로그 출력 함수
  */
 const log = (
-  level: LogLevel, 
-  levelName: string, 
-  message: string, 
+  level: LogLevel,
+  levelName: string,
+  message: string,
   data: LogData | null = null
 ): void => {
   if (level <= currentLogLevel) {
     const formattedMessage: string = formatLogMessage(levelName, message, data);
-    
+
     switch (level) {
       case LOG_LEVELS.ERROR:
         console.error(formattedMessage);
@@ -115,8 +115,8 @@ const log = (
  * 에러 로깅
  */
 export const logError = (
-  message: string, 
-  error: Error | null = null, 
+  message: string,
+  error: Error | null = null,
   context: LogData = {}
 ): void => {
   const errorData: ErrorData = {
@@ -124,7 +124,7 @@ export const logError = (
     stack: error?.stack || '',
     context,
   };
-  
+
   log(LOG_LEVELS.ERROR, 'ERROR', message, errorData);
 };
 
@@ -153,9 +153,9 @@ export const logDebug = (message: string, data: LogData | null = null): void => 
  * 성능 로깅
  */
 export const logPerformance = (
-  operation: string, 
-  startTime: number, 
-  endTime: number, 
+  operation: string,
+  startTime: number,
+  endTime: number,
   data: LogData = {}
 ): void => {
   const duration: number = endTime - startTime;
@@ -164,7 +164,7 @@ export const logPerformance = (
     duration: `${duration}ms`,
     ...data,
   };
-  
+
   if (duration > 1000) {
     logWarn(`Slow operation: ${operation}`, performanceData);
   } else {
@@ -181,7 +181,7 @@ export const logUserAction = (action: string, data: LogData = {}): void => {
     timestamp: new Date().toISOString(),
     ...data,
   };
-  
+
   logInfo(`User Action: ${action}`, actionData);
 };
 
@@ -189,10 +189,10 @@ export const logUserAction = (action: string, data: LogData = {}): void => {
  * API 호출 로깅
  */
 export const logApiCall = (
-  endpoint: string, 
-  method: string, 
-  status: number, 
-  duration: number, 
+  endpoint: string,
+  method: string,
+  status: number,
+  duration: number,
   data: LogData = {}
 ): void => {
   const apiData: ApiCallData = {
@@ -202,7 +202,7 @@ export const logApiCall = (
     duration: `${duration}ms`,
     ...data,
   };
-  
+
   if (status >= 400) {
     logError(`API Error: ${method} ${endpoint}`, null, apiData);
   } else {
@@ -214,27 +214,27 @@ export const logApiCall = (
  * 성능 측정 래퍼
  */
 export const measurePerformance = async <T>(
-  operation: string, 
-  asyncFunction: () => Promise<T>, 
+  operation: string,
+  asyncFunction: () => Promise<T>,
   data: LogData = {}
 ): Promise<T> => {
   const startTime: number = Date.now();
-  
+
   try {
     const result: T = await asyncFunction();
     const endTime: number = Date.now();
-    
+
     logPerformance(operation, startTime, endTime, data);
-    
+
     return result;
   } catch (error) {
     const endTime: number = Date.now();
-    
+
     logError(`Performance measurement failed: ${operation}`, error as Error, {
       ...data,
       duration: `${endTime - startTime}ms`,
     });
-    
+
     throw error;
   }
 };

@@ -17,11 +17,11 @@ interface DiaryCardProps {
   style?: ViewStyle;
 }
 
-const DiaryCard: React.FC<DiaryCardProps> = ({ 
-  diary, 
+const DiaryCard: React.FC<DiaryCardProps> = ({
+  diary,
   onEdit,
   onDelete,
-  style 
+  style
 }) => {
   if (!diary) return null;
 
@@ -93,7 +93,7 @@ const DiaryCard: React.FC<DiaryCardProps> = ({
           >
             <Text style={styles.editText}>✏️ 수정</Text>
           </TouchableOpacity>
-          
+
           <TouchableOpacity
             style={styles.actionButton}
             onPress={() => onDelete?.(diary.id)}
@@ -117,69 +117,69 @@ const styles = StyleSheet.create({
     borderColor: colors.border.light,
     ...shadows.base,
   },
-  
+
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: spacing[3],
   },
-  
+
   emotionInfo: {
     flexDirection: 'row',
     alignItems: 'center',
   },
-  
+
   emotionEmoji: {
     fontSize: typography.fontSize.xl,
     marginRight: spacing[2],
   },
-  
+
   emotionName: {
     fontSize: typography.fontSize.sm,
     fontWeight: typography.fontWeight.medium,
     color: colors.text.secondary,
   },
-  
+
   date: {
     fontSize: typography.fontSize.xs,
     color: colors.text.tertiary,
   },
-  
+
   content: {
     marginBottom: spacing[3],
   },
-  
+
   text: {
     fontSize: typography.fontSize.base,
     color: colors.text.primary,
     lineHeight: typography.lineHeight.normal * typography.fontSize.base,
   },
-  
+
   footer: {
     borderTopWidth: 1,
     borderTopColor: colors.border.light,
     paddingTop: spacing[3],
   },
-  
+
   actions: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
     gap: spacing[3],
   },
-  
+
   actionButton: {
     paddingHorizontal: spacing[3],
     paddingVertical: spacing[1],
     borderRadius: borderRadius.sm,
   },
-  
+
   editText: {
     fontSize: typography.fontSize.sm,
     color: colors.primary[500],
     fontWeight: typography.fontWeight.medium,
   },
-  
+
   deleteText: {
     fontSize: typography.fontSize.sm,
     color: colors.error,

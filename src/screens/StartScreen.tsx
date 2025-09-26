@@ -26,7 +26,7 @@ const StartScreen: React.FC<StartScreenProps> = ({ onNavigate }) => {
           외출부터 취업까지, 함께 성장해요
         </Text>
       </View>
-      
+
       <View style={styles.buttonContainer}>
         <Button
           title="새로운 시작하기"

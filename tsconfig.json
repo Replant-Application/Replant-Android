@@ -23,12 +23,12 @@
     }
   },
   "include": [
-    "**/*.ts", 
+    "**/*.ts",
     "**/*.tsx",
     "src/**/*"
   ],
   "exclude": [
-    "**/node_modules", 
+    "**/node_modules",
     "**/Pods",
     "**/build",
     "**/dist"

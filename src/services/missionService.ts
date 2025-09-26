@@ -18,18 +18,18 @@ import { Mission, MissionData, ServiceResult } from '../types';
  * 나만의 미션 생성
  */
 export const createCustomMission = async (
-  missionData: MissionData, 
+  missionData: MissionData,
   nickname: string
 ): Promise<ServiceResult<Mission>> => {
   try {
     const storageKeys = getStorageKeys(nickname);
     const missions: Mission[] = await getData(storageKeys.MISSIONS) || [];
-    
+
     // 새로운 미션 ID 생성
     const customMissions: Mission[] = missions.filter(m => m.is_custom);
     const newId: number = customMissions.length + 1;
     const missionId: string = `custom_${newId}`;
-    
+
     const newMission: Mission = {
       id: Date.now(), // 고유 ID
       mission_id: missionId,
@@ -48,10 +48,10 @@ export const createCustomMission = async (
       completed_at: undefined,
       photo_url: undefined
     };
-    
+
     const updatedMissions: Mission[] = [...missions, newMission];
     await setData(storageKeys.MISSIONS, updatedMissions);
-    
+
     return {
       success: true,
       data: newMission
@@ -69,24 +69,24 @@ export const createCustomMission = async (
  * 나만의 미션 수정
  */
 export const updateCustomMission = async (
-  missionId: string, 
-  updateData: Partial<MissionData>, 
+  missionId: string,
+  updateData: Partial<MissionData>,
   nickname: string
 ): Promise<ServiceResult<Mission>> => {
   try {
     const storageKeys = getStorageKeys(nickname);
     const missions: Mission[] = await getData(storageKeys.MISSIONS) || [];
-    
+
     const missionIndex: number = missions.findIndex(m => m.mission_id === missionId && m.is_custom);
     if (missionIndex === -1) {
       throw new Error('미션을 찾을 수 없습니다.');
     }
-    
+
     const mission = missions[missionIndex];
     if (!mission) {
       throw new Error('미션을 찾을 수 없습니다.');
     }
-    
+
     const updatedMission: Mission = {
       ...mission,
       ...updateData,
@@ -94,10 +94,10 @@ export const updateCustomMission = async (
       id: mission.id,
       mission_id: mission.mission_id
     };
-    
+
     missions[missionIndex] = updatedMission;
     await setData(storageKeys.MISSIONS, missions);
-    
+
     return {
       success: true,
       data: updatedMission
@@ -115,21 +115,21 @@ export const updateCustomMission = async (
  * 나만의 미션 삭제
  */
 export const deleteCustomMission = async (
-  missionId: string, 
+  missionId: string,
   nickname: string
 ): Promise<ServiceResult<void>> => {
   try {
     const storageKeys = getStorageKeys(nickname);
     const missions: Mission[] = await getData(storageKeys.MISSIONS) || [];
-    
+
     const filteredMissions: Mission[] = missions.filter(m => !(m.mission_id === missionId && m.is_custom));
-    
+
     if (filteredMissions.length === missions.length) {
       throw new Error('미션을 찾을 수 없습니다.');
     }
-    
+
     await setData(storageKeys.MISSIONS, filteredMissions);
-    
+
     return {
       success: true
     };
@@ -149,7 +149,7 @@ export const getCustomMissions = async (nickname: string): Promise<Mission[]> =>
   try {
     const storageKeys = getStorageKeys(nickname);
     const missions: Mission[] = await getData(storageKeys.MISSIONS) || [];
-    
+
     return missions.filter(m => m.is_custom);
   } catch (error) {
     logError('나만의 미션 목록 조회 실패', error as Error, { nickname });

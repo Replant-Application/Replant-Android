@@ -67,7 +67,7 @@ const ChatBotScreen: React.FC<ChatBotScreenProps> = ({ navigation }) => {
           timestamp: new Date(),
           emotion: botResponse.emotion
         };
-      
+
         setMessages(prev => [...prev, botMessage]);
         setIsTyping(false);
       }
@@ -83,7 +83,7 @@ const ChatBotScreen: React.FC<ChatBotScreenProps> = ({ navigation }) => {
       { text: '혼자 감당하기 어려운 일이 있으시군요. 함께 생각해보아요. 🤝', emotion: 'supportive' },
       { text: '당신의 감정을 표현해주셔서 감사해요. 더 이야기해주세요. 💚', emotion: 'warm' }
     ];
-    
+
     return responses[Math.floor(Math.random() * responses.length)];
   };
 
@@ -100,13 +100,13 @@ const ChatBotScreen: React.FC<ChatBotScreenProps> = ({ navigation }) => {
   };
 
   return (
-    <KeyboardAvoidingView 
+    <KeyboardAvoidingView
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       {/* 헤더 */}
       <View style={styles.header}>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.backButton}
           onPress={() => navigation.goBack()}
         >
@@ -117,19 +117,19 @@ const ChatBotScreen: React.FC<ChatBotScreenProps> = ({ navigation }) => {
       </View>
 
       {/* 메시지 목록 */}
-      <ScrollView 
+      <ScrollView
         ref={scrollViewRef}
         style={styles.messagesContainer}
         contentContainerStyle={styles.messagesContent}
         onContentSizeChange={scrollToBottom}
       >
         {messages.map((message) => (
-          <MessageBubble 
-            key={message.id} 
-            message={message} 
+          <MessageBubble
+            key={message.id}
+            message={message}
           />
         ))}
-        
+
         {isTyping && (
           <View style={styles.typingContainer}>
             <Text style={styles.typingText}>상담사가 입력 중...</Text>
@@ -220,9 +220,9 @@ const MessageBubble: React.FC<{ message: Message }> = ({ message }) => {
         styles.messageTime,
         isUser ? styles.userMessageTime : styles.botMessageTime
       ]}>
-        {message.timestamp.toLocaleTimeString('ko-KR', { 
-          hour: '2-digit', 
-          minute: '2-digit' 
+        {message.timestamp.toLocaleTimeString('ko-KR', {
+          hour: '2-digit',
+          minute: '2-digit'
         })}
       </Text>
     </View>

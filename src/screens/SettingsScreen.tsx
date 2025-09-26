@@ -15,8 +15,8 @@ const SettingsScreen = () => {
       '정말로 로그아웃하시겠습니까?',
       [
         { text: '취소', style: 'cancel' },
-        { 
-          text: '로그아웃', 
+        {
+          text: '로그아웃',
           style: 'destructive',
           onPress: logout
         }
@@ -54,14 +54,14 @@ const SettingsScreen = () => {
   return (
     <ScrollView style={[styles.container, { backgroundColor: colors.background.secondary }]}>
       <View style={styles.header} />
-      
+
       <View style={styles.content}>
         {/* 사용자 정보 */}
         <Card style={styles.userCard}>
           <Text style={styles.userTitle}>👤 사용자 정보</Text>
           <Text style={styles.userInfo}>닉네임: {user?.nickname}</Text>
           <Text style={styles.userInfo}>가입일: {new Date().toLocaleDateString('ko-KR')}</Text>
-          
+
           {showNicknameForm ? (
             <View style={styles.nicknameForm}>
               <Input
@@ -72,8 +72,8 @@ const SettingsScreen = () => {
                 style={styles.nicknameInput}
               />
               <View style={styles.nicknameActions}>
-                <TouchableOpacity 
-                  style={styles.cancelButton} 
+                <TouchableOpacity
+                  style={styles.cancelButton}
                   onPress={() => {
                     setShowNicknameForm(false);
                     setNewNickname('');
@@ -81,8 +81,8 @@ const SettingsScreen = () => {
                 >
                   <Text style={styles.cancelButtonText}>취소</Text>
                 </TouchableOpacity>
-                <TouchableOpacity 
-                  style={styles.saveButton} 
+                <TouchableOpacity
+                  style={styles.saveButton}
                   onPress={handleNicknameChange}
                 >
                   <Text style={styles.saveButtonText}>변경</Text>
@@ -90,8 +90,8 @@ const SettingsScreen = () => {
               </View>
             </View>
           ) : (
-            <TouchableOpacity 
-              style={styles.changeNicknameButton} 
+            <TouchableOpacity
+              style={styles.changeNicknameButton}
               onPress={() => setShowNicknameForm(true)}
             >
               <Text style={styles.changeNicknameText}>✏️ 닉네임 변경</Text>
@@ -100,7 +100,7 @@ const SettingsScreen = () => {
         </Card>
 
 
-        
+
         {/* 계정 설정 */}
         <Card style={styles.accountCard}>
           <Text style={styles.sectionTitle}>🔐 계정</Text>

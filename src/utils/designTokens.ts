@@ -19,7 +19,7 @@ export const colors: Colors = {
     800: '#166534',
     900: '#14532d',
   },
-  
+
   // Neutral grays
   gray: {
     50: '#f9fafb',
@@ -33,7 +33,7 @@ export const colors: Colors = {
     800: '#1f2937',
     900: '#111827',
   },
-  
+
   // Blue colors
   blue: {
     50: '#eff6ff',
@@ -47,7 +47,7 @@ export const colors: Colors = {
     800: '#1e40af',
     900: '#1e3a8a',
   },
-  
+
   // Purple colors
   purple: {
     50: '#faf5ff',
@@ -61,7 +61,7 @@ export const colors: Colors = {
     800: '#5b21b6',
     900: '#581c87',
   },
-  
+
   // Green colors
   green: {
     50: '#f0fdf4',
@@ -75,7 +75,7 @@ export const colors: Colors = {
     800: '#166534',
     900: '#14532d',
   },
-  
+
   // Orange colors
   orange: {
     50: '#fff7ed',
@@ -89,24 +89,24 @@ export const colors: Colors = {
     800: '#9a3412',
     900: '#7c2d12',
   },
-  
+
   // Black and white colors
   black: '#000000',
   white: '#ffffff',
-  
+
   // Semantic colors
   success: '#22c55e',
   warning: '#f59e0b',
   error: '#ef4444',
   info: '#3b82f6',
-  
+
   // Background colors
   background: {
     primary: '#ffffff',
     secondary: '#f8f9fa',
     tertiary: '#f3f4f6',
   },
-  
+
   // Text colors
   text: {
     primary: '#111827',
@@ -114,7 +114,7 @@ export const colors: Colors = {
     tertiary: '#9ca3af',
     inverse: '#ffffff',
   },
-  
+
   // Border colors
   border: {
     light: '#e5e7eb',
@@ -122,7 +122,7 @@ export const colors: Colors = {
     dark: '#9ca3af',
     primary: '#22c55e',
   },
-  
+
   // Emotion colors
   emotions: {
     happy: '#b45309',

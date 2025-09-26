@@ -55,7 +55,7 @@ const CustomMissionCreateScreen: React.FC<CustomMissionCreateScreenProps> = ({ n
 
     try {
       setLoading(true);
-      
+
       const missionData = {
         title: title.trim(),
         description: description.trim(),
@@ -66,7 +66,7 @@ const CustomMissionCreateScreen: React.FC<CustomMissionCreateScreenProps> = ({ n
       };
 
       const result = await createCustomMission(missionData as any, currentNickname || 'default');
-      
+
       if (result.success) {
         Alert.alert(
           '성공!',
@@ -97,13 +97,13 @@ const CustomMissionCreateScreen: React.FC<CustomMissionCreateScreenProps> = ({ n
   };
 
   return (
-    <KeyboardAvoidingView 
+    <KeyboardAvoidingView
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       {/* 헤더 */}
       <View style={styles.header}>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.backButton}
           onPress={() => navigation.goBack()}
         >

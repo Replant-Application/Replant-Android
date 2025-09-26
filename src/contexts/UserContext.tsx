@@ -53,11 +53,11 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
       const deviceId = await getDeviceId();
       const oldNicknameKey = `userNickname_${deviceId}`;
       const nickname = await AsyncStorage.getItem(oldNicknameKey);
-      
+
       if (nickname) {
-        setUser({ 
-          nickname, 
-          id: `user_${Date.now()}` 
+        setUser({
+          nickname,
+          id: `user_${Date.now()}`
         });
         setCurrentNickname(nickname);
       }
@@ -71,32 +71,32 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   // 사용자 로그인 (인증 없이 닉네임만으로)
   const login = useCallback(async (nickname: string) => {
     logUserAction('login_attempt', { nickname });
-    
+
     const result = await executeWithErrorHandling(async () => {
       // 사용자 상태 업데이트
       const userId = `user_${Date.now()}`;
-      setUser({ 
-        nickname, 
+      setUser({
+        nickname,
         id: userId
       });
       setCurrentNickname(nickname);
-      
+
       // 미션 데이터 초기화
       await initializeUserData(userId, nickname);
-      
+
       logUserAction('login_success', { nickname, userId });
       return true;
     }, '사용자 로그인');
-    
+
     // 에러가 발생해도 강제로 성공 처리
     if (!result.success) {
       const userId = `user_${Date.now()}`;
-      setUser({ 
-        nickname, 
+      setUser({
+        nickname,
         id: userId
       });
       setCurrentNickname(nickname);
-      
+
       // 미션 데이터 초기화 (에러가 발생해도)
       try {
         await initializeUserData(userId, nickname);
@@ -104,7 +104,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         logError('데이터 초기화 실패', initError as Error, { nickname, userId });
       }
     }
-    
+
     return true;
   }, []);
 
@@ -129,11 +129,11 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
       if (currentNickname) {
         const storageKeys = getStorageKeys(currentNickname);
         const nickname = await AsyncStorage.getItem(storageKeys.USER_NICKNAME);
-        
+
         if (nickname) {
-          setUser({ 
-            nickname, 
-            id: `user_${Date.now()}` 
+          setUser({
+            nickname,
+            id: `user_${Date.now()}`
           });
         }
       }
@@ -152,11 +152,11 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
       // 기존 데이터 백업
       const oldStorageKeys = getStorageKeys(currentNickname);
       const newStorageKeys = getStorageKeys(newNickname);
-      
+
       // 모든 기존 데이터를 새 닉네임으로 복사
       const allKeys = await AsyncStorage.getAllKeys();
       const userKeys = allKeys.filter(key => key.includes(currentNickname));
-      
+
       for (const key of userKeys) {
         const value = await AsyncStorage.getItem(key);
         if (value) {
@@ -164,17 +164,17 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
           await AsyncStorage.setItem(newKey, value);
         }
       }
-      
+
       // 기존 데이터 삭제
       await AsyncStorage.multiRemove(userKeys);
-      
+
       // 사용자 정보 업데이트
-      setUser({ 
-        nickname: newNickname, 
-        id: user?.id || `user_${Date.now()}` 
+      setUser({
+        nickname: newNickname,
+        id: user?.id || `user_${Date.now()}`
       });
       setCurrentNickname(newNickname);
-      
+
       logUserAction('nickname_updated', { oldNickname: currentNickname, newNickname });
       return { success: true };
     } catch (error) {

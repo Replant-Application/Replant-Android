@@ -22,13 +22,13 @@ interface MissionCardProps {
   style?: ViewStyle;
 }
 
-const MissionCard: React.FC<MissionCardProps> = ({ 
-  mission, 
+const MissionCard: React.FC<MissionCardProps> = ({
+  mission,
   onComplete,
   onUncomplete,
   loading = false,
   disabled = false,
-  style 
+  style
 }) => {
   if (!mission) return null;
 
@@ -85,10 +85,10 @@ const MissionCard: React.FC<MissionCardProps> = ({
         {mission.description && (
           <Text style={styles.description}>{mission.description}</Text>
         )}
-        
+
         {mission.photo_url && (
-          <Image 
-            source={{ uri: mission.photo_url }} 
+          <Image
+            source={{ uri: mission.photo_url }}
             style={styles.photo}
             resizeMode="cover"
           />
@@ -101,7 +101,7 @@ const MissionCard: React.FC<MissionCardProps> = ({
             +{mission.experience || 50} EXP
           </Text>
         </View>
-        
+
         <TouchableOpacity
           style={[
             styles.actionButton,
@@ -135,121 +135,121 @@ const styles = StyleSheet.create({
     borderColor: colors.border.light,
     ...shadows.base,
   },
-  
+
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: spacing[3],
   },
-  
+
   categoryInfo: {
     flexDirection: 'row',
     alignItems: 'center',
   },
-  
+
   categoryEmoji: {
     fontSize: typography.fontSize.xl,
     marginRight: spacing[2],
   },
-  
+
   categoryName: {
     fontSize: typography.fontSize.sm,
     fontWeight: typography.fontWeight.medium,
     color: colors.text.secondary,
   },
-  
+
   statusContainer: {
     paddingHorizontal: spacing[2],
     paddingVertical: spacing[1],
     borderRadius: borderRadius.sm,
     backgroundColor: colors.gray[100],
   },
-  
+
   completedText: {
     fontSize: typography.fontSize.xs,
     color: colors.success,
     fontWeight: typography.fontWeight.medium,
   },
-  
+
   pendingText: {
     fontSize: typography.fontSize.xs,
     color: colors.warning,
     fontWeight: typography.fontWeight.medium,
   },
-  
+
   content: {
     marginBottom: spacing[3],
   },
-  
+
   title: {
     fontSize: typography.fontSize.lg,
     fontWeight: typography.fontWeight.semibold,
     color: colors.text.primary,
     marginBottom: spacing[1],
   },
-  
+
   description: {
     fontSize: typography.fontSize.base,
     color: colors.text.secondary,
     lineHeight: typography.lineHeight.normal * typography.fontSize.base,
   },
-  
+
   photo: {
     width: '100%',
     height: 120,
     borderRadius: borderRadius.base,
     marginTop: spacing[2],
   },
-  
+
   footer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
   },
-  
+
   experienceInfo: {
     flex: 1,
   },
-  
+
   experienceText: {
     fontSize: typography.fontSize.sm,
     color: colors.primary[500],
     fontWeight: typography.fontWeight.medium,
   },
-  
+
   actionButton: {
     paddingHorizontal: spacing[4],
     paddingVertical: spacing[2],
     borderRadius: borderRadius.base,
   },
-  
+
   completeButton: {
     backgroundColor: colors.primary[500],
   },
-  
+
   uncompleteButton: {
     backgroundColor: colors.gray[300],
   },
-  
+
   actionText: {
     fontSize: typography.fontSize.sm,
     fontWeight: typography.fontWeight.medium,
   },
-  
+
   completeText: {
     color: colors.text.inverse,
   },
-  
+
   uncompleteText: {
     color: colors.text.secondary,
   },
-  
+
   disabledButton: {
     backgroundColor: colors.gray[200],
     opacity: 0.6,
   },
-  
+
   disabledText: {
     color: colors.text.tertiary,
   },

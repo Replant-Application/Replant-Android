@@ -27,7 +27,7 @@ export const SCREEN_NAMES: Record<string, string> = {
 // 미션 카테고리 (3개로 축소)
 export const MISSION_CATEGORIES: Record<string, MissionCategory> = {
   SELF_MANAGEMENT: 'self_management',
-  COMMUNICATION: 'communication', 
+  COMMUNICATION: 'communication',
   CAREER: 'career',
 } as const;
 
