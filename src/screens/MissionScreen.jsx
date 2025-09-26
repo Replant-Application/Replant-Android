@@ -11,6 +11,7 @@ const MISSION_CATEGORIES = [
   { id: 'self_management', name: '자기관리', emoji: '🧘' },
   { id: 'communication', name: '소통관리', emoji: '🏃‍♂️' },
   { id: 'career', name: '커리어관리', emoji: '📚' },
+  { id: 'custom', name: '나만의 미션', emoji: '✨' },
 ];
 
 const MissionScreen = () => {
@@ -21,6 +22,8 @@ const MissionScreen = () => {
   // 필터링된 미션 목록
   const filteredMissions = selectedCategory === 'all' 
     ? missions 
+    : selectedCategory === 'custom'
+    ? missions.filter(mission => mission.is_custom)
     : missions.filter(mission => mission.category === selectedCategory);
 
   // 진행률 계산
@@ -129,25 +132,46 @@ const MissionScreen = () => {
 
         {/* 미션 목록 */}
         <View style={styles.missionSection}>
-          <Text style={styles.sectionTitle}>
-            {selectedCategory === 'all' ? '전체 미션' : `${MISSION_CATEGORIES.find(c => c.id === selectedCategory)?.name} 미션`}
-          </Text>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>
+              {selectedCategory === 'all' ? '전체 미션' : `${MISSION_CATEGORIES.find(c => c.id === selectedCategory)?.name} 미션`}
+            </Text>
+            {selectedCategory === 'custom' && (
+              <Button
+                title="+ 새 미션"
+                onPress={() => Alert.alert('알림', '나만의 미션 생성 기능은 준비 중입니다!')}
+                style={styles.addButton}
+                textStyle={styles.addButtonText}
+              />
+            )}
+          </View>
           
           {filteredMissions.length === 0 ? (
             <Card style={styles.emptyCard}>
               <Text style={styles.emptyIcon}>
-                {selectedCategory === 'all' ? '🎯' : '📚'}
+                {selectedCategory === 'all' ? '🎯' : selectedCategory === 'custom' ? '✨' : '📚'}
               </Text>
               <Text style={styles.emptyTitle}>
                 {selectedCategory === 'all' 
                   ? '아직 미션이 없어요' 
+                  : selectedCategory === 'custom'
+                  ? '나만의 미션이 없어요'
                   : '이 카테고리의 미션이 없어요'}
               </Text>
               <Text style={styles.emptyText}>
                 {selectedCategory === 'all'
                   ? '새로운 미션이 곧 추가될 예정입니다!'
+                  : selectedCategory === 'custom'
+                  ? '첫 번째 나만의 미션을 만들어보세요!'
                   : '다른 카테고리의 미션을 확인해보세요!'}
               </Text>
+              {selectedCategory === 'custom' && (
+                <Button
+                  title="미션 만들기"
+                  onPress={() => Alert.alert('알림', '나만의 미션 생성 기능은 준비 중입니다!')}
+                  style={styles.createButton}
+                />
+              )}
             </Card>
           ) : (
             filteredMissions.map((mission, index) => (
@@ -264,6 +288,28 @@ const styles = StyleSheet.create({
   },
   missionSection: {
     marginBottom: spacing[6],
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: spacing[3],
+  },
+  addButton: {
+    backgroundColor: colors.primary[500],
+    paddingHorizontal: spacing[4],
+    paddingVertical: spacing[2],
+    borderRadius: borderRadius.md,
+  },
+  addButtonText: {
+    color: colors.white,
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.semibold,
+  },
+  createButton: {
+    backgroundColor: colors.primary[500],
+    marginTop: spacing[4],
+    alignSelf: 'center',
   },
   missionCard: {
     marginBottom: spacing[3],
