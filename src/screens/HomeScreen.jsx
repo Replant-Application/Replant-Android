@@ -156,6 +156,7 @@ const HomeScreen = ({ navigation }) => {
                 onComplete={handleCompleteMission}
                 onUncomplete={handleUncompleteMission}
                 style={styles.missionCard}
+                disabled={true}
               />
             ))
           ) : (

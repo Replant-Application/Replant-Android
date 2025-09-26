@@ -7,6 +7,7 @@ const MissionCard = ({
   onComplete,
   onUncomplete,
   loading = false,
+  disabled = false,
   style 
 }) => {
   if (!mission) return null;
@@ -84,17 +85,19 @@ const MissionCard = ({
         <TouchableOpacity
           style={[
             styles.actionButton,
-            mission.completed ? styles.uncompleteButton : styles.completeButton
+            mission.completed ? styles.uncompleteButton : styles.completeButton,
+            disabled && styles.disabledButton
           ]}
-          onPress={handleToggleComplete}
-          disabled={loading}
-          activeOpacity={0.7}
+          onPress={disabled ? null : handleToggleComplete}
+          disabled={loading || disabled}
+          activeOpacity={disabled ? 1 : 0.7}
         >
           <Text style={[
             styles.actionText,
-            mission.completed ? styles.uncompleteText : styles.completeText
+            mission.completed ? styles.uncompleteText : styles.completeText,
+            disabled && styles.disabledText
           ]}>
-            {loading ? '처리중...' : mission.completed ? '완료 취소' : '완료하기'}
+            {disabled ? '비활성화' : loading ? '처리중...' : mission.completed ? '완료 취소' : '완료하기'}
           </Text>
         </TouchableOpacity>
       </View>
@@ -220,6 +223,15 @@ const styles = StyleSheet.create({
   
   uncompleteText: {
     color: colors.text.secondary,
+  },
+  
+  disabledButton: {
+    backgroundColor: colors.gray[200],
+    opacity: 0.6,
+  },
+  
+  disabledText: {
+    color: colors.text.tertiary,
   },
 });
 
