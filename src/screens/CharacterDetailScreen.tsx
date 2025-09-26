@@ -51,9 +51,11 @@ const CharacterDetailScreen: React.FC<CharacterDetailScreenProps> = ({ route, na
 
   // 레벨 이름 변환
   const getLevelName = (level: number): string => {
-    if (level >= 10) return '성숙한 나무';
-    if (level >= 7) return '자라는 나무';
-    if (level >= 4) return '새싹';
+    if (level >= 6) return '성숙한 나무';
+    if (level >= 5) return '열매 나무';
+    if (level >= 4) return '나무';
+    if (level >= 3) return '어린 식물';
+    if (level >= 2) return '새싹';
     return '씨앗';
   };
 
