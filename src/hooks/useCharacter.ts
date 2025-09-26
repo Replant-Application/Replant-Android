@@ -18,7 +18,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { getData, getStorageKeys, autoLevelupCharacter, setData } from '../services';
 import { useUser } from '../contexts/UserContext';
 import { logError } from '../utils/logger';
-import { Character, CharacterData, UseCharacterReturn, ExperienceResult, ServiceResult } from '../types';
+import { Character, CharacterData, UseCharacterReturn, ExperienceResult, ServiceResult, MissionCategory } from '../types';
 
 export const useCharacter = (): UseCharacterReturn => {
   const { currentNickname } = useUser();
@@ -108,7 +108,7 @@ export const useCharacter = (): UseCharacterReturn => {
 
   // 경험치 추가 (카테고리별)
   const addExperienceByCategory = useCallback(async (
-    categoryId: string,
+    categoryId: MissionCategory,
     experience: number
   ): Promise<ExperienceResult> => {
     try {
@@ -132,6 +132,11 @@ export const useCharacter = (): UseCharacterReturn => {
         // 선택된 캐릭터도 업데이트
         if (selectedCharacter && selectedCharacter.id === character.id) {
           setSelectedCharacter(result.character!);
+        }
+
+        // 대표 캐릭터도 업데이트
+        if (representativeCharacter && representativeCharacter.id === character.id) {
+          setRepresentativeCharacter(result.character!);
         }
       }
 

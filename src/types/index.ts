@@ -198,7 +198,7 @@ export interface UseCharacterReturn {
   representativeCharacter: Character | null;
   loading: boolean;
   error: string | null;
-  addExperienceByCategory: (category: string, experience: number) => Promise<ExperienceResult>;
+  addExperienceByCategory: (category: MissionCategory, experience: number) => Promise<ExperienceResult>;
   setRepresentative: (characterId: string) => Promise<ServiceResult>;
   createCharacter: (characterData: CharacterData) => Promise<ServiceResult>;
   updateCharacter: (characterId: string, characterData: CharacterData) => Promise<ServiceResult>;
