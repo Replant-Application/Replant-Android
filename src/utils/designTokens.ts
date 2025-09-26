@@ -3,7 +3,9 @@
  * React Native용 디자인 시스템
  */
 
-export const colors = {
+import { Colors, Spacing, Typography, BorderRadius, Shadows, ComponentStyles } from '../types/design';
+
+export const colors: Colors = {
   // Primary brand colors
   primary: {
     100: '#dcfce7',
@@ -106,7 +108,7 @@ export const colors = {
   },
 };
 
-export const spacing = {
+export const spacing: Spacing = {
   0: 0,
   1: 4,
   2: 8,
@@ -122,7 +124,7 @@ export const spacing = {
   24: 96,
 };
 
-export const typography = {
+export const typography: Typography = {
   fontSize: {
     xs: 12,
     sm: 14,
@@ -146,7 +148,7 @@ export const typography = {
   },
 };
 
-export const borderRadius = {
+export const borderRadius: BorderRadius = {
   none: 0,
   sm: 4,
   base: 8,
@@ -156,7 +158,7 @@ export const borderRadius = {
   full: 9999,
 };
 
-export const shadows = {
+export const shadows: Shadows = {
   sm: {
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
@@ -180,7 +182,7 @@ export const shadows = {
   },
 };
 
-export const components = {
+export const components: ComponentStyles = {
   button: {
     height: {
       sm: 32,
@@ -212,4 +214,3 @@ export const components = {
     },
   },
 };
-

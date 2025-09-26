@@ -7,9 +7,37 @@ import { Alert } from 'react-native';
 import { logError, logWarn, logInfo } from './logger';
 
 /**
+ * 에러 타입 정의
+ */
+type ErrorType = 
+  | 'DATA_LOAD_FAILED'
+  | 'DATA_SAVE_FAILED'
+  | 'DATA_UPDATE_FAILED'
+  | 'DATA_DELETE_FAILED'
+  | 'LOGIN_FAILED'
+  | 'LOGOUT_FAILED'
+  | 'USER_INFO_LOAD_FAILED'
+  | 'MISSION_COMPLETE_FAILED'
+  | 'MISSION_UNCOMPLETE_FAILED'
+  | 'MISSION_LOAD_FAILED'
+  | 'CHARACTER_LOAD_FAILED'
+  | 'CHARACTER_LEVELUP_FAILED'
+  | 'CHARACTER_CREATE_FAILED'
+  | 'REPRESENTATIVE_CHARACTER_SET_FAILED'
+  | 'DIARY_LOAD_FAILED'
+  | 'DIARY_SAVE_FAILED'
+  | 'DIARY_UPDATE_FAILED'
+  | 'DIARY_DELETE_FAILED'
+  | 'APP_INIT_FAILED'
+  | 'DATA_RESET_FAILED'
+  | 'NETWORK_ERROR'
+  | 'TIMEOUT_ERROR'
+  | 'UNKNOWN_ERROR';
+
+/**
  * 에러 타입별 메시지 매핑
  */
-const ERROR_MESSAGES = {
+const ERROR_MESSAGES: Record<ErrorType, string> = {
   // 데이터 관련 에러
   DATA_LOAD_FAILED: '데이터를 불러오는데 실패했습니다.',
   DATA_SAVE_FAILED: '데이터 저장에 실패했습니다.',
@@ -53,9 +81,9 @@ const ERROR_MESSAGES = {
 /**
  * 에러 타입을 결정하는 함수
  */
-const getErrorType = (error, context = '') => {
+const getErrorType = (error: Error, context: string = ''): ErrorType => {
   if (error.message) {
-    const message = error.message.toLowerCase();
+    const message: string = error.message.toLowerCase();
     
     if (message.includes('network') || message.includes('fetch')) {
       return 'NETWORK_ERROR';
@@ -89,8 +117,8 @@ const getErrorType = (error, context = '') => {
 /**
  * 에러 로깅 함수 (통합 로거 사용)
  */
-export const logErrorHandler = (error, context = '') => {
-  const errorType = getErrorType(error, context);
+export const logErrorHandler = (error: Error, context: string = ''): void => {
+  const errorType: ErrorType = getErrorType(error, context);
   
   logError(`Error: ${errorType}`, error, { context, errorType });
 };
@@ -98,9 +126,9 @@ export const logErrorHandler = (error, context = '') => {
 /**
  * 사용자 친화적 에러 메시지 표시
  */
-export const showErrorAlert = (error, context = '') => {
-  const errorType = getErrorType(error, context);
-  const userMessage = ERROR_MESSAGES[errorType] || ERROR_MESSAGES.UNKNOWN_ERROR;
+export const showErrorAlert = (error: Error, context: string = ''): void => {
+  const errorType: ErrorType = getErrorType(error, context);
+  const userMessage: string = ERROR_MESSAGES[errorType] || ERROR_MESSAGES.UNKNOWN_ERROR;
   
   logWarn(`User shown error alert: ${errorType}`, { context, userMessage });
   Alert.alert('오류', userMessage);
@@ -109,7 +137,7 @@ export const showErrorAlert = (error, context = '') => {
 /**
  * 성공 메시지 표시
  */
-export const showSuccessAlert = (message, title = '성공') => {
+export const showSuccessAlert = (message: string, title: string = '성공'): void => {
   logInfo(`User shown success alert: ${title}`, { message });
   Alert.alert(title, message);
 };
@@ -117,7 +145,11 @@ export const showSuccessAlert = (message, title = '성공') => {
 /**
  * 확인 다이얼로그 표시
  */
-export const showConfirmAlert = (message, onConfirm, title = '확인') => {
+export const showConfirmAlert = (
+  message: string, 
+  onConfirm: () => void, 
+  title: string = '확인'
+): void => {
   Alert.alert(
     title,
     message,
@@ -131,12 +163,15 @@ export const showConfirmAlert = (message, onConfirm, title = '확인') => {
 /**
  * 에러 처리 래퍼 함수
  */
-export const handleAsyncError = async (asyncFunction, context = '') => {
+export const handleAsyncError = async <T>(
+  asyncFunction: () => Promise<T>, 
+  context: string = ''
+): Promise<T> => {
   try {
     return await asyncFunction();
   } catch (error) {
-    logErrorHandler(error, context);
-    showErrorAlert(error, context);
+    logErrorHandler(error as Error, context);
+    showErrorAlert(error as Error, context);
     throw error;
   }
 };
@@ -144,12 +179,15 @@ export const handleAsyncError = async (asyncFunction, context = '') => {
 /**
  * 에러 처리와 함께 실행하는 함수
  */
-export const executeWithErrorHandling = async (asyncFunction, context = '') => {
+export const executeWithErrorHandling = async <T>(
+  asyncFunction: () => Promise<T>, 
+  context: string = ''
+): Promise<{ success: boolean; data?: T; error?: string }> => {
   try {
-    const result = await asyncFunction();
+    const result: T = await asyncFunction();
     return { success: true, data: result };
   } catch (error) {
-    logErrorHandler(error, context);
-    return { success: false, error: error.message };
+    logErrorHandler(error as Error, context);
+    return { success: false, error: (error as Error).message };
   }
 };
