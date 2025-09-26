@@ -179,28 +179,6 @@ const CharacterDetailScreen: React.FC<CharacterDetailScreenProps> = ({ route, na
           </Text>
         </View>
 
-        {/* 성장 팁 */}
-        <View style={styles.tipsSection}>
-          <Text style={styles.sectionTitle}>💡 성장 팁</Text>
-          <View style={styles.tipItem}>
-            <Text style={styles.tipIcon}>🎯</Text>
-            <Text style={styles.tipText}>
-              {getCategoryName(character.category_id)} 관련 미션을 완료하면 더 많은 경험치를 얻을 수 있어요!
-            </Text>
-          </View>
-          <View style={styles.tipItem}>
-            <Text style={styles.tipIcon}>📈</Text>
-            <Text style={styles.tipText}>
-              매일 꾸준히 미션을 완료하면 캐릭터가 빠르게 성장해요!
-            </Text>
-          </View>
-          <View style={styles.tipItem}>
-            <Text style={styles.tipIcon}>🌟</Text>
-            <Text style={styles.tipText}>
-              레벨이 올라갈수록 더 멋진 캐릭터 모습을 볼 수 있어요!
-            </Text>
-          </View>
-        </View>
       </View>
     </ScrollView>
   );
@@ -364,28 +342,6 @@ const styles = StyleSheet.create({
     ...shadows.base,
   },
   description: {
-    fontSize: typography.fontSize.base,
-    color: colors.text.secondary,
-    lineHeight: typography.lineHeight.relaxed * typography.fontSize.base,
-  },
-  tipsSection: {
-    padding: spacing[5],
-    backgroundColor: colors.background.primary,
-    borderRadius: borderRadius.lg,
-    ...shadows.base,
-  },
-  tipItem: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    marginBottom: spacing[4],
-  },
-  tipIcon: {
-    fontSize: typography.fontSize.lg,
-    marginRight: spacing[3],
-    marginTop: spacing[1],
-  },
-  tipText: {
-    flex: 1,
     fontSize: typography.fontSize.base,
     color: colors.text.secondary,
     lineHeight: typography.lineHeight.relaxed * typography.fontSize.base,
