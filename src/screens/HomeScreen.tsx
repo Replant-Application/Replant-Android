@@ -91,9 +91,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
     return (
       <ScrollView style={styles.container}>
         <View style={styles.header}>
-          <Text style={styles.greeting}>안녕하세요, {user?.nickname}님!</Text>
         </View>
-
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>나의 캐릭터</Text>
@@ -123,11 +121,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.welcomeText}>
-          안녕하세요, {user?.nickname || '사용자'}님!
-        </Text>
       </View>
-
       <View style={styles.content}>
 
         {/* 메인 캐릭터 표시 */}
@@ -198,25 +192,8 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: colors.border.light,
   },
-  title: {
-    fontSize: typography.fontSize['2xl'],
-    fontWeight: typography.fontWeight.bold,
-    color: colors.text.primary,
-  },
-  userInfo: {
-    fontSize: typography.fontSize.base,
-    color: colors.text.secondary,
-  },
   content: {
     padding: spacing[5],
-  },
-  welcomeText: {
-    fontSize: typography.fontSize.lg,
-    color: colors.text.primary,
-    lineHeight: typography.lineHeight.relaxed * typography.fontSize.lg,
-    marginTop: spacing[6],
-    marginBottom: spacing[8],
-    textAlign: 'center',
   },
   characterSection: {
     marginBottom: spacing[8],
@@ -254,11 +231,6 @@ const styles = StyleSheet.create({
     color: colors.text.secondary,
     textAlign: 'center',
     lineHeight: typography.lineHeight.relaxed * typography.fontSize.base,
-  },
-  greeting: {
-    fontSize: typography.fontSize.lg,
-    color: colors.text.primary,
-    fontWeight: typography.fontWeight.bold,
   },
   section: {
     marginBottom: spacing[6],
