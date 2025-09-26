@@ -2,6 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getData, setData, getStorageKeys } from './storage';
 import { logError } from '../utils/logger';
 import { ServiceResult, User, Character } from '../types';
+import { generateUserCharacterName } from '../utils/characterNameGenerator';
 
 // 닉네임 중복 확인
 export const checkNicknameDuplicate = async (nickname: string): Promise<boolean> => {
@@ -149,7 +150,7 @@ export const initializeUserData = async (
           id: `character_${Date.now()}_self_management`,
           character_id: `character_${Date.now()}_self_management`,
           user_id: userId,
-          name: characterTemplates[0].name,
+          name: generateUserCharacterName(userId, 'self_management'),
           title: characterTemplates[0].title,
           description: characterTemplates[0].description || '',
           emoji: characterTemplates[0].emoji || '🌱',
@@ -168,7 +169,7 @@ export const initializeUserData = async (
           id: `character_${Date.now()}_communication`,
           character_id: `character_${Date.now()}_communication`,
           user_id: userId,
-          name: characterTemplates[0].name,
+          name: generateUserCharacterName(userId, 'communication'),
           title: characterTemplates[0].title,
           description: characterTemplates[0].description || '',
           emoji: characterTemplates[0].emoji || '🌱',
@@ -187,7 +188,7 @@ export const initializeUserData = async (
           id: `character_${Date.now()}_career`,
           character_id: `character_${Date.now()}_career`,
           user_id: userId,
-          name: characterTemplates[0].name,
+          name: generateUserCharacterName(userId, 'career'),
           title: characterTemplates[0].title,
           description: characterTemplates[0].description || '',
           emoji: characterTemplates[0].emoji || '🌱',
