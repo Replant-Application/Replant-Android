@@ -117,12 +117,6 @@ const HomeScreen = ({ navigation }) => {
         <Text style={styles.welcomeText}>
           안녕하세요, {user?.nickname || '사용자'}님!
         </Text>
-        <TouchableOpacity
-          style={styles.chatbotButton}
-          onPress={() => navigation.navigate(SCREEN_NAMES.CHATBOT)}
-        >
-          <Text style={styles.chatbotButtonText}>🤖 심리상담</Text>
-        </TouchableOpacity>
       </View>
       
       <View style={styles.content}>
@@ -211,21 +205,8 @@ const styles = StyleSheet.create({
     color: colors.text.primary,
     lineHeight: typography.lineHeight.relaxed * typography.fontSize.lg,
     marginTop: spacing[6],
-    marginBottom: spacing[4],
+    marginBottom: spacing[8],
     textAlign: 'center',
-  },
-  chatbotButton: {
-    backgroundColor: colors.primary[500],
-    paddingHorizontal: spacing[4],
-    paddingVertical: spacing[3],
-    borderRadius: borderRadius.lg,
-    alignSelf: 'center',
-    marginBottom: spacing[4],
-  },
-  chatbotButtonText: {
-    color: colors.white,
-    fontSize: typography.fontSize.base,
-    fontWeight: typography.fontWeight.semibold,
   },
   characterSection: {
     marginBottom: spacing[8],

@@ -125,6 +125,14 @@ const AppNavigator = () => {
         </TouchableOpacity>
         
         <TouchableOpacity 
+          style={[styles.tab, currentScreen === SCREEN_NAMES.CHATBOT && styles.activeTab]}
+          onPress={() => setCurrentScreen(SCREEN_NAMES.CHATBOT)}
+        >
+          <Text style={styles.tabIcon}>🤖</Text>
+          <Text style={styles.tabLabel}>상담</Text>
+        </TouchableOpacity>
+        
+        <TouchableOpacity 
           style={[styles.tab, currentScreen === SCREEN_NAMES.CHARACTER_GUIDE && styles.activeTab]}
           onPress={() => setCurrentScreen(SCREEN_NAMES.CHARACTER_GUIDE)}
         >
