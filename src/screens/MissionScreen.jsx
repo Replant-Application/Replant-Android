@@ -27,6 +27,17 @@ const MissionScreen = ({ navigation }) => {
     ? missions.filter(mission => mission.is_custom)
     : missions.filter(mission => mission.category === selectedCategory);
 
+  // 카테고리별 미션 수 계산
+  const getCategoryMissionCount = (categoryId) => {
+    if (categoryId === 'all') {
+      return missions.length;
+    } else if (categoryId === 'custom') {
+      return missions.filter(mission => mission.is_custom).length;
+    } else {
+      return missions.filter(mission => mission.category === categoryId).length;
+    }
+  };
+
   // 진행률 계산
   const completedMissions = missions.filter(mission => mission.completed).length;
   const totalMissions = missions.length;
@@ -109,25 +120,34 @@ const MissionScreen = ({ navigation }) => {
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={styles.categoryList}
           >
-            {MISSION_CATEGORIES.map((category) => (
-              <TouchableOpacity
-                key={category.id}
-                style={[
-                  styles.categoryButton,
-                  selectedCategory === category.id && styles.selectedCategory
-                ]}
-                onPress={() => setSelectedCategory(category.id)}
-                activeOpacity={0.7}
-              >
-                <Text style={styles.categoryEmoji}>{category.emoji}</Text>
-                <Text style={[
-                  styles.categoryName,
-                  selectedCategory === category.id && styles.selectedCategoryText
-                ]}>
-                  {category.name}
-                </Text>
-              </TouchableOpacity>
-            ))}
+            {MISSION_CATEGORIES.map((category) => {
+              const missionCount = getCategoryMissionCount(category.id);
+              return (
+                <TouchableOpacity
+                  key={category.id}
+                  style={[
+                    styles.categoryButton,
+                    selectedCategory === category.id && styles.selectedCategory
+                  ]}
+                  onPress={() => setSelectedCategory(category.id)}
+                  activeOpacity={0.7}
+                >
+                  <Text style={styles.categoryEmoji}>{category.emoji}</Text>
+                  <Text style={[
+                    styles.categoryName,
+                    selectedCategory === category.id && styles.selectedCategoryText
+                  ]}>
+                    {category.name}
+                  </Text>
+                  <Text style={[
+                    styles.categoryCount,
+                    selectedCategory === category.id && styles.selectedCategoryCount
+                  ]}>
+                    ({missionCount}개)
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
           </ScrollView>
         </View>
 
@@ -289,6 +309,16 @@ const styles = StyleSheet.create({
   selectedCategoryText: {
     color: colors.primary[500],
     fontWeight: typography.fontWeight.semibold,
+  },
+  categoryCount: {
+    fontSize: typography.fontSize.xs,
+    color: colors.text.tertiary,
+    marginTop: spacing[1],
+    textAlign: 'center',
+  },
+  selectedCategoryCount: {
+    color: colors.primary[400],
+    fontWeight: typography.fontWeight.medium,
   },
   missionSection: {
     marginBottom: spacing[6],
