@@ -32,7 +32,11 @@ export const autoLevelupCharacter = async (
       total_experience: (character.total_experience || 0) + experienceGained
     };
 
-    await updateData(storageKeys.CHARACTERS, parseInt(character.id), updatedCharacter as any);
+    // Character의 id는 string이므로 직접 배열을 업데이트
+    const updatedCharacters: Character[] = characters.map(c =>
+      c.id === character.id ? updatedCharacter : c
+    );
+    await setData(storageKeys.CHARACTERS, updatedCharacters);
 
     return {
       success: true,

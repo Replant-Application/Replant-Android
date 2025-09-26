@@ -16,10 +16,10 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { getData, updateData, getStorageKeys } from '../services';
 import { useUser } from '../contexts/UserContext';
 import { logError } from '../utils/logger';
-import { Mission, MissionData, UseMissionReturn, MissionCompletionResult, ServiceResult, ExperienceResult } from '../types';
+import { Mission, MissionData, UseMissionReturn, MissionCompletionResult, ServiceResult, ExperienceResult, MissionCategory } from '../types';
 
 export const useMission = (
-  addExperienceByCategory?: (category: string, experience: number) => Promise<ExperienceResult>
+  addExperienceByCategory?: (category: MissionCategory, experience: number) => Promise<ExperienceResult>
 ): UseMissionReturn => {
   const { currentNickname } = useUser();
   const [missions, setMissions] = useState<Mission[]>([]);
