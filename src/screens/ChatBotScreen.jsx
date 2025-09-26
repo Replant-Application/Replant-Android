@@ -104,10 +104,7 @@ const ChatBotScreen = ({ navigation }) => {
         >
           <Text style={styles.backButtonText}>←</Text>
         </TouchableOpacity>
-        <View style={styles.headerCenter}>
-          <Text style={styles.headerTitle}>심리상담 챗봇</Text>
-          <Text style={styles.headerSubtitle}>🤖 온라인 상담사</Text>
-        </View>
+        <Text style={styles.headerTitle}>심리상담 챗봇</Text>
         <View style={styles.headerSpacer} />
       </View>
 
@@ -238,18 +235,10 @@ const styles = StyleSheet.create({
     color: colors.text.primary,
     fontWeight: typography.fontWeight.bold,
   },
-  headerCenter: {
-    alignItems: 'center',
-  },
   headerTitle: {
     fontSize: typography.fontSize.lg,
     fontWeight: typography.fontWeight.bold,
     color: colors.text.primary,
-  },
-  headerSubtitle: {
-    fontSize: typography.fontSize.sm,
-    color: colors.text.secondary,
-    marginTop: spacing[1],
   },
   headerSpacer: {
     width: 40,
