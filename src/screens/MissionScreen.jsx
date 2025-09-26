@@ -144,7 +144,7 @@ const MissionScreen = ({ navigation }) => {
                 title="+ 새 미션"
                 onPress={() => navigation.navigate(SCREEN_NAMES.CUSTOM_MISSION_CREATE)}
                 style={styles.addButton}
-                textStyle={styles.addButtonText}
+                textStyle={[styles.addButtonText, { color: colors.white }]}
               />
             )}
           </View>
@@ -173,6 +173,7 @@ const MissionScreen = ({ navigation }) => {
                   title="미션 만들기"
                   onPress={() => navigation.navigate(SCREEN_NAMES.CUSTOM_MISSION_CREATE)}
                   style={styles.createButton}
+                  textStyle={{ color: colors.white }}
                 />
               )}
             </Card>
