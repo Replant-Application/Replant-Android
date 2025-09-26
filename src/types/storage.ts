@@ -10,6 +10,10 @@ export interface StorageKeys {
   DIARIES: string;
   SETTINGS: string;
   PREFERENCES: string;
+  USER_NICKNAME: string;
+  REPRESENTATIVE_CHARACTER: string;
+  CHARACTER_TEMPLATES: string;
+  MISSION_TEMPLATES: string;
 }
 
 // 스토리지 서비스 함수 타입

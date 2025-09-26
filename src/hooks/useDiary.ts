@@ -4,6 +4,13 @@ import { useUser } from '../contexts/UserContext';
 import { logError } from '../utils/logger';
 import { Diary, UseDiaryReturn, DiaryData, ServiceResult } from '../types';
 
+// 간단한 일기 데이터 타입
+interface SimpleDiaryData {
+  date: string;
+  emotion: string;
+  content: string;
+}
+
 export const useDiary = (): UseDiaryReturn => {
   const { currentNickname } = useUser();
   const [diaries, setDiaries] = useState<Diary[]>([]);
@@ -21,7 +28,7 @@ export const useDiary = (): UseDiaryReturn => {
       const storageKeys = getStorageKeys(currentNickname);
       const diariesData: Diary[] = await getData(storageKeys.DIARIES) || [];
       const sortedDiaries: Diary[] = diariesData.sort((a, b) => 
-        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        new Date(b.created_at || '').getTime() - new Date(a.created_at || '').getTime()
       );
 
       setDiaries(sortedDiaries);
@@ -39,32 +46,29 @@ export const useDiary = (): UseDiaryReturn => {
   }, [loadDiaries]);
 
   // 다이어리 저장
-  const saveDiary = useCallback(async (diaryData: DiaryData): Promise<Diary> => {
+  const saveDiary = useCallback(async (diaryData: SimpleDiaryData): Promise<ServiceResult<Diary>> => {
     try {
       setLoading(true);
 
       const storageKeys = getStorageKeys(currentNickname!);
       const newDiary: Diary = await addData(storageKeys.DIARIES, {
-        diary_id: `diary_${Date.now()}`,
-        title: diaryData.title,
-        content: diaryData.content,
+        id: `diary_${Date.now()}`,
+        date: diaryData.date,
         emotion: diaryData.emotion,
-        intensity: diaryData.intensity,
-        mood_score: diaryData.mood_score,
-        tags: diaryData.tags,
-        weather: diaryData.weather,
-        location: diaryData.location,
-        photos: diaryData.photos,
-        is_private: diaryData.is_private,
-        created_by: currentNickname!,
+        content: diaryData.content,
         created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      });
+        updated_at: new Date().toISOString(),
+        weather: undefined,
+        location: undefined,
+        photos: [],
+        is_private: false,
+        created_by: currentNickname!
+      }) as unknown as Diary;
 
       // 로컬 상태 업데이트
       setDiaries(prev => [newDiary, ...prev]);
 
-      return newDiary;
+      return { success: true, data: newDiary };
     } catch (saveError) {
       logError('다이어리 저장 실패', saveError as Error, { diaryData, currentNickname });
       throw saveError;
@@ -76,25 +80,25 @@ export const useDiary = (): UseDiaryReturn => {
   // 다이어리 수정
   const updateDiary = useCallback(async (
     diaryId: string, 
-    diaryData: Partial<DiaryData>
-  ): Promise<Diary> => {
+    diaryData: SimpleDiaryData
+  ): Promise<ServiceResult<Diary>> => {
     try {
       setLoading(true);
 
       const storageKeys = getStorageKeys(currentNickname!);
       const updatedDiary: Diary = await updateData(storageKeys.DIARIES, parseInt(diaryId), {
-        ...diaryData,
-        updated_at: new Date().toISOString()
-      }) as Diary;
+        id: parseInt(diaryId),
+        ...diaryData
+      }) as unknown as Diary;
 
       // 로컬 상태 업데이트
       setDiaries(prev => 
         prev.map(diary => 
-          diary.id === parseInt(diaryId) ? updatedDiary : diary
+          diary.id === diaryId ? updatedDiary : diary
         )
       );
 
-      return updatedDiary;
+      return { success: true, data: updatedDiary };
     } catch (updateError) {
       logError('다이어리 수정 실패', updateError as Error, { diaryId, diaryData, currentNickname });
       throw updateError;
@@ -112,7 +116,7 @@ export const useDiary = (): UseDiaryReturn => {
       await deleteData(storageKeys.DIARIES, parseInt(diaryId));
 
       // 로컬 상태 업데이트
-      setDiaries(prev => prev.filter(diary => diary.id !== parseInt(diaryId)));
+      setDiaries(prev => prev.filter(diary => diary.id !== diaryId));
 
       return { success: true };
     } catch (deleteError) {
@@ -136,7 +140,7 @@ export const useDiary = (): UseDiaryReturn => {
   // 날짜 범위별 다이어리 조회
   const getDiariesByDateRange = useCallback((startDate: string, endDate: string): Diary[] => {
     return diaries.filter(diary => {
-      const diaryDate = new Date(diary.created_at);
+      const diaryDate = new Date(diary.created_at || '');
       const start = new Date(startDate);
       const end = new Date(endDate);
       return diaryDate >= start && diaryDate <= end;
@@ -148,11 +152,8 @@ export const useDiary = (): UseDiaryReturn => {
     loading,
     error,
     loadDiaries,
-    saveDiary,
-    updateDiary,
+    saveDiary: saveDiary as (data: any) => Promise<any>,
+    updateDiary: updateDiary as (id: string, data: any) => Promise<any>,
     deleteDiary,
-    getDiaryById,
-    getDiariesByEmotion,
-    getDiariesByDateRange,
   };
 };

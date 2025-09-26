@@ -2,22 +2,13 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, Alert } from 'react-native';
 import { useCharacter } from '../hooks/useCharacter';
 import { colors, spacing, typography, borderRadius, shadows } from '../utils/designTokens';
-
-interface Character {
-  id: string;
-  name: string;
-  level: number;
-  experience: number;
-  category_id: string;
-}
+import { NavigationProp, RouteProp } from '@react-navigation/native';
+import { RootStackParamList } from '../types/navigation';
+import { Character } from '../types/character';
 
 interface CharacterDetailScreenProps {
-  route: {
-    params: {
-      character: Character;
-    };
-  };
-  navigation: any;
+  route: RouteProp<RootStackParamList, 'CharacterDetail'>;
+  navigation: NavigationProp<RootStackParamList>;
 }
 
 const CharacterDetailScreen: React.FC<CharacterDetailScreenProps> = ({ route, navigation }) => {
@@ -70,129 +61,145 @@ const CharacterDetailScreen: React.FC<CharacterDetailScreenProps> = ({ route, na
     const categoryNames: Record<string, string> = {
       'self_management': '자기관리',
       'communication': '소통관리',
-      'career': '커리어관리',
+      'career': '커리어관리'
     };
-    return categoryNames[categoryId] || '기타';
+    return categoryNames[categoryId] || '알 수 없음';
   };
 
-  // 경험치 진행률 계산
-  const getExperienceProgress = (experience: number): number => {
-    return experience % 100;
+  // 카테고리 아이콘
+  const getCategoryIcon = (categoryId: string): string => {
+    const categoryIcons: Record<string, string> = {
+      'self_management': '🧘',
+      'communication': '💬',
+      'career': '📚'
+    };
+    return categoryIcons[categoryId] || '❓';
   };
 
-  // 다음 레벨까지 필요한 경험치
-  const getNextLevelExp = (experience: number): number => {
-    return 100 - (experience % 100);
-  };
-
-  // 감정 변경
-  const handleEmotionChange = (emotion: string): void => {
-    setCurrentEmotion(emotion);
-  };
-
-  // 뒤로가기
-  const handleGoBack = (): void => {
-    navigation.goBack();
-  };
-
-  if (!character) {
-    return (
-      <View style={styles.errorContainer}>
-        <Text style={styles.errorText}>캐릭터 정보를 찾을 수 없습니다.</Text>
-        <TouchableOpacity style={styles.backButton} onPress={handleGoBack}>
-          <Text style={styles.backButtonText}>돌아가기</Text>
-        </TouchableOpacity>
-      </View>
-    );
-  }
+  // 감정 표현 버튼들
+  const emotionButtons = [
+    { key: 'default', label: '기본', emoji: '😐' },
+    { key: 'happy', label: '기쁨', emoji: '😊' },
+    { key: 'waving', label: '인사', emoji: '👋' }
+  ];
 
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity style={styles.backButton} onPress={handleGoBack}>
-          <Text style={styles.backButtonText}>←</Text>
+        <TouchableOpacity 
+          style={styles.backButton}
+          onPress={() => navigation.goBack()}
+        >
+          <Text style={styles.backButtonText}>← 뒤로</Text>
         </TouchableOpacity>
-        <Text style={styles.title}>캐릭터 상세</Text>
-        <View style={styles.placeholder} />
       </View>
 
       <View style={styles.content}>
-        {/* 캐릭터 이미지 */}
-        <View style={styles.characterImageContainer}>
-          <Image 
-            source={getCharacterImage(character.level, currentEmotion)}
-            style={styles.characterImage}
-            resizeMode="contain"
-          />
-        </View>
-
-        {/* 캐릭터 정보 */}
-        <View style={styles.characterInfo}>
-          <Text style={styles.characterName}>{character.name}</Text>
-          <Text style={styles.characterLevel}>{getLevelName(character.level)}</Text>
-          <Text style={styles.characterCategory}>{getCategoryName(character.category_id)}</Text>
-        </View>
-
-        {/* 경험치 진행률 */}
-        <View style={styles.progressSection}>
-          <Text style={styles.progressTitle}>경험치 진행률</Text>
-          <View style={styles.progressBar}>
-            <View 
-              style={[
-                styles.progressFill, 
-                { width: `${getExperienceProgress(character.experience)}%` }
-              ]} 
+        {/* 캐릭터 이미지 섹션 */}
+        <View style={styles.characterSection}>
+          <View style={styles.characterImageContainer}>
+            <Image 
+              source={getCharacterImage(character.level || 1, currentEmotion)}
+              style={styles.characterImage}
+              resizeMode="contain"
             />
           </View>
-          <Text style={styles.progressText}>
-            {getExperienceProgress(character.experience)}/100 EXP
-          </Text>
-          <Text style={styles.nextLevelText}>
-            다음 레벨까지 {getNextLevelExp(character.experience)} EXP
-          </Text>
+          
+          {/* 감정 표현 버튼들 */}
+          <View style={styles.emotionButtons}>
+            {emotionButtons.map((emotion) => (
+              <TouchableOpacity
+                key={emotion.key}
+                style={[
+                  styles.emotionButton,
+                  currentEmotion === emotion.key && styles.emotionButtonActive
+                ]}
+                onPress={() => setCurrentEmotion(emotion.key)}
+              >
+                <Text style={styles.emotionEmoji}>{emotion.emoji}</Text>
+                <Text style={[
+                  styles.emotionLabel,
+                  currentEmotion === emotion.key && styles.emotionLabelActive
+                ]}>
+                  {emotion.label}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
         </View>
 
-        {/* 감정 변경 버튼들 */}
-        <View style={styles.emotionSection}>
-          <Text style={styles.emotionTitle}>감정 표현</Text>
-          <View style={styles.emotionButtons}>
-            <TouchableOpacity
-              style={[
-                styles.emotionButton,
-                currentEmotion === 'default' && styles.selectedEmotion
-              ]}
-              onPress={() => handleEmotionChange('default')}
-            >
-              <Text style={styles.emotionText}>기본</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[
-                styles.emotionButton,
-                currentEmotion === 'happy' && styles.selectedEmotion
-              ]}
-              onPress={() => handleEmotionChange('happy')}
-            >
-              <Text style={styles.emotionText}>행복</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[
-                styles.emotionButton,
-                currentEmotion === 'waving' && styles.selectedEmotion
-              ]}
-              onPress={() => handleEmotionChange('waving')}
-            >
-              <Text style={styles.emotionText}>인사</Text>
-            </TouchableOpacity>
+        {/* 캐릭터 정보 섹션 */}
+        <View style={styles.infoSection}>
+          <View style={styles.characterInfo}>
+            <Text style={styles.characterName}>{character.name}</Text>
+            <Text style={styles.characterTitle}>{character.title}</Text>
+            <View style={styles.categoryContainer}>
+              <Text style={styles.categoryIcon}>
+                {getCategoryIcon(character.category_id)}
+              </Text>
+              <Text style={styles.categoryName}>
+                {getCategoryName(character.category_id)}
+              </Text>
+            </View>
+          </View>
+
+          <View style={styles.levelInfo}>
+            <Text style={styles.levelText}>Lv.{character.level || 1}</Text>
+            <Text style={styles.levelName}>{getLevelName(character.level || 1)}</Text>
+          </View>
+        </View>
+
+        {/* 경험치 정보 */}
+        <View style={styles.statsSection}>
+          <Text style={styles.sectionTitle}>📊 성장 정보</Text>
+          <View style={styles.statItem}>
+            <Text style={styles.statLabel}>현재 경험치</Text>
+            <Text style={styles.statValue}>{character.experience || 0} EXP</Text>
+          </View>
+          <View style={styles.statItem}>
+            <Text style={styles.statLabel}>다음 레벨까지</Text>
+            <Text style={styles.statValue}>
+              {100 - ((character.experience || 0) % 100)} EXP
+            </Text>
+          </View>
+          <View style={styles.statItem}>
+            <Text style={styles.statLabel}>총 미션 완료</Text>
+            <Text style={styles.statValue}>{character.completed_missions || 0}개</Text>
           </View>
         </View>
 
         {/* 캐릭터 설명 */}
         <View style={styles.descriptionSection}>
-          <Text style={styles.descriptionTitle}>캐릭터 소개</Text>
-          <Text style={styles.descriptionText}>
-            {character.name}은(는) {getLevelName(character.level)} 단계의 캐릭터입니다.
-            꾸준한 미션 수행을 통해 성장하고 있으며, 현재 {character.experience}의 경험치를 보유하고 있습니다.
+          <Text style={styles.sectionTitle}>🌱 캐릭터 소개</Text>
+          <Text style={styles.description}>
+            {character.description || 
+              `${getCategoryName(character.category_id)} 영역에서 성장하고 있는 캐릭터입니다. ` +
+              `미션을 완료할 때마다 경험치를 얻고 레벨업할 수 있어요!`
+            }
           </Text>
+        </View>
+
+        {/* 성장 팁 */}
+        <View style={styles.tipsSection}>
+          <Text style={styles.sectionTitle}>💡 성장 팁</Text>
+          <View style={styles.tipItem}>
+            <Text style={styles.tipIcon}>🎯</Text>
+            <Text style={styles.tipText}>
+              {getCategoryName(character.category_id)} 관련 미션을 완료하면 더 많은 경험치를 얻을 수 있어요!
+            </Text>
+          </View>
+          <View style={styles.tipItem}>
+            <Text style={styles.tipIcon}>📈</Text>
+            <Text style={styles.tipText}>
+              매일 꾸준히 미션을 완료하면 캐릭터가 빠르게 성장해요!
+            </Text>
+          </View>
+          <View style={styles.tipItem}>
+            <Text style={styles.tipIcon}>🌟</Text>
+            <Text style={styles.tipText}>
+              레벨이 올라갈수록 더 멋진 캐릭터 모습을 볼 수 있어요!
+            </Text>
+          </View>
         </View>
       </View>
     </ScrollView>
@@ -206,160 +213,204 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: spacing[5],
     paddingTop: spacing[20],
-    paddingBottom: spacing[5],
+    paddingBottom: spacing[6],
     backgroundColor: colors.background.primary,
     borderBottomWidth: 1,
     borderBottomColor: colors.border.light,
   },
   backButton: {
-    padding: spacing[2],
+    marginRight: spacing[4],
   },
   backButtonText: {
-    fontSize: typography.fontSize.xl,
-    color: colors.text.primary,
+    fontSize: typography.fontSize.lg,
+    color: colors.primary[500],
+    fontWeight: typography.fontWeight.medium,
   },
-  title: {
+  headerTitle: {
     fontSize: typography.fontSize.lg,
     fontWeight: typography.fontWeight.bold,
     color: colors.text.primary,
-  },
-  placeholder: {
-    width: 40,
   },
   content: {
     padding: spacing[5],
+    paddingTop: spacing[6],
+  },
+  characterSection: {
+    alignItems: 'center',
+    marginBottom: spacing[8],
   },
   characterImageContainer: {
-    alignItems: 'center',
+    width: 160,
+    height: 160,
     marginBottom: spacing[6],
+    borderRadius: borderRadius.xl,
+    backgroundColor: colors.background.primary,
+    justifyContent: 'center',
+    alignItems: 'center',
+    ...shadows.lg,
   },
   characterImage: {
-    width: 200,
-    height: 200,
-  },
-  characterInfo: {
-    alignItems: 'center',
-    marginBottom: spacing[6],
-  },
-  characterName: {
-    fontSize: typography.fontSize['2xl'],
-    fontWeight: typography.fontWeight.bold,
-    color: colors.text.primary,
-    marginBottom: spacing[2],
-  },
-  characterLevel: {
-    fontSize: typography.fontSize.lg,
-    color: colors.text.secondary,
-    marginBottom: spacing[1],
-  },
-  characterCategory: {
-    fontSize: typography.fontSize.base,
-    color: colors.text.tertiary,
-  },
-  progressSection: {
-    backgroundColor: colors.background.primary,
-    borderRadius: borderRadius.lg,
-    padding: spacing[4],
-    marginBottom: spacing[6],
-    ...shadows.base,
-  },
-  progressTitle: {
-    fontSize: typography.fontSize.lg,
-    fontWeight: typography.fontWeight.bold,
-    color: colors.text.primary,
-    marginBottom: spacing[3],
-    textAlign: 'center',
-  },
-  progressBar: {
-    height: 12,
-    backgroundColor: colors.gray[200],
-    borderRadius: borderRadius.sm,
-    overflow: 'hidden',
-    marginBottom: spacing[2],
-  },
-  progressFill: {
-    height: '100%',
-    backgroundColor: colors.primary[500],
-    borderRadius: borderRadius.sm,
-  },
-  progressText: {
-    fontSize: typography.fontSize.base,
-    color: colors.text.secondary,
-    textAlign: 'center',
-    marginBottom: spacing[1],
-  },
-  nextLevelText: {
-    fontSize: typography.fontSize.sm,
-    color: colors.text.tertiary,
-    textAlign: 'center',
-  },
-  emotionSection: {
-    backgroundColor: colors.background.primary,
-    borderRadius: borderRadius.lg,
-    padding: spacing[4],
-    marginBottom: spacing[6],
-    ...shadows.base,
-  },
-  emotionTitle: {
-    fontSize: typography.fontSize.lg,
-    fontWeight: typography.fontWeight.bold,
-    color: colors.text.primary,
-    marginBottom: spacing[3],
-    textAlign: 'center',
+    width: '90%',
+    height: '90%',
   },
   emotionButtons: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
+    gap: spacing[2],
+    paddingHorizontal: spacing[2],
   },
   emotionButton: {
-    paddingHorizontal: spacing[4],
-    paddingVertical: spacing[2],
-    borderRadius: borderRadius.base,
-    backgroundColor: colors.background.secondary,
-    borderWidth: 1,
-    borderColor: colors.border.primary,
+    flex: 1,
+    paddingHorizontal: spacing[3],
+    paddingVertical: spacing[4],
+    borderRadius: borderRadius.xl,
+    backgroundColor: colors.background.primary,
+    borderWidth: 2,
+    borderColor: colors.border.light,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
   },
-  selectedEmotion: {
-    backgroundColor: colors.primary[500],
-    borderColor: colors.primary[500],
+  emotionButtonActive: {
+    backgroundColor: colors.primary[50],
+    borderColor: colors.primary[400],
+    shadowColor: colors.primary[400],
+    shadowOpacity: 0.2,
+    transform: [{ scale: 1.02 }],
   },
-  emotionText: {
+  emotionEmoji: {
+    fontSize: typography.fontSize['2xl'],
+    marginBottom: spacing[2],
+  },
+  emotionLabel: {
     fontSize: typography.fontSize.sm,
-    color: colors.text.primary,
-    fontWeight: typography.fontWeight.medium,
+    color: colors.text.secondary,
+    fontWeight: typography.fontWeight.semibold,
   },
-  descriptionSection: {
+  emotionLabelActive: {
+    color: colors.primary[700],
+    fontWeight: typography.fontWeight.bold,
+  },
+  infoSection: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: spacing[8],
+    padding: spacing[5],
     backgroundColor: colors.background.primary,
     borderRadius: borderRadius.lg,
-    padding: spacing[4],
     ...shadows.base,
   },
-  descriptionTitle: {
+  characterInfo: {
+    flex: 1,
+  },
+  characterName: {
+    fontSize: typography.fontSize.xl,
+    fontWeight: typography.fontWeight.bold,
+    color: colors.text.primary,
+    marginBottom: spacing[1],
+  },
+  characterTitle: {
+    fontSize: typography.fontSize.base,
+    color: colors.text.secondary,
+    marginBottom: spacing[2],
+  },
+  categoryContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  categoryIcon: {
+    fontSize: typography.fontSize.lg,
+    marginRight: spacing[2],
+  },
+  categoryName: {
+    fontSize: typography.fontSize.base,
+    color: colors.primary[600],
+    fontWeight: typography.fontWeight.medium,
+  },
+  levelInfo: {
+    alignItems: 'flex-end',
+  },
+  levelText: {
+    fontSize: typography.fontSize['2xl'],
+    fontWeight: typography.fontWeight.bold,
+    color: colors.primary[500],
+  },
+  levelName: {
+    fontSize: typography.fontSize.base,
+    color: colors.text.secondary,
+  },
+  statsSection: {
+    marginBottom: spacing[8],
+    padding: spacing[5],
+    backgroundColor: colors.background.primary,
+    borderRadius: borderRadius.lg,
+    ...shadows.base,
+  },
+  sectionTitle: {
     fontSize: typography.fontSize.lg,
     fontWeight: typography.fontWeight.bold,
     color: colors.text.primary,
-    marginBottom: spacing[3],
+    marginBottom: spacing[4],
   },
-  descriptionText: {
+  statItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: spacing[3],
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border.light,
+  },
+  statLabel: {
+    fontSize: typography.fontSize.base,
+    color: colors.text.secondary,
+  },
+  statValue: {
+    fontSize: typography.fontSize.base,
+    fontWeight: typography.fontWeight.medium,
+    color: colors.text.primary,
+  },
+  descriptionSection: {
+    marginBottom: spacing[8],
+    padding: spacing[5],
+    backgroundColor: colors.background.primary,
+    borderRadius: borderRadius.lg,
+    ...shadows.base,
+  },
+  description: {
     fontSize: typography.fontSize.base,
     color: colors.text.secondary,
     lineHeight: typography.lineHeight.relaxed * typography.fontSize.base,
   },
-  errorContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+  tipsSection: {
     padding: spacing[5],
+    backgroundColor: colors.background.primary,
+    borderRadius: borderRadius.lg,
+    ...shadows.base,
   },
-  errorText: {
+  tipItem: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginBottom: spacing[4],
+  },
+  tipIcon: {
+    fontSize: typography.fontSize.lg,
+    marginRight: spacing[3],
+    marginTop: spacing[1],
+  },
+  tipText: {
+    flex: 1,
     fontSize: typography.fontSize.base,
     color: colors.text.secondary,
-    textAlign: 'center',
-    marginBottom: spacing[4],
+    lineHeight: typography.lineHeight.relaxed * typography.fontSize.base,
   },
 });
 

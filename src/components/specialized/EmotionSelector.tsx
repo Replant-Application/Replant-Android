@@ -10,8 +10,8 @@ interface Emotion {
 }
 
 interface EmotionSelectorProps {
-  selectedEmotion?: string | string[];
-  onSelect: (emotion: string | string[]) => void;
+  selectedEmotion?: string;
+  onSelect: (emotion: string) => void;
   multiple?: boolean;
   style?: ViewStyle;
 }
@@ -41,7 +41,7 @@ const EmotionSelector: React.FC<EmotionSelectorProps> = ({
         ? selected.filter(id => id !== emotion.id)
         : [...selected, emotion.id];
       setSelected(newSelected);
-      onSelect(newSelected);
+      onSelect(newSelected.join(','));
     } else {
       setSelected([emotion.id]);
       onSelect(emotion.id);

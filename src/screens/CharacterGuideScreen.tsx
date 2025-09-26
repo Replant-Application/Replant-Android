@@ -3,17 +3,11 @@ import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, Alert } fr
 import { useCharacter } from '../hooks/useCharacter';
 import { colors, spacing, typography, borderRadius, shadows } from '../utils/designTokens';
 import { SCREEN_NAMES } from '../utils/constants';
-
-interface Character {
-  id: string;
-  name: string;
-  level: number;
-  experience: number;
-  category_id: string;
-}
+import { NavigationProp } from '@react-navigation/native';
+import { RootStackParamList } from '../types/navigation';
 
 interface CharacterGuideScreenProps {
-  navigation: any;
+  navigation: NavigationProp<RootStackParamList>;
 }
 
 const CharacterGuideScreen: React.FC<CharacterGuideScreenProps> = ({ navigation }) => {
@@ -61,370 +55,327 @@ const CharacterGuideScreen: React.FC<CharacterGuideScreenProps> = ({ navigation 
     return categoryIcons[categoryId] || '❓';
   };
 
-  // 대표 캐릭터 설정
-  const handleSetRepresentative = async (character: Character): Promise<void> => {
+  // 캐릭터 상세 페이지로 이동
+  const handleCharacterPress = (character: any) => {
+    navigation.navigate('CharacterDetail', { character });
+  };
+
+  // 대표 캐릭터 설정 핸들러
+  const handleSetRepresentative = async (character: any) => {
     try {
-      const result = await setRepresentative(character.id);
+      const result = await setRepresentative(character.category_id);
       if (result.success) {
-        Alert.alert('성공', `${character.name}을(를) 대표 캐릭터로 설정했습니다.`);
+        Alert.alert('성공', `${getCategoryName(character.category_id)} 캐릭터가 대표 캐릭터로 설정되었습니다.`);
       } else {
-        Alert.alert('오류', '대표 캐릭터 설정에 실패했습니다.');
+        Alert.alert('오류', result.error || '대표 캐릭터 설정에 실패했습니다.');
       }
     } catch (error) {
       Alert.alert('오류', '대표 캐릭터 설정 중 오류가 발생했습니다.');
     }
   };
 
-  // 캐릭터 상세 페이지로 이동
-  const handleCharacterPress = (character: Character): void => {
-    navigation.navigate(SCREEN_NAMES.CHARACTER_DETAIL, { character });
-  };
-
-  // 뒤로가기
-  const handleGoBack = (): void => {
-    navigation.goBack();
-  };
-
   if (loading) {
     return (
-      <View style={styles.loadingContainer}>
-        <Text style={styles.loadingText}>캐릭터를 불러오는 중...</Text>
+      <View style={[styles.container, { backgroundColor: colors.background.secondary }]}>
+        <View style={[styles.header, { backgroundColor: colors.background.primary }]} />
+        <View style={styles.loadingContainer}>
+          <Text style={[styles.loadingText, { color: colors.text.secondary }]}>캐릭터 정보를 불러오는 중...</Text>
+        </View>
       </View>
     );
   }
 
   if (error) {
     return (
-      <View style={styles.errorContainer}>
-        <Text style={styles.errorText}>캐릭터를 불러올 수 없습니다.</Text>
-        <TouchableOpacity style={styles.retryButton} onPress={handleGoBack}>
-          <Text style={styles.retryButtonText}>돌아가기</Text>
-        </TouchableOpacity>
+      <View style={[styles.container, { backgroundColor: colors.background.secondary }]}>
+        <View style={[styles.header, { backgroundColor: colors.background.primary }]} />
+        <View style={styles.errorContainer}>
+          <Text style={[styles.errorText, { color: colors.text.secondary }]}>캐릭터 정보를 불러올 수 없습니다.</Text>
+        </View>
       </View>
     );
   }
 
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity style={styles.backButton} onPress={handleGoBack}>
-          <Text style={styles.backButtonText}>←</Text>
-        </TouchableOpacity>
-        <Text style={styles.title}>캐릭터 가이드</Text>
-        <View style={styles.placeholder} />
-      </View>
+    <View style={[styles.container, { backgroundColor: colors.background.secondary }]}>
+      <View style={[styles.header, { backgroundColor: colors.background.primary, borderBottomColor: colors.border.light }]} />
+      
+      <ScrollView style={styles.content}>
 
-      <View style={styles.content}>
-        {/* 대표 캐릭터 섹션 */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>🌱 대표 캐릭터</Text>
-          {representativeCharacter ? (
-            <View style={styles.representativeCard}>
-              <Image 
-                source={getCharacterImage(representativeCharacter.level)}
-                style={styles.representativeImage}
-                resizeMode="contain"
-              />
-              <View style={styles.representativeInfo}>
-                <Text style={styles.representativeName}>{representativeCharacter.name}</Text>
-                <Text style={styles.representativeLevel}>{getLevelName(representativeCharacter.level)}</Text>
-                <Text style={styles.representativeCategory}>
-                  {getCategoryIcon(representativeCharacter.category_id)} {getCategoryName(representativeCharacter.category_id)}
-                </Text>
-              </View>
+        {/* 캐릭터 목록 */}
+        <View style={styles.charactersSection}>
+          {characters.length === 0 ? (
+            <View style={[styles.emptyCard, { backgroundColor: colors.background.primary, borderColor: colors.border.light }]}>
+              <Text style={[styles.emptyIcon, { color: colors.text.tertiary }]}>📝</Text>
+              <Text style={[styles.emptyTitle, { color: colors.text.primary }]}>캐릭터가 없어요</Text>
+              <Text style={[styles.emptyText, { color: colors.text.secondary }]}>
+                아직 캐릭터가 없습니다.
+              </Text>
             </View>
           ) : (
-            <View style={styles.emptyRepresentative}>
-              <Text style={styles.emptyText}>대표 캐릭터가 설정되지 않았습니다.</Text>
-            </View>
-          )}
-        </View>
-
-        {/* 모든 캐릭터 목록 */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>📚 모든 캐릭터</Text>
-          {characters.length > 0 ? (
-            characters.map((character) => (
-              <TouchableOpacity
-                key={character.id}
-                style={[
-                  styles.characterCard,
-                  representativeCharacter?.id === character.id && styles.selectedCharacter
-                ]}
+            characters
+              .sort((a, b) => {
+                // 대표 캐릭터를 맨 위로
+                if (representativeCharacter && a.id === representativeCharacter.id) return -1;
+                if (representativeCharacter && b.id === representativeCharacter.id) return 1;
+                return 0;
+              })
+              .map((character) => (
+              <TouchableOpacity 
+                key={character.id} 
+                style={[styles.characterCard, { backgroundColor: colors.background.primary, borderColor: colors.border.light }]}
                 onPress={() => handleCharacterPress(character)}
+                activeOpacity={0.7}
               >
-                <Image 
-                  source={getCharacterImage(character.level)}
-                  style={styles.characterImage}
-                  resizeMode="contain"
-                />
-                <View style={styles.characterInfo}>
-                  <Text style={styles.characterName}>{character.name}</Text>
-                  <Text style={styles.characterLevel}>{getLevelName(character.level)}</Text>
-                  <Text style={styles.characterCategory}>
-                    {getCategoryIcon(character.category_id)} {getCategoryName(character.category_id)}
-                  </Text>
-                  <Text style={styles.characterExp}>경험치: {character.experience}</Text>
+                <View style={styles.characterHeader}>
+                  <View style={styles.characterImageContainer}>
+                    <Image 
+                      source={getCharacterImage(character.level || 1)}
+                      style={styles.characterImage}
+                      resizeMode="contain"
+                    />
+                  </View>
+                  <View style={styles.characterInfo}>
+                    <Text style={[styles.characterName, { color: colors.text.primary }]}>{character.name}</Text>
+                    <Text style={[styles.characterTitle, { color: colors.text.secondary }]}>{character.title}</Text>
+                    <Text style={[styles.characterCategory, { color: colors.primary[500] }]}>
+                      {getCategoryIcon(character.category_id)} {getCategoryName(character.category_id)}
+                    </Text>
+                  </View>
+                  <View style={styles.characterLevel}>
+                    <Text style={[styles.levelText, { color: colors.primary[500] }]}>Lv.{character.level || 1}</Text>
+                    <Text style={[styles.levelName, { color: colors.text.secondary }]}>{getLevelName(character.level || 1)}</Text>
+                  </View>
                 </View>
-                <View style={styles.characterActions}>
-                  {representativeCharacter?.id !== character.id && (
+                
+                <View style={styles.characterStats}>
+                  <View style={styles.statRow}>
+                    <Text style={[styles.characterStatLabel, { color: colors.text.secondary }]}>현재 경험치</Text>
+                    <Text style={[styles.statValue, { color: colors.text.primary }]}>
+                      {(character.experience || 0).toLocaleString()} EXP
+                    </Text>
+                  </View>
+                  <View style={styles.statRow}>
+                    <Text style={[styles.characterStatLabel, { color: colors.text.secondary }]}>총 경험치</Text>
+                    <Text style={[styles.statValue, { color: colors.text.primary }]}>
+                      {(character.total_experience || 0).toLocaleString()} EXP
+                    </Text>
+                  </View>
+                  <View style={styles.statRow}>
+                    <Text style={[styles.characterStatLabel, { color: colors.text.secondary }]}>해제일</Text>
+                    <Text style={[styles.statValue, { color: colors.text.primary }]}>
+                      {character.unlocked_date ? new Date(character.unlocked_date).toLocaleDateString('ko-KR') : '알 수 없음'}
+                    </Text>
+                  </View>
+                </View>
+                
+                <View style={styles.progressContainer}>
+                  <View style={[styles.progressBar, { backgroundColor: colors.background.secondary }]}>
+                    <View 
+                      style={[
+                        styles.progressFill, 
+                        { backgroundColor: colors.primary[500], width: `${((character.experience || 0) % 100)}%` }
+                      ]} 
+                    />
+                  </View>
+                  <Text style={[styles.progressText, { color: colors.text.tertiary }]}>
+                    다음 레벨까지 {100 - ((character.experience || 0) % 100)} EXP
+                  </Text>
+                </View>
+
+                {/* 대표 캐릭터 설정 버튼 */}
+                <View style={styles.actionContainer}>
+                  {representativeCharacter && representativeCharacter.id === character.id ? (
+                    <View style={[styles.representativeBadge, { backgroundColor: colors.primary[500] }]}>
+                      <Text style={[styles.representativeText, { color: colors.text.inverse }]}>
+                        ⭐ 대표 캐릭터
+                      </Text>
+                    </View>
+                  ) : (
                     <TouchableOpacity
-                      style={styles.setRepresentativeButton}
+                      style={[styles.setRepresentativeButton, { backgroundColor: colors.background.secondary, borderColor: colors.border.medium }]}
                       onPress={() => handleSetRepresentative(character)}
                     >
-                      <Text style={styles.setRepresentativeText}>대표로 설정</Text>
+                      <Text style={[styles.setRepresentativeText, { color: colors.text.primary }]}>
+                        대표로 설정
+                      </Text>
                     </TouchableOpacity>
-                  )}
-                  {representativeCharacter?.id === character.id && (
-                    <View style={styles.currentRepresentative}>
-                      <Text style={styles.currentRepresentativeText}>현재 대표</Text>
-                    </View>
                   )}
                 </View>
               </TouchableOpacity>
             ))
-          ) : (
-            <View style={styles.emptyCharacters}>
-              <Text style={styles.emptyText}>아직 캐릭터가 없습니다.</Text>
-            </View>
           )}
         </View>
-
-        {/* 캐릭터 시스템 설명 */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>💡 캐릭터 시스템</Text>
-          <View style={styles.infoCard}>
-            <Text style={styles.infoTitle}>레벨 시스템</Text>
-            <Text style={styles.infoText}>
-              • 씨앗 (Lv.1-3): 초보 단계{'\n'}
-              • 새싹 (Lv.4-6): 성장 단계{'\n'}
-              • 자라는 나무 (Lv.7-9): 발전 단계{'\n'}
-              • 성숙한 나무 (Lv.10+): 완성 단계
-            </Text>
-          </View>
-          <View style={styles.infoCard}>
-            <Text style={styles.infoTitle}>경험치 획득</Text>
-            <Text style={styles.infoText}>
-              • 미션 완료 시 경험치 획득{'\n'}
-              • 100 경험치마다 레벨업{'\n'}
-              • 카테고리별로 다른 성장
-            </Text>
-          </View>
-        </View>
-      </View>
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background.secondary,
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
     paddingHorizontal: spacing[5],
     paddingTop: spacing[20],
-    paddingBottom: spacing[5],
-    backgroundColor: colors.background.primary,
+    paddingBottom: spacing[6],
     borderBottomWidth: 1,
-    borderBottomColor: colors.border.light,
-  },
-  backButton: {
-    padding: spacing[2],
-  },
-  backButtonText: {
-    fontSize: typography.fontSize.xl,
-    color: colors.text.primary,
   },
   title: {
-    fontSize: typography.fontSize.lg,
+    fontSize: typography.fontSize['2xl'],
     fontWeight: typography.fontWeight.bold,
-    color: colors.text.primary,
-  },
-  placeholder: {
-    width: 40,
   },
   content: {
+    flex: 1,
     padding: spacing[5],
-  },
-  section: {
-    marginBottom: spacing[6],
-  },
-  sectionTitle: {
-    fontSize: typography.fontSize.xl,
-    fontWeight: typography.fontWeight.bold,
-    color: colors.text.primary,
-    marginBottom: spacing[4],
-  },
-  representativeCard: {
-    backgroundColor: colors.background.primary,
-    borderRadius: borderRadius.lg,
-    padding: spacing[4],
-    flexDirection: 'row',
-    alignItems: 'center',
-    ...shadows.base,
-  },
-  representativeImage: {
-    width: 80,
-    height: 80,
-    marginRight: spacing[4],
-  },
-  representativeInfo: {
-    flex: 1,
-  },
-  representativeName: {
-    fontSize: typography.fontSize.lg,
-    fontWeight: typography.fontWeight.bold,
-    color: colors.text.primary,
-    marginBottom: spacing[1],
-  },
-  representativeLevel: {
-    fontSize: typography.fontSize.base,
-    color: colors.text.secondary,
-    marginBottom: spacing[1],
-  },
-  representativeCategory: {
-    fontSize: typography.fontSize.sm,
-    color: colors.text.tertiary,
-  },
-  emptyRepresentative: {
-    backgroundColor: colors.background.primary,
-    borderRadius: borderRadius.lg,
-    padding: spacing[6],
-    alignItems: 'center',
-    ...shadows.base,
-  },
-  characterCard: {
-    backgroundColor: colors.background.primary,
-    borderRadius: borderRadius.lg,
-    padding: spacing[4],
-    marginBottom: spacing[3],
-    flexDirection: 'row',
-    alignItems: 'center',
-    ...shadows.base,
-  },
-  selectedCharacter: {
-    borderWidth: 2,
-    borderColor: colors.primary[500],
-    backgroundColor: colors.primary[100],
-  },
-  characterImage: {
-    width: 60,
-    height: 60,
-    marginRight: spacing[4],
-  },
-  characterInfo: {
-    flex: 1,
-  },
-  characterName: {
-    fontSize: typography.fontSize.base,
-    fontWeight: typography.fontWeight.bold,
-    color: colors.text.primary,
-    marginBottom: spacing[1],
-  },
-  characterLevel: {
-    fontSize: typography.fontSize.sm,
-    color: colors.text.secondary,
-    marginBottom: spacing[1],
-  },
-  characterCategory: {
-    fontSize: typography.fontSize.sm,
-    color: colors.text.tertiary,
-    marginBottom: spacing[1],
-  },
-  characterExp: {
-    fontSize: typography.fontSize.xs,
-    color: colors.text.tertiary,
-  },
-  characterActions: {
-    alignItems: 'flex-end',
-  },
-  setRepresentativeButton: {
-    backgroundColor: colors.primary[500],
-    paddingHorizontal: spacing[3],
-    paddingVertical: spacing[2],
-    borderRadius: borderRadius.sm,
-  },
-  setRepresentativeText: {
-    fontSize: typography.fontSize.sm,
-    color: colors.text.inverse,
-    fontWeight: typography.fontWeight.medium,
-  },
-  currentRepresentative: {
-    backgroundColor: colors.success[500],
-    paddingHorizontal: spacing[3],
-    paddingVertical: spacing[2],
-    borderRadius: borderRadius.sm,
-  },
-  currentRepresentativeText: {
-    fontSize: typography.fontSize.sm,
-    color: colors.text.inverse,
-    fontWeight: typography.fontWeight.medium,
-  },
-  emptyCharacters: {
-    backgroundColor: colors.background.primary,
-    borderRadius: borderRadius.lg,
-    padding: spacing[6],
-    alignItems: 'center',
-    ...shadows.base,
-  },
-  emptyText: {
-    fontSize: typography.fontSize.base,
-    color: colors.text.secondary,
-    textAlign: 'center',
-  },
-  infoCard: {
-    backgroundColor: colors.background.primary,
-    borderRadius: borderRadius.lg,
-    padding: spacing[4],
-    marginBottom: spacing[3],
-    ...shadows.base,
-  },
-  infoTitle: {
-    fontSize: typography.fontSize.base,
-    fontWeight: typography.fontWeight.bold,
-    color: colors.text.primary,
-    marginBottom: spacing[2],
-  },
-  infoText: {
-    fontSize: typography.fontSize.sm,
-    color: colors.text.secondary,
-    lineHeight: typography.lineHeight.relaxed * typography.fontSize.sm,
+    paddingTop: spacing[6],
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: spacing[5],
   },
   loadingText: {
     fontSize: typography.fontSize.base,
-    color: colors.text.secondary,
   },
   errorContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: spacing[5],
   },
   errorText: {
     fontSize: typography.fontSize.base,
-    color: colors.text.secondary,
-    textAlign: 'center',
+  },
+  charactersSection: {
+    marginBottom: spacing[5],
+  },
+  sectionTitle: {
+    fontSize: typography.fontSize.xl,
+    fontWeight: typography.fontWeight.bold,
     marginBottom: spacing[4],
   },
-  retryButton: {
-    backgroundColor: colors.primary[500],
-    paddingHorizontal: spacing[4],
-    paddingVertical: spacing[3],
+  emptyCard: {
+    padding: spacing[8],
+    borderRadius: borderRadius.lg,
+    borderWidth: 1,
+    alignItems: 'center',
+  },
+  emptyIcon: {
+    fontSize: typography.fontSize['4xl'],
+    marginBottom: spacing[4],
+  },
+  emptyTitle: {
+    fontSize: typography.fontSize.xl,
+    fontWeight: typography.fontWeight.bold,
+    marginBottom: spacing[2],
+  },
+  emptyText: {
+    fontSize: typography.fontSize.base,
+    textAlign: 'center',
+    lineHeight: typography.lineHeight.relaxed * typography.fontSize.base,
+  },
+  characterCard: {
+    padding: spacing[5],
+    borderRadius: borderRadius.lg,
+    borderWidth: 1,
+    marginBottom: spacing[4],
+    ...shadows.base,
+  },
+  characterHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: spacing[4],
+  },
+  characterImageContainer: {
+    width: 60,
+    height: 60,
+    marginRight: spacing[3],
+    borderRadius: borderRadius.md,
+    overflow: 'hidden',
+  },
+  characterImage: {
+    width: '100%',
+    height: '100%',
+  },
+  characterInfo: {
+    flex: 1,
+  },
+  characterName: {
+    fontSize: typography.fontSize.lg,
+    fontWeight: typography.fontWeight.bold,
+    marginBottom: spacing[1],
+  },
+  characterTitle: {
+    fontSize: typography.fontSize.sm,
+    marginBottom: spacing[1],
+  },
+  characterCategory: {
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.medium,
+  },
+  characterLevel: {
+    alignItems: 'center',
+  },
+  levelText: {
+    fontSize: typography.fontSize.lg,
+    fontWeight: typography.fontWeight.bold,
+  },
+  levelName: {
+    fontSize: typography.fontSize.sm,
+  },
+  characterStats: {
+    marginBottom: spacing[4],
+  },
+  statRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: spacing[2],
+  },
+  characterStatLabel: {
+    fontSize: typography.fontSize.sm,
+  },
+  statValue: {
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.medium,
+  },
+  progressContainer: {
+    marginTop: spacing[2],
+  },
+  progressBar: {
+    height: 8,
+    borderRadius: borderRadius.sm,
+    overflow: 'hidden',
+    marginBottom: spacing[1],
+  },
+  progressFill: {
+    height: '100%',
+    borderRadius: borderRadius.sm,
+  },
+  progressText: {
+    fontSize: typography.fontSize.xs,
+    textAlign: 'right',
+  },
+  actionContainer: {
+    marginTop: spacing[3],
+    alignItems: 'center',
+  },
+  representativeBadge: {
+    paddingHorizontal: spacing[3],
+    paddingVertical: spacing[2],
     borderRadius: borderRadius.base,
   },
-  retryButtonText: {
-    fontSize: typography.fontSize.base,
-    color: colors.text.inverse,
+  representativeText: {
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.medium,
+  },
+  setRepresentativeButton: {
+    paddingHorizontal: spacing[4],
+    paddingVertical: spacing[2],
+    borderRadius: borderRadius.base,
+    borderWidth: 1,
+  },
+  setRepresentativeText: {
+    fontSize: typography.fontSize.sm,
     fontWeight: typography.fontWeight.medium,
   },
 });

@@ -18,7 +18,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { getData, getStorageKeys, autoLevelupCharacter, setData } from '../services';
 import { useUser } from '../contexts/UserContext';
 import { logError } from '../utils/logger';
-import { Character, UseCharacterReturn, ExperienceResult, ServiceResult } from '../types';
+import { Character, CharacterData, UseCharacterReturn, ExperienceResult, ServiceResult } from '../types';
 
 export const useCharacter = (): UseCharacterReturn => {
   const { currentNickname } = useUser();
@@ -81,7 +81,7 @@ export const useCharacter = (): UseCharacterReturn => {
         setRepresentativeCharacter(representativeChar);
       } else if (sortedCharacters.length > 0) {
         // 자기관리 캐릭터를 찾지 못하면 첫 번째 캐릭터 사용
-        setRepresentativeCharacter(sortedCharacters[0]);
+        setRepresentativeCharacter(sortedCharacters[0] || null);
       } else {
         // 캐릭터가 아예 없으면 null
         setRepresentativeCharacter(null);
@@ -89,7 +89,7 @@ export const useCharacter = (): UseCharacterReturn => {
       
       // 선택된 캐릭터가 없으면 첫 번째 캐릭터 선택
       if (sortedCharacters.length > 0 && !selectedCharacter) {
-        setSelectedCharacter(sortedCharacters[0]);
+        setSelectedCharacter(sortedCharacters[0] || null);
       }
       
       // 모든 설정이 완료된 후 로딩 종료
@@ -110,11 +110,11 @@ export const useCharacter = (): UseCharacterReturn => {
   const addExperienceByCategory = useCallback(async (
     categoryId: string, 
     experience: number
-  ): Promise<ExperienceResult> => {
+  ): Promise<any> => {
     try {
       // 해당 카테고리의 캐릭터 찾기
       const character: Character | undefined = characters.find(char => char.category_id === categoryId);
-      if (!character) return { success: false, error: '캐릭터를 찾을 수 없습니다.' };
+      if (!character) return { success: false, experienceGained: 0, levelUp: false, error: '캐릭터를 찾을 수 없습니다.' };
 
       // autoLevelupCharacter 함수 사용
       const result = await autoLevelupCharacter(character.id, experience, currentNickname!);
@@ -135,10 +135,16 @@ export const useCharacter = (): UseCharacterReturn => {
         }
       }
 
-      return result;
+      return {
+        success: result.success,
+        experienceGained: result.experienceGained,
+        levelUp: result.levelUp || false,
+        newLevel: result.newLevel,
+        error: result.error || undefined
+      };
     } catch (expError) {
       logError('경험치 추가 실패', expError as Error, { categoryId, experience });
-      return { success: false, error: (expError as Error).message };
+      return { success: false, experienceGained: 0, levelUp: false, error: (expError as Error).message };
     }
   }, [characters, selectedCharacter, currentNickname]);
 
@@ -165,6 +171,21 @@ export const useCharacter = (): UseCharacterReturn => {
     }
   }, [characters, currentNickname]);
 
+  // 캐릭터 생성 (placeholder)
+  const createCharacter = useCallback(async (characterData: CharacterData): Promise<ServiceResult> => {
+    return { success: false, error: '캐릭터 생성 기능은 아직 구현되지 않았습니다.' };
+  }, []);
+
+  // 캐릭터 업데이트 (placeholder)
+  const updateCharacter = useCallback(async (characterId: string, characterData: CharacterData): Promise<ServiceResult> => {
+    return { success: false, error: '캐릭터 업데이트 기능은 아직 구현되지 않았습니다.' };
+  }, []);
+
+  // 캐릭터 삭제 (placeholder)
+  const deleteCharacter = useCallback(async (characterId: string): Promise<ServiceResult> => {
+    return { success: false, error: '캐릭터 삭제 기능은 아직 구현되지 않았습니다.' };
+  }, []);
+
   // 메모이제이션된 반환 객체
   return useMemo(() => ({
     characters,
@@ -176,6 +197,9 @@ export const useCharacter = (): UseCharacterReturn => {
     addExperienceByCategory,
     selectCharacter,
     setRepresentative,
+    createCharacter,
+    updateCharacter,
+    deleteCharacter,
   }), [
     characters,
     selectedCharacter,

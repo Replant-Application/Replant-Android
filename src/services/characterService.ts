@@ -32,11 +32,13 @@ export const autoLevelupCharacter = async (
       total_experience: (character.total_experience || 0) + experienceGained
     };
     
-    await updateData(storageKeys.CHARACTERS, character.id, updatedCharacter);
+    await updateData(storageKeys.CHARACTERS, parseInt(character.id), updatedCharacter as any);
     
     return {
       success: true,
+      oldLevel,
       newLevel,
+      experienceGained,
       experience: newExperience,
       levelUp: newLevel > oldLevel,
       character: updatedCharacter
@@ -45,6 +47,9 @@ export const autoLevelupCharacter = async (
     logError('캐릭터 레벨업 실패', error as Error, { characterId, experienceGained, nickname });
     return {
       success: false,
+      oldLevel: 0,
+      newLevel: 0,
+      experienceGained: 0,
       error: (error as Error).message
     };
   }
@@ -60,16 +65,13 @@ export const createCharacter = async (
     const characters: Character[] = await getData(storageKeys.CHARACTERS) || [];
     
     const newCharacter: Character = {
-      id: Date.now(),
+      id: Date.now().toString(),
       character_id: `character_${Date.now()}`,
       name: characterData.name,
-      description: characterData.description,
-      emoji: characterData.emoji,
       level: 1,
       experience: 0,
       max_experience: 100,
       unlocked: false,
-      category: characterData.category,
       category_id: characterData.category_id,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString()

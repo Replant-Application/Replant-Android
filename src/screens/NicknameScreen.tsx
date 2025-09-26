@@ -5,15 +5,15 @@ import { Button, Input } from '../components/ui';
 import { colors, spacing, typography } from '../utils/designTokens';
 
 interface NicknameScreenProps {
-  onNavigate: (screen: string) => void;
+  onNavigate: () => void;
 }
 
 const NicknameScreen: React.FC<NicknameScreenProps> = ({ onNavigate }) => {
   const { login } = useUser();
-  const [nickname, setNickname] = useState<string>('');
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [nickname, setNickname] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = async (): Promise<void> => {
+  const handleSubmit = async () => {
     // 닉네임 유효성 검사
     if (!nickname.trim()) {
       Alert.alert('오류', '닉네임을 입력해주세요.');
@@ -36,8 +36,8 @@ const NicknameScreen: React.FC<NicknameScreenProps> = ({ onNavigate }) => {
       // 간단한 로그인 처리 (인증 없이)
       await login(nickname);
       // 성공 시 자동으로 홈 화면으로 이동
-    } catch (error: any) {
-      Alert.alert('오류', error.message || '로그인 중 오류가 발생했습니다.');
+    } catch (error) {
+      Alert.alert('오류', (error as Error).message || '로그인 중 오류가 발생했습니다.');
     } finally {
       setIsLoading(false);
     }
@@ -53,27 +53,23 @@ const NicknameScreen: React.FC<NicknameScreenProps> = ({ onNavigate }) => {
         </Text>
         
         <Input
-          label="닉네임"
           placeholder="닉네임을 입력하세요"
           value={nickname}
           onChangeText={setNickname}
+          onSubmitEditing={handleSubmit}
           maxLength={20}
+          autoFocus
+          returnKeyType="done"
           style={styles.input}
         />
-        
-        <Text style={styles.helpText}>
-          • 2-20글자 사이로 입력해주세요{'\n'}
-          • 특수문자 사용 가능합니다{'\n'}
-          • 나중에 변경할 수 있습니다
-        </Text>
       </View>
       
       <View style={styles.buttonContainer}>
         <Button
-          title="시작하기"
+          title={isLoading ? '처리 중...' : '완료'}
           onPress={handleSubmit}
+          disabled={isLoading}
           loading={isLoading}
-          disabled={!nickname.trim() || isLoading}
           size="lg"
           style={styles.button}
         />
@@ -94,32 +90,27 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   title: {
-    fontSize: typography.fontSize['3xl'],
+    fontSize: typography.fontSize['2xl'],
     fontWeight: typography.fontWeight.bold,
     color: colors.text.primary,
     marginBottom: spacing[4],
-    textAlign: 'center',
+    textAlign: 'center' as const,
   },
   subtitle: {
     fontSize: typography.fontSize.base,
     color: colors.text.secondary,
     textAlign: 'center',
     lineHeight: typography.lineHeight.relaxed * typography.fontSize.base,
-    marginBottom: spacing[8],
+    marginBottom: spacing[10],
   },
   input: {
-    marginBottom: spacing[4],
-  },
-  helpText: {
-    fontSize: typography.fontSize.sm,
-    color: colors.text.tertiary,
-    lineHeight: typography.lineHeight.relaxed * typography.fontSize.sm,
+    // textAlign은 Input 컴포넌트에서 처리
   },
   buttonContainer: {
-    paddingBottom: spacing[8],
+    paddingBottom: spacing[10],
   },
   button: {
-    backgroundColor: colors.primary[500],
+    width: '100%',
   },
 });
 

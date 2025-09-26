@@ -8,14 +8,18 @@ import { BaseEntity, Emotion, ServiceResult } from './index';
 export interface Character extends BaseEntity {
   character_id: string;
   name: string;
+  title: string;
   description: string;
   emoji: string;
   level: number;
   experience: number;
+  total_experience: number;
   max_experience: number;
   unlocked: boolean;
+  unlocked_date?: string;
   category: string;
   category_id: string;
+  completed_missions: number;
 }
 
 // 캐릭터 생성 데이터

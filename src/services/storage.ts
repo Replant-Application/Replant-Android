@@ -4,9 +4,12 @@ import { StorageKeys, GetData, SetData, GetStorageKeys } from '../types/storage'
 
 // 로컬 저장소 키 상수
 export const STORAGE_KEYS: StorageKeys = {
+  USER: 'user',
   MISSIONS: 'missions',
   DIARIES: 'diaries',
   CHARACTERS: 'characters',
+  SETTINGS: 'settings',
+  PREFERENCES: 'preferences',
   USER_NICKNAME: 'userNickname',
   MISSION_TEMPLATES: 'mission_templates',
   CHARACTER_TEMPLATES: 'character_templates',
@@ -16,9 +19,12 @@ export const STORAGE_KEYS: StorageKeys = {
 // 사용자별 스토리지 키 생성 함수
 export const getStorageKeys = (nickname: string): StorageKeys => {
   return {
+    USER: `user_${nickname}`,
     MISSIONS: `missions_${nickname}`,
     DIARIES: `diaries_${nickname}`,
     CHARACTERS: `characters_${nickname}`,
+    SETTINGS: `settings_${nickname}`,
+    PREFERENCES: `preferences_${nickname}`,
     USER_NICKNAME: `userNickname_${nickname}`,
     MISSION_TEMPLATES: 'mission_templates', // 템플릿은 공유
     CHARACTER_TEMPLATES: 'character_templates', // 템플릿은 공유
@@ -51,7 +57,7 @@ export const addData = async <T extends { id?: number }>(
   item: Omit<T, 'id'>
 ): Promise<T> => {
   try {
-    const existingData: T[] = await getData<T[]>(key) || [];
+    const existingData: T[] = await getData(key) || [];
     const newItem: T = { ...item, id: Date.now() } as T;
     const newData: T[] = [...existingData, newItem];
     await setData(key, newData);
@@ -68,7 +74,7 @@ export const updateData = async <T extends { id: number }>(
   updates: Partial<T>
 ): Promise<T | undefined> => {
   try {
-    const existingData: T[] = await getData<T[]>(key) || [];
+    const existingData: T[] = await getData(key) || [];
     const updatedData: T[] = existingData.map(item => 
       item.id === id ? { ...item, ...updates } : item
     );
@@ -85,7 +91,7 @@ export const deleteData = async <T extends { id: number }>(
   id: number
 ): Promise<boolean> => {
   try {
-    const existingData: T[] = await getData<T[]>(key) || [];
+    const existingData: T[] = await getData(key) || [];
     const filteredData: T[] = existingData.filter(item => item.id !== id);
     await setData(key, filteredData);
     return true;

@@ -45,8 +45,8 @@ export const createCustomMission = async (
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
       completed: false,
-      completed_at: null,
-      photo_url: null
+      completed_at: undefined,
+      photo_url: undefined
     };
     
     const updatedMissions: Mission[] = [...missions, newMission];
@@ -82,10 +82,17 @@ export const updateCustomMission = async (
       throw new Error('미션을 찾을 수 없습니다.');
     }
     
+    const mission = missions[missionIndex];
+    if (!mission) {
+      throw new Error('미션을 찾을 수 없습니다.');
+    }
+    
     const updatedMission: Mission = {
-      ...missions[missionIndex],
+      ...mission,
       ...updateData,
-      updated_at: new Date().toISOString()
+      updated_at: new Date().toISOString(),
+      id: mission.id,
+      mission_id: mission.mission_id
     };
     
     missions[missionIndex] = updatedMission;

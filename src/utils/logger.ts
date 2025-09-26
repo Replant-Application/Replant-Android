@@ -121,7 +121,7 @@ export const logError = (
 ): void => {
   const errorData: ErrorData = {
     message: error?.message || message,
-    stack: error?.stack,
+    stack: error?.stack || '',
     context,
   };
   

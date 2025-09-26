@@ -6,18 +6,10 @@ import { useCharacter } from '../hooks/useCharacter';
 import { MissionCard } from '../components/specialized';
 import { Card, Loading, ErrorBoundary, Button } from '../components/ui';
 import { colors, spacing, typography, borderRadius } from '../utils/designTokens';
+import { NavigationProp } from '@react-navigation/native';
+import { RootStackParamList } from '../types/navigation';
 
-interface MissionCategory {
-  id: string;
-  name: string;
-  emoji: string;
-}
-
-interface MissionScreenProps {
-  navigation: any;
-}
-
-const MISSION_CATEGORIES: MissionCategory[] = [
+const MISSION_CATEGORIES = [
   { id: 'all', name: '전체', emoji: '🎯' },
   { id: 'self_management', name: '자기관리', emoji: '🧘' },
   { id: 'communication', name: '소통관리', emoji: '💬' },
@@ -25,10 +17,10 @@ const MISSION_CATEGORIES: MissionCategory[] = [
   { id: 'custom', name: '나만의 미션', emoji: '✨' },
 ];
 
-const MissionScreen: React.FC<MissionScreenProps> = ({ navigation }) => {
+const MissionScreen: React.FC = () => {
   const { addExperienceByCategory } = useCharacter();
   const { missions, loading, error, completeMissionWithPhoto, uncompleteMission } = useMission(addExperienceByCategory);
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [selectedCategory, setSelectedCategory] = useState('all');
 
   // 필터링된 미션 목록
   const filteredMissions = selectedCategory === 'all' 
@@ -38,7 +30,7 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation }) => {
     : missions.filter(mission => mission.category === selectedCategory);
 
   // 카테고리별 미션 수 계산
-  const getCategoryMissionCount = (categoryId: string): number => {
+  const getCategoryMissionCount = (categoryId: string) => {
     if (categoryId === 'all') {
       return missions.length;
     } else if (categoryId === 'custom') {
@@ -53,33 +45,37 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation }) => {
   const totalMissions = missions.length;
   const progressPercentage = totalMissions > 0 ? (completedMissions / totalMissions) * 100 : 0;
 
-  const handleMissionComplete = async (missionId: string): Promise<void> => {
+  const handleMissionComplete = async (missionId: string) => {
     try {
       // 사진 없이 미션 완료 (Phase 4 상태)
       const result = await completeMissionWithPhoto(missionId, null);
       
-      if (result.success) {
-        // 성공 시 추가 처리 (예: 토스트 메시지)
+      if (result && result.success) {
+        if (result.levelUp) {
+          Alert.alert(
+            '🎉 레벨업!',
+            `축하합니다! 레벨 ${result.newLevel}이 되었습니다!`,
+            [{ text: '확인' }]
+          );
+        } else {
+          Alert.alert(
+            '✅ 미션 완료',
+            `+${result.experience || 50} EXP를 획득했습니다!`,
+            [{ text: '확인' }]
+          );
+        }
       }
-    } catch (error) {
-      console.error('미션 완료 실패:', error);
+    } catch (completeError) {
+      Alert.alert('오류', '미션 완료에 실패했습니다.');
     }
   };
 
-  const handleMissionUncomplete = async (missionId: string): Promise<void> => {
+  const handleMissionUncomplete = async (missionId: string) => {
     try {
-      const result = await uncompleteMission(missionId);
-      
-      if (result.success) {
-        // 성공 시 추가 처리
-      }
-    } catch (error) {
-      console.error('미션 완료 취소 실패:', error);
+      await uncompleteMission(missionId);
+    } catch (uncompleteError) {
+      Alert.alert('오류', '미션 완료 취소에 실패했습니다.');
     }
-  };
-
-  const handleCreateMission = (): void => {
-    navigation.navigate(SCREEN_NAMES.CUSTOM_MISSION_CREATE);
   };
 
   if (loading) {
@@ -91,111 +87,126 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation }) => {
   }
 
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>미션</Text>
-        <Text style={styles.userInfo}>사용자님</Text>
-      </View>
-
-      {/* 진행률 표시 */}
-      <View style={styles.progressSection}>
-        <Text style={styles.progressTitle}>전체 진행률</Text>
-        <View style={styles.progressBar}>
-          <View 
-            style={[
-              styles.progressFill, 
-              { width: `${progressPercentage}%` }
-            ]} 
-          />
-        </View>
-        <Text style={styles.progressText}>
-          {completedMissions}/{totalMissions} 완료 ({Math.round(progressPercentage)}%)
-        </Text>
-      </View>
-
-      {/* 카테고리 필터 */}
-      <View style={styles.categoryContainer}>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-          {MISSION_CATEGORIES.map((category) => (
-            <TouchableOpacity
-              key={category.id}
-              style={[
-                styles.categoryButton,
-                selectedCategory === category.id && styles.selectedCategory
-              ]}
-              onPress={() => setSelectedCategory(category.id)}
-            >
-              <Text style={styles.categoryEmoji}>{category.emoji}</Text>
-              <Text style={[
-                styles.categoryName,
-                selectedCategory === category.id && styles.selectedCategoryText
-              ]}>
-                {category.name}
+    <View style={styles.container}>
+      <View style={styles.header} />
+      
+      <ScrollView style={styles.content}>
+        {/* 진행률 표시 */}
+        {totalMissions > 0 && (
+          <Card style={styles.progressCard}>
+            <Text style={styles.progressTitle}>진행률</Text>
+            <View style={styles.progressInfo}>
+              <Text style={styles.progressText}>
+                {completedMissions}개 완료 / {totalMissions}개
               </Text>
-              <Text style={[
-                styles.categoryCount,
-                selectedCategory === category.id && styles.selectedCategoryCount
-              ]}>
-                ({getCategoryMissionCount(category.id)})
+              <Text style={styles.progressPercentage}>
+                {Math.round(progressPercentage)}%
               </Text>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
-      </View>
-
-      {/* 섹션 제목 */}
-      <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>
-          {selectedCategory === 'all' 
-            ? `전체 미션 (${filteredMissions.length}개)`
-            : selectedCategory === 'custom'
-            ? `나만의 미션 (${filteredMissions.length}개)`
-            : `${MISSION_CATEGORIES.find(cat => cat.id === selectedCategory)?.name} 미션 (${filteredMissions.length}개)`
-          }
-        </Text>
-        {selectedCategory === 'custom' && (
-          <Button
-            title="+ 새 미션"
-            onPress={handleCreateMission}
-            size="sm"
-            style={styles.addButton}
-            textStyle={{ color: colors.white }}
-          />
+            </View>
+            <View style={styles.progressBar}>
+              <View 
+                style={[
+                  styles.progressFill, 
+                  { width: `${progressPercentage}%` }
+                ]} 
+              />
+            </View>
+          </Card>
         )}
-      </View>
 
-      {/* 미션 목록 */}
-      <View style={styles.missionList}>
-        {filteredMissions.length > 0 ? (
-          filteredMissions.map((mission) => (
-            <MissionCard
-              key={mission.mission_id}
-              mission={mission}
-              onComplete={handleMissionComplete}
-              onUncomplete={handleMissionUncomplete}
-              style={styles.missionCard}
-            />
-          ))
-        ) : (
-          <Card style={styles.emptyCard}>
-            <Text style={styles.emptyText}>
-              {selectedCategory === 'custom' 
-                ? '아직 나만의 미션이 없어요.\n새로운 미션을 만들어보세요!'
-                : '이 카테고리의 미션이 없어요.'
-              }
+        {/* 카테고리 필터 */}
+        <View style={styles.categorySection}>
+          <Text style={styles.sectionTitle}>카테고리</Text>
+          <ScrollView 
+            horizontal 
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.categoryList}
+          >
+            {MISSION_CATEGORIES.map((category) => (
+              <TouchableOpacity
+                key={category.id}
+                style={[
+                  styles.categoryButton,
+                  selectedCategory === category.id && styles.selectedCategory
+                ]}
+                onPress={() => setSelectedCategory(category.id)}
+                activeOpacity={0.7}
+              >
+                <Text style={styles.categoryEmoji}>{category.emoji}</Text>
+                <Text style={[
+                  styles.categoryName,
+                  selectedCategory === category.id && styles.selectedCategoryText
+                ]}>
+                  {category.name}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
+
+        {/* 미션 목록 */}
+        <View style={styles.missionSection}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>
+              {selectedCategory === 'all' ? '전체 미션' : 
+               selectedCategory === 'custom' ? '나만의 미션' :
+               `${MISSION_CATEGORIES.find(c => c.id === selectedCategory)?.name} 미션`}
+              <Text style={styles.missionCount}>
+                ({filteredMissions.length}개)
+              </Text>
             </Text>
             {selectedCategory === 'custom' && (
               <Button
-                title="미션 만들기"
-                onPress={handleCreateMission}
-                style={styles.createButton}
-                textStyle={{ color: colors.white }}
+                title="+ 새 미션"
+                onPress={() => {}}
+                style={styles.addButton}
+                textStyle={StyleSheet.flatten([styles.addButtonText, { color: colors.white }])}
               />
             )}
-          </Card>
-        )}
-      </View>
-    </ScrollView>
+          </View>
+          
+          {filteredMissions.length === 0 ? (
+            <Card style={styles.emptyCard}>
+              <Text style={styles.emptyIcon}>
+                {selectedCategory === 'all' ? '🎯' : selectedCategory === 'custom' ? '✨' : '📚'}
+              </Text>
+              <Text style={styles.emptyTitle}>
+                {selectedCategory === 'all' 
+                  ? '아직 미션이 없어요' 
+                  : selectedCategory === 'custom'
+                  ? '나만의 미션이 없어요'
+                  : '이 카테고리의 미션이 없어요'}
+              </Text>
+              <Text style={styles.emptyText}>
+                {selectedCategory === 'all'
+                  ? '새로운 미션이 곧 추가될 예정입니다!'
+                  : selectedCategory === 'custom'
+                  ? '첫 번째 나만의 미션을 만들어보세요!'
+                  : '다른 카테고리의 미션을 확인해보세요!'}
+              </Text>
+              {selectedCategory === 'custom' && (
+                <Button
+                  title="미션 만들기"
+                  onPress={() => {}}
+                  style={styles.createButton}
+                  textStyle={{ color: colors.white }}
+                />
+              )}
+            </Card>
+          ) : (
+            filteredMissions.map((mission, index) => (
+              <MissionCard
+                key={`${mission.mission_id}-${mission.id || index}`}
+                mission={mission}
+                onComplete={handleMissionComplete}
+                onUncomplete={handleMissionUncomplete}
+                style={styles.missionCard}
+              />
+            ))
+          )}
+        </View>
+      </ScrollView>
+    </View>
   );
 };
 
@@ -205,9 +216,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background.secondary,
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
     paddingHorizontal: spacing[5],
     paddingTop: spacing[20],
     paddingBottom: spacing[5],
@@ -220,112 +228,137 @@ const styles = StyleSheet.create({
     fontWeight: typography.fontWeight.bold,
     color: colors.text.primary,
   },
-  userInfo: {
-    fontSize: typography.fontSize.base,
-    color: colors.text.secondary,
-  },
-  progressSection: {
+  content: {
+    flex: 1,
     padding: spacing[5],
-    backgroundColor: colors.background.primary,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border.light,
+  },
+  progressCard: {
+    marginBottom: spacing[6],
   },
   progressTitle: {
-    fontSize: typography.fontSize.base,
-    fontWeight: typography.fontWeight.medium,
+    fontSize: typography.fontSize.lg,
+    fontWeight: typography.fontWeight.bold,
     color: colors.text.primary,
+    marginBottom: spacing[3],
+  },
+  progressInfo: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     marginBottom: spacing[2],
+  },
+  progressText: {
+    fontSize: typography.fontSize.sm,
+    color: colors.text.secondary,
+  },
+  progressPercentage: {
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.semibold,
+    color: colors.primary[500],
   },
   progressBar: {
     height: 8,
     backgroundColor: colors.gray[200],
     borderRadius: borderRadius.sm,
     overflow: 'hidden',
-    marginBottom: spacing[2],
   },
   progressFill: {
     height: '100%',
     backgroundColor: colors.primary[500],
     borderRadius: borderRadius.sm,
   },
-  progressText: {
-    fontSize: typography.fontSize.sm,
-    color: colors.text.secondary,
-    textAlign: 'center',
+  categorySection: {
+    marginBottom: spacing[6],
   },
-  categoryContainer: {
-    paddingVertical: spacing[4],
-    paddingHorizontal: spacing[5],
+  sectionTitle: {
+    fontSize: typography.fontSize.xl,
+    fontWeight: typography.fontWeight.bold,
+    color: colors.text.primary,
+    marginBottom: spacing[3],
+  },
+  missionCount: {
+    fontSize: typography.fontSize.lg,
+    fontWeight: typography.fontWeight.medium,
+    color: colors.text.secondary,
+  },
+  categoryList: {
+    paddingHorizontal: spacing[1],
   },
   categoryButton: {
-    flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: spacing[4],
-    paddingVertical: spacing[3],
-    marginRight: spacing[3],
+    padding: spacing[3],
+    marginHorizontal: spacing[1],
+    borderRadius: borderRadius.md,
     backgroundColor: colors.background.primary,
-    borderRadius: spacing[6],
     borderWidth: 1,
-    borderColor: colors.border.primary,
+    borderColor: colors.border.light,
+    minWidth: 80,
   },
   selectedCategory: {
-    backgroundColor: colors.primary[500],
+    backgroundColor: colors.primary[100],
     borderColor: colors.primary[500],
   },
   categoryEmoji: {
-    fontSize: typography.fontSize.base,
-    marginRight: spacing[2],
+    fontSize: typography.fontSize.xl,
+    marginBottom: spacing[1],
   },
   categoryName: {
     fontSize: typography.fontSize.sm,
-    color: colors.text.primary,
     fontWeight: typography.fontWeight.medium,
+    color: colors.text.secondary,
+    textAlign: 'center',
   },
   selectedCategoryText: {
-    color: colors.text.inverse,
+    color: colors.primary[500],
+    fontWeight: typography.fontWeight.semibold,
   },
-  categoryCount: {
-    fontSize: typography.fontSize.xs,
-    color: colors.text.secondary,
-    marginLeft: spacing[1],
-  },
-  selectedCategoryCount: {
-    color: colors.text.inverse,
+  missionSection: {
+    marginBottom: spacing[6],
   },
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: spacing[5],
-    marginBottom: spacing[4],
-  },
-  sectionTitle: {
-    fontSize: typography.fontSize.lg,
-    fontWeight: typography.fontWeight.bold,
-    color: colors.text.primary,
+    marginBottom: spacing[3],
   },
   addButton: {
     backgroundColor: colors.primary[500],
+    paddingHorizontal: spacing[4],
+    paddingVertical: spacing[2],
+    borderRadius: borderRadius.md,
   },
-  missionList: {
-    paddingHorizontal: spacing[5],
+  addButtonText: {
+    color: colors.white,
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.semibold,
+  },
+  createButton: {
+    backgroundColor: colors.primary[500],
+    marginTop: spacing[4],
+    alignSelf: 'center',
   },
   missionCard: {
     marginBottom: spacing[3],
   },
   emptyCard: {
-    padding: spacing[6],
+    padding: spacing[8],
     alignItems: 'center',
+  },
+  emptyIcon: {
+    fontSize: typography.fontSize['4xl'],
+    marginBottom: spacing[4],
+  },
+  emptyTitle: {
+    fontSize: typography.fontSize.xl,
+    fontWeight: typography.fontWeight.bold,
+    color: colors.text.primary,
+    marginBottom: spacing[2],
+    textAlign: 'center',
   },
   emptyText: {
     fontSize: typography.fontSize.base,
     color: colors.text.secondary,
     textAlign: 'center',
     lineHeight: typography.lineHeight.relaxed * typography.fontSize.base,
-    marginBottom: spacing[4],
-  },
-  createButton: {
-    backgroundColor: colors.primary[500],
   },
 });
 

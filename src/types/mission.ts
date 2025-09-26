@@ -11,6 +11,7 @@ export interface MissionData {
   emoji: string;
   difficulty: Difficulty;
   experience: number;
+  category_id: string;
 }
 
 // 미션 엔티티

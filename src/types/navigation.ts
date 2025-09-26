@@ -2,6 +2,8 @@
  * 네비게이션 관련 타입 정의
  */
 
+import { Character } from './character';
+
 // 화면 이름 enum
 export enum ScreenNames {
   START = 'Start',
@@ -15,6 +17,22 @@ export enum ScreenNames {
   CHARACTER_DETAIL = 'CharacterDetail',
   SETTINGS = 'Settings',
 }
+
+// React Navigation용 RootStackParamList
+export type RootStackParamList = {
+  Start: undefined;
+  Nickname: undefined;
+  Home: undefined;
+  Diary: undefined;
+  Mission: undefined;
+  CustomMissionCreate: undefined;
+  ChatBot: undefined;
+  CharacterGuide: undefined;
+  CharacterDetail: {
+    character: Character;
+  };
+  Settings: undefined;
+};
 
 // 네비게이션 파라미터 타입
 export interface NavigationParams {

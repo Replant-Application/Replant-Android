@@ -10,9 +10,9 @@ interface StartScreenProps {
 
 const StartScreen: React.FC<StartScreenProps> = ({ onNavigate }) => {
 
-  const handleGetStarted = (): void => {
+  const handleGetStarted = () => {
     if (onNavigate) {
-      onNavigate(SCREEN_NAMES.NICKNAME);
+      onNavigate(SCREEN_NAMES.NICKNAME as string);
     }
   };
 
@@ -55,26 +55,25 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize['4xl'],
     fontWeight: typography.fontWeight.bold,
     color: colors.text.primary,
-    marginBottom: spacing[3],
-    textAlign: 'center',
+    marginBottom: spacing[4],
   },
   subtitle: {
-    fontSize: typography.fontSize.xl,
-    color: colors.text.secondary,
-    marginBottom: spacing[4],
-    textAlign: 'center',
+    fontSize: typography.fontSize['2xl'],
+    fontWeight: typography.fontWeight.semibold,
+    color: colors.text.primary,
+    marginBottom: spacing[6],
   },
   description: {
     fontSize: typography.fontSize.base,
-    color: colors.text.tertiary,
+    color: colors.text.secondary,
     textAlign: 'center',
     lineHeight: typography.lineHeight.relaxed * typography.fontSize.base,
   },
   buttonContainer: {
-    paddingBottom: spacing[8],
+    paddingBottom: spacing[10],
   },
   button: {
-    backgroundColor: colors.primary[500],
+    width: '100%',
   },
 });
 

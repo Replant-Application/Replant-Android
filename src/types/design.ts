@@ -4,12 +4,16 @@
 
 // 색상 팔레트 타입
 export interface ColorPalette {
+  50: string;
   100: string;
   200: string;
   300: string;
   400: string;
   500: string;
   600: string;
+  700: string;
+  800: string;
+  900: string;
 }
 
 // 색상 타입
@@ -39,6 +43,7 @@ export interface Colors {
     light: string;
     medium: string;
     dark: string;
+    primary: string;
   };
   emotions: {
     happy: string;
@@ -50,6 +55,8 @@ export interface Colors {
     anxious: string;
     tired: string;
   };
+  black: string;
+  white: string;
 }
 
 // 간격 타입
@@ -82,10 +89,10 @@ export interface Typography {
     '4xl': number;
   };
   fontWeight: {
-    normal: string;
-    medium: string;
-    semibold: string;
-    bold: string;
+    normal: 'normal' | '400';
+    medium: '500';
+    semibold: '600';
+    bold: 'bold' | '700';
   };
   lineHeight: {
     tight: number;

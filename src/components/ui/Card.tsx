@@ -17,12 +17,12 @@ const Card: React.FC<CardProps> = ({
   style,
   ...props 
 }) => {
-  const cardStyle = [
-    styles.base,
-    styles[variant],
-    styles[`padding${padding.charAt(0).toUpperCase() + padding.slice(1)}`],
-    style,
-  ];
+      const cardStyle = [
+        styles.base,
+        styles[variant],
+        styles[`padding${padding.charAt(0).toUpperCase() + padding.slice(1)}` as keyof typeof styles],
+        style,
+      ];
 
   return (
     <View style={cardStyle} {...props}>

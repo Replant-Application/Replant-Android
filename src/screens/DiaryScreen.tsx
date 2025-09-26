@@ -4,43 +4,38 @@ import { useDiary } from '../hooks/useDiary';
 import { DiaryCard, EmotionSelector } from '../components/specialized';
 import { Button, Card, Loading, ErrorBoundary } from '../components/ui';
 import { colors, spacing, typography, borderRadius } from '../utils/designTokens';
-
-interface Diary {
-  id: string;
+// 간단한 일기 데이터 타입
+interface SimpleDiaryData {
   date: string;
   emotion: string;
   content: string;
 }
 
-interface DiaryScreenProps {
-  navigation: any;
-}
-
-const DiaryScreen: React.FC<DiaryScreenProps> = ({ navigation }) => {
+const DiaryScreen: React.FC = () => {
   const { diaries, loading, error, saveDiary, updateDiary, deleteDiary } = useDiary();
-  const [showForm, setShowForm] = useState<boolean>(false);
-  const [editingDiary, setEditingDiary] = useState<Diary | null>(null);
-  const [selectedEmotion, setSelectedEmotion] = useState<string>('');
-  const [diaryContent, setDiaryContent] = useState<string>('');
+  const [showForm, setShowForm] = useState(false);
+  const [editingDiary, setEditingDiary] = useState<any>(null);
+  const [selectedEmotion, setSelectedEmotion] = useState('');
+  const [diaryContent, setDiaryContent] = useState('');
 
-  const handleSaveDiary = async (): Promise<void> => {
+  const handleSaveDiary = async () => {
     if (!selectedEmotion || !diaryContent.trim()) {
       Alert.alert('오류', '감정과 내용을 모두 입력해주세요.');
       return;
     }
 
     try {
-      const diaryData = {
-        date: new Date().toISOString().split('T')[0],
+      const diaryData: SimpleDiaryData = {
+        date: new Date().toISOString().split('T')[0] || '',
         emotion: selectedEmotion,
         content: diaryContent.trim(),
       };
 
       if (editingDiary) {
-        await updateDiary(editingDiary.id, diaryData);
+        await updateDiary(editingDiary.id, diaryData as any);
         setEditingDiary(null);
       } else {
-        await saveDiary(diaryData);
+        await saveDiary(diaryData as any);
       }
       
       setShowForm(false);
@@ -51,14 +46,14 @@ const DiaryScreen: React.FC<DiaryScreenProps> = ({ navigation }) => {
     }
   };
 
-  const handleEditDiary = (diary: Diary): void => {
+  const handleEditDiary = (diary: any) => {
     setEditingDiary(diary);
     setSelectedEmotion(diary.emotion);
     setDiaryContent(diary.content);
     setShowForm(true);
   };
 
-  const handleDeleteDiary = (diaryId: string): void => {
+  const handleDeleteDiary = (diaryId: string) => {
     Alert.alert(
       '일기 삭제',
       '정말로 이 일기를 삭제하시겠습니까?',
@@ -79,7 +74,7 @@ const DiaryScreen: React.FC<DiaryScreenProps> = ({ navigation }) => {
     );
   };
 
-  const handleCancelEdit = (): void => {
+  const handleCancelForm = () => {
     setShowForm(false);
     setEditingDiary(null);
     setSelectedEmotion('');
@@ -95,96 +90,91 @@ const DiaryScreen: React.FC<DiaryScreenProps> = ({ navigation }) => {
   }
 
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>다이어리</Text>
-        <Text style={styles.userInfo}>사용자님</Text>
-      </View>
-
-      {!showForm ? (
-        <>
-          {/* 일기 목록 */}
-          <View style={styles.diaryList}>
-            {diaries.length > 0 ? (
-              diaries.map((diary) => (
-                <DiaryCard
-                  key={diary.id}
-                  diary={diary}
-                  onEdit={handleEditDiary}
-                  onDelete={handleDeleteDiary}
-                  style={styles.diaryCard}
-                />
-              ))
-            ) : (
-              <Card style={styles.emptyCard}>
-                <Text style={styles.emptyText}>
-                  아직 작성된 일기가 없어요.{'\n'}
-                  첫 번째 일기를 작성해보세요!
-                </Text>
-                <Button
-                  title="일기 작성하기"
-                  onPress={() => setShowForm(true)}
-                  style={styles.writeButton}
-                />
-              </Card>
-            )}
-          </View>
-
-          {/* 작성 버튼 */}
-          <View style={styles.fabContainer}>
-            <TouchableOpacity
-              style={styles.fab}
-              onPress={() => setShowForm(true)}
-            >
-              <Text style={styles.fabText}>+</Text>
-            </TouchableOpacity>
-          </View>
-        </>
-      ) : (
-        <>
-          {/* 일기 작성 폼 */}
-          <View style={styles.formContainer}>
+    <View style={styles.container}>
+      <View style={styles.header} />
+      
+      <ScrollView style={styles.content}>
+        
+        {showForm ? (
+          <Card style={styles.formCard}>
             <Text style={styles.formTitle}>
-              {editingDiary ? '일기 수정' : '새 일기 작성'}
+              {editingDiary ? '✏️ 일기 수정' : '✏️ 일기 작성'}
             </Text>
             
-            <View style={styles.formContent}>
-              <Text style={styles.label}>오늘의 감정</Text>
-              <EmotionSelector
-                selectedEmotion={selectedEmotion}
-                onSelect={setSelectedEmotion}
-                style={styles.emotionSelector}
-              />
-              
-              <Text style={styles.label}>일기 내용</Text>
+            <EmotionSelector
+              selectedEmotion={selectedEmotion}
+              onSelect={setSelectedEmotion}
+              style={styles.emotionSelector}
+            />
+            
+            <View style={styles.contentInput}>
+              <Text style={styles.contentLabel}>오늘의 이야기</Text>
               <TextInput
                 style={styles.textInput}
                 value={diaryContent}
                 onChangeText={setDiaryContent}
-                placeholder="오늘 하루는 어땠나요?"
-                multiline
-                numberOfLines={6}
+                placeholder="오늘의 감정과 이야기를 자유롭게 적어보세요..."
+                placeholderTextColor={colors.text.tertiary}
+                multiline={true}
                 textAlignVertical="top"
+                maxLength={1000}
               />
+              <Text style={styles.characterCount}>
+                {diaryContent.length}/1000
+              </Text>
             </View>
-
+            
             <View style={styles.formActions}>
               <Button
                 title="취소"
-                onPress={handleCancelEdit}
                 variant="outline"
+                onPress={handleCancelForm}
                 style={styles.cancelButton}
               />
               <Button
                 title={editingDiary ? '수정하기' : '저장하기'}
                 onPress={handleSaveDiary}
+                disabled={!selectedEmotion || !diaryContent.trim()}
                 style={styles.saveButton}
               />
             </View>
-          </View>
-        </>
+          </Card>
+        ) : (
+          <>
+            {diaries.length === 0 ? (
+              <Card style={styles.emptyCard}>
+                <Text style={styles.emptyIcon}>📝</Text>
+                <Text style={styles.emptyTitle}>아직 작성된 일기가 없어요</Text>
+                <Text style={styles.emptyText}>오늘의 감정을 기록해보세요!</Text>
+              </Card>
+            ) : (
+              <>
+                {diaries.map((diary) => (
+                  <DiaryCard
+                    key={diary.id}
+                    diary={diary}
+                    onEdit={handleEditDiary}
+                    onDelete={handleDeleteDiary}
+                    style={styles.diaryCard}
+                  />
+                ))}
+              </>
+            )}
+          </>
+        )}
+      </ScrollView>
+      
+      {/* 플로팅 액션 버튼 */}
+      {!showForm && (
+        <TouchableOpacity
+          style={styles.fab}
+          onPress={() => setShowForm(true)}
+          activeOpacity={0.8}
+        >
+          <Text style={styles.fabIcon}>+</Text>
+        </TouchableOpacity>
       )}
-    </ScrollView>
+    </View>
   );
 };
 
@@ -209,55 +199,36 @@ const styles = StyleSheet.create({
     fontWeight: typography.fontWeight.bold,
     color: colors.text.primary,
   },
-  userInfo: {
-    fontSize: typography.fontSize.base,
-    color: colors.text.secondary,
-  },
-  diaryList: {
-    padding: spacing[5],
-  },
-  diaryCard: {
-    marginBottom: spacing[3],
-  },
-  emptyCard: {
-    padding: spacing[6],
-    alignItems: 'center',
-  },
-  emptyText: {
-    fontSize: typography.fontSize.base,
-    color: colors.text.secondary,
-    textAlign: 'center',
-    lineHeight: typography.lineHeight.relaxed * typography.fontSize.base,
-    marginBottom: spacing[4],
-  },
-  writeButton: {
-    backgroundColor: colors.primary[500],
-  },
-  fabContainer: {
-    position: 'absolute',
-    bottom: spacing[20], // 하단 네비게이션 바 위로 올림
-    right: spacing[5],
-  },
   fab: {
+    position: 'absolute',
+    bottom: spacing[6],
+    right: spacing[5],
     width: 56,
     height: 56,
-    borderRadius: 28,
+    borderRadius: borderRadius.full,
     backgroundColor: colors.primary[500],
-    alignItems: 'center',
     justifyContent: 'center',
+    alignItems: 'center',
     elevation: 8,
-    shadowColor: colors.black,
-    shadowOffset: { width: 0, height: 4 },
+    shadowColor: colors.primary[500],
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
     shadowOpacity: 0.3,
     shadowRadius: 8,
   },
-  fabText: {
+  fabIcon: {
     fontSize: typography.fontSize['2xl'],
     color: colors.text.inverse,
     fontWeight: typography.fontWeight.bold,
   },
-  formContainer: {
+  content: {
+    flex: 1,
     padding: spacing[5],
+  },
+  formCard: {
+    marginBottom: spacing[6],
   },
   formTitle: {
     fontSize: typography.fontSize.xl,
@@ -266,41 +237,74 @@ const styles = StyleSheet.create({
     marginBottom: spacing[4],
     textAlign: 'center',
   },
-  formContent: {
+  emotionSelector: {
     marginBottom: spacing[6],
   },
-  label: {
+  contentInput: {
+    marginBottom: spacing[6],
+  },
+  contentLabel: {
     fontSize: typography.fontSize.base,
     fontWeight: typography.fontWeight.medium,
     color: colors.text.primary,
     marginBottom: spacing[2],
   },
-  emotionSelector: {
-    marginBottom: spacing[4],
-  },
   textInput: {
+    backgroundColor: colors.background.primary,
     borderWidth: 1,
     borderColor: colors.border.medium,
     borderRadius: borderRadius.base,
     padding: spacing[3],
+    minHeight: 120,
     fontSize: typography.fontSize.base,
     color: colors.text.primary,
-    backgroundColor: colors.background.primary,
-    minHeight: 120,
-    textAlignVertical: 'top',
+    lineHeight: typography.lineHeight.normal * typography.fontSize.base,
+  },
+  characterCount: {
+    fontSize: typography.fontSize.sm,
+    color: colors.text.tertiary,
+    textAlign: 'right',
+    marginTop: spacing[1],
   },
   formActions: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     gap: spacing[3],
   },
   cancelButton: {
     flex: 1,
-    borderColor: colors.border.primary,
   },
   saveButton: {
     flex: 1,
-    backgroundColor: colors.primary[500],
+  },
+  emptyCard: {
+    padding: spacing[8],
+    alignItems: 'center',
+  },
+  emptyIcon: {
+    fontSize: typography.fontSize['4xl'],
+    marginBottom: spacing[4],
+  },
+  emptyTitle: {
+    fontSize: typography.fontSize.xl,
+    fontWeight: typography.fontWeight.bold,
+    color: colors.text.primary,
+    marginBottom: spacing[2],
+    textAlign: 'center',
+  },
+  emptyText: {
+    fontSize: typography.fontSize.base,
+    color: colors.text.secondary,
+    textAlign: 'center',
+    lineHeight: typography.lineHeight.relaxed * typography.fontSize.base,
+  },
+  sectionTitle: {
+    fontSize: typography.fontSize.xl,
+    fontWeight: typography.fontWeight.bold,
+    color: colors.text.primary,
+    marginBottom: spacing[4],
+  },
+  diaryCard: {
+    marginBottom: spacing[3],
   },
 });
 

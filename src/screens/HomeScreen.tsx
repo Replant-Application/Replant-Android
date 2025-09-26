@@ -16,7 +16,7 @@ interface HomeScreenProps {
 const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const { user } = useUser();
   const { representativeCharacter, loading: characterLoading, error: characterError, addExperienceByCategory } = useCharacter();
-  const { missions, loading: missionLoading, error: missionError, completeMissionWithPhoto, uncompleteMission } = useMission(addExperienceByCategory);
+  const { missions, loading: missionLoading, error: missionError, completeMissionWithPhoto, uncompleteMission } = useMission(addExperienceByCategory as any);
 
 
   // 추천 미션 (카테고리 우선순위: 자기관리 → 소통관리 → 커리어관리)
@@ -30,8 +30,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
         'career': 3             // 커리어관리 (세번째)
       };
       
-      const priorityA = categoryPriority[a.category] || 999;
-      const priorityB = categoryPriority[b.category] || 999;
+      const priorityA = categoryPriority[a.category as keyof typeof categoryPriority] || 999;
+      const priorityB = categoryPriority[b.category as keyof typeof categoryPriority] || 999;
       
       // 카테고리 우선순위로 정렬
       if (priorityA !== priorityB) {
@@ -70,7 +70,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   // 캐릭터 상세 페이지로 이동
   const handleCharacterPress = (): void => {
     if (representativeCharacter) {
-      navigation.navigate(SCREEN_NAMES.CHARACTER_DETAIL, { character: representativeCharacter });
+      navigation.navigate('CharacterDetail', { character: representativeCharacter });
     }
   };
 
@@ -81,7 +81,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   }
 
   if (characterError || missionError) {
-    return <ErrorBoundary error={characterError || missionError} />;
+    return <ErrorBoundary error={characterError || missionError || 'Unknown error'} />;
   }
 
   // 미션 로딩 중이면 미션 부분만 로딩 표시
@@ -97,7 +97,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
             <Text style={styles.sectionTitle}>나의 캐릭터</Text>
           </View>
           {representativeCharacter ? (
-            <CharacterCard character={representativeCharacter} />
+            <CharacterCard character={representativeCharacter} onPress={() => {}} />
           ) : (
             <View style={styles.emptyCharacterCard}>
               <Text style={styles.emptyCharacterText}>캐릭터를 불러올 수 없습니다.</Text>
@@ -249,6 +249,20 @@ const styles = StyleSheet.create({
     color: colors.text.secondary,
     textAlign: 'center',
     lineHeight: typography.lineHeight.relaxed * typography.fontSize.base,
+  },
+  greeting: {
+    fontSize: typography.fontSize.lg,
+    color: colors.text.primary,
+    fontWeight: typography.fontWeight.bold,
+  },
+  section: {
+    marginBottom: spacing[6],
+  },
+  sectionHeader: {
+    fontSize: typography.fontSize.xl,
+    fontWeight: typography.fontWeight.bold,
+    color: colors.text.primary,
+    marginBottom: spacing[4],
   },
 });
 

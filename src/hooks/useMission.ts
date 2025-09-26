@@ -16,10 +16,10 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { getData, updateData, getStorageKeys } from '../services';
 import { useUser } from '../contexts/UserContext';
 import { logError } from '../utils/logger';
-import { Mission, UseMissionReturn, MissionCompletionResult, ServiceResult } from '../types';
+import { Mission, MissionData, UseMissionReturn, MissionCompletionResult, ServiceResult } from '../types';
 
 export const useMission = (
-  addExperienceByCategory?: (category: string, experience: number) => Promise<any>
+  addExperienceByCategory?: any
 ): UseMissionReturn => {
   const { currentNickname } = useUser();
   const [missions, setMissions] = useState<Mission[]>([]);
@@ -76,7 +76,7 @@ export const useMission = (
         ...mission,
         completed: true,
         completed_at: new Date().toISOString(),
-        photo_url: photoUrl
+        photo_url: photoUrl || undefined
       };
 
       const storageKeys = getStorageKeys(currentNickname!);
@@ -99,6 +99,7 @@ export const useMission = (
 
       return {
         success: true,
+        experienceGained: experienceResult?.experienceGained || mission.experience || 50,
         experience: experienceResult?.experience,
         levelUp: experienceResult?.levelUp,
         newLevel: experienceResult?.newLevel,
@@ -106,7 +107,7 @@ export const useMission = (
       };
     } catch (completeError) {
       logError('미션 완료 실패', completeError as Error, { missionId, photoUrl });
-      return { success: false, error: (completeError as Error).message };
+      return { success: false, experienceGained: 0, levelUp: false, error: (completeError as Error).message };
     }
   }, [missions, addExperienceByCategory, currentNickname]);
 
@@ -121,8 +122,8 @@ export const useMission = (
       const updatedMission: Mission = {
         ...mission,
         completed: false,
-        completed_at: null,
-        photo_url: null
+        completed_at: undefined,
+        photo_url: undefined
       };
 
       const storageKeys = getStorageKeys(currentNickname!);
@@ -144,6 +145,21 @@ export const useMission = (
     }
   }, [missions, currentNickname]);
 
+  // 커스텀 미션 생성 (placeholder)
+  const createCustomMission = useCallback(async (missionData: MissionData): Promise<ServiceResult> => {
+    return { success: false, error: '커스텀 미션 생성 기능은 아직 구현되지 않았습니다.' };
+  }, []);
+
+  // 커스텀 미션 업데이트 (placeholder)
+  const updateCustomMission = useCallback(async (missionId: string, missionData: MissionData): Promise<ServiceResult> => {
+    return { success: false, error: '커스텀 미션 업데이트 기능은 아직 구현되지 않았습니다.' };
+  }, []);
+
+  // 커스텀 미션 삭제 (placeholder)
+  const deleteCustomMission = useCallback(async (missionId: string): Promise<ServiceResult> => {
+    return { success: false, error: '커스텀 미션 삭제 기능은 아직 구현되지 않았습니다.' };
+  }, []);
+
   // 메모이제이션된 반환 객체
   return useMemo(() => ({
     missions,
@@ -152,6 +168,9 @@ export const useMission = (
     loadMissions,
     completeMissionWithPhoto,
     uncompleteMission,
+    createCustomMission,
+    updateCustomMission,
+    deleteCustomMission,
   }), [
     missions,
     loading,

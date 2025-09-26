@@ -4,16 +4,12 @@ import { useUser } from '../contexts/UserContext';
 import { Card, Input } from '../components/ui';
 import { colors, spacing, typography, borderRadius } from '../utils/designTokens';
 
-interface SettingsScreenProps {
-  navigation: any;
-}
-
-const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
+const SettingsScreen = () => {
   const { user, logout, updateNickname } = useUser();
-  const [showNicknameForm, setShowNicknameForm] = useState<boolean>(false);
-  const [newNickname, setNewNickname] = useState<string>('');
+  const [showNicknameForm, setShowNicknameForm] = useState(false);
+  const [newNickname, setNewNickname] = useState('');
 
-  const handleLogout = (): void => {
+  const handleLogout = () => {
     Alert.alert(
       '로그아웃',
       '정말로 로그아웃하시겠습니까?',
@@ -28,7 +24,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
     );
   };
 
-  const handleNicknameChange = async (): Promise<void> => {
+  const handleNicknameChange = async () => {
     if (!newNickname.trim()) {
       Alert.alert('오류', '닉네임을 입력해주세요.');
       return;
@@ -53,96 +49,73 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
     }
   };
 
-  const handleCancelNicknameChange = (): void => {
-    setShowNicknameForm(false);
-    setNewNickname('');
-  };
+
 
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>설정</Text>
-        <Text style={styles.userInfo}>{user?.nickname}님</Text>
-      </View>
-
+    <ScrollView style={[styles.container, { backgroundColor: colors.background.secondary }]}>
+      <View style={styles.header} />
+      
       <View style={styles.content}>
-        {/* 사용자 정보 섹션 */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>사용자 정보</Text>
-          <Card style={styles.infoCard}>
-            <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>닉네임</Text>
-              <View style={styles.infoValue}>
-                <Text style={styles.infoText}>{user?.nickname}</Text>
-                <TouchableOpacity
-                  style={styles.editButton}
-                  onPress={() => setShowNicknameForm(true)}
-                >
-                  <Text style={styles.editButtonText}>변경</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          </Card>
-        </View>
-
-        {/* 닉네임 변경 폼 */}
-        {showNicknameForm && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>닉네임 변경</Text>
-            <Card style={styles.formCard}>
+        {/* 사용자 정보 */}
+        <Card style={styles.userCard}>
+          <Text style={styles.userTitle}>👤 사용자 정보</Text>
+          <Text style={styles.userInfo}>닉네임: {user?.nickname}</Text>
+          <Text style={styles.userInfo}>가입일: {new Date().toLocaleDateString('ko-KR')}</Text>
+          
+          {showNicknameForm ? (
+            <View style={styles.nicknameForm}>
               <Input
                 label="새 닉네임"
                 placeholder="새 닉네임을 입력하세요"
                 value={newNickname}
                 onChangeText={setNewNickname}
-                maxLength={20}
                 style={styles.nicknameInput}
               />
-              <View style={styles.formActions}>
-                <TouchableOpacity
-                  style={styles.cancelButton}
-                  onPress={handleCancelNicknameChange}
+              <View style={styles.nicknameActions}>
+                <TouchableOpacity 
+                  style={styles.cancelButton} 
+                  onPress={() => {
+                    setShowNicknameForm(false);
+                    setNewNickname('');
+                  }}
                 >
                   <Text style={styles.cancelButtonText}>취소</Text>
                 </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.saveButton}
+                <TouchableOpacity 
+                  style={styles.saveButton} 
                   onPress={handleNicknameChange}
                 >
-                  <Text style={styles.saveButtonText}>저장</Text>
+                  <Text style={styles.saveButtonText}>변경</Text>
                 </TouchableOpacity>
               </View>
-            </Card>
-          </View>
-        )}
-
-        {/* 앱 정보 섹션 */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>앱 정보</Text>
-          <Card style={styles.infoCard}>
-            <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>버전</Text>
-              <Text style={styles.infoText}>1.0.0</Text>
             </View>
-            <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>개발자</Text>
-              <Text style={styles.infoText}>Replant Team</Text>
-            </View>
-          </Card>
-        </View>
-
-        {/* 계정 관리 섹션 */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>계정 관리</Text>
-          <Card style={styles.infoCard}>
-            <TouchableOpacity
-              style={styles.logoutButton}
-              onPress={handleLogout}
+          ) : (
+            <TouchableOpacity 
+              style={styles.changeNicknameButton} 
+              onPress={() => setShowNicknameForm(true)}
             >
-              <Text style={styles.logoutButtonText}>로그아웃</Text>
+              <Text style={styles.changeNicknameText}>✏️ 닉네임 변경</Text>
             </TouchableOpacity>
-          </Card>
-        </View>
+          )}
+        </Card>
+
+
+        
+        {/* 계정 설정 */}
+        <Card style={styles.accountCard}>
+          <Text style={styles.sectionTitle}>🔐 계정</Text>
+          <TouchableOpacity style={styles.logoutOption} onPress={handleLogout}>
+            <Text style={styles.logoutText}>🚪 로그아웃</Text>
+          </TouchableOpacity>
+        </Card>
+
+        {/* 앱 정보 */}
+        <Card style={styles.appInfoCard}>
+          <Text style={styles.sectionTitle}>ℹ️ 앱 정보</Text>
+          <Text style={styles.appInfo}>버전: 1.0.0 (Build 123)</Text>
+          <Text style={styles.appInfo}>최근 업데이트: 2025.01.26</Text>
+          <Text style={styles.appInfo}>Replant - 감정 회복을 위한 여정</Text>
+        </Card>
       </View>
     </ScrollView>
   );
@@ -154,9 +127,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background.secondary,
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
     paddingHorizontal: spacing[5],
     paddingTop: spacing[20],
     paddingBottom: spacing[5],
@@ -169,15 +139,22 @@ const styles = StyleSheet.create({
     fontWeight: typography.fontWeight.bold,
     color: colors.text.primary,
   },
-  userInfo: {
-    fontSize: typography.fontSize.base,
-    color: colors.text.secondary,
-  },
   content: {
     padding: spacing[5],
   },
-  section: {
+  userCard: {
     marginBottom: spacing[6],
+  },
+  userTitle: {
+    fontSize: typography.fontSize.lg,
+    fontWeight: typography.fontWeight.bold,
+    color: colors.text.primary,
+    marginBottom: spacing[3],
+  },
+  userInfo: {
+    fontSize: typography.fontSize.base,
+    color: colors.text.secondary,
+    marginBottom: spacing[1],
   },
   sectionTitle: {
     fontSize: typography.fontSize.lg,
@@ -185,81 +162,91 @@ const styles = StyleSheet.create({
     color: colors.text.primary,
     marginBottom: spacing[3],
   },
-  infoCard: {
+  themeCard: {
+    marginBottom: spacing[6],
+  },
+  accountCard: {
+    marginBottom: spacing[6],
+  },
+  appInfoCard: {
+    marginBottom: spacing[6],
+  },
+  option: {
+    backgroundColor: colors.background.primary,
     padding: spacing[4],
-  },
-  infoRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: spacing[2],
-  },
-  infoLabel: {
-    fontSize: typography.fontSize.base,
-    color: colors.text.primary,
-    fontWeight: typography.fontWeight.medium,
-  },
-  infoValue: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  infoText: {
-    fontSize: typography.fontSize.base,
-    color: colors.text.secondary,
-  },
-  editButton: {
-    marginLeft: spacing[3],
-    paddingHorizontal: spacing[2],
-    paddingVertical: spacing[1],
-    backgroundColor: colors.primary[500],
-    borderRadius: borderRadius.sm,
-  },
-  editButtonText: {
-    fontSize: typography.fontSize.sm,
-    color: colors.text.inverse,
-    fontWeight: typography.fontWeight.medium,
-  },
-  formCard: {
-    padding: spacing[4],
-  },
-  nicknameInput: {
-    marginBottom: spacing[4],
-  },
-  formActions: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    gap: spacing[3],
-  },
-  cancelButton: {
-    paddingHorizontal: spacing[4],
-    paddingVertical: spacing[2],
     borderRadius: borderRadius.base,
     borderWidth: 1,
-    borderColor: colors.border.primary,
+    borderColor: colors.border.light,
+  },
+  optionText: {
+    fontSize: typography.fontSize.base,
+    color: colors.text.primary,
+  },
+  logoutOption: {
+    backgroundColor: colors.error[50],
+    padding: spacing[4],
+    borderRadius: borderRadius.base,
+    borderWidth: 1,
+    borderColor: colors.border.light,
+  },
+  logoutText: {
+    fontSize: typography.fontSize.base,
+    color: colors.error[600],
+    fontWeight: typography.fontWeight.medium,
+  },
+  appInfo: {
+    fontSize: typography.fontSize.sm,
+    color: colors.text.secondary,
+    marginBottom: spacing[1],
+  },
+  nicknameForm: {
+    marginTop: spacing[4],
+  },
+  nicknameInput: {
+    marginBottom: spacing[3],
+  },
+  nicknameActions: {
+    flexDirection: 'row',
+    gap: spacing[2],
+  },
+  cancelButton: {
+    flex: 1,
+    backgroundColor: colors.background.secondary,
+    padding: spacing[3],
+    borderRadius: borderRadius.base,
+    borderWidth: 1,
+    borderColor: colors.border.medium,
+    alignItems: 'center',
   },
   cancelButtonText: {
     fontSize: typography.fontSize.base,
-    color: colors.text.primary,
+    color: colors.text.secondary,
     fontWeight: typography.fontWeight.medium,
   },
   saveButton: {
-    paddingHorizontal: spacing[4],
-    paddingVertical: spacing[2],
+    flex: 1,
     backgroundColor: colors.primary[500],
+    padding: spacing[3],
     borderRadius: borderRadius.base,
+    alignItems: 'center',
   },
   saveButtonText: {
     fontSize: typography.fontSize.base,
     color: colors.text.inverse,
     fontWeight: typography.fontWeight.medium,
   },
-  logoutButton: {
-    paddingVertical: spacing[3],
+  changeNicknameButton: {
+    backgroundColor: colors.background.secondary,
+    padding: spacing[3],
+    borderRadius: borderRadius.base,
+    borderWidth: 1,
+    borderColor: colors.border.light,
+    marginTop: spacing[3],
     alignItems: 'center',
   },
-  logoutButtonText: {
+  changeNicknameText: {
     fontSize: typography.fontSize.base,
-    color: colors.error,
+    color: colors.primary[500],
     fontWeight: typography.fontWeight.medium,
   },
 });

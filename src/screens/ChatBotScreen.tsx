@@ -12,47 +12,41 @@ import {
 } from 'react-native';
 import { Card, Button } from '../components/ui';
 import { colors, spacing, typography, borderRadius } from '../utils/designTokens';
-
-interface Message {
-  id: number;
-  type: 'user' | 'bot';
-  text: string;
-  timestamp: Date;
-  emotion: string;
-}
+import { NavigationProp } from '@react-navigation/native';
+import { RootStackParamList } from '../types/navigation';
 
 interface ChatBotScreenProps {
-  navigation: any;
+  navigation: NavigationProp<RootStackParamList>;
 }
 
 const ChatBotScreen: React.FC<ChatBotScreenProps> = ({ navigation }) => {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 1,
-      type: 'bot',
+      type: 'bot' as const,
       text: '안녕하세요! 저는 당신의 마음을 들어주는 심리상담 챗봇입니다. 오늘 기분은 어떠신가요? 😊',
       timestamp: new Date(),
       emotion: 'warm'
     }
   ]);
-  const [inputText, setInputText] = useState<string>('');
-  const [isTyping, setIsTyping] = useState<boolean>(false);
+  const [inputText, setInputText] = useState('');
+  const [isTyping, setIsTyping] = useState(false);
   const scrollViewRef = useRef<ScrollView>(null);
 
   // 스크롤을 맨 아래로 이동
-  const scrollToBottom = (): void => {
+  const scrollToBottom = () => {
     setTimeout(() => {
       scrollViewRef.current?.scrollToEnd({ animated: true });
     }, 100);
   };
 
   // 메시지 전송
-  const sendMessage = (): void => {
+  const sendMessage = () => {
     if (!inputText.trim()) return;
 
     const newMessage: Message = {
       id: Date.now(),
-      type: 'user',
+      type: 'user' as const,
       text: inputText.trim(),
       timestamp: new Date(),
       emotion: 'neutral'
@@ -64,184 +58,174 @@ const ChatBotScreen: React.FC<ChatBotScreenProps> = ({ navigation }) => {
 
     // 봇 응답 시뮬레이션
     setTimeout(() => {
-      const botResponse = getBotResponse(inputText.trim());
-      const botMessage: Message = {
-        id: Date.now() + 1,
-        type: 'bot',
-        text: botResponse.text,
-        timestamp: new Date(),
-        emotion: botResponse.emotion
-      };
+      const botResponse = generateBotResponse(inputText.trim());
+      if (botResponse) {
+        const botMessage: Message = {
+          id: Date.now() + 1,
+          type: 'bot' as const,
+          text: botResponse.text,
+          timestamp: new Date(),
+          emotion: botResponse.emotion
+        };
       
-      setMessages(prev => [...prev, botMessage]);
-      setIsTyping(false);
+        setMessages(prev => [...prev, botMessage]);
+        setIsTyping(false);
+      }
     }, 1500);
   };
 
-  // 봇 응답 생성 (간단한 규칙 기반)
-  const getBotResponse = (userMessage: string): { text: string; emotion: string } => {
-    const lowerMessage = userMessage.toLowerCase();
+  // 봇 응답 생성 (임시)
+  const generateBotResponse = (userText: string) => {
+    const responses = [
+      { text: '그렇게 생각하시는군요. 더 자세히 말씀해 주실 수 있나요? 🤗', emotion: 'caring' },
+      { text: '정말 힘드셨겠어요. 그런 마음이 이해됩니다. 💙', emotion: 'empathetic' },
+      { text: '좋은 생각이네요! 그런 긍정적인 마음이 중요해요. ✨', emotion: 'encouraging' },
+      { text: '혼자 감당하기 어려운 일이 있으시군요. 함께 생각해보아요. 🤝', emotion: 'supportive' },
+      { text: '당신의 감정을 표현해주셔서 감사해요. 더 이야기해주세요. 💚', emotion: 'warm' }
+    ];
     
-    if (lowerMessage.includes('안녕') || lowerMessage.includes('hello')) {
-      return {
-        text: '안녕하세요! 오늘 하루는 어떠셨나요? 기분이 좋으시거나 힘든 일이 있으시면 언제든 말씀해주세요. 😊',
-        emotion: 'warm'
-      };
-    }
-    
-    if (lowerMessage.includes('힘들') || lowerMessage.includes('스트레스') || lowerMessage.includes('우울')) {
-      return {
-        text: '힘든 시간을 보내고 계시는군요. 그런 감정을 느끼는 것은 자연스러운 일입니다. 혼자 감당하기 어려우시다면 주변 사람들에게 도움을 요청하는 것도 좋은 방법이에요. 🌱',
-        emotion: 'caring'
-      };
-    }
-    
-    if (lowerMessage.includes('기쁘') || lowerMessage.includes('좋') || lowerMessage.includes('행복')) {
-      return {
-        text: '좋은 일이 있으셨군요! 기쁜 마음을 나눠주셔서 저도 기뻐요. 이런 긍정적인 에너지가 계속되길 바랍니다. ✨',
-        emotion: 'happy'
-      };
-    }
-    
-    if (lowerMessage.includes('고마') || lowerMessage.includes('감사')) {
-      return {
-        text: '감사 인사를 해주셔서 저도 기뻐요! 서로를 배려하는 마음이 정말 소중하죠. 🙏',
-        emotion: 'grateful'
-      };
-    }
-    
-    if (lowerMessage.includes('미션') || lowerMessage.includes('목표')) {
-      return {
-        text: '목표를 향해 나아가고 계시는군요! 작은 단계부터 차근차근 진행하시면 됩니다. 완벽하지 않아도 괜찮아요. 한 걸음씩 나아가는 것이 중요합니다. 💪',
-        emotion: 'encouraging'
-      };
-    }
-    
-    // 기본 응답
-    return {
-      text: '말씀해주셔서 감사해요. 제가 도울 수 있는 것이 있다면 언제든 말씀해주세요. 당신의 이야기를 들어드릴 준비가 되어있어요. 🤗',
-      emotion: 'supportive'
-    };
+    return responses[Math.floor(Math.random() * responses.length)];
   };
 
-  // 감정별 색상
-  const getEmotionColor = (emotion: string): string => {
-    const emotionColors: Record<string, string> = {
-      'warm': colors.orange[500],
-      'caring': colors.blue[500],
-      'happy': colors.green[500],
-      'grateful': colors.purple[500],
-      'encouraging': colors.primary[500],
-      'supportive': colors.gray[600],
-      'neutral': colors.gray[500]
-    };
-    return emotionColors[emotion] || colors.gray[500];
-  };
+  // 빠른 응답 버튼들
+  const quickResponses = [
+    '오늘 기분이 좋아요 😊',
+    '조금 우울해요 😔',
+    '스트레스가 많아요 😰',
+    '도움이 필요해요 🆘'
+  ];
 
-  // 메시지 포맷팅
-  const formatTime = (date: Date): string => {
-    return date.toLocaleTimeString('ko-KR', { 
-      hour: '2-digit', 
-      minute: '2-digit' 
-    });
+  const handleQuickResponse = (response: string) => {
+    setInputText(response);
   };
-
-  // 뒤로가기
-  const handleGoBack = (): void => {
-    navigation.goBack();
-  };
-
-  // 메시지가 추가될 때마다 스크롤
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
 
   return (
     <KeyboardAvoidingView 
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
+      {/* 헤더 */}
       <View style={styles.header}>
-        <TouchableOpacity style={styles.backButton} onPress={handleGoBack}>
+        <TouchableOpacity 
+          style={styles.backButton}
+          onPress={() => navigation.goBack()}
+        >
           <Text style={styles.backButtonText}>←</Text>
         </TouchableOpacity>
-        <Text style={styles.title}>심리상담 챗봇</Text>
-        <View style={styles.placeholder} />
+        <Text style={styles.headerTitle}>심리상담 챗봇</Text>
+        <View style={styles.headerSpacer} />
       </View>
 
+      {/* 메시지 목록 */}
       <ScrollView 
         ref={scrollViewRef}
         style={styles.messagesContainer}
         contentContainerStyle={styles.messagesContent}
-        showsVerticalScrollIndicator={false}
+        onContentSizeChange={scrollToBottom}
       >
         {messages.map((message) => (
-          <View
-            key={message.id}
-            style={[
-              styles.messageContainer,
-              message.type === 'user' ? styles.userMessage : styles.botMessage
-            ]}
-          >
-            <Card style={[
-              styles.messageCard,
-              message.type === 'user' ? styles.userMessageCard : styles.botMessageCard,
-              { borderLeftColor: getEmotionColor(message.emotion) }
-            ]}>
-              <Text style={[
-                styles.messageText,
-                message.type === 'user' ? styles.userMessageText : styles.botMessageText
-              ]}>
-                {message.text}
-              </Text>
-              <Text style={[
-                styles.messageTime,
-                message.type === 'user' ? styles.userMessageTime : styles.botMessageTime
-              ]}>
-                {formatTime(message.timestamp)}
-              </Text>
-            </Card>
-          </View>
+          <MessageBubble 
+            key={message.id} 
+            message={message} 
+          />
         ))}
         
         {isTyping && (
           <View style={styles.typingContainer}>
-            <Card style={styles.typingCard}>
-              <Text style={styles.typingText}>상담사가 입력 중...</Text>
-            </Card>
+            <Text style={styles.typingText}>상담사가 입력 중...</Text>
+            <View style={styles.typingDots}>
+              <Text style={styles.typingDot}>●</Text>
+              <Text style={styles.typingDot}>●</Text>
+              <Text style={styles.typingDot}>●</Text>
+            </View>
           </View>
         )}
       </ScrollView>
 
+      {/* 빠른 응답 버튼들 */}
+      <View style={styles.quickResponsesContainer}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+          {quickResponses.map((response, index) => (
+            <TouchableOpacity
+              key={index}
+              style={styles.quickResponseButton}
+              onPress={() => handleQuickResponse(response)}
+            >
+              <Text style={styles.quickResponseText}>{response}</Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+      </View>
+
+      {/* 입력 영역 */}
       <View style={styles.inputContainer}>
-        <View style={styles.inputWrapper}>
-          <TextInput
-            style={styles.textInput}
-            value={inputText}
-            onChangeText={setInputText}
-            placeholder="메시지를 입력하세요..."
-            multiline
-            maxLength={500}
-          />
-          <TouchableOpacity
-            style={[
-              styles.sendButton,
-              !inputText.trim() && styles.sendButtonDisabled
-            ]}
-            onPress={sendMessage}
-            disabled={!inputText.trim()}
-          >
-            <Text style={[
-              styles.sendButtonText,
-              !inputText.trim() && styles.sendButtonTextDisabled
-            ]}>
-              전송
-            </Text>
-          </TouchableOpacity>
-        </View>
-        <Text style={styles.characterCount}>{inputText.length}/500</Text>
+        <TextInput
+          style={styles.textInput}
+          value={inputText}
+          onChangeText={setInputText}
+          placeholder="마음을 나누어 주세요..."
+          placeholderTextColor={colors.text.tertiary}
+          multiline
+          maxLength={500}
+        />
+        <TouchableOpacity
+          style={[
+            styles.sendButton,
+            !inputText.trim() && styles.sendButtonDisabled
+          ]}
+          onPress={sendMessage}
+          disabled={!inputText.trim()}
+        >
+          <Text style={styles.sendButtonText}>전송</Text>
+        </TouchableOpacity>
       </View>
     </KeyboardAvoidingView>
+  );
+};
+
+// 메시지 타입 정의
+interface Message {
+  id: number;
+  type: 'user' | 'bot';
+  text: string;
+  timestamp: Date;
+  emotion?: string;
+}
+
+// 메시지 버블 컴포넌트
+const MessageBubble: React.FC<{ message: Message }> = ({ message }) => {
+  const isUser = message.type === 'user';
+  const emotionColors: Record<string, string> = {
+    warm: colors.primary[100],
+    caring: colors.blue[100],
+    empathetic: colors.purple[100],
+    encouraging: colors.green[100],
+    supportive: colors.orange[100],
+    neutral: colors.gray[100]
+  };
+
+  return (
+    <View style={[
+      styles.messageBubble,
+      isUser ? styles.userMessage : styles.botMessage,
+      { backgroundColor: emotionColors[message.emotion || 'neutral'] || colors.gray[100] }
+    ]}>
+      <Text style={[
+        styles.messageText,
+        isUser ? styles.userMessageText : styles.botMessageText
+      ]}>
+        {message.text}
+      </Text>
+      <Text style={[
+        styles.messageTime,
+        isUser ? styles.userMessageTime : styles.botMessageTime
+      ]}>
+        {message.timestamp.toLocaleTimeString('ko-KR', { 
+          hour: '2-digit', 
+          minute: '2-digit' 
+        })}
+      </Text>
+    </View>
   );
 };
 
@@ -252,11 +236,10 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
+    justifyContent: 'space-between',
     paddingHorizontal: spacing[5],
-    paddingTop: spacing[20],
-    paddingBottom: spacing[5],
+    paddingVertical: spacing[4],
     backgroundColor: colors.background.primary,
     borderBottomWidth: 1,
     borderBottomColor: colors.border.light,
@@ -267,46 +250,42 @@ const styles = StyleSheet.create({
   backButtonText: {
     fontSize: typography.fontSize.xl,
     color: colors.text.primary,
+    fontWeight: typography.fontWeight.bold,
   },
-  title: {
+  headerTitle: {
     fontSize: typography.fontSize.lg,
     fontWeight: typography.fontWeight.bold,
     color: colors.text.primary,
   },
-  placeholder: {
+  headerSpacer: {
     width: 40,
   },
   messagesContainer: {
     flex: 1,
+    paddingHorizontal: spacing[4],
   },
   messagesContent: {
-    padding: spacing[4],
+    paddingVertical: spacing[4],
   },
-  messageContainer: {
-    marginBottom: spacing[3],
+  messageBubble: {
+    maxWidth: '80%',
+    padding: spacing[3],
+    borderRadius: borderRadius.lg,
+    marginVertical: spacing[2],
   },
   userMessage: {
-    alignItems: 'flex-end',
-  },
-  botMessage: {
-    alignItems: 'flex-start',
-  },
-  messageCard: {
-    maxWidth: '80%',
-    borderLeftWidth: 4,
-  },
-  userMessageCard: {
+    alignSelf: 'flex-end',
     backgroundColor: colors.primary[500],
   },
-  botMessageCard: {
-    backgroundColor: colors.background.primary,
+  botMessage: {
+    alignSelf: 'flex-start',
   },
   messageText: {
     fontSize: typography.fontSize.base,
-    lineHeight: typography.lineHeight.relaxed * typography.fontSize.base,
+    lineHeight: typography.lineHeight.normal * typography.fontSize.base,
   },
   userMessageText: {
-    color: colors.text.inverse,
+    color: colors.white,
   },
   botMessageText: {
     color: colors.text.primary,
@@ -316,70 +295,88 @@ const styles = StyleSheet.create({
     marginTop: spacing[1],
   },
   userMessageTime: {
-    color: colors.text.inverse,
-    opacity: 0.7,
+    color: colors.white,
+    opacity: 0.8,
   },
   botMessageTime: {
     color: colors.text.tertiary,
   },
   typingContainer: {
-    alignItems: 'flex-start',
-  },
-  typingCard: {
-    backgroundColor: colors.background.primary,
-    borderLeftWidth: 4,
-    borderLeftColor: colors.gray[400],
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    backgroundColor: colors.gray[100],
+    padding: spacing[3],
+    borderRadius: borderRadius.lg,
+    marginVertical: spacing[2],
   },
   typingText: {
     fontSize: typography.fontSize.sm,
     color: colors.text.secondary,
-    fontStyle: 'italic',
+    marginRight: spacing[2],
+  },
+  typingDots: {
+    flexDirection: 'row',
+  },
+  typingDot: {
+    fontSize: typography.fontSize.sm,
+    color: colors.text.tertiary,
+    marginHorizontal: spacing[1],
+  },
+  quickResponsesContainer: {
+    paddingHorizontal: spacing[4],
+    paddingVertical: spacing[3],
+    borderTopWidth: 1,
+    borderTopColor: colors.border.light,
+    backgroundColor: colors.background.primary,
+  },
+  quickResponseButton: {
+    backgroundColor: colors.primary[100],
+    paddingHorizontal: spacing[4],
+    paddingVertical: spacing[2],
+    borderRadius: borderRadius.full,
+    marginRight: spacing[2],
+  },
+  quickResponseText: {
+    fontSize: typography.fontSize.sm,
+    color: colors.primary[600],
+    fontWeight: typography.fontWeight.medium,
   },
   inputContainer: {
-    padding: spacing[4],
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    paddingHorizontal: spacing[4],
+    paddingVertical: spacing[3],
     backgroundColor: colors.background.primary,
     borderTopWidth: 1,
     borderTopColor: colors.border.light,
   },
-  inputWrapper: {
-    flexDirection: 'row',
-    alignItems: 'flex-end',
-    gap: spacing[2],
-  },
   textInput: {
     flex: 1,
     borderWidth: 1,
-    borderColor: colors.border.medium,
-    borderRadius: borderRadius.base,
-    padding: spacing[3],
+    borderColor: colors.border.light,
+    borderRadius: borderRadius.lg,
+    paddingHorizontal: spacing[3],
+    paddingVertical: spacing[2],
     fontSize: typography.fontSize.base,
     color: colors.text.primary,
     backgroundColor: colors.background.secondary,
     maxHeight: 100,
-    textAlignVertical: 'top',
+    marginRight: spacing[3],
   },
   sendButton: {
     backgroundColor: colors.primary[500],
     paddingHorizontal: spacing[4],
     paddingVertical: spacing[3],
-    borderRadius: borderRadius.base,
+    borderRadius: borderRadius.lg,
   },
   sendButtonDisabled: {
     backgroundColor: colors.gray[300],
   },
   sendButtonText: {
-    fontSize: typography.fontSize.base,
-    color: colors.text.inverse,
-    fontWeight: typography.fontWeight.medium,
-  },
-  sendButtonTextDisabled: {
-    color: colors.text.tertiary,
-  },
-  characterCount: {
-    fontSize: typography.fontSize.xs,
-    color: colors.text.tertiary,
-    textAlign: 'right',
-    marginTop: spacing[1],
+    color: colors.white,
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.semibold,
   },
 });
 

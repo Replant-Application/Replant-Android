@@ -14,25 +14,20 @@ import { Card, Button } from '../components/ui';
 import { colors, spacing, typography, borderRadius } from '../utils/designTokens';
 import { createCustomMission } from '../services/missionService';
 import { useUser } from '../contexts/UserContext';
-
-interface DifficultyOption {
-  id: string;
-  name: string;
-  emoji: string;
-  exp: number;
-}
+import { NavigationProp } from '@react-navigation/native';
+import { RootStackParamList } from '../types/navigation';
 
 interface CustomMissionCreateScreenProps {
-  navigation: any;
+  navigation: NavigationProp<RootStackParamList>;
 }
 
-const DIFFICULTY_OPTIONS: DifficultyOption[] = [
+const DIFFICULTY_OPTIONS = [
   { id: 'easy', name: '쉬움', emoji: '😊', exp: 30 },
   { id: 'medium', name: '보통', emoji: '😐', exp: 50 },
   { id: 'hard', name: '어려움', emoji: '😤', exp: 80 },
 ];
 
-const EMOJI_OPTIONS: string[] = [
+const EMOJI_OPTIONS = [
   '🎯', '✨', '🔥', '💪', '🌟', '🎉', '💡', '🚀',
   '📚', '🏃‍♂️', '🧘', '💬', '🎵', '🎨', '🍎', '☕',
   '🌱', '🎪', '🎭', '🎨', '🎵', '🎪', '🎭', '🎪'
@@ -40,14 +35,14 @@ const EMOJI_OPTIONS: string[] = [
 
 const CustomMissionCreateScreen: React.FC<CustomMissionCreateScreenProps> = ({ navigation }) => {
   const { currentNickname } = useUser();
-  const [title, setTitle] = useState<string>('');
-  const [description, setDescription] = useState<string>('');
-  const [selectedEmoji, setSelectedEmoji] = useState<string>('🎯');
-  const [difficulty, setDifficulty] = useState<string>('medium');
-  const [customExp, setCustomExp] = useState<number>(50);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [selectedEmoji, setSelectedEmoji] = useState('🎯');
+  const [difficulty, setDifficulty] = useState('medium');
+  const [customExp, setCustomExp] = useState(50);
+  const [loading, setLoading] = useState(false);
 
-  const handleCreateMission = async (): Promise<void> => {
+  const handleCreateMission = async () => {
     if (!title.trim()) {
       Alert.alert('오류', '미션 제목을 입력해주세요.');
       return;
@@ -65,18 +60,16 @@ const CustomMissionCreateScreen: React.FC<CustomMissionCreateScreenProps> = ({ n
         title: title.trim(),
         description: description.trim(),
         emoji: selectedEmoji,
-        difficulty,
+        difficulty: difficulty as any,
         experience: customExp,
-        category_id: 'custom',
-        is_custom: true,
-        created_by: currentNickname || 'anonymous',
+        category_id: 'custom', // 커스텀 미션 카테고리
       };
 
-      const result = await createCustomMission(missionData);
+      const result = await createCustomMission(missionData as any, currentNickname || 'default');
       
       if (result.success) {
         Alert.alert(
-          '성공',
+          '성공!',
           '나만의 미션이 생성되었습니다!',
           [
             {
@@ -95,20 +88,12 @@ const CustomMissionCreateScreen: React.FC<CustomMissionCreateScreenProps> = ({ n
     }
   };
 
-  const handleDifficultyChange = (newDifficulty: string): void => {
-    setDifficulty(newDifficulty);
-    const selectedOption = DIFFICULTY_OPTIONS.find(option => option.id === newDifficulty);
-    if (selectedOption) {
-      setCustomExp(selectedOption.exp);
+  const handleDifficultyChange = (selectedDifficulty: string) => {
+    setDifficulty(selectedDifficulty);
+    const difficultyOption = DIFFICULTY_OPTIONS.find(opt => opt.id === selectedDifficulty);
+    if (difficultyOption) {
+      setCustomExp(difficultyOption.exp);
     }
-  };
-
-  const handleEmojiSelect = (emoji: string): void => {
-    setSelectedEmoji(emoji);
-  };
-
-  const handleGoBack = (): void => {
-    navigation.goBack();
   };
 
   return (
@@ -116,128 +101,102 @@ const CustomMissionCreateScreen: React.FC<CustomMissionCreateScreenProps> = ({ n
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
+      {/* 헤더 */}
       <View style={styles.header}>
-        <TouchableOpacity style={styles.backButton} onPress={handleGoBack}>
+        <TouchableOpacity 
+          style={styles.backButton}
+          onPress={() => navigation.goBack()}
+        >
           <Text style={styles.backButtonText}>←</Text>
         </TouchableOpacity>
-        <Text style={styles.title}>나만의 미션 만들기</Text>
-        <View style={styles.placeholder} />
+        <Text style={styles.headerTitle}>나만의 미션 만들기</Text>
+        <View style={styles.headerSpacer} />
       </View>
 
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        <View style={styles.form}>
-          {/* 미션 제목 */}
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>미션 제목 *</Text>
+      <ScrollView style={styles.content}>
+        <Card style={styles.formCard}>
+          <Text style={styles.sectionTitle}>미션 제목</Text>
+          <TextInput
+            style={styles.textInput}
+            value={title}
+            onChangeText={setTitle}
+            placeholder="미션 제목을 입력하세요"
+            maxLength={50}
+          />
+        </Card>
+
+        <Card style={styles.formCard}>
+          <Text style={styles.sectionTitle}>미션 설명</Text>
+          <TextInput
+            style={[styles.textInput, styles.textArea]}
+            value={description}
+            onChangeText={setDescription}
+            placeholder="미션에 대한 자세한 설명을 입력하세요"
+            multiline
+            numberOfLines={4}
+            maxLength={200}
+          />
+        </Card>
+
+
+        <Card style={styles.formCard}>
+          <Text style={styles.sectionTitle}>난이도 선택</Text>
+          <View style={styles.difficultyContainer}>
+            {DIFFICULTY_OPTIONS.map((option) => (
+              <TouchableOpacity
+                key={option.id}
+                style={[
+                  styles.difficultyButton,
+                  difficulty === option.id && styles.selectedDifficulty
+                ]}
+                onPress={() => handleDifficultyChange(option.id)}
+              >
+                <Text style={styles.difficultyEmoji}>{option.emoji}</Text>
+                <Text style={[
+                  styles.difficultyText,
+                  difficulty === option.id && styles.selectedDifficultyText
+                ]}>
+                  {option.name}
+                </Text>
+                <Text style={styles.difficultyExp}>+{option.exp} EXP</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </Card>
+
+        <Card style={styles.formCard}>
+          <Text style={styles.sectionTitle}>경험치 설정</Text>
+          <View style={styles.expContainer}>
             <TextInput
-              style={styles.textInput}
-              value={title}
-              onChangeText={setTitle}
-              placeholder="미션 제목을 입력하세요"
-              maxLength={50}
+              style={styles.expInput}
+              value={customExp.toString()}
+              onChangeText={(text) => {
+                const num = parseInt(text) || 0;
+                if (num >= 0 && num <= 200) {
+                  setCustomExp(num);
+                }
+              }}
+              keyboardType="numeric"
+              maxLength={3}
             />
-            <Text style={styles.characterCount}>{title.length}/50</Text>
+            <Text style={styles.expLabel}>EXP</Text>
           </View>
-
-          {/* 미션 설명 */}
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>미션 설명 *</Text>
-            <TextInput
-              style={[styles.textInput, styles.multilineInput]}
-              value={description}
-              onChangeText={setDescription}
-              placeholder="미션에 대한 자세한 설명을 입력하세요"
-              multiline
-              numberOfLines={4}
-              textAlignVertical="top"
-              maxLength={200}
-            />
-            <Text style={styles.characterCount}>{description.length}/200</Text>
-          </View>
-
-          {/* 이모지 선택 */}
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>이모지 선택</Text>
-            <View style={styles.emojiContainer}>
-              {EMOJI_OPTIONS.map((emoji, index) => (
-                <TouchableOpacity
-                  key={`emoji-${index}`}
-                  style={[
-                    styles.emojiButton,
-                    selectedEmoji === emoji && styles.selectedEmoji
-                  ]}
-                  onPress={() => handleEmojiSelect(emoji)}
-                >
-                  <Text style={styles.emojiText}>{emoji}</Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-          </View>
-
-          {/* 난이도 선택 */}
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>난이도</Text>
-            <View style={styles.difficultyContainer}>
-              {DIFFICULTY_OPTIONS.map((option) => (
-                <TouchableOpacity
-                  key={option.id}
-                  style={[
-                    styles.difficultyButton,
-                    difficulty === option.id && styles.selectedDifficulty
-                  ]}
-                  onPress={() => handleDifficultyChange(option.id)}
-                >
-                  <Text style={styles.difficultyEmoji}>{option.emoji}</Text>
-                  <Text style={[
-                    styles.difficultyText,
-                    difficulty === option.id && styles.selectedDifficultyText
-                  ]}>
-                    {option.name}
-                  </Text>
-                  <Text style={[
-                    styles.difficultyExp,
-                    difficulty === option.id && styles.selectedDifficultyText
-                  ]}>
-                    {option.exp} EXP
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-          </View>
-
-          {/* 경험치 설정 */}
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>경험치 설정</Text>
-            <View style={styles.expContainer}>
-              <Text style={styles.expLabel}>경험치: {customExp}</Text>
-              <TextInput
-                style={styles.expInput}
-                value={customExp.toString()}
-                onChangeText={(text) => {
-                  const num = parseInt(text) || 0;
-                  if (num >= 0 && num <= 1000) {
-                    setCustomExp(num);
-                  }
-                }}
-                keyboardType="numeric"
-                placeholder="0"
-              />
-            </View>
-            <Text style={styles.helpText}>
-              난이도에 따라 자동으로 설정되며, 직접 조정할 수 있습니다.
-            </Text>
-          </View>
-        </View>
+          <Text style={styles.expHint}>0~200 사이의 값을 입력하세요</Text>
+        </Card>
       </ScrollView>
 
-      <View style={styles.footer}>
+      <View style={styles.buttonContainer}>
         <Button
-          title="미션 생성하기"
+          title="취소"
+          onPress={() => navigation.goBack()}
+          style={StyleSheet.flatten([styles.button, styles.cancelButton])}
+          textStyle={styles.cancelButtonText}
+        />
+        <Button
+          title={loading ? "생성 중..." : "미션 생성"}
           onPress={handleCreateMission}
-          loading={loading}
-          disabled={!title.trim() || !description.trim() || loading}
-          size="lg"
-          style={styles.createButton}
+          style={StyleSheet.flatten([styles.button, styles.createButton])}
+          disabled={loading}
         />
       </View>
     </KeyboardAvoidingView>
@@ -251,11 +210,10 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
+    justifyContent: 'space-between',
     paddingHorizontal: spacing[5],
-    paddingTop: spacing[20],
-    paddingBottom: spacing[5],
+    paddingVertical: spacing[4],
     backgroundColor: colors.background.primary,
     borderBottomWidth: 1,
     borderBottomColor: colors.border.light,
@@ -266,86 +224,81 @@ const styles = StyleSheet.create({
   backButtonText: {
     fontSize: typography.fontSize.xl,
     color: colors.text.primary,
+    fontWeight: typography.fontWeight.bold,
   },
-  title: {
+  headerTitle: {
     fontSize: typography.fontSize.lg,
     fontWeight: typography.fontWeight.bold,
     color: colors.text.primary,
   },
-  placeholder: {
-    width: 40,
+  headerSpacer: {
+    width: 40, // 뒤로가기 버튼과 같은 너비로 균형 맞춤
   },
   content: {
     flex: 1,
-  },
-  form: {
     padding: spacing[5],
   },
-  inputGroup: {
-    marginBottom: spacing[6],
+  formCard: {
+    marginBottom: spacing[4],
   },
-  label: {
-    fontSize: typography.fontSize.base,
-    fontWeight: typography.fontWeight.medium,
+  sectionTitle: {
+    fontSize: typography.fontSize.lg,
+    fontWeight: typography.fontWeight.bold,
     color: colors.text.primary,
-    marginBottom: spacing[2],
+    marginBottom: spacing[3],
   },
   textInput: {
     borderWidth: 1,
-    borderColor: colors.border.medium,
-    borderRadius: borderRadius.base,
+    borderColor: colors.border.light,
+    borderRadius: borderRadius.md,
     padding: spacing[3],
     fontSize: typography.fontSize.base,
     color: colors.text.primary,
     backgroundColor: colors.background.primary,
   },
-  multilineInput: {
+  textArea: {
     height: 100,
     textAlignVertical: 'top',
   },
-  characterCount: {
-    fontSize: typography.fontSize.sm,
-    color: colors.text.tertiary,
-    textAlign: 'right',
-    marginTop: spacing[1],
-  },
-  emojiContainer: {
+  emojiGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: spacing[2],
+    justifyContent: 'space-between',
   },
   emojiButton: {
-    width: 40,
-    height: 40,
-    borderRadius: borderRadius.base,
+    width: 50,
+    height: 50,
+    borderRadius: borderRadius.md,
     backgroundColor: colors.background.primary,
     borderWidth: 1,
-    borderColor: colors.border.primary,
+    borderColor: colors.border.light,
     alignItems: 'center',
     justifyContent: 'center',
+    marginBottom: spacing[2],
   },
   selectedEmoji: {
-    backgroundColor: colors.primary[500],
+    backgroundColor: colors.primary[100],
     borderColor: colors.primary[500],
   },
   emojiText: {
-    fontSize: typography.fontSize.lg,
+    fontSize: typography.fontSize.xl,
   },
   difficultyContainer: {
     flexDirection: 'row',
-    gap: spacing[3],
+    justifyContent: 'space-between',
   },
   difficultyButton: {
     flex: 1,
+    alignItems: 'center',
     padding: spacing[3],
-    borderRadius: borderRadius.base,
+    marginHorizontal: spacing[1],
+    borderRadius: borderRadius.md,
     backgroundColor: colors.background.primary,
     borderWidth: 1,
-    borderColor: colors.border.primary,
-    alignItems: 'center',
+    borderColor: colors.border.light,
   },
   selectedDifficulty: {
-    backgroundColor: colors.primary[500],
+    backgroundColor: colors.primary[100],
     borderColor: colors.primary[500],
   },
   difficultyEmoji: {
@@ -355,47 +308,60 @@ const styles = StyleSheet.create({
   difficultyText: {
     fontSize: typography.fontSize.sm,
     fontWeight: typography.fontWeight.medium,
-    color: colors.text.primary,
+    color: colors.text.secondary,
     marginBottom: spacing[1],
   },
   selectedDifficultyText: {
-    color: colors.text.inverse,
+    color: colors.primary[500],
+    fontWeight: typography.fontWeight.semibold,
   },
   difficultyExp: {
     fontSize: typography.fontSize.xs,
-    color: colors.text.secondary,
+    color: colors.text.tertiary,
   },
   expContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing[3],
-  },
-  expLabel: {
-    fontSize: typography.fontSize.base,
-    color: colors.text.primary,
-    fontWeight: typography.fontWeight.medium,
+    marginBottom: spacing[2],
   },
   expInput: {
-    flex: 1,
     borderWidth: 1,
-    borderColor: colors.border.medium,
-    borderRadius: borderRadius.base,
-    padding: spacing[2],
-    fontSize: typography.fontSize.base,
+    borderColor: colors.border.light,
+    borderRadius: borderRadius.md,
+    padding: spacing[3],
+    fontSize: typography.fontSize.lg,
+    fontWeight: typography.fontWeight.bold,
     color: colors.text.primary,
     backgroundColor: colors.background.primary,
+    width: 80,
     textAlign: 'center',
+    marginRight: spacing[2],
   },
-  helpText: {
+  expLabel: {
+    fontSize: typography.fontSize.lg,
+    fontWeight: typography.fontWeight.bold,
+    color: colors.text.primary,
+  },
+  expHint: {
     fontSize: typography.fontSize.sm,
     color: colors.text.tertiary,
-    marginTop: spacing[2],
   },
-  footer: {
+  buttonContainer: {
+    flexDirection: 'row',
     padding: spacing[5],
     backgroundColor: colors.background.primary,
     borderTopWidth: 1,
     borderTopColor: colors.border.light,
+  },
+  button: {
+    flex: 1,
+    marginHorizontal: spacing[2],
+  },
+  cancelButton: {
+    backgroundColor: colors.gray[200],
+  },
+  cancelButtonText: {
+    color: colors.text.secondary,
   },
   createButton: {
     backgroundColor: colors.primary[500],
