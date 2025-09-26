@@ -10,7 +10,7 @@ import { colors, spacing, typography, borderRadius } from '../utils/designTokens
 const MISSION_CATEGORIES = [
   { id: 'all', name: '전체', emoji: '🎯' },
   { id: 'self_management', name: '자기관리', emoji: '🧘' },
-  { id: 'communication', name: '소통관리', emoji: '🏃‍♂️' },
+  { id: 'communication', name: '소통관리', emoji: '💬' },
   { id: 'career', name: '커리어관리', emoji: '📚' },
   { id: 'custom', name: '나만의 미션', emoji: '✨' },
 ];
