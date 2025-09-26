@@ -25,6 +25,46 @@ export const colors = {
     900: '#111827',
   },
   
+  // Blue colors
+  blue: {
+    100: '#dbeafe',
+    200: '#bfdbfe',
+    300: '#93c5fd',
+    400: '#60a5fa',
+    500: '#3b82f6',
+    600: '#2563eb',
+  },
+  
+  // Purple colors
+  purple: {
+    100: '#e9d5ff',
+    200: '#ddd6fe',
+    300: '#c4b5fd',
+    400: '#a78bfa',
+    500: '#8b5cf6',
+    600: '#7c3aed',
+  },
+  
+  // Green colors
+  green: {
+    100: '#dcfce7',
+    200: '#bbf7d0',
+    300: '#86efac',
+    400: '#4ade80',
+    500: '#22c55e',
+    600: '#16a34a',
+  },
+  
+  // Orange colors
+  orange: {
+    100: '#fed7aa',
+    200: '#fdba74',
+    300: '#fb923c',
+    400: '#f97316',
+    500: '#ea580c',
+    600: '#dc2626',
+  },
+  
   // Semantic colors
   success: '#22c55e',
   warning: '#f59e0b',

@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { useUser } from '../contexts/UserContext';
 import { useCharacter } from '../hooks/useCharacter';
 import { useMission } from '../hooks/useMission';
@@ -113,12 +113,13 @@ const HomeScreen = ({ navigation }) => {
 
   return (
     <ScrollView style={styles.container}>
-      <View style={styles.header} />
-      
-      <View style={styles.content}>
+      <View style={styles.header}>
         <Text style={styles.welcomeText}>
           안녕하세요, {user?.nickname || '사용자'}님!
         </Text>
+      </View>
+      
+      <View style={styles.content}>
         
         {/* 메인 캐릭터 표시 */}
         <View style={styles.characterSection}>
