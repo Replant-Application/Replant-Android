@@ -137,7 +137,6 @@ const CharacterGuideScreen: React.FC<CharacterGuideScreenProps> = ({ navigation 
                   </View>
                   <View style={styles.characterInfo}>
                     <Text style={[styles.characterName, { color: colors.text.primary }]}>{character.name}</Text>
-                    <Text style={[styles.characterTitle, { color: colors.text.secondary }]}>{character.title}</Text>
                     <Text style={[styles.characterCategory, { color: colors.primary[500] }]}>
                       {getCategoryIcon(character.category_id)} {getCategoryName(character.category_id)}
                     </Text>
@@ -303,10 +302,6 @@ const styles = StyleSheet.create({
   characterName: {
     fontSize: typography.fontSize.lg,
     fontWeight: typography.fontWeight.bold,
-    marginBottom: spacing[1],
-  },
-  characterTitle: {
-    fontSize: typography.fontSize.sm,
     marginBottom: spacing[1],
   },
   characterCategory: {
