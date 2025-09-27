@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet, ViewStyle } from 'react-native';
+import { StyleSheet, ViewStyle } from 'react-native';
 import { spacing } from '../../utils/designTokens';
 import Card from './Card';
 

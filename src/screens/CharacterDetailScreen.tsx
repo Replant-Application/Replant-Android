@@ -1,10 +1,8 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, Alert } from 'react-native';
-import { useCharacter } from '../hooks/useCharacter';
+import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity } from 'react-native';
 import { colors, spacing, typography, borderRadius, shadows } from '../utils/designTokens';
 import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../types/navigation';
-import { Character } from '../types';
 import { ProgressBar, Header, SectionTitle } from '../components/ui';
 
 interface CharacterDetailScreenProps {

@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useMemo, useCall
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getStorageKeys, initializeUserData } from '../services';
 import { getDeviceId } from '../services/storage';
-import { logError, logInfo, logUserAction } from '../utils/logger';
+import { logError, logUserAction } from '../utils/logger';
 import { executeWithErrorHandling } from '../utils/errorHandler';
 import { User } from '../types';
 
@@ -104,7 +104,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   }, []);
 
   // 사용자 로그아웃
-  const logout = async () => {
+  const logout = useCallback(async () => {
     try {
       // AsyncStorage에서 닉네임 제거
       if (currentNickname) {
@@ -116,10 +116,10 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     } catch (error) {
       logError('로그아웃 실패', error as Error);
     }
-  };
+  }, [currentNickname]);
 
   // 사용자 정보 새로고침
-  const refreshUser = async () => {
+  const refreshUser = useCallback(async () => {
     try {
       if (currentNickname) {
         const storageKeys = getStorageKeys(currentNickname);
@@ -135,7 +135,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     } catch (error) {
       logError('사용자 정보 새로고침 실패', error as Error);
     }
-  };
+  }, [currentNickname]);
 
   // 닉네임 변경
   const updateNickname = useCallback(async (newNickname: string) => {
@@ -145,8 +145,6 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
       }
 
       // 기존 데이터 백업
-      const oldStorageKeys = getStorageKeys(currentNickname);
-      const newStorageKeys = getStorageKeys(newNickname);
 
       // 모든 기존 데이터를 새 닉네임으로 복사
       const allKeys = await AsyncStorage.getAllKeys();

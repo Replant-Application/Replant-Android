@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, TextInput } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Alert, TextInput } from 'react-native';
 import { useDiary } from '../hooks/useDiary';
 import { DiaryCard, EmotionSelector } from '../components/specialized';
-import { Button, Card, Loading, ErrorBoundary, Header, EmptyState, SectionTitle, FormCard, FAB } from '../components/ui';
+import { Button, Loading, ErrorBoundary, Header, EmptyState, FormCard, FAB } from '../components/ui';
 import { colors, spacing, typography, borderRadius } from '../utils/designTokens';
-import { Diary, SimpleDiaryData } from '../types';
+import { SimpleDiaryData } from '../types';
 
 const DiaryScreen: React.FC = () => {
   const { diaries, loading, error, saveDiary, updateDiary, deleteDiary } = useDiary();

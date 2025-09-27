@@ -8,7 +8,7 @@ interface NicknameScreenProps {
   onNavigate: () => void;
 }
 
-const NicknameScreen: React.FC<NicknameScreenProps> = ({ onNavigate }) => {
+const NicknameScreen: React.FC<NicknameScreenProps> = ({ onNavigate: _onNavigate }) => {
   const { login } = useUser();
   const [nickname, setNickname] = useState('');
   const [isLoading, setIsLoading] = useState(false);

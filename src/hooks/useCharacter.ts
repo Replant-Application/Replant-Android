@@ -64,7 +64,7 @@ export const useCharacter = (): UseCharacterReturn => {
         if (storedCategory) {
           representativeCategory = storedCategory; // JSON.parse 제거 - 문자열이므로
         }
-      } catch (error) {
+      } catch (expError) {
         // 에러 무시
       }
 
@@ -151,7 +151,7 @@ export const useCharacter = (): UseCharacterReturn => {
       logError('경험치 추가 실패', expError as Error, { categoryId, experience });
       return { success: false, experienceGained: 0, levelUp: false, error: (expError as Error).message };
     }
-  }, [characters, selectedCharacter, currentNickname]);
+  }, [characters, selectedCharacter, currentNickname, representativeCharacter]);
 
   // 캐릭터 선택
   const selectCharacter = useCallback((character: Character): void => {
@@ -170,24 +170,24 @@ export const useCharacter = (): UseCharacterReturn => {
       }
 
       return { success: true };
-    } catch (error) {
-      logError('대표 캐릭터 설정 실패', error as Error, { categoryId });
-      return { success: false, error: (error as Error).message };
+    } catch (expError) {
+      logError('대표 캐릭터 설정 실패', expError as Error, { categoryId });
+      return { success: false, error: (expError as Error).message };
     }
   }, [characters, currentNickname]);
 
   // 캐릭터 생성 (placeholder)
-  const createCharacter = useCallback(async (characterData: CharacterData): Promise<ServiceResult> => {
+  const createCharacter = useCallback(async (_characterData: CharacterData): Promise<ServiceResult> => {
     return { success: false, error: '캐릭터 생성 기능은 아직 구현되지 않았습니다.' };
   }, []);
 
   // 캐릭터 업데이트 (placeholder)
-  const updateCharacter = useCallback(async (characterId: string, characterData: CharacterData): Promise<ServiceResult> => {
+  const updateCharacter = useCallback(async (_characterId: string, _characterData: CharacterData): Promise<ServiceResult> => {
     return { success: false, error: '캐릭터 업데이트 기능은 아직 구현되지 않았습니다.' };
   }, []);
 
   // 캐릭터 삭제 (placeholder)
-  const deleteCharacter = useCallback(async (characterId: string): Promise<ServiceResult> => {
+  const deleteCharacter = useCallback(async (_characterId: string): Promise<ServiceResult> => {
     return { success: false, error: '캐릭터 삭제 기능은 아직 구현되지 않았습니다.' };
   }, []);
 
@@ -215,5 +215,8 @@ export const useCharacter = (): UseCharacterReturn => {
     addExperienceByCategory,
     selectCharacter,
     setRepresentative,
+    createCharacter,
+    updateCharacter,
+    deleteCharacter,
   ]);
 };

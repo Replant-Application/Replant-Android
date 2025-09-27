@@ -7,7 +7,6 @@ import { Platform } from 'react-native';
 
 // 환경 설정
 const isDevelopment: boolean = __DEV__;
-const isProduction: boolean = !isDevelopment;
 
 /**
  * 로그 레벨 정의

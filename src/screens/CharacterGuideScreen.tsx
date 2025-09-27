@@ -2,8 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, Alert } from 'react-native';
 import { useCharacter } from '../hooks/useCharacter';
 import { colors, spacing, typography, borderRadius, shadows } from '../utils/designTokens';
-import { Header, EmptyState, SectionTitle } from '../components/ui';
-import { SCREEN_NAMES } from '../utils/constants';
+import { Header, EmptyState } from '../components/ui';
 import { NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '../types/navigation';
 
@@ -72,7 +71,7 @@ const CharacterGuideScreen: React.FC<CharacterGuideScreenProps> = ({ navigation 
       } else {
         Alert.alert('오류', result.error || '대표 캐릭터 설정에 실패했습니다.');
       }
-    } catch (error) {
+    } catch (expError) {
       Alert.alert('오류', '대표 캐릭터 설정 중 오류가 발생했습니다.');
     }
   };

@@ -145,17 +145,17 @@ export const useMission = (
   }, [missions, currentNickname]);
 
   // 커스텀 미션 생성 (placeholder)
-  const createCustomMission = useCallback(async (missionData: MissionData): Promise<ServiceResult> => {
+  const createCustomMission = useCallback(async (_missionData: MissionData): Promise<ServiceResult> => {
     return { success: false, error: '커스텀 미션 생성 기능은 아직 구현되지 않았습니다.' };
   }, []);
 
   // 커스텀 미션 업데이트 (placeholder)
-  const updateCustomMission = useCallback(async (missionId: string, missionData: MissionData): Promise<ServiceResult> => {
+  const updateCustomMission = useCallback(async (_missionId: string, _missionData: MissionData): Promise<ServiceResult> => {
     return { success: false, error: '커스텀 미션 업데이트 기능은 아직 구현되지 않았습니다.' };
   }, []);
 
   // 커스텀 미션 삭제 (placeholder)
-  const deleteCustomMission = useCallback(async (missionId: string): Promise<ServiceResult> => {
+  const deleteCustomMission = useCallback(async (_missionId: string): Promise<ServiceResult> => {
     return { success: false, error: '커스텀 미션 삭제 기능은 아직 구현되지 않았습니다.' };
   }, []);
 
@@ -177,5 +177,8 @@ export const useMission = (
     loadMissions,
     completeMissionWithPhoto,
     uncompleteMission,
+    createCustomMission,
+    updateCustomMission,
+    deleteCustomMission,
   ]);
 };

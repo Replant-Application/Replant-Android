@@ -10,7 +10,7 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
-import { Card, Button, Header, SectionTitle, FormCard } from '../components/ui';
+import { Button, Header, SectionTitle, FormCard } from '../components/ui';
 import { colors, spacing, typography, borderRadius } from '../utils/designTokens';
 import { createCustomMission } from '../services/missionService';
 import { useUser } from '../contexts/UserContext';
@@ -27,17 +27,12 @@ const DIFFICULTY_OPTIONS = [
   { id: 'hard', name: '어려움', emoji: '😤', exp: 80 },
 ];
 
-const EMOJI_OPTIONS = [
-  '🎯', '✨', '🔥', '💪', '🌟', '🎉', '💡', '🚀',
-  '📚', '🏃‍♂️', '🧘', '💬', '🎵', '🎨', '🍎', '☕',
-  '🌱', '🎪', '🎭', '🎨', '🎵', '🎪', '🎭', '🎪'
-];
 
 const CustomMissionCreateScreen: React.FC<CustomMissionCreateScreenProps> = ({ navigation }) => {
   const { currentNickname } = useUser();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [selectedEmoji, setSelectedEmoji] = useState('🎯');
+  const [selectedEmoji] = useState('🎯');
   const [difficulty, setDifficulty] = useState('medium');
   const [customExp, setCustomExp] = useState(50);
   const [loading, setLoading] = useState(false);
@@ -162,7 +157,7 @@ const CustomMissionCreateScreen: React.FC<CustomMissionCreateScreenProps> = ({ n
               style={styles.expInput}
               value={customExp.toString()}
               onChangeText={(text) => {
-                const num = parseInt(text) || 0;
+                const num = parseInt(text, 10) || 0;
                 if (num >= 0 && num <= 200) {
                   setCustomExp(num);
                 }

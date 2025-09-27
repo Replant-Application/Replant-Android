@@ -1,6 +1,6 @@
-import { getData, updateData, setData, getStorageKeys } from './storage';
+import { getData, setData, getStorageKeys } from './storage';
 import { logError } from '../utils/logger';
-import { Character, CharacterData, ServiceResult, ExperienceResult, LevelUpResult } from '../types';
+import { Character, CharacterData, ServiceResult, LevelUpResult } from '../types';
 
 // 캐릭터 자동 레벨업
 export const autoLevelupCharacter = async (

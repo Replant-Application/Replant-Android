@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   View,
   Text,
@@ -8,9 +8,8 @@ import {
   TextInput,
   KeyboardAvoidingView,
   Platform,
-  Alert,
 } from 'react-native';
-import { Card, Button, Header, FormCard } from '../components/ui';
+import { Header } from '../components/ui';
 import { colors, spacing, typography, borderRadius } from '../utils/designTokens';
 import { NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '../types/navigation';
@@ -19,12 +18,12 @@ interface ChatBotScreenProps {
   navigation: NavigationProp<RootStackParamList>;
 }
 
-const ChatBotScreen: React.FC<ChatBotScreenProps> = ({ navigation }) => {
+const ChatBotScreen: React.FC<ChatBotScreenProps> = ({ navigation: _navigation }) => {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 1,
       type: 'bot' as const,
-      text: '안녕하세요! 저는 당신의 마음을 들어주는 심리상담 챗봇입니다. 오늘 기분은 어떠신가요? 😊',
+      text: '안녕하세요! 오늘 기분은 어떠신가요? 😊',
       timestamp: new Date(),
       emotion: 'warm'
     }
@@ -75,7 +74,7 @@ const ChatBotScreen: React.FC<ChatBotScreenProps> = ({ navigation }) => {
   };
 
   // 봇 응답 생성 (임시)
-  const generateBotResponse = (userText: string) => {
+  const generateBotResponse = (_userText: string) => {
     const responses = [
       { text: '그렇게 생각하시는군요. 더 자세히 말씀해 주실 수 있나요? 🤗', emotion: 'caring' },
       { text: '정말 힘드셨겠어요. 그런 마음이 이해됩니다. 💙', emotion: 'empathetic' },
@@ -105,7 +104,7 @@ const ChatBotScreen: React.FC<ChatBotScreenProps> = ({ navigation }) => {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       {/* 헤더 */}
-      <Header title="심리상담 챗봇" />
+      <Header />
 
       {/* 메시지 목록 */}
       <ScrollView

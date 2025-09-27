@@ -1,14 +1,12 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { NavigationProp } from '@react-navigation/native';
-import { useUser } from '../contexts/UserContext';
 import { useCharacter } from '../hooks/useCharacter';
 import { useMission } from '../hooks/useMission';
 import { CharacterCard, MissionCard } from '../components/specialized';
 import { Card, Loading, ErrorBoundary, Header, EmptyState, SectionTitle } from '../components/ui';
 import { colors, spacing, typography } from '../utils/designTokens';
 import { executeWithErrorHandling } from '../utils/errorHandler';
-import { SCREEN_NAMES } from '../utils/constants';
 import { RootStackParamList } from '../types/navigation';
 
 interface HomeScreenProps {
@@ -16,7 +14,6 @@ interface HomeScreenProps {
 }
 
 const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
-  const { user } = useUser();
   const { representativeCharacter, loading: characterLoading, error: characterError, addExperienceByCategory } = useCharacter();
   const { missions, loading: missionLoading, error: missionError, completeMissionWithPhoto, uncompleteMission } = useMission(addExperienceByCategory);
 

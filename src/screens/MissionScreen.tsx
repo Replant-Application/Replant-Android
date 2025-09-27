@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
-import { SCREEN_NAMES } from '../utils/constants';
 import { useMission } from '../hooks/useMission';
 import { useCharacter } from '../hooks/useCharacter';
 import { MissionCard } from '../components/specialized';
@@ -33,16 +32,6 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation }) => {
     ? missions.filter(mission => mission.is_custom)
     : missions.filter(mission => mission.category_id === selectedCategory);
 
-  // 카테고리별 미션 수 계산
-  const getCategoryMissionCount = (categoryId: string) => {
-    if (categoryId === 'all') {
-      return missions.length;
-    } else if (categoryId === 'custom') {
-      return missions.filter(mission => mission.is_custom).length;
-    } else {
-      return missions.filter(mission => mission.category_id === categoryId).length;
-    }
-  };
 
   // 진행률 계산
   const completedMissions = missions.filter(mission => mission.completed).length;

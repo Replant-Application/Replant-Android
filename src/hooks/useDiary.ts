@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { getData, addData, updateData, deleteData, getStorageKeys } from '../services';
 import { useUser } from '../contexts/UserContext';
 import { logError } from '../utils/logger';
-import { Diary, UseDiaryReturn, DiaryData, ServiceResult, SimpleDiaryData } from '../types';
+import { Diary, UseDiaryReturn, ServiceResult, SimpleDiaryData } from '../types';
 
 export const useDiary = (): UseDiaryReturn => {
   const { currentNickname } = useUser();
@@ -120,25 +120,6 @@ export const useDiary = (): UseDiaryReturn => {
     }
   }, [currentNickname]);
 
-  // 다이어리 ID로 조회
-  const getDiaryById = useCallback((diaryId: string): Diary | null => {
-    return diaries.find(diary => diary.diary_id === diaryId) || null;
-  }, [diaries]);
-
-  // 감정별 다이어리 조회
-  const getDiariesByEmotion = useCallback((emotion: string): Diary[] => {
-    return diaries.filter(diary => diary.emotion === emotion);
-  }, [diaries]);
-
-  // 날짜 범위별 다이어리 조회
-  const getDiariesByDateRange = useCallback((startDate: string, endDate: string): Diary[] => {
-    return diaries.filter(diary => {
-      const diaryDate = new Date(diary.created_at || '');
-      const start = new Date(startDate);
-      const end = new Date(endDate);
-      return diaryDate >= start && diaryDate <= end;
-    });
-  }, [diaries]);
 
   return {
     diaries,

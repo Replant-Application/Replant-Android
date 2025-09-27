@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { logError } from '../utils/logger';
-import { StorageKeys, GetData, SetData, GetStorageKeys } from '../types/storage';
+import { StorageKeys, GetData, SetData } from '../types/storage';
 
 // 로컬 저장소 키 상수
 export const STORAGE_KEYS: StorageKeys = {

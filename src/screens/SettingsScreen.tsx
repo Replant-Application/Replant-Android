@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, TextInput } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import { useUser } from '../contexts/UserContext';
 import { Card, Input, Header, SectionTitle } from '../components/ui';
 import { colors, spacing, typography, borderRadius } from '../utils/designTokens';

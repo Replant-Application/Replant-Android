@@ -2,7 +2,7 @@
  * 앱 상수 정의
  */
 
-import { ScreenNames, MissionCategory } from '../types';
+import { MissionCategory } from '../types';
 
 // 앱 설정
 export const APP_CONFIG = {

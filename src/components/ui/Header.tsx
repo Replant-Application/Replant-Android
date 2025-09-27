@@ -1,6 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ViewStyle, TextStyle } from 'react-native';
-import { colors, spacing, typography } from '../../utils/designTokens';
+import { View, Text, StyleSheet, ViewStyle, TextStyle } from 'react-native';
+import { spacing } from '../../utils/designTokens';
 
 interface HeaderProps {
   title?: string;
@@ -51,13 +51,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: spacing[5],
-    paddingTop: spacing[20],
+    paddingTop: spacing[4],
     paddingBottom: spacing[5],
-    backgroundColor: colors.background.primary,
+    backgroundColor: 'transparent',
   },
   headerWithBorder: {
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border.light,
+    // 테두리 스타일 제거
   },
   leftSection: {
     flex: 1,
@@ -72,9 +71,7 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
   },
   title: {
-    fontSize: typography.fontSize.lg,
-    fontWeight: typography.fontWeight.bold,
-    color: colors.text.primary,
+    // 제목 스타일 제거
   },
 });
 

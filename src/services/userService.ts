@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getData, setData, getStorageKeys } from './storage';
 import { logError } from '../utils/logger';
-import { ServiceResult, User, Character } from '../types';
+import { ServiceResult, Character } from '../types';
 import { generateUserCharacterName } from '../utils/characterNameGenerator';
 
 // 카테고리별 캐릭터 설명
@@ -33,7 +33,7 @@ export const checkNicknameDuplicate = async (nickname: string): Promise<boolean>
 // 닉네임으로 사용자 생성
 export const createUserWithNickname = async (
   nickname: string,
-  deviceId: string
+  _deviceId: string
 ): Promise<ServiceResult<{ userId: string; nickname: string }>> => {
   try {
     // 닉네임 중복 확인
