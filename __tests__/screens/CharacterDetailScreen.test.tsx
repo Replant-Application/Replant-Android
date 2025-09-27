@@ -18,14 +18,19 @@ const mockNavigation = {
 
 // Mock character data
 const mockCharacter: Character = {
-  id: 1,
+  id: '1',
   character_id: 'char-1',
   name: '자기관리 캐릭터',
+  title: '자기관리 캐릭터',
+  description: '매일 조금씩 성장하며 나만의 길을 찾아가요',
+  emoji: '🧘',
   level: 3,
   experience: 150,
   total_experience: 250,
+  max_experience: 300,
+  unlocked: true,
+  completed_missions: 5,
   category_id: 'self_management',
-  image_url: undefined,
   unlocked_date: '2024-01-01T00:00:00Z',
   created_at: '2024-01-01T00:00:00Z',
   updated_at: '2024-01-01T00:00:00Z'
@@ -141,14 +146,19 @@ describe('CharacterDetailScreen', () => {
 
   it('다른 카테고리 캐릭터 정보도 올바르게 표시된다', () => {
     const communicationCharacter: Character = {
-      id: 2,
+      id: '2',
       character_id: 'char-2',
       name: '소통관리 캐릭터',
+      title: '소통관리 캐릭터',
+      description: '따뜻한 대화로 세상을 더 아름답게 만들어가요',
+      emoji: '💬',
       level: 2,
       experience: 80,
       total_experience: 180,
+      max_experience: 200,
+      unlocked: true,
+      completed_missions: 3,
       category_id: 'communication',
-      image_url: undefined,
       unlocked_date: '2024-01-02T00:00:00Z',
       created_at: '2024-01-02T00:00:00Z',
       updated_at: '2024-01-02T00:00:00Z'
@@ -182,14 +192,19 @@ describe('CharacterDetailScreen', () => {
 
   it('커리어관리 캐릭터 정보가 올바르게 표시된다', () => {
     const careerCharacter: Character = {
-      id: 3,
+      id: '3',
       character_id: 'char-3',
       name: '커리어관리 캐릭터',
+      title: '커리어관리 캐릭터',
+      description: '꿈을 현실로 만드는 과정을 즐기고 있어요',
+      emoji: '📚',
       level: 4,
       experience: 200,
       total_experience: 400,
+      max_experience: 500,
+      unlocked: true,
+      completed_missions: 8,
       category_id: 'career',
-      image_url: undefined,
       unlocked_date: '2024-01-03T00:00:00Z',
       created_at: '2024-01-03T00:00:00Z',
       updated_at: '2024-01-03T00:00:00Z'
