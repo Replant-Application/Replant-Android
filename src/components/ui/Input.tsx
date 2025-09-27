@@ -58,6 +58,10 @@ const Input: React.FC<InputProps> = ({
         multiline={multiline}
         numberOfLines={numberOfLines}
         placeholderTextColor={colors.text.tertiary}
+        autoCorrect={false}
+        autoCapitalize="none"
+        keyboardType="default"
+        returnKeyType="done"
         {...props}
       />
       {error && <Text style={styles.errorText}>{error}</Text>}

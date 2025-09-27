@@ -60,6 +60,9 @@ const NicknameScreen: React.FC<NicknameScreenProps> = ({ onNavigate: _onNavigate
           maxLength={20}
           autoFocus
           returnKeyType="done"
+          autoCorrect={false}
+          autoCapitalize="none"
+          keyboardType="default"
           style={styles.input}
         />
       </View>
