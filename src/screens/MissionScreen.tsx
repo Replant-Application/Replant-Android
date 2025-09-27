@@ -159,14 +159,6 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation }) => {
                 ({filteredMissions.length}개)
               </Text>
             </Text>
-            {selectedCategory === 'custom' && (
-              <Button
-                title="+ 새 미션"
-                onPress={() => {}}
-                style={styles.addButton}
-                textStyle={StyleSheet.flatten([styles.addButtonText, { color: colors.white }])}
-              />
-            )}
           </View>
 
           {filteredMissions.length === 0 ? (
@@ -323,17 +315,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: spacing[3],
-  },
-  addButton: {
-    backgroundColor: colors.primary[500],
-    paddingHorizontal: spacing[4],
-    paddingVertical: spacing[2],
-    borderRadius: borderRadius.md,
-  },
-  addButtonText: {
-    color: colors.white,
-    fontSize: typography.fontSize.sm,
-    fontWeight: typography.fontWeight.semibold,
   },
   createButton: {
     backgroundColor: colors.primary[500],

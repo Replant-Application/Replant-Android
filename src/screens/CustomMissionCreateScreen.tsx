@@ -102,16 +102,7 @@ const CustomMissionCreateScreen: React.FC<CustomMissionCreateScreenProps> = ({ n
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       {/* 헤더 */}
-      <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => navigation.goBack()}
-        >
-          <Text style={styles.backButtonText}>←</Text>
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>나만의 미션 만들기</Text>
-        <View style={styles.headerSpacer} />
-      </View>
+      <View style={styles.header} />
 
       <ScrollView style={styles.content}>
         <Card style={styles.formCard}>
@@ -209,30 +200,12 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background.secondary,
   },
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
     paddingHorizontal: spacing[5],
-    paddingVertical: spacing[4],
+    paddingTop: spacing[20],
+    paddingBottom: spacing[5],
     backgroundColor: colors.background.primary,
     borderBottomWidth: 1,
     borderBottomColor: colors.border.light,
-  },
-  backButton: {
-    padding: spacing[2],
-  },
-  backButtonText: {
-    fontSize: typography.fontSize.xl,
-    color: colors.text.primary,
-    fontWeight: typography.fontWeight.bold,
-  },
-  headerTitle: {
-    fontSize: typography.fontSize.lg,
-    fontWeight: typography.fontWeight.bold,
-    color: colors.text.primary,
-  },
-  headerSpacer: {
-    width: 40, // 뒤로가기 버튼과 같은 너비로 균형 맞춤
   },
   content: {
     flex: 1,
