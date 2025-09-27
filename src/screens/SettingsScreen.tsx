@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, TextInput } from 'react-native';
 import { useUser } from '../contexts/UserContext';
-import { Card, Input } from '../components/ui';
+import { Card, Input, Header } from '../components/ui';
 import { colors, spacing, typography, borderRadius } from '../utils/designTokens';
 
 const SettingsScreen = () => {
@@ -53,7 +53,7 @@ const SettingsScreen = () => {
 
   return (
     <ScrollView style={[styles.container, { backgroundColor: colors.background.secondary }]}>
-      <View style={styles.header} />
+      <Header />
 
       <View style={styles.content}>
         {/* 사용자 정보 */}
@@ -125,14 +125,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background.secondary,
-  },
-  header: {
-    paddingHorizontal: spacing[5],
-    paddingTop: spacing[20],
-    paddingBottom: spacing[5],
-    backgroundColor: colors.background.primary,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border.light,
   },
   title: {
     fontSize: typography.fontSize['2xl'],

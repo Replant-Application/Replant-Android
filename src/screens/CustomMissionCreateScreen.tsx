@@ -10,7 +10,7 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
-import { Card, Button } from '../components/ui';
+import { Card, Button, Header } from '../components/ui';
 import { colors, spacing, typography, borderRadius } from '../utils/designTokens';
 import { createCustomMission } from '../services/missionService';
 import { useUser } from '../contexts/UserContext';
@@ -102,7 +102,7 @@ const CustomMissionCreateScreen: React.FC<CustomMissionCreateScreenProps> = ({ n
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       {/* 헤더 */}
-      <View style={styles.header} />
+      <Header />
 
       <ScrollView style={styles.content}>
         <Card style={styles.formCard}>
@@ -198,14 +198,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background.secondary,
-  },
-  header: {
-    paddingHorizontal: spacing[5],
-    paddingTop: spacing[20],
-    paddingBottom: spacing[5],
-    backgroundColor: colors.background.primary,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border.light,
   },
   content: {
     flex: 1,

@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, Alert } from 'react-native';
 import { useCharacter } from '../hooks/useCharacter';
 import { colors, spacing, typography, borderRadius, shadows } from '../utils/designTokens';
+import { Header } from '../components/ui';
 import { SCREEN_NAMES } from '../utils/constants';
 import { NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '../types/navigation';
@@ -79,7 +80,7 @@ const CharacterGuideScreen: React.FC<CharacterGuideScreenProps> = ({ navigation 
   if (loading) {
     return (
       <View style={[styles.container, { backgroundColor: colors.background.secondary }]}>
-        <View style={[styles.header, { backgroundColor: colors.background.primary }]} />
+        <Header />
         <View style={styles.loadingContainer}>
           <Text style={[styles.loadingText, { color: colors.text.secondary }]}>캐릭터 정보를 불러오는 중...</Text>
         </View>
@@ -90,7 +91,7 @@ const CharacterGuideScreen: React.FC<CharacterGuideScreenProps> = ({ navigation 
   if (error) {
     return (
       <View style={[styles.container, { backgroundColor: colors.background.secondary }]}>
-        <View style={[styles.header, { backgroundColor: colors.background.primary }]} />
+        <Header />
         <View style={styles.errorContainer}>
           <Text style={[styles.errorText, { color: colors.text.secondary }]}>캐릭터 정보를 불러올 수 없습니다.</Text>
         </View>
@@ -100,7 +101,7 @@ const CharacterGuideScreen: React.FC<CharacterGuideScreenProps> = ({ navigation 
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background.secondary }]}>
-      <View style={[styles.header, { backgroundColor: colors.background.primary, borderBottomColor: colors.border.light }]} />
+      <Header />
 
       <ScrollView style={styles.content}>
 
@@ -215,12 +216,6 @@ const CharacterGuideScreen: React.FC<CharacterGuideScreenProps> = ({ navigation 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  header: {
-    paddingHorizontal: spacing[5],
-    paddingTop: spacing[20],
-    paddingBottom: spacing[6],
-    borderBottomWidth: 1,
   },
   title: {
     fontSize: typography.fontSize['2xl'],

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, TextInput } from 'react-native';
 import { useDiary } from '../hooks/useDiary';
 import { DiaryCard, EmotionSelector } from '../components/specialized';
-import { Button, Card, Loading, ErrorBoundary } from '../components/ui';
+import { Button, Card, Loading, ErrorBoundary, Header } from '../components/ui';
 import { colors, spacing, typography, borderRadius } from '../utils/designTokens';
 import { Diary, SimpleDiaryData } from '../types';
 
@@ -93,7 +93,7 @@ const DiaryScreen: React.FC = () => {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header} />
+      <Header />
 
       <ScrollView style={styles.content}>
 
@@ -189,17 +189,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background.secondary,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: spacing[5],
-    paddingTop: spacing[20],
-    paddingBottom: spacing[5],
-    backgroundColor: colors.background.primary,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border.light,
   },
   title: {
     fontSize: typography.fontSize['2xl'],

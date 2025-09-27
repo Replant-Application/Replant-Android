@@ -10,7 +10,7 @@ import {
   Platform,
   Alert,
 } from 'react-native';
-import { Card, Button } from '../components/ui';
+import { Card, Button, Header } from '../components/ui';
 import { colors, spacing, typography, borderRadius } from '../utils/designTokens';
 import { NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '../types/navigation';
@@ -105,9 +105,7 @@ const ChatBotScreen: React.FC<ChatBotScreenProps> = ({ navigation }) => {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       {/* 헤더 */}
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>심리상담 챗봇</Text>
-      </View>
+      <Header title="심리상담 챗봇" />
 
       {/* 메시지 목록 */}
       <ScrollView
@@ -226,17 +224,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background.secondary,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: spacing[5],
-    paddingTop: spacing[20],
-    paddingBottom: spacing[6],
-    backgroundColor: colors.background.primary,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border.light,
   },
   headerTitle: {
     fontSize: typography.fontSize.lg,

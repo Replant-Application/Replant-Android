@@ -5,7 +5,7 @@ import { useUser } from '../contexts/UserContext';
 import { useCharacter } from '../hooks/useCharacter';
 import { useMission } from '../hooks/useMission';
 import { CharacterCard, MissionCard } from '../components/specialized';
-import { Card, Loading, ErrorBoundary } from '../components/ui';
+import { Card, Loading, ErrorBoundary, Header } from '../components/ui';
 import { colors, spacing, typography } from '../utils/designTokens';
 import { executeWithErrorHandling } from '../utils/errorHandler';
 import { SCREEN_NAMES } from '../utils/constants';
@@ -88,11 +88,10 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
 
   // 미션 로딩 중이면 미션 부분만 로딩 표시
   if (missionLoading) {
-    return (
-      <ScrollView style={styles.container}>
-        <View style={styles.header}>
-        </View>
-        <View style={styles.section}>
+  return (
+    <ScrollView style={styles.container}>
+      <Header />
+      <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>나의 캐릭터</Text>
           </View>
@@ -120,8 +119,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
 
   return (
     <ScrollView style={styles.container}>
-      <View style={styles.header}>
-      </View>
+      <Header />
       <View style={styles.content}>
 
         {/* 메인 캐릭터 표시 */}
@@ -180,17 +178,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background.secondary,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: spacing[5],
-    paddingTop: spacing[20],
-    paddingBottom: spacing[5],
-    backgroundColor: colors.background.primary,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border.light,
   },
   content: {
     padding: spacing[5],

@@ -5,7 +5,7 @@ import { colors, spacing, typography, borderRadius, shadows } from '../utils/des
 import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../types/navigation';
 import { Character } from '../types';
-import { ProgressBar } from '../components/ui';
+import { ProgressBar, Header } from '../components/ui';
 
 interface CharacterDetailScreenProps {
   route: RouteProp<RootStackParamList, 'CharacterDetail'>;
@@ -101,14 +101,16 @@ const CharacterDetailScreen: React.FC<CharacterDetailScreenProps> = ({ route, na
 
   return (
     <ScrollView style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => navigation.goBack()}
-        >
-          <Text style={styles.backButtonText}>← 뒤로</Text>
-        </TouchableOpacity>
-      </View>
+      <Header
+        leftButton={
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => navigation.goBack()}
+          >
+            <Text style={styles.backButtonText}>← 뒤로</Text>
+          </TouchableOpacity>
+        }
+      />
 
       <View style={styles.content}>
         {/* 캐릭터 이미지 섹션 */}
@@ -198,16 +200,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background.secondary,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: spacing[5],
-    paddingTop: spacing[20],
-    paddingBottom: spacing[6],
-    backgroundColor: colors.background.primary,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border.light,
   },
   backButton: {
     marginRight: spacing[4],

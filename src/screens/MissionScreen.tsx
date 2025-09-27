@@ -4,7 +4,7 @@ import { SCREEN_NAMES } from '../utils/constants';
 import { useMission } from '../hooks/useMission';
 import { useCharacter } from '../hooks/useCharacter';
 import { MissionCard } from '../components/specialized';
-import { Card, Loading, ErrorBoundary, Button } from '../components/ui';
+import { Card, Loading, ErrorBoundary, Button, Header } from '../components/ui';
 import { colors, spacing, typography, borderRadius } from '../utils/designTokens';
 import { NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '../types/navigation';
@@ -92,7 +92,7 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header} />
+      <Header />
 
       <ScrollView style={styles.content}>
         {/* 진행률 표시 */}
@@ -210,14 +210,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background.secondary,
-  },
-  header: {
-    paddingHorizontal: spacing[5],
-    paddingTop: spacing[20],
-    paddingBottom: spacing[5],
-    backgroundColor: colors.background.primary,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border.light,
   },
   title: {
     fontSize: typography.fontSize['2xl'],
