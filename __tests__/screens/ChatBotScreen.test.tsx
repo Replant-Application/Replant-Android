@@ -64,7 +64,7 @@ describe('ChatBotScreen', () => {
   });
 
   it('전송 중 로딩 상태가 표시된다', async () => {
-    const { getByPlaceholderText, getByText, getByDisplayValue } = render(
+    const { getByPlaceholderText, getByText } = render(
       <ChatBotScreen navigation={mockNavigation as any} />
     );
 
@@ -127,7 +127,7 @@ describe('ChatBotScreen', () => {
   });
 
   it('메시지 전송 후 봇 응답이 표시된다', async () => {
-    const { getByPlaceholderText, getByText, getByDisplayValue } = render(
+    const { getByPlaceholderText, getByText } = render(
       <ChatBotScreen navigation={mockNavigation as any} />
     );
 

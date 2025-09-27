@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, fireEvent, waitFor } from '@testing-library/react-native';
+import { render, fireEvent } from '@testing-library/react-native';
 import CharacterGuideScreen from '../../src/screens/CharacterGuideScreen';
 import { useCharacter } from '../../src/hooks/useCharacter';
 import { Character } from '../../src/types';

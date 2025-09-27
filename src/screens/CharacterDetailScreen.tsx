@@ -10,7 +10,7 @@ interface CharacterDetailScreenProps {
   navigation: NavigationProp<RootStackParamList>;
 }
 
-const CharacterDetailScreen: React.FC<CharacterDetailScreenProps> = ({ route, navigation }) => {
+const CharacterDetailScreen: React.FC<CharacterDetailScreenProps> = ({ route, navigation: _navigation }) => {
   const { character } = route.params;
   const [currentEmotion, setCurrentEmotion] = useState<string>('default');
 

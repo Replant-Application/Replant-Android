@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, fireEvent, waitFor } from '@testing-library/react-native';
+import { render, fireEvent } from '@testing-library/react-native';
 import MissionScreen from '../../src/screens/MissionScreen';
 import { useMission } from '../../src/hooks/useMission';
 import { useCharacter } from '../../src/hooks/useCharacter';

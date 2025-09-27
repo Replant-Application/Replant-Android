@@ -6,7 +6,7 @@ import { useMission } from '../hooks/useMission';
 import { CharacterCard, MissionCard } from '../components/specialized';
 import { Card, Loading, ErrorBoundary, Header, EmptyState, SectionTitle } from '../components/ui';
 import { colors, spacing, typography } from '../utils/designTokens';
-import { executeWithErrorHandling } from '../utils/errorHandler';
+// import { executeWithErrorHandling } from '../utils/errorHandler';
 import { RootStackParamList } from '../types/navigation';
 
 interface HomeScreenProps {
@@ -15,7 +15,7 @@ interface HomeScreenProps {
 
 const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const { representativeCharacter, loading: characterLoading, error: characterError, addExperienceByCategory } = useCharacter();
-  const { missions, loading: missionLoading, error: missionError, completeMissionWithPhoto, uncompleteMission } = useMission(addExperienceByCategory);
+  const { missions, loading: missionLoading, error: missionError } = useMission(addExperienceByCategory);
 
 
   // 추천 미션 (카테고리 우선순위: 자기관리 → 소통관리 → 커리어관리)
@@ -42,32 +42,32 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
     })
     .slice(0, 3);
 
-  // 미션 완료 핸들러
-  const handleCompleteMission = async (missionId: string): Promise<void> => {
-    const result = await executeWithErrorHandling(
-      () => completeMissionWithPhoto(missionId, null),
-      '미션 완료'
-    );
+  // 미션 완료 핸들러 (현재 사용되지 않음)
+  // const handleCompleteMission = async (missionId: string): Promise<void> => {
+  //   const result = await executeWithErrorHandling(
+  //     () => completeMissionWithPhoto(missionId, null),
+  //     '미션 완료'
+  //   );
 
-    if (result.success) {
-      // 성공 시 추가 처리 (예: 토스트 메시지)
-    }
-  };
+  //   if (result.success) {
+  //     // 성공 시 추가 처리 (예: 토스트 메시지)
+  //   }
+  // };
 
-  // 미션 완료 취소 핸들러
-  const handleUncompleteMission = async (missionId: string): Promise<void> => {
-    const result = await executeWithErrorHandling(
-      () => uncompleteMission(missionId),
-      '미션 완료 취소'
-    );
+  // 미션 완료 취소 핸들러 (현재 사용되지 않음)
+  // const handleUncompleteMission = async (missionId: string): Promise<void> => {
+  //   const result = await executeWithErrorHandling(
+  //     () => uncompleteMission(missionId),
+  //     '미션 완료 취소'
+  //   );
 
-    if (result.success) {
-      // 성공 시 추가 처리
-    }
-  };
+  //   if (result.success) {
+  //     // 성공 시 추가 처리
+  //   }
+  // };
 
   // 미션 상세 보기 핸들러 (미션 페이지로 이동)
-  const handleViewMissionDetails = (missionId: string): void => {
+  const handleViewMissionDetails = (_missionId: string): void => {
     navigation.navigate('Mission');
   };
 
