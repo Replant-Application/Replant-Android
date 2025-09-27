@@ -58,6 +58,10 @@ const Input: React.FC<InputProps> = ({
         multiline={multiline}
         numberOfLines={numberOfLines}
         placeholderTextColor={colors.text.tertiary}
+        autoCorrect={false}
+        autoCapitalize="none"
+        keyboardType="default"
+        returnKeyType="done"
         {...props}
       />
       {error && <Text style={styles.errorText}>{error}</Text>}
@@ -85,6 +89,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing[3],
     color: colors.text.primary,
     fontSize: typography.fontSize.base,
+    textAlign: 'left', // 한글 입력을 위해 명시적으로 설정
   },
 
   // Sizes
