@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, Alert } from 'react-native';
 import { useUser } from '../contexts/UserContext';
-import { Button, Input } from '../components/ui';
+import { Button, Input, Header } from '../components/ui';
 import { colors, spacing, typography } from '../utils/designTokens';
 
 interface NicknameScreenProps {
@@ -45,6 +45,7 @@ const NicknameScreen: React.FC<NicknameScreenProps> = ({ onNavigate: _onNavigate
 
   return (
     <View style={styles.container}>
+      <Header />
       <View style={styles.content}>
         <Text style={styles.title}>닉네임을 입력해주세요</Text>
         <Text style={styles.subtitle}>

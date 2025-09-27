@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { SCREEN_NAMES } from '../utils/constants';
-import { Button } from '../components/ui';
+import { Button, Header } from '../components/ui';
 import { colors, spacing, typography } from '../utils/designTokens';
 
 interface StartScreenProps {
@@ -18,6 +18,7 @@ const StartScreen: React.FC<StartScreenProps> = ({ onNavigate }) => {
 
   return (
     <View style={styles.container}>
+      <Header />
       <View style={styles.content}>
         <Text style={styles.title}>🌱 Replant</Text>
         <Text style={styles.subtitle}>사회로의 첫 걸음</Text>
