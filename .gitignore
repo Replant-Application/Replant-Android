@@ -113,8 +113,6 @@ android/gradlew.bat
 android/local.properties
 android/app/release/
 
-# Metro
-
 # Flipper
 ios/Flipper-Folly
 
@@ -135,6 +133,7 @@ ios/Flipper-Folly
 *.swo
 
 # macOS
+.DS_Store
 .AppleDouble
 .LSOverride
 
