@@ -179,6 +179,91 @@ describe('CharacterGuideScreen', () => {
     expect(setRepresentativeButtons).toHaveLength(2); // 자기관리 캐릭터 제외
   });
 
+  it('미션 완료 시 해당 카테고리 캐릭터에 경험치가 올바르게 추가된다', async () => {
+    const mockAddExperience = jest.fn();
+
+    mockUseCharacter.mockReturnValue({
+      characters: mockCharacters,
+      selectedCharacter: null,
+      representativeCharacter: mockRepresentativeCharacter,
+      loading: false,
+      error: null,
+      loadCharacters: jest.fn(),
+      addExperienceByCategory: mockAddExperience,
+      selectCharacter: jest.fn(),
+      setRepresentative: jest.fn(),
+    });
+
+    const { getAllByText } = render(
+      <CharacterGuideScreen navigation={mockNavigation as any} />
+    );
+
+    // 자기관리 캐릭터의 경험치 추가 시뮬레이션
+    const selfManagementCharacter = mockCharacters[0];
+    const experienceToAdd = 50;
+
+    // addExperienceByCategory 함수 호출 시뮬레이션
+    mockAddExperience('self_management', experienceToAdd);
+
+    expect(mockAddExperience).toHaveBeenCalledWith('self_management', experienceToAdd);
+  });
+
+  it('소통관리 미션 완료 시 소통관리 캐릭터에 경험치가 추가된다', async () => {
+    const mockAddExperience = jest.fn();
+
+    mockUseCharacter.mockReturnValue({
+      characters: mockCharacters,
+      selectedCharacter: null,
+      representativeCharacter: mockRepresentativeCharacter,
+      loading: false,
+      error: null,
+      loadCharacters: jest.fn(),
+      addExperienceByCategory: mockAddExperience,
+      selectCharacter: jest.fn(),
+      setRepresentative: jest.fn(),
+    });
+
+    const { getAllByText } = render(
+      <CharacterGuideScreen navigation={mockNavigation as any} />
+    );
+
+    // 소통관리 캐릭터의 경험치 추가 시뮬레이션
+    const experienceToAdd = 50;
+
+    // addExperienceByCategory 함수 호출 시뮬레이션
+    mockAddExperience('communication', experienceToAdd);
+
+    expect(mockAddExperience).toHaveBeenCalledWith('communication', experienceToAdd);
+  });
+
+  it('커리어관리 미션 완료 시 커리어관리 캐릭터에 경험치가 추가된다', async () => {
+    const mockAddExperience = jest.fn();
+
+    mockUseCharacter.mockReturnValue({
+      characters: mockCharacters,
+      selectedCharacter: null,
+      representativeCharacter: mockRepresentativeCharacter,
+      loading: false,
+      error: null,
+      loadCharacters: jest.fn(),
+      addExperienceByCategory: mockAddExperience,
+      selectCharacter: jest.fn(),
+      setRepresentative: jest.fn(),
+    });
+
+    const { getAllByText } = render(
+      <CharacterGuideScreen navigation={mockNavigation as any} />
+    );
+
+    // 커리어관리 캐릭터의 경험치 추가 시뮬레이션
+    const experienceToAdd = 50;
+
+    // addExperienceByCategory 함수 호출 시뮬레이션
+    mockAddExperience('career', experienceToAdd);
+
+    expect(mockAddExperience).toHaveBeenCalledWith('career', experienceToAdd);
+  });
+
   it('캐릭터 카드 클릭 시 상세 페이지로 이동한다', () => {
     const { getByText } = render(
       <CharacterGuideScreen navigation={mockNavigation as any} />

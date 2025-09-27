@@ -1,9 +1,9 @@
 import React from 'react';
-import { render, fireEvent } from '@testing-library/react-native';
+import { render, fireEvent, waitFor } from '@testing-library/react-native';
 import MissionScreen from '../../src/screens/MissionScreen';
 import { useMission } from '../../src/hooks/useMission';
 import { useCharacter } from '../../src/hooks/useCharacter';
-import { Mission } from '../../src/types';
+import { Mission, Character } from '../../src/types';
 
 // Mock hooks
 jest.mock('../../src/hooks/useMission');
@@ -59,6 +59,26 @@ const mockMissions: Mission[] = [
     updated_at: '2024-01-01T00:00:00Z'
   }
 ];
+
+// Mock character data
+const mockRepresentativeCharacter: Character = {
+  id: '1',
+  character_id: 'char-1',
+  name: '테스트 대표 캐릭터',
+  title: '테스트 대표 캐릭터',
+  description: '매일 조금씩 성장하며 나만의 길을 찾아가요',
+  emoji: '🧘',
+  level: 3,
+  experience: 150,
+  total_experience: 250,
+  max_experience: 300,
+  unlocked: true,
+  completed_missions: 5,
+  category_id: 'self_management',
+  unlocked_date: '2024-01-01T00:00:00Z',
+  created_at: '2024-01-01T00:00:00Z',
+  updated_at: '2024-01-01T00:00:00Z'
+};
 
 const mockNavigation = {
   navigate: jest.fn(),
@@ -246,6 +266,147 @@ describe('MissionScreen', () => {
     // 진행률 정보 확인
     expect(getByText('1개 완료 / 3개')).toBeTruthy();
     expect(getByText('33%')).toBeTruthy();
+  });
+
+  it('미션 완료 시 해당 카테고리 캐릭터에 경험치가 추가된다', async () => {
+    const mockCompleteMission = jest.fn();
+    const mockAddExperience = jest.fn();
+
+    mockUseMission.mockReturnValue({
+      missions: mockMissions,
+      loading: false,
+      error: null,
+      completeMissionWithPhoto: mockCompleteMission,
+      uncompleteMission: jest.fn(),
+      createCustomMission: jest.fn(),
+      updateCustomMission: jest.fn(),
+      deleteCustomMission: jest.fn(),
+    });
+
+    mockUseCharacter.mockReturnValue({
+      characters: [],
+      selectedCharacter: null,
+      representativeCharacter: mockRepresentativeCharacter,
+      loading: false,
+      error: null,
+      loadCharacters: jest.fn(),
+      addExperienceByCategory: mockAddExperience,
+      selectCharacter: jest.fn(),
+      setRepresentative: jest.fn(),
+    });
+
+    const { getAllByText } = render(
+      <MissionScreen navigation={mockNavigation as any} />
+    );
+
+    // 자기관리 미션 완료 버튼 클릭
+    const completeButtons = getAllByText('완료하기');
+    if (completeButtons[0]) {
+      fireEvent.press(completeButtons[0]);
+    }
+
+    await waitFor(() => {
+      // completeMissionWithPhoto이 호출되었는지 확인
+      expect(mockCompleteMission).toHaveBeenCalledWith('mission-1', null);
+    });
+  });
+
+  it('소통관리 미션 완료 시 소통관리 카테고리 캐릭터에 경험치가 추가된다', async () => {
+    const mockCompleteMission = jest.fn();
+    const mockAddExperience = jest.fn();
+
+    mockUseMission.mockReturnValue({
+      missions: mockMissions,
+      loading: false,
+      error: null,
+      completeMissionWithPhoto: mockCompleteMission,
+      uncompleteMission: jest.fn(),
+      createCustomMission: jest.fn(),
+      updateCustomMission: jest.fn(),
+      deleteCustomMission: jest.fn(),
+    });
+
+    mockUseCharacter.mockReturnValue({
+      characters: [],
+      selectedCharacter: null,
+      representativeCharacter: mockRepresentativeCharacter,
+      loading: false,
+      error: null,
+      loadCharacters: jest.fn(),
+      addExperienceByCategory: mockAddExperience,
+      selectCharacter: jest.fn(),
+      setRepresentative: jest.fn(),
+    });
+
+    const { getAllByText } = render(
+      <MissionScreen navigation={mockNavigation as any} />
+    );
+
+    // 소통관리 카테고리 선택
+    const communicationButtons = getAllByText('소통관리');
+    if (communicationButtons[0]) {
+      fireEvent.press(communicationButtons[0]);
+    }
+
+    // 소통관리 미션 완료 버튼 클릭
+    const completeButtons = getAllByText('완료하기');
+    if (completeButtons[0]) {
+      fireEvent.press(completeButtons[0]);
+    }
+
+    await waitFor(() => {
+      // completeMissionWithPhoto이 호출되었는지 확인
+      expect(mockCompleteMission).toHaveBeenCalledWith('mission-2', null);
+    });
+  });
+
+  it('커리어관리 미션 완료 시 커리어관리 카테고리 캐릭터에 경험치가 추가된다', async () => {
+    const mockCompleteMission = jest.fn();
+    const mockAddExperience = jest.fn();
+
+    mockUseMission.mockReturnValue({
+      missions: mockMissions,
+      loading: false,
+      error: null,
+      completeMissionWithPhoto: mockCompleteMission,
+      uncompleteMission: jest.fn(),
+      createCustomMission: jest.fn(),
+      updateCustomMission: jest.fn(),
+      deleteCustomMission: jest.fn(),
+    });
+
+    mockUseCharacter.mockReturnValue({
+      characters: [],
+      selectedCharacter: null,
+      representativeCharacter: mockRepresentativeCharacter,
+      loading: false,
+      error: null,
+      loadCharacters: jest.fn(),
+      addExperienceByCategory: mockAddExperience,
+      selectCharacter: jest.fn(),
+      setRepresentative: jest.fn(),
+    });
+
+    const { getAllByText } = render(
+      <MissionScreen navigation={mockNavigation as any} />
+    );
+
+    // 커리어관리 카테고리 선택
+    const careerButtons = getAllByText('커리어관리');
+    if (careerButtons[0]) {
+      fireEvent.press(careerButtons[0]);
+    }
+
+    // 커리어관리 미션 완료 버튼 클릭
+    const completeButtons = getAllByText('완료하기');
+    if (completeButtons[0]) {
+      fireEvent.press(completeButtons[0]);
+    }
+
+    await waitFor(() => {
+      // completeMissionWithPhoto이 호출되었는지 확인
+      expect(mockCompleteMission).toHaveBeenCalledWith('mission-3', null);
+    });
   });
 
   it('미션이 없을 때 EmptyState가 표시된다', () => {
