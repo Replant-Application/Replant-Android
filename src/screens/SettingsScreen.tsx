@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, TextInput } from 'react-native';
 import { useUser } from '../contexts/UserContext';
-import { Card, Input, Header } from '../components/ui';
+import { Card, Input, Header, SectionTitle } from '../components/ui';
 import { colors, spacing, typography, borderRadius } from '../utils/designTokens';
 
 const SettingsScreen = () => {
@@ -103,7 +103,7 @@ const SettingsScreen = () => {
 
         {/* 계정 설정 */}
         <Card style={styles.accountCard}>
-          <Text style={styles.sectionTitle}>🔐 계정</Text>
+          <SectionTitle title="🔐 계정" size="lg" marginBottom={spacing[3]} />
           <TouchableOpacity style={styles.logoutOption} onPress={handleLogout}>
             <Text style={styles.logoutText}>🚪 로그아웃</Text>
           </TouchableOpacity>
@@ -111,7 +111,7 @@ const SettingsScreen = () => {
 
         {/* 앱 정보 */}
         <Card style={styles.appInfoCard}>
-          <Text style={styles.sectionTitle}>ℹ️ 앱 정보</Text>
+          <SectionTitle title="ℹ️ 앱 정보" size="lg" marginBottom={spacing[3]} />
           <Text style={styles.appInfo}>버전: 1.0.0 (Build 123)</Text>
           <Text style={styles.appInfo}>최근 업데이트: 2025.01.26</Text>
           <Text style={styles.appInfo}>Replant - 감정 회복을 위한 여정</Text>
@@ -147,12 +147,6 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.base,
     color: colors.text.secondary,
     marginBottom: spacing[1],
-  },
-  sectionTitle: {
-    fontSize: typography.fontSize.lg,
-    fontWeight: typography.fontWeight.bold,
-    color: colors.text.primary,
-    marginBottom: spacing[3],
   },
   themeCard: {
     marginBottom: spacing[6],

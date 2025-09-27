@@ -5,7 +5,7 @@ import { useUser } from '../contexts/UserContext';
 import { useCharacter } from '../hooks/useCharacter';
 import { useMission } from '../hooks/useMission';
 import { CharacterCard, MissionCard } from '../components/specialized';
-import { Card, Loading, ErrorBoundary, Header, EmptyState } from '../components/ui';
+import { Card, Loading, ErrorBoundary, Header, EmptyState, SectionTitle } from '../components/ui';
 import { colors, spacing, typography } from '../utils/designTokens';
 import { executeWithErrorHandling } from '../utils/errorHandler';
 import { SCREEN_NAMES } from '../utils/constants';
@@ -93,7 +93,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
       <Header />
       <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>나의 캐릭터</Text>
+            <SectionTitle title="나의 캐릭터" />
           </View>
           {representativeCharacter ? (
             <CharacterCard
@@ -109,7 +109,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
 
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>추천 미션</Text>
+            <SectionTitle title="추천 미션" />
           </View>
           <Loading text="미션을 불러오는 중..." />
         </View>
@@ -124,7 +124,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
 
         {/* 메인 캐릭터 표시 */}
         <View style={styles.characterSection}>
-          <Text style={styles.sectionTitle}>🌱 나의 캐릭터</Text>
+          <SectionTitle title="🌱 나의 캐릭터" />
           {characterLoading ? (
             <Card style={styles.emptyCharacterCard}>
               <Text style={styles.emptyCharacterText}>
@@ -148,7 +148,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
 
         {/* 추천 미션 */}
         <View style={styles.missionSection}>
-          <Text style={styles.sectionTitle}>🎯 추천 미션</Text>
+          <SectionTitle title="🎯 추천 미션" />
           {recommendedMissions.length > 0 ? (
             recommendedMissions.map((mission) => (
               <MissionCard
@@ -186,12 +186,6 @@ const styles = StyleSheet.create({
   },
   missionSection: {
     marginBottom: spacing[8],
-  },
-  sectionTitle: {
-    fontSize: typography.fontSize.xl,
-    fontWeight: typography.fontWeight.bold,
-    color: colors.text.primary,
-    marginBottom: spacing[4],
   },
   characterCard: {
     marginBottom: spacing[4],

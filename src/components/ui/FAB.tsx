@@ -1,0 +1,104 @@
+import React from 'react';
+import { TouchableOpacity, Text, StyleSheet, ViewStyle, TextStyle } from 'react-native';
+import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
+
+interface FABProps {
+  onPress: () => void;
+  icon?: string;
+  size?: 'sm' | 'base' | 'lg';
+  color?: string;
+  style?: ViewStyle;
+  iconStyle?: TextStyle;
+}
+
+/**
+ * 재사용 가능한 플로팅 액션 버튼 컴포넌트
+ * 화면 우하단에 떠있는 액션 버튼을 제공
+ */
+const FAB: React.FC<FABProps> = ({
+  onPress,
+  icon = '+',
+  size = 'base',
+  color = colors.primary[500],
+  style,
+  iconStyle,
+}) => {
+  const sizeStyles = {
+    sm: styles.sm,
+    base: styles.base,
+    lg: styles.lg,
+  };
+
+  const iconSizeStyles = {
+    sm: styles.smIcon,
+    base: styles.baseIcon,
+    lg: styles.lgIcon,
+  };
+
+  return (
+    <TouchableOpacity
+      style={[
+        styles.fab,
+        sizeStyles[size],
+        { backgroundColor: color },
+        style,
+      ]}
+      onPress={onPress}
+      activeOpacity={0.8}
+    >
+      <Text style={[
+        styles.icon,
+        iconSizeStyles[size],
+        iconStyle,
+      ]}>
+        {icon}
+      </Text>
+    </TouchableOpacity>
+  );
+};
+
+const styles = StyleSheet.create({
+  fab: {
+    position: 'absolute',
+    bottom: spacing[6],
+    right: spacing[5],
+    borderRadius: borderRadius.full,
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 8,
+    shadowColor: colors.primary[500],
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+  },
+  base: {
+    width: 56,
+    height: 56,
+  },
+  sm: {
+    width: 48,
+    height: 48,
+  },
+  lg: {
+    width: 64,
+    height: 64,
+  },
+  icon: {
+    color: colors.text.inverse,
+    fontWeight: typography.fontWeight.bold,
+  },
+  baseIcon: {
+    fontSize: typography.fontSize['2xl'],
+  },
+  smIcon: {
+    fontSize: typography.fontSize.xl,
+  },
+  lgIcon: {
+    fontSize: typography.fontSize['3xl'],
+  },
+});
+
+export default FAB;

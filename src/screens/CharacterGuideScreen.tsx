@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, Alert } from 'react-native';
 import { useCharacter } from '../hooks/useCharacter';
 import { colors, spacing, typography, borderRadius, shadows } from '../utils/designTokens';
-import { Header, EmptyState } from '../components/ui';
+import { Header, EmptyState, SectionTitle } from '../components/ui';
 import { SCREEN_NAMES } from '../utils/constants';
 import { NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '../types/navigation';
@@ -242,11 +242,6 @@ const styles = StyleSheet.create({
   },
   charactersSection: {
     marginBottom: spacing[5],
-  },
-  sectionTitle: {
-    fontSize: typography.fontSize.xl,
-    fontWeight: typography.fontWeight.bold,
-    marginBottom: spacing[4],
   },
   characterCard: {
     padding: spacing[5],

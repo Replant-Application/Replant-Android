@@ -4,7 +4,7 @@ import { SCREEN_NAMES } from '../utils/constants';
 import { useMission } from '../hooks/useMission';
 import { useCharacter } from '../hooks/useCharacter';
 import { MissionCard } from '../components/specialized';
-import { Card, Loading, ErrorBoundary, Button, Header, EmptyState } from '../components/ui';
+import { Card, Loading, ErrorBoundary, Button, Header, EmptyState, SectionTitle } from '../components/ui';
 import { colors, spacing, typography, borderRadius } from '../utils/designTokens';
 import { NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '../types/navigation';
@@ -120,7 +120,7 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation }) => {
 
         {/* 카테고리 필터 */}
         <View style={styles.categorySection}>
-          <Text style={styles.sectionTitle}>카테고리</Text>
+          <SectionTitle title="카테고리" />
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
@@ -151,14 +151,11 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation }) => {
         {/* 미션 목록 */}
         <View style={styles.missionSection}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>
-              {selectedCategory === 'all' ? '전체 미션' :
+            <SectionTitle
+              title={`${selectedCategory === 'all' ? '전체 미션' :
                selectedCategory === 'custom' ? '나만의 미션' :
-               `${MISSION_CATEGORIES.find(c => c.id === selectedCategory)?.name} 미션`}
-              <Text style={styles.missionCount}>
-                ({filteredMissions.length}개)
-              </Text>
-            </Text>
+               `${MISSION_CATEGORIES.find(c => c.id === selectedCategory)?.name} 미션`} (${filteredMissions.length}개)`}
+            />
           </View>
 
           {filteredMissions.length === 0 ? (
@@ -250,12 +247,6 @@ const styles = StyleSheet.create({
   },
   categorySection: {
     marginBottom: spacing[6],
-  },
-  sectionTitle: {
-    fontSize: typography.fontSize.xl,
-    fontWeight: typography.fontWeight.bold,
-    color: colors.text.primary,
-    marginBottom: spacing[3],
   },
   missionCount: {
     fontSize: typography.fontSize.lg,

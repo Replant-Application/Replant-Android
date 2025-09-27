@@ -10,7 +10,7 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
-import { Card, Button, Header } from '../components/ui';
+import { Card, Button, Header, SectionTitle, FormCard } from '../components/ui';
 import { colors, spacing, typography, borderRadius } from '../utils/designTokens';
 import { createCustomMission } from '../services/missionService';
 import { useUser } from '../contexts/UserContext';
@@ -105,8 +105,8 @@ const CustomMissionCreateScreen: React.FC<CustomMissionCreateScreenProps> = ({ n
       <Header />
 
       <ScrollView style={styles.content}>
-        <Card style={styles.formCard}>
-          <Text style={styles.sectionTitle}>미션 제목</Text>
+        <FormCard>
+          <SectionTitle title="미션 제목" size="lg" marginBottom={spacing[3]} />
           <TextInput
             style={styles.textInput}
             value={title}
@@ -114,10 +114,10 @@ const CustomMissionCreateScreen: React.FC<CustomMissionCreateScreenProps> = ({ n
             placeholder="미션 제목을 입력하세요"
             maxLength={50}
           />
-        </Card>
+        </FormCard>
 
-        <Card style={styles.formCard}>
-          <Text style={styles.sectionTitle}>미션 설명</Text>
+        <FormCard>
+          <SectionTitle title="미션 설명" size="lg" marginBottom={spacing[3]} />
           <TextInput
             style={[styles.textInput, styles.textArea]}
             value={description}
@@ -127,11 +127,11 @@ const CustomMissionCreateScreen: React.FC<CustomMissionCreateScreenProps> = ({ n
             numberOfLines={4}
             maxLength={200}
           />
-        </Card>
+        </FormCard>
 
 
-        <Card style={styles.formCard}>
-          <Text style={styles.sectionTitle}>난이도 선택</Text>
+        <FormCard>
+          <SectionTitle title="난이도 선택" size="lg" marginBottom={spacing[3]} />
           <View style={styles.difficultyContainer}>
             {DIFFICULTY_OPTIONS.map((option) => (
               <TouchableOpacity
@@ -153,10 +153,10 @@ const CustomMissionCreateScreen: React.FC<CustomMissionCreateScreenProps> = ({ n
               </TouchableOpacity>
             ))}
           </View>
-        </Card>
+        </FormCard>
 
-        <Card style={styles.formCard}>
-          <Text style={styles.sectionTitle}>경험치 설정</Text>
+        <FormCard>
+          <SectionTitle title="경험치 설정" size="lg" marginBottom={spacing[3]} />
           <View style={styles.expContainer}>
             <TextInput
               style={styles.expInput}
@@ -173,7 +173,7 @@ const CustomMissionCreateScreen: React.FC<CustomMissionCreateScreenProps> = ({ n
             <Text style={styles.expLabel}>EXP</Text>
           </View>
           <Text style={styles.expHint}>0~200 사이의 값을 입력하세요</Text>
-        </Card>
+        </FormCard>
       </ScrollView>
 
       <View style={styles.buttonContainer}>
@@ -202,15 +202,6 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     padding: spacing[5],
-  },
-  formCard: {
-    marginBottom: spacing[4],
-  },
-  sectionTitle: {
-    fontSize: typography.fontSize.lg,
-    fontWeight: typography.fontWeight.bold,
-    color: colors.text.primary,
-    marginBottom: spacing[3],
   },
   textInput: {
     borderWidth: 1,

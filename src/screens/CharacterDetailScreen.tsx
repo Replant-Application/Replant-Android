@@ -5,7 +5,7 @@ import { colors, spacing, typography, borderRadius, shadows } from '../utils/des
 import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../types/navigation';
 import { Character } from '../types';
-import { ProgressBar, Header } from '../components/ui';
+import { ProgressBar, Header, SectionTitle } from '../components/ui';
 
 interface CharacterDetailScreenProps {
   route: RouteProp<RootStackParamList, 'CharacterDetail'>;
@@ -185,7 +185,7 @@ const CharacterDetailScreen: React.FC<CharacterDetailScreenProps> = ({ route, na
 
         {/* 캐릭터 설명 */}
         <View style={styles.descriptionSection}>
-          <Text style={styles.sectionTitle}>🌱 캐릭터 소개</Text>
+          <SectionTitle title="🌱 캐릭터 소개" />
           <Text style={styles.description}>
             {character.description || getCategoryDescription(character.category_id)}
           </Text>
@@ -329,12 +329,6 @@ const styles = StyleSheet.create({
   },
   experienceSection: {
     width: '100%',
-  },
-  sectionTitle: {
-    fontSize: typography.fontSize.lg,
-    fontWeight: typography.fontWeight.bold,
-    color: colors.text.primary,
-    marginBottom: spacing[4],
   },
   descriptionSection: {
     marginBottom: spacing[8],

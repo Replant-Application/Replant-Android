@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, TextInput } from 'react-native';
 import { useDiary } from '../hooks/useDiary';
 import { DiaryCard, EmotionSelector } from '../components/specialized';
-import { Button, Card, Loading, ErrorBoundary, Header, EmptyState } from '../components/ui';
+import { Button, Card, Loading, ErrorBoundary, Header, EmptyState, SectionTitle, FormCard, FAB } from '../components/ui';
 import { colors, spacing, typography, borderRadius } from '../utils/designTokens';
 import { Diary, SimpleDiaryData } from '../types';
 
@@ -98,7 +98,7 @@ const DiaryScreen: React.FC = () => {
       <ScrollView style={styles.content}>
 
         {showForm ? (
-          <Card style={styles.formCard}>
+          <FormCard>
             <Text style={styles.formTitle}>
               {editingDiary ? '✏️ 일기 수정' : '✏️ 일기 작성'}
             </Text>
@@ -140,7 +140,7 @@ const DiaryScreen: React.FC = () => {
                 style={styles.saveButton}
               />
             </View>
-          </Card>
+          </FormCard>
         ) : (
           <>
             {diaries.length === 0 ? (
@@ -173,13 +173,9 @@ const DiaryScreen: React.FC = () => {
 
       {/* 플로팅 액션 버튼 */}
       {!showForm && (
-        <TouchableOpacity
-          style={styles.fab}
+        <FAB
           onPress={() => setShowForm(true)}
-          activeOpacity={0.8}
-        >
-          <Text style={styles.fabIcon}>+</Text>
-        </TouchableOpacity>
+        />
       )}
     </View>
   );
@@ -195,36 +191,9 @@ const styles = StyleSheet.create({
     fontWeight: typography.fontWeight.bold,
     color: colors.text.primary,
   },
-  fab: {
-    position: 'absolute',
-    bottom: spacing[6],
-    right: spacing[5],
-    width: 56,
-    height: 56,
-    borderRadius: borderRadius.full,
-    backgroundColor: colors.primary[500],
-    justifyContent: 'center',
-    alignItems: 'center',
-    elevation: 8,
-    shadowColor: colors.primary[500],
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-  },
-  fabIcon: {
-    fontSize: typography.fontSize['2xl'],
-    color: colors.text.inverse,
-    fontWeight: typography.fontWeight.bold,
-  },
   content: {
     flex: 1,
     padding: spacing[5],
-  },
-  formCard: {
-    marginBottom: spacing[6],
   },
   formTitle: {
     fontSize: typography.fontSize.xl,
@@ -271,12 +240,6 @@ const styles = StyleSheet.create({
   },
   saveButton: {
     flex: 1,
-  },
-  sectionTitle: {
-    fontSize: typography.fontSize.xl,
-    fontWeight: typography.fontWeight.bold,
-    color: colors.text.primary,
-    marginBottom: spacing[4],
   },
   diaryCard: {
     marginBottom: spacing[3],
