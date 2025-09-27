@@ -99,16 +99,7 @@ const CharacterDetailScreen: React.FC<CharacterDetailScreenProps> = ({ route, na
 
   return (
     <ScrollView style={styles.container}>
-      <Header
-        leftButton={
-          <TouchableOpacity
-            style={styles.backButton}
-            onPress={() => navigation.goBack()}
-          >
-            <Text style={styles.backButtonText}>← 뒤로</Text>
-          </TouchableOpacity>
-        }
-      />
+      <Header />
 
       <View style={styles.content}>
         {/* 캐릭터 이미지 섹션 */}
@@ -198,19 +189,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background.secondary,
-  },
-  backButton: {
-    marginRight: spacing[4],
-  },
-  backButtonText: {
-    fontSize: typography.fontSize.lg,
-    color: colors.primary[500],
-    fontWeight: typography.fontWeight.medium,
-  },
-  headerTitle: {
-    fontSize: typography.fontSize.lg,
-    fontWeight: typography.fontWeight.bold,
-    color: colors.text.primary,
   },
   content: {
     padding: spacing[5],
