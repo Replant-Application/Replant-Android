@@ -1,6 +1,5 @@
 # OSX
 #
-.DS_Store
 
 # Xcode
 #
@@ -24,7 +23,6 @@ DerivedData
 
 # Android/IntelliJ
 #
-build/
 .idea
 .gradle
 local.properties
@@ -74,6 +72,16 @@ yarn-error.log
 !.yarn/sdks
 !.yarn/versions
 
+# pnpm
+.pnpm-debug.log*
+.pnpm-store/
+
+# bun
+bun.lockb
+
+# Turbo
+.turbo/
+
 # React Native specific
 *.log
 *.tmp
@@ -106,7 +114,6 @@ android/local.properties
 android/app/release/
 
 # Metro
-.metro-health-check*
 
 # Flipper
 ios/Flipper-Folly
@@ -128,7 +135,6 @@ ios/Flipper-Folly
 *.swo
 
 # macOS
-.DS_Store
 .AppleDouble
 .LSOverride
 
@@ -136,8 +142,3 @@ ios/Flipper-Folly
 Thumbs.db
 ehthumbs.db
 Desktop.ini
-
-replant-web/
-
-# MCP settings (민감한 토큰 포함)
-.cursor/
