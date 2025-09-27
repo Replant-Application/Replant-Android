@@ -37,6 +37,7 @@ const FAB: React.FC<FABProps> = ({
 
   return (
     <TouchableOpacity
+      testID="fab-button"
       style={[
         styles.fab,
         sizeStyles[size],
