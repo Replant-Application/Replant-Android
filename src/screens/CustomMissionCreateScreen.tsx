@@ -69,7 +69,7 @@ const CustomMissionCreateScreen: React.FC<CustomMissionCreateScreenProps> = ({ n
           [
             {
               text: '확인',
-              onPress: () => navigation.goBack()
+              onPress: () => navigation.navigate('Mission')
             }
           ]
         );
@@ -174,7 +174,7 @@ const CustomMissionCreateScreen: React.FC<CustomMissionCreateScreenProps> = ({ n
       <View style={styles.buttonContainer}>
         <Button
           title="취소"
-          onPress={() => navigation.goBack()}
+          onPress={() => navigation.navigate('Mission')}
           style={StyleSheet.flatten([styles.button, styles.cancelButton])}
           textStyle={styles.cancelButtonText}
         />
