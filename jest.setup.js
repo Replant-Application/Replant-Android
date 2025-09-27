@@ -49,7 +49,4 @@ global.console = {
   error: jest.fn(),
 };
 
-// Mock Alert
-jest.mock('react-native/Libraries/Alert/Alert', () => ({
-  alert: jest.fn(),
-}));
+// Mock Alert - removed to avoid conflicts

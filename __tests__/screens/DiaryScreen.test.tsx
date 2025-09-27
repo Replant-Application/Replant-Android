@@ -3,6 +3,12 @@ import { render, fireEvent, waitFor } from '@testing-library/react-native';
 import DiaryScreen from '../../src/screens/DiaryScreen';
 import { useDiary } from '../../src/hooks/useDiary';
 
+// Mock Alert
+const mockAlert = jest.fn();
+jest.mock('react-native/Libraries/Alert/Alert', () => ({
+  alert: mockAlert,
+}));
+
 // Mock hooks
 jest.mock('../../src/hooks/useDiary');
 
@@ -27,6 +33,7 @@ const mockDiaries = [
 describe('DiaryScreen', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockAlert.mockClear();
 
     mockUseDiary.mockReturnValue({
       diaries: mockDiaries,
@@ -279,5 +286,107 @@ describe('DiaryScreen', () => {
     // 저장 버튼이 비활성화되어 있는지 확인
     const saveButton = getByText('저장하기');
     expect(saveButton).toBeTruthy();
+  });
+
+  it('일기 수정이 성공한다', async () => {
+    const mockUpdateDiary = jest.fn().mockResolvedValue(undefined);
+
+    mockUseDiary.mockReturnValue({
+      diaries: mockDiaries,
+      loading: false,
+      error: null,
+      loadDiaries: jest.fn(),
+      saveDiary: jest.fn(),
+      updateDiary: mockUpdateDiary,
+      deleteDiary: jest.fn(),
+    });
+
+    const { getByText, getByDisplayValue, getAllByText } = render(<DiaryScreen />);
+
+    // 1. 기존 일기 내용 확인
+    expect(getByText('오늘은 좋은 하루였어요')).toBeTruthy();
+
+    // 2. 수정 버튼 클릭 (일기 카드에서 수정 버튼 찾기)
+    // 실제 구현에 따라 수정 버튼의 testID나 텍스트가 다를 수 있음
+    const editButtons = getAllByText('✏️ 수정'); // 이모지와 함께 표시됨
+    if (editButtons[0]) {
+      fireEvent.press(editButtons[0]);
+    }
+
+    // 3. 수정 폼이 표시되는지 확인
+    await waitFor(() => {
+      expect(getByText('✏️ 일기 수정')).toBeTruthy();
+    });
+
+    // 4. 내용 수정
+    const textInput = getByDisplayValue('오늘은 좋은 하루였어요');
+    fireEvent.changeText(textInput, '수정된 내용입니다');
+
+    // 5. 저장 버튼 클릭
+    const saveButton = getByText('수정하기');
+    fireEvent.press(saveButton);
+
+    // 6. updateDiary 함수가 올바른 데이터로 호출되었는지 확인
+    await waitFor(() => {
+      expect(mockUpdateDiary).toHaveBeenCalledWith(
+        'diary-1',
+        expect.objectContaining({
+          emotion: 'happy',
+          content: '수정된 내용입니다',
+          date: expect.stringMatching(/^\d{4}-\d{2}-\d{2}$/) // YYYY-MM-DD 형식
+        })
+      );
+    });
+
+    // 7. updateDiary가 한 번만 호출되었는지 확인
+    expect(mockUpdateDiary).toHaveBeenCalledTimes(1);
+  });
+
+  it('일기 삭제 버튼이 표시된다', async () => {
+    const mockDeleteDiary = jest.fn().mockResolvedValue(undefined);
+
+    mockUseDiary.mockReturnValue({
+      diaries: mockDiaries,
+      loading: false,
+      error: null,
+      loadDiaries: jest.fn(),
+      saveDiary: jest.fn(),
+      updateDiary: jest.fn(),
+      deleteDiary: mockDeleteDiary,
+    });
+
+    const { getByText, getAllByText } = render(<DiaryScreen />);
+
+    // 1. 기존 일기 내용 확인
+    expect(getByText('오늘은 좋은 하루였어요')).toBeTruthy();
+
+    // 2. 삭제 버튼이 표시되는지 확인
+    const deleteButtons = getAllByText('🗑️ 삭제');
+    expect(deleteButtons.length).toBeGreaterThan(0);
+    expect(deleteButtons[0]).toBeTruthy();
+  });
+
+  it('일기 수정 버튼이 표시된다', async () => {
+    const mockUpdateDiary = jest.fn().mockResolvedValue(undefined);
+
+    mockUseDiary.mockReturnValue({
+      diaries: mockDiaries,
+      loading: false,
+      error: null,
+      loadDiaries: jest.fn(),
+      saveDiary: jest.fn(),
+      updateDiary: mockUpdateDiary,
+      deleteDiary: jest.fn(),
+    });
+
+    const { getByText, getAllByText } = render(<DiaryScreen />);
+
+    // 1. 기존 일기 내용 확인
+    expect(getByText('오늘은 좋은 하루였어요')).toBeTruthy();
+
+    // 2. 수정 버튼이 표시되는지 확인
+    const editButtons = getAllByText('✏️ 수정');
+    expect(editButtons.length).toBeGreaterThan(0);
+    expect(editButtons[0]).toBeTruthy();
   });
 });
