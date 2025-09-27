@@ -42,7 +42,8 @@ const CharacterGuideScreen: React.FC<CharacterGuideScreenProps> = ({ navigation 
     const categoryNames: Record<string, string> = {
       'self_management': '자기관리',
       'communication': '소통관리',
-      'career': '커리어관리'
+      'career': '커리어관리',
+      'custom': '나만의 미션'
     };
     return categoryNames[categoryId] || '알 수 없음';
   };
@@ -52,7 +53,8 @@ const CharacterGuideScreen: React.FC<CharacterGuideScreenProps> = ({ navigation 
     const categoryIcons: Record<string, string> = {
       'self_management': '🧘',
       'communication': '💬',
-      'career': '📚'
+      'career': '📚',
+      'custom': '⭐'
     };
     return categoryIcons[categoryId] || '❓';
   };

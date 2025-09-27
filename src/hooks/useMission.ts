@@ -94,12 +94,12 @@ export const useMission = (
       // 경험치 추가 (캐릭터 시스템과 연동)
       let experienceResult: ExperienceResult | null = null;
       if (addExperienceByCategory && mission.category_id) {
-        experienceResult = await addExperienceByCategory(mission.category_id, mission.experience || 50);
+        experienceResult = await addExperienceByCategory(mission.category_id, mission.experience);
       }
 
       return {
         success: true,
-        experienceGained: experienceResult?.experienceGained || mission.experience || 50,
+        experienceGained: experienceResult?.experienceGained || mission.experience,
         levelUp: experienceResult?.levelUp || false,
         newLevel: experienceResult?.newLevel,
         unlocked: false // 나중에 캐릭터 해제 로직 추가

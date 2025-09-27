@@ -13,6 +13,8 @@ const getCategoryDescription = (categoryId: string): string => {
       return '따뜻한 대화로 세상을 더 아름답게 만들어가요';
     case 'career':
       return '꿈을 현실로 만드는 과정을 즐기고 있어요';
+    case 'custom':
+      return '나만의 특별한 여정을 함께 걸어가요';
     default:
       return '꾸준한 성장을 통해 더욱 빛나고 있어요';
   }
@@ -158,7 +160,7 @@ export const initializeUserData = async (
     await setData(storageKeys.CHARACTER_TEMPLATES, characterTemplatesData);
     const characterTemplates: any[] = characterTemplatesData;
     if (characterTemplates.length > 0) {
-      // 3개 카테고리별 캐릭터 생성
+      // 4개 카테고리별 캐릭터 생성 (custom 포함)
       const initialCharacters: Character[] = [
         {
           id: `character_${Date.now()}_self_management`,
@@ -213,6 +215,25 @@ export const initializeUserData = async (
           unlocked: true,
           unlocked_date: new Date().toISOString(),
           category_id: 'career',
+          completed_missions: 0,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        },
+        {
+          id: `character_${Date.now()}_custom`,
+          character_id: `character_${Date.now()}_custom`,
+          user_id: userId,
+          name: generateUserCharacterName(userId, 'custom'),
+          title: '나만의 동반자',
+          description: getCategoryDescription('custom'),
+          emoji: '⭐',
+          level: 1,
+          experience: 0,
+          max_experience: 100,
+          total_experience: 0,
+          unlocked: true,
+          unlocked_date: new Date().toISOString(),
+          category_id: 'custom',
           completed_missions: 0,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()

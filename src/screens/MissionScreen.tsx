@@ -53,7 +53,7 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation }) => {
         } else {
           Alert.alert(
             '✅ 미션 완료',
-            `+${result.experience || 50} EXP를 획득했습니다!`,
+            `+${result.experienceGained} EXP를 획득했습니다!`,
             [{ text: '확인' }]
           );
         }
