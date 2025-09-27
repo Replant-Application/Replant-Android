@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'rea
 import { useMission } from '../hooks/useMission';
 import { useCharacter } from '../hooks/useCharacter';
 import { MissionCard } from '../components/specialized';
-import { Card, Loading, ErrorBoundary, Button, Header, EmptyState, SectionTitle } from '../components/ui';
+import { Card, Loading, ErrorBoundary, Button, Header, EmptyState, SectionTitle, FAB } from '../components/ui';
 import { colors, spacing, typography, borderRadius } from '../utils/designTokens';
 import { NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '../types/navigation';
@@ -140,22 +140,11 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation }) => {
         {/* 미션 목록 */}
         <View style={styles.missionSection}>
           <View style={styles.sectionHeader}>
-            <View style={styles.sectionTitleContainer}>
-              <SectionTitle
-                title={`${selectedCategory === 'all' ? '전체 미션' :
-                 selectedCategory === 'custom' ? '나만의 미션' :
-                 `${MISSION_CATEGORIES.find(c => c.id === selectedCategory)?.name} 미션`} (${filteredMissions.length}개)`}
-              />
-              {/* 나만의 미션 카테고리일 때만 + 버튼 표시 */}
-              {selectedCategory === 'custom' && (
-                <Button
-                  title="+"
-                  onPress={() => navigation.navigate('CustomMissionCreate')}
-                  style={styles.addButton}
-                  textStyle={styles.addButtonText}
-                />
-              )}
-            </View>
+            <SectionTitle
+              title={`${selectedCategory === 'all' ? '전체 미션' :
+               selectedCategory === 'custom' ? '나만의 미션' :
+               `${MISSION_CATEGORIES.find(c => c.id === selectedCategory)?.name} 미션`} (${filteredMissions.length}개)`}
+            />
           </View>
 
           {filteredMissions.length === 0 ? (
@@ -195,6 +184,13 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation }) => {
           )}
         </View>
       </ScrollView>
+
+      {/* 플로팅 액션 버튼 - 나만의 미션 카테고리일 때만 표시 */}
+      {selectedCategory === 'custom' && (
+        <FAB
+          onPress={() => navigation.navigate('CustomMissionCreate')}
+        />
+      )}
     </View>
   );
 };
@@ -304,38 +300,6 @@ const styles = StyleSheet.create({
     gap: spacing[4],
   },
 
-  sectionTitleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    width: '100%',
-    paddingHorizontal: 0,
-  },
-
-  addButton: {
-    backgroundColor: colors.primary[500],
-    borderRadius: 20,
-    width: 40,
-    height: 40,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginLeft: 'auto',
-    shadowColor: colors.primary[500],
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-
-  addButtonText: {
-    color: colors.white,
-    fontSize: 20,
-    fontWeight: typography.fontWeight.bold,
-    textAlign: 'center',
-  },
 
   missionList: {
     gap: spacing[3],
