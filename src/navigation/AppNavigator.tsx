@@ -118,19 +118,19 @@ const AppNavigator = () => {
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={[styles.tab, currentScreen === SCREEN_NAMES.DIARY && styles.activeTab]}
-          onPress={() => setCurrentScreen(SCREEN_NAMES.DIARY)}
-        >
-          <Text style={styles.tabIcon}>📝</Text>
-          <Text style={styles.tabLabel}>다이어리</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
           style={[styles.tab, currentScreen === SCREEN_NAMES.MISSION && styles.activeTab]}
           onPress={() => setCurrentScreen(SCREEN_NAMES.MISSION)}
         >
           <Text style={styles.tabIcon}>🎯</Text>
           <Text style={styles.tabLabel}>미션</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.tab, currentScreen === SCREEN_NAMES.DIARY && styles.activeTab]}
+          onPress={() => setCurrentScreen(SCREEN_NAMES.DIARY)}
+        >
+          <Text style={styles.tabIcon}>📝</Text>
+          <Text style={styles.tabLabel}>다이어리</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
