@@ -140,11 +140,22 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation }) => {
         {/* 미션 목록 */}
         <View style={styles.missionSection}>
           <View style={styles.sectionHeader}>
-            <SectionTitle
-              title={`${selectedCategory === 'all' ? '전체 미션' :
-               selectedCategory === 'custom' ? '나만의 미션' :
-               `${MISSION_CATEGORIES.find(c => c.id === selectedCategory)?.name} 미션`} (${filteredMissions.length}개)`}
-            />
+            <View style={styles.sectionTitleContainer}>
+              <SectionTitle
+                title={`${selectedCategory === 'all' ? '전체 미션' :
+                 selectedCategory === 'custom' ? '나만의 미션' :
+                 `${MISSION_CATEGORIES.find(c => c.id === selectedCategory)?.name} 미션`} (${filteredMissions.length}개)`}
+              />
+              {/* 나만의 미션 카테고리일 때만 + 버튼 표시 */}
+              {selectedCategory === 'custom' && (
+                <Button
+                  title="+"
+                  onPress={() => navigation.navigate('CustomMissionCreate')}
+                  style={styles.addButton}
+                  textStyle={styles.addButtonText}
+                />
+              )}
+            </View>
           </View>
 
           {filteredMissions.length === 0 ? (
@@ -170,15 +181,17 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation }) => {
               )}
             />
           ) : (
-            filteredMissions.map((mission, index) => (
-              <MissionCard
-                key={`${mission.mission_id}-${mission.id || index}`}
-                mission={mission}
-                onComplete={handleMissionComplete}
-                onUncomplete={handleMissionUncomplete}
-                style={styles.missionCard}
-              />
-            ))
+            <View style={styles.missionList}>
+              {filteredMissions.map((mission, index) => (
+                <MissionCard
+                  key={`${mission.mission_id}-${mission.id || index}`}
+                  mission={mission}
+                  onComplete={handleMissionComplete}
+                  onUncomplete={handleMissionUncomplete}
+                  style={styles.missionCard}
+                />
+              ))}
+            </View>
           )}
         </View>
       </ScrollView>
@@ -278,7 +291,6 @@ const styles = StyleSheet.create({
   },
   sectionHeader: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: spacing[3],
   },
@@ -287,6 +299,48 @@ const styles = StyleSheet.create({
     marginTop: spacing[4],
     alignSelf: 'center',
   },
+
+  missionListContainer: {
+    gap: spacing[4],
+  },
+
+  sectionTitleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    width: '100%',
+    paddingHorizontal: 0,
+  },
+
+  addButton: {
+    backgroundColor: colors.primary[500],
+    borderRadius: 20,
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: 'auto',
+    shadowColor: colors.primary[500],
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+
+  addButtonText: {
+    color: colors.white,
+    fontSize: 20,
+    fontWeight: typography.fontWeight.bold,
+    textAlign: 'center',
+  },
+
+  missionList: {
+    gap: spacing[3],
+  },
+
   missionCard: {
     marginBottom: spacing[3],
   },

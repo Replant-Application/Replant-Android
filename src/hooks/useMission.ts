@@ -14,6 +14,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { getData, updateData, getStorageKeys } from '../services';
+import { createCustomMission as createCustomMissionService, updateCustomMission as updateCustomMissionService, deleteCustomMission as deleteCustomMissionService } from '../services/missionService';
 import { useUser } from '../contexts/UserContext';
 import { logError } from '../utils/logger';
 import { Mission, MissionData, UseMissionReturn, MissionCompletionResult, ServiceResult, ExperienceResult, MissionCategory } from '../types';
@@ -144,20 +145,74 @@ export const useMission = (
     }
   }, [missions, currentNickname]);
 
-  // 커스텀 미션 생성 (placeholder)
-  const createCustomMission = useCallback(async (_missionData: MissionData): Promise<ServiceResult> => {
-    return { success: false, error: '커스텀 미션 생성 기능은 아직 구현되지 않았습니다.' };
-  }, []);
+  // 커스텀 미션 생성
+  const createCustomMission = useCallback(async (missionData: MissionData): Promise<ServiceResult> => {
+    if (!currentNickname) {
+      return { success: false, error: '사용자 정보가 없습니다.' };
+    }
 
-  // 커스텀 미션 업데이트 (placeholder)
-  const updateCustomMission = useCallback(async (_missionId: string, _missionData: MissionData): Promise<ServiceResult> => {
-    return { success: false, error: '커스텀 미션 업데이트 기능은 아직 구현되지 않았습니다.' };
-  }, []);
+    try {
+      const result = await createCustomMissionService(missionData, currentNickname);
 
-  // 커스텀 미션 삭제 (placeholder)
-  const deleteCustomMission = useCallback(async (_missionId: string): Promise<ServiceResult> => {
-    return { success: false, error: '커스텀 미션 삭제 기능은 아직 구현되지 않았습니다.' };
-  }, []);
+      if (result.success && result.data) {
+        // 로컬 상태에 새 미션 추가
+        setMissions(prev => [...prev, result.data!]);
+      }
+
+      return result;
+    } catch (error) {
+      logError('커스텀 미션 생성 실패', error as Error, { missionData, currentNickname });
+      return { success: false, error: (error as Error).message };
+    }
+  }, [currentNickname]);
+
+  // 커스텀 미션 업데이트
+  const updateCustomMission = useCallback(async (missionId: string, missionData: MissionData): Promise<ServiceResult> => {
+    if (!currentNickname) {
+      return { success: false, error: '사용자 정보가 없습니다.' };
+    }
+
+    try {
+      const result = await updateCustomMissionService(missionId, missionData, currentNickname);
+
+      if (result.success && result.data) {
+        // 로컬 상태 업데이트
+        setMissions(prev =>
+          prev.map(m =>
+            m.mission_id === missionId
+              ? result.data!
+              : m
+          )
+        );
+      }
+
+      return result;
+    } catch (error) {
+      logError('커스텀 미션 업데이트 실패', error as Error, { missionId, missionData, currentNickname });
+      return { success: false, error: (error as Error).message };
+    }
+  }, [currentNickname]);
+
+  // 커스텀 미션 삭제
+  const deleteCustomMission = useCallback(async (missionId: string): Promise<ServiceResult> => {
+    if (!currentNickname) {
+      return { success: false, error: '사용자 정보가 없습니다.' };
+    }
+
+    try {
+      const result = await deleteCustomMissionService(missionId, currentNickname);
+
+      if (result.success) {
+        // 로컬 상태에서 미션 제거
+        setMissions(prev => prev.filter(m => m.mission_id !== missionId));
+      }
+
+      return result;
+    } catch (error) {
+      logError('커스텀 미션 삭제 실패', error as Error, { missionId, currentNickname });
+      return { success: false, error: (error as Error).message };
+    }
+  }, [currentNickname]);
 
   // 메모이제이션된 반환 객체
   return useMemo(() => ({
