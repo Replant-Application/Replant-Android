@@ -109,13 +109,6 @@ const SettingsScreen = () => {
           </TouchableOpacity>
         </Card>
 
-        {/* 앱 정보 */}
-        <Card style={styles.appInfoCard}>
-          <SectionTitle title="ℹ️ 앱 정보" size="lg" marginBottom={spacing[3]} />
-          <Text style={styles.appInfo}>버전: 1.0.0 (Build 123)</Text>
-          <Text style={styles.appInfo}>최근 업데이트: 2025.01.26</Text>
-          <Text style={styles.appInfo}>Replant - 감정 회복을 위한 여정</Text>
-        </Card>
       </View>
     </ScrollView>
   );
@@ -154,9 +147,6 @@ const styles = StyleSheet.create({
   accountCard: {
     marginBottom: spacing[6],
   },
-  appInfoCard: {
-    marginBottom: spacing[6],
-  },
   option: {
     backgroundColor: colors.background.primary,
     padding: spacing[4],
@@ -179,11 +169,6 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.base,
     color: colors.error[600],
     fontWeight: typography.fontWeight.medium,
-  },
-  appInfo: {
-    fontSize: typography.fontSize.sm,
-    color: colors.text.secondary,
-    marginBottom: spacing[1],
   },
   nicknameForm: {
     marginTop: spacing[4],
