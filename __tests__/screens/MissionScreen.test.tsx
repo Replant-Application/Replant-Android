@@ -77,10 +77,15 @@ describe('MissionScreen', () => {
     jest.clearAllMocks();
 
     mockUseCharacter.mockReturnValue({
+      characters: [],
       representativeCharacter: null,
       loading: false,
       error: null,
       addExperienceByCategory: jest.fn(),
+      setRepresentative: jest.fn(),
+      createCharacter: jest.fn(),
+      updateCharacter: jest.fn(),
+      deleteCharacter: jest.fn(),
     });
 
     mockUseMission.mockReturnValue({
@@ -89,6 +94,9 @@ describe('MissionScreen', () => {
       error: null,
       completeMissionWithPhoto: jest.fn(),
       uncompleteMission: jest.fn(),
+      createCustomMission: jest.fn(),
+      updateCustomMission: jest.fn(),
+      deleteCustomMission: jest.fn(),
     });
   });
 
@@ -121,7 +129,9 @@ describe('MissionScreen', () => {
 
     // 자기관리 카테고리 선택 (첫 번째 "자기관리"는 카테고리 버튼)
     const selfManagementButtons = getAllByText('자기관리');
-    fireEvent.press(selfManagementButtons[0]);
+    if (selfManagementButtons[0]) {
+      fireEvent.press(selfManagementButtons[0]);
+    }
 
     // 자기관리 미션만 표시
     expect(getAllByText('자기관리 미션')).toHaveLength(1);
@@ -136,7 +146,9 @@ describe('MissionScreen', () => {
 
     // 소통관리 카테고리 선택 (첫 번째 "소통관리"는 카테고리 버튼)
     const communicationButtons = getAllByText('소통관리');
-    fireEvent.press(communicationButtons[0]);
+    if (communicationButtons[0]) {
+      fireEvent.press(communicationButtons[0]);
+    }
 
     // 소통관리 미션만 표시
     expect(getAllByText('소통관리 미션')).toHaveLength(1);
@@ -161,7 +173,9 @@ describe('MissionScreen', () => {
 
     // 소통관리 카테고리 선택
     const communicationButtons = getAllByText('소통관리');
-    fireEvent.press(communicationButtons[0]);
+    if (communicationButtons[0]) {
+      fireEvent.press(communicationButtons[0]);
+    }
 
     // 완료 버튼이 표시되는지 확인
     const completeButtons = getAllByText('완료하기');
@@ -175,7 +189,9 @@ describe('MissionScreen', () => {
 
     // 커리어관리 카테고리 선택
     const careerButtons = getAllByText('커리어관리');
-    fireEvent.press(careerButtons[0]);
+    if (careerButtons[0]) {
+      fireEvent.press(careerButtons[0]);
+    }
 
     // 완료 버튼이 표시되는지 확인
     const completeButtons = getAllByText('완료하기');
@@ -206,10 +222,10 @@ describe('MissionScreen', () => {
   });
 
   it('진행률이 올바르게 표시된다', () => {
-    const completedMissions = [
-      { ...mockMissions[0], completed: true },
-      { ...mockMissions[1], completed: false },
-      { ...mockMissions[2], completed: false }
+    const completedMissions: Mission[] = [
+      { ...mockMissions[0], completed: true } as Mission,
+      { ...mockMissions[1], completed: false } as Mission,
+      { ...mockMissions[2], completed: false } as Mission
     ];
 
     mockUseMission.mockReturnValue({
@@ -218,6 +234,9 @@ describe('MissionScreen', () => {
       error: null,
       completeMissionWithPhoto: jest.fn(),
       uncompleteMission: jest.fn(),
+      createCustomMission: jest.fn(),
+      updateCustomMission: jest.fn(),
+      deleteCustomMission: jest.fn(),
     });
 
     const { getByText } = render(
@@ -236,6 +255,9 @@ describe('MissionScreen', () => {
       error: null,
       completeMissionWithPhoto: jest.fn(),
       uncompleteMission: jest.fn(),
+      createCustomMission: jest.fn(),
+      updateCustomMission: jest.fn(),
+      deleteCustomMission: jest.fn(),
     });
 
     const { getByText } = render(
@@ -253,6 +275,9 @@ describe('MissionScreen', () => {
       error: null,
       completeMissionWithPhoto: jest.fn(),
       uncompleteMission: jest.fn(),
+      createCustomMission: jest.fn(),
+      updateCustomMission: jest.fn(),
+      deleteCustomMission: jest.fn(),
     });
 
     const { getByText } = render(
@@ -269,6 +294,9 @@ describe('MissionScreen', () => {
       error: '미션을 불러올 수 없습니다.',
       completeMissionWithPhoto: jest.fn(),
       uncompleteMission: jest.fn(),
+      createCustomMission: jest.fn(),
+      updateCustomMission: jest.fn(),
+      deleteCustomMission: jest.fn(),
     });
 
     const { getByText } = render(

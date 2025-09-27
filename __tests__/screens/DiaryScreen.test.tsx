@@ -13,13 +13,13 @@ const mockDiaries = [
   {
     id: 'diary-1',
     content: '오늘은 좋은 하루였어요',
-    emotion: 'happy',
+    emotion: 'happy' as const,
     date: '2024-01-01'
   },
   {
     id: 'diary-2',
     content: '조금 피곤한 하루였어요',
-    emotion: 'tired',
+    emotion: 'tired' as const,
     date: '2024-01-02'
   }
 ];
@@ -32,6 +32,7 @@ describe('DiaryScreen', () => {
       diaries: mockDiaries,
       loading: false,
       error: null,
+      loadDiaries: jest.fn(),
       saveDiary: jest.fn(),
       updateDiary: jest.fn(),
       deleteDiary: jest.fn(),
@@ -120,6 +121,7 @@ describe('DiaryScreen', () => {
       diaries: [],
       loading: false,
       error: null,
+      loadDiaries: jest.fn(),
       saveDiary: jest.fn(),
       updateDiary: jest.fn(),
       deleteDiary: jest.fn(),
@@ -136,6 +138,7 @@ describe('DiaryScreen', () => {
       diaries: [],
       loading: true,
       error: null,
+      loadDiaries: jest.fn(),
       saveDiary: jest.fn(),
       updateDiary: jest.fn(),
       deleteDiary: jest.fn(),
@@ -151,6 +154,7 @@ describe('DiaryScreen', () => {
       diaries: [],
       loading: false,
       error: '일기를 불러올 수 없습니다.',
+      loadDiaries: jest.fn(),
       saveDiary: jest.fn(),
       updateDiary: jest.fn(),
       deleteDiary: jest.fn(),
@@ -168,6 +172,7 @@ describe('DiaryScreen', () => {
       diaries: mockDiaries,
       loading: false,
       error: null,
+      loadDiaries: jest.fn(),
       saveDiary: mockSaveDiary,
       updateDiary: jest.fn(),
       deleteDiary: jest.fn(),

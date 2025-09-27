@@ -58,14 +58,19 @@ const mockMissions: Mission[] = [
 ];
 
 const mockRepresentativeCharacter: Character = {
-  id: 1,
+  id: '1',
   character_id: 'char-1',
   name: '테스트 대표 캐릭터',
+  title: '테스트 대표 캐릭터',
+  description: '매일 조금씩 성장하며 나만의 길을 찾아가요',
+  emoji: '🧘',
   level: 3,
   experience: 150,
   total_experience: 250,
+  max_experience: 300,
+  unlocked: true,
+  completed_missions: 5,
   category_id: 'self_management',
-  image_url: undefined,
   unlocked_date: '2024-01-01T00:00:00Z',
   created_at: '2024-01-01T00:00:00Z',
   updated_at: '2024-01-01T00:00:00Z'
@@ -77,10 +82,15 @@ describe('HomeScreen', () => {
     jest.clearAllMocks();
 
     mockUseCharacter.mockReturnValue({
+      characters: [],
       representativeCharacter: mockRepresentativeCharacter,
       loading: false,
       error: null,
       addExperienceByCategory: jest.fn(),
+      setRepresentative: jest.fn(),
+      createCharacter: jest.fn(),
+      updateCharacter: jest.fn(),
+      deleteCharacter: jest.fn(),
     });
 
     mockUseMission.mockReturnValue({
@@ -89,6 +99,9 @@ describe('HomeScreen', () => {
       error: null,
       completeMissionWithPhoto: jest.fn(),
       uncompleteMission: jest.fn(),
+      createCustomMission: jest.fn(),
+      updateCustomMission: jest.fn(),
+      deleteCustomMission: jest.fn(),
     });
   });
 
@@ -107,7 +120,9 @@ describe('HomeScreen', () => {
     );
 
     const viewDetailsButtons = getAllByText('자세히 보기');
-    fireEvent.press(viewDetailsButtons[0]);
+    if (viewDetailsButtons[0]) {
+      fireEvent.press(viewDetailsButtons[0]);
+    }
 
     await waitFor(() => {
       expect(mockNavigation.navigate).toHaveBeenCalledWith('Mission');
@@ -123,16 +138,20 @@ describe('HomeScreen', () => {
     expect(viewDetailsButtons).toHaveLength(2);
 
     // 첫 번째 버튼 클릭
-    fireEvent.press(viewDetailsButtons[0]);
-    await waitFor(() => {
-      expect(mockNavigation.navigate).toHaveBeenCalledWith('Mission');
-    });
+    if (viewDetailsButtons[0]) {
+      fireEvent.press(viewDetailsButtons[0]);
+      await waitFor(() => {
+        expect(mockNavigation.navigate).toHaveBeenCalledWith('Mission');
+      });
+    }
 
     // 두 번째 버튼 클릭
-    fireEvent.press(viewDetailsButtons[1]);
-    await waitFor(() => {
-      expect(mockNavigation.navigate).toHaveBeenCalledWith('Mission');
-    });
+    if (viewDetailsButtons[1]) {
+      fireEvent.press(viewDetailsButtons[1]);
+      await waitFor(() => {
+        expect(mockNavigation.navigate).toHaveBeenCalledWith('Mission');
+      });
+    }
 
     expect(mockNavigation.navigate).toHaveBeenCalledTimes(2);
   });
@@ -158,6 +177,9 @@ describe('HomeScreen', () => {
       error: null,
       completeMissionWithPhoto: jest.fn(),
       uncompleteMission: jest.fn(),
+      createCustomMission: jest.fn(),
+      updateCustomMission: jest.fn(),
+      deleteCustomMission: jest.fn(),
     });
 
     const { getByText } = render(
@@ -175,6 +197,9 @@ describe('HomeScreen', () => {
       error: null,
       completeMissionWithPhoto: jest.fn(),
       uncompleteMission: jest.fn(),
+      createCustomMission: jest.fn(),
+      updateCustomMission: jest.fn(),
+      deleteCustomMission: jest.fn(),
     });
 
     const { getByText } = render(
