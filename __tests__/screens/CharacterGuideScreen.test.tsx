@@ -88,14 +88,14 @@ describe('CharacterGuideScreen', () => {
 
     mockUseCharacter.mockReturnValue({
       characters: mockCharacters,
+      selectedCharacter: null,
       representativeCharacter: mockRepresentativeCharacter,
       loading: false,
       error: null,
+      loadCharacters: jest.fn(),
       addExperienceByCategory: jest.fn(),
+      selectCharacter: jest.fn(),
       setRepresentative: jest.fn(),
-      createCharacter: jest.fn(),
-      updateCharacter: jest.fn(),
-      deleteCharacter: jest.fn(),
     });
   });
 
@@ -218,14 +218,14 @@ describe('CharacterGuideScreen', () => {
   it('캐릭터가 없을 때 EmptyState가 표시된다', () => {
     mockUseCharacter.mockReturnValue({
       characters: [],
+      selectedCharacter: null,
       representativeCharacter: null,
       loading: false,
       error: null,
+      loadCharacters: jest.fn(),
       addExperienceByCategory: jest.fn(),
+      selectCharacter: jest.fn(),
       setRepresentative: jest.fn(),
-      createCharacter: jest.fn(),
-      updateCharacter: jest.fn(),
-      deleteCharacter: jest.fn(),
     });
 
     const { getByText } = render(
@@ -239,14 +239,14 @@ describe('CharacterGuideScreen', () => {
   it('로딩 중일 때 로딩 상태가 표시된다', () => {
     mockUseCharacter.mockReturnValue({
       characters: [],
+      selectedCharacter: null,
       representativeCharacter: null,
       loading: true,
       error: null,
+      loadCharacters: jest.fn(),
       addExperienceByCategory: jest.fn(),
+      selectCharacter: jest.fn(),
       setRepresentative: jest.fn(),
-      createCharacter: jest.fn(),
-      updateCharacter: jest.fn(),
-      deleteCharacter: jest.fn(),
     });
 
     const { getByText } = render(
@@ -259,14 +259,14 @@ describe('CharacterGuideScreen', () => {
   it('에러 발생 시 에러 상태가 표시된다', () => {
     mockUseCharacter.mockReturnValue({
       characters: [],
+      selectedCharacter: null,
       representativeCharacter: null,
       loading: false,
       error: '캐릭터 정보를 불러올 수 없습니다.',
+      loadCharacters: jest.fn(),
       addExperienceByCategory: jest.fn(),
+      selectCharacter: jest.fn(),
       setRepresentative: jest.fn(),
-      createCharacter: jest.fn(),
-      updateCharacter: jest.fn(),
-      deleteCharacter: jest.fn(),
     });
 
     const { getByText } = render(

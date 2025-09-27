@@ -83,14 +83,14 @@ describe('HomeScreen', () => {
 
     mockUseCharacter.mockReturnValue({
       characters: [],
+      selectedCharacter: null,
       representativeCharacter: mockRepresentativeCharacter,
       loading: false,
       error: null,
+      loadCharacters: jest.fn(),
       addExperienceByCategory: jest.fn(),
+      selectCharacter: jest.fn(),
       setRepresentative: jest.fn(),
-      createCharacter: jest.fn(),
-      updateCharacter: jest.fn(),
-      deleteCharacter: jest.fn(),
     });
 
     mockUseMission.mockReturnValue({

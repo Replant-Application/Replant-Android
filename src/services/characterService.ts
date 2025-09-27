@@ -59,48 +59,6 @@ export const autoLevelupCharacter = async (
   }
 };
 
-// 캐릭터 생성
-export const createCharacter = async (
-  characterData: CharacterData,
-  nickname: string
-): Promise<ServiceResult<Character>> => {
-  try {
-    const storageKeys = getStorageKeys(nickname);
-    const characters: Character[] = await getData(storageKeys.CHARACTERS) || [];
-
-    const newCharacter: Character = {
-      id: Date.now().toString(),
-      character_id: `character_${Date.now()}`,
-      name: characterData.name,
-      title: characterData.name,
-      description: characterData.description || '',
-      emoji: characterData.emoji || '🌱',
-      level: 1,
-      experience: 0,
-      total_experience: 0,
-      max_experience: 100,
-      unlocked: false,
-      category_id: characterData.category_id,
-      completed_missions: 0,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
-    };
-
-    const updatedCharacters: Character[] = [...characters, newCharacter];
-    await setData(storageKeys.CHARACTERS, updatedCharacters);
-
-    return {
-      success: true,
-      data: newCharacter
-    };
-  } catch (error) {
-    logError('캐릭터 생성 실패', error as Error, { characterData, nickname });
-    return {
-      success: false,
-      error: (error as Error).message
-    };
-  }
-};
 
 // 캐릭터 조회
 export const getCharacters = async (nickname: string): Promise<Character[]> => {

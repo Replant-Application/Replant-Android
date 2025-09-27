@@ -176,20 +176,6 @@ export const useCharacter = (): UseCharacterReturn => {
     }
   }, [characters, currentNickname]);
 
-  // 캐릭터 생성 (placeholder)
-  const createCharacter = useCallback(async (_characterData: CharacterData): Promise<ServiceResult> => {
-    return { success: false, error: '캐릭터 생성 기능은 아직 구현되지 않았습니다.' };
-  }, []);
-
-  // 캐릭터 업데이트 (placeholder)
-  const updateCharacter = useCallback(async (_characterId: string, _characterData: CharacterData): Promise<ServiceResult> => {
-    return { success: false, error: '캐릭터 업데이트 기능은 아직 구현되지 않았습니다.' };
-  }, []);
-
-  // 캐릭터 삭제 (placeholder)
-  const deleteCharacter = useCallback(async (_characterId: string): Promise<ServiceResult> => {
-    return { success: false, error: '캐릭터 삭제 기능은 아직 구현되지 않았습니다.' };
-  }, []);
 
   // 메모이제이션된 반환 객체
   return useMemo(() => ({
@@ -202,9 +188,6 @@ export const useCharacter = (): UseCharacterReturn => {
     addExperienceByCategory,
     selectCharacter,
     setRepresentative,
-    createCharacter,
-    updateCharacter,
-    deleteCharacter,
   }), [
     characters,
     selectedCharacter,
@@ -215,8 +198,5 @@ export const useCharacter = (): UseCharacterReturn => {
     addExperienceByCategory,
     selectCharacter,
     setRepresentative,
-    createCharacter,
-    updateCharacter,
-    deleteCharacter,
   ]);
 };

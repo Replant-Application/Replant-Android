@@ -6,7 +6,6 @@ import { useMission } from '../hooks/useMission';
 import { CharacterCard, MissionCard } from '../components/specialized';
 import { Card, Loading, ErrorBoundary, Header, EmptyState, SectionTitle } from '../components/ui';
 import { colors, spacing, typography } from '../utils/designTokens';
-// import { executeWithErrorHandling } from '../utils/errorHandler';
 import { RootStackParamList } from '../types/navigation';
 
 interface HomeScreenProps {
@@ -14,8 +13,8 @@ interface HomeScreenProps {
 }
 
 const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
-  const { representativeCharacter, loading: characterLoading, error: characterError, addExperienceByCategory } = useCharacter();
-  const { missions, loading: missionLoading, error: missionError } = useMission(addExperienceByCategory);
+  const { representativeCharacter, loading: characterLoading, error: characterError } = useCharacter();
+  const { missions, loading: missionLoading, error: missionError } = useMission();
 
 
   // 추천 미션 (카테고리 우선순위: 자기관리 → 소통관리 → 커리어관리)
@@ -42,29 +41,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
     })
     .slice(0, 3);
 
-  // 미션 완료 핸들러 (현재 사용되지 않음)
-  // const handleCompleteMission = async (missionId: string): Promise<void> => {
-  //   const result = await executeWithErrorHandling(
-  //     () => completeMissionWithPhoto(missionId, null),
-  //     '미션 완료'
-  //   );
-
-  //   if (result.success) {
-  //     // 성공 시 추가 처리 (예: 토스트 메시지)
-  //   }
-  // };
-
-  // 미션 완료 취소 핸들러 (현재 사용되지 않음)
-  // const handleUncompleteMission = async (missionId: string): Promise<void> => {
-  //   const result = await executeWithErrorHandling(
-  //     () => uncompleteMission(missionId),
-  //     '미션 완료 취소'
-  //   );
-
-  //   if (result.success) {
-  //     // 성공 시 추가 처리
-  //   }
-  // };
 
   // 미션 상세 보기 핸들러 (미션 페이지로 이동)
   const handleViewMissionDetails = (_missionId: string): void => {
@@ -79,44 +55,9 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   };
 
 
-  // 캐릭터 로딩 중이면 로딩 화면 표시
-  if (characterLoading) {
-    return <Loading text="캐릭터를 불러오는 중..." />;
-  }
-
+  // 에러 처리
   if (characterError || missionError) {
     return <ErrorBoundary error={characterError || missionError || 'Unknown error'} />;
-  }
-
-  // 미션 로딩 중이면 미션 부분만 로딩 표시
-  if (missionLoading) {
-  return (
-    <ScrollView style={styles.container}>
-      <Header />
-      <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <SectionTitle title="나의 캐릭터" />
-          </View>
-          {representativeCharacter ? (
-            <CharacterCard
-              character={representativeCharacter}
-              onPress={handleCharacterPress}
-            />
-          ) : (
-            <View style={styles.emptyCharacterCard}>
-              <Text style={styles.emptyCharacterText}>캐릭터를 불러올 수 없습니다.</Text>
-            </View>
-          )}
-        </View>
-
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <SectionTitle title="추천 미션" />
-          </View>
-          <Loading text="미션을 불러오는 중..." />
-        </View>
-      </ScrollView>
-    );
   }
 
   return (
@@ -128,11 +69,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
         <View style={styles.characterSection}>
           <SectionTitle title="🌱 나의 캐릭터" />
           {characterLoading ? (
-            <Card style={styles.emptyCharacterCard}>
-              <Text style={styles.emptyCharacterText}>
-                캐릭터를 불러오는 중...
-              </Text>
-            </Card>
+            <Loading text="캐릭터를 불러오는 중..." />
           ) : representativeCharacter ? (
             <CharacterCard
               character={representativeCharacter}
@@ -151,7 +88,9 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
         {/* 추천 미션 */}
         <View style={styles.missionSection}>
           <SectionTitle title="🎯 추천 미션" />
-          {recommendedMissions.length > 0 ? (
+          {missionLoading ? (
+            <Loading text="미션을 불러오는 중..." />
+          ) : recommendedMissions.length > 0 ? (
             recommendedMissions.map((mission) => (
               <MissionCard
                 key={mission.mission_id}
@@ -202,15 +141,6 @@ const styles = StyleSheet.create({
   },
   missionCard: {
     marginBottom: spacing[3],
-  },
-  section: {
-    marginBottom: spacing[6],
-  },
-  sectionHeader: {
-    fontSize: typography.fontSize.xl,
-    fontWeight: typography.fontWeight.bold,
-    color: colors.text.primary,
-    marginBottom: spacing[4],
   },
 });
 
