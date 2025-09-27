@@ -101,206 +101,6 @@
   },
   {
     "id": 11,
-    "mission_id": "cm1",
-    "title": "가족·친구 안부 메시지 전송",
-    "description": "가족이나 친구에게 안부 메시지 1회 전송",
-    "emoji": "💬",
-    "difficulty": "easy",
-    "experience": 30,
-    "category_id": "communication"
-  },
-  {
-    "id": 12,
-    "mission_id": "cm2",
-    "title": "커뮤니티 글/댓글 작성",
-    "description": "커뮤니티에 글이나 댓글 1개 작성",
-    "emoji": "📝",
-    "difficulty": "easy",
-    "experience": 35,
-    "category_id": "communication"
-  },
-  {
-    "id": 13,
-    "mission_id": "cm3",
-    "title": "지인과 10분 전화 통화",
-    "description": "지인과 10분 이상 전화 통화",
-    "emoji": "📞",
-    "difficulty": "medium",
-    "experience": 50,
-    "category_id": "communication"
-  },
-  {
-    "id": 14,
-    "mission_id": "cm4",
-    "title": "온라인 그룹 자기소개 1줄",
-    "description": "온라인 그룹/오픈채팅방에서 자기소개 1줄 남기기",
-    "emoji": "👋",
-    "difficulty": "easy",
-    "experience": 40,
-    "category_id": "communication"
-  },
-  {
-    "id": 15,
-    "mission_id": "cm5",
-    "title": "자기소개 영상 피드백 요청",
-    "description": "자기소개 영상 업로드 후 피드백 요청",
-    "emoji": "📹",
-    "difficulty": "medium",
-    "experience": 60,
-    "category_id": "communication"
-  },
-  {
-    "id": 16,
-    "mission_id": "cm6",
-    "title": "친구/멘토와 예상 질문 주고받기",
-    "description": "친구나 멘토와 예상 질문 1개 주고받기",
-    "emoji": "❓",
-    "difficulty": "medium",
-    "experience": 55,
-    "category_id": "communication"
-  },
-  {
-    "id": 17,
-    "mission_id": "cm7",
-    "title": "면접 빈출 질문 소리내어 답변",
-    "description": "면접 빈출 질문 1개 선택 후 소리 내어 답변",
-    "emoji": "🗣️",
-    "difficulty": "medium",
-    "experience": 50,
-    "category_id": "communication"
-  },
-  {
-    "id": 18,
-    "mission_id": "cm8",
-    "title": "멘토/교수님께 이메일 질문",
-    "description": "멘토나 교수님께 이메일로 질문 1개 보내기",
-    "emoji": "📧",
-    "difficulty": "medium",
-    "experience": 45,
-    "category_id": "communication"
-  },
-  {
-    "id": 19,
-    "mission_id": "cm9",
-    "title": "가상 면접 파트너와 5분 대화",
-    "description": "가상 면접 파트너와 5분 대화 연습",
-    "emoji": "💻",
-    "difficulty": "medium",
-    "experience": 100,
-    "category_id": "communication"
-  },
-  {
-    "id": 20,
-    "mission_id": "cm10",
-    "title": "면접 스터디 그룹 참여",
-    "description": "면접 스터디 그룹 참여 신청",
-    "emoji": "👥",
-    "difficulty": "medium",
-    "experience": 55,
-    "category_id": "communication"
-  },
-  {
-    "id": 21,
-    "mission_id": "cr1",
-    "title": "직무 키워드 3개 정리",
-    "description": "관심 직무와 기업 키워드 3개 검색 및 정리",
-    "emoji": "🔍",
-    "difficulty": "easy",
-    "experience": 40,
-    "category_id": "career"
-  },
-  {
-    "id": 22,
-    "mission_id": "cr2",
-    "title": "채용 사이트 공고 1개 저장",
-    "description": "채용 사이트에서 관심 있는 공고 1개 저장",
-    "emoji": "💼",
-    "difficulty": "easy",
-    "experience": 35,
-    "category_id": "career"
-  },
-  {
-    "id": 23,
-    "mission_id": "cr3",
-    "title": "자기소개서 문장 3줄 작성",
-    "description": "자기소개서 문장 3줄 작성",
-    "emoji": "📝",
-    "difficulty": "medium",
-    "experience": 55,
-    "category_id": "career"
-  },
-  {
-    "id": 24,
-    "mission_id": "cr4",
-    "title": "내 강점 키워드 3개 정리",
-    "description": "나의 강점을 키워드 3개로 정리",
-    "emoji": "💪",
-    "difficulty": "easy",
-    "experience": 45,
-    "category_id": "career"
-  },
-  {
-    "id": 25,
-    "mission_id": "cr5",
-    "title": "이력서 기본 항목 채우기",
-    "description": "이력서 학력, 경력, 자격증 등 기본 항목 채우기",
-    "emoji": "📄",
-    "difficulty": "medium",
-    "experience": 60,
-    "category_id": "career"
-  },
-  {
-    "id": 26,
-    "mission_id": "cr6",
-    "title": "직무 관련 강의/기사 요약",
-    "description": "직무 관련 유튜브 강의/기사 1개 보고 요약",
-    "emoji": "📺",
-    "difficulty": "medium",
-    "experience": 50,
-    "category_id": "career"
-  },
-  {
-    "id": 27,
-    "mission_id": "cr7",
-    "title": "예상 질문 답변 작성 후 낭독",
-    "description": "예상 질문 1개에 답변 작성 후 낭독",
-    "emoji": "🗣️",
-    "difficulty": "medium",
-    "experience": 55,
-    "category_id": "career"
-  },
-  {
-    "id": 28,
-    "mission_id": "cr8",
-    "title": "관심 기업 홈페이지 탐색",
-    "description": "관심 기업 1곳 홈페이지 탐색 후 비전·가치 정리",
-    "emoji": "🏢",
-    "difficulty": "medium",
-    "experience": 50,
-    "category_id": "career"
-  },
-  {
-    "id": 29,
-    "mission_id": "cr9",
-    "title": "3개월 취업 준비 목표 3가지",
-    "description": "3개월 내 취업 준비 목표 3가지 작성",
-    "emoji": "🎯",
-    "difficulty": "easy",
-    "experience": 100,
-    "category_id": "career"
-  },
-  {
-    "id": 30,
-    "mission_id": "cr10",
-    "title": "직무와 연결 가능한 경험 사례 정리",
-    "description": "나의 경험 중 직무와 연결 가능한 사례 1개 정리",
-    "emoji": "📋",
-    "difficulty": "medium",
-    "experience": 55,
-    "category_id": "career"
-  },
-  {
-    "id": 31,
     "mission_id": "sm11",
     "title": "면접용 헤어·메이크업 연습",
     "description": "면접용 헤어스타일과 메이크업 연습",
@@ -310,7 +110,7 @@
     "category_id": "self_management"
   },
   {
-    "id": 32,
+    "id": 12,
     "mission_id": "sm12",
     "title": "취업 기사 읽고 핵심 문장 기록",
     "description": "취업 관련 기사 읽고 인상 깊은 문장 1줄 기록",
@@ -320,7 +120,7 @@
     "category_id": "self_management"
   },
   {
-    "id": 33,
+    "id": 13,
     "mission_id": "sm13",
     "title": "정장 착용 증명사진 촬영",
     "description": "이력서용 정장 착용 증명사진 촬영",
@@ -330,7 +130,7 @@
     "category_id": "self_management"
   },
   {
-    "id": 34,
+    "id": 14,
     "mission_id": "sm14",
     "title": "면접 시뮬레이션 앱 활용",
     "description": "면접 시뮬레이션 앱 활용 후 소감 작성",
@@ -340,7 +140,7 @@
     "category_id": "self_management"
   },
   {
-    "id": 35,
+    "id": 15,
     "mission_id": "sm15",
     "title": "일주일 수면시간 기록",
     "description": "일주일간 수면시간 기록 및 개선점 찾기",
@@ -350,7 +150,7 @@
     "category_id": "self_management"
   },
   {
-    "id": 36,
+    "id": 16,
     "mission_id": "sm16",
     "title": "멘토 피드백 요청",
     "description": "복장/헤어스타일 관련 멘토 피드백 요청",
@@ -360,7 +160,7 @@
     "category_id": "self_management"
   },
   {
-    "id": 37,
+    "id": 17,
     "mission_id": "sm17",
     "title": "아침 5분 스트레칭 루틴",
     "description": "아침 기상 후 5분 스트레칭 루틴 실천",
@@ -370,7 +170,7 @@
     "category_id": "self_management"
   },
   {
-    "id": 38,
+    "id": 18,
     "mission_id": "sm18",
     "title": "하루 물 2리터 마시기",
     "description": "매일 물 2리터 마시기 체크",
@@ -380,7 +180,7 @@
     "category_id": "self_management"
   },
   {
-    "id": 39,
+    "id": 19,
     "mission_id": "sm19",
     "title": "주간 자기관리 목표 3가지",
     "description": "주간 자기관리 목표 3가지 기록",
@@ -390,7 +190,7 @@
     "category_id": "self_management"
   },
   {
-    "id": 40,
+    "id": 20,
     "mission_id": "sm20",
     "title": "건강 검진 예약",
     "description": "건강 검진 항목 확인 및 예약",
@@ -400,7 +200,7 @@
     "category_id": "self_management"
   },
   {
-    "id": 41,
+    "id": 21,
     "mission_id": "sm21",
     "title": "면접용 자기소개 암기",
     "description": "면접용 자기소개 암기 및 점검",
@@ -410,7 +210,7 @@
     "category_id": "self_management"
   },
   {
-    "id": 42,
+    "id": 22,
     "mission_id": "sm22",
     "title": "취업용 이메일 계정 정리",
     "description": "취업용 이메일 계정 정리 및 서명 등록",
@@ -420,7 +220,107 @@
     "category_id": "self_management"
   },
   {
-    "id": 43,
+    "id": 23,
+    "mission_id": "cm1",
+    "title": "가족·친구 안부 메시지 전송",
+    "description": "가족이나 친구에게 안부 메시지 1회 전송",
+    "emoji": "💬",
+    "difficulty": "easy",
+    "experience": 30,
+    "category_id": "communication"
+  },
+  {
+    "id": 24,
+    "mission_id": "cm2",
+    "title": "커뮤니티 글/댓글 작성",
+    "description": "커뮤니티에 글이나 댓글 1개 작성",
+    "emoji": "📝",
+    "difficulty": "easy",
+    "experience": 35,
+    "category_id": "communication"
+  },
+  {
+    "id": 25,
+    "mission_id": "cm3",
+    "title": "지인과 10분 전화 통화",
+    "description": "지인과 10분 이상 전화 통화",
+    "emoji": "📞",
+    "difficulty": "medium",
+    "experience": 50,
+    "category_id": "communication"
+  },
+  {
+    "id": 26,
+    "mission_id": "cm4",
+    "title": "온라인 그룹 자기소개 1줄",
+    "description": "온라인 그룹/오픈채팅방에서 자기소개 1줄 남기기",
+    "emoji": "👋",
+    "difficulty": "easy",
+    "experience": 40,
+    "category_id": "communication"
+  },
+  {
+    "id": 27,
+    "mission_id": "cm5",
+    "title": "자기소개 영상 피드백 요청",
+    "description": "자기소개 영상 업로드 후 피드백 요청",
+    "emoji": "📹",
+    "difficulty": "medium",
+    "experience": 60,
+    "category_id": "communication"
+  },
+  {
+    "id": 28,
+    "mission_id": "cm6",
+    "title": "친구/멘토와 예상 질문 주고받기",
+    "description": "친구나 멘토와 예상 질문 1개 주고받기",
+    "emoji": "❓",
+    "difficulty": "medium",
+    "experience": 55,
+    "category_id": "communication"
+  },
+  {
+    "id": 29,
+    "mission_id": "cm7",
+    "title": "면접 빈출 질문 소리내어 답변",
+    "description": "면접 빈출 질문 1개 선택 후 소리 내어 답변",
+    "emoji": "🗣️",
+    "difficulty": "medium",
+    "experience": 50,
+    "category_id": "communication"
+  },
+  {
+    "id": 30,
+    "mission_id": "cm8",
+    "title": "멘토/교수님께 이메일 질문",
+    "description": "멘토나 교수님께 이메일로 질문 1개 보내기",
+    "emoji": "📧",
+    "difficulty": "medium",
+    "experience": 45,
+    "category_id": "communication"
+  },
+  {
+    "id": 31,
+    "mission_id": "cm9",
+    "title": "가상 면접 파트너와 5분 대화",
+    "description": "가상 면접 파트너와 5분 대화 연습",
+    "emoji": "💻",
+    "difficulty": "medium",
+    "experience": 100,
+    "category_id": "communication"
+  },
+  {
+    "id": 32,
+    "mission_id": "cm10",
+    "title": "면접 스터디 그룹 참여",
+    "description": "면접 스터디 그룹 참여 신청",
+    "emoji": "👥",
+    "difficulty": "medium",
+    "experience": 55,
+    "category_id": "communication"
+  },
+  {
+    "id": 33,
     "mission_id": "cm11",
     "title": "하루 감사한 일 1가지 공유",
     "description": "하루 감사한 일 1가지 적어 공유",
@@ -430,7 +330,7 @@
     "category_id": "communication"
   },
   {
-    "id": 44,
+    "id": 34,
     "mission_id": "cm12",
     "title": "직무 관련 게시글 소감 댓글",
     "description": "관심 직무 관련 게시글 읽고 짧은 소감 댓글 남기기",
@@ -440,7 +340,7 @@
     "category_id": "communication"
   },
   {
-    "id": 45,
+    "id": 35,
     "mission_id": "cm13",
     "title": "하루 대화 경험 1가지 기록",
     "description": "하루 대화 경험 1가지 기록",
@@ -450,7 +350,7 @@
     "category_id": "communication"
   },
   {
-    "id": 46,
+    "id": 36,
     "mission_id": "cm14",
     "title": "스터디 모임에서 역할 맡기",
     "description": "스터디 모임에서 본인 역할 맡기",
@@ -460,7 +360,7 @@
     "category_id": "communication"
   },
   {
-    "id": 47,
+    "id": 37,
     "mission_id": "cm15",
     "title": "관심 분야 오픈채팅방 의견 남기기",
     "description": "관심 분야 오픈채팅방에서 의견 남기기",
@@ -470,7 +370,7 @@
     "category_id": "communication"
   },
   {
-    "id": 48,
+    "id": 38,
     "mission_id": "cm16",
     "title": "관심 직무 온라인 세미나 참가",
     "description": "관심 직무 온라인 세미나 참가",
@@ -480,7 +380,7 @@
     "category_id": "communication"
   },
   {
-    "id": 49,
+    "id": 39,
     "mission_id": "cm17",
     "title": "자기소개서 초안 피드백 받기",
     "description": "지인에게 자기소개서 초안 공유하고 피드백 받기",
@@ -490,7 +390,7 @@
     "category_id": "communication"
   },
   {
-    "id": 50,
+    "id": 40,
     "mission_id": "cm18",
     "title": "직무 관련 네트워킹 모임 참가",
     "description": "직무 관련 네트워킹 모임 참가",
@@ -500,7 +400,7 @@
     "category_id": "communication"
   },
   {
-    "id": 51,
+    "id": 41,
     "mission_id": "cm19",
     "title": "하루 최소 1명과 인사",
     "description": "하루에 최소 1명과 인사 나누기",
@@ -510,7 +410,7 @@
     "category_id": "communication"
   },
   {
-    "id": 52,
+    "id": 42,
     "mission_id": "cm20",
     "title": "전문가 인터뷰 질문 3개 준비",
     "description": "전문가 인터뷰 질문 3개 준비",
@@ -520,7 +420,7 @@
     "category_id": "communication"
   },
   {
-    "id": 53,
+    "id": 43,
     "mission_id": "cm21",
     "title": "취업 멘토링 세션 신청 및 후기",
     "description": "취업 멘토링 세션 신청 및 후기 작성",
@@ -530,7 +430,7 @@
     "category_id": "communication"
   },
   {
-    "id": 54,
+    "id": 44,
     "mission_id": "cm22",
     "title": "관심 기업 HR 담당자 인사 메일",
     "description": "관심 기업 HR 담당자에게 인사 메일 보내기",
@@ -538,6 +438,106 @@
     "difficulty": "hard",
     "experience": 80,
     "category_id": "communication"
+  },
+  {
+    "id": 45,
+    "mission_id": "cr1",
+    "title": "직무 키워드 3개 정리",
+    "description": "관심 직무와 기업 키워드 3개 검색 및 정리",
+    "emoji": "🔍",
+    "difficulty": "easy",
+    "experience": 40,
+    "category_id": "career"
+  },
+  {
+    "id": 46,
+    "mission_id": "cr2",
+    "title": "채용 사이트 공고 1개 저장",
+    "description": "채용 사이트에서 관심 있는 공고 1개 저장",
+    "emoji": "💼",
+    "difficulty": "easy",
+    "experience": 35,
+    "category_id": "career"
+  },
+  {
+    "id": 47,
+    "mission_id": "cr3",
+    "title": "자기소개서 문장 3줄 작성",
+    "description": "자기소개서 문장 3줄 작성",
+    "emoji": "📝",
+    "difficulty": "medium",
+    "experience": 55,
+    "category_id": "career"
+  },
+  {
+    "id": 48,
+    "mission_id": "cr4",
+    "title": "내 강점 키워드 3개 정리",
+    "description": "나의 강점을 키워드 3개로 정리",
+    "emoji": "💪",
+    "difficulty": "easy",
+    "experience": 45,
+    "category_id": "career"
+  },
+  {
+    "id": 49,
+    "mission_id": "cr5",
+    "title": "이력서 기본 항목 채우기",
+    "description": "이력서 학력, 경력, 자격증 등 기본 항목 채우기",
+    "emoji": "📄",
+    "difficulty": "medium",
+    "experience": 60,
+    "category_id": "career"
+  },
+  {
+    "id": 50,
+    "mission_id": "cr6",
+    "title": "직무 관련 강의/기사 요약",
+    "description": "직무 관련 유튜브 강의/기사 1개 보고 요약",
+    "emoji": "📺",
+    "difficulty": "medium",
+    "experience": 50,
+    "category_id": "career"
+  },
+  {
+    "id": 51,
+    "mission_id": "cr7",
+    "title": "예상 질문 답변 작성 후 낭독",
+    "description": "예상 질문 1개에 답변 작성 후 낭독",
+    "emoji": "🗣️",
+    "difficulty": "medium",
+    "experience": 55,
+    "category_id": "career"
+  },
+  {
+    "id": 52,
+    "mission_id": "cr8",
+    "title": "관심 기업 홈페이지 탐색",
+    "description": "관심 기업 1곳 홈페이지 탐색 후 비전·가치 정리",
+    "emoji": "🏢",
+    "difficulty": "medium",
+    "experience": 50,
+    "category_id": "career"
+  },
+  {
+    "id": 53,
+    "mission_id": "cr9",
+    "title": "3개월 취업 준비 목표 3가지",
+    "description": "3개월 내 취업 준비 목표 3가지 작성",
+    "emoji": "🎯",
+    "difficulty": "easy",
+    "experience": 100,
+    "category_id": "career"
+  },
+  {
+    "id": 54,
+    "mission_id": "cr10",
+    "title": "직무와 연결 가능한 경험 사례 정리",
+    "description": "나의 경험 중 직무와 연결 가능한 사례 1개 정리",
+    "emoji": "📋",
+    "difficulty": "medium",
+    "experience": 55,
+    "category_id": "career"
   },
   {
     "id": 55,
