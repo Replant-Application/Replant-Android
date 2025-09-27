@@ -24,8 +24,7 @@ const ChatBotScreen: React.FC<ChatBotScreenProps> = ({ navigation: _navigation }
       id: 1,
       type: 'bot' as const,
       text: '안녕하세요! 오늘 기분은 어떠신가요? 😊',
-      timestamp: new Date(),
-      emotion: 'warm'
+      timestamp: new Date()
     }
   ]);
   const [inputText, setInputText] = useState('');
@@ -63,8 +62,7 @@ const ChatBotScreen: React.FC<ChatBotScreenProps> = ({ navigation: _navigation }
           id: Date.now() + 1,
           type: 'bot' as const,
           text: botResponse.text,
-          timestamp: new Date(),
-          emotion: botResponse.emotion
+          timestamp: new Date()
         };
 
         setMessages(prev => [...prev, botMessage]);
@@ -76,11 +74,11 @@ const ChatBotScreen: React.FC<ChatBotScreenProps> = ({ navigation: _navigation }
   // 봇 응답 생성 (임시)
   const generateBotResponse = (_userText: string) => {
     const responses = [
-      { text: '그렇게 생각하시는군요. 더 자세히 말씀해 주실 수 있나요? 🤗', emotion: 'caring' },
-      { text: '정말 힘드셨겠어요. 그런 마음이 이해됩니다. 💙', emotion: 'empathetic' },
-      { text: '좋은 생각이네요! 그런 긍정적인 마음이 중요해요. ✨', emotion: 'encouraging' },
-      { text: '혼자 감당하기 어려운 일이 있으시군요. 함께 생각해보아요. 🤝', emotion: 'supportive' },
-      { text: '당신의 감정을 표현해주셔서 감사해요. 더 이야기해주세요. 💚', emotion: 'warm' }
+      { text: '그렇게 생각하시는군요. 더 자세히 말씀해 주실 수 있나요? 🤗' },
+      { text: '정말 힘드셨겠어요. 그런 마음이 이해됩니다. 💙' },
+      { text: '좋은 생각이네요! 그런 긍정적인 마음이 중요해요. ✨' },
+      { text: '혼자 감당하기 어려운 일이 있으시군요. 함께 생각해보아요. 🤝' },
+      { text: '당신의 감정을 표현해주셔서 감사해요. 더 이야기해주세요. 💚' }
     ];
 
     return responses[Math.floor(Math.random() * responses.length)];
@@ -185,20 +183,11 @@ interface Message {
 // 메시지 버블 컴포넌트
 const MessageBubble: React.FC<{ message: Message }> = ({ message }) => {
   const isUser = message.type === 'user';
-  const emotionColors: Record<string, string> = {
-    warm: colors.primary[100],
-    caring: colors.blue[100],
-    empathetic: colors.purple[100],
-    encouraging: colors.green[100],
-    supportive: colors.orange[100],
-    neutral: colors.gray[100]
-  };
 
   return (
     <View style={[
       styles.messageBubble,
-      isUser ? styles.userMessage : styles.botMessage,
-      { backgroundColor: emotionColors[message.emotion || 'neutral'] || colors.gray[100] }
+      isUser ? styles.userMessage : styles.botMessage
     ]}>
       <Text style={[
         styles.messageText,
@@ -248,6 +237,7 @@ const styles = StyleSheet.create({
   },
   botMessage: {
     alignSelf: 'flex-start',
+    backgroundColor: colors.gray[100],
   },
   messageText: {
     fontSize: typography.fontSize.base,
