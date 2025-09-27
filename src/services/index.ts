@@ -5,3 +5,4 @@ export * from './userService';
 export * from './templateService';
 export * from './appService';
 export * from './missionService';
+export * from './chatService';

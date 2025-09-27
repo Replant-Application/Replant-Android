@@ -13,13 +13,14 @@ import { Header } from '../components/ui';
 import { colors, spacing, typography, borderRadius } from '../utils/designTokens';
 import { NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '../types/navigation';
+import { chatService, ChatMessage } from '../services';
 
 interface ChatBotScreenProps {
   navigation: NavigationProp<RootStackParamList>;
 }
 
 const ChatBotScreen: React.FC<ChatBotScreenProps> = ({ navigation: _navigation }) => {
-  const [messages, setMessages] = useState<Message[]>([
+  const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: 1,
       type: 'bot' as const,
@@ -39,13 +40,14 @@ const ChatBotScreen: React.FC<ChatBotScreenProps> = ({ navigation: _navigation }
   };
 
   // 메시지 전송
-  const sendMessage = () => {
+  const sendMessage = async () => {
     if (!inputText.trim()) return;
 
-    const newMessage: Message = {
+    const userMessage = inputText.trim();
+    const newMessage: ChatMessage = {
       id: Date.now(),
       type: 'user' as const,
-      text: inputText.trim(),
+      text: userMessage,
       timestamp: new Date(),
       emotion: 'neutral'
     };
@@ -54,35 +56,33 @@ const ChatBotScreen: React.FC<ChatBotScreenProps> = ({ navigation: _navigation }
     setInputText('');
     setIsTyping(true);
 
-    // 봇 응답 시뮬레이션
-    setTimeout(() => {
-      const botResponse = generateBotResponse(inputText.trim());
-      if (botResponse) {
-        const botMessage: Message = {
-          id: Date.now() + 1,
-          type: 'bot' as const,
-          text: botResponse.text,
-          timestamp: new Date()
-        };
+    try {
+      // 실제 API 호출
+      const response = await chatService.sendMessage(userMessage);
 
-        setMessages(prev => [...prev, botMessage]);
-        setIsTyping(false);
-      }
-    }, 1500);
+      const botMessage: ChatMessage = {
+        id: Date.now() + 1,
+        type: 'bot' as const,
+        text: response.error ? chatService.getFallbackResponse(userMessage) : response.message,
+        timestamp: new Date()
+      };
+
+      setMessages(prev => [...prev, botMessage]);
+    } catch (error) {
+      // 에러 발생 시 fallback 응답
+      const fallbackMessage: ChatMessage = {
+        id: Date.now() + 1,
+        type: 'bot' as const,
+        text: chatService.getFallbackResponse(userMessage),
+        timestamp: new Date()
+      };
+
+      setMessages(prev => [...prev, fallbackMessage]);
+    } finally {
+      setIsTyping(false);
+    }
   };
 
-  // 봇 응답 생성 (임시)
-  const generateBotResponse = (_userText: string) => {
-    const responses = [
-      { text: '그렇게 생각하시는군요. 더 자세히 말씀해 주실 수 있나요? 🤗' },
-      { text: '정말 힘드셨겠어요. 그런 마음이 이해됩니다. 💙' },
-      { text: '좋은 생각이네요! 그런 긍정적인 마음이 중요해요. ✨' },
-      { text: '혼자 감당하기 어려운 일이 있으시군요. 함께 생각해보아요. 🤝' },
-      { text: '당신의 감정을 표현해주셔서 감사해요. 더 이야기해주세요. 💚' }
-    ];
-
-    return responses[Math.floor(Math.random() * responses.length)];
-  };
 
   // 빠른 응답 버튼들
   const quickResponses = [
@@ -171,17 +171,8 @@ const ChatBotScreen: React.FC<ChatBotScreenProps> = ({ navigation: _navigation }
   );
 };
 
-// 메시지 타입 정의
-interface Message {
-  id: number;
-  type: 'user' | 'bot';
-  text: string;
-  timestamp: Date;
-  emotion?: string;
-}
-
 // 메시지 버블 컴포넌트
-const MessageBubble: React.FC<{ message: Message }> = ({ message }) => {
+const MessageBubble: React.FC<{ message: ChatMessage }> = ({ message }) => {
   const isUser = message.type === 'user';
 
   return (
