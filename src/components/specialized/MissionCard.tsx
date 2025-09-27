@@ -8,8 +8,10 @@ interface MissionCardProps {
   mission: Mission;
   onComplete?: (missionId: string) => void;
   onUncomplete?: (missionId: string) => void;
+  onViewDetails?: (missionId: string) => void;
   loading?: boolean;
   disabled?: boolean;
+  readonly?: boolean;
   style?: ViewStyle;
 }
 
@@ -17,8 +19,10 @@ const MissionCard: React.FC<MissionCardProps> = ({
   mission,
   onComplete,
   onUncomplete,
+  onViewDetails,
   loading = false,
   disabled = false,
+  readonly = false,
   style
 }) => {
   if (!mission) return null;
@@ -93,24 +97,36 @@ const MissionCard: React.FC<MissionCardProps> = ({
           </Text>
         </View>
 
-        <TouchableOpacity
-          style={[
-            styles.actionButton,
-            mission.completed ? styles.uncompleteButton : styles.completeButton,
-            disabled && styles.disabledButton
-          ]}
-          onPress={disabled ? undefined : handleToggleComplete}
-          disabled={loading || disabled}
-          activeOpacity={disabled ? 1 : 0.7}
-        >
-          <Text style={[
-            styles.actionText,
-            mission.completed ? styles.uncompleteText : styles.completeText,
-            disabled && styles.disabledText
-          ]}>
-            {disabled ? '비활성화' : loading ? '처리중...' : mission.completed ? '완료 취소' : '완료하기'}
-          </Text>
-        </TouchableOpacity>
+        {readonly ? (
+          <TouchableOpacity
+            style={[styles.actionButton, styles.viewButton]}
+            onPress={() => onViewDetails?.(mission.mission_id)}
+            activeOpacity={0.7}
+          >
+            <Text style={[styles.actionText, styles.viewText]}>
+              자세히 보기
+            </Text>
+          </TouchableOpacity>
+        ) : (
+          <TouchableOpacity
+            style={[
+              styles.actionButton,
+              mission.completed ? styles.uncompleteButton : styles.completeButton,
+              disabled && styles.disabledButton
+            ]}
+            onPress={disabled ? undefined : handleToggleComplete}
+            disabled={loading || disabled}
+            activeOpacity={disabled ? 1 : 0.7}
+          >
+            <Text style={[
+              styles.actionText,
+              mission.completed ? styles.uncompleteText : styles.completeText,
+              disabled && styles.disabledText
+            ]}>
+              {disabled ? '비활성화' : loading ? '처리중...' : mission.completed ? '완료 취소' : '완료하기'}
+            </Text>
+          </TouchableOpacity>
+        )}
       </View>
     </View>
   );
@@ -223,6 +239,12 @@ const styles = StyleSheet.create({
     backgroundColor: colors.gray[300],
   },
 
+  viewButton: {
+    backgroundColor: colors.primary[100],
+    borderWidth: 1,
+    borderColor: colors.primary[300],
+  },
+
   actionText: {
     fontSize: typography.fontSize.sm,
     fontWeight: typography.fontWeight.medium,
@@ -234,6 +256,10 @@ const styles = StyleSheet.create({
 
   uncompleteText: {
     color: colors.text.secondary,
+  },
+
+  viewText: {
+    color: colors.primary[600],
   },
 
   disabledButton: {

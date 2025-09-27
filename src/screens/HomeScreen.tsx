@@ -66,6 +66,11 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
     }
   };
 
+  // 미션 상세 보기 핸들러 (미션 페이지로 이동)
+  const handleViewMissionDetails = (missionId: string): void => {
+    navigation.navigate('Mission');
+  };
+
   // 캐릭터 상세 페이지로 이동
   const handleCharacterPress = (): void => {
     if (representativeCharacter) {
@@ -151,10 +156,9 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
               <MissionCard
                 key={mission.mission_id}
                 mission={mission}
-                onComplete={handleCompleteMission}
-                onUncomplete={handleUncompleteMission}
+                onViewDetails={handleViewMissionDetails}
                 style={styles.missionCard}
-                disabled={true}
+                readonly={true}
               />
             ))
           ) : (
