@@ -141,3 +141,6 @@ ios/Flipper-Folly
 Thumbs.db
 ehthumbs.db
 Desktop.ini
+
+# Cursor IDE
+.cursor/
