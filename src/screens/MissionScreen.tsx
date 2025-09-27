@@ -4,7 +4,7 @@ import { SCREEN_NAMES } from '../utils/constants';
 import { useMission } from '../hooks/useMission';
 import { useCharacter } from '../hooks/useCharacter';
 import { MissionCard } from '../components/specialized';
-import { Card, Loading, ErrorBoundary, Button, Header } from '../components/ui';
+import { Card, Loading, ErrorBoundary, Button, Header, EmptyState } from '../components/ui';
 import { colors, spacing, typography, borderRadius } from '../utils/designTokens';
 import { NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '../types/navigation';
@@ -162,25 +162,19 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation }) => {
           </View>
 
           {filteredMissions.length === 0 ? (
-            <Card style={styles.emptyCard}>
-              <Text style={styles.emptyIcon}>
-                {selectedCategory === 'all' ? '🎯' : selectedCategory === 'custom' ? '✨' : '📚'}
-              </Text>
-              <Text style={styles.emptyTitle}>
-                {selectedCategory === 'all'
-                  ? '아직 미션이 없어요'
-                  : selectedCategory === 'custom'
-                  ? '나만의 미션이 없어요'
-                  : '이 카테고리의 미션이 없어요'}
-              </Text>
-              <Text style={styles.emptyText}>
-                {selectedCategory === 'all'
-                  ? '새로운 미션이 곧 추가될 예정입니다!'
-                  : selectedCategory === 'custom'
-                  ? '첫 번째 나만의 미션을 만들어보세요!'
-                  : '다른 카테고리의 미션을 확인해보세요!'}
-              </Text>
-              {selectedCategory === 'custom' && (
+            <EmptyState
+              icon={selectedCategory === 'all' ? '🎯' : selectedCategory === 'custom' ? '✨' : '📚'}
+              title={selectedCategory === 'all'
+                ? '아직 미션이 없어요'
+                : selectedCategory === 'custom'
+                ? '나만의 미션이 없어요'
+                : '이 카테고리의 미션이 없어요'}
+              description={selectedCategory === 'all'
+                ? '새로운 미션이 곧 추가될 예정입니다!'
+                : selectedCategory === 'custom'
+                ? '첫 번째 나만의 미션을 만들어보세요!'
+                : '다른 카테고리의 미션을 확인해보세요!'}
+              actionButton={selectedCategory === 'custom' && (
                 <Button
                   title="미션 만들기"
                   onPress={() => navigation.navigate('CustomMissionCreate')}
@@ -188,7 +182,7 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation }) => {
                   textStyle={{ color: colors.white }}
                 />
               )}
-            </Card>
+            />
           ) : (
             filteredMissions.map((mission, index) => (
               <MissionCard
@@ -315,27 +309,6 @@ const styles = StyleSheet.create({
   },
   missionCard: {
     marginBottom: spacing[3],
-  },
-  emptyCard: {
-    padding: spacing[8],
-    alignItems: 'center',
-  },
-  emptyIcon: {
-    fontSize: typography.fontSize['4xl'],
-    marginBottom: spacing[4],
-  },
-  emptyTitle: {
-    fontSize: typography.fontSize.xl,
-    fontWeight: typography.fontWeight.bold,
-    color: colors.text.primary,
-    marginBottom: spacing[2],
-    textAlign: 'center',
-  },
-  emptyText: {
-    fontSize: typography.fontSize.base,
-    color: colors.text.secondary,
-    textAlign: 'center',
-    lineHeight: typography.lineHeight.relaxed * typography.fontSize.base,
   },
 });
 

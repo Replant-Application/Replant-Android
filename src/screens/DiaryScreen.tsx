@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, TextInput } from 'react-native';
 import { useDiary } from '../hooks/useDiary';
 import { DiaryCard, EmotionSelector } from '../components/specialized';
-import { Button, Card, Loading, ErrorBoundary, Header } from '../components/ui';
+import { Button, Card, Loading, ErrorBoundary, Header, EmptyState } from '../components/ui';
 import { colors, spacing, typography, borderRadius } from '../utils/designTokens';
 import { Diary, SimpleDiaryData } from '../types';
 
@@ -144,11 +144,11 @@ const DiaryScreen: React.FC = () => {
         ) : (
           <>
             {diaries.length === 0 ? (
-              <Card style={styles.emptyCard}>
-                <Text style={styles.emptyIcon}>📝</Text>
-                <Text style={styles.emptyTitle}>아직 작성된 일기가 없어요</Text>
-                <Text style={styles.emptyText}>오늘의 감정을 기록해보세요!</Text>
-              </Card>
+              <EmptyState
+                icon="📝"
+                title="아직 작성된 일기가 없어요"
+                description="오늘의 감정을 기록해보세요!"
+              />
             ) : (
               <>
                 {diaries.map((diary) => (
@@ -271,27 +271,6 @@ const styles = StyleSheet.create({
   },
   saveButton: {
     flex: 1,
-  },
-  emptyCard: {
-    padding: spacing[8],
-    alignItems: 'center',
-  },
-  emptyIcon: {
-    fontSize: typography.fontSize['4xl'],
-    marginBottom: spacing[4],
-  },
-  emptyTitle: {
-    fontSize: typography.fontSize.xl,
-    fontWeight: typography.fontWeight.bold,
-    color: colors.text.primary,
-    marginBottom: spacing[2],
-    textAlign: 'center',
-  },
-  emptyText: {
-    fontSize: typography.fontSize.base,
-    color: colors.text.secondary,
-    textAlign: 'center',
-    lineHeight: typography.lineHeight.relaxed * typography.fontSize.base,
   },
   sectionTitle: {
     fontSize: typography.fontSize.xl,

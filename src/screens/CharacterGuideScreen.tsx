@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, Alert } from 'react-native';
 import { useCharacter } from '../hooks/useCharacter';
 import { colors, spacing, typography, borderRadius, shadows } from '../utils/designTokens';
-import { Header } from '../components/ui';
+import { Header, EmptyState } from '../components/ui';
 import { SCREEN_NAMES } from '../utils/constants';
 import { NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '../types/navigation';
@@ -108,13 +108,11 @@ const CharacterGuideScreen: React.FC<CharacterGuideScreenProps> = ({ navigation 
         {/* 캐릭터 목록 */}
         <View style={styles.charactersSection}>
           {characters.length === 0 ? (
-            <View style={[styles.emptyCard, { backgroundColor: colors.background.primary, borderColor: colors.border.light }]}>
-              <Text style={[styles.emptyIcon, { color: colors.text.tertiary }]}>📝</Text>
-              <Text style={[styles.emptyTitle, { color: colors.text.primary }]}>캐릭터가 없어요</Text>
-              <Text style={[styles.emptyText, { color: colors.text.secondary }]}>
-                아직 캐릭터가 없습니다.
-              </Text>
-            </View>
+            <EmptyState
+              icon="📝"
+              title="캐릭터가 없어요"
+              description="아직 캐릭터가 없습니다."
+            />
           ) : (
             characters
               .sort((a, b) => {
@@ -249,26 +247,6 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.xl,
     fontWeight: typography.fontWeight.bold,
     marginBottom: spacing[4],
-  },
-  emptyCard: {
-    padding: spacing[8],
-    borderRadius: borderRadius.lg,
-    borderWidth: 1,
-    alignItems: 'center',
-  },
-  emptyIcon: {
-    fontSize: typography.fontSize['4xl'],
-    marginBottom: spacing[4],
-  },
-  emptyTitle: {
-    fontSize: typography.fontSize.xl,
-    fontWeight: typography.fontWeight.bold,
-    marginBottom: spacing[2],
-  },
-  emptyText: {
-    fontSize: typography.fontSize.base,
-    textAlign: 'center',
-    lineHeight: typography.lineHeight.relaxed * typography.fontSize.base,
   },
   characterCard: {
     padding: spacing[5],

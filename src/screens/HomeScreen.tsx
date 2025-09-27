@@ -5,7 +5,7 @@ import { useUser } from '../contexts/UserContext';
 import { useCharacter } from '../hooks/useCharacter';
 import { useMission } from '../hooks/useMission';
 import { CharacterCard, MissionCard } from '../components/specialized';
-import { Card, Loading, ErrorBoundary, Header } from '../components/ui';
+import { Card, Loading, ErrorBoundary, Header, EmptyState } from '../components/ui';
 import { colors, spacing, typography } from '../utils/designTokens';
 import { executeWithErrorHandling } from '../utils/errorHandler';
 import { SCREEN_NAMES } from '../utils/constants';
@@ -161,12 +161,11 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
               />
             ))
           ) : (
-            <Card style={styles.emptyCard}>
-              <Text style={styles.emptyText}>
-                🎉 모든 미션을 완료했습니다!{'\n'}
-                새로운 미션이 곧 추가될 예정입니다.
-              </Text>
-            </Card>
+            <EmptyState
+              icon="🎉"
+              title="모든 미션을 완료했습니다!"
+              description="새로운 미션이 곧 추가될 예정입니다."
+            />
           )}
         </View>
       </View>
@@ -208,16 +207,6 @@ const styles = StyleSheet.create({
   },
   missionCard: {
     marginBottom: spacing[3],
-  },
-  emptyCard: {
-    padding: spacing[6],
-    alignItems: 'center',
-  },
-  emptyText: {
-    fontSize: typography.fontSize.base,
-    color: colors.text.secondary,
-    textAlign: 'center',
-    lineHeight: typography.lineHeight.relaxed * typography.fontSize.base,
   },
   section: {
     marginBottom: spacing[6],
