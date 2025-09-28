@@ -14,13 +14,34 @@ import {
 } from 'react-native';
 import { Header } from '../components/ui';
 import { colors, spacing, typography, borderRadius } from '../utils/designTokens';
-import { NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '../types/navigation';
 import placesService, { Place } from '../services/placesService';
 
 interface PlacesSearchScreenProps {
-  navigation: NavigationProp<RootStackParamList>;
+  navigation: any;
 }
+
+// 지역 목록
+const REGIONS = [
+  { id: 'all', name: '전체', location: '' },
+  { id: 'seoul', name: '서울', location: '서울' },
+  { id: 'busan', name: '부산', location: '부산' },
+  { id: 'daegu', name: '대구', location: '대구' },
+  { id: 'incheon', name: '인천', location: '인천' },
+  { id: 'gwangju', name: '광주', location: '광주' },
+  { id: 'daejeon', name: '대전', location: '대전' },
+  { id: 'ulsan', name: '울산', location: '울산' },
+  { id: 'sejong', name: '세종', location: '세종' },
+  { id: 'gyeonggi', name: '경기', location: '경기' },
+  { id: 'gangwon', name: '강원', location: '강원' },
+  { id: 'chungbuk', name: '충북', location: '충북' },
+  { id: 'chungnam', name: '충남', location: '충남' },
+  { id: 'jeonbuk', name: '전북', location: '전북' },
+  { id: 'jeonnam', name: '전남', location: '전남' },
+  { id: 'gyeongbuk', name: '경북', location: '경북' },
+  { id: 'gyeongnam', name: '경남', location: '경남' },
+  { id: 'jeju', name: '제주', location: '제주' },
+];
 
 const PlacesSearchScreen: React.FC<PlacesSearchScreenProps> = ({ navigation }) => {
   const [places, setPlaces] = useState<Place[]>([]);
@@ -29,6 +50,8 @@ const PlacesSearchScreen: React.FC<PlacesSearchScreenProps> = ({ navigation }) =
   const [isLoading, setIsLoading] = useState(false);
   const [userLocation, setUserLocation] = useState<{lat: number, lng: number} | null>(null);
   const [selectedFilter, setSelectedFilter] = useState<'all' | 'counseling' | 'mental_health'>('all');
+  const [selectedRegion, setSelectedRegion] = useState('all');
+  const [showAllRegions, setShowAllRegions] = useState(false);
 
   useEffect(() => {
     requestLocationPermission();
@@ -42,7 +65,7 @@ const PlacesSearchScreen: React.FC<PlacesSearchScreenProps> = ({ navigation }) =
 
   useEffect(() => {
     filterPlaces();
-  }, [places, searchText, selectedFilter]);
+  }, [places, searchText, selectedFilter, selectedRegion]);
 
   // 위치 권한 요청
   const requestLocationPermission = async () => {
@@ -75,15 +98,15 @@ const PlacesSearchScreen: React.FC<PlacesSearchScreenProps> = ({ navigation }) =
 
   // 현재 위치 가져오기
   const getCurrentLocation = () => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
+    if (typeof window !== 'undefined' && window.navigator.geolocation) {
+      window.navigator.geolocation.getCurrentPosition(
+        (position: any) => {
           setUserLocation({
             lat: position.coords.latitude,
             lng: position.coords.longitude
           });
         },
-        (error) => {
+        (error: any) => {
           console.error('위치 가져오기 실패:', error);
           // 기본값으로 서울 중심 설정
           setUserLocation({ lat: 37.5665, lng: 126.9780 });
@@ -114,6 +137,28 @@ const PlacesSearchScreen: React.FC<PlacesSearchScreenProps> = ({ navigation }) =
     }
   };
 
+  // 지역별 장소 검색
+  const searchPlacesByRegion = async (region: string) => {
+    if (region === 'all') {
+      searchPlaces();
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const regionData = REGIONS.find(r => r.id === region);
+      if (!regionData) return;
+
+      const results = await placesService.searchCounselingCenters(regionData.location);
+      setPlaces(results);
+    } catch (error) {
+      console.error('지역별 장소 검색 오류:', error);
+      Alert.alert('오류', '지역별 장소 검색 중 오류가 발생했습니다.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   // 장소 필터링
   const filterPlaces = () => {
     let filtered = places;
@@ -139,6 +184,16 @@ const PlacesSearchScreen: React.FC<PlacesSearchScreenProps> = ({ navigation }) =
             return true;
         }
       });
+    }
+
+    // 지역 필터
+    if (selectedRegion !== 'all') {
+      const regionData = REGIONS.find(r => r.id === selectedRegion);
+      if (regionData) {
+        filtered = filtered.filter(place =>
+          place.formatted_address.includes(regionData.location)
+        );
+      }
     }
 
     setFilteredPlaces(filtered);
@@ -220,6 +275,43 @@ const PlacesSearchScreen: React.FC<PlacesSearchScreenProps> = ({ navigation }) =
                   selectedFilter === filter.key && styles.filterButtonTextActive
                 ]}>
                   {filter.label}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
+
+        {/* 지역 선택 버튼들 */}
+        <View style={styles.regionContainer}>
+          <View style={styles.regionHeader}>
+            <Text style={styles.regionTitle}>지역 선택</Text>
+            <TouchableOpacity
+              onPress={() => setShowAllRegions(!showAllRegions)}
+              style={styles.moreButton}
+            >
+              <Text style={styles.moreButtonText}>
+                {showAllRegions ? '간단히' : '더보기'}
+              </Text>
+            </TouchableOpacity>
+          </View>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            {(showAllRegions ? REGIONS : REGIONS.slice(0, 8)).map((region) => (
+              <TouchableOpacity
+                key={region.id}
+                style={[
+                  styles.regionButton,
+                  selectedRegion === region.id && styles.regionButtonActive
+                ]}
+                onPress={() => {
+                  setSelectedRegion(region.id);
+                  searchPlacesByRegion(region.id);
+                }}
+              >
+                <Text style={[
+                  styles.regionButtonText,
+                  selectedRegion === region.id && styles.regionButtonTextActive
+                ]}>
+                  {region.name}
                 </Text>
               </TouchableOpacity>
             ))}
@@ -534,6 +626,51 @@ const styles = StyleSheet.create({
   emptyStateSubText: {
     fontSize: typography.fontSize.sm,
     color: colors.text.tertiary,
+  },
+  regionContainer: {
+    marginBottom: spacing[4],
+  },
+  regionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: spacing[4],
+    marginBottom: spacing[2],
+  },
+  regionTitle: {
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.medium,
+    color: colors.text.primary,
+  },
+  moreButton: {
+    paddingHorizontal: spacing[2],
+    paddingVertical: spacing[1],
+  },
+  moreButtonText: {
+    fontSize: typography.fontSize.xs,
+    color: colors.primary[600],
+    fontWeight: typography.fontWeight.medium,
+  },
+  regionButton: {
+    paddingHorizontal: spacing[3],
+    paddingVertical: spacing[2],
+    marginRight: spacing[2],
+    borderRadius: borderRadius.full,
+    backgroundColor: colors.background.secondary,
+    borderWidth: 1,
+    borderColor: colors.border.primary,
+  },
+  regionButtonActive: {
+    backgroundColor: colors.primary[500],
+    borderColor: colors.primary[500],
+  },
+  regionButtonText: {
+    fontSize: typography.fontSize.sm,
+    color: colors.text.secondary,
+    fontWeight: typography.fontWeight.medium,
+  },
+  regionButtonTextActive: {
+    color: colors.white,
   },
 });
 
