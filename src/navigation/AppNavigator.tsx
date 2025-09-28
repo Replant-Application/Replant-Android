@@ -4,7 +4,6 @@ import { useUser } from '../contexts/UserContext';
 import { SCREEN_NAMES } from '../utils/constants';
 import { colors, spacing, typography } from '../utils/designTokens';
 import { RootStackParamList } from '../types/navigation';
-import { NavigationProp, RouteProp } from '@react-navigation/native';
 
 // 화면 컴포넌트들
 import StartScreen from '../screens/StartScreen';
@@ -13,7 +12,9 @@ import HomeScreen from '../screens/HomeScreen';
 import DiaryScreen from '../screens/DiaryScreen';
 import MissionScreen from '../screens/MissionScreen';
 import CustomMissionCreateScreen from '../screens/CustomMissionCreateScreen';
+import CounselingSelectScreen from '../screens/CounselingSelectScreen';
 import ChatBotScreen from '../screens/ChatBotScreen';
+import PlacesSearchScreen from '../screens/PlacesSearchScreen';
 import CharacterGuideScreen from '../screens/CharacterGuideScreen';
 import CharacterDetailScreen from '../screens/CharacterDetailScreen';
 import SettingsScreen from '../screens/SettingsScreen';
@@ -68,15 +69,15 @@ const AppNavigator = () => {
 
   // 로그인한 경우 - 간단한 탭 네비게이션
   const renderScreen = () => {
-    const navigation: NavigationProp<RootStackParamList> = {
+    const navigation = {
       navigate: navigate as any,
       goBack
-    } as any;
-    const route: RouteProp<RootStackParamList, 'CharacterDetail'> = {
+    };
+    const route = {
       params: navigationParams,
       key: 'CharacterDetail',
       name: 'CharacterDetail'
-    } as any;
+    };
 
     switch (currentScreen) {
       case SCREEN_NAMES.HOME:
@@ -87,8 +88,12 @@ const AppNavigator = () => {
         return <MissionScreen navigation={navigation} />;
       case SCREEN_NAMES.CUSTOM_MISSION_CREATE:
         return <CustomMissionCreateScreen navigation={navigation} />;
+      case SCREEN_NAMES.COUNSELING_SELECT:
+        return <CounselingSelectScreen navigation={navigation} />;
       case SCREEN_NAMES.CHATBOT:
         return <ChatBotScreen navigation={navigation} />;
+      case SCREEN_NAMES.PLACES_SEARCH:
+        return <PlacesSearchScreen navigation={navigation} />;
       case SCREEN_NAMES.CHARACTER_GUIDE:
         return <CharacterGuideScreen navigation={navigation} />;
       case SCREEN_NAMES.CHARACTER_DETAIL:
@@ -134,8 +139,8 @@ const AppNavigator = () => {
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={[styles.tab, currentScreen === SCREEN_NAMES.CHATBOT && styles.activeTab]}
-          onPress={() => setCurrentScreen(SCREEN_NAMES.CHATBOT)}
+          style={[styles.tab, currentScreen === SCREEN_NAMES.COUNSELING_SELECT && styles.activeTab]}
+          onPress={() => setCurrentScreen(SCREEN_NAMES.COUNSELING_SELECT)}
         >
           <Text style={styles.tabIcon}>🤖</Text>
           <Text style={styles.tabLabel}>상담</Text>
