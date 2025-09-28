@@ -18,7 +18,7 @@ interface ChatBotScreenProps {
   navigation: NavigationProp<RootStackParamList>;
 }
 
-const ChatBotScreen: React.FC<ChatBotScreenProps> = ({ navigation: _navigation }) => {
+const ChatBotScreen: React.FC<ChatBotScreenProps> = ({ navigation }) => {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 1,
@@ -96,13 +96,25 @@ const ChatBotScreen: React.FC<ChatBotScreenProps> = ({ navigation: _navigation }
     setInputText(response);
   };
 
+  // 뒤로 가기 함수
+  const handleGoBack = () => {
+    navigation.goBack();
+  };
+
   return (
     <KeyboardAvoidingView
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       {/* 헤더 */}
-      <Header />
+      <Header 
+        title="챗봇 상담"
+        leftButton={
+          <TouchableOpacity onPress={handleGoBack} style={styles.backButton}>
+            <Text style={styles.backButtonText}>← 뒤로</Text>
+          </TouchableOpacity>
+        }
+      />
 
       {/* 메시지 목록 */}
       <ScrollView
@@ -212,6 +224,17 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background.secondary,
+  },
+  backButton: {
+    paddingVertical: spacing[2],
+    paddingHorizontal: spacing[3],
+    borderRadius: borderRadius.md,
+    backgroundColor: colors.primary[100],
+  },
+  backButtonText: {
+    fontSize: typography.fontSize.sm,
+    color: colors.primary[600],
+    fontWeight: typography.fontWeight.medium,
   },
   headerTitle: {
     fontSize: typography.fontSize.lg,
