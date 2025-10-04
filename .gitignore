@@ -143,5 +143,5 @@ ehthumbs.db
 Desktop.ini
 
 # Cursor IDE
-# .cursor/
+.cursor/
 scripts/
