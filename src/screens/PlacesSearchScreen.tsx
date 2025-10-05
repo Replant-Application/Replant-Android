@@ -98,21 +98,29 @@ const PlacesSearchScreen: React.FC<PlacesSearchScreenProps> = ({ navigation }) =
 
   // 현재 위치 가져오기
   const getCurrentLocation = () => {
-    if (typeof navigator !== 'undefined' && navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position: any) => {
-          setUserLocation({
-            lat: position.coords.latitude,
-            lng: position.coords.longitude
-          });
-        },
-        (error: any) => {
-          console.error('위치 가져오기 실패:', error);
-          // 기본값으로 서울 중심 설정
-          setUserLocation({ lat: 37.5665, lng: 126.9780 });
-        }
-      );
-    } else {
+    // React Native에서는 Geolocation API를 직접 사용
+    try {
+      // @ts-ignore - React Native 환경에서는 navigator가 사용 가능
+      if (typeof navigator !== 'undefined' && navigator.geolocation) {
+        // @ts-ignore
+        navigator.geolocation.getCurrentPosition(
+          (position: any) => {
+            setUserLocation({
+              lat: position.coords.latitude,
+              lng: position.coords.longitude
+            });
+          },
+          (error: any) => {
+            console.error('위치 가져오기 실패:', error);
+            // 기본값으로 서울 중심 설정
+            setUserLocation({ lat: 37.5665, lng: 126.9780 });
+          }
+        );
+      } else {
+        setUserLocation({ lat: 37.5665, lng: 126.9780 });
+      }
+    } catch (error) {
+      console.error('위치 가져오기 오류:', error);
       setUserLocation({ lat: 37.5665, lng: 126.9780 });
     }
   };

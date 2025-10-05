@@ -9,7 +9,7 @@ import { KAKAO_MAP_API_KEY, HAS_KAKAO_API_KEY } from '../config/api';
 const HAS_API_KEY = HAS_KAKAO_API_KEY;
 
 // Google Places API 키 (환경변수에서 가져오거나 기본값 사용)
-const GOOGLE_PLACES_API_KEY = (global as any).process?.env?.GOOGLE_PLACES_API_KEY || 'your-google-places-api-key';
+const GOOGLE_PLACES_API_KEY = 'your-google-places-api-key';
 
 export interface Place {
   place_id: string;
