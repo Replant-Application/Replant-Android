@@ -98,8 +98,8 @@ const PlacesSearchScreen: React.FC<PlacesSearchScreenProps> = ({ navigation }) =
 
   // 현재 위치 가져오기
   const getCurrentLocation = () => {
-    if (typeof window !== 'undefined' && window.navigator.geolocation) {
-      window.navigator.geolocation.getCurrentPosition(
+    if (typeof navigator !== 'undefined' && navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
         (position: any) => {
           setUserLocation({
             lat: position.coords.latitude,
@@ -233,7 +233,7 @@ const PlacesSearchScreen: React.FC<PlacesSearchScreenProps> = ({ navigation }) =
 
   return (
     <View style={styles.container}>
-      <Header 
+      <Header
         title="근처 상담센터"
         leftButton={
           <TouchableOpacity onPress={handleGoBack} style={styles.backButton}>
@@ -404,7 +404,7 @@ const PlacesSearchScreen: React.FC<PlacesSearchScreenProps> = ({ navigation }) =
             </View>
 
             <View style={styles.placeActions}>
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={styles.actionButton}
                 onPress={() => handleMap(place)}
               >

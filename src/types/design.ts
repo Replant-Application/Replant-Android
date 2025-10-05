@@ -84,6 +84,7 @@ export interface Typography {
     base: number;
     lg: number;
     xl: number;
+    xxl: number;
     '2xl': number;
     '3xl': number;
     '4xl': number;

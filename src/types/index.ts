@@ -229,4 +229,6 @@ export enum ScreenNames {
   SETTINGS = 'Settings',
   CUSTOM_MISSION_CREATE = 'CustomMissionCreate',
   CHATBOT = 'ChatBot',
+  COUNSELING_SELECT = 'CounselingSelect',
+  PLACES_SEARCH = 'PlacesSearch',
 }

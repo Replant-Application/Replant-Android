@@ -8,6 +8,9 @@ import { KAKAO_MAP_API_KEY, HAS_KAKAO_API_KEY } from '../config/api';
 // API 키가 설정되지 않은 경우를 위한 플래그
 const HAS_API_KEY = HAS_KAKAO_API_KEY;
 
+// Google Places API 키 (환경변수에서 가져오거나 기본값 사용)
+const GOOGLE_PLACES_API_KEY = (global as any).process?.env?.GOOGLE_PLACES_API_KEY || 'your-google-places-api-key';
+
 export interface Place {
   place_id: string;
   name: string;
@@ -45,12 +48,12 @@ class PlacesService {
     try {
       const queries = ['심리상담센터', '상담센터', '정신건강복지센터'];
       const allResults: Place[] = [];
-      
+
       for (const query of queries) {
         const results = await this.searchKakaoPlaces(query, location);
         allResults.push(...results);
       }
-      
+
       return this.removeDuplicates(allResults);
     } catch (error) {
       console.error('심리상담센터 검색 오류:', error);
@@ -65,12 +68,12 @@ class PlacesService {
     try {
       const queries = ['청소년상담복지센터', '사회복지관', '사회복귀지원'];
       const allResults: Place[] = [];
-      
+
       for (const query of queries) {
         const results = await this.searchKakaoPlaces(query, location);
         allResults.push(...results);
       }
-      
+
       return this.removeDuplicates(allResults);
     } catch (error) {
       console.error('은둔형 외톨이 지원 기관 검색 오류:', error);
@@ -198,8 +201,8 @@ class PlacesService {
    * 사용자 위치 기반 검색 (카카오맵 API)
    */
   async searchByUserLocation(
-    userLat: number, 
-    userLng: number, 
+    userLat: number,
+    userLng: number,
     searchTypes: string[] = ['counseling', 'mental_health', 'social_services']
   ): Promise<Place[]> {
     // API 키가 없으면 샘플 데이터 반환
@@ -210,13 +213,13 @@ class PlacesService {
 
     try {
       const allResults: Place[] = [];
-      
+
       // 위치를 주소로 변환 (간단한 방법으로 서울 중심으로 설정)
       const location = '서울';
 
       for (const type of searchTypes) {
         let places: Place[] = [];
-        
+
         switch (type) {
           case 'counseling':
             places = await this.searchCounselingCenters(location);
@@ -230,7 +233,7 @@ class PlacesService {
         }
 
         // 관련 키워드가 포함된 장소만 필터링
-        const filteredPlaces = places.filter(place => 
+        const filteredPlaces = places.filter(place =>
           this.isRelevantPlace(place, type)
         );
 
@@ -251,7 +254,7 @@ class PlacesService {
    * 관련 장소인지 확인
    */
   private isRelevantPlace(place: Place, type: string): boolean {
-    const relevantKeywords = {
+    const relevantKeywords: { [key: string]: string[] } = {
       counseling: ['상담', '심리', '정신건강', '복지', '센터'],
       mental_health: ['정신', '심리', '상담', '치료', '병원'],
       social_services: ['복지', '상담', '지원', '센터', '청소년']
@@ -260,7 +263,7 @@ class PlacesService {
     const keywords = relevantKeywords[type] || [];
     const searchText = `${place.name} ${place.formatted_address}`.toLowerCase();
 
-    return keywords.some(keyword => searchText.includes(keyword));
+    return keywords.some((keyword: string) => searchText.includes(keyword));
   }
 
   /**
@@ -283,11 +286,11 @@ class PlacesService {
   private sortByDistance(places: Place[], userLat: number, userLng: number): Place[] {
     return places.sort((a, b) => {
       const distanceA = this.calculateDistance(
-        userLat, userLng, 
+        userLat, userLng,
         a.geometry.location.lat, a.geometry.location.lng
       );
       const distanceB = this.calculateDistance(
-        userLat, userLng, 
+        userLat, userLng,
         b.geometry.location.lat, b.geometry.location.lng
       );
       return distanceA - distanceB;
@@ -301,9 +304,9 @@ class PlacesService {
     const R = 6371; // 지구 반지름 (km)
     const dLat = this.deg2rad(lat2 - lat1);
     const dLng = this.deg2rad(lng2 - lng1);
-    const a = 
+    const a =
       Math.sin(dLat/2) * Math.sin(dLat/2) +
-      Math.cos(this.deg2rad(lat1)) * Math.cos(this.deg2rad(lat2)) * 
+      Math.cos(this.deg2rad(lat1)) * Math.cos(this.deg2rad(lat2)) *
       Math.sin(dLng/2) * Math.sin(dLng/2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
     return R * c;

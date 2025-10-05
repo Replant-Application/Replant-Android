@@ -71,13 +71,20 @@ const AppNavigator = () => {
   const renderScreen = () => {
     const navigation = {
       navigate: navigate as any,
-      goBack
-    };
+      goBack,
+      isFocused: () => true,
+      dispatch: () => {},
+      navigateDeprecated: () => {},
+      preload: () => {},
+      addListener: () => () => {},
+      removeListener: () => () => {},
+      getParent: () => null,
+    } as any;
     const route = {
       params: navigationParams,
       key: 'CharacterDetail',
       name: 'CharacterDetail'
-    };
+    } as any;
 
     switch (currentScreen) {
       case SCREEN_NAMES.HOME:
