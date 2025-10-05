@@ -148,3 +148,6 @@ scripts/
 
 # MCP Configuration
 mcp.json
+
+# CSpell Configuration
+cspell.json
