@@ -145,3 +145,6 @@ Desktop.ini
 # Cursor IDE
 .cursor/
 scripts/
+
+# MCP Configuration
+mcp.json
