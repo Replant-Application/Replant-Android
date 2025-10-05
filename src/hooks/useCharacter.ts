@@ -18,7 +18,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { getData, getStorageKeys, autoLevelupCharacter, setData } from '../services';
 import { useUser } from '../contexts/UserContext';
 import { logError } from '../utils/logger';
-import { Character, CharacterData, UseCharacterReturn, ExperienceResult, ServiceResult, MissionCategory } from '../types';
+import { Character, UseCharacterReturn, ExperienceResult, ServiceResult, MissionCategory } from '../types';
 
 export const useCharacter = (): UseCharacterReturn => {
   const { currentNickname } = useUser();

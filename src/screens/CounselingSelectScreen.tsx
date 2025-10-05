@@ -5,7 +5,6 @@ import {
   StyleSheet,
   TouchableOpacity,
   ScrollView,
-  Alert,
 } from 'react-native';
 import { Header } from '../components/ui';
 import { colors, spacing, typography, borderRadius } from '../utils/designTokens';
@@ -31,7 +30,7 @@ const CounselingSelectScreen: React.FC<CounselingSelectScreenProps> = ({ navigat
   return (
     <ScrollView style={styles.container}>
       <Header />
-      
+
       <View style={styles.content}>
         <Text style={styles.title}>상담 서비스</Text>
         <Text style={styles.subtitle}>어떤 도움이 필요하신가요?</Text>

@@ -44,7 +44,7 @@ class PlacesService {
   /**
    * 심리상담센터 검색 (카카오맵 API)
    */
-  async searchCounselingCenters(location: string, radius: number = 5000): Promise<Place[]> {
+  async searchCounselingCenters(location: string): Promise<Place[]> {
     try {
       const queries = ['심리상담센터', '상담센터', '정신건강복지센터'];
       const allResults: Place[] = [];
@@ -64,7 +64,7 @@ class PlacesService {
   /**
    * 은둔형 외톨이 관련 기관 검색 (카카오맵 API)
    */
-  async searchHikikomoriSupport(location: string, radius: number = 5000): Promise<Place[]> {
+  async searchHikikomoriSupport(location: string): Promise<Place[]> {
     try {
       const queries = ['청소년상담복지센터', '사회복지관', '사회복귀지원'];
       const allResults: Place[] = [];
@@ -129,7 +129,7 @@ class PlacesService {
         }
       },
       rating: kakaoDoc.rating ? parseFloat(kakaoDoc.rating) : undefined,
-      user_ratings_total: kakaoDoc.review_count ? parseInt(kakaoDoc.review_count) : undefined,
+      user_ratings_total: kakaoDoc.review_count ? parseInt(kakaoDoc.review_count, 10) : undefined,
       formatted_phone_number: kakaoDoc.phone,
       website: kakaoDoc.place_url,
       types: [kakaoDoc.category_name],

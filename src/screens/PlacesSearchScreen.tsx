@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -14,7 +14,6 @@ import {
 } from 'react-native';
 import { Header } from '../components/ui';
 import { colors, spacing, typography, borderRadius } from '../utils/designTokens';
-import { RootStackParamList } from '../types/navigation';
 import placesService, { Place } from '../services/placesService';
 
 interface PlacesSearchScreenProps {
@@ -53,51 +52,8 @@ const PlacesSearchScreen: React.FC<PlacesSearchScreenProps> = ({ navigation }) =
   const [selectedRegion, setSelectedRegion] = useState('all');
   const [showAllRegions, setShowAllRegions] = useState(false);
 
-  useEffect(() => {
-    requestLocationPermission();
-  }, []);
-
-  useEffect(() => {
-    if (userLocation) {
-      searchPlaces();
-    }
-  }, [userLocation]);
-
-  useEffect(() => {
-    filterPlaces();
-  }, [places, searchText, selectedFilter, selectedRegion]);
-
-  // 위치 권한 요청
-  const requestLocationPermission = async () => {
-    if (Platform.OS === 'android') {
-      try {
-        const granted = await PermissionsAndroid.request(
-          PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-          {
-            title: '위치 권한',
-            message: '근처 상담센터를 찾기 위해 위치 정보가 필요합니다.',
-            buttonNeutral: '나중에',
-            buttonNegative: '취소',
-            buttonPositive: '확인',
-          }
-        );
-        if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-          getCurrentLocation();
-        } else {
-          // 위치 권한이 없으면 서울 중심으로 검색
-          setUserLocation({ lat: 37.5665, lng: 126.9780 });
-        }
-      } catch (err) {
-        console.warn(err);
-        setUserLocation({ lat: 37.5665, lng: 126.9780 });
-      }
-    } else {
-      getCurrentLocation();
-    }
-  };
-
   // 현재 위치 가져오기
-  const getCurrentLocation = () => {
+  const getCurrentLocation = useCallback(() => {
     // React Native에서는 Geolocation API를 직접 사용
     try {
       // @ts-ignore - React Native 환경에서는 navigator가 사용 가능
@@ -123,10 +79,39 @@ const PlacesSearchScreen: React.FC<PlacesSearchScreenProps> = ({ navigation }) =
       console.error('위치 가져오기 오류:', error);
       setUserLocation({ lat: 37.5665, lng: 126.9780 });
     }
-  };
+  }, []);
+
+  // 위치 권한 요청
+  const requestLocationPermission = useCallback(async () => {
+    if (Platform.OS === 'android') {
+      try {
+        const granted = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+          {
+            title: '위치 권한',
+            message: '근처 상담센터를 찾기 위해 위치 정보가 필요합니다.',
+            buttonNeutral: '나중에',
+            buttonNegative: '취소',
+            buttonPositive: '확인',
+          }
+        );
+        if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+          getCurrentLocation();
+        } else {
+          // 위치 권한이 없으면 서울 중심으로 검색
+          setUserLocation({ lat: 37.5665, lng: 126.9780 });
+        }
+      } catch (err) {
+        console.warn(err);
+        setUserLocation({ lat: 37.5665, lng: 126.9780 });
+      }
+    } else {
+      getCurrentLocation();
+    }
+  }, [getCurrentLocation]);
 
   // 장소 검색
-  const searchPlaces = async () => {
+  const searchPlaces = useCallback(async () => {
     if (!userLocation) return;
 
     setIsLoading(true);
@@ -143,7 +128,7 @@ const PlacesSearchScreen: React.FC<PlacesSearchScreenProps> = ({ navigation }) =
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [userLocation]);
 
   // 지역별 장소 검색
   const searchPlacesByRegion = async (region: string) => {
@@ -168,7 +153,7 @@ const PlacesSearchScreen: React.FC<PlacesSearchScreenProps> = ({ navigation }) =
   };
 
   // 장소 필터링
-  const filterPlaces = () => {
+  const filterPlaces = useCallback(() => {
     let filtered = places;
 
     // 검색어 필터
@@ -182,12 +167,12 @@ const PlacesSearchScreen: React.FC<PlacesSearchScreenProps> = ({ navigation }) =
     // 카테고리 필터
     if (selectedFilter !== 'all') {
       filtered = filtered.filter(place => {
-        const searchText = `${place.name} ${place.formatted_address}`.toLowerCase();
+        const placeText = `${place.name} ${place.formatted_address}`.toLowerCase();
         switch (selectedFilter) {
           case 'counseling':
-            return searchText.includes('상담') || searchText.includes('심리');
+            return placeText.includes('상담') || placeText.includes('심리');
           case 'mental_health':
-            return searchText.includes('정신') || searchText.includes('병원');
+            return placeText.includes('정신') || placeText.includes('병원');
           default:
             return true;
         }
@@ -205,7 +190,22 @@ const PlacesSearchScreen: React.FC<PlacesSearchScreenProps> = ({ navigation }) =
     }
 
     setFilteredPlaces(filtered);
-  };
+  }, [places, searchText, selectedFilter, selectedRegion]);
+
+  // useEffect들
+  useEffect(() => {
+    requestLocationPermission();
+  }, [requestLocationPermission]);
+
+  useEffect(() => {
+    if (userLocation) {
+      searchPlaces();
+    }
+  }, [userLocation, searchPlaces]);
+
+  useEffect(() => {
+    filterPlaces();
+  }, [places, searchText, selectedFilter, selectedRegion, filterPlaces]);
 
   // 뒤로 가기
   const handleGoBack = () => {

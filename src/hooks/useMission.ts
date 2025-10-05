@@ -160,9 +160,9 @@ export const useMission = (
       }
 
       return result;
-    } catch (error) {
-      logError('커스텀 미션 생성 실패', error as Error, { missionData, currentNickname });
-      return { success: false, error: (error as Error).message };
+    } catch (createError) {
+      logError('커스텀 미션 생성 실패', createError as Error, { missionData, currentNickname });
+      return { success: false, error: (createError as Error).message };
     }
   }, [currentNickname]);
 
@@ -187,9 +187,9 @@ export const useMission = (
       }
 
       return result;
-    } catch (error) {
-      logError('커스텀 미션 업데이트 실패', error as Error, { missionId, missionData, currentNickname });
-      return { success: false, error: (error as Error).message };
+    } catch (updateError) {
+      logError('커스텀 미션 업데이트 실패', updateError as Error, { missionId, missionData, currentNickname });
+      return { success: false, error: (updateError as Error).message };
     }
   }, [currentNickname]);
 
@@ -208,9 +208,9 @@ export const useMission = (
       }
 
       return result;
-    } catch (error) {
-      logError('커스텀 미션 삭제 실패', error as Error, { missionId, currentNickname });
-      return { success: false, error: (error as Error).message };
+    } catch (deleteError) {
+      logError('커스텀 미션 삭제 실패', deleteError as Error, { missionId, currentNickname });
+      return { success: false, error: (deleteError as Error).message };
     }
   }, [currentNickname]);
 
