@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { NavigationProp } from '@react-navigation/native';
 import { useCharacter } from '../hooks/useCharacter';
@@ -6,6 +6,7 @@ import { useMission } from '../hooks/useMission';
 import { CharacterCard, MissionCard } from '../components/specialized';
 import { Card, Loading, ErrorBoundary, Header, EmptyState, SectionTitle } from '../components/ui';
 import { colors, spacing, typography } from '../utils/designTokens';
+import { getSortedIncompleteMissions } from '../utils/missionUtils';
 import { RootStackParamList } from '../types/navigation';
 
 interface HomeScreenProps {
@@ -16,12 +17,10 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const { representativeCharacter, loading: characterLoading, error: characterError } = useCharacter();
   const { missions, loading: missionLoading, error: missionError } = useMission();
 
-
-  // 추천 미션 (단일 카테고리: 제목 기준 정렬)
-  const recommendedMissions = missions
-    .filter(mission => !mission.completed)
-    .sort((a, b) => a.title.localeCompare(b.title))
-    .slice(0, 3);
+  // 추천 미션 (미완료 미션 중 제목 기준 정렬하여 상위 3개)
+  const recommendedMissions = useMemo(() => {
+    return getSortedIncompleteMissions(missions).slice(0, 3);
+  }, [missions]);
 
 
   // 미션 상세 보기 핸들러 (미션 페이지로 이동)

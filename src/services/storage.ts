@@ -100,8 +100,6 @@ export const deleteData = async <T extends { id: string | number }>(
     throw error;
   }
 };
-
-
 // 기기 ID 생성/조회
 export const getDeviceId = async (): Promise<string> => {
   try {

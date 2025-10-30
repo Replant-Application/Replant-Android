@@ -17,6 +17,7 @@ import { getData, setData, updateData, getStorageKeys } from '../services';
 import { createCustomMission as createCustomMissionService, updateCustomMission as updateCustomMissionService, deleteCustomMission as deleteCustomMissionService } from '../services/missionService';
 import { useUser } from '../contexts/UserContext';
 import { logError } from '../utils/logger';
+import { sortMissionsByTitle, removeDuplicateMissions } from '../utils/missionUtils';
 import { Mission, MissionData, UseMissionReturn, MissionCompletionResult, ServiceResult, ExperienceResult, MissionCategory } from '../types';
 
 export const useMission = (
@@ -37,23 +38,22 @@ export const useMission = (
 
       const storageKeys = getStorageKeys(currentNickname);
       const missionsData: Mission[] = await getData(storageKeys.MISSIONS) || [];
+
       // 단일 카테고리로 normalize
       const normalizedMissions: Mission[] = missionsData.map(m => ({
         ...m,
         category_id: 'growth'
       }));
-      if (JSON.stringify(missionsData) !== JSON.stringify(normalizedMissions)) {
+
+      // category_id가 변경된 경우에만 저장 (JSON.stringify 비교 최적화)
+      const needsUpdate = missionsData.some(mission => mission.category_id !== 'growth');
+      if (needsUpdate) {
         await setData(storageKeys.MISSIONS, normalizedMissions);
       }
 
-      // 중복 제거 (mission_id 기준)
-      const uniqueMissions: Mission[] = normalizedMissions.filter((mission, index, self) =>
-        index === self.findIndex(m => m.mission_id === mission.mission_id)
-      );
-
-      const sortedMissions: Mission[] = uniqueMissions.sort((a, b) =>
-        a.title.localeCompare(b.title)
-      );
+      // 중복 제거 및 정렬
+      const uniqueMissions = removeDuplicateMissions(normalizedMissions);
+      const sortedMissions = sortMissionsByTitle(uniqueMissions);
 
       setMissions(sortedMissions);
     } catch (loadError) {

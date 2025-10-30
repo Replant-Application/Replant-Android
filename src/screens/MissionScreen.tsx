@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { useMission } from '../hooks/useMission';
 import { useCharacter } from '../hooks/useCharacter';
@@ -24,7 +24,10 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation }) => {
 
 
   // 진행률 계산
-  const completedMissions = missions.filter(mission => mission.completed).length;
+  const completedMissions = useMemo(() =>
+    missions.filter(mission => mission.completed).length,
+    [missions]
+  );
   const totalMissions = missions.length;
   const progressPercentage = totalMissions > 0 ? (completedMissions / totalMissions) * 100 : 0;
 

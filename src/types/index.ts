@@ -16,13 +16,6 @@ export interface LoadingState {
   error: string | null;
 }
 
-// 기본 엔티티 타입
-export interface BaseEntity {
-  id: number;
-  created_at: string;
-  updated_at: string;
-}
-
 // 난이도 타입
 export type Difficulty = 'easy' | 'medium' | 'hard';
 
@@ -37,24 +30,6 @@ export type MissionCategory = 'growth';
 
 // 감정 타입
 export type Emotion = 'happy' | 'excited' | 'calm' | 'grateful' | 'sad' | 'angry' | 'anxious' | 'tired';
-
-// 네비게이션 관련 타입
-export interface NavigationProps {
-  navigation: any; // React Navigation 타입은 나중에 정확히 정의
-}
-
-// 스타일 관련 타입
-export interface StyleProps {
-  style?: any;
-  textStyle?: any;
-}
-
-// 재사용 가능한 컴포넌트 Props
-export interface BaseComponentProps {
-  disabled?: boolean;
-  loading?: boolean;
-  testID?: string;
-}
 
 // Mission 관련 타입
 export interface Mission {
