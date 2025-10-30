@@ -15,7 +15,6 @@ import CustomMissionCreateScreen from '../screens/CustomMissionCreateScreen';
 import CounselingSelectScreen from '../screens/CounselingSelectScreen';
 import ChatBotScreen from '../screens/ChatBotScreen';
 import PlacesSearchScreen from '../screens/PlacesSearchScreen';
-import CharacterGuideScreen from '../screens/CharacterGuideScreen';
 import CharacterDetailScreen from '../screens/CharacterDetailScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 
@@ -62,8 +61,14 @@ const AppNavigator = () => {
   };
 
   const goBack = () => {
-    // 간단한 뒤로가기 로직 (홈으로)
-    setCurrentScreen(SCREEN_NAMES.HOME);
+    // 화면별 뒤로가기 목적지 정의
+    if (currentScreen === SCREEN_NAMES.CHATBOT || currentScreen === SCREEN_NAMES.PLACES_SEARCH) {
+      setCurrentScreen(SCREEN_NAMES.COUNSELING_SELECT);
+    } else if (currentScreen === SCREEN_NAMES.COUNSELING_SELECT) {
+      setCurrentScreen(SCREEN_NAMES.HOME);
+    } else {
+      setCurrentScreen(SCREEN_NAMES.HOME);
+    }
     setNavigationParams({});
   };
 
@@ -101,8 +106,6 @@ const AppNavigator = () => {
         return <ChatBotScreen navigation={navigation} />;
       case SCREEN_NAMES.PLACES_SEARCH:
         return <PlacesSearchScreen navigation={navigation} />;
-      case SCREEN_NAMES.CHARACTER_GUIDE:
-        return <CharacterGuideScreen navigation={navigation} />;
       case SCREEN_NAMES.CHARACTER_DETAIL:
         return <CharacterDetailScreen navigation={navigation} route={route} />;
       case SCREEN_NAMES.SETTINGS:
@@ -138,14 +141,6 @@ const AppNavigator = () => {
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={[styles.tab, currentScreen === SCREEN_NAMES.DIARY && styles.activeTab]}
-          onPress={() => setCurrentScreen(SCREEN_NAMES.DIARY)}
-        >
-          <Text style={styles.tabIcon}>📝</Text>
-          <Text style={styles.tabLabel}>다이어리</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
           style={[styles.tab, currentScreen === SCREEN_NAMES.COUNSELING_SELECT && styles.activeTab]}
           onPress={() => setCurrentScreen(SCREEN_NAMES.COUNSELING_SELECT)}
         >
@@ -154,11 +149,11 @@ const AppNavigator = () => {
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={[styles.tab, currentScreen === SCREEN_NAMES.CHARACTER_GUIDE && styles.activeTab]}
-          onPress={() => setCurrentScreen(SCREEN_NAMES.CHARACTER_GUIDE)}
+          style={[styles.tab, currentScreen === SCREEN_NAMES.DIARY && styles.activeTab]}
+          onPress={() => setCurrentScreen(SCREEN_NAMES.DIARY)}
         >
-          <Text style={styles.tabIcon}>📚</Text>
-          <Text style={styles.tabLabel}>도감</Text>
+          <Text style={styles.tabIcon}>📝</Text>
+          <Text style={styles.tabLabel}>다이어리</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
