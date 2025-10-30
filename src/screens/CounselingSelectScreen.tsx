@@ -42,9 +42,7 @@ const CounselingSelectScreen: React.FC<CounselingSelectScreenProps> = ({ navigat
           </View>
           <View style={styles.cardContent}>
             <Text style={styles.cardTitle}>챗봇 상담</Text>
-            <Text style={styles.cardDescription}>
-              AI 챗봇과 함께 마음을 나누고 위로받아보세요. 24시간 언제든 이용 가능합니다.
-            </Text>
+            <Text style={styles.cardDescription}>AI 챗봇과 24시간 상담해요.</Text>
           </View>
           <View style={styles.cardArrow}>
             <Text style={styles.arrowText}>→</Text>
@@ -58,9 +56,7 @@ const CounselingSelectScreen: React.FC<CounselingSelectScreenProps> = ({ navigat
           </View>
           <View style={styles.cardContent}>
             <Text style={styles.cardTitle}>근처 상담센터 찾기</Text>
-            <Text style={styles.cardDescription}>
-              구글 API를 통해 근처 심리상담센터, 정신건강복지센터 등을 찾아보세요.
-            </Text>
+            <Text style={styles.cardDescription}>주변 상담센터를 찾아보세요.</Text>
           </View>
           <View style={styles.cardArrow}>
             <Text style={styles.arrowText}>→</Text>

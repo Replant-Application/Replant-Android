@@ -50,7 +50,35 @@ export const useCharacter = (): UseCharacterReturn => {
         return character;
       });
 
-      const sortedCharacters: Character[] = updatedCharacters.sort((a, b) => a.level - b.level);
+      // 단일 캐릭터로 병합 (기존 다중 카테고리 데이터를 통합)
+      let sortedCharacters: Character[] = updatedCharacters.sort((a, b) => a.level - b.level);
+      const hasNonGrowthCategory = sortedCharacters.some(c => c.category_id !== 'growth');
+      if (sortedCharacters.length !== 1 || hasNonGrowthCategory) {
+        const totalExperience: number = sortedCharacters.reduce((sum, c) => sum + (c.experience || 0), 0);
+        const newLevel: number = Math.floor(totalExperience / 100) + 1;
+        const now = Date.now();
+        const unifiedCharacter: Character = {
+          id: `character_${now}_growth`,
+          character_id: `character_${now}_growth`,
+          name: sortedCharacters[0]?.name || '나의 동반자',
+          title: sortedCharacters[0]?.title || '성장하는 동반자',
+          description: sortedCharacters[0]?.description || '성장 여정을 함께해요',
+          emoji: sortedCharacters[0]?.emoji || '🌱',
+          level: newLevel,
+          experience: totalExperience,
+          total_experience: totalExperience,
+          max_experience: 100,
+          unlocked: true,
+          unlocked_date: new Date().toISOString(),
+          category_id: 'growth',
+          completed_missions: 0,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        };
+        await setData(storageKeys.CHARACTERS, [unifiedCharacter]);
+        sortedCharacters = [unifiedCharacter];
+        await setData(storageKeys.REPRESENTATIVE_CHARACTER, 'growth');
+      }
 
       // 업데이트된 캐릭터 데이터가 있으면 저장소에 저장
       if (updatedCharacters.some((char, index) => char !== charactersData[index])) {
@@ -58,7 +86,7 @@ export const useCharacter = (): UseCharacterReturn => {
       }
 
       // 대표 캐릭터 로드
-      let representativeCategory: string = 'self_management'; // 기본값
+      let representativeCategory: string = 'growth'; // 기본값
       try {
         const storedCategory: string = await getData(storageKeys.REPRESENTATIVE_CHARACTER) || '';
         if (storedCategory) {

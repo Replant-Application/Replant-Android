@@ -17,28 +17,10 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const { missions, loading: missionLoading, error: missionError } = useMission();
 
 
-  // 추천 미션 (카테고리 우선순위: 자기관리 → 소통관리 → 커리어관리)
+  // 추천 미션 (단일 카테고리: 제목 기준 정렬)
   const recommendedMissions = missions
     .filter(mission => !mission.completed)
-    .sort((a, b) => {
-      // 카테고리 우선순위 정의
-      const categoryPriority: Record<string, number> = {
-        'self_management': 1,    // 자기관리 (최우선)
-        'communication': 2,      // 소통관리 (두번째)
-        'career': 3             // 커리어관리 (세번째)
-      };
-
-      const priorityA = categoryPriority[a.category_id as keyof typeof categoryPriority] || 999;
-      const priorityB = categoryPriority[b.category_id as keyof typeof categoryPriority] || 999;
-
-      // 카테고리 우선순위로 정렬
-      if (priorityA !== priorityB) {
-        return priorityA - priorityB;
-      }
-
-      // 같은 카테고리 내에서는 제목 순으로 정렬
-      return a.title.localeCompare(b.title);
-    })
+    .sort((a, b) => a.title.localeCompare(b.title))
     .slice(0, 3);
 
 

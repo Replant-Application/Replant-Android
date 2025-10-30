@@ -26,11 +26,9 @@ export const SCREEN_NAMES: Record<string, string> = {
   SETTINGS: 'Settings',
 } as const;
 
-// 미션 카테고리 (3개로 축소)
+// 미션 카테고리 (단일화)
 export const MISSION_CATEGORIES: Record<string, MissionCategory> = {
-  SELF_MANAGEMENT: 'self_management',
-  COMMUNICATION: 'communication',
-  CAREER: 'career',
+  GROWTH: 'growth',
 } as const;
 
 // 감정 태그

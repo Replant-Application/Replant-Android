@@ -38,7 +38,7 @@ export const createCustomMission = async (
       emoji: missionData.emoji,
       difficulty: missionData.difficulty,
       experience: missionData.experience,
-      category_id: 'custom',
+      category_id: 'growth',
       is_custom: true,
       created_by: nickname,
       created_at: new Date().toISOString(),

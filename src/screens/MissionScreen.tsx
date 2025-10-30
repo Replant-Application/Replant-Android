@@ -1,20 +1,14 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { useMission } from '../hooks/useMission';
 import { useCharacter } from '../hooks/useCharacter';
 import { MissionCard } from '../components/specialized';
-import { Card, Loading, ErrorBoundary, Button, Header, EmptyState, SectionTitle, FAB } from '../components/ui';
+import { Card, Loading, ErrorBoundary, Button, Header, EmptyState, SectionTitle } from '../components/ui';
 import { colors, spacing, typography, borderRadius } from '../utils/designTokens';
 import { NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '../types/navigation';
 
-const MISSION_CATEGORIES = [
-  { id: 'all', name: '전체', emoji: '🎯' },
-  { id: 'self_management', name: '자기관리', emoji: '🧘' },
-  { id: 'communication', name: '소통관리', emoji: '💬' },
-  { id: 'career', name: '커리어관리', emoji: '📚' },
-  { id: 'custom', name: '나만의 미션', emoji: '✨' },
-];
+// 단일 카테고리: 성장
 
 interface MissionScreenProps {
   navigation: NavigationProp<RootStackParamList>;
@@ -23,14 +17,10 @@ interface MissionScreenProps {
 const MissionScreen: React.FC<MissionScreenProps> = ({ navigation }) => {
   const { addExperienceByCategory } = useCharacter();
   const { missions, loading, error, completeMissionWithPhoto, uncompleteMission } = useMission(addExperienceByCategory);
-  const [selectedCategory, setSelectedCategory] = useState('all');
 
   // 필터링된 미션 목록
-  const filteredMissions = selectedCategory === 'all'
-    ? missions
-    : selectedCategory === 'custom'
-    ? missions.filter(mission => mission.is_custom)
-    : missions.filter(mission => mission.category_id === selectedCategory);
+  const totalGrowthMissions = missions.length;
+  const displayedMissions = missions.slice(0, 5);
 
 
   // 진행률 계산
@@ -107,71 +97,23 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation }) => {
           </Card>
         )}
 
-        {/* 카테고리 필터 */}
-        <View style={styles.categorySection}>
-          <SectionTitle title="카테고리" />
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.categoryList}
-          >
-            {MISSION_CATEGORIES.map((category) => (
-              <TouchableOpacity
-                key={category.id}
-                style={[
-                  styles.categoryButton,
-                  selectedCategory === category.id && styles.selectedCategory
-                ]}
-                onPress={() => setSelectedCategory(category.id)}
-                activeOpacity={0.7}
-              >
-                <Text style={styles.categoryEmoji}>{category.emoji}</Text>
-                <Text style={[
-                  styles.categoryName,
-                  selectedCategory === category.id && styles.selectedCategoryText
-                ]}>
-                  {category.name}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
-        </View>
+        {/* 카테고리 UI 제거: 단일 카테고리이므로 생략 */}
 
         {/* 미션 목록 */}
         <View style={styles.missionSection}>
           <View style={styles.sectionHeader}>
-            <SectionTitle
-              title={`${selectedCategory === 'all' ? '전체 미션' :
-               selectedCategory === 'custom' ? '나만의 미션' :
-               `${MISSION_CATEGORIES.find(c => c.id === selectedCategory)?.name} 미션`} (${filteredMissions.length}개)`}
-            />
+            <SectionTitle title={`성장 미션 (${totalGrowthMissions}개)`} />
           </View>
 
-          {filteredMissions.length === 0 ? (
+          {displayedMissions.length === 0 ? (
             <EmptyState
-              icon={selectedCategory === 'all' ? '🎯' : selectedCategory === 'custom' ? '✨' : '📚'}
-              title={selectedCategory === 'all'
-                ? '아직 미션이 없어요'
-                : selectedCategory === 'custom'
-                ? '나만의 미션이 없어요'
-                : '이 카테고리의 미션이 없어요'}
-              description={selectedCategory === 'all'
-                ? '새로운 미션이 곧 추가될 예정입니다!'
-                : selectedCategory === 'custom'
-                ? '첫 번째 나만의 미션을 만들어보세요!'
-                : '다른 카테고리의 미션을 확인해보세요!'}
-              actionButton={selectedCategory === 'custom' && (
-                <Button
-                  title="미션 만들기"
-                  onPress={() => navigation.navigate('CustomMissionCreate')}
-                  style={styles.createButton}
-                  textStyle={{ color: colors.white }}
-                />
-              )}
+              icon={'🌱'}
+              title={'아직 미션이 없어요'}
+              description={'새로운 미션이 곧 추가될 예정입니다!'}
             />
           ) : (
             <View style={styles.missionList}>
-              {filteredMissions.map((mission, index) => (
+              {displayedMissions.map((mission, index) => (
                 <MissionCard
                   key={`${mission.mission_id}-${mission.id || index}`}
                   mission={mission}
@@ -180,17 +122,16 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation }) => {
                   style={styles.missionCard}
                 />
               ))}
+              <Button
+                title="미션 만들기"
+                onPress={() => navigation.navigate('CustomMissionCreate')}
+                style={styles.createButton}
+                textStyle={{ color: colors.white }}
+              />
             </View>
           )}
         </View>
       </ScrollView>
-
-      {/* 플로팅 액션 버튼 - 나만의 미션 카테고리일 때만 표시 */}
-      {selectedCategory === 'custom' && (
-        <FAB
-          onPress={() => navigation.navigate('CustomMissionCreate')}
-        />
-      )}
     </View>
   );
 };

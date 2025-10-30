@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity } from 'react-native';
 import { useCharacter } from '../hooks/useCharacter';
 import { colors, spacing, typography, borderRadius, shadows } from '../utils/designTokens';
 import { Header, EmptyState } from '../components/ui';
@@ -11,7 +11,7 @@ interface CharacterGuideScreenProps {
 }
 
 const CharacterGuideScreen: React.FC<CharacterGuideScreenProps> = ({ navigation }) => {
-  const { characters, representativeCharacter, loading, error, setRepresentative } = useCharacter();
+  const { characters, loading, error } = useCharacter();
 
   // 레벨별 캐릭터 이미지
   const getCharacterImage = (level: number) => {
@@ -37,46 +37,18 @@ const CharacterGuideScreen: React.FC<CharacterGuideScreenProps> = ({ navigation 
     return '씨앗';
   };
 
-  // 카테고리 이름 변환
-  const getCategoryName = (categoryId: string): string => {
-    const categoryNames: Record<string, string> = {
-      'self_management': '자기관리',
-      'communication': '소통관리',
-      'career': '커리어관리',
-      'custom': '나만의 미션'
-    };
-    return categoryNames[categoryId] || '알 수 없음';
-  };
+  // 단일 카테고리 표기 (성장)
+  const getCategoryName = (): string => '성장';
 
-  // 카테고리 아이콘
-  const getCategoryIcon = (categoryId: string): string => {
-    const categoryIcons: Record<string, string> = {
-      'self_management': '🧘',
-      'communication': '💬',
-      'career': '📚',
-      'custom': '⭐'
-    };
-    return categoryIcons[categoryId] || '❓';
-  };
+  // 단일 카테고리 이모지
+  const getCategoryIcon = (): string => '🌱';
 
   // 캐릭터 상세 페이지로 이동
   const handleCharacterPress = (character: any) => {
     navigation.navigate('CharacterDetail', { character });
   };
 
-  // 대표 캐릭터 설정 핸들러
-  const handleSetRepresentative = async (character: any) => {
-    try {
-      const result = await setRepresentative(character.category_id);
-      if (result.success) {
-        Alert.alert('성공', `${getCategoryName(character.category_id)} 캐릭터가 대표 캐릭터로 설정되었습니다.`);
-      } else {
-        Alert.alert('오류', result.error || '대표 캐릭터 설정에 실패했습니다.');
-      }
-    } catch (expError) {
-      Alert.alert('오류', '대표 캐릭터 설정 중 오류가 발생했습니다.');
-    }
-  };
+  // 단일 캐릭터 구조에서는 대표 설정 기능이 필요 없음
 
   if (loading) {
     return (
@@ -116,12 +88,7 @@ const CharacterGuideScreen: React.FC<CharacterGuideScreenProps> = ({ navigation 
             />
           ) : (
             characters
-              .sort((a, b) => {
-                // 대표 캐릭터를 맨 위로
-                if (representativeCharacter && a.id === representativeCharacter.id) return -1;
-                if (representativeCharacter && b.id === representativeCharacter.id) return 1;
-                return 0;
-              })
+              .sort(() => 0)
               .map((character) => (
               <TouchableOpacity
                 key={character.id}
@@ -140,7 +107,7 @@ const CharacterGuideScreen: React.FC<CharacterGuideScreenProps> = ({ navigation 
                   <View style={styles.characterInfo}>
                     <Text style={[styles.characterName, { color: colors.text.primary }]}>{character.name}</Text>
                     <Text style={[styles.characterCategory, { color: colors.primary[500] }]}>
-                      {getCategoryIcon(character.category_id)} {getCategoryName(character.category_id)}
+                      {getCategoryIcon()} {getCategoryName()}
                     </Text>
                   </View>
                   <View style={styles.characterLevel}>
@@ -185,24 +152,7 @@ const CharacterGuideScreen: React.FC<CharacterGuideScreenProps> = ({ navigation 
                 </View>
 
                 {/* 대표 캐릭터 설정 버튼 */}
-                <View style={styles.actionContainer}>
-                  {representativeCharacter && representativeCharacter.id === character.id ? (
-                    <View style={[styles.representativeBadge, { backgroundColor: colors.primary[500] }]}>
-                      <Text style={[styles.representativeText, { color: colors.text.inverse }]}>
-                        ⭐ 대표 캐릭터
-                      </Text>
-                    </View>
-                  ) : (
-                    <TouchableOpacity
-                      style={[styles.setRepresentativeButton, { backgroundColor: colors.background.secondary, borderColor: colors.border.medium }]}
-                      onPress={() => handleSetRepresentative(character)}
-                    >
-                      <Text style={[styles.setRepresentativeText, { color: colors.text.primary }]}>
-                        대표로 설정
-                      </Text>
-                    </TouchableOpacity>
-                  )}
-                </View>
+                {/* 대표 캐릭터 설정 기능 제거됨 */}
               </TouchableOpacity>
             ))
           )}

@@ -57,42 +57,15 @@ const CharacterDetailScreen: React.FC<CharacterDetailScreenProps> = ({ route, na
     return '씨앗';
   };
 
-  const getCategoryDescription = (categoryId: string): string => {
-    switch (categoryId) {
-      case 'self_management':
-        return '매일 조금씩 성장하며 나만의 길을 찾아가요';
-      case 'communication':
-        return '따뜻한 대화로 세상을 더 아름답게 만들어가요';
-      case 'career':
-        return '꿈을 현실로 만드는 과정을 즐기고 있어요';
-      case 'custom':
-        return '나만의 특별한 여정을 함께 걸어가요';
-      default:
-        return '꾸준한 성장을 통해 더욱 빛나고 있어요';
-    }
+  const getCategoryDescription = (): string => {
+    return '꾸준한 성장을 통해 더욱 빛나고 있어요';
   };
 
   // 카테고리 이름 변환
-  const getCategoryName = (categoryId: string): string => {
-    const categoryNames: Record<string, string> = {
-      'self_management': '자기관리',
-      'communication': '소통관리',
-      'career': '커리어관리',
-      'custom': '나만의 미션'
-    };
-    return categoryNames[categoryId] || '알 수 없음';
-  };
+  const getCategoryName = (): string => '성장';
 
   // 카테고리 아이콘
-  const getCategoryIcon = (categoryId: string): string => {
-    const categoryIcons: Record<string, string> = {
-      'self_management': '🧘',
-      'communication': '💬',
-      'career': '📚',
-      'custom': '⭐'
-    };
-    return categoryIcons[categoryId] || '❓';
-  };
+  const getCategoryIcon = (): string => '🌱';
 
   // 감정 표현 버튼들
   const emotionButtons = [
@@ -152,14 +125,10 @@ const CharacterDetailScreen: React.FC<CharacterDetailScreenProps> = ({ route, na
             <Text style={styles.levelName}>{getLevelName(character.level || 1)}</Text>
           </View>
 
-          {/* 3. 카테고리 정보 */}
+          {/* 3. 카테고리 정보 (단일: 성장) */}
           <View style={styles.categorySection}>
-            <Text style={styles.categoryIcon}>
-              {getCategoryIcon(character.category_id)}
-            </Text>
-            <Text style={styles.categoryName}>
-              {getCategoryName(character.category_id)}
-            </Text>
+            <Text style={styles.categoryIcon}>{getCategoryIcon()}</Text>
+            <Text style={styles.categoryName}>{getCategoryName()}</Text>
           </View>
 
           {/* 4. 경험치 바 */}
@@ -180,7 +149,7 @@ const CharacterDetailScreen: React.FC<CharacterDetailScreenProps> = ({ route, na
         <View style={styles.descriptionSection}>
           <SectionTitle title="🌱 캐릭터 소개" />
           <Text style={styles.description}>
-            {character.description || getCategoryDescription(character.category_id)}
+            {character.description || getCategoryDescription()}
           </Text>
         </View>
 

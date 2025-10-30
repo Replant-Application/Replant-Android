@@ -33,7 +33,7 @@ export type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'ghost';
 export type ButtonSize = 'sm' | 'base' | 'lg';
 
 // 카테고리 타입
-export type MissionCategory = 'self_management' | 'communication' | 'career' | 'custom';
+export type MissionCategory = 'growth';
 
 // 감정 타입
 export type Emotion = 'happy' | 'excited' | 'calm' | 'grateful' | 'sad' | 'angry' | 'anxious' | 'tired';

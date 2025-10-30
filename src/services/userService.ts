@@ -102,16 +102,46 @@ export const migrateUserData = async (
       };
     }
 
-    // 유효한 카테고리만 유지 (self_management, communication, career)
-    const validCategories: string[] = ['self_management', 'communication', 'career'];
-    const migratedMissions = existingMissions.map(mission => ({
+    // 모든 미션을 단일 카테고리(growth)로 통합
+    // 필수 5개만 유지, 없으면 기존 순서대로 상위 5개
+    const essentialIds: string[] = ['sm1', 'sm3', 'sm5', 'sm9', 'sm10'];
+    const normalized = existingMissions.map(mission => ({
       ...mission,
-      category_id: validCategories.includes(mission.category_id) ? mission.category_id : 'career'
+      category_id: 'growth'
     }));
+    const picked = normalized.filter(m => essentialIds.includes(m.mission_id));
+    const migratedMissions = (picked.length > 0 ? picked : normalized).slice(0, 5);
 
     await setData(storageKeys.MISSIONS, migratedMissions);
 
-    // 캐릭터 데이터는 레벨 기반이므로 변경 없음
+    // 캐릭터 데이터 통합: 기존 캐릭터들의 경험치를 합산하여 하나의 캐릭터로 병합
+    const existingCharacters: any[] = await getData(storageKeys.CHARACTERS) || [];
+    if (existingCharacters.length > 1) {
+      const totalExperience: number = existingCharacters.reduce((sum, c) => sum + (c.experience || 0), 0);
+      const newLevel: number = Math.floor(totalExperience / 100) + 1;
+      const now = Date.now();
+      const unifiedCharacter = {
+        id: `character_${now}_growth`,
+        character_id: `character_${now}_growth`,
+        user_id: '',
+        name: generateUserCharacterName('', 'growth'),
+        title: '성장하는 동반자',
+        description: getCategoryDescription('growth'),
+        emoji: '🌱',
+        level: newLevel,
+        experience: totalExperience,
+        max_experience: 100,
+        total_experience: totalExperience,
+        unlocked: true,
+        unlocked_date: new Date().toISOString(),
+        category_id: 'growth',
+        completed_missions: 0,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+      await setData(storageKeys.CHARACTERS, [unifiedCharacter]);
+      await setData(storageKeys.REPRESENTATIVE_CHARACTER, 'growth');
+    }
 
     return {
       success: true,
@@ -140,113 +170,56 @@ export const initializeUserData = async (
 
     // 항상 JSON 파일에서 최신 템플릿 로드
     const missionTemplates = require('../data/missionTemplates.json');
-    // 템플릿에서 미션 생성 (전체 템플릿 데이터 사용)
-    const missions = missionTemplates.map((template: any) => ({
+    // 필수 5개 미션만 사용
+    const essentialIds: string[] = ['sm1', 'sm3', 'sm5', 'sm9', 'sm10'];
+    const selectedTemplates = missionTemplates.filter((t: any) => essentialIds.includes(t.mission_id)).slice(0, 5);
+    const missions = selectedTemplates.map((template: any) => ({
       id: `mission_${Date.now()}_${template.id}`,
       mission_id: template.mission_id,
       title: template.title,
       description: template.description,
       emoji: template.emoji,
-      category_id: template.category_id,
+      category_id: 'growth',
       difficulty: template.difficulty,
       experience: template.experience,
       completed: false
     }));
     await setData(storageKeys.MISSIONS, missions);
 
-    // 캐릭터 템플릿에서 초기 캐릭터 생성
+    // 캐릭터 템플릿에서 초기 캐릭터 생성 (단일 캐릭터)
     // 항상 JSON 파일에서 최신 템플릿 로드
     const characterTemplatesData = require('../data/characterTemplates.json');
     await setData(storageKeys.CHARACTER_TEMPLATES, characterTemplatesData);
     const characterTemplates: any[] = characterTemplatesData;
     if (characterTemplates.length > 0) {
-      // 4개 카테고리별 캐릭터 생성 (custom 포함)
-      const initialCharacters: Character[] = [
-        {
-          id: `character_${Date.now()}_self_management`,
-          character_id: `character_${Date.now()}_self_management`,
-          user_id: userId,
-          name: generateUserCharacterName(userId, 'self_management'),
-          title: characterTemplates[0].title,
-          description: getCategoryDescription('self_management'),
-          emoji: characterTemplates[0].emoji || '🌱',
-          level: 1,
-          experience: 0,
-          max_experience: 100,
-          total_experience: 0,
-          unlocked: true,
-          unlocked_date: new Date().toISOString(),
-          category_id: 'self_management',
-          completed_missions: 0,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        },
-        {
-          id: `character_${Date.now()}_communication`,
-          character_id: `character_${Date.now()}_communication`,
-          user_id: userId,
-          name: generateUserCharacterName(userId, 'communication'),
-          title: characterTemplates[0].title,
-          description: getCategoryDescription('communication'),
-          emoji: characterTemplates[0].emoji || '🌱',
-          level: 1,
-          experience: 0,
-          max_experience: 100,
-          total_experience: 0,
-          unlocked: true,
-          unlocked_date: new Date().toISOString(),
-          category_id: 'communication',
-          completed_missions: 0,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        },
-        {
-          id: `character_${Date.now()}_career`,
-          character_id: `character_${Date.now()}_career`,
-          user_id: userId,
-          name: generateUserCharacterName(userId, 'career'),
-          title: characterTemplates[0].title,
-          description: getCategoryDescription('career'),
-          emoji: characterTemplates[0].emoji || '🌱',
-          level: 1,
-          experience: 0,
-          max_experience: 100,
-          total_experience: 0,
-          unlocked: true,
-          unlocked_date: new Date().toISOString(),
-          category_id: 'career',
-          completed_missions: 0,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        },
-        {
-          id: `character_${Date.now()}_custom`,
-          character_id: `character_${Date.now()}_custom`,
-          user_id: userId,
-          name: generateUserCharacterName(userId, 'custom'),
-          title: '나만의 동반자',
-          description: getCategoryDescription('custom'),
-          emoji: '⭐',
-          level: 1,
-          experience: 0,
-          max_experience: 100,
-          total_experience: 0,
-          unlocked: true,
-          unlocked_date: new Date().toISOString(),
-          category_id: 'custom',
-          completed_missions: 0,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        }
-      ];
-      await setData(storageKeys.CHARACTERS, initialCharacters);
+      const now = Date.now();
+      const initialCharacter: Character = {
+        id: `character_${now}_growth`,
+        character_id: `character_${now}_growth`,
+        user_id: userId,
+        name: generateUserCharacterName(userId, 'growth'),
+        title: characterTemplates[0].title,
+        description: getCategoryDescription('growth'),
+        emoji: characterTemplates[0].emoji || '🌱',
+        level: 1,
+        experience: 0,
+        max_experience: 100,
+        total_experience: 0,
+        unlocked: true,
+        unlocked_date: new Date().toISOString(),
+        category_id: 'growth',
+        completed_missions: 0,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+      await setData(storageKeys.CHARACTERS, [initialCharacter]);
     }
 
     // 다이어리는 빈 배열로 시작
     await setData(storageKeys.DIARIES, []);
 
-    // 대표 캐릭터 설정 (초기에는 자기관리 캐릭터)
-    await setData(storageKeys.REPRESENTATIVE_CHARACTER, 'self_management');
+    // 대표 캐릭터 설정 (단일: growth)
+    await setData(storageKeys.REPRESENTATIVE_CHARACTER, 'growth');
     return {
       success: true,
       data: {

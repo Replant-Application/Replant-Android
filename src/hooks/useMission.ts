@@ -13,7 +13,7 @@
  */
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { getData, updateData, getStorageKeys } from '../services';
+import { getData, setData, updateData, getStorageKeys } from '../services';
 import { createCustomMission as createCustomMissionService, updateCustomMission as updateCustomMissionService, deleteCustomMission as deleteCustomMissionService } from '../services/missionService';
 import { useUser } from '../contexts/UserContext';
 import { logError } from '../utils/logger';
@@ -37,9 +37,17 @@ export const useMission = (
 
       const storageKeys = getStorageKeys(currentNickname);
       const missionsData: Mission[] = await getData(storageKeys.MISSIONS) || [];
+      // 단일 카테고리로 normalize
+      const normalizedMissions: Mission[] = missionsData.map(m => ({
+        ...m,
+        category_id: 'growth'
+      }));
+      if (JSON.stringify(missionsData) !== JSON.stringify(normalizedMissions)) {
+        await setData(storageKeys.MISSIONS, normalizedMissions);
+      }
 
       // 중복 제거 (mission_id 기준)
-      const uniqueMissions: Mission[] = missionsData.filter((mission, index, self) =>
+      const uniqueMissions: Mission[] = normalizedMissions.filter((mission, index, self) =>
         index === self.findIndex(m => m.mission_id === mission.mission_id)
       );
 
