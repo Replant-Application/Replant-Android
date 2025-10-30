@@ -1,12 +1,12 @@
 import { loadTemplates } from './templateService';
 import { logError } from '../utils/logger';
-import { ServiceResult, Mission, Character } from '../types';
+import { ServiceResult, MissionTemplate, Character } from '../types';
 
 // 앱 초기화
 export const initializeApp = async (): Promise<ServiceResult<{
   message: string;
   templates: {
-    missionTemplates: Mission[];
+    missionTemplates: MissionTemplate[];
     characterTemplates: Character[];
   };
 }>> => {

@@ -1,10 +1,10 @@
 // 템플릿 서비스 - JSON 파일에서 직접 로드
 import { logError } from '../utils/logger';
-import { Mission, Character } from '../types';
+import { MissionTemplate, Character } from '../types';
 import { ServiceResult } from '../types';
 
 // 미션 템플릿 로드
-export const loadMissionTemplates = async (): Promise<Mission[]> => {
+export const loadMissionTemplates = async (): Promise<MissionTemplate[]> => {
   try {
     // 항상 JSON 파일에서 최신 템플릿 로드
     const missionTemplatesData = require('../data/missionTemplates.json');
@@ -29,11 +29,11 @@ export const loadCharacterTemplates = async (): Promise<Character[]> => {
 
 // 모든 템플릿 로드
 export const loadTemplates = async (): Promise<ServiceResult<{
-  missionTemplates: Mission[];
+  missionTemplates: MissionTemplate[];
   characterTemplates: Character[];
 }>> => {
   try {
-    const missionTemplates: Mission[] = await loadMissionTemplates();
+    const missionTemplates: MissionTemplate[] = await loadMissionTemplates();
     const characterTemplates: Character[] = await loadCharacterTemplates();
 
     return {

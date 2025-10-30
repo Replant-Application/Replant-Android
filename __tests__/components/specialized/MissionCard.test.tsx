@@ -9,7 +9,7 @@ const mockMission: Mission = {
   mission_id: 'test-mission-1',
   title: '테스트 미션',
   description: '테스트 미션 설명',
-  category_id: 'self_management',
+  category_id: 'growth',
   emoji: '🧘',
   difficulty: 'easy',
   completed: false,

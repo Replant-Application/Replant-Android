@@ -75,6 +75,16 @@ export interface Mission {
   photo_url?: string | undefined;
 }
 
+// 템플릿 전용 타입 (사용자 인스턴스 필드 제외)
+export interface MissionTemplate {
+  mission_id: string;
+  title: string;
+  description: string;
+  emoji: string;
+  difficulty: Difficulty;
+  experience: number;
+}
+
 export interface MissionData {
   title: string;
   description: string;

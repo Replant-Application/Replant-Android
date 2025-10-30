@@ -104,7 +104,7 @@ export const migrateUserData = async (
 
     // 모든 미션을 단일 카테고리(growth)로 통합
     // 필수 5개만 유지, 없으면 기존 순서대로 상위 5개
-    const essentialIds: string[] = ['sm1', 'sm3', 'sm5', 'sm9', 'sm10'];
+    const essentialIds: string[] = ['1', '2', '3', '4', '5'];
     const normalized = existingMissions.map(mission => ({
       ...mission,
       category_id: 'growth'
@@ -171,10 +171,10 @@ export const initializeUserData = async (
     // 항상 JSON 파일에서 최신 템플릿 로드
     const missionTemplates = require('../data/missionTemplates.json');
     // 필수 5개 미션만 사용
-    const essentialIds: string[] = ['sm1', 'sm3', 'sm5', 'sm9', 'sm10'];
+    const essentialIds: string[] = ['1', '2', '3', '4', '5'];
     const selectedTemplates = missionTemplates.filter((t: any) => essentialIds.includes(t.mission_id)).slice(0, 5);
     const missions = selectedTemplates.map((template: any) => ({
-      id: `mission_${Date.now()}_${template.id}`,
+      id: `mission_${Date.now()}_${template.mission_id}`,
       mission_id: template.mission_id,
       title: template.title,
       description: template.description,
