@@ -234,7 +234,6 @@ export enum ScreenNames {
   HOME = 'Home',
   MISSION = 'Mission',
   DIARY = 'Diary',
-  CHARACTER_GUIDE = 'CharacterGuide',
   CHARACTER_DETAIL = 'CharacterDetail',
   SETTINGS = 'Settings',
   CUSTOM_MISSION_CREATE = 'CustomMissionCreate',

@@ -15,7 +15,6 @@ export type RootStackParamList = {
   CounselingSelect: undefined;
   ChatBot: undefined;
   PlacesSearch: undefined;
-  CharacterGuide: undefined;
   CharacterDetail: {
     character: Character;
   };
@@ -37,7 +36,6 @@ export interface NavigationParams {
   [ScreenNames.COUNSELING_SELECT]: undefined;
   [ScreenNames.CHATBOT]: undefined;
   [ScreenNames.PLACES_SEARCH]: undefined;
-  [ScreenNames.CHARACTER_GUIDE]: undefined;
   [ScreenNames.CHARACTER_DETAIL]: {
     character: Character;
   };

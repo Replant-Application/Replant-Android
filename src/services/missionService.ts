@@ -140,18 +140,3 @@ export const deleteCustomMission = async (
     };
   }
 };
-
-/**
- * 나만의 미션 목록 조회
- */
-export const getCustomMissions = async (nickname: string): Promise<Mission[]> => {
-  try {
-    const storageKeys = getStorageKeys(nickname);
-    const missions: Mission[] = await getData(storageKeys.MISSIONS) || [];
-
-    return missions.filter(m => m.is_custom);
-  } catch (error) {
-    logError('나만의 미션 목록 조회 실패', error as Error, { nickname });
-    return [];
-  }
-};

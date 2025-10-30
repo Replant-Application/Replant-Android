@@ -101,25 +101,6 @@ export const deleteData = async <T extends { id: string | number }>(
   }
 };
 
-// 기기별 데이터 삭제 함수
-export const clearDeviceBasedData = async (): Promise<void> => {
-  try {
-    const deviceId: string = await getDeviceId();
-    const keysToRemove: string[] = [
-      `missions_${deviceId}`,
-      `diaries_${deviceId}`,
-      `characters_${deviceId}`,
-      `userNickname_${deviceId}`,
-    ];
-
-    for (const key of keysToRemove) {
-      await AsyncStorage.removeItem(key);
-    }
-
-  } catch (error) {
-    logError('기기별 데이터 삭제 실패', error as Error);
-  }
-};
 
 // 기기 ID 생성/조회
 export const getDeviceId = async (): Promise<string> => {

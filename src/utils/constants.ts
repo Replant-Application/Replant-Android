@@ -13,7 +13,6 @@ export const SCREEN_NAMES: Record<string, string> = {
   COUNSELING_SELECT: 'CounselingSelect',
   CHATBOT: 'ChatBot',
   PLACES_SEARCH: 'PlacesSearch',
-  CHARACTER_GUIDE: 'CharacterGuide',
   CHARACTER_DETAIL: 'CharacterDetail',
   SETTINGS: 'Settings',
   INFO: 'Info',
