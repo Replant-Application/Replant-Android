@@ -139,13 +139,17 @@ export const useCharacter = (): UseCharacterReturn => {
     categoryId: MissionCategory,
     experience: number
   ): Promise<ExperienceResult> => {
+    if (!currentNickname) {
+      return { success: false, experienceGained: 0, levelUp: false, error: '사용자 정보가 없습니다.' };
+    }
+
     try {
       // 해당 카테고리의 캐릭터 찾기
       const character: Character | undefined = characters.find(char => char.category_id === categoryId);
       if (!character) return { success: false, experienceGained: 0, levelUp: false, error: '캐릭터를 찾을 수 없습니다.' };
 
       // autoLevelupCharacter 함수 사용
-      const result = await autoLevelupCharacter(character.id, experience, currentNickname!);
+      const result = await autoLevelupCharacter(character.id, experience, currentNickname);
 
       if (result.success) {
         // 로컬 상태 업데이트
@@ -188,8 +192,12 @@ export const useCharacter = (): UseCharacterReturn => {
 
   // 대표 캐릭터 설정
   const setRepresentative = useCallback(async (categoryId: string): Promise<ServiceResult<void>> => {
+    if (!currentNickname) {
+      return { success: false, error: '사용자 정보가 없습니다.' };
+    }
+
     try {
-      const storageKeys = getStorageKeys(currentNickname!);
+      const storageKeys = getStorageKeys(currentNickname);
       await setData(storageKeys.REPRESENTATIVE_CHARACTER, categoryId);
 
       const representativeChar: Character | undefined = characters.find(char => char.category_id === categoryId);

@@ -2,6 +2,4 @@
 export * from './storage';
 export * from './characterService';
 export * from './userService';
-export * from './templateService';
-export * from './appService';
 export * from './missionService';

@@ -11,7 +11,15 @@ interface CharacterDetailScreenProps {
 }
 
 const CharacterDetailScreen: React.FC<CharacterDetailScreenProps> = ({ route, navigation: _navigation }) => {
-  const { character } = route.params;
+  const { character } = route.params || {};
+
+  if (!character) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <Text>캐릭터 정보를 불러올 수 없습니다.</Text>
+      </View>
+    );
+  }
   const [currentEmotion, setCurrentEmotion] = useState<string>('default');
 
   // 레벨별 캐릭터 이미지

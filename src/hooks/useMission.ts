@@ -74,6 +74,10 @@ export const useMission = (
     missionId: string,
     photoUrl: string | null
   ): Promise<MissionCompletionResult> => {
+    if (!currentNickname) {
+      return { success: false, experienceGained: 0, levelUp: false, error: '사용자 정보가 없습니다.' };
+    }
+
     try {
       const mission: Mission | undefined = missions.find(m => m.mission_id === missionId);
       if (!mission) {
@@ -88,7 +92,7 @@ export const useMission = (
         photo_url: photoUrl || undefined
       };
 
-      const storageKeys = getStorageKeys(currentNickname!);
+      const storageKeys = getStorageKeys(currentNickname);
       await updateData(storageKeys.MISSIONS, mission.id, updatedMission);
 
       // 로컬 상태 업데이트
@@ -121,6 +125,10 @@ export const useMission = (
 
   // 미션 완료 취소
   const uncompleteMission = useCallback(async (missionId: string): Promise<ServiceResult<void>> => {
+    if (!currentNickname) {
+      return { success: false, error: '사용자 정보가 없습니다.' };
+    }
+
     try {
       const mission: Mission | undefined = missions.find(m => m.mission_id === missionId);
       if (!mission) {
@@ -134,7 +142,7 @@ export const useMission = (
         photo_url: undefined
       };
 
-      const storageKeys = getStorageKeys(currentNickname!);
+      const storageKeys = getStorageKeys(currentNickname);
       await updateData(storageKeys.MISSIONS, mission.id, updatedMission);
 
       // 로컬 상태 업데이트

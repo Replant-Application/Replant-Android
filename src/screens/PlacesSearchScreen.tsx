@@ -360,7 +360,7 @@ const PlacesSearchScreen: React.FC<PlacesSearchScreenProps> = ({ navigation }) =
           <View key={place.place_id} style={styles.placeCard}>
             <View style={styles.placeHeader}>
               <Text style={styles.placeName}>{place.name}</Text>
-              {place.rating && (
+              {place.rating !== undefined && (
                 <View style={styles.ratingContainer}>
                   <View style={styles.starRating}>
                     {[1, 2, 3, 4, 5].map((star) => (
@@ -369,7 +369,7 @@ const PlacesSearchScreen: React.FC<PlacesSearchScreenProps> = ({ navigation }) =
                       </Text>
                     ))}
                   </View>
-                  <Text style={styles.ratingText}>{place.rating.toFixed(1)}</Text>
+                  <Text style={styles.ratingText}>{place.rating!.toFixed(1)}</Text>
                   {place.user_ratings_total && (
                     <Text style={styles.ratingCount}>({place.user_ratings_total})</Text>
                   )}

@@ -241,4 +241,5 @@ export enum ScreenNames {
   CHATBOT = 'ChatBot',
   COUNSELING_SELECT = 'CounselingSelect',
   PLACES_SEARCH = 'PlacesSearch',
+  INFO = 'Info',
 }

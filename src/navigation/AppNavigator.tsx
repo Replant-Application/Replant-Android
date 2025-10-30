@@ -17,6 +17,7 @@ import ChatBotScreen from '../screens/ChatBotScreen';
 import PlacesSearchScreen from '../screens/PlacesSearchScreen';
 import CharacterDetailScreen from '../screens/CharacterDetailScreen';
 import SettingsScreen from '../screens/SettingsScreen';
+import InfoScreen from '../screens/InfoScreen';
 
 // 간단한 상태 기반 네비게이션 (React Navigation 없이)
 const AppNavigator = () => {
@@ -64,8 +65,8 @@ const AppNavigator = () => {
     // 화면별 뒤로가기 목적지 정의
     if (currentScreen === SCREEN_NAMES.CHATBOT || currentScreen === SCREEN_NAMES.PLACES_SEARCH) {
       setCurrentScreen(SCREEN_NAMES.COUNSELING_SELECT);
-    } else if (currentScreen === SCREEN_NAMES.COUNSELING_SELECT) {
-      setCurrentScreen(SCREEN_NAMES.HOME);
+    } else if (currentScreen === SCREEN_NAMES.COUNSELING_SELECT || currentScreen === SCREEN_NAMES.INFO) {
+      setCurrentScreen(SCREEN_NAMES.SETTINGS);
     } else {
       setCurrentScreen(SCREEN_NAMES.HOME);
     }
@@ -86,9 +87,9 @@ const AppNavigator = () => {
       getParent: () => null,
     } as any;
     const route = {
-      params: navigationParams,
-      key: 'CharacterDetail',
-      name: 'CharacterDetail'
+      params: navigationParams || {},
+      key: currentScreen,
+      name: currentScreen
     } as any;
 
     switch (currentScreen) {
@@ -109,7 +110,9 @@ const AppNavigator = () => {
       case SCREEN_NAMES.CHARACTER_DETAIL:
         return <CharacterDetailScreen navigation={navigation} route={route} />;
       case SCREEN_NAMES.SETTINGS:
-        return <SettingsScreen />;
+        return <SettingsScreen navigation={navigation} />;
+      case SCREEN_NAMES.INFO:
+        return <InfoScreen navigation={navigation} route={route} />;
       default:
         return <HomeScreen navigation={navigation} />;
     }

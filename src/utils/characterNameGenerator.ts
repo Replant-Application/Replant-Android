@@ -19,17 +19,6 @@ const nouns = [
 ];
 
 /**
- * 랜덤한 캐릭터 이름 생성
- * @returns 형용사 + 명사 조합의 캐릭터 이름
- */
-export const generateCharacterName = (): string => {
-  const randomAdjective = adjectives[Math.floor(Math.random() * adjectives.length)];
-  const randomNoun = nouns[Math.floor(Math.random() * nouns.length)];
-
-  return `${randomAdjective} ${randomNoun}`;
-};
-
-/**
  * 특정 시드로 캐릭터 이름 생성 (일관성 보장)
  * @param seed 시드 값
  * @returns 시드 기반 캐릭터 이름

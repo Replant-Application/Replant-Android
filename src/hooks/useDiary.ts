@@ -40,10 +40,14 @@ export const useDiary = (): UseDiaryReturn => {
 
   // 다이어리 저장
   const saveDiary = useCallback(async (diaryData: SimpleDiaryData): Promise<ServiceResult<Diary>> => {
+    if (!currentNickname) {
+      return { success: false, error: '사용자 정보가 없습니다.' };
+    }
+
     try {
       setLoading(true);
 
-      const storageKeys = getStorageKeys(currentNickname!);
+      const storageKeys = getStorageKeys(currentNickname);
       const newDiary: Diary = await addData(storageKeys.DIARIES, {
         id: `diary_${Date.now()}`,
         date: diaryData.date,
@@ -55,7 +59,7 @@ export const useDiary = (): UseDiaryReturn => {
         location: undefined,
         photos: [],
         is_private: false,
-        created_by: currentNickname!
+        created_by: currentNickname
       }) as unknown as Diary;
 
       // 로컬 상태 업데이트
@@ -75,10 +79,14 @@ export const useDiary = (): UseDiaryReturn => {
     diaryId: string,
     diaryData: SimpleDiaryData
   ): Promise<ServiceResult<Diary>> => {
+    if (!currentNickname) {
+      return { success: false, error: '사용자 정보가 없습니다.' };
+    }
+
     try {
       setLoading(true);
 
-      const storageKeys = getStorageKeys(currentNickname!);
+      const storageKeys = getStorageKeys(currentNickname);
       const updatedDiary: Diary = await updateData(storageKeys.DIARIES, diaryId, {
         id: diaryId,
         ...diaryData
@@ -102,10 +110,14 @@ export const useDiary = (): UseDiaryReturn => {
 
   // 다이어리 삭제
   const deleteDiary = useCallback(async (diaryId: string): Promise<ServiceResult<void>> => {
+    if (!currentNickname) {
+      return { success: false, error: '사용자 정보가 없습니다.' };
+    }
+
     try {
       setLoading(true);
 
-      const storageKeys = getStorageKeys(currentNickname!);
+      const storageKeys = getStorageKeys(currentNickname);
       await deleteData(storageKeys.DIARIES, diaryId);
 
       // 로컬 상태 업데이트

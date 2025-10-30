@@ -20,6 +20,10 @@ export type RootStackParamList = {
     character: Character;
   };
   Settings: undefined;
+  Info: {
+    title: string;
+    content: string;
+  };
 };
 
 // 네비게이션 파라미터 타입
@@ -38,6 +42,10 @@ export interface NavigationParams {
     character: Character;
   };
   [ScreenNames.SETTINGS]: undefined;
+  [ScreenNames.INFO]: {
+    title: string;
+    content: string;
+  };
 }
 
 // 네비게이션 Props 타입
