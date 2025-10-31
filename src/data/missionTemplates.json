@@ -1,42 +1,58 @@
 [
   {
     "mission_id": "1",
-    "title": "아침 8시 전 기상 기록",
-    "description": "매일 아침 8시 전 기상 및 기록",
-    "emoji": "⏰",
+    "title": "책 30분 읽고 5줄 요약하기",
+    "description": "30분 동안 읽은 책의 내용을 5줄로 요약하여 커뮤니티에 공유 (책 안내페이지 첨부 가능)",
+    "emoji": "📖",
+    "difficulty": "medium",
+    "experience": 60
+  },
+  {
+    "mission_id": "2",
+    "title": "인바디 결과 공유",
+    "description": "주기적으로 자신의 인바디 결과를 커뮤니티에 공유",
+    "emoji": "💪",
+    "difficulty": "medium",
+    "experience": 55
+  },
+  {
+    "mission_id": "3",
+    "title": "오늘의 사진 공유하기",
+    "description": "오늘 가장 뜻깊었던 사진을 커뮤니티에 공유하고 다른 사용자들의 평가 받기",
+    "emoji": "📸",
     "difficulty": "easy",
     "experience": 50
   },
   {
-    "mission_id": "2",
-    "title": "30초 자기소개 영상 촬영",
-    "description": "면접용 30초 자기소개 영상 셀프 촬영",
-    "emoji": "📹",
-    "difficulty": "medium",
-    "experience": 60
-  },
-  {
-    "mission_id": "3",
-    "title": "주 3회 20분 걷기/스트레칭",
-    "description": "주 3회 이상 20분 걷기 또는 스트레칭",
-    "emoji": "🚶",
-    "difficulty": "medium",
-    "experience": 55
-  },
-  {
     "mission_id": "4",
-    "title": "면접 예상질문 5개 작성",
-    "description": "면접 예상질문 5개 리스트 작성",
-    "emoji": "❓",
+    "title": "오늘의 운동 인증하기",
+    "description": "GPS와 시간 데이터를 이용하여 헬스장에서의 운동 시간 인증 (사용자 정보 노출 최소화)",
+    "emoji": "🏋️",
     "difficulty": "medium",
-    "experience": 55
+    "experience": 65
   },
   {
     "mission_id": "5",
-    "title": "하루 1시간 학습 기록",
-    "description": "하루 1시간 학습 시간 기록",
+    "title": "산책 인증하기",
+    "description": "GPS 데이터를 이용하여 산책 거리나 지정된 스팟 방문 여부에 따라 보상 차등 지급",
+    "emoji": "🚶",
+    "difficulty": "easy",
+    "experience": 55
+  },
+  {
+    "mission_id": "6",
+    "title": "오늘의 공부 인증하기",
+    "description": "전날 약속한 시간 또는 다른 유저가 정해준 시간을 수행했는지 시간 데이터로 인증",
     "emoji": "📚",
     "difficulty": "medium",
     "experience": 60
+  },
+  {
+    "mission_id": "7",
+    "title": "기상 미션",
+    "description": "지정된 시간에 일어나서 앱에서 인증하는 미션",
+    "emoji": "⏰",
+    "difficulty": "medium",
+    "experience": 55
   }
 ]

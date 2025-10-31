@@ -31,9 +31,9 @@ export const initializeUserData = async (
 
     // 항상 JSON 파일에서 최신 템플릿 로드
     const missionTemplates = require('../data/missionTemplates.json');
-    // 필수 5개 미션만 사용
-    const essentialIds: string[] = ['1', '2', '3', '4', '5'];
-    const selectedTemplates = missionTemplates.filter((t: any) => essentialIds.includes(t.mission_id)).slice(0, 5);
+    // 모든 미션 사용 (7개)
+    const essentialIds: string[] = ['1', '2', '3', '4', '5', '6', '7'];
+    const selectedTemplates = missionTemplates.filter((t: any) => essentialIds.includes(t.mission_id));
     const missions = selectedTemplates.map((template: any) => ({
       id: `mission_${Date.now()}_${template.mission_id}`,
       mission_id: template.mission_id,
