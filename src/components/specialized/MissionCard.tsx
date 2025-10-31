@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, Image, ViewStyle } from 'reac
 import { colors, spacing, typography, borderRadius, shadows } from '../../utils/designTokens';
 
 import { Mission } from '../../types';
+import Badge from './Badge';
 
 interface MissionCardProps {
   mission: Mission;
@@ -64,7 +65,7 @@ const MissionCard: React.FC<MissionCardProps> = ({
         </View>
         <View style={styles.statusContainer}>
           {mission.completed ? (
-            <Text style={styles.completedText}>✅ 완료</Text>
+            <Badge tier="bronze" size="sm" />
           ) : (
             <Text style={styles.pendingText}>⏳ 진행중</Text>
           )}
@@ -163,16 +164,10 @@ const styles = StyleSheet.create({
   },
 
   statusContainer: {
-    paddingHorizontal: spacing[2],
-    paddingVertical: spacing[1],
-    borderRadius: borderRadius.sm,
-    backgroundColor: colors.gray[100],
-  },
-
-  completedText: {
-    fontSize: typography.fontSize.xs,
-    color: colors.success,
-    fontWeight: typography.fontWeight.medium,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 36,
+    minWidth: 36,
   },
 
   pendingText: {
