@@ -29,13 +29,6 @@ jest.mock('@react-navigation/native', () => ({
   }),
 }));
 
-jest.mock('@react-navigation/stack', () => ({
-  createStackNavigator: () => ({
-    Navigator: ({ children }) => children,
-    Screen: ({ children }) => children,
-  }),
-}));
-
 // Mock React Native components that might cause issues
 // jest.mock('react-native/Libraries/Animated/NativeAnimatedHelper');
 

@@ -8,7 +8,6 @@ const { getDefaultConfig, mergeConfig } = require('@react-native/metro-config');
  */
 const config = {
   resolver: {
-    // filter-obj 오류 해결을 위한 설정
     unstable_enablePackageExports: false,
     unstable_conditionNames: ['react-native', 'browser', 'require'],
   },

@@ -8,9 +8,6 @@ import { KAKAO_MAP_API_KEY, HAS_KAKAO_API_KEY } from '../config/api';
 // API 키가 설정되지 않은 경우를 위한 플래그
 const HAS_API_KEY = HAS_KAKAO_API_KEY;
 
-// Google Places API 키 (환경변수에서 가져오거나 기본값 사용)
-const GOOGLE_PLACES_API_KEY = 'your-google-places-api-key';
-
 export interface Place {
   place_id: string;
   name: string;
@@ -30,12 +27,6 @@ export interface Place {
   formatted_phone_number?: string;
   website?: string;
   types: string[];
-}
-
-export interface PlacesSearchResult {
-  results: Place[];
-  status: string;
-  next_page_token?: string;
 }
 
 class PlacesService {
@@ -138,63 +129,6 @@ class PlacesService {
         weekday_text: [kakaoDoc.open_hours]
       } : undefined
     };
-  }
-
-  /**
-   * 근처 장소 검색 (위도/경도 기반)
-   */
-  async searchNearby(lat: number, lng: number, type: string, radius: number = 5000): Promise<Place[]> {
-    try {
-      const url = `${this.baseUrl}/nearbysearch/json`;
-      const params = new URLSearchParams({
-        location: `${lat},${lng}`,
-        radius: radius.toString(),
-        type: type,
-        key: GOOGLE_PLACES_API_KEY,
-        language: 'ko'
-      });
-
-      const response = await fetch(`${url}?${params}`);
-      const data: PlacesSearchResult = await response.json();
-
-      if (data.status === 'OK') {
-        return data.results;
-      } else {
-        console.error('Nearby Search API 오류:', data.status);
-        return [];
-      }
-    } catch (error) {
-      console.error('Nearby Search API 요청 오류:', error);
-      return [];
-    }
-  }
-
-  /**
-   * 장소 상세 정보 가져오기
-   */
-  async getPlaceDetails(placeId: string): Promise<Place | null> {
-    try {
-      const url = `${this.baseUrl}/details/json`;
-      const params = new URLSearchParams({
-        place_id: placeId,
-        fields: 'place_id,name,formatted_address,geometry,rating,user_ratings_total,opening_hours,formatted_phone_number,website,types',
-        key: GOOGLE_PLACES_API_KEY,
-        language: 'ko'
-      });
-
-      const response = await fetch(`${url}?${params}`);
-      const data = await response.json();
-
-      if (data.status === 'OK') {
-        return data.result;
-      } else {
-        console.error('Place Details API 오류:', data.status);
-        return null;
-      }
-    } catch (error) {
-      console.error('Place Details API 요청 오류:', error);
-      return null;
-    }
   }
 
   /**
