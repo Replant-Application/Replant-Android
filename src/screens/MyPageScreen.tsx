@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { NavigationProp } from '@react-navigation/native';
 import { useUserProfile } from '../hooks/useUserProfile';
 import { useCharacter } from '../hooks/useCharacter';
@@ -7,6 +7,7 @@ import { CharacterCard } from '../components/specialized';
 import { Card, Loading, ErrorBoundary, Header, SectionTitle } from '../components/ui';
 import { colors, spacing, typography, borderRadius, shadows } from '../utils/designTokens';
 import { RootStackParamList } from '../types/navigation';
+import { Character } from '../types';
 
 interface MyPageScreenProps {
   navigation: NavigationProp<RootStackParamList>;
@@ -49,7 +50,7 @@ const MyPageScreen: React.FC<MyPageScreenProps> = ({ navigation }) => {
   };
 
   // 캐릭터 상세 페이지로 이동
-  const handleCharacterPress = (character: any): void => {
+  const handleCharacterPress = (character: Character): void => {
     navigation.navigate('CharacterDetail', { character });
   };
 
