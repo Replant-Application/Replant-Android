@@ -14,6 +14,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { getData, getStorageKeys, autoLevelupCharacter, setData } from '../services';
+import { updateCharacterName as updateCharacterNameService } from '../services/characterService';
 import { useUser } from '../contexts/UserContext';
 import { logError } from '../utils/logger';
 import { Character, UseCharacterReturn, ExperienceResult, ServiceResult, MissionCategory } from '../types';
@@ -154,6 +155,44 @@ export const useCharacter = (): UseCharacterReturn => {
     setSelectedCharacter(character);
   }, []);
 
+  // 캐릭터 이름 변경
+  const updateCharacterName = useCallback(async (
+    characterId: string,
+    newName: string
+  ): Promise<ServiceResult<Character>> => {
+    if (!currentNickname) {
+      return { success: false, error: '사용자 정보가 없습니다.' };
+    }
+
+    try {
+      const result = await updateCharacterNameService(characterId, newName, currentNickname);
+      
+      if (result.success && result.data) {
+        // 로컬 상태 업데이트
+        setCharacters(prev =>
+          prev.map(char =>
+            char.id === characterId
+              ? result.data!
+              : char
+          )
+        );
+
+        // 선택된 캐릭터도 업데이트
+        if (selectedCharacter && selectedCharacter.id === characterId) {
+          setSelectedCharacter(result.data);
+        }
+      }
+      
+      return result;
+    } catch (updateError) {
+      logError('캐릭터 이름 변경 실패', updateError as Error, { characterId, newName, currentNickname });
+      return {
+        success: false,
+        error: (updateError as Error).message,
+      };
+    }
+  }, [currentNickname, selectedCharacter]);
+
   // 메모이제이션된 반환 객체
   return useMemo(() => ({
     characters,
@@ -163,6 +202,7 @@ export const useCharacter = (): UseCharacterReturn => {
     loadCharacters,
     addExperienceByCategory,
     selectCharacter,
+    updateCharacterName,
   }), [
     characters,
     selectedCharacter,
@@ -171,5 +211,6 @@ export const useCharacter = (): UseCharacterReturn => {
     loadCharacters,
     addExperienceByCategory,
     selectCharacter,
+    updateCharacterName,
   ]);
 };

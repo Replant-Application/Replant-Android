@@ -58,3 +58,50 @@ export const autoLevelupCharacter = async (
     };
   }
 };
+
+/**
+ * 캐릭터 이름 변경
+ */
+export const updateCharacterName = async (
+  characterId: string,
+  newName: string,
+  nickname: string
+): Promise<ServiceResult<Character>> => {
+  try {
+    if (!newName || !newName.trim()) {
+      return { success: false, error: '캐릭터 이름을 입력해주세요.' };
+    }
+
+    const storageKeys = getStorageKeys(nickname);
+    const characters: Character[] = await getData(storageKeys.CHARACTERS) || [];
+    const character: Character | undefined = characters.find(c => c.id === characterId);
+
+    if (!character) {
+      return { success: false, error: '캐릭터를 찾을 수 없습니다.' };
+    }
+
+    // 캐릭터 이름 업데이트
+    const updatedCharacter: Character = {
+      ...character,
+      name: newName.trim(),
+      updated_at: new Date().toISOString(),
+    };
+
+    // 캐릭터 배열 업데이트
+    const updatedCharacters: Character[] = characters.map(c =>
+      c.id === character.id ? updatedCharacter : c
+    );
+    await setData(storageKeys.CHARACTERS, updatedCharacters);
+
+    return {
+      success: true,
+      data: updatedCharacter,
+    };
+  } catch (error) {
+    logError('캐릭터 이름 변경 실패', error as Error, { characterId, newName, nickname });
+    return {
+      success: false,
+      error: (error as Error).message,
+    };
+  }
+};

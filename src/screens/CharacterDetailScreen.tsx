@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity } from 'react-native';
+import React, { useState, useMemo } from 'react';
+import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, Modal, TextInput, Alert } from 'react-native';
 import { colors, spacing, typography, borderRadius, shadows } from '../utils/designTokens';
 import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../types/navigation';
-import { ProgressBar, Header, SectionTitle } from '../components/ui';
+import { ProgressBar, Header, SectionTitle, Button } from '../components/ui';
+import { useCharacter } from '../hooks/useCharacter';
 
 interface CharacterDetailScreenProps {
   route: RouteProp<RootStackParamList, 'CharacterDetail'>;
@@ -11,7 +12,19 @@ interface CharacterDetailScreenProps {
 }
 
 const CharacterDetailScreen: React.FC<CharacterDetailScreenProps> = ({ route, navigation: _navigation }) => {
-  const { character } = route.params || {};
+  const { character: initialCharacter } = route.params || {};
+  const { characters, updateCharacterName, loadCharacters } = useCharacter();
+  const [currentEmotion, setCurrentEmotion] = useState<string>('default');
+  const [showNameEditModal, setShowNameEditModal] = useState(false);
+  const [newName, setNewName] = useState('');
+
+  // characters에서 현재 캐릭터 찾기 (이름 변경 후 최신 정보 반영)
+  const character = useMemo(() => {
+    if (!initialCharacter) return null;
+    // characters 배열에서 같은 id의 캐릭터 찾기
+    const updatedCharacter = characters.find(c => c.id === initialCharacter.id);
+    return updatedCharacter || initialCharacter;
+  }, [characters, initialCharacter]);
 
   if (!character) {
     return (
@@ -20,7 +33,37 @@ const CharacterDetailScreen: React.FC<CharacterDetailScreenProps> = ({ route, na
       </View>
     );
   }
-  const [currentEmotion, setCurrentEmotion] = useState<string>('default');
+
+  // 이름 변경 핸들러
+  const handleNameChange = async () => {
+    if (!newName.trim()) {
+      Alert.alert('오류', '캐릭터 이름을 입력해주세요.');
+      return;
+    }
+
+    if (newName.trim() === character.name) {
+      Alert.alert('알림', '현재 이름과 동일합니다.');
+      setShowNameEditModal(false);
+      return;
+    }
+
+    if (!character) return;
+
+    try {
+      const result = await updateCharacterName(character.id, newName.trim());
+      if (result.success && result.data) {
+        // loadCharacters를 호출하여 최신 캐릭터 정보 로드
+        await loadCharacters();
+        Alert.alert('완료', '캐릭터 이름이 변경되었습니다.');
+        setShowNameEditModal(false);
+        setNewName('');
+      } else {
+        Alert.alert('오류', result.error || '이름 변경에 실패했습니다.');
+      }
+    } catch (error) {
+      Alert.alert('오류', '이름 변경 중 오류가 발생했습니다.');
+    }
+  };
 
   // 레벨별 캐릭터 이미지
   const getCharacterImage = (level: number, emotion: string = 'default') => {
@@ -125,6 +168,15 @@ const CharacterDetailScreen: React.FC<CharacterDetailScreenProps> = ({ route, na
           {/* 1. 캐릭터 이름 */}
           <View style={styles.characterNameSection}>
             <Text style={styles.characterName}>{character.name}</Text>
+            <TouchableOpacity
+              style={styles.editNameButton}
+              onPress={() => {
+                setNewName(character.name);
+                setShowNameEditModal(true);
+              }}
+            >
+              <Text style={styles.editNameIcon}>✏️</Text>
+            </TouchableOpacity>
           </View>
 
           {/* 2. 레벨 정보 */}
@@ -162,6 +214,45 @@ const CharacterDetailScreen: React.FC<CharacterDetailScreenProps> = ({ route, na
         </View>
 
       </View>
+
+      {/* 이름 변경 모달 */}
+      <Modal
+        visible={showNameEditModal}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setShowNameEditModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>캐릭터 이름 변경</Text>
+            <TextInput
+              style={styles.nameInput}
+              placeholder="새 이름을 입력하세요"
+              value={newName}
+              onChangeText={setNewName}
+              placeholderTextColor={colors.text.secondary}
+              maxLength={20}
+              autoFocus
+            />
+            <View style={styles.modalActions}>
+              <Button
+                title="취소"
+                onPress={() => {
+                  setShowNameEditModal(false);
+                  setNewName('');
+                }}
+                variant="outline"
+                style={styles.modalButton}
+              />
+              <Button
+                title="변경"
+                onPress={handleNameChange}
+                style={styles.modalButton}
+              />
+            </View>
+          </View>
+        </View>
+      </Modal>
     </ScrollView>
   );
 };
@@ -244,13 +335,60 @@ const styles = StyleSheet.create({
     ...shadows.base,
   },
   characterNameSection: {
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     marginBottom: spacing[4],
+    gap: spacing[2],
   },
   characterName: {
     fontSize: typography.fontSize['2xl'],
     fontWeight: typography.fontWeight.bold,
     color: colors.text.primary,
+  },
+  editNameButton: {
+    padding: spacing[2],
+  },
+  editNameIcon: {
+    fontSize: typography.fontSize.base,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    width: '90%',
+    maxWidth: 400,
+    backgroundColor: colors.background.primary,
+    borderRadius: borderRadius.xl,
+    padding: spacing[6],
+    ...shadows.xl,
+  },
+  modalTitle: {
+    fontSize: typography.fontSize.xl,
+    fontWeight: typography.fontWeight.bold,
+    color: colors.text.primary,
+    marginBottom: spacing[4],
+    textAlign: 'center',
+  },
+  nameInput: {
+    borderWidth: 1,
+    borderColor: colors.border.light,
+    borderRadius: borderRadius.base,
+    padding: spacing[3],
+    fontSize: typography.fontSize.base,
+    color: colors.text.primary,
+    backgroundColor: colors.background.secondary,
+    marginBottom: spacing[4],
+  },
+  modalActions: {
+    flexDirection: 'row',
+    gap: spacing[3],
+  },
+  modalButton: {
+    flex: 1,
   },
   levelSection: {
     flexDirection: 'row',

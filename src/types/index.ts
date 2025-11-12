@@ -234,6 +234,7 @@ export interface UseCharacterReturn {
   loadCharacters: () => Promise<void>;
   addExperienceByCategory: (categoryId: MissionCategory, experience: number) => Promise<ExperienceResult>;
   selectCharacter: (character: Character) => void;
+  updateCharacterName: (characterId: string, newName: string) => Promise<ServiceResult<Character>>;
 }
 
 export interface UseDiaryReturn {

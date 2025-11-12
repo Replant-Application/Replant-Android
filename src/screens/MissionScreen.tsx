@@ -1,4 +1,4 @@
-import React, { useMemo, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { useMission } from '../hooks/useMission';
 import { useCharacter } from '../hooks/useCharacter';
@@ -15,6 +15,8 @@ interface MissionScreenProps {
   route?: RouteProp<RootStackParamList, 'Mission'>;
 }
 
+type MissionFilter = 'all' | 'daily' | 'completed';
+
 const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
   const { addExperienceByCategory } = useCharacter();
   const { missions, loading, error, saveMissionPhoto, completeMissionWithPhoto, uncompleteMission } = useMission(addExperienceByCategory);
@@ -22,10 +24,39 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
   // route params에서 사진 정보 확인
   const routeParams = route?.params;
   const processedPhotoRef = useRef<string | null>(null);
+  const [selectedFilter, setSelectedFilter] = useState<MissionFilter>('all');
+
+  // 오늘 날짜 (YYYY-MM-DD 형식)
+  const today = useMemo(() => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }, []);
 
   // 필터링된 미션 목록
-  const totalGrowthMissions = missions.length;
-  const displayedMissions = missions.slice(0, 5);
+  const filteredMissions = useMemo(() => {
+    switch (selectedFilter) {
+      case 'daily':
+        // 오늘 완료한 미션만 표시
+        return missions.filter(mission => {
+          if (mission.completed && mission.completed_at) {
+            const completedDate = mission.completed_at.split('T')[0];
+            return completedDate === today;
+          }
+          return false;
+        });
+      case 'completed':
+        return missions.filter(mission => mission.completed);
+      case 'all':
+      default:
+        return missions;
+    }
+  }, [missions, selectedFilter, today]);
+
+  const totalGrowthMissions = filteredMissions.length;
+  const displayedMissions = filteredMissions;
 
 
   // 진행률 계산
@@ -184,19 +215,57 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
           </Card>
         )}
 
-        {/* 카테고리 UI 제거: 단일 카테고리이므로 생략 */}
+        {/* 필터 탭 */}
+        <View style={styles.filterTabs}>
+          <TouchableOpacity
+            style={[styles.filterTab, selectedFilter === 'all' && styles.filterTabActive]}
+            onPress={() => setSelectedFilter('all')}
+          >
+            <Text style={[styles.filterTabText, selectedFilter === 'all' && styles.filterTabTextActive]}>
+              전체
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.filterTab, selectedFilter === 'daily' && styles.filterTabActive]}
+            onPress={() => setSelectedFilter('daily')}
+          >
+            <Text style={[styles.filterTabText, selectedFilter === 'daily' && styles.filterTabTextActive]}>
+              오늘의 미션
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.filterTab, selectedFilter === 'completed' && styles.filterTabActive]}
+            onPress={() => setSelectedFilter('completed')}
+          >
+            <Text style={[styles.filterTabText, selectedFilter === 'completed' && styles.filterTabTextActive]}>
+              완료한 미션
+            </Text>
+          </TouchableOpacity>
+        </View>
 
         {/* 미션 목록 */}
         <View style={styles.missionSection}>
           <View style={styles.sectionHeader}>
-            <SectionTitle title={`성장 미션 (${totalGrowthMissions}개)`} />
+            <SectionTitle title={
+              selectedFilter === 'all' ? `성장 미션 (${totalGrowthMissions}개)` :
+              selectedFilter === 'daily' ? `오늘의 미션 (${totalGrowthMissions}개)` :
+              `완료한 미션 (${totalGrowthMissions}개)`
+            } />
           </View>
 
           {displayedMissions.length === 0 ? (
             <EmptyState
               icon={'🌱'}
-              title={'아직 미션이 없어요'}
-              description={'새로운 미션이 곧 추가될 예정입니다!'}
+              title={
+                selectedFilter === 'all' ? '아직 미션이 없어요' :
+                selectedFilter === 'daily' ? '오늘의 미션이 없어요' :
+                '완료한 미션이 없어요'
+              }
+              description={
+                selectedFilter === 'all' ? '새로운 미션이 곧 추가될 예정입니다!' :
+                selectedFilter === 'daily' ? '오늘 완료한 미션이 없습니다. 미션을 완료해보세요!' :
+                '아직 완료한 미션이 없습니다. 미션을 완료해보세요!'
+              }
             />
           ) : (
             <View style={styles.missionList}>
@@ -337,6 +406,35 @@ const styles = StyleSheet.create({
 
   missionCard: {
     marginBottom: spacing[3],
+  },
+  filterTabs: {
+    flexDirection: 'row',
+    marginBottom: spacing[4],
+    gap: spacing[2],
+    paddingHorizontal: spacing[1],
+  },
+  filterTab: {
+    flex: 1,
+    paddingVertical: spacing[3],
+    paddingHorizontal: spacing[4],
+    borderRadius: borderRadius.base,
+    backgroundColor: colors.background.primary,
+    borderWidth: 1,
+    borderColor: colors.border.light,
+    alignItems: 'center',
+  },
+  filterTabActive: {
+    backgroundColor: colors.primary[50],
+    borderColor: colors.primary[500],
+  },
+  filterTabText: {
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.medium,
+    color: colors.text.secondary,
+  },
+  filterTabTextActive: {
+    color: colors.primary[700],
+    fontWeight: typography.fontWeight.semibold,
   },
 });
 
