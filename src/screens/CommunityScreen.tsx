@@ -69,7 +69,7 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <Header title="커뮤니티" />
+      <Header />
 
       {/* 검색 및 정렬 */}
       <View style={styles.filterContainer}>

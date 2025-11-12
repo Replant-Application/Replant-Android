@@ -7,6 +7,7 @@ import { Card, Loading, ErrorBoundary, Button, Header, EmptyState, SectionTitle 
 import { colors, spacing, typography, borderRadius } from '../utils/designTokens';
 import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../types/navigation';
+import { useUser } from '../contexts/UserContext';
 
 // 단일 카테고리: 성장
 
@@ -111,9 +112,11 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
 
   // 사진 인증 업로드
   const handlePhotoUpload = (missionId: string) => {
+    const mission = missions.find(m => m.mission_id === missionId);
     // 사진 선택 화면으로 이동
     navigation.navigate('PhotoSelect', {
       missionId,
+      missionTitle: mission?.title || '미션',
     });
   };
 
@@ -129,6 +132,7 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
       photoUrl: mission.photo_url || undefined,
     });
   };
+
 
   // 사진 선택 후 돌아왔을 때 처리 (사진만 저장, 미션 완료하지 않음)
   const handlePhotoSelected = useCallback(async (missionId: string, photoUri: string) => {
@@ -266,8 +270,8 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
               }
               description={
                 selectedFilter === 'all' ? '새로운 미션이 곧 추가될 예정입니다!' :
-                selectedFilter === 'daily' ? '오늘 완료한 미션이 없습니다. 미션을 완료해보세요!' :
-                '아직 완료한 미션이 없습니다. 미션을 완료해보세요!'
+                selectedFilter === 'daily' ? '오늘 완료한 미션이 없습니다.' :
+                '아직 완료한 미션이 없습니다.'
               }
             />
           ) : (

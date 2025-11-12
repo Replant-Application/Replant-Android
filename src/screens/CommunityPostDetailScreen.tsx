@@ -37,7 +37,7 @@ const CommunityPostDetailScreen: React.FC<CommunityPostDetailScreenProps> = ({
   const { currentNickname } = useUser();
   const { post, comments, loading, error, createComment, updateComment, deleteComment, loadPost } =
     useCommunityPost(postId);
-  const { toggleLike, toggleScrap, deletePost } = useCommunity();
+  const { toggleLike, deletePost } = useCommunity();
   const [commentContent, setCommentContent] = useState('');
   const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
   const [editingContent, setEditingContent] = useState('');
@@ -51,12 +51,6 @@ const CommunityPostDetailScreen: React.FC<CommunityPostDetailScreenProps> = ({
     }
   };
 
-  const handleScrap = async () => {
-    if (post) {
-      await toggleScrap(post.post_id);
-      await loadPost(); // 게시글 정보 새로고침
-    }
-  };
 
   const handleDeletePost = () => {
     if (!post) return;
@@ -192,10 +186,10 @@ const CommunityPostDetailScreen: React.FC<CommunityPostDetailScreenProps> = ({
               <Text style={styles.actionText}>{post.like_count}</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.actionButton} onPress={handleScrap}>
-              <Text style={styles.actionIcon}>{post.is_scrapped ? '🔖' : '📌'}</Text>
-              <Text style={styles.actionText}>{post.scrap_count}</Text>
-            </TouchableOpacity>
+            <View style={styles.actionButton}>
+              <Text style={styles.actionIcon}>💬</Text>
+              <Text style={styles.actionText}>{post.comment_count}</Text>
+            </View>
 
             {isAuthor && (
               <TouchableOpacity
