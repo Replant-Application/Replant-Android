@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { getData, setData, getStorageKeys } from './storage';
+import { getData, setData, getStorageKeys, addData, updateData, deleteData } from './storage';
 import { logError } from '../utils/logger';
-import { ServiceResult, Character } from '../types';
+import { ServiceResult, Character, UserProfile, UserInfoUpdateData, CalendarEvent, CalendarEventData, User, Mission, Diary, CommunityPost } from '../types';
 import { generateUserCharacterName } from '../utils/characterNameGenerator';
 
 // 카테고리별 캐릭터 설명
@@ -90,6 +90,228 @@ export const initializeUserData = async (
     return {
       success: false,
       error: (error as Error).message
+    };
+  }
+};
+
+/**
+ * 사용자 프로필 조회 (통계 포함)
+ */
+export const getUserProfile = async (nickname: string): Promise<ServiceResult<UserProfile>> => {
+  try {
+    const storageKeys = getStorageKeys(nickname);
+    
+    // User 정보 로드
+    const userData: User | null = await getData(storageKeys.USER);
+    if (!userData) {
+      return { success: false, error: '사용자 정보를 찾을 수 없습니다.' };
+    }
+
+    // 캐릭터 정보 로드
+    const characters: Character[] = await getData(storageKeys.CHARACTERS) || [];
+    const character = characters.length > 0 ? characters[0] : null;
+
+    // 미션 통계
+    const missions: Mission[] = await getData(storageKeys.MISSIONS) || [];
+    const completedMissions = missions.filter(m => m.completed).length;
+    
+    // 경험치 통계 (캐릭터의 total_experience 사용)
+    const totalExperience = character?.total_experience || 0;
+
+    // 다이어리 통계
+    const diaries: Diary[] = await getData(storageKeys.DIARIES) || [];
+    const diaryCount = diaries.length;
+
+    // 커뮤니티 게시글 통계
+    const posts: CommunityPost[] = await getData(storageKeys.COMMUNITY_POSTS) || [];
+    const userPosts = posts.filter(p => p.author === nickname);
+    const postCount = userPosts.length;
+
+    const profile: UserProfile = {
+      nickname: userData.nickname,
+      createdAt: userData.createdAt || new Date().toISOString(),
+      character,
+      stats: {
+        completedMissions,
+        totalExperience,
+        diaryCount,
+        postCount,
+      },
+    };
+
+    return {
+      success: true,
+      data: profile,
+    };
+  } catch (error) {
+    logError('사용자 프로필 조회 실패', error as Error, { nickname });
+    return {
+      success: false,
+      error: (error as Error).message,
+    };
+  }
+};
+
+/**
+ * 사용자 정보 수정
+ */
+export const updateUserInfo = async (
+  nickname: string,
+  data: UserInfoUpdateData
+): Promise<ServiceResult<void>> => {
+  try {
+    const storageKeys = getStorageKeys(nickname);
+    const userData: User | null = await getData(storageKeys.USER);
+    
+    if (!userData) {
+      return { success: false, error: '사용자 정보를 찾을 수 없습니다.' };
+    }
+
+    // 닉네임 변경은 UserContext의 updateNickname을 사용해야 함
+    if (data.nickname && data.nickname !== nickname) {
+      return { success: false, error: '닉네임 변경은 설정 화면에서 해주세요.' };
+    }
+
+    // 프로필 이미지는 추후 구현 (현재는 User 타입에 없음)
+    // TODO: User 타입에 profileImage 필드 추가 시 구현
+
+    return { success: true };
+  } catch (error) {
+    logError('사용자 정보 수정 실패', error as Error, { nickname, data });
+    return {
+      success: false,
+      error: (error as Error).message,
+    };
+  }
+};
+
+/**
+ * 캘린더 이벤트 조회
+ */
+export const getCalendarEvents = async (nickname: string): Promise<ServiceResult<CalendarEvent[]>> => {
+  try {
+    const storageKeys = getStorageKeys(nickname);
+    const events: CalendarEvent[] = await getData(storageKeys.CALENDAR_EVENTS) || [];
+    
+    // 날짜순 정렬
+    const sortedEvents = events.sort((a, b) => 
+      new Date(a.date).getTime() - new Date(b.date).getTime()
+    );
+
+    return {
+      success: true,
+      data: sortedEvents,
+    };
+  } catch (error) {
+    logError('캘린더 이벤트 조회 실패', error as Error, { nickname });
+    return {
+      success: false,
+      error: (error as Error).message,
+    };
+  }
+};
+
+/**
+ * 캘린더 이벤트 추가
+ */
+export const addCalendarEvent = async (
+  nickname: string,
+  eventData: CalendarEventData
+): Promise<ServiceResult<CalendarEvent>> => {
+  try {
+    const storageKeys = getStorageKeys(nickname);
+    const events: CalendarEvent[] = await getData(storageKeys.CALENDAR_EVENTS) || [];
+
+    const newEvent: CalendarEvent = {
+      id: `event_${Date.now()}`,
+      title: eventData.title,
+      description: eventData.description,
+      date: eventData.date,
+      time: eventData.time,
+      created_at: new Date().toISOString(),
+    };
+
+    const updatedEvents = [...events, newEvent];
+    await setData(storageKeys.CALENDAR_EVENTS, updatedEvents);
+
+    return {
+      success: true,
+      data: newEvent,
+    };
+  } catch (error) {
+    logError('캘린더 이벤트 추가 실패', error as Error, { nickname, eventData });
+    return {
+      success: false,
+      error: (error as Error).message,
+    };
+  }
+};
+
+/**
+ * 캘린더 이벤트 수정
+ */
+export const updateCalendarEvent = async (
+  nickname: string,
+  eventId: string,
+  eventData: Partial<CalendarEventData>
+): Promise<ServiceResult<CalendarEvent>> => {
+  try {
+    const storageKeys = getStorageKeys(nickname);
+    const events: CalendarEvent[] = await getData(storageKeys.CALENDAR_EVENTS) || [];
+    
+    const eventIndex = events.findIndex(e => e.id === eventId);
+    if (eventIndex === -1) {
+      return { success: false, error: '이벤트를 찾을 수 없습니다.' };
+    }
+
+    const updatedEvent: CalendarEvent = {
+      ...events[eventIndex],
+      ...eventData,
+      updated_at: new Date().toISOString(),
+    };
+
+    const updatedEvents = [...events];
+    updatedEvents[eventIndex] = updatedEvent;
+    await setData(storageKeys.CALENDAR_EVENTS, updatedEvents);
+
+    return {
+      success: true,
+      data: updatedEvent,
+    };
+  } catch (error) {
+    logError('캘린더 이벤트 수정 실패', error as Error, { nickname, eventId, eventData });
+    return {
+      success: false,
+      error: (error as Error).message,
+    };
+  }
+};
+
+/**
+ * 캘린더 이벤트 삭제
+ */
+export const deleteCalendarEvent = async (
+  nickname: string,
+  eventId: string
+): Promise<ServiceResult<void>> => {
+  try {
+    const storageKeys = getStorageKeys(nickname);
+    const events: CalendarEvent[] = await getData(storageKeys.CALENDAR_EVENTS) || [];
+    
+    const filteredEvents = events.filter(e => e.id !== eventId);
+    
+    if (filteredEvents.length === events.length) {
+      return { success: false, error: '이벤트를 찾을 수 없습니다.' };
+    }
+
+    await setData(storageKeys.CALENDAR_EVENTS, filteredEvents);
+
+    return { success: true };
+  } catch (error) {
+    logError('캘린더 이벤트 삭제 실패', error as Error, { nickname, eventId });
+    return {
+      success: false,
+      error: (error as Error).message,
     };
   }
 };

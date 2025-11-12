@@ -256,7 +256,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
         <Card style={styles.userCard}>
           <Text style={styles.userTitle}>👤 사용자 정보</Text>
           <Text style={styles.userInfo}>닉네임: {user?.nickname}</Text>
-          <Text style={styles.userInfo}>가입일: {new Date().toLocaleDateString('ko-KR')}</Text>
+          <Text style={styles.userInfo}>가입일: {user?.createdAt ? new Date(user.createdAt).toLocaleDateString('ko-KR') : '알 수 없음'}</Text>
 
           {showNicknameForm ? (
             <View style={styles.nicknameForm}>
@@ -293,6 +293,23 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
               <Text style={styles.changeNicknameText}>✏️ 닉네임 변경</Text>
             </TouchableOpacity>
           )}
+        </Card>
+
+        {/* 기능 */}
+        <Card style={styles.featuresCard}>
+          <SectionTitle title="✨ 기능" size="lg" marginBottom={spacing[3]} />
+          <TouchableOpacity
+            style={styles.infoOption}
+            onPress={() => navigation?.navigate('MyPage')}
+          >
+            <Text style={styles.infoOptionText}>👤 마이페이지</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.infoOption}
+            onPress={() => navigation?.navigate('Calendar')}
+          >
+            <Text style={styles.infoOptionText}>📅 캘린더</Text>
+          </TouchableOpacity>
         </Card>
 
         {/* 정보 */}
@@ -359,6 +376,9 @@ const styles = StyleSheet.create({
     marginBottom: spacing[1],
   },
   themeCard: {
+    marginBottom: spacing[6],
+  },
+  featuresCard: {
     marginBottom: spacing[6],
   },
   infoCard: {

@@ -21,4 +21,6 @@ export const SCREEN_NAMES: Record<string, string> = {
   COMMUNITY_POST_CREATE: 'CommunityPostCreate',
   COMMUNITY_POST_EDIT: 'CommunityPostEdit',
   COMMUNITY_POST_DETAIL: 'CommunityPostDetail',
+  MY_PAGE: 'MyPage',
+  CALENDAR: 'Calendar',
 } as const;

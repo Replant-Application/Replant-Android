@@ -44,6 +44,8 @@ export type RootStackParamList = {
   CommunityPostEdit: {
     postId: string;
   };
+  MyPage: undefined;
+  Calendar: undefined;
 };
 
 // 네비게이션 파라미터 타입
@@ -82,6 +84,8 @@ export interface NavigationParams {
   [ScreenNames.COMMUNITY_POST_EDIT]: {
     postId: string;
   };
+  [ScreenNames.MY_PAGE]: undefined;
+  [ScreenNames.CALENDAR]: undefined;
 }
 
 // 네비게이션 Props 타입

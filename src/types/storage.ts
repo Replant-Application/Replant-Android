@@ -17,6 +17,7 @@ export interface StorageKeys {
   COMMUNITY_COMMENTS: string;
   USER_LIKES: string;
   USER_SCRAPS: string;
+  CALENDAR_EVENTS: string;
 }
 
 // 스토리지 서비스 함수 타입

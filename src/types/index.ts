@@ -134,6 +134,7 @@ export interface LevelUpResult {
 export interface User {
   id: string;
   nickname: string;
+  createdAt?: string; // 가입일
 }
 
 // Diary 관련 타입
@@ -272,6 +273,63 @@ export interface UseCommunityPostReturn {
   deleteComment: (commentId: string) => Promise<ServiceResult<void>>;
 }
 
+// 사용자 프로필 관련 타입
+export interface UserProfile {
+  nickname: string;
+  createdAt: string;
+  character: Character | null;
+  stats: {
+    completedMissions: number;
+    totalExperience: number;
+    diaryCount: number;
+    postCount: number;
+  };
+}
+
+export interface UserInfoUpdateData {
+  nickname?: string;
+  profileImage?: string;
+}
+
+// 캘린더 관련 타입
+export interface CalendarEvent {
+  id: string;
+  title: string;
+  description?: string;
+  date: string; // ISO date string (YYYY-MM-DD)
+  time?: string; // Optional time (HH:mm)
+  created_at: string;
+  updated_at?: string;
+}
+
+export interface CalendarEventData {
+  title: string;
+  description?: string;
+  date: string;
+  time?: string;
+}
+
+// 사용자 프로필 Hook 반환 타입
+export interface UseUserProfileReturn {
+  profile: UserProfile | null;
+  loading: boolean;
+  error: string | null;
+  loadProfile: () => Promise<void>;
+  updateUserInfo: (data: UserInfoUpdateData) => Promise<ServiceResult<void>>;
+}
+
+// 캘린더 Hook 반환 타입
+export interface UseCalendarReturn {
+  events: CalendarEvent[];
+  loading: boolean;
+  error: string | null;
+  loadEvents: () => Promise<void>;
+  addEvent: (eventData: CalendarEventData) => Promise<ServiceResult<CalendarEvent>>;
+  updateEvent: (eventId: string, eventData: Partial<CalendarEventData>) => Promise<ServiceResult<CalendarEvent>>;
+  deleteEvent: (eventId: string) => Promise<ServiceResult<void>>;
+  getEventsByDate: (date: string) => CalendarEvent[];
+}
+
 // Screen Names 타입
 export enum ScreenNames {
   START = 'Start',
@@ -291,4 +349,6 @@ export enum ScreenNames {
   COMMUNITY_POST_CREATE = 'CommunityPostCreate',
   COMMUNITY_POST_EDIT = 'CommunityPostEdit',
   COMMUNITY_POST_DETAIL = 'CommunityPostDetail',
+  MY_PAGE = 'MyPage',
+  CALENDAR = 'Calendar',
 }

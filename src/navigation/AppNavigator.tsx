@@ -23,6 +23,8 @@ import CommunityScreen from '../screens/CommunityScreen';
 import CommunityPostCreateScreen from '../screens/CommunityPostCreateScreen';
 import CommunityPostDetailScreen from '../screens/CommunityPostDetailScreen';
 import CommunityPostEditScreen from '../screens/CommunityPostEditScreen';
+import MyPageScreen from '../screens/MyPageScreen';
+import CalendarScreen from '../screens/CalendarScreen';
 
 // 간단한 상태 기반 네비게이션 (React Navigation 없이)
 const AppNavigator = () => {
@@ -80,6 +82,11 @@ const AppNavigator = () => {
       currentScreen === SCREEN_NAMES.COMMUNITY_POST_EDIT
     ) {
       setCurrentScreen(SCREEN_NAMES.COMMUNITY);
+    } else if (
+      currentScreen === SCREEN_NAMES.MY_PAGE ||
+      currentScreen === SCREEN_NAMES.CALENDAR
+    ) {
+      setCurrentScreen(SCREEN_NAMES.SETTINGS);
     } else {
       setCurrentScreen(SCREEN_NAMES.HOME);
     }
@@ -136,6 +143,10 @@ const AppNavigator = () => {
         return <CommunityPostDetailScreen navigation={navigation} route={route} />;
       case SCREEN_NAMES.COMMUNITY_POST_EDIT:
         return <CommunityPostEditScreen navigation={navigation} route={route} />;
+      case SCREEN_NAMES.MY_PAGE:
+        return <MyPageScreen navigation={navigation} />;
+      case SCREEN_NAMES.CALENDAR:
+        return <CalendarScreen />;
       default:
         return <HomeScreen navigation={navigation} />;
     }
