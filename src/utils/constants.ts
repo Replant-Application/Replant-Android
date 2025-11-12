@@ -17,4 +17,8 @@ export const SCREEN_NAMES: Record<string, string> = {
   SETTINGS: 'Settings',
   INFO: 'Info',
   PHOTO_SELECT: 'PhotoSelect',
+  COMMUNITY: 'Community',
+  COMMUNITY_POST_CREATE: 'CommunityPostCreate',
+  COMMUNITY_POST_EDIT: 'CommunityPostEdit',
+  COMMUNITY_POST_DETAIL: 'CommunityPostDetail',
 } as const;

@@ -168,6 +168,50 @@ export interface SimpleDiaryData {
   content: string;
 }
 
+// 커뮤니티 관련 타입
+export interface CommunityPost {
+  id: string;
+  post_id: string;
+  mission_id: string; // 완료한 미션 ID
+  mission_title: string; // 미션 제목
+  mission_emoji: string; // 미션 이모지
+  title: string; // 게시글 제목 (미션 제목을 기본값으로 사용 가능)
+  content: string; // 사용자가 작성한 내용
+  author: string;
+  author_nickname: string;
+  created_at: string;
+  updated_at?: string;
+  like_count: number;
+  comment_count: number;
+  scrap_count: number;
+  images?: string[]; // 미션 인증 사진
+  tags?: string[];
+  category?: string;
+}
+
+export interface CommunityComment {
+  id: string;
+  comment_id: string;
+  post_id: string;
+  content: string;
+  author: string;
+  author_nickname: string;
+  created_at: string;
+  updated_at?: string;
+  parent_comment_id?: string; // 대댓글용
+}
+
+export interface CommunityPostData {
+  mission_id: string; // 완료한 미션 ID
+  mission_title: string; // 미션 제목
+  mission_emoji: string; // 미션 이모지
+  title?: string; // 게시글 제목 (선택사항, 없으면 미션 제목 사용)
+  content: string; // 사용자가 작성한 내용
+  images?: string[]; // 미션 인증 사진
+  tags?: string[];
+  category?: string;
+}
+
 // Hooks 반환 타입
 export interface UseMissionReturn {
   missions: Mission[];
@@ -203,6 +247,33 @@ export interface UseDiaryReturn {
   deleteDiary: (diaryId: string) => Promise<ServiceResult<void>>;
 }
 
+// 커뮤니티 Hook 반환 타입
+export interface UseCommunityReturn {
+  posts: CommunityPost[];
+  loading: boolean;
+  error: string | null;
+  loadPosts: () => Promise<void>;
+  createPost: (postData: CommunityPostData) => Promise<ServiceResult<CommunityPost>>;
+  updatePost: (postId: string, postData: Partial<CommunityPostData>) => Promise<ServiceResult<CommunityPost>>;
+  deletePost: (postId: string) => Promise<ServiceResult<void>>;
+  toggleLike: (postId: string) => Promise<ServiceResult<void>>;
+  toggleScrap: (postId: string) => Promise<ServiceResult<void>>;
+  searchPosts: (query: string) => CommunityPost[];
+  filterPosts: (category?: string, sortBy?: 'latest' | 'popular') => CommunityPost[];
+}
+
+export interface UseCommunityPostReturn {
+  post: CommunityPost | null;
+  comments: CommunityComment[];
+  loading: boolean;
+  error: string | null;
+  loadPost: (postId: string) => Promise<void>;
+  loadComments: (postId: string) => Promise<void>;
+  createComment: (content: string, parentCommentId?: string) => Promise<ServiceResult<CommunityComment>>;
+  updateComment: (commentId: string, content: string) => Promise<ServiceResult<CommunityComment>>;
+  deleteComment: (commentId: string) => Promise<ServiceResult<void>>;
+}
+
 // Screen Names 타입
 export enum ScreenNames {
   START = 'Start',
@@ -218,4 +289,8 @@ export enum ScreenNames {
   PLACES_SEARCH = 'PlacesSearch',
   INFO = 'Info',
   PHOTO_SELECT = 'PhotoSelect',
+  COMMUNITY = 'Community',
+  COMMUNITY_POST_CREATE = 'CommunityPostCreate',
+  COMMUNITY_POST_EDIT = 'CommunityPostEdit',
+  COMMUNITY_POST_DETAIL = 'CommunityPostDetail',
 }

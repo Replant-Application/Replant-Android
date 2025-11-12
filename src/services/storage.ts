@@ -14,6 +14,10 @@ export const STORAGE_KEYS: StorageKeys = {
   MISSION_TEMPLATES: 'mission_templates',
   CHARACTER_TEMPLATES: 'character_templates',
   REPRESENTATIVE_CHARACTER: 'representative_character',
+  COMMUNITY_POSTS: 'community_posts',
+  COMMUNITY_COMMENTS: 'community_comments',
+  USER_LIKES: 'user_likes',
+  USER_SCRAPS: 'user_scraps',
 } as const;
 
 // 사용자별 스토리지 키 생성 함수
@@ -29,6 +33,10 @@ export const getStorageKeys = (nickname: string): StorageKeys => {
     MISSION_TEMPLATES: 'mission_templates', // 템플릿은 공유
     CHARACTER_TEMPLATES: 'character_templates', // 템플릿은 공유
     REPRESENTATIVE_CHARACTER: `representative_character_${nickname}`,
+    COMMUNITY_POSTS: 'community_posts', // 전역 공유
+    COMMUNITY_COMMENTS: 'community_comments', // 전역 공유
+    USER_LIKES: `user_likes_${nickname}`, // 사용자별
+    USER_SCRAPS: `user_scraps_${nickname}`, // 사용자별
   };
 };
 

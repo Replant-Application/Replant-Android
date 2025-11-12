@@ -31,6 +31,19 @@ export type RootStackParamList = {
     onPhotoSelected?: (photoUri: string) => void;
     missionId?: string;
   };
+  Community: undefined;
+  CommunityPostCreate: {
+    missionId: string;
+    missionTitle: string;
+    missionEmoji: string;
+    photoUrl?: string;
+  };
+  CommunityPostDetail: {
+    postId: string;
+  };
+  CommunityPostEdit: {
+    postId: string;
+  };
 };
 
 // 네비게이션 파라미터 타입
@@ -55,6 +68,19 @@ export interface NavigationParams {
   [ScreenNames.PHOTO_SELECT]: {
     onPhotoSelected?: (photoUri: string) => void;
     missionId?: string;
+  };
+  [ScreenNames.COMMUNITY]: undefined;
+  [ScreenNames.COMMUNITY_POST_CREATE]: {
+    missionId: string;
+    missionTitle: string;
+    missionEmoji: string;
+    photoUrl?: string;
+  };
+  [ScreenNames.COMMUNITY_POST_DETAIL]: {
+    postId: string;
+  };
+  [ScreenNames.COMMUNITY_POST_EDIT]: {
+    postId: string;
   };
 }
 

@@ -14,6 +14,10 @@ export interface StorageKeys {
   REPRESENTATIVE_CHARACTER: string;
   CHARACTER_TEMPLATES: string;
   MISSION_TEMPLATES: string;
+  COMMUNITY_POSTS: string;
+  COMMUNITY_COMMENTS: string;
+  USER_LIKES: string;
+  USER_SCRAPS: string;
 }
 
 // 스토리지 서비스 함수 타입
