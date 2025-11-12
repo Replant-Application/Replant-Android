@@ -69,6 +69,58 @@ export const useMission = (
     loadMissions();
   }, [loadMissions]);
 
+  // 미션에 사진만 저장 (완료하지 않음)
+  const saveMissionPhoto = useCallback(async (
+    missionId: string,
+    photoUrl: string
+  ): Promise<ServiceResult<void>> => {
+    if (!currentNickname) {
+      return { success: false, error: '사용자 정보가 없습니다.' };
+    }
+
+    try {
+      const storageKeys = getStorageKeys(currentNickname);
+      // 스토리지에서 직접 미션 찾기 (로컬 스토리지만 사용)
+      const missionsData: Mission[] = await getData(storageKeys.MISSIONS) || [];
+      const mission: Mission | undefined = missionsData.find(m => m.mission_id === missionId);
+      
+      if (!mission) {
+        logError('미션을 찾을 수 없음', new Error('Mission not found'), { 
+          missionId, 
+          availableMissionIds: missionsData.map(m => m.mission_id),
+          totalMissions: missionsData.length 
+        });
+        return { success: false, error: '미션을 찾을 수 없습니다.' };
+      }
+
+      // 사진만 저장 (완료 상태는 변경하지 않음)
+      const updatedMission: Mission = {
+        ...mission,
+        photo_url: photoUrl,
+        updated_at: new Date().toISOString()
+      };
+
+      const updatedMissions = missionsData.map(m => 
+        m.mission_id === missionId ? updatedMission : m
+      );
+      await setData(storageKeys.MISSIONS, updatedMissions);
+
+      // 로컬 상태 업데이트
+      setMissions(prev =>
+        prev.map(m =>
+          m.mission_id === missionId
+            ? updatedMission
+            : m
+        )
+      );
+
+      return { success: true };
+    } catch (error) {
+      logError('사진 저장 실패', error as Error, { missionId, photoUrl });
+      return { success: false, error: (error as Error).message };
+    }
+  }, [currentNickname]);
+
   // 미션 완료 (사진 포함)
   const completeMissionWithPhoto = useCallback(async (
     missionId: string,
@@ -93,7 +145,12 @@ export const useMission = (
       };
 
       const storageKeys = getStorageKeys(currentNickname);
-      await updateData(storageKeys.MISSIONS, mission.id, updatedMission);
+      // mission_id로 찾아서 업데이트 (더 안전함)
+      const missionsData: Mission[] = await getData(storageKeys.MISSIONS) || [];
+      const updatedMissions = missionsData.map(m => 
+        m.mission_id === missionId ? updatedMission : m
+      );
+      await setData(storageKeys.MISSIONS, updatedMissions);
 
       // 로컬 상태 업데이트
       setMissions(prev =>
@@ -236,6 +293,7 @@ export const useMission = (
     loading,
     error,
     loadMissions,
+    saveMissionPhoto,
     completeMissionWithPhoto,
     uncompleteMission,
     createCustomMission,
@@ -246,6 +304,7 @@ export const useMission = (
     loading,
     error,
     loadMissions,
+    saveMissionPhoto,
     completeMissionWithPhoto,
     uncompleteMission,
     createCustomMission,
