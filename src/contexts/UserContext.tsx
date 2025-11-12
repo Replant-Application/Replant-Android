@@ -58,14 +58,22 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
 
         if (userData) {
           // 기존 User 객체가 있으면 사용 (createdAt 포함)
+          // role이 없고 닉네임이 "admin"이면 admin 역할 부여
+          if (!userData.role && nickname.toLowerCase() === 'admin') {
+            userData.role = 'admin';
+            await AsyncStorage.setItem(storageKeys.USER, JSON.stringify(userData));
+          }
           setUser(userData);
           setCurrentNickname(nickname);
         } else {
           // 기존 User 객체가 없으면 새로 생성 (기존 사용자 호환성)
+          // 닉네임이 "admin"이면 admin 역할 부여
+          const role = nickname.toLowerCase() === 'admin' ? 'admin' : 'user';
           const newUser: User = {
             nickname,
             id: `user_${Date.now()}`,
-            createdAt: new Date().toISOString() // 기존 사용자도 현재 시간을 가입일로 설정
+            createdAt: new Date().toISOString(), // 기존 사용자도 현재 시간을 가입일로 설정
+            role
           };
           await AsyncStorage.setItem(storageKeys.USER, JSON.stringify(newUser));
           setUser(newUser);
@@ -87,10 +95,13 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
       // 사용자 상태 업데이트
       const userId = `user_${Date.now()}`;
       const createdAt = new Date().toISOString();
+      // 닉네임이 "admin"이면 admin 역할 부여
+      const role = nickname.toLowerCase() === 'admin' ? 'admin' : 'user';
       const newUser: User = {
         nickname,
         id: userId,
-        createdAt
+        createdAt,
+        role
       };
       
       // User 객체를 스토리지에 저장
@@ -111,10 +122,13 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     if (!result.success) {
       const userId = `user_${Date.now()}`;
       const createdAt = new Date().toISOString();
+      // 닉네임이 "admin"이면 admin 역할 부여
+      const role = nickname.toLowerCase() === 'admin' ? 'admin' : 'user';
       const newUser: User = {
         nickname,
         id: userId,
-        createdAt
+        createdAt,
+        role
       };
       
       // User 객체를 스토리지에 저장

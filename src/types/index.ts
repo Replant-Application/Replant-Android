@@ -135,6 +135,7 @@ export interface User {
   id: string;
   nickname: string;
   createdAt?: string; // 가입일
+  role?: string; // 사용자 역할 (user, admin 등)
 }
 
 // Diary 관련 타입

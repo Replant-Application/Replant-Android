@@ -53,13 +53,7 @@ const NicknameScreen: React.FC<NicknameScreenProps> = ({ onNavigate }) => {
 
   return (
     <View style={styles.container}>
-      <Header
-        leftButton={
-          <TouchableOpacity onPress={handleGoBackToSocialLogin} style={styles.backButton}>
-            <Text style={styles.backButtonText}>← 뒤로</Text>
-          </TouchableOpacity>
-        }
-      />
+      <Header />
       <View style={styles.content}>
         <Text style={styles.title}>닉네임을 입력해주세요</Text>
         <Text style={styles.subtitle}>
@@ -136,13 +130,6 @@ const styles = StyleSheet.create({
   },
   button: {
     width: '100%',
-  },
-  backButton: {
-    padding: spacing[2],
-  },
-  backButtonText: {
-    fontSize: typography.fontSize.base,
-    color: colors.text.primary,
   },
   backToSocialButton: {
     paddingVertical: spacing[3],

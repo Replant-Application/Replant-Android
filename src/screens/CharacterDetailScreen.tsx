@@ -174,8 +174,17 @@ const CharacterDetailScreen: React.FC<CharacterDetailScreenProps> = ({ route, na
             onPress={handleDownloadImage}
             disabled={downloading}
           >
-            <Text style={styles.downloadButtonIcon}>
-              {downloading ? '⏳' : '⬇️'}
+            {downloading ? (
+              <Text style={styles.downloadButtonIcon}>⏳</Text>
+            ) : (
+              <Image
+                source={require('../assets/images/download-icon.png')}
+                style={styles.downloadIconImage}
+                resizeMode="contain"
+              />
+            )}
+            <Text style={styles.downloadButtonText}>
+              {downloading ? '저장 중...' : '저장'}
             </Text>
           </TouchableOpacity>
         </View>
@@ -314,7 +323,7 @@ const styles = StyleSheet.create({
   characterImageContainer: {
     width: 180,
     height: 180,
-    marginBottom: spacing[5],
+    marginBottom: spacing[2],
     borderRadius: borderRadius.xl,
     backgroundColor: colors.background.primary,
     justifyContent: 'center',
@@ -484,23 +493,32 @@ const styles = StyleSheet.create({
     lineHeight: typography.lineHeight.relaxed * typography.fontSize.base,
   },
   downloadButton: {
-    marginTop: spacing[4],
-    marginBottom: spacing[5],
-    width: 48,
-    height: 48,
-    borderRadius: borderRadius.full,
+    marginTop: spacing[1],
+    marginBottom: spacing[3],
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 2,
-    borderColor: colors.primary[500],
+    paddingHorizontal: spacing[4],
+    paddingVertical: spacing[3],
+    borderRadius: borderRadius.base,
     backgroundColor: 'transparent',
+    gap: spacing[2],
   },
   downloadButtonDisabled: {
     borderColor: colors.gray[300],
     opacity: 0.6,
   },
   downloadButtonIcon: {
-    fontSize: typography.fontSize.xl,
+    fontSize: typography.fontSize.base,
+  },
+  downloadIconImage: {
+    width: 20,
+    height: 20,
+  },
+  downloadButtonText: {
+    fontSize: typography.fontSize.sm,
+    color: colors.text.primary,
+    fontWeight: typography.fontWeight.medium,
   },
 });
 

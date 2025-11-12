@@ -23,4 +23,8 @@ export const SCREEN_NAMES: Record<string, string> = {
   COMMUNITY_POST_DETAIL: 'CommunityPostDetail',
   MY_PAGE: 'MyPage',
   CALENDAR: 'Calendar',
+  ADMIN_DASHBOARD: 'AdminDashboard',
+  ADMIN_USER_LIST: 'AdminUserList',
+  ADMIN_USER_DETAIL: 'AdminUserDetail',
+  ADMIN_USER_EDIT: 'AdminUserEdit',
 } as const;

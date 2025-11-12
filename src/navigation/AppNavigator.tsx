@@ -25,6 +25,10 @@ import CommunityPostDetailScreen from '../screens/CommunityPostDetailScreen';
 import CommunityPostEditScreen from '../screens/CommunityPostEditScreen';
 import MyPageScreen from '../screens/MyPageScreen';
 import CalendarScreen from '../screens/CalendarScreen';
+import AdminDashboardScreen from '../screens/AdminDashboardScreen';
+import AdminUserListScreen from '../screens/AdminUserListScreen';
+import AdminUserDetailScreen from '../screens/AdminUserDetailScreen';
+import AdminUserEditScreen from '../screens/AdminUserEditScreen';
 
 // 간단한 상태 기반 네비게이션 (React Navigation 없이)
 const AppNavigator = () => {
@@ -147,6 +151,14 @@ const AppNavigator = () => {
         return <MyPageScreen navigation={navigation} />;
       case SCREEN_NAMES.CALENDAR:
         return <CalendarScreen />;
+      case SCREEN_NAMES.ADMIN_DASHBOARD:
+        return <AdminDashboardScreen navigation={navigation} />;
+      case SCREEN_NAMES.ADMIN_USER_LIST:
+        return <AdminUserListScreen navigation={navigation} />;
+      case SCREEN_NAMES.ADMIN_USER_DETAIL:
+        return <AdminUserDetailScreen navigation={navigation} route={route} />;
+      case SCREEN_NAMES.ADMIN_USER_EDIT:
+        return <AdminUserEditScreen navigation={navigation} route={route} />;
       default:
         return <HomeScreen navigation={navigation} />;
     }

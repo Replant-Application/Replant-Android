@@ -16,7 +16,7 @@ interface CommunityScreenProps {
 }
 
 const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation }) => {
-  const { posts, loading, error, loadPosts, toggleLike } = useCommunity();
+  const { posts, loading, error, loadPosts, toggleLike, toggleScrap } = useCommunity();
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<'latest' | 'popular'>('latest');
 
@@ -57,6 +57,10 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation }) => {
 
   const handleLike = async (postId: string) => {
     await toggleLike(postId);
+  };
+
+  const handleScrap = async (postId: string) => {
+    await toggleScrap(postId);
   };
 
   if (loading) {
@@ -127,6 +131,7 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation }) => {
                 post={post}
                 onPress={handlePostPress}
                 onLike={handleLike}
+                onScrap={handleScrap}
               />
             ))}
           </View>

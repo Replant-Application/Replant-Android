@@ -48,6 +48,14 @@ export type RootStackParamList = {
   };
   MyPage: undefined;
   Calendar: undefined;
+  AdminDashboard: undefined;
+  AdminUserList: undefined;
+  AdminUserDetail: {
+    userId: number;
+  };
+  AdminUserEdit: {
+    userId: number;
+  };
 };
 
 // 네비게이션 파라미터 타입
@@ -72,6 +80,7 @@ export interface NavigationParams {
   [ScreenNames.PHOTO_SELECT]: {
     onPhotoSelected?: (photoUri: string) => void;
     missionId?: string;
+    missionTitle?: string;
   };
   [ScreenNames.COMMUNITY]: undefined;
   [ScreenNames.COMMUNITY_POST_CREATE]: {
@@ -88,6 +97,14 @@ export interface NavigationParams {
   };
   [ScreenNames.MY_PAGE]: undefined;
   [ScreenNames.CALENDAR]: undefined;
+  [ScreenNames.ADMIN_DASHBOARD]: undefined;
+  [ScreenNames.ADMIN_USER_LIST]: undefined;
+  [ScreenNames.ADMIN_USER_DETAIL]: {
+    userId: number;
+  };
+  [ScreenNames.ADMIN_USER_EDIT]: {
+    userId: number;
+  };
 }
 
 // 네비게이션 Props 타입

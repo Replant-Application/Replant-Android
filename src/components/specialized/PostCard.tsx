@@ -7,6 +7,7 @@ interface PostCardProps {
   post: CommunityPost;
   onPress?: (postId: string) => void;
   onLike?: (postId: string) => void;
+  onScrap?: (postId: string) => void;
   style?: ViewStyle;
 }
 
@@ -14,6 +15,7 @@ const PostCard: React.FC<PostCardProps> = ({
   post,
   onPress,
   onLike,
+  onScrap,
   style
 }) => {
   if (!post) return null;
@@ -109,11 +111,21 @@ const PostCard: React.FC<PostCardProps> = ({
             <Text style={styles.statText}>{post.comment_count}</Text>
           </View>
 
-          {post.is_scrapped && (
-            <View style={styles.statButton}>
-              <Text style={styles.statIcon}>🔖</Text>
-            </View>
-          )}
+          <TouchableOpacity
+            style={styles.statButton}
+            onPress={(e) => {
+              e.stopPropagation();
+              onScrap?.(post.post_id);
+            }}
+            activeOpacity={0.7}
+          >
+            <Text style={[styles.statIcon, post.is_scrapped && styles.scrappedIcon]}>
+              {post.is_scrapped ? '🔖' : '📌'}
+            </Text>
+            {post.scrap_count > 0 && (
+              <Text style={styles.statText}>{post.scrap_count}</Text>
+            )}
+          </TouchableOpacity>
         </View>
       </View>
     </TouchableOpacity>
@@ -236,6 +248,9 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.base,
   },
   likedIcon: {
+    // 이미 이모지로 표시됨
+  },
+  scrappedIcon: {
     // 이미 이모지로 표시됨
   },
   statText: {

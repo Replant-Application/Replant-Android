@@ -312,6 +312,25 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
           </TouchableOpacity>
         </Card>
 
+        {/* 관리자 메뉴 */}
+        {user?.role === 'admin' && (
+          <Card style={styles.adminCard}>
+            <SectionTitle title="👨‍💼 관리자" size="lg" marginBottom={spacing[3]} />
+            <TouchableOpacity
+              style={styles.infoOption}
+              onPress={() => navigation?.navigate('AdminDashboard')}
+            >
+              <Text style={styles.infoOptionText}>📊 관리자 대시보드</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.infoOption}
+              onPress={() => navigation?.navigate('AdminUserList')}
+            >
+              <Text style={styles.infoOptionText}>👥 전체 유저 목록</Text>
+            </TouchableOpacity>
+          </Card>
+        )}
+
         {/* 정보 */}
         <Card style={styles.infoCard}>
           <SectionTitle title="ℹ️ 정보" size="lg" marginBottom={spacing[3]} />
@@ -379,6 +398,9 @@ const styles = StyleSheet.create({
     marginBottom: spacing[6],
   },
   featuresCard: {
+    marginBottom: spacing[6],
+  },
+  adminCard: {
     marginBottom: spacing[6],
   },
   infoCard: {
