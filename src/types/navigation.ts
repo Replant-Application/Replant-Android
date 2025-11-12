@@ -14,6 +14,7 @@ export type RootStackParamList = {
     selectedPhotoUri?: string;
     missionId?: string;
     timestamp?: number;
+    analysisResult?: { verified: boolean } | null;
   };
   CustomMissionCreate: undefined;
   CounselingSelect: undefined;
@@ -30,6 +31,7 @@ export type RootStackParamList = {
   PhotoSelect: {
     onPhotoSelected?: (photoUri: string) => void;
     missionId?: string;
+    missionTitle?: string;
   };
   Community: undefined;
   CommunityPostCreate: {

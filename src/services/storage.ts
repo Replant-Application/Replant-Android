@@ -18,6 +18,7 @@ export const STORAGE_KEYS: StorageKeys = {
   USER_LIKES: 'user_likes',
   USER_SCRAPS: 'user_scraps',
   CALENDAR_EVENTS: 'calendar_events',
+  AI_ANALYSIS_RESULTS: 'ai_analysis_results',
 } as const;
 
 // 사용자별 스토리지 키 생성 함수
@@ -37,6 +38,7 @@ export const getStorageKeys = (nickname: string): StorageKeys => {
     USER_LIKES: `user_likes_${nickname}`, // 사용자별
     USER_SCRAPS: `user_scraps_${nickname}`, // 사용자별
     CALENDAR_EVENTS: `calendar_events_${nickname}`, // 사용자별
+    AI_ANALYSIS_RESULTS: `ai_analysis_results_${nickname}`, // 사용자별
   };
 };
 

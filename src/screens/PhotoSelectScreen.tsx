@@ -17,6 +17,8 @@ import { Header, Button } from '../components/ui';
 import { colors, spacing, typography, borderRadius } from '../utils/designTokens';
 import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../types/navigation';
+import { analyzeImage, getAnalysisType, saveAnalysisResult } from '../services/aiService';
+import { useUser } from '../contexts/UserContext';
 
 interface PhotoSelectScreenProps {
   navigation: NavigationProp<RootStackParamList>;
@@ -24,10 +26,14 @@ interface PhotoSelectScreenProps {
 }
 
 const PhotoSelectScreen: React.FC<PhotoSelectScreenProps> = ({ navigation, route }) => {
+  const { currentNickname } = useUser();
   const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null);
   const [showPreview, setShowPreview] = useState(false);
+  const [analyzing, setAnalyzing] = useState(false);
+  const [analysisResult, setAnalysisResult] = useState<{ verified: boolean } | null>(null);
 
   const missionId = route?.params?.missionId;
+  const missionTitle = route?.params?.missionTitle || '미션';
 
   // 카메라로 사진 촬영
   const handleTakePhoto = () => {
@@ -44,11 +50,11 @@ const PhotoSelectScreen: React.FC<PhotoSelectScreenProps> = ({ navigation, route
 
       if (response.errorCode) {
         const errorMessage = response.errorMessage || '카메라를 사용할 수 없습니다.';
-        Alert.alert(
-          '카메라 사용 불가',
+          Alert.alert(
+            '카메라 사용 불가',
           errorMessage,
-          [{ text: '확인' }]
-        );
+            [{ text: '확인' }]
+          );
         return;
       }
 
@@ -90,13 +96,64 @@ const PhotoSelectScreen: React.FC<PhotoSelectScreenProps> = ({ navigation, route
     });
   };
 
+  // AI 분석하기
+  const handleAnalyzePhoto = async () => {
+    if (!selectedPhoto || !missionId || !currentNickname) {
+      Alert.alert('오류', '분석할 사진이 없습니다.');
+      return;
+    }
+
+    try {
+      setAnalyzing(true);
+      setAnalysisResult(null);
+
+      // 분석 타입 결정
+      const analysisType = getAnalysisType(missionTitle);
+
+      // 이미지 분석 요청
+      const result = await analyzeImage(selectedPhoto, missionTitle, analysisType);
+
+      if (result.success && result.data) {
+        // 분석 결과 저장
+        await saveAnalysisResult(currentNickname, missionId, result.data);
+
+        // 분석 결과 상태 업데이트
+        setAnalysisResult({
+          verified: result.data.verified,
+        });
+
+        // 결과 알림
+        if (result.data.verified) {
+          Alert.alert(
+            '✅ 분석 완료',
+            '미션 수행이 확인되었습니다.',
+            [{ text: '확인' }]
+          );
+        } else {
+          Alert.alert(
+            '❌ 분석 완료',
+            '미션 수행이 확인되지 않았습니다.',
+            [{ text: '확인' }]
+          );
+        }
+      } else {
+        Alert.alert('오류', result.error || '이미지 분석에 실패했습니다.');
+      }
+    } catch (analyzeError) {
+      Alert.alert('오류', '이미지 분석 중 오류가 발생했습니다.');
+    } finally {
+      setAnalyzing(false);
+    }
+  };
+
   // 사진 선택 확인
   const handleConfirm = () => {
     if (selectedPhoto && missionId) {
       navigation.navigate('Mission', { 
         selectedPhotoUri: selectedPhoto, 
         missionId,
-        timestamp: Date.now()
+        timestamp: Date.now(),
+        analysisResult: analysisResult, // 분석 결과도 함께 전달
       });
     }
   };
@@ -182,6 +239,13 @@ const PhotoSelectScreen: React.FC<PhotoSelectScreenProps> = ({ navigation, route
                 style={styles.cancelButton}
               />
               <Button
+                title={analyzing ? '🤖 분석중...' : '🤖 AI 분석'}
+                onPress={handleAnalyzePhoto}
+                style={[styles.analyzeButton, analyzing && styles.analyzingButton]}
+                textStyle={styles.analyzeButtonText}
+                disabled={analyzing}
+              />
+              <Button
                 title="확인"
                 onPress={handleConfirm}
                 style={styles.confirmButton}
@@ -265,10 +329,24 @@ const styles = StyleSheet.create({
   },
   previewButtons: {
     flexDirection: 'row',
-    gap: spacing[3],
+    gap: spacing[2],
   },
   cancelButton: {
     flex: 1,
+  },
+  analyzeButton: {
+    flex: 1,
+    backgroundColor: colors.blue[100],
+    borderWidth: 1,
+    borderColor: colors.blue[300],
+  },
+  analyzingButton: {
+    backgroundColor: colors.blue[200],
+    opacity: 0.7,
+  },
+  analyzeButtonText: {
+    color: colors.blue[700],
+    fontWeight: typography.fontWeight.semibold,
   },
   confirmButton: {
     flex: 1,
