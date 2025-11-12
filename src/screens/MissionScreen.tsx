@@ -246,11 +246,14 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
         {/* 미션 목록 */}
         <View style={styles.missionSection}>
           <View style={styles.sectionHeader}>
-            <SectionTitle title={
-              selectedFilter === 'all' ? `성장 미션 (${totalGrowthMissions}개)` :
-              selectedFilter === 'daily' ? `오늘의 미션 (${totalGrowthMissions}개)` :
-              `완료한 미션 (${totalGrowthMissions}개)`
-            } />
+            <SectionTitle 
+              title={
+                selectedFilter === 'all' ? `성장 미션 (${totalGrowthMissions}개)` :
+                selectedFilter === 'daily' ? `오늘의 미션 (${totalGrowthMissions}개)` :
+                `완료한 미션 (${totalGrowthMissions}개)`
+              }
+              marginBottom={spacing[3]}
+            />
           </View>
 
           {displayedMissions.length === 0 ? (
@@ -387,7 +390,7 @@ const styles = StyleSheet.create({
   sectionHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: spacing[3],
+    marginBottom: spacing[1],
   },
   createButton: {
     backgroundColor: colors.primary[500],
@@ -409,7 +412,7 @@ const styles = StyleSheet.create({
   },
   filterTabs: {
     flexDirection: 'row',
-    marginBottom: spacing[4],
+    marginBottom: spacing[6],
     gap: spacing[2],
     paddingHorizontal: spacing[1],
   },
