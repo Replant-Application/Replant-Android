@@ -10,7 +10,11 @@ export type RootStackParamList = {
   Nickname: undefined;
   Home: undefined;
   Diary: undefined;
-  Mission: undefined;
+  Mission: {
+    selectedPhotoUri?: string;
+    missionId?: string;
+    timestamp?: number;
+  };
   CustomMissionCreate: undefined;
   CounselingSelect: undefined;
   ChatBot: undefined;
@@ -22,6 +26,10 @@ export type RootStackParamList = {
   Info: {
     title: string;
     content: string;
+  };
+  PhotoSelect: {
+    onPhotoSelected?: (photoUri: string) => void;
+    missionId?: string;
   };
 };
 
@@ -43,6 +51,10 @@ export interface NavigationParams {
   [ScreenNames.INFO]: {
     title: string;
     content: string;
+  };
+  [ScreenNames.PHOTO_SELECT]: {
+    onPhotoSelected?: (photoUri: string) => void;
+    missionId?: string;
   };
 }
 

@@ -16,4 +16,5 @@ export const SCREEN_NAMES: Record<string, string> = {
   CHARACTER_DETAIL: 'CharacterDetail',
   SETTINGS: 'Settings',
   INFO: 'Info',
+  PHOTO_SELECT: 'PhotoSelect',
 } as const;
