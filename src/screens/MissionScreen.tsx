@@ -54,7 +54,7 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
           ? `축하합니다! 레벨 ${result.newLevel}이 되었습니다!`
           : `+${result.experienceGained} EXP를 획득했습니다!`;
 
-        Alert.alert(
+          Alert.alert(
           alertTitle,
           alertMessage,
           [
@@ -71,7 +71,7 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
               },
             },
           ]
-        );
+          );
       }
     } catch (completeError) {
       Alert.alert('오류', '미션 완료에 실패했습니다.');

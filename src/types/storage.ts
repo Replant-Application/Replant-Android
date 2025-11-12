@@ -11,7 +11,6 @@ export interface StorageKeys {
   SETTINGS: string;
   PREFERENCES: string;
   USER_NICKNAME: string;
-  REPRESENTATIVE_CHARACTER: string;
   CHARACTER_TEMPLATES: string;
   MISSION_TEMPLATES: string;
   COMMUNITY_POSTS: string;

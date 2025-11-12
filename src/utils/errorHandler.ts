@@ -23,7 +23,6 @@ type ErrorType =
   | 'CHARACTER_LOAD_FAILED'
   | 'CHARACTER_LEVELUP_FAILED'
   | 'CHARACTER_CREATE_FAILED'
-  | 'REPRESENTATIVE_CHARACTER_SET_FAILED'
   | 'DIARY_LOAD_FAILED'
   | 'DIARY_SAVE_FAILED'
   | 'DIARY_UPDATE_FAILED'
@@ -58,7 +57,6 @@ const ERROR_MESSAGES: Record<ErrorType, string> = {
   CHARACTER_LOAD_FAILED: '캐릭터를 불러오는데 실패했습니다.',
   CHARACTER_LEVELUP_FAILED: '캐릭터 레벨업에 실패했습니다.',
   CHARACTER_CREATE_FAILED: '캐릭터 생성에 실패했습니다.',
-  REPRESENTATIVE_CHARACTER_SET_FAILED: '대표 캐릭터 설정에 실패했습니다.',
 
   // 다이어리 관련 에러
   DIARY_LOAD_FAILED: '다이어리를 불러오는데 실패했습니다.',

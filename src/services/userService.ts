@@ -79,8 +79,6 @@ export const initializeUserData = async (
     // 다이어리는 빈 배열로 시작
     await setData(storageKeys.DIARIES, []);
 
-    // 대표 캐릭터 설정 (단일: growth)
-    await setData(storageKeys.REPRESENTATIVE_CHARACTER, 'growth');
     return {
       success: true,
       data: {

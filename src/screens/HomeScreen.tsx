@@ -14,8 +14,11 @@ interface HomeScreenProps {
 }
 
 const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
-  const { representativeCharacter, loading: characterLoading, error: characterError } = useCharacter();
+  const { characters, loading: characterLoading, error: characterError } = useCharacter();
   const { missions, loading: missionLoading, error: missionError } = useMission();
+  
+  // 단일 캐릭터 시스템이므로 첫 번째 캐릭터 사용
+  const currentCharacter = characters.length > 0 ? characters[0] : null;
 
   // 추천 미션 (미완료 미션 중 제목 기준 정렬하여 상위 3개)
   const recommendedMissions = useMemo(() => {
@@ -30,8 +33,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
 
   // 캐릭터 상세 페이지로 이동
   const handleCharacterPress = (): void => {
-    if (representativeCharacter) {
-      navigation.navigate('CharacterDetail', { character: representativeCharacter });
+    if (currentCharacter) {
+      navigation.navigate('CharacterDetail', { character: currentCharacter });
     }
   };
 
@@ -51,9 +54,9 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
           <SectionTitle title="🌱 나의 캐릭터" />
           {characterLoading ? (
             <Loading text="캐릭터를 불러오는 중..." />
-          ) : representativeCharacter ? (
+          ) : currentCharacter ? (
             <CharacterCard
-              character={representativeCharacter}
+              character={currentCharacter}
               onPress={handleCharacterPress}
               style={styles.characterCard}
             />

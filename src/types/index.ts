@@ -228,13 +228,11 @@ export interface UseMissionReturn {
 export interface UseCharacterReturn {
   characters: Character[];
   selectedCharacter: Character | null;
-  representativeCharacter: Character | null;
   loading: boolean;
   error: string | null;
   loadCharacters: () => Promise<void>;
   addExperienceByCategory: (categoryId: MissionCategory, experience: number) => Promise<ExperienceResult>;
   selectCharacter: (character: Character) => void;
-  setRepresentative: (characterId: string) => Promise<ServiceResult>;
 }
 
 export interface UseDiaryReturn {

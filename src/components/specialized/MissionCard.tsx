@@ -130,24 +130,24 @@ const MissionCard: React.FC<MissionCardProps> = ({
                 <Text style={styles.shareButtonText}>💬 공유</Text>
               </TouchableOpacity>
             )}
-            <TouchableOpacity
-              style={[
-                styles.actionButton,
-                mission.completed ? styles.uncompleteButton : styles.completeButton,
-                disabled && styles.disabledButton
-              ]}
-              onPress={disabled ? undefined : handleToggleComplete}
-              disabled={loading || disabled}
-              activeOpacity={disabled ? 1 : 0.7}
-            >
-              <Text style={[
-                styles.actionText,
-                mission.completed ? styles.uncompleteText : styles.completeText,
-                disabled && styles.disabledText
-              ]}>
-                {disabled ? '비활성화' : loading ? '처리중...' : mission.completed ? '완료 취소' : '완료하기'}
-              </Text>
-            </TouchableOpacity>
+          <TouchableOpacity
+            style={[
+              styles.actionButton,
+              mission.completed ? styles.uncompleteButton : styles.completeButton,
+              disabled && styles.disabledButton
+            ]}
+            onPress={disabled ? undefined : handleToggleComplete}
+            disabled={loading || disabled}
+            activeOpacity={disabled ? 1 : 0.7}
+          >
+            <Text style={[
+              styles.actionText,
+              mission.completed ? styles.uncompleteText : styles.completeText,
+              disabled && styles.disabledText
+            ]}>
+              {disabled ? '비활성화' : loading ? '처리중...' : mission.completed ? '완료 취소' : '완료하기'}
+            </Text>
+          </TouchableOpacity>
           </View>
         )}
       </View>
