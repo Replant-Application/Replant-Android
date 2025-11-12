@@ -1,17 +1,25 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Alert } from 'react-native';
+import { View, Text, StyleSheet, Alert, TouchableOpacity } from 'react-native';
 import { useUser } from '../contexts/UserContext';
 import { Button, Input, Header } from '../components/ui';
 import { colors, spacing, typography } from '../utils/designTokens';
+import { SCREEN_NAMES } from '../utils/constants';
 
 interface NicknameScreenProps {
-  onNavigate: () => void;
+  onNavigate: (screen: string) => void;
 }
 
-const NicknameScreen: React.FC<NicknameScreenProps> = ({ onNavigate: _onNavigate }) => {
+const NicknameScreen: React.FC<NicknameScreenProps> = ({ onNavigate }) => {
   const { login } = useUser();
   const [nickname, setNickname] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+
+  // 소셜 로그인 화면으로 돌아가기
+  const handleGoBackToSocialLogin = () => {
+    if (onNavigate) {
+      onNavigate(SCREEN_NAMES.START);
+    }
+  };
 
   const handleSubmit = async () => {
     // 닉네임 유효성 검사
@@ -45,7 +53,13 @@ const NicknameScreen: React.FC<NicknameScreenProps> = ({ onNavigate: _onNavigate
 
   return (
     <View style={styles.container}>
-      <Header />
+      <Header
+        leftButton={
+          <TouchableOpacity onPress={handleGoBackToSocialLogin} style={styles.backButton}>
+            <Text style={styles.backButtonText}>← 뒤로</Text>
+          </TouchableOpacity>
+        }
+      />
       <View style={styles.content}>
         <Text style={styles.title}>닉네임을 입력해주세요</Text>
         <Text style={styles.subtitle}>
@@ -77,6 +91,12 @@ const NicknameScreen: React.FC<NicknameScreenProps> = ({ onNavigate: _onNavigate
           size="lg"
           style={styles.button}
         />
+        <TouchableOpacity
+          onPress={handleGoBackToSocialLogin}
+          style={styles.backToSocialButton}
+        >
+          <Text style={styles.backToSocialText}>소셜 로그인으로 돌아가기</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -112,9 +132,26 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     paddingBottom: spacing[10],
+    gap: spacing[3],
   },
   button: {
     width: '100%',
+  },
+  backButton: {
+    padding: spacing[2],
+  },
+  backButtonText: {
+    fontSize: typography.fontSize.base,
+    color: colors.text.primary,
+  },
+  backToSocialButton: {
+    paddingVertical: spacing[3],
+    alignItems: 'center',
+  },
+  backToSocialText: {
+    fontSize: typography.fontSize.sm,
+    color: colors.text.secondary,
+    textDecorationLine: 'underline',
   },
 });
 

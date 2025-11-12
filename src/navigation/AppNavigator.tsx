@@ -47,7 +47,7 @@ const AppNavigator = () => {
         case SCREEN_NAMES.START:
           return <StartScreen onNavigate={setCurrentScreen} />;
         case SCREEN_NAMES.NICKNAME:
-          return <NicknameScreen onNavigate={() => setCurrentScreen(SCREEN_NAMES.HOME)} />;
+          return <NicknameScreen onNavigate={setCurrentScreen} />;
         default:
           return <StartScreen onNavigate={setCurrentScreen} />;
       }
