@@ -46,19 +46,32 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
       const result = await completeMissionWithPhoto(missionId, photoUrl);
 
       if (result && result.success) {
-        if (result.levelUp) {
-          Alert.alert(
-            '🎉 레벨업!',
-            `축하합니다! 레벨 ${result.newLevel}이 되었습니다!`,
-            [{ text: '확인' }]
-          );
-        } else {
-          Alert.alert(
-            '✅ 미션 완료',
-            `+${result.experienceGained} EXP를 획득했습니다!`,
-            [{ text: '확인' }]
-          );
-        }
+        const mission = missions.find(m => m.mission_id === missionId);
+        if (!mission) return;
+
+        const alertTitle = result.levelUp ? '🎉 레벨업!' : '✅ 미션 완료';
+        const alertMessage = result.levelUp
+          ? `축하합니다! 레벨 ${result.newLevel}이 되었습니다!`
+          : `+${result.experienceGained} EXP를 획득했습니다!`;
+
+        Alert.alert(
+          alertTitle,
+          alertMessage,
+          [
+            { text: '나중에', style: 'cancel' },
+            {
+              text: '커뮤니티에 공유',
+              onPress: () => {
+                navigation.navigate('CommunityPostCreate', {
+                  missionId: mission.mission_id,
+                  missionTitle: mission.title,
+                  missionEmoji: mission.emoji,
+                  photoUrl: mission.photo_url || undefined,
+                });
+              },
+            },
+          ]
+        );
       }
     } catch (completeError) {
       Alert.alert('오류', '미션 완료에 실패했습니다.');
@@ -70,6 +83,19 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
     // 사진 선택 화면으로 이동
     navigation.navigate('PhotoSelect', {
       missionId,
+    });
+  };
+
+  // 커뮤니티에 공유
+  const handleShareToCommunity = (missionId: string) => {
+    const mission = missions.find(m => m.mission_id === missionId);
+    if (!mission) return;
+
+    navigation.navigate('CommunityPostCreate', {
+      missionId: mission.mission_id,
+      missionTitle: mission.title,
+      missionEmoji: mission.emoji,
+      photoUrl: mission.photo_url || undefined,
     });
   };
 
@@ -181,6 +207,7 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
                   onComplete={handleMissionComplete}
                   onUncomplete={handleMissionUncomplete}
                   onUploadPhoto={handlePhotoUpload}
+                  onShareToCommunity={handleShareToCommunity}
                   style={styles.missionCard}
                 />
               ))}

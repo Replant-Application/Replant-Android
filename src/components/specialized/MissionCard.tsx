@@ -10,6 +10,7 @@ interface MissionCardProps {
   onComplete?: (missionId: string) => void;
   onUncomplete?: (missionId: string) => void;
   onUploadPhoto?: (missionId: string) => void;
+  onShareToCommunity?: (missionId: string) => void;
   onViewDetails?: (missionId: string) => void;
   loading?: boolean;
   disabled?: boolean;
@@ -22,6 +23,7 @@ const MissionCard: React.FC<MissionCardProps> = ({
   onComplete,
   onUncomplete,
   onUploadPhoto,
+  onShareToCommunity,
   onViewDetails,
   loading = false,
   disabled = false,
@@ -116,6 +118,16 @@ const MissionCard: React.FC<MissionCardProps> = ({
                 activeOpacity={disabled ? 1 : 0.7}
               >
                 <Text style={styles.photoIcon}>➕</Text>
+              </TouchableOpacity>
+            )}
+            {mission.completed && onShareToCommunity && (
+              <TouchableOpacity
+                style={[styles.shareButton]}
+                onPress={() => onShareToCommunity(mission.mission_id)}
+                disabled={disabled}
+                activeOpacity={disabled ? 1 : 0.7}
+              >
+                <Text style={styles.shareButtonText}>💬 공유</Text>
               </TouchableOpacity>
             )}
             <TouchableOpacity
@@ -287,6 +299,22 @@ const styles = StyleSheet.create({
   },
   photoIcon: {
     fontSize: typography.fontSize.xl,
+  },
+  shareButton: {
+    paddingHorizontal: spacing[3],
+    paddingVertical: spacing[2],
+    borderRadius: borderRadius.base,
+    backgroundColor: colors.primary[100],
+    borderWidth: 1,
+    borderColor: colors.primary[300],
+    minHeight: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  shareButtonText: {
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.medium,
+    color: colors.primary[700],
   },
   disabledButton: {
     backgroundColor: colors.gray[200],

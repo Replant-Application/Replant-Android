@@ -19,6 +19,10 @@ import CharacterDetailScreen from '../screens/CharacterDetailScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 import InfoScreen from '../screens/InfoScreen';
 import PhotoSelectScreen from '../screens/PhotoSelectScreen';
+import CommunityScreen from '../screens/CommunityScreen';
+import CommunityPostCreateScreen from '../screens/CommunityPostCreateScreen';
+import CommunityPostDetailScreen from '../screens/CommunityPostDetailScreen';
+import CommunityPostEditScreen from '../screens/CommunityPostEditScreen';
 
 // 간단한 상태 기반 네비게이션 (React Navigation 없이)
 const AppNavigator = () => {
@@ -70,6 +74,12 @@ const AppNavigator = () => {
       setCurrentScreen(SCREEN_NAMES.SETTINGS);
     } else if (currentScreen === SCREEN_NAMES.PHOTO_SELECT) {
       setCurrentScreen(SCREEN_NAMES.MISSION);
+    } else if (
+      currentScreen === SCREEN_NAMES.COMMUNITY_POST_CREATE ||
+      currentScreen === SCREEN_NAMES.COMMUNITY_POST_DETAIL ||
+      currentScreen === SCREEN_NAMES.COMMUNITY_POST_EDIT
+    ) {
+      setCurrentScreen(SCREEN_NAMES.COMMUNITY);
     } else {
       setCurrentScreen(SCREEN_NAMES.HOME);
     }
@@ -118,6 +128,14 @@ const AppNavigator = () => {
         return <InfoScreen navigation={navigation} route={route} />;
       case SCREEN_NAMES.PHOTO_SELECT:
         return <PhotoSelectScreen navigation={navigation} route={route} />;
+      case SCREEN_NAMES.COMMUNITY:
+        return <CommunityScreen navigation={navigation} />;
+      case SCREEN_NAMES.COMMUNITY_POST_CREATE:
+        return <CommunityPostCreateScreen navigation={navigation} route={route} />;
+      case SCREEN_NAMES.COMMUNITY_POST_DETAIL:
+        return <CommunityPostDetailScreen navigation={navigation} route={route} />;
+      case SCREEN_NAMES.COMMUNITY_POST_EDIT:
+        return <CommunityPostEditScreen navigation={navigation} route={route} />;
       default:
         return <HomeScreen navigation={navigation} />;
     }
@@ -146,6 +164,14 @@ const AppNavigator = () => {
         >
           <Text style={styles.tabIcon}>🎯</Text>
           <Text style={styles.tabLabel}>미션</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.tab, currentScreen === SCREEN_NAMES.COMMUNITY && styles.activeTab]}
+          onPress={() => setCurrentScreen(SCREEN_NAMES.COMMUNITY)}
+        >
+          <Text style={styles.tabIcon}>💬</Text>
+          <Text style={styles.tabLabel}>커뮤니티</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
