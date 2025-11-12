@@ -1,10 +1,11 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, Modal, TextInput, Alert } from 'react-native';
 import { colors, spacing, typography, borderRadius, shadows } from '../utils/designTokens';
 import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../types/navigation';
 import { ProgressBar, Header, SectionTitle, Button } from '../components/ui';
 import { useCharacter } from '../hooks/useCharacter';
+import { downloadPetImage } from '../services/petService';
 
 interface CharacterDetailScreenProps {
   route: RouteProp<RootStackParamList, 'CharacterDetail'>;
@@ -17,6 +18,8 @@ const CharacterDetailScreen: React.FC<CharacterDetailScreenProps> = ({ route, na
   const [currentEmotion, setCurrentEmotion] = useState<string>('default');
   const [showNameEditModal, setShowNameEditModal] = useState(false);
   const [newName, setNewName] = useState('');
+  const [downloading, setDownloading] = useState(false);
+  const imageRef = useRef<Image>(null);
 
   // characters에서 현재 캐릭터 찾기 (이름 변경 후 최신 정보 반영)
   const character = useMemo(() => {
@@ -62,6 +65,30 @@ const CharacterDetailScreen: React.FC<CharacterDetailScreenProps> = ({ route, na
       }
     } catch (error) {
       Alert.alert('오류', '이름 변경 중 오류가 발생했습니다.');
+    }
+  };
+
+  // 이미지 다운로드 핸들러
+  const handleDownloadImage = async () => {
+    if (!character || !imageRef.current) return;
+
+    try {
+      setDownloading(true);
+      const result = await downloadPetImage(imageRef, character.name, character.level || 1);
+
+      if (result.success) {
+        Alert.alert(
+          '다운로드 완료',
+          '캐릭터 이미지가 갤러리에 저장되었습니다.',
+          [{ text: '확인' }]
+        );
+      } else {
+        Alert.alert('오류', result.error || '이미지 다운로드에 실패했습니다.');
+      }
+    } catch (error) {
+      Alert.alert('오류', '이미지 다운로드 중 오류가 발생했습니다.');
+    } finally {
+      setDownloading(false);
     }
   };
 
@@ -134,13 +161,27 @@ const CharacterDetailScreen: React.FC<CharacterDetailScreenProps> = ({ route, na
         <View style={styles.characterSection}>
           <View style={styles.characterImageContainer}>
             <Image
+              ref={imageRef}
               source={getCharacterImage(character.level || 1, currentEmotion)}
               style={styles.characterImage}
               resizeMode="contain"
             />
           </View>
 
-          {/* 감정 표현 버튼들 */}
+          {/* 이미지 다운로드 버튼 */}
+          <TouchableOpacity
+            style={[styles.downloadButton, downloading && styles.downloadButtonDisabled]}
+            onPress={handleDownloadImage}
+            disabled={downloading}
+          >
+            <Text style={styles.downloadButtonIcon}>
+              {downloading ? '⏳' : '⬇️'}
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* 감정 표현 버튼들 */}
+        <View style={styles.emotionButtonsContainer}>
           <View style={styles.emotionButtons}>
             {emotionButtons.map((emotion) => (
               <TouchableOpacity
@@ -268,12 +309,12 @@ const styles = StyleSheet.create({
   },
   characterSection: {
     alignItems: 'center',
-    marginBottom: spacing[8],
+    marginBottom: spacing[6],
   },
   characterImageContainer: {
-    width: 160,
-    height: 160,
-    marginBottom: spacing[6],
+    width: 180,
+    height: 180,
+    marginBottom: spacing[5],
     borderRadius: borderRadius.xl,
     backgroundColor: colors.background.primary,
     justifyContent: 'center',
@@ -284,10 +325,15 @@ const styles = StyleSheet.create({
     width: '90%',
     height: '90%',
   },
+  emotionButtonsContainer: {
+    width: '100%',
+    marginBottom: spacing[6],
+    paddingHorizontal: spacing[1],
+  },
   emotionButtons: {
     flexDirection: 'row',
-    gap: spacing[2],
-    paddingHorizontal: spacing[2],
+    gap: spacing[3],
+    width: '100%',
   },
   emotionButton: {
     flex: 1,
@@ -328,8 +374,8 @@ const styles = StyleSheet.create({
     fontWeight: typography.fontWeight.bold,
   },
   infoSection: {
-    marginBottom: spacing[8],
-    padding: spacing[5],
+    marginBottom: spacing[6],
+    padding: spacing[6],
     backgroundColor: colors.background.primary,
     borderRadius: borderRadius.lg,
     ...shadows.base,
@@ -338,7 +384,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: spacing[4],
+    marginBottom: spacing[5],
     gap: spacing[2],
   },
   characterName: {
@@ -394,7 +440,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: spacing[4],
+    marginBottom: spacing[5],
     gap: spacing[3],
   },
   levelText: {
@@ -411,7 +457,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: spacing[4],
+    marginBottom: spacing[5],
     gap: spacing[2],
   },
   categoryIcon: {
@@ -426,8 +472,8 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   descriptionSection: {
-    marginBottom: spacing[8],
-    padding: spacing[5],
+    marginBottom: spacing[6],
+    padding: spacing[6],
     backgroundColor: colors.background.primary,
     borderRadius: borderRadius.lg,
     ...shadows.base,
@@ -436,6 +482,25 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.base,
     color: colors.text.secondary,
     lineHeight: typography.lineHeight.relaxed * typography.fontSize.base,
+  },
+  downloadButton: {
+    marginTop: spacing[4],
+    marginBottom: spacing[5],
+    width: 48,
+    height: 48,
+    borderRadius: borderRadius.full,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: colors.primary[500],
+    backgroundColor: 'transparent',
+  },
+  downloadButtonDisabled: {
+    borderColor: colors.gray[300],
+    opacity: 0.6,
+  },
+  downloadButtonIcon: {
+    fontSize: typography.fontSize.xl,
   },
 });
 
