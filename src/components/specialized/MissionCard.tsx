@@ -10,6 +10,7 @@ interface MissionCardProps {
   onComplete?: (missionId: string) => void;
   onUncomplete?: (missionId: string) => void;
   onUploadPhoto?: (missionId: string) => void;
+  onDeletePhoto?: (missionId: string) => void;
   onShareToCommunity?: (missionId: string) => void;
   onViewDetails?: (missionId: string) => void;
   loading?: boolean;
@@ -23,6 +24,7 @@ const MissionCard: React.FC<MissionCardProps> = ({
   onComplete,
   onUncomplete,
   onUploadPhoto,
+  onDeletePhoto,
   onShareToCommunity,
   onViewDetails,
   loading = false,
@@ -83,11 +85,23 @@ const MissionCard: React.FC<MissionCardProps> = ({
         )}
 
         {mission.photo_url && (
-          <Image
-            source={{ uri: mission.photo_url }}
-            style={styles.photo}
-            resizeMode="cover"
-          />
+          <View style={styles.photoContainer}>
+            <Image
+              source={{ uri: mission.photo_url }}
+              style={styles.photo}
+              resizeMode="cover"
+            />
+            {onDeletePhoto && !readonly && (
+              <TouchableOpacity
+                style={styles.deletePhotoButton}
+                onPress={() => onDeletePhoto(mission.mission_id)}
+                disabled={disabled}
+                activeOpacity={0.7}
+              >
+                <Text style={styles.deletePhotoIcon}>✕</Text>
+              </TouchableOpacity>
+            )}
+          </View>
         )}
       </View>
 
@@ -219,11 +233,31 @@ const styles = StyleSheet.create({
     lineHeight: typography.lineHeight.normal * typography.fontSize.base,
   },
 
+  photoContainer: {
+    position: 'relative',
+    width: '100%',
+    marginTop: spacing[2],
+  },
   photo: {
     width: '100%',
     height: 120,
     borderRadius: borderRadius.base,
-    marginTop: spacing[2],
+  },
+  deletePhotoButton: {
+    position: 'absolute',
+    top: spacing[1],
+    right: spacing[1],
+    width: 28,
+    height: 28,
+    borderRadius: borderRadius.full,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  deletePhotoIcon: {
+    color: colors.text.inverse,
+    fontSize: typography.fontSize.base,
+    fontWeight: typography.fontWeight.bold,
   },
 
   footer: {

@@ -14,7 +14,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { getData, setData, updateData, getStorageKeys } from '../services';
-import { createCustomMission as createCustomMissionService, updateCustomMission as updateCustomMissionService, deleteCustomMission as deleteCustomMissionService } from '../services/missionService';
+import { createCustomMission as createCustomMissionService, updateCustomMission as updateCustomMissionService, deleteCustomMission as deleteCustomMissionService, deleteMissionPhoto as deleteMissionPhotoService } from '../services/missionService';
 import { useUser } from '../contexts/UserContext';
 import { logError } from '../utils/logger';
 import { sortMissionsByTitle, removeDuplicateMissions } from '../utils/missionUtils';
@@ -117,6 +117,35 @@ export const useMission = (
       return { success: true };
     } catch (error) {
       logError('사진 저장 실패', error as Error, { missionId, photoUrl });
+      return { success: false, error: (error as Error).message };
+    }
+  }, [currentNickname]);
+
+  // 미션 사진 삭제
+  const deleteMissionPhoto = useCallback(async (
+    missionId: string
+  ): Promise<ServiceResult<void>> => {
+    if (!currentNickname) {
+      return { success: false, error: '사용자 정보가 없습니다.' };
+    }
+
+    try {
+      const result = await deleteMissionPhotoService(missionId, currentNickname);
+
+      if (result.success) {
+        // 로컬 상태 업데이트
+        setMissions(prev =>
+          prev.map(m =>
+            m.mission_id === missionId
+              ? { ...m, photo_url: undefined, updated_at: new Date().toISOString() }
+              : m
+          )
+        );
+      }
+
+      return result;
+    } catch (error) {
+      logError('미션 사진 삭제 실패', error as Error, { missionId, currentNickname });
       return { success: false, error: (error as Error).message };
     }
   }, [currentNickname]);
@@ -294,6 +323,7 @@ export const useMission = (
     error,
     loadMissions,
     saveMissionPhoto,
+    deleteMissionPhoto,
     completeMissionWithPhoto,
     uncompleteMission,
     createCustomMission,
@@ -305,6 +335,7 @@ export const useMission = (
     error,
     loadMissions,
     saveMissionPhoto,
+    deleteMissionPhoto,
     completeMissionWithPhoto,
     uncompleteMission,
     createCustomMission,

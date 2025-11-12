@@ -140,3 +140,47 @@ export const deleteCustomMission = async (
     };
   }
 };
+
+/**
+ * 미션 사진 삭제
+ */
+export const deleteMissionPhoto = async (
+  missionId: string,
+  nickname: string
+): Promise<ServiceResult<void>> => {
+  try {
+    const storageKeys = getStorageKeys(nickname);
+    const missions: Mission[] = await getData(storageKeys.MISSIONS) || [];
+    const mission: Mission | undefined = missions.find(m => m.mission_id === missionId);
+
+    if (!mission) {
+      return { success: false, error: '미션을 찾을 수 없습니다.' };
+    }
+
+    if (!mission.photo_url) {
+      return { success: false, error: '삭제할 사진이 없습니다.' };
+    }
+
+    // 사진 URL 제거
+    const updatedMission: Mission = {
+      ...mission,
+      photo_url: undefined,
+      updated_at: new Date().toISOString()
+    };
+
+    const updatedMissions = missions.map(m =>
+      m.mission_id === missionId ? updatedMission : m
+    );
+    await setData(storageKeys.MISSIONS, updatedMissions);
+
+    return {
+      success: true
+    };
+  } catch (error) {
+    logError('미션 사진 삭제 실패', error as Error, { missionId, nickname });
+    return {
+      success: false,
+      error: (error as Error).message
+    };
+  }
+};

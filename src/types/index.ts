@@ -219,6 +219,7 @@ export interface UseMissionReturn {
   loading: boolean;
   error: string | null;
   saveMissionPhoto: (missionId: string, photoUrl: string) => Promise<ServiceResult<void>>;
+  deleteMissionPhoto: (missionId: string) => Promise<ServiceResult<void>>;
   completeMissionWithPhoto: (missionId: string, photoUrl: string | null) => Promise<MissionCompletionResult>;
   uncompleteMission: (missionId: string) => Promise<ServiceResult>;
   createCustomMission: (missionData: MissionData) => Promise<ServiceResult>;

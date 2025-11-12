@@ -20,7 +20,7 @@ type MissionFilter = 'all' | 'daily' | 'completed';
 
 const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
   const { addExperienceByCategory } = useCharacter();
-  const { missions, loading, error, saveMissionPhoto, completeMissionWithPhoto, uncompleteMission } = useMission(addExperienceByCategory);
+  const { missions, loading, error, saveMissionPhoto, deleteMissionPhoto, completeMissionWithPhoto, uncompleteMission } = useMission(addExperienceByCategory);
   
   // route params에서 사진 정보 확인
   const routeParams = route?.params;
@@ -131,6 +131,33 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
       missionEmoji: mission.emoji,
       photoUrl: mission.photo_url || undefined,
     });
+  };
+
+  // 미션 사진 삭제
+  const handleDeletePhoto = async (missionId: string) => {
+    Alert.alert(
+      '사진 삭제',
+      '첨부한 사진을 삭제하시겠습니까?',
+      [
+        { text: '취소', style: 'cancel' },
+        {
+          text: '삭제',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              const result = await deleteMissionPhoto(missionId);
+              if (result.success) {
+                Alert.alert('완료', '사진이 삭제되었습니다.');
+              } else {
+                Alert.alert('오류', result.error || '사진 삭제에 실패했습니다.');
+              }
+            } catch (error) {
+              Alert.alert('오류', '사진 삭제 중 오류가 발생했습니다.');
+            }
+          }
+        }
+      ]
+    );
   };
 
 
@@ -283,6 +310,7 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
                   onComplete={handleMissionComplete}
                   onUncomplete={handleMissionUncomplete}
                   onUploadPhoto={handlePhotoUpload}
+                  onDeletePhoto={handleDeletePhoto}
                   onShareToCommunity={handleShareToCommunity}
                   style={styles.missionCard}
                 />
