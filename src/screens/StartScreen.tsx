@@ -132,7 +132,7 @@ const styles = StyleSheet.create({
     height: 48,
     borderRadius: borderRadius.base,
     paddingHorizontal: spacing[4],
-    gap: spacing[2],
+    gap: spacing[3],
   },
   kakaoButton: {
     backgroundColor: '#FEE500', // 카카오 노란색
@@ -142,8 +142,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border.light,
   },
-  socialButtonIcon: {
-    fontSize: 20,
+  socialLogo: {
+    width: 24,
+    height: 24,
   },
   socialButtonText: {
     fontSize: typography.fontSize.base,
