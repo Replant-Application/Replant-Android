@@ -6,7 +6,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Platform, KeyboardAvoidingView } from 'react-native';
 import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { useAdmin } from '../hooks/useAdmin';
-import { Header, Loading, ErrorBoundary, SectionTitle, Button, Input } from '../components/ui';
+import { Header, Loading, ErrorBoundary, Button, Input } from '../components/ui';
 import { colors, spacing, typography, borderRadius } from '../utils/designTokens';
 import { RootStackParamList } from '../types/navigation';
 import { UserInfo } from '../api/manageApi';

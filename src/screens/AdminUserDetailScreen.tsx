@@ -7,7 +7,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'rea
 import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { useAdmin } from '../hooks/useAdmin';
 import { Card, Header, Loading, ErrorBoundary, SectionTitle, Button } from '../components/ui';
-import { colors, spacing, typography, borderRadius, shadows } from '../utils/designTokens';
+import { colors, spacing, typography, borderRadius } from '../utils/designTokens';
 import { RootStackParamList } from '../types/navigation';
 import { UserInfo } from '../api/manageApi';
 

@@ -2,11 +2,11 @@
  * 전체 유저 목록 화면
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Alert } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput } from 'react-native';
 import { NavigationProp } from '@react-navigation/native';
 import { useAdmin } from '../hooks/useAdmin';
-import { Card, Header, Loading, ErrorBoundary, SectionTitle } from '../components/ui';
+import { Header, Loading, ErrorBoundary } from '../components/ui';
 import { colors, spacing, typography, borderRadius, shadows } from '../utils/designTokens';
 import { RootStackParamList } from '../types/navigation';
 import { UserInfo } from '../api/manageApi';
