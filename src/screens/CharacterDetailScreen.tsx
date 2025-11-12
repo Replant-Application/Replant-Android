@@ -184,7 +184,7 @@ const CharacterDetailScreen: React.FC<CharacterDetailScreenProps> = ({ route, na
               />
             )}
             <Text style={styles.downloadButtonText}>
-              {downloading ? '저장 중...' : '저장'}
+              {downloading ? '다운로드 중...' : '다운로드'}
             </Text>
           </TouchableOpacity>
         </View>
