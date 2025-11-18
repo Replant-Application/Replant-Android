@@ -167,7 +167,7 @@ const AppNavigator = () => {
       case SCREEN_NAMES.MISSION_GROUP:
         return <MissionGroupScreen navigation={navigation} />;
       case SCREEN_NAMES.AI_MISSION_GENERATE:
-        return <AIMissionGenerateScreen navigation={navigation} route={route} />;
+        return <AIMissionGenerateScreen navigation={navigation} />;
       default:
         return <HomeScreen navigation={navigation} />;
     }

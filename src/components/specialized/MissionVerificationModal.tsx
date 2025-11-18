@@ -17,8 +17,6 @@ import { colors, spacing, typography, borderRadius } from '../../utils/designTok
 import { Mission } from '../../types';
 import { getLocationWithPermission, getCurrentTimestamp } from '../../services/gpsService';
 import { verifyMissionByGPS, getVerificationRequirements } from '../../api/missionApi';
-import { NavigationProp } from '@react-navigation/native';
-import { RootStackParamList } from '../../types/navigation';
 
 interface MissionVerificationModalProps {
   visible: boolean;
@@ -26,7 +24,6 @@ interface MissionVerificationModalProps {
   onClose: () => void;
   onLikeVerification: () => void; // 좋아요 인증 선택 시 (커뮤니티 공유 화면으로 이동)
   onVerificationSuccess?: () => void; // 인증 성공 시 콜백 (미션 목록 새로고침용)
-  navigation: NavigationProp<RootStackParamList>;
 }
 
 const MissionVerificationModal: React.FC<MissionVerificationModalProps> = ({
@@ -35,7 +32,6 @@ const MissionVerificationModal: React.FC<MissionVerificationModalProps> = ({
   onClose,
   onLikeVerification,
   onVerificationSuccess,
-  navigation,
 }) => {
   const [gpsLoading, setGpsLoading] = useState(false);
 

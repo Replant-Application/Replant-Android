@@ -9,11 +9,9 @@ import {
   Text,
   StyleSheet,
   ScrollView,
-  TouchableOpacity,
   Alert,
-  ActivityIndicator,
 } from 'react-native';
-import { NavigationProp, RouteProp } from '@react-navigation/native';
+import { NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '../types/navigation';
 import { Header, Loading, ErrorBoundary, Card, Button, SectionTitle } from '../components/ui';
 import { colors, spacing, typography, borderRadius } from '../utils/designTokens';
@@ -22,10 +20,9 @@ import { WeeklyMissionStats, MissionAnalysis, AIGeneratedMission } from '../type
 
 interface AIMissionGenerateScreenProps {
   navigation: NavigationProp<RootStackParamList>;
-  route?: RouteProp<RootStackParamList, 'AIMissionGenerate'>;
 }
 
-const AIMissionGenerateScreen: React.FC<AIMissionGenerateScreenProps> = ({ navigation, route }) => {
+const AIMissionGenerateScreen: React.FC<AIMissionGenerateScreenProps> = ({ navigation }) => {
   const [stats, setStats] = useState<WeeklyMissionStats | null>(null);
   const [analysis, setAnalysis] = useState<MissionAnalysis | null>(null);
   const [generatedMission, setGeneratedMission] = useState<AIGeneratedMission | null>(null);
@@ -95,8 +92,6 @@ const AIMissionGenerateScreen: React.FC<AIMissionGenerateScreenProps> = ({ navig
   const handleEditMission = () => {
     if (!generatedMission) return;
 
-    // 생성된 미션 데이터를 CustomMissionCreateScreen으로 전달
-    // CustomMissionCreateScreen에서 route.params로 받아서 폼에 채움
     navigation.navigate('CustomMissionCreate', {
       generatedMission: generatedMission,
     });

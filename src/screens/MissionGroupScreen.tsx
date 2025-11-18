@@ -14,7 +14,7 @@ import {
 } from 'react-native';
 import { NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '../types/navigation';
-import { Header, Loading, ErrorBoundary, EmptyState, Card } from '../components/ui';
+import { Header, Loading, ErrorBoundary, EmptyState } from '../components/ui';
 import { PostCard } from '../components/specialized';
 import { colors, spacing, typography, borderRadius } from '../utils/designTokens';
 import { getMissionGroups, getPostsByMission } from '../api/communityApi';

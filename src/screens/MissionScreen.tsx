@@ -275,7 +275,6 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
         onVerificationSuccess={async () => {
           await loadMissions();
         }}
-        navigation={navigation}
       />
 
       <ScrollView style={styles.content}>
