@@ -27,4 +27,6 @@ export const SCREEN_NAMES: Record<string, string> = {
   ADMIN_USER_LIST: 'AdminUserList',
   ADMIN_USER_DETAIL: 'AdminUserDetail',
   ADMIN_USER_EDIT: 'AdminUserEdit',
+  MISSION_GROUP: 'MissionGroup',
+  AI_MISSION_GENERATE: 'AIMissionGenerate',
 } as const;

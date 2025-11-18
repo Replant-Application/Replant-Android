@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -14,11 +14,12 @@ import { Button, Header, SectionTitle, FormCard } from '../components/ui';
 import { colors, spacing, typography, borderRadius } from '../utils/designTokens';
 import { createCustomMission } from '../services/missionService';
 import { useUser } from '../contexts/UserContext';
-import { NavigationProp } from '@react-navigation/native';
+import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../types/navigation';
 
 interface CustomMissionCreateScreenProps {
   navigation: NavigationProp<RootStackParamList>;
+  route?: RouteProp<RootStackParamList, 'CustomMissionCreate'>;
 }
 
 const DIFFICULTY_OPTIONS = [
@@ -28,14 +29,27 @@ const DIFFICULTY_OPTIONS = [
 ];
 
 
-const CustomMissionCreateScreen: React.FC<CustomMissionCreateScreenProps> = ({ navigation }) => {
+const CustomMissionCreateScreen: React.FC<CustomMissionCreateScreenProps> = ({ navigation, route }) => {
   const { currentNickname } = useUser();
+  const generatedMission = route?.params?.generatedMission;
+  
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [selectedEmoji] = useState('🎯');
+  const [selectedEmoji, setSelectedEmoji] = useState('🎯');
   const [difficulty, setDifficulty] = useState('medium');
   const [customExp, setCustomExp] = useState(50);
   const [loading, setLoading] = useState(false);
+  
+  // AI 생성 미션이 있으면 초기값 설정
+  useEffect(() => {
+    if (generatedMission) {
+      setTitle(generatedMission.title || '');
+      setDescription(generatedMission.description || '');
+      setSelectedEmoji(generatedMission.emoji || '🎯');
+      setDifficulty(generatedMission.difficulty || 'medium');
+      setCustomExp(generatedMission.experience || 50);
+    }
+  }, [generatedMission]);
 
   const handleCreateMission = async () => {
     if (!title.trim()) {
@@ -55,9 +69,9 @@ const CustomMissionCreateScreen: React.FC<CustomMissionCreateScreenProps> = ({ n
         title: title.trim(),
         description: description.trim(),
         emoji: selectedEmoji,
-        difficulty: difficulty as any,
+        difficulty: difficulty as 'easy' | 'medium' | 'hard',
         experience: customExp,
-        category_id: 'custom', // 커스텀 미션 카테고리
+        category_id: 'growth' as const, // 기존 구조에 맞춰 growth로 설정
       };
 
       const result = await createCustomMission(missionData as any, currentNickname || 'default');
@@ -100,6 +114,20 @@ const CustomMissionCreateScreen: React.FC<CustomMissionCreateScreenProps> = ({ n
       <Header />
 
       <ScrollView style={styles.content}>
+        {/* AI 미션 생성 버튼 */}
+        <FormCard style={{ marginBottom: spacing[4] }}>
+          <SectionTitle title="AI로 미션 만들기" size="lg" marginBottom={spacing[3]} />
+          <Text style={styles.aiDescription}>
+            지난 1주일간 완료한 미션을 분석하여 나만의 맞춤형 미션을 추천받을 수 있어요.
+          </Text>
+          <Button
+            title="🤖 AI 미션 생성하기"
+            onPress={() => navigation.navigate('AIMissionGenerate')}
+            style={styles.aiButton}
+            variant="outline"
+          />
+        </FormCard>
+
         <FormCard>
           <SectionTitle title="미션 제목" size="lg" marginBottom={spacing[3]} />
           <TextInput
@@ -316,6 +344,15 @@ const styles = StyleSheet.create({
   },
   createButton: {
     backgroundColor: colors.primary[500],
+  },
+  aiDescription: {
+    fontSize: typography.fontSize.sm,
+    color: colors.text.secondary,
+    marginBottom: spacing[3],
+    lineHeight: typography.lineHeight.normal * typography.fontSize.sm,
+  },
+  aiButton: {
+    borderColor: colors.primary[500],
   },
 });
 

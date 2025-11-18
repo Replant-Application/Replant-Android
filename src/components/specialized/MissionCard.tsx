@@ -71,7 +71,14 @@ const MissionCard: React.FC<MissionCardProps> = ({
         </View>
         <View style={styles.statusContainer}>
           {mission.completed ? (
-            <Badge tier="bronze" size="sm" />
+            <>
+              {/* 인증 완료된 경우에만 인증 뱃지(badge_verified.png) 표시 */}
+              {mission.verified === true ? (
+                <Badge tier="bronze" size="sm" />
+              ) : (
+                <Text style={styles.pendingVerificationText}>⏳ 인증 대기</Text>
+              )}
+            </>
           ) : (
             <Text style={styles.pendingText}>⏳ 진행중</Text>
           )}
@@ -211,6 +218,11 @@ const styles = StyleSheet.create({
   },
 
   pendingText: {
+    fontSize: typography.fontSize.xs,
+    color: colors.warning,
+    fontWeight: typography.fontWeight.medium,
+  },
+  pendingVerificationText: {
     fontSize: typography.fontSize.xs,
     color: colors.warning,
     fontWeight: typography.fontWeight.medium,

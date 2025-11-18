@@ -2,12 +2,14 @@ import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react'
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { useMission } from '../hooks/useMission';
 import { useCharacter } from '../hooks/useCharacter';
-import { MissionCard } from '../components/specialized';
+import { MissionCard, MissionVerificationModal } from '../components/specialized';
 import { Card, Loading, ErrorBoundary, Button, Header, EmptyState, SectionTitle } from '../components/ui';
 import { colors, spacing, typography, borderRadius } from '../utils/designTokens';
 import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../types/navigation';
 import { useUser } from '../contexts/UserContext';
+import { Mission } from '../types';
+import { checkVerificationStatus } from '../api/missionApi';
 
 // 단일 카테고리: 성장
 
@@ -20,12 +22,16 @@ type MissionFilter = 'all' | 'daily' | 'completed';
 
 const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
   const { addExperienceByCategory } = useCharacter();
-  const { missions, loading, error, saveMissionPhoto, deleteMissionPhoto, completeMissionWithPhoto, uncompleteMission } = useMission(addExperienceByCategory);
+  const { missions, loading, error, saveMissionPhoto, deleteMissionPhoto, completeMissionWithPhoto, uncompleteMission, loadMissions } = useMission(addExperienceByCategory);
   
   // route params에서 사진 정보 확인
   const routeParams = route?.params;
   const processedPhotoRef = useRef<string | null>(null);
   const [selectedFilter, setSelectedFilter] = useState<MissionFilter>('all');
+  
+  // 인증 모달 상태
+  const [verificationModalVisible, setVerificationModalVisible] = useState(false);
+  const [selectedMissionForVerification, setSelectedMissionForVerification] = useState<Mission | null>(null);
 
   // 오늘 날짜 (YYYY-MM-DD 형식)
   const today = useMemo(() => {
@@ -78,37 +84,72 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
       const result = await completeMissionWithPhoto(missionId, photoUrl);
 
       if (result && result.success) {
-        const mission = missions.find(m => m.mission_id === missionId);
-        if (!mission) return;
+        const completedMission = missions.find(m => m.mission_id === missionId);
+        if (!completedMission) return;
 
         const alertTitle = result.levelUp ? '🎉 레벨업!' : '✅ 미션 완료';
         const alertMessage = result.levelUp
           ? `축하합니다! 레벨 ${result.newLevel}이 되었습니다!`
           : `+${result.experienceGained} EXP를 획득했습니다!`;
 
-          Alert.alert(
+        Alert.alert(
           alertTitle,
           alertMessage,
           [
             { text: '나중에', style: 'cancel' },
             {
-              text: '커뮤니티에 공유',
+              text: '인증하기',
               onPress: () => {
-                navigation.navigate('CommunityPostCreate', {
-                  missionId: mission.mission_id,
-                  missionTitle: mission.title,
-                  missionEmoji: mission.emoji,
-                  photoUrl: mission.photo_url || undefined,
-                });
+                // 인증 방법 선택 모달 표시
+                setSelectedMissionForVerification(completedMission);
+                setVerificationModalVisible(true);
               },
             },
           ]
-          );
+        );
       }
     } catch (completeError) {
       Alert.alert('오류', '미션 완료에 실패했습니다.');
     }
   };
+
+  // 좋아요 인증 선택 시 (커뮤니티 공유 화면으로 이동)
+  const handleLikeVerification = useCallback(() => {
+    if (!selectedMissionForVerification) return;
+    
+    navigation.navigate('CommunityPostCreate', {
+      missionId: selectedMissionForVerification.mission_id,
+      missionTitle: selectedMissionForVerification.title,
+      missionEmoji: selectedMissionForVerification.emoji,
+      photoUrl: selectedMissionForVerification.photo_url || undefined,
+    });
+  }, [selectedMissionForVerification, navigation]);
+
+  // 인증 상태 확인 (게시글 작성 후 복귀 시)
+  const checkVerificationOnReturn = useCallback(async () => {
+    if (!selectedMissionForVerification) return;
+    
+    try {
+      const result = await checkVerificationStatus(selectedMissionForVerification.mission_id);
+      if (result.success && result.data?.verified) {
+        // 인증 완료 시 미션 목록 새로고침
+        await loadMissions();
+        Alert.alert('✅ 인증 완료', '미션이 인증되었습니다!');
+      }
+    } catch (error) {
+      console.error('인증 상태 확인 오류:', error);
+    }
+  }, [selectedMissionForVerification, loadMissions]);
+
+  // 화면 포커스 시 인증 상태 확인
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      if (selectedMissionForVerification) {
+        checkVerificationOnReturn();
+      }
+    });
+    return unsubscribe;
+  }, [navigation, selectedMissionForVerification, checkVerificationOnReturn]);
 
   // 사진 인증 업로드
   const handlePhotoUpload = (missionId: string) => {
@@ -222,6 +263,21 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
     <View style={styles.container}>
       <Header />
 
+      {/* 인증 방법 선택 모달 */}
+      <MissionVerificationModal
+        visible={verificationModalVisible}
+        mission={selectedMissionForVerification}
+        onClose={() => {
+          setVerificationModalVisible(false);
+          setSelectedMissionForVerification(null);
+        }}
+        onLikeVerification={handleLikeVerification}
+        onVerificationSuccess={async () => {
+          await loadMissions();
+        }}
+        navigation={navigation}
+      />
+
       <ScrollView style={styles.content}>
         {/* 진행률 표시 */}
         {totalMissions > 0 && (
@@ -315,12 +371,20 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
                   style={styles.missionCard}
                 />
               ))}
-              <Button
-                title="미션 만들기"
-                onPress={() => navigation.navigate('CustomMissionCreate')}
-                style={styles.createButton}
-                textStyle={{ color: colors.white }}
-              />
+              <View style={styles.createButtonsContainer}>
+                <Button
+                  title="미션 만들기"
+                  onPress={() => navigation.navigate('CustomMissionCreate')}
+                  style={styles.createButton}
+                  textStyle={{ color: colors.white }}
+                />
+                <Button
+                  title="🤖 AI로 미션 만들기"
+                  onPress={() => navigation.navigate('AIMissionGenerate')}
+                  style={styles.aiCreateButton}
+                  variant="outline"
+                />
+              </View>
             </View>
           )}
         </View>
@@ -424,10 +488,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: spacing[1],
   },
+  createButtonsContainer: {
+    marginTop: spacing[4],
+    gap: spacing[3],
+  },
   createButton: {
     backgroundColor: colors.primary[500],
-    marginTop: spacing[4],
-    alignSelf: 'center',
+  },
+  aiCreateButton: {
+    borderColor: colors.primary[500],
   },
 
   missionListContainer: {

@@ -16,7 +16,9 @@ export type RootStackParamList = {
     timestamp?: number;
     analysisResult?: { verified: boolean } | null;
   };
-  CustomMissionCreate: undefined;
+  CustomMissionCreate: {
+    generatedMission?: any; // AIGeneratedMission 타입
+  };
   CounselingSelect: undefined;
   ChatBot: undefined;
   PlacesSearch: undefined;
@@ -56,6 +58,10 @@ export type RootStackParamList = {
   AdminUserEdit: {
     userId: number;
   };
+  MissionGroup: undefined;
+  AIMissionGenerate: {
+    generatedMission?: any;
+  };
 };
 
 // 네비게이션 파라미터 타입
@@ -65,7 +71,9 @@ export interface NavigationParams {
   [ScreenNames.HOME]: undefined;
   [ScreenNames.DIARY]: undefined;
   [ScreenNames.MISSION]: undefined;
-  [ScreenNames.CUSTOM_MISSION_CREATE]: undefined;
+  [ScreenNames.CUSTOM_MISSION_CREATE]: {
+    generatedMission?: any;
+  };
   [ScreenNames.COUNSELING_SELECT]: undefined;
   [ScreenNames.CHATBOT]: undefined;
   [ScreenNames.PLACES_SEARCH]: undefined;
@@ -104,6 +112,10 @@ export interface NavigationParams {
   };
   [ScreenNames.ADMIN_USER_EDIT]: {
     userId: number;
+  };
+  [ScreenNames.MISSION_GROUP]: undefined;
+  [ScreenNames.AI_MISSION_GENERATE]: {
+    generatedMission?: any;
   };
 }
 

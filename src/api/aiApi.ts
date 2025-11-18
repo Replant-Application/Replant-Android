@@ -5,7 +5,7 @@
 
 import { apiClient } from './client';
 import { API_CONFIG } from '../config/apiConfig';
-import { ServiceResult } from '../types';
+import { ServiceResult, WeeklyMissionStats, MissionAnalysis, AIGeneratedMission } from '../types';
 
 /**
  * LLM 호출
@@ -51,5 +51,33 @@ export const analyzeImage = async (data: {
     tags?: string[];
     emotions?: string[];
   }>(API_CONFIG.endpoints.ai.imageAnalysis, data);
+};
+
+/**
+ * 주간 미션 통계 조회
+ * GET /mission/weekly-stats
+ */
+export const getWeeklyMissionStats = async (): Promise<ServiceResult<WeeklyMissionStats>> => {
+  // TODO: 백엔드 개발자가 실제 구현
+  // missionApi의 getWeeklyMissionStats와 동일하지만 aiApi에서도 사용
+  return apiClient.get<WeeklyMissionStats>(API_CONFIG.endpoints.mission.weeklyStats);
+};
+
+/**
+ * 1주일간 미션 분석 요청
+ * POST /ai/analyze-missions
+ */
+export const analyzeWeeklyMissions = async (): Promise<ServiceResult<MissionAnalysis>> => {
+  // TODO: 백엔드 개발자가 실제 구현
+  return apiClient.post<MissionAnalysis>(API_CONFIG.endpoints.ai.analyzeMissions, {});
+};
+
+/**
+ * AI 미션 생성 요청
+ * POST /ai/generate-mission
+ */
+export const generateCustomMission = async (analysis: MissionAnalysis): Promise<ServiceResult<AIGeneratedMission>> => {
+  // TODO: 백엔드 개발자가 실제 구현
+  return apiClient.post<AIGeneratedMission>(API_CONFIG.endpoints.ai.generateMission, { analysis });
 };
 

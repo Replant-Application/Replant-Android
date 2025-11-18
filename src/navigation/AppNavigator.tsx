@@ -29,6 +29,8 @@ import AdminDashboardScreen from '../screens/AdminDashboardScreen';
 import AdminUserListScreen from '../screens/AdminUserListScreen';
 import AdminUserDetailScreen from '../screens/AdminUserDetailScreen';
 import AdminUserEditScreen from '../screens/AdminUserEditScreen';
+import MissionGroupScreen from '../screens/MissionGroupScreen';
+import AIMissionGenerateScreen from '../screens/AIMissionGenerateScreen';
 
 // 간단한 상태 기반 네비게이션 (React Navigation 없이)
 const AppNavigator = () => {
@@ -80,10 +82,13 @@ const AppNavigator = () => {
       setCurrentScreen(SCREEN_NAMES.SETTINGS);
     } else if (currentScreen === SCREEN_NAMES.PHOTO_SELECT) {
       setCurrentScreen(SCREEN_NAMES.MISSION);
+    } else if (currentScreen === SCREEN_NAMES.AI_MISSION_GENERATE) {
+      setCurrentScreen(SCREEN_NAMES.MISSION);
     } else if (
       currentScreen === SCREEN_NAMES.COMMUNITY_POST_CREATE ||
       currentScreen === SCREEN_NAMES.COMMUNITY_POST_DETAIL ||
-      currentScreen === SCREEN_NAMES.COMMUNITY_POST_EDIT
+      currentScreen === SCREEN_NAMES.COMMUNITY_POST_EDIT ||
+      currentScreen === SCREEN_NAMES.MISSION_GROUP
     ) {
       setCurrentScreen(SCREEN_NAMES.COMMUNITY);
     } else if (
@@ -124,7 +129,7 @@ const AppNavigator = () => {
       case SCREEN_NAMES.MISSION:
         return <MissionScreen navigation={navigation} route={route} />;
       case SCREEN_NAMES.CUSTOM_MISSION_CREATE:
-        return <CustomMissionCreateScreen navigation={navigation} />;
+        return <CustomMissionCreateScreen navigation={navigation} route={route} />;
       case SCREEN_NAMES.COUNSELING_SELECT:
         return <CounselingSelectScreen navigation={navigation} />;
       case SCREEN_NAMES.CHATBOT:
@@ -159,6 +164,10 @@ const AppNavigator = () => {
         return <AdminUserDetailScreen navigation={navigation} route={route} />;
       case SCREEN_NAMES.ADMIN_USER_EDIT:
         return <AdminUserEditScreen navigation={navigation} route={route} />;
+      case SCREEN_NAMES.MISSION_GROUP:
+        return <MissionGroupScreen navigation={navigation} />;
+      case SCREEN_NAMES.AI_MISSION_GENERATE:
+        return <AIMissionGenerateScreen navigation={navigation} route={route} />;
       default:
         return <HomeScreen navigation={navigation} />;
     }

@@ -166,11 +166,14 @@ export const useMission = (
       }
 
       // 미션 완료 상태 업데이트
+      // 인증은 아직 안 된 상태이므로 verified는 false로 명시적 설정
       const updatedMission: Mission = {
         ...mission,
         completed: true,
         completed_at: new Date().toISOString(),
-        photo_url: photoUrl || undefined
+        photo_url: photoUrl || undefined,
+        verified: false, // 미션 완료 시점에는 아직 인증 안 됨
+        verification_method: undefined, // 인증 방법도 아직 선택 안 됨
       };
 
       const storageKeys = getStorageKeys(currentNickname);

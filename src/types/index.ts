@@ -48,6 +48,12 @@ export interface Mission {
   completed: boolean;
   completed_at?: string | undefined;
   photo_url?: string | undefined;
+  // 인증 관련 필드
+  verification_method?: 'like' | 'gps' | 'manual';
+  verified?: boolean;
+  verified_at?: string;
+  related_post_id?: string; // 좋아요 인증인 경우 게시글 ID
+  verification_requirements?: VerificationRequirements;
 }
 
 // 템플릿 전용 타입 (사용자 인스턴스 필드 제외)
@@ -333,6 +339,63 @@ export interface UseCalendarReturn {
   getEventsByDate: (date: string) => CalendarEvent[];
 }
 
+// 인증 관련 타입
+export type VerificationMethod = 'like' | 'gps' | 'manual';
+
+export interface MissionVerificationStatus {
+  verified: boolean;
+  verification_method?: VerificationMethod;
+  like_count?: number;
+  required_likes?: number;
+  related_post_id?: string;
+  verified_at?: string;
+}
+
+export interface GPSVerificationData {
+  location: { lat: number; lng: number };
+  timestamp: string;
+}
+
+export interface VerificationRequirements {
+  required_location?: { lat: number; lng: number; radius: number };
+  required_time?: { start: string; end: string };
+}
+
+// 미션 그룹 관련 타입
+export interface MissionGroup {
+  mission_id: string;
+  mission_title: string;
+  mission_emoji: string;
+  completed_at: string;
+  post_count: number; // 해당 미션 완료자 게시글 수
+  member_count: number; // 해당 미션 완료자 수
+}
+
+// AI 미션 생성 관련 타입
+export interface WeeklyMissionStats {
+  total_completed: number;
+  category_stats: { [category: string]: number };
+  difficulty_stats: { [difficulty: string]: number };
+  completed_dates: string[];
+}
+
+export interface MissionAnalysis {
+  patterns: string[];
+  recommendations: string[];
+  strengths: string[];
+  areas_for_improvement: string[];
+}
+
+export interface AIGeneratedMission {
+  title: string;
+  description: string;
+  emoji: string;
+  difficulty: Difficulty;
+  experience: number;
+  category_id: MissionCategory;
+  reasoning: string; // AI가 이 미션을 추천한 이유
+}
+
 // Screen Names 타입
 export enum ScreenNames {
   START = 'Start',
@@ -354,4 +417,6 @@ export enum ScreenNames {
   COMMUNITY_POST_DETAIL = 'CommunityPostDetail',
   MY_PAGE = 'MyPage',
   CALENDAR = 'Calendar',
+  MISSION_GROUP = 'MissionGroup',
+  AI_MISSION_GENERATE = 'AIMissionGenerate',
 }

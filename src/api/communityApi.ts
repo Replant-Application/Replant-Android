@@ -5,7 +5,7 @@
 
 import { apiClient } from './client';
 import { API_CONFIG } from '../config/apiConfig';
-import { ServiceResult, CommunityPost, CommunityComment, CommunityPostData } from '../types';
+import { ServiceResult, CommunityPost, CommunityComment, CommunityPostData, MissionGroup } from '../types';
 
 /**
  * 게시글 작성
@@ -143,5 +143,24 @@ export const getComments = async (postId: string): Promise<ServiceResult<Communi
   // TODO: 백엔드 개발자가 실제 구현
   const endpoint = API_CONFIG.endpoints.community.getComments.replace(':id', postId);
   return apiClient.get<CommunityComment[]>(endpoint);
+};
+
+/**
+ * 내가 완료한 미션 그룹 목록 조회
+ * GET /community/my-mission-groups
+ */
+export const getMissionGroups = async (): Promise<ServiceResult<MissionGroup[]>> => {
+  // TODO: 백엔드 개발자가 실제 구현
+  return apiClient.get<MissionGroup[]>(API_CONFIG.endpoints.community.myMissionGroups);
+};
+
+/**
+ * 특정 미션 완료자 게시글 조회
+ * GET /community/mission/:missionId/posts
+ */
+export const getPostsByMission = async (missionId: string): Promise<ServiceResult<CommunityPost[]>> => {
+  // TODO: 백엔드 개발자가 실제 구현
+  const endpoint = API_CONFIG.endpoints.community.postsByMission.replace(':missionId', missionId);
+  return apiClient.get<CommunityPost[]>(endpoint);
 };
 

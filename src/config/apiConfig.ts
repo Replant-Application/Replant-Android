@@ -48,6 +48,12 @@ export const API_CONFIG = {
       getCompletedMissions: '/mission/completed',
       saveTodoList: '/mission/todo',
       getTodoList: '/mission/todo',
+      // 인증 관련
+      verificationStatus: '/mission/:id/verification-status',
+      verifyByLikes: '/mission/:id/verify-by-likes',
+      verificationRequirements: '/mission/:id/verification-requirements',
+      verifyByGPS: '/mission/:id/verify-by-gps',
+      weeklyStats: '/mission/weekly-stats',
     },
     
     // 커뮤니티
@@ -66,6 +72,9 @@ export const API_CONFIG = {
       getPosts: '/community',
       getPost: '/community/:id',
       getComments: '/community/:id/comments',
+      // 미션 그룹 관련
+      myMissionGroups: '/community/my-mission-groups',
+      postsByMission: '/community/mission/:missionId/posts',
     },
     
     // 펫
@@ -91,6 +100,8 @@ export const API_CONFIG = {
       llmCall: '/ai/llm',
       llmResult: '/ai/llm/result',
       imageAnalysis: '/ai/image',
+      analyzeMissions: '/ai/analyze-missions',
+      generateMission: '/ai/generate-mission',
     },
   },
   

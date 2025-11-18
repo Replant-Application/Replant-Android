@@ -5,7 +5,7 @@
 
 import { apiClient } from './client';
 import { API_CONFIG } from '../config/apiConfig';
-import { ServiceResult, Mission, MissionData } from '../types';
+import { ServiceResult, Mission, MissionData, MissionVerificationStatus, VerificationRequirements, GPSVerificationData } from '../types';
 
 /**
  * 미션 추가
@@ -92,4 +92,45 @@ export const getTodoList = async (): Promise<ServiceResult<{ missions: string[] 
   // TODO: 백엔드 개발자가 실제 구현
   return apiClient.get<{ missions: string[] }>(API_CONFIG.endpoints.mission.getTodoList);
 };
+
+/**
+ * 인증 상태 확인
+ * GET /mission/:id/verification-status
+ */
+export const checkVerificationStatus = async (missionId: string): Promise<ServiceResult<MissionVerificationStatus>> => {
+  // TODO: 백엔드 개발자가 실제 구현
+  const endpoint = API_CONFIG.endpoints.mission.verificationStatus.replace(':id', missionId);
+  return apiClient.get<MissionVerificationStatus>(endpoint);
+};
+
+/**
+ * 좋아요 기반 인증 요청
+ * POST /mission/:id/verify-by-likes
+ */
+export const verifyMissionByLikes = async (missionId: string, postId: string): Promise<ServiceResult<Mission>> => {
+  // TODO: 백엔드 개발자가 실제 구현
+  const endpoint = API_CONFIG.endpoints.mission.verifyByLikes.replace(':id', missionId);
+  return apiClient.post<Mission>(endpoint, { postId });
+};
+
+/**
+ * 인증 요구사항 조회
+ * GET /mission/:id/verification-requirements
+ */
+export const getVerificationRequirements = async (missionId: string): Promise<ServiceResult<VerificationRequirements>> => {
+  // TODO: 백엔드 개발자가 실제 구현
+  const endpoint = API_CONFIG.endpoints.mission.verificationRequirements.replace(':id', missionId);
+  return apiClient.get<VerificationRequirements>(endpoint);
+};
+
+/**
+ * GPS 기반 인증 요청
+ * POST /mission/:id/verify-by-gps
+ */
+export const verifyMissionByGPS = async (missionId: string, data: GPSVerificationData): Promise<ServiceResult<Mission>> => {
+  // TODO: 백엔드 개발자가 실제 구현
+  const endpoint = API_CONFIG.endpoints.mission.verifyByGPS.replace(':id', missionId);
+  return apiClient.post<Mission>(endpoint, data);
+};
+
 

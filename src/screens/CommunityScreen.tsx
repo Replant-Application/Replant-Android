@@ -15,10 +15,13 @@ interface CommunityScreenProps {
   navigation: NavigationProp<RootStackParamList>;
 }
 
+type CommunityTab = 'all' | 'mission-group';
+
 const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation }) => {
   const { posts, loading, error, loadPosts, toggleLike, toggleScrap } = useCommunity();
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<'latest' | 'popular'>('latest');
+  const [activeTab, setActiveTab] = useState<CommunityTab>('all');
 
   // 검색 및 필터링
   const filteredPosts = useMemo(() => {
@@ -71,12 +74,38 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation }) => {
     return <ErrorBoundary error={error} />;
   }
 
+  // 미션 그룹 화면으로 이동
+  const handleMissionGroupPress = () => {
+    navigation.navigate('MissionGroup');
+  };
+
   return (
     <View style={styles.container}>
       <Header />
 
+      {/* 탭 */}
+      <View style={styles.tabContainer}>
+        <TouchableOpacity
+          style={[styles.tab, activeTab === 'all' && styles.tabActive]}
+          onPress={() => setActiveTab('all')}
+        >
+          <Text style={[styles.tabText, activeTab === 'all' && styles.tabTextActive]}>
+            전체 게시판
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.tab, activeTab === 'mission-group' && styles.tabActive]}
+          onPress={handleMissionGroupPress}
+        >
+          <Text style={[styles.tabText, activeTab === 'mission-group' && styles.tabTextActive]}>
+            미션 그룹
+          </Text>
+        </TouchableOpacity>
+      </View>
+
       {/* 검색 및 정렬 */}
-      <View style={styles.filterContainer}>
+      {activeTab === 'all' && (
+        <View style={styles.filterContainer}>
         <View style={styles.searchContainer}>
           <TextInput
             style={styles.searchInput}
@@ -115,7 +144,9 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation }) => {
           </TouchableOpacity>
         </View>
       </View>
+      )}
 
+      {activeTab === 'all' && (
       <ScrollView style={styles.content}>
         {filteredPosts.length === 0 ? (
           <EmptyState
@@ -137,6 +168,7 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation }) => {
           </View>
         )}
       </ScrollView>
+      )}
     </View>
   );
 };
@@ -145,6 +177,31 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background.secondary,
+  },
+  tabContainer: {
+    flexDirection: 'row',
+    backgroundColor: colors.background.primary,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border.light,
+  },
+  tab: {
+    flex: 1,
+    paddingVertical: spacing[4],
+    alignItems: 'center',
+    borderBottomWidth: 2,
+    borderBottomColor: 'transparent',
+  },
+  tabActive: {
+    borderBottomColor: colors.primary[500],
+  },
+  tabText: {
+    fontSize: typography.fontSize.base,
+    fontWeight: typography.fontWeight.medium,
+    color: colors.text.secondary,
+  },
+  tabTextActive: {
+    color: colors.primary[600],
+    fontWeight: typography.fontWeight.semibold,
   },
   filterContainer: {
     padding: spacing[4],
