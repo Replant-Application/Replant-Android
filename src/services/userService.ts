@@ -29,23 +29,29 @@ export const initializeUserData = async (
     // 미션 템플릿에서 초기 미션 생성
     const storageKeys = getStorageKeys(nickname);
 
-    // 항상 JSON 파일에서 최신 템플릿 로드
-    const missionTemplates = require('../data/missionTemplates.json');
-    // 모든 미션 사용 (7개)
-    const essentialIds: string[] = ['1', '2', '3', '4', '5', '6', '7'];
-    const selectedTemplates = missionTemplates.filter((t: any) => essentialIds.includes(t.mission_id));
-    const missions = selectedTemplates.map((template: any) => ({
-      id: `mission_${Date.now()}_${template.mission_id}`,
-      mission_id: template.mission_id,
-      title: template.title,
-      description: template.description,
-      emoji: template.emoji,
-      category_id: 'growth',
-      difficulty: template.difficulty,
-      experience: template.experience,
-      completed: false
-    }));
-    await setData(storageKeys.MISSIONS, missions);
+    // 기존 미션 데이터 확인
+    const existingMissions = await getData(storageKeys.MISSIONS);
+    
+    // 기존 미션이 없거나 빈 배열인 경우에만 초기화
+    if (!existingMissions || (Array.isArray(existingMissions) && existingMissions.length === 0)) {
+      // 항상 JSON 파일에서 최신 템플릿 로드
+      const missionTemplates = require('../data/missionTemplates.json');
+      // 모든 미션 사용 (7개)
+      const essentialIds: string[] = ['1', '2', '3', '4', '5', '6', '7'];
+      const selectedTemplates = missionTemplates.filter((t: any) => essentialIds.includes(t.mission_id));
+      const missions = selectedTemplates.map((template: any) => ({
+        id: `mission_${Date.now()}_${template.mission_id}`,
+        mission_id: template.mission_id,
+        title: template.title,
+        description: template.description,
+        emoji: template.emoji,
+        category_id: 'growth',
+        difficulty: template.difficulty,
+        experience: template.experience,
+        completed: false
+      }));
+      await setData(storageKeys.MISSIONS, missions);
+    }
 
     // 캐릭터 템플릿에서 초기 캐릭터 생성 (단일 캐릭터)
     // 항상 JSON 파일에서 최신 템플릿 로드
@@ -76,8 +82,11 @@ export const initializeUserData = async (
       await setData(storageKeys.CHARACTERS, [initialCharacter]);
     }
 
-    // 다이어리는 빈 배열로 시작
-    await setData(storageKeys.DIARIES, []);
+    // 다이어리는 기존 데이터가 있으면 유지, 없으면 빈 배열로 시작
+    const existingDiaries = await getData(storageKeys.DIARIES);
+    if (!existingDiaries || (Array.isArray(existingDiaries) && existingDiaries.length === 0)) {
+      await setData(storageKeys.DIARIES, []);
+    }
 
     return {
       success: true,
