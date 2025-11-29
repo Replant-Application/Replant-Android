@@ -8,7 +8,7 @@ import { colors, spacing, typography, borderRadius } from '../utils/designTokens
 import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../types/navigation';
 import { ScreenNames } from '../types';
-import { useUser } from '../contexts/UserContext';
+// useUser는 사용하지 않음
 import { Mission } from '../types';
 import { checkVerificationStatus } from '../api/missionApi';
 
@@ -137,8 +137,8 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
         await loadMissions();
         Alert.alert('✅ 인증 완료', '미션이 인증되었습니다!');
       }
-    } catch (error) {
-      console.error('인증 상태 확인 오류:', error);
+    } catch (err) {
+      console.error('인증 상태 확인 오류:', err);
     }
   }, [selectedMissionForVerification, loadMissions]);
 
@@ -193,7 +193,7 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
               } else {
                 Alert.alert('오류', result.error || '사진 삭제에 실패했습니다.');
               }
-            } catch (error) {
+            } catch (err) {
               Alert.alert('오류', '사진 삭제 중 오류가 발생했습니다.');
             }
           }
@@ -217,7 +217,7 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
       } else {
         Alert.alert('오류', result?.error || '사진 저장에 실패했습니다.');
       }
-    } catch (error) {
+    } catch (err) {
       Alert.alert('오류', '사진 저장에 실패했습니다.');
     }
   }, [saveMissionPhoto]);
@@ -378,12 +378,6 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
                   style={styles.createButton}
                   textStyle={{ color: colors.white }}
                 />
-                <Button
-                  title="🤖 AI로 미션 만들기"
-                  onPress={() => (navigation as any).navigate(ScreenNames.AI_MISSION_GENERATE)}
-                  style={styles.aiCreateButton}
-                  variant="outline"
-                />
               </View>
             </View>
           )}
@@ -494,9 +488,6 @@ const styles = StyleSheet.create({
   },
   createButton: {
     backgroundColor: colors.primary[500],
-  },
-  aiCreateButton: {
-    borderColor: colors.primary[500],
   },
 
   missionListContainer: {

@@ -1,5 +1,4 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { getData, setData, getStorageKeys, addData, updateData, deleteData } from './storage';
+import { getData, setData, getStorageKeys } from './storage';
 import { logError } from '../utils/logger';
 import { ServiceResult, Character, UserProfile, UserInfoUpdateData, CalendarEvent, CalendarEventData, User, Mission, Diary, CommunityPost } from '../types';
 import { generateUserCharacterName } from '../utils/characterNameGenerator';

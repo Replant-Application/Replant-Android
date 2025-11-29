@@ -6,7 +6,7 @@ import React, { useState, useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput } from 'react-native';
 import { useCommunity } from '../hooks/useCommunity';
 import { PostCard } from '../components/specialized';
-import { Loading, ErrorBoundary, Header, EmptyState, FAB } from '../components/ui';
+import { Loading, ErrorBoundary, Header, EmptyState } from '../components/ui';
 import { colors, spacing, typography } from '../utils/designTokens';
 import { NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '../types/navigation';
@@ -18,7 +18,7 @@ interface CommunityScreenProps {
 type CommunityTab = 'all' | 'mission-group';
 
 const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation }) => {
-  const { posts, loading, error, loadPosts, toggleLike } = useCommunity();
+  const { posts, loading, error, toggleLike } = useCommunity();
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<'latest' | 'popular'>('latest');
   const [activeTab, setActiveTab] = useState<CommunityTab>('all');

@@ -43,7 +43,7 @@ export const useAdmin = () => {
             const userData: User = JSON.parse(userDataString);
 
             users.push({
-              id: parseInt(userData.id.replace('user_', '')) || Date.now(),
+              id: parseInt(userData.id.replace('user_', ''), 10) || Date.now(),
               nickname: userData.nickname,
               email: undefined,
               username: userData.nickname,

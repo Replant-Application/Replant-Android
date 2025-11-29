@@ -4,7 +4,7 @@
  */
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { getData } from '../services';
+// getData는 사용하지 않음
 import {
   createPost as createPostService,
   updatePost as updatePostService,

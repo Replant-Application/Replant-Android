@@ -2,8 +2,8 @@
  * 유저 상세 조회 화면
  */
 
-import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import React, { useEffect, useState, useCallback } from 'react';
+import { View, Text, StyleSheet, ScrollView, Alert } from 'react-native';
 import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { useAdmin } from '../hooks/useAdmin';
 import { Card, Header, Loading, ErrorBoundary, SectionTitle, Button } from '../components/ui';
@@ -21,16 +21,16 @@ const AdminUserDetailScreen: React.FC<AdminUserDetailScreenProps> = ({ navigatio
   const { getUserDetail, deactivateUser, activateUser, loading, error } = useAdmin();
   const [user, setUser] = useState<UserInfo | null>(null);
 
-  useEffect(() => {
-    loadUserDetail();
-  }, [userId]);
-
-  const loadUserDetail = async () => {
+  const loadUserDetail = useCallback(async () => {
     const result = await getUserDetail(userId);
     if (result.success && result.data) {
       setUser(result.data);
     }
-  };
+  }, [userId, getUserDetail]);
+
+  useEffect(() => {
+    loadUserDetail();
+  }, [loadUserDetail]);
 
   const handleEdit = () => {
     if (user) {

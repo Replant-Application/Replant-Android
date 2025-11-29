@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { Header } from '../components/ui';
-import { colors, spacing, typography, borderRadius } from '../utils/designTokens';
+import { colors, spacing, typography } from '../utils/designTokens';
 import { NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '../types/navigation';
 

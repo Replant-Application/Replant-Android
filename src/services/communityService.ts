@@ -3,7 +3,7 @@
  * 게시글 및 댓글 CRUD 기능 제공
  */
 
-import { getData, setData, getStorageKeys, addData, deleteData, updateData } from './storage';
+import { getData, setData, getStorageKeys } from './storage';
 import { logError } from '../utils/logger';
 import { CommunityPost, CommunityComment, CommunityPostData, ServiceResult } from '../types';
 
@@ -63,7 +63,7 @@ export const createPost = async (
  */
 export const updatePost = async (
   postId: string,
-  updateData: Partial<CommunityPostData>,
+  updateDataParam: Partial<CommunityPostData>,
   nickname: string
 ): Promise<ServiceResult<CommunityPost>> => {
   try {
@@ -86,11 +86,11 @@ export const updatePost = async (
 
     const updatedPost: CommunityPost = {
       ...post,
-      title: updateData.title ?? post.title,
-      content: updateData.content ?? post.content,
-      images: updateData.images ?? post.images,
-      tags: updateData.tags ?? post.tags,
-      category: updateData.category ?? post.category,
+      title: updateDataParam.title ?? post.title,
+      content: updateDataParam.content ?? post.content,
+      images: updateDataParam.images ?? post.images,
+      tags: updateDataParam.tags ?? post.tags,
+      category: updateDataParam.category ?? post.category,
       updated_at: new Date().toISOString(),
       // mission 관련 필드는 수정 불가
     };
@@ -103,7 +103,7 @@ export const updatePost = async (
       data: updatedPost
     };
   } catch (error) {
-    logError('게시글 수정 실패', error as Error, { postId, updateData, nickname });
+    logError('게시글 수정 실패', error as Error, { postId, updateData: updateDataParam, nickname });
     return {
       success: false,
       error: (error as Error).message

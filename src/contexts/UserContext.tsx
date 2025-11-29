@@ -93,7 +93,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
 
     const result = await executeWithErrorHandling(async () => {
       const storageKeys = getStorageKeys(nickname);
-      
+
       // 기존 사용자 확인
       const existingUserData: User | null = await AsyncStorage.getItem(storageKeys.USER)
         ? JSON.parse(await AsyncStorage.getItem(storageKeys.USER) || 'null')
@@ -123,10 +123,10 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         createdAt,
         role
       };
-      
+
       // User 객체를 스토리지에 저장
       await AsyncStorage.setItem(storageKeys.USER, JSON.stringify(newUser));
-      
+
       setUser(newUser);
       setCurrentNickname(nickname);
 
@@ -140,7 +140,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     // 에러가 발생해도 강제로 성공 처리
     if (!result.success) {
       const storageKeys = getStorageKeys(nickname);
-      
+
       // 기존 사용자 확인
       let existingUserData: User | null = null;
       try {
@@ -175,13 +175,13 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
           createdAt,
           role
         };
-        
+
         try {
           await AsyncStorage.setItem(storageKeys.USER, JSON.stringify(newUser));
         } catch (storageError) {
           logError('User 저장 실패', storageError as Error);
         }
-        
+
         setUser(newUser);
         setCurrentNickname(nickname);
 
@@ -260,11 +260,11 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         id: user?.id || `user_${Date.now()}`,
         createdAt: user?.createdAt || new Date().toISOString()
       };
-      
+
       // 새 닉네임으로 User 객체 저장
       const newStorageKeys = getStorageKeys(newNickname);
       await AsyncStorage.setItem(newStorageKeys.USER, JSON.stringify(updatedUser));
-      
+
       setUser(updatedUser);
       setCurrentNickname(newNickname);
 
@@ -274,7 +274,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
       logError('닉네임 변경 실패', error as Error);
       return { success: false, error: (error as Error).message };
     }
-  }, [currentNickname, user?.id]);
+  }, [currentNickname, user?.id, user?.createdAt]);
 
   // 메모이제이션된 Context 값
   const value = useMemo(() => ({

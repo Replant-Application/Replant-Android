@@ -6,7 +6,7 @@ import { colors, spacing, typography, borderRadius, shadows } from '../utils/des
 import { CalendarEventData } from '../types';
 
 const CalendarScreen: React.FC = () => {
-  const { events, loading, error, addEvent, updateEvent, deleteEvent, getEventsByDate } = useCalendar();
+  const { loading, error, addEvent, updateEvent, deleteEvent, getEventsByDate } = useCalendar();
   const todayDateString = new Date().toISOString().split('T')[0] || '';
   const [selectedDate, setSelectedDate] = useState<string>(todayDateString);
   const [showEventModal, setShowEventModal] = useState(false);

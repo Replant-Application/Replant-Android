@@ -7,7 +7,7 @@ interface BadgeProps {
   style?: ImageStyle;
 }
 
-const Badge: React.FC<BadgeProps> = ({ tier, size = 'md', style }) => {
+const Badge: React.FC<BadgeProps> = ({ tier: _tier, size = 'md', style }) => {
   const getSizeStyles = () => {
     switch (size) {
       case 'sm':

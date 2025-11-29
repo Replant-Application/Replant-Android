@@ -27,8 +27,8 @@ const MissionVerificationModal: React.FC<MissionVerificationModalProps> = ({
   visible,
   mission,
   onClose,
-  onLikeVerification,
-  onVerificationSuccess,
+  onLikeVerification: _onLikeVerification,
+  onVerificationSuccess: _onVerificationSuccess,
 }) => {
   if (!mission) return null;
 

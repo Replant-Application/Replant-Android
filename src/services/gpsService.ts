@@ -3,7 +3,7 @@
  * 현재 위치 가져오기 및 위치 권한 관리
  */
 
-import { Platform, PermissionsAndroid, Alert } from 'react-native';
+import { Platform, PermissionsAndroid } from 'react-native';
 
 export interface Location {
   lat: number;

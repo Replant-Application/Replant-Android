@@ -41,7 +41,7 @@ export class ApiClient {
    */
   async request<T>(
     endpoint: string,
-    options: ApiRequestOptions = {}
+    _options: ApiRequestOptions = {}
   ): Promise<ServiceResult<T>> {
     // TODO: 백엔드 개발자가 실제 구현
     // 예시:
@@ -51,13 +51,13 @@ export class ApiClient {
     //   ...(this.accessToken && { Authorization: `Bearer ${this.accessToken}` }),
     //   ...options.headers,
     // };
-    // 
+    //
     // const response = await fetch(url, {
     //   method: options.method || 'GET',
     //   headers,
     //   body: options.body ? JSON.stringify(options.body) : undefined,
     // });
-    // 
+    //
     // const data = await response.json();
     // return { success: response.ok, data, error: response.ok ? undefined : data.message };
 
@@ -105,4 +105,3 @@ export class ApiClient {
 
 // 싱글톤 인스턴스
 export const apiClient = new ApiClient();
-

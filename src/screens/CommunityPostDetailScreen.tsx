@@ -18,7 +18,7 @@ import {
 import { useCommunityPost } from '../hooks/useCommunityPost';
 import { useCommunity } from '../hooks/useCommunity';
 import { CommentCard } from '../components/specialized';
-import { Loading, ErrorBoundary, Header, EmptyState, Button } from '../components/ui';
+import { Loading, ErrorBoundary, Header, EmptyState } from '../components/ui';
 import { colors, spacing, typography, borderRadius } from '../utils/designTokens';
 import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../types/navigation';

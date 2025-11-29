@@ -2,7 +2,7 @@
  * 유저 수정 화면
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Platform, KeyboardAvoidingView } from 'react-native';
 import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { useAdmin } from '../hooks/useAdmin';
@@ -24,11 +24,7 @@ const AdminUserEditScreen: React.FC<AdminUserEditScreenProps> = ({ navigation, r
   const [email, setEmail] = useState('');
   const [role, setRole] = useState('user');
 
-  useEffect(() => {
-    loadUserDetail();
-  }, [userId]);
-
-  const loadUserDetail = async () => {
+  const loadUserDetail = useCallback(async () => {
     const result = await getUserDetail(userId);
     if (result.success && result.data) {
       const userData = result.data;
@@ -37,7 +33,11 @@ const AdminUserEditScreen: React.FC<AdminUserEditScreenProps> = ({ navigation, r
       setEmail(userData.email || '');
       setRole(userData.role || 'user');
     }
-  };
+  }, [userId, getUserDetail]);
+
+  useEffect(() => {
+    loadUserDetail();
+  }, [loadUserDetail]);
 
   const handleSave = async () => {
     if (!nickname.trim()) {
@@ -89,7 +89,7 @@ const AdminUserEditScreen: React.FC<AdminUserEditScreenProps> = ({ navigation, r
           </TouchableOpacity>
         }
       />
-      
+
       <ScrollView style={styles.content} keyboardShouldPersistTaps="handled">
         <View style={styles.formContainer}>
           {/* 닉네임 */}
@@ -225,4 +225,3 @@ const styles = StyleSheet.create({
 });
 
 export default AdminUserEditScreen;
-
