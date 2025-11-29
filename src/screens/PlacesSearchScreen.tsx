@@ -50,7 +50,6 @@ const PlacesSearchScreen: React.FC<PlacesSearchScreenProps> = ({ navigation }) =
   const [userLocation, setUserLocation] = useState<{lat: number, lng: number} | null>(null);
   const [selectedFilter, setSelectedFilter] = useState<'all' | 'counseling' | 'mental_health'>('all');
   const [selectedRegion, setSelectedRegion] = useState('all');
-  const [showAllRegions, setShowAllRegions] = useState(false);
 
   // 현재 위치 가져오기
   const getCurrentLocation = useCallback(() => {
@@ -291,19 +290,8 @@ const PlacesSearchScreen: React.FC<PlacesSearchScreenProps> = ({ navigation }) =
 
         {/* 지역 선택 버튼들 */}
         <View style={styles.regionContainer}>
-          <View style={styles.regionHeader}>
-            <Text style={styles.regionTitle}>지역 선택</Text>
-            <TouchableOpacity
-              onPress={() => setShowAllRegions(!showAllRegions)}
-              style={styles.moreButton}
-            >
-              <Text style={styles.moreButtonText}>
-                {showAllRegions ? '간단히' : '더보기'}
-              </Text>
-            </TouchableOpacity>
-          </View>
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            {(showAllRegions ? REGIONS : REGIONS.slice(0, 8)).map((region) => (
+            {REGIONS.map((region) => (
               <TouchableOpacity
                 key={region.id}
                 style={[
@@ -331,18 +319,6 @@ const PlacesSearchScreen: React.FC<PlacesSearchScreenProps> = ({ navigation }) =
           <View style={styles.loadingContainer}>
             <ActivityIndicator size="large" color={colors.primary[500]} />
             <Text style={styles.loadingText}>근처 상담센터를 찾는 중...</Text>
-          </View>
-        )}
-
-        {/* API 키 안내 */}
-        {!isLoading && (
-          <View style={styles.apiInfoContainer}>
-            <Text style={styles.apiInfoText}>
-              💡 카카오맵 API를 사용하여 실제 상담센터 정보를 검색합니다.
-            </Text>
-            <Text style={styles.apiInfoSubText}>
-              한국의 정확한 상담센터 정보를 제공합니다.
-            </Text>
           </View>
         )}
 
@@ -504,25 +480,6 @@ const styles = StyleSheet.create({
     color: colors.text.secondary,
     marginTop: spacing[2],
   },
-  apiInfoContainer: {
-    backgroundColor: colors.primary[50],
-    borderRadius: borderRadius.lg,
-    padding: spacing[3],
-    marginBottom: spacing[4],
-    borderWidth: 1,
-    borderColor: colors.primary[200],
-  },
-  apiInfoText: {
-    fontSize: typography.fontSize.sm,
-    color: colors.primary[700],
-    fontWeight: typography.fontWeight.medium,
-    marginBottom: spacing[1],
-  },
-  apiInfoSubText: {
-    fontSize: typography.fontSize.xs,
-    color: colors.primary[600],
-    lineHeight: typography.lineHeight.normal * typography.fontSize.xs,
-  },
   resultInfo: {
     marginBottom: spacing[4],
   },
@@ -649,15 +606,6 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.sm,
     fontWeight: typography.fontWeight.medium,
     color: colors.text.primary,
-  },
-  moreButton: {
-    paddingHorizontal: spacing[2],
-    paddingVertical: spacing[1],
-  },
-  moreButtonText: {
-    fontSize: typography.fontSize.xs,
-    color: colors.primary[600],
-    fontWeight: typography.fontWeight.medium,
   },
   regionButton: {
     paddingHorizontal: spacing[3],
