@@ -124,3 +124,25 @@ export const getDeviceId = async (): Promise<string> => {
     return 'device_' + Math.random().toString(36).substr(2, 9);
   }
 };
+
+/**
+ * 모든 커뮤니티 게시글 삭제
+ */
+export const clearAllCommunityPosts = async (): Promise<{ success: boolean; deletedCount: number }> => {
+  try {
+    const key = 'community_posts';
+    const currentPosts = await getData(key) || [];
+    const deletedCount = Array.isArray(currentPosts) ? currentPosts.length : 0;
+
+    await setData(key, []);
+
+    // 댓글도 함께 삭제
+    const commentsKey = 'community_comments';
+    await setData(commentsKey, []);
+
+    return { success: true, deletedCount };
+  } catch (error) {
+    logError('커뮤니티 게시글 삭제 실패', error as Error);
+    return { success: false, deletedCount: 0 };
+  }
+};

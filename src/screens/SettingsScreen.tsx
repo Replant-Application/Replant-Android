@@ -5,6 +5,7 @@ import { Card, Input, Header, SectionTitle } from '../components/ui';
 import { colors, spacing, typography, borderRadius } from '../utils/designTokens';
 import { NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '../types/navigation';
+import { clearAllCommunityPosts } from '../services/storage';
 
 const TERMS_OF_SERVICE = `Replant 이용약관
 
@@ -245,6 +246,35 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
     }
   };
 
+  const handleClearAllPosts = () => {
+    Alert.alert(
+      '⚠️ 경고',
+      '모든 커뮤니티 게시글과 댓글이 삭제됩니다.\n이 작업은 되돌릴 수 없습니다.\n정말 삭제하시겠습니까?',
+      [
+        { text: '취소', style: 'cancel' },
+        {
+          text: '삭제',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              const result = await clearAllCommunityPosts();
+              if (result.success) {
+                Alert.alert(
+                  '✅ 완료',
+                  `${result.deletedCount}개의 게시글이 삭제되었습니다.`
+                );
+              } else {
+                Alert.alert('오류', '게시글 삭제에 실패했습니다.');
+              }
+            } catch (error) {
+              Alert.alert('오류', '게시글 삭제 중 오류가 발생했습니다.');
+            }
+          }
+        }
+      ]
+    );
+  };
+
 
 
   return (
@@ -304,12 +334,6 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
           >
             <Text style={styles.infoOptionText}>👤 마이페이지</Text>
           </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.infoOption}
-            onPress={() => navigation?.navigate('Calendar')}
-          >
-            <Text style={styles.infoOptionText}>📅 캘린더</Text>
-          </TouchableOpacity>
         </Card>
 
         {/* 관리자 메뉴 */}
@@ -327,6 +351,12 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
               onPress={() => navigation?.navigate('AdminUserList')}
             >
               <Text style={styles.infoOptionText}>👥 전체 유저 목록</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.infoOption, styles.dangerOption]}
+              onPress={handleClearAllPosts}
+            >
+              <Text style={[styles.infoOptionText, styles.dangerText]}>🗑️ 모든 커뮤니티 게시글 삭제</Text>
             </TouchableOpacity>
           </Card>
         )}
@@ -494,6 +524,13 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.base,
     color: colors.primary[500],
     fontWeight: typography.fontWeight.medium,
+  },
+  dangerOption: {
+    backgroundColor: colors.error[50],
+    borderColor: colors.error[300],
+  },
+  dangerText: {
+    color: colors.error[700],
   },
 });
 

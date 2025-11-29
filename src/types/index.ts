@@ -195,6 +195,7 @@ export interface CommunityPost {
   images?: string[]; // 미션 인증 사진
   tags?: string[];
   category?: string;
+  is_liked?: boolean; // 현재 사용자가 좋아요를 눌렀는지 여부
 }
 
 export interface CommunityComment {
@@ -265,7 +266,6 @@ export interface UseCommunityReturn {
   updatePost: (postId: string, postData: Partial<CommunityPostData>) => Promise<ServiceResult<CommunityPost>>;
   deletePost: (postId: string) => Promise<ServiceResult<void>>;
   toggleLike: (postId: string) => Promise<ServiceResult<void>>;
-  toggleScrap: (postId: string) => Promise<ServiceResult<void>>;
   searchPosts: (query: string) => CommunityPost[];
   filterPosts: (category?: string, sortBy?: 'latest' | 'popular') => CommunityPost[];
 }

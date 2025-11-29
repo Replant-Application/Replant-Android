@@ -25,6 +25,10 @@ const StartScreen: React.FC<StartScreenProps> = ({ onNavigate }) => {
     Alert.alert('구글 로그인', '구글 로그인 기능은 준비 중입니다.');
   };
 
+  const handleNaverLogin = () => {
+    Alert.alert('네이버 로그인', '네이버 로그인 기능은 준비 중입니다.');
+  };
+
   return (
     <View style={styles.container}>
       <Header />
@@ -37,7 +41,7 @@ const StartScreen: React.FC<StartScreenProps> = ({ onNavigate }) => {
         {/* 소셜 로그인 버튼들 */}
         <View style={styles.socialLoginContainer}>
           <Text style={styles.socialLoginTitle}>소셜 로그인</Text>
-          
+
           {/* 카카오 로그인 */}
           <TouchableOpacity
             style={[styles.socialButton, styles.kakaoButton]}
@@ -64,6 +68,20 @@ const StartScreen: React.FC<StartScreenProps> = ({ onNavigate }) => {
               resizeMode="contain"
             />
             <Text style={styles.socialButtonText}>구글로 시작하기</Text>
+          </TouchableOpacity>
+
+          {/* 네이버 로그인 */}
+          <TouchableOpacity
+            style={[styles.socialButton, styles.naverButton]}
+            onPress={handleNaverLogin}
+            activeOpacity={0.8}
+          >
+            <Image
+              source={require('../assets/images/naver_logo.png')}
+              style={styles.socialLogo}
+              resizeMode="contain"
+            />
+            <Text style={[styles.socialButtonText, styles.naverButtonText]}>네이버로 시작하기</Text>
           </TouchableOpacity>
         </View>
 
@@ -142,6 +160,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border.light,
   },
+  naverButton: {
+    backgroundColor: '#03C75A', // 네이버 그린 컬러
+  },
   socialLogo: {
     width: 24,
     height: 24,
@@ -150,6 +171,9 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.base,
     fontWeight: typography.fontWeight.semibold,
     color: colors.text.primary,
+  },
+  naverButtonText: {
+    color: colors.text.inverse,
   },
   dividerContainer: {
     flexDirection: 'row',

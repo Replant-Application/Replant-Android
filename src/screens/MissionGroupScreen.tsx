@@ -87,11 +87,6 @@ const MissionGroupScreen: React.FC<MissionGroupScreenProps> = ({ navigation }) =
     navigation.navigate('CommunityPostDetail', { postId });
   };
 
-  const handleScrap = async (postId: string) => {
-    // 스크랩 기능은 CommunityPostDetail에서 처리
-    navigation.navigate('CommunityPostDetail', { postId });
-  };
-
   if (loading) {
     return <Loading text="미션 그룹을 불러오는 중..." />;
   }
@@ -166,7 +161,6 @@ const MissionGroupScreen: React.FC<MissionGroupScreenProps> = ({ navigation }) =
                         post={post}
                         onPress={handlePostPress}
                         onLike={handleLike}
-                        onScrap={handleScrap}
                       />
                     ))}
                   </View>
@@ -245,4 +239,3 @@ const styles = StyleSheet.create({
 });
 
 export default MissionGroupScreen;
-

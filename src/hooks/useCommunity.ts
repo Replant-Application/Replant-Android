@@ -1,6 +1,6 @@
 /**
  * 커뮤니티 관리 Hook
- * 게시글 목록, 생성, 수정, 삭제, 좋아요, 스크랩 기능 제공
+ * 게시글 목록, 생성, 수정, 삭제, 좋아요 기능 제공
  */
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
@@ -11,7 +11,6 @@ import {
   deletePost as deletePostService,
   getPosts as getPostsService,
   toggleLike as toggleLikeService,
-  toggleScrap as toggleScrapService,
 } from '../services/communityService';
 import { useUser } from '../contexts/UserContext';
 import { logError } from '../utils/logger';
@@ -168,41 +167,6 @@ export const useCommunity = (): UseCommunityReturn => {
     [currentNickname]
   );
 
-  // 스크랩 토글
-  const toggleScrap = useCallback(
-    async (postId: string): Promise<ServiceResult<void>> => {
-      if (!currentNickname) {
-        return { success: false, error: '사용자 정보가 없습니다.' };
-      }
-
-      try {
-        const result = await toggleScrapService(postId, currentNickname);
-
-        if (result.success) {
-          // 로컬 상태 업데이트
-          setPosts(prev =>
-            prev.map(p => {
-              if (p.post_id === postId) {
-                return {
-                  ...p,
-                  is_scrapped: !p.is_scrapped,
-                  scrap_count: p.is_scrapped ? p.scrap_count - 1 : p.scrap_count + 1,
-                };
-              }
-              return p;
-            })
-          );
-        }
-
-        return result;
-      } catch (toggleError) {
-        logError('스크랩 토글 실패', toggleError as Error, { postId, currentNickname });
-        return { success: false, error: (toggleError as Error).message };
-      }
-    },
-    [currentNickname]
-  );
-
   // 게시글 검색
   const searchPosts = useCallback(
     (query: string): CommunityPost[] => {
@@ -261,7 +225,6 @@ export const useCommunity = (): UseCommunityReturn => {
       updatePost,
       deletePost,
       toggleLike,
-      toggleScrap,
       searchPosts,
       filterPosts,
     }),
@@ -274,10 +237,8 @@ export const useCommunity = (): UseCommunityReturn => {
       updatePost,
       deletePost,
       toggleLike,
-      toggleScrap,
       searchPosts,
       filterPosts,
     ]
   );
 };
-

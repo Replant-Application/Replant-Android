@@ -18,7 +18,7 @@ interface CommunityScreenProps {
 type CommunityTab = 'all' | 'mission-group';
 
 const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation }) => {
-  const { posts, loading, error, loadPosts, toggleLike, toggleScrap } = useCommunity();
+  const { posts, loading, error, loadPosts, toggleLike } = useCommunity();
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<'latest' | 'popular'>('latest');
   const [activeTab, setActiveTab] = useState<CommunityTab>('all');
@@ -60,10 +60,6 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation }) => {
 
   const handleLike = async (postId: string) => {
     await toggleLike(postId);
-  };
-
-  const handleScrap = async (postId: string) => {
-    await toggleScrap(postId);
   };
 
   if (loading) {
@@ -162,7 +158,6 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation }) => {
                 post={post}
                 onPress={handlePostPress}
                 onLike={handleLike}
-                onScrap={handleScrap}
               />
             ))}
           </View>
@@ -250,4 +245,3 @@ const styles = StyleSheet.create({
 });
 
 export default CommunityScreen;
-

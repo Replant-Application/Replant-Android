@@ -154,16 +154,14 @@ export const getPosts = async (nickname: string): Promise<CommunityPost[]> => {
   try {
     const storageKeys = getStorageKeys(nickname);
     const posts: CommunityPost[] = await getData(storageKeys.COMMUNITY_POSTS) || [];
-    
-    // 사용자의 좋아요/스크랩 정보 가져오기
-    const userLikes: string[] = await getData(storageKeys.USER_LIKES) || [];
-    const userScraps: string[] = await getData(storageKeys.USER_SCRAPS) || [];
 
-    // 좋아요/스크랩 상태 추가
+    // 사용자의 좋아요 정보 가져오기
+    const userLikes: string[] = await getData(storageKeys.USER_LIKES) || [];
+
+    // 좋아요 상태 추가
     return posts.map(post => ({
       ...post,
       is_liked: userLikes.includes(post.post_id),
-      is_scrapped: userScraps.includes(post.post_id),
     }));
   } catch (error) {
     logError('게시글 목록 조회 실패', error as Error, { nickname });
@@ -187,14 +185,12 @@ export const getPost = async (
       return null;
     }
 
-    // 사용자의 좋아요/스크랩 정보 가져오기
+    // 사용자의 좋아요 정보 가져오기
     const userLikes: string[] = await getData(storageKeys.USER_LIKES) || [];
-    const userScraps: string[] = await getData(storageKeys.USER_SCRAPS) || [];
 
     return {
       ...post,
       is_liked: userLikes.includes(post.post_id),
-      is_scrapped: userScraps.includes(post.post_id),
     };
   } catch (error) {
     logError('게시글 상세 조회 실패', error as Error, { postId, nickname });
@@ -411,50 +407,3 @@ export const toggleLike = async (
     };
   }
 };
-
-/**
- * 스크랩 토글
- */
-export const toggleScrap = async (
-  postId: string,
-  nickname: string
-): Promise<ServiceResult<void>> => {
-  try {
-    const storageKeys = getStorageKeys(nickname);
-    const posts: CommunityPost[] = await getData(storageKeys.COMMUNITY_POSTS) || [];
-    const userScraps: string[] = await getData(storageKeys.USER_SCRAPS) || [];
-
-    const postIndex = posts.findIndex(p => p.post_id === postId);
-    if (postIndex === -1) {
-      throw new Error('게시글을 찾을 수 없습니다.');
-    }
-
-    const isScrapped = userScraps.includes(postId);
-    const post = posts[postIndex];
-
-    if (isScrapped) {
-      // 스크랩 취소
-      const filteredScraps = userScraps.filter(id => id !== postId);
-      await setData(storageKeys.USER_SCRAPS, filteredScraps);
-      post.scrap_count = Math.max(0, post.scrap_count - 1);
-    } else {
-      // 스크랩 추가
-      await setData(storageKeys.USER_SCRAPS, [...userScraps, postId]);
-      post.scrap_count += 1;
-    }
-
-    posts[postIndex] = post;
-    await setData(storageKeys.COMMUNITY_POSTS, posts);
-
-    return {
-      success: true
-    };
-  } catch (error) {
-    logError('스크랩 토글 실패', error as Error, { postId, nickname });
-    return {
-      success: false,
-      error: (error as Error).message
-    };
-  }
-};
-
