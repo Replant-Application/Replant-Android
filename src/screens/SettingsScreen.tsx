@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import { useUser } from '../contexts/UserContext';
+import { useAdmin } from '../hooks/useAdmin';
 import { Card, Input, Header, SectionTitle } from '../components/ui';
 import { colors, spacing, typography, borderRadius } from '../utils/designTokens';
 import { NavigationProp } from '@react-navigation/native';
@@ -197,6 +198,7 @@ interface SettingsScreenProps {
 
 const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
   const { user, logout, updateNickname } = useUser();
+  const { deleteAllUsers } = useAdmin();
   const [showNicknameForm, setShowNicknameForm] = useState(false);
   const [newNickname, setNewNickname] = useState('');
 
@@ -275,6 +277,35 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
     );
   };
 
+  const handleDeleteAllUsers = () => {
+    Alert.alert(
+      '⚠️ 경고',
+      '모든 유저 데이터가 삭제됩니다.\n\n이 작업은 되돌릴 수 없습니다.\n정말로 모든 유저를 삭제하시겠습니까?',
+      [
+        { text: '취소', style: 'cancel' },
+        {
+          text: '삭제',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              const result = await deleteAllUsers();
+              if (result.success) {
+                Alert.alert(
+                  '✅ 완료',
+                  `${result.data?.deletedCount || 0}명의 유저가 삭제되었습니다.`
+                );
+              } else {
+                Alert.alert('오류', result.error || '유저 삭제에 실패했습니다.');
+              }
+            } catch (error) {
+              Alert.alert('오류', '유저 삭제 중 오류가 발생했습니다.');
+            }
+          }
+        }
+      ]
+    );
+  };
+
 
 
   return (
@@ -342,12 +373,6 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
             <SectionTitle title="👨‍💼 관리자" size="lg" marginBottom={spacing[3]} />
             <TouchableOpacity
               style={styles.infoOption}
-              onPress={() => navigation?.navigate('AdminDashboard')}
-            >
-              <Text style={styles.infoOptionText}>📊 관리자 대시보드</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.infoOption}
               onPress={() => navigation?.navigate('AdminUserList')}
             >
               <Text style={styles.infoOptionText}>👥 전체 유저 목록</Text>
@@ -357,6 +382,12 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
               onPress={handleClearAllPosts}
             >
               <Text style={[styles.infoOptionText, styles.dangerText]}>🗑️ 모든 커뮤니티 게시글 삭제</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.infoOption, styles.dangerOption]}
+              onPress={handleDeleteAllUsers}
+            >
+              <Text style={[styles.infoOptionText, styles.dangerText]}>🗑️ 전체 유저 삭제</Text>
             </TouchableOpacity>
           </Card>
         )}

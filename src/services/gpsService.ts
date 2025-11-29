@@ -47,8 +47,10 @@ export const requestLocationPermission = async (): Promise<boolean> => {
 export const getCurrentLocation = (): Promise<Location> => {
   return new Promise((resolve, reject) => {
     // React Native의 Geolocation API 사용
-    if (typeof navigator !== 'undefined' && (navigator as any).geolocation) {
-      (navigator as any).geolocation.getCurrentPosition(
+    // @ts-ignore - navigator는 런타임에 존재할 수 있음
+    const nav = (typeof navigator !== 'undefined' ? navigator : null) as any;
+    if (nav && nav.geolocation) {
+      nav.geolocation.getCurrentPosition(
         (position: any) => {
           resolve({
             lat: position.coords.latitude,
@@ -105,4 +107,3 @@ export const getLocationWithPermission = async (): Promise<Location> => {
 export const getCurrentTimestamp = (): string => {
   return new Date().toISOString();
 };
-

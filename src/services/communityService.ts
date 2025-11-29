@@ -76,6 +76,10 @@ export const updatePost = async (
     }
 
     const post = posts[postIndex];
+    if (!post) {
+      throw new Error('게시글을 찾을 수 없습니다.');
+    }
+
     if (post.author !== nickname) {
       throw new Error('본인의 게시글만 수정할 수 있습니다.');
     }
@@ -238,7 +242,7 @@ export const createComment = async (
 
     // 게시글의 댓글 수 증가
     const postIndex = posts.findIndex(p => p.post_id === postId);
-    if (postIndex !== -1) {
+    if (postIndex !== -1 && posts[postIndex]) {
       posts[postIndex].comment_count += 1;
       await setData(storageKeys.COMMUNITY_POSTS, posts);
     }
@@ -274,6 +278,10 @@ export const updateComment = async (
     }
 
     const comment = comments[commentIndex];
+    if (!comment) {
+      throw new Error('댓글을 찾을 수 없습니다.');
+    }
+
     if (comment.author !== nickname) {
       throw new Error('본인의 댓글만 수정할 수 있습니다.');
     }
@@ -317,6 +325,10 @@ export const deleteComment = async (
       throw new Error('댓글을 찾을 수 없습니다.');
     }
 
+    if (!comment) {
+      throw new Error('댓글을 찾을 수 없습니다.');
+    }
+
     if (comment.author !== nickname) {
       throw new Error('본인의 댓글만 삭제할 수 있습니다.');
     }
@@ -326,7 +338,7 @@ export const deleteComment = async (
 
     // 게시글의 댓글 수 감소
     const postIndex = posts.findIndex(p => p.post_id === comment.post_id);
-    if (postIndex !== -1) {
+    if (postIndex !== -1 && posts[postIndex]) {
       posts[postIndex].comment_count = Math.max(0, posts[postIndex].comment_count - 1);
       await setData(storageKeys.COMMUNITY_POSTS, posts);
     }
@@ -379,8 +391,12 @@ export const toggleLike = async (
       throw new Error('게시글을 찾을 수 없습니다.');
     }
 
-    const isLiked = userLikes.includes(postId);
     const post = posts[postIndex];
+    if (!post) {
+      throw new Error('게시글을 찾을 수 없습니다.');
+    }
+
+    const isLiked = userLikes.includes(postId);
 
     if (isLiked) {
       // 좋아요 취소

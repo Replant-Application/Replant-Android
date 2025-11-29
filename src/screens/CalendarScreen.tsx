@@ -7,7 +7,8 @@ import { CalendarEventData } from '../types';
 
 const CalendarScreen: React.FC = () => {
   const { events, loading, error, addEvent, updateEvent, deleteEvent, getEventsByDate } = useCalendar();
-  const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0]);
+  const todayDateString = new Date().toISOString().split('T')[0] || '';
+  const [selectedDate, setSelectedDate] = useState<string>(todayDateString);
   const [showEventModal, setShowEventModal] = useState(false);
   const [editingEvent, setEditingEvent] = useState<{ id: string; data: CalendarEventData } | null>(null);
   const [eventTitle, setEventTitle] = useState('');
@@ -42,10 +43,11 @@ const CalendarScreen: React.FC = () => {
 
   // 이벤트 모달 열기
   const openEventModal = (date?: string, event?: { id: string; data: CalendarEventData }) => {
-    setSelectedDate(date || new Date().toISOString().split('T')[0]);
+    const dateToSet = date || todayDateString || '';
+    setSelectedDate(dateToSet);
     if (event) {
       setEditingEvent(event);
-      setEventTitle(event.data.title);
+      setEventTitle(event.data.title || '');
       setEventDescription(event.data.description || '');
       setEventTime(event.data.time || '');
     } else {
@@ -127,7 +129,7 @@ const CalendarScreen: React.FC = () => {
   };
 
   // 선택된 날짜의 이벤트
-  const dayEvents = getEventsByDate(selectedDate);
+  const dayEvents = selectedDate ? getEventsByDate(selectedDate) : [];
 
   // 날짜 선택 UI (간단한 버전)
   const today = new Date();
@@ -150,7 +152,7 @@ const CalendarScreen: React.FC = () => {
             <View style={styles.dateButtons}>
               <TouchableOpacity
                 style={[styles.dateButton, selectedDate === yesterdayString && styles.dateButtonActive]}
-                onPress={() => setSelectedDate(yesterdayString)}
+                onPress={() => setSelectedDate(yesterdayString || '')}
               >
                 <Text style={[styles.dateButtonText, selectedDate === yesterdayString && styles.dateButtonTextActive]}>
                   어제
@@ -158,7 +160,7 @@ const CalendarScreen: React.FC = () => {
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.dateButton, selectedDate === todayString && styles.dateButtonActive]}
-                onPress={() => setSelectedDate(todayString)}
+                onPress={() => setSelectedDate(todayString || '')}
               >
                 <Text style={[styles.dateButtonText, selectedDate === todayString && styles.dateButtonTextActive]}>
                   오늘
@@ -166,7 +168,7 @@ const CalendarScreen: React.FC = () => {
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.dateButton, selectedDate === tomorrowString && styles.dateButtonActive]}
-                onPress={() => setSelectedDate(tomorrowString)}
+                onPress={() => setSelectedDate(tomorrowString || '')}
               >
                 <Text style={[styles.dateButtonText, selectedDate === tomorrowString && styles.dateButtonTextActive]}>
                   내일
@@ -395,7 +397,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background.primary,
     borderRadius: borderRadius.xl,
     padding: spacing[6],
-    ...shadows.xl,
+    ...shadows.lg,
   },
   modalTitle: {
     fontSize: typography.fontSize.xl,
@@ -433,4 +435,3 @@ const styles = StyleSheet.create({
 });
 
 export default CalendarScreen;
-

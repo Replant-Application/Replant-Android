@@ -118,7 +118,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.primary[100],
     paddingHorizontal: spacing[1],
     paddingVertical: 2,
-    borderRadius: borderRadius.xs,
+    borderRadius: borderRadius.sm,
   },
   authorBadgeText: {
     fontSize: typography.fontSize.xs,
@@ -171,4 +171,3 @@ const styles = StyleSheet.create({
 });
 
 export default CommentCard;
-

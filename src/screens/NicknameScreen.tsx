@@ -17,7 +17,10 @@ const NicknameScreen: React.FC<NicknameScreenProps> = ({ onNavigate }) => {
   // 소셜 로그인 화면으로 돌아가기
   const handleGoBackToSocialLogin = () => {
     if (onNavigate) {
-      onNavigate(SCREEN_NAMES.START);
+      const startScreen = SCREEN_NAMES.START;
+      if (startScreen) {
+        onNavigate(startScreen);
+      }
     }
   };
 

@@ -419,7 +419,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background.primary,
     borderRadius: borderRadius.xl,
     padding: spacing[6],
-    ...shadows.xl,
+    ...shadows.lg,
   },
   modalTitle: {
     fontSize: typography.fontSize.xl,

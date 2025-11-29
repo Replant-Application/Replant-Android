@@ -54,7 +54,7 @@ const AdminUserDetailScreen: React.FC<AdminUserDetailScreenProps> = ({ navigatio
             const result = user.isActive === false
               ? await activateUser(user.id)
               : await deactivateUser(user.id);
-            
+
             if (result.success) {
               Alert.alert('성공', `유저가 ${action}되었습니다.`);
               loadUserDetail();
@@ -85,12 +85,12 @@ const AdminUserDetailScreen: React.FC<AdminUserDetailScreenProps> = ({ navigatio
   return (
     <ScrollView style={styles.container}>
       <Header title="유저 상세" />
-      
+
       <View style={styles.content}>
         {/* 기본 정보 */}
         <Card style={styles.infoCard}>
           <SectionTitle title="👤 기본 정보" size="lg" marginBottom={spacing[4]} />
-          
+
           <View style={styles.infoRow}>
             <Text style={styles.infoLabel}>ID</Text>
             <Text style={styles.infoValue}>{user.id}</Text>
@@ -165,8 +165,8 @@ const AdminUserDetailScreen: React.FC<AdminUserDetailScreenProps> = ({ navigatio
             variant={user.isActive === false ? 'primary' : 'outline'}
             style={[
               styles.toggleButton,
-              user.isActive === false && styles.activateButton
-            ]}
+              user.isActive === false ? styles.activateButton : null
+            ].filter(Boolean) as any}
             size="lg"
           />
         </View>
@@ -253,4 +253,3 @@ const styles = StyleSheet.create({
 });
 
 export default AdminUserDetailScreen;
-

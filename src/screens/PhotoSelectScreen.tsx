@@ -39,7 +39,7 @@ const PhotoSelectScreen: React.FC<PhotoSelectScreenProps> = ({ navigation, route
   const handleTakePhoto = () => {
     const options = {
       mediaType: 'photo' as MediaType,
-      quality: 0.8,
+      quality: 0.8 as any,
       saveToPhotos: true,
     };
 
@@ -72,7 +72,7 @@ const PhotoSelectScreen: React.FC<PhotoSelectScreenProps> = ({ navigation, route
   const handlePickFromGallery = () => {
     const options = {
       mediaType: 'photo' as MediaType,
-      quality: 0.8,
+      quality: 0.8 as any,
       selectionLimit: 1,
       includeBase64: false,
     };
@@ -149,8 +149,8 @@ const PhotoSelectScreen: React.FC<PhotoSelectScreenProps> = ({ navigation, route
   // 사진 선택 확인
   const handleConfirm = () => {
     if (selectedPhoto && missionId) {
-      navigation.navigate('Mission', { 
-        selectedPhotoUri: selectedPhoto, 
+      navigation.navigate('Mission', {
+        selectedPhotoUri: selectedPhoto,
         missionId,
         timestamp: Date.now(),
         analysisResult: analysisResult, // 분석 결과도 함께 전달
@@ -171,7 +171,7 @@ const PhotoSelectScreen: React.FC<PhotoSelectScreenProps> = ({ navigation, route
 
   return (
     <View style={styles.container}>
-      <Header 
+      <Header
         title="사진 선택"
         leftButton={
           <TouchableOpacity onPress={handleGoBack} style={styles.backButton}>
@@ -241,7 +241,7 @@ const PhotoSelectScreen: React.FC<PhotoSelectScreenProps> = ({ navigation, route
               <Button
                 title={analyzing ? '🤖 분석중...' : '🤖 AI 분석'}
                 onPress={handleAnalyzePhoto}
-                style={[styles.analyzeButton, analyzing && styles.analyzingButton]}
+                style={[styles.analyzeButton, analyzing ? styles.analyzingButton : undefined].filter(Boolean) as any}
                 textStyle={styles.analyzeButtonText}
                 disabled={analyzing}
               />
@@ -355,4 +355,3 @@ const styles = StyleSheet.create({
 });
 
 export default PhotoSelectScreen;
-

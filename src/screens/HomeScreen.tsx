@@ -8,6 +8,7 @@ import { Card, Loading, ErrorBoundary, Header, EmptyState, SectionTitle } from '
 import { colors, spacing, typography } from '../utils/designTokens';
 import { getSortedIncompleteMissions } from '../utils/missionUtils';
 import { RootStackParamList } from '../types/navigation';
+import { ScreenNames } from '../types';
 
 interface HomeScreenProps {
   navigation: NavigationProp<RootStackParamList>;
@@ -16,7 +17,7 @@ interface HomeScreenProps {
 const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const { characters, loading: characterLoading, error: characterError } = useCharacter();
   const { missions, loading: missionLoading, error: missionError } = useMission();
-  
+
   // 단일 캐릭터 시스템이므로 첫 번째 캐릭터 사용
   const currentCharacter = characters.length > 0 ? characters[0] : null;
 
@@ -28,7 +29,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
 
   // 미션 상세 보기 핸들러 (미션 페이지로 이동)
   const handleViewMissionDetails = (_missionId: string): void => {
-    navigation.navigate('Mission');
+    (navigation as any).navigate(ScreenNames.MISSION);
   };
 
   // 캐릭터 상세 페이지로 이동

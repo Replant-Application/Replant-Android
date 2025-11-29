@@ -5,8 +5,15 @@
 
 export const API_CONFIG = {
   // TODO: 백엔드 개발자와 협의하여 실제 baseURL 설정
-  baseURL: process.env.API_BASE_URL || 'http://localhost:3000/api',
-  
+  baseURL: (() => {
+    try {
+      // @ts-ignore - process는 런타임에 존재할 수 있음
+      return typeof process !== 'undefined' && process.env?.API_BASE_URL ? process.env.API_BASE_URL : 'http://localhost:3000/api';
+    } catch {
+      return 'http://localhost:3000/api';
+    }
+  })(),
+
   endpoints: {
     // 인증
     auth: {
@@ -19,7 +26,7 @@ export const API_CONFIG = {
       resetPasswordConfirm: '/auth/reset-password/confirm',
       me: '/auth/me',
     },
-    
+
     // 관리자
     manage: {
       updateUser: '/manag/users/:id',
@@ -27,7 +34,7 @@ export const API_CONFIG = {
       getAllUsers: '/manag/users',
       getUserDetail: '/manag/users/:id',
     },
-    
+
     // 사용자
     user: {
       myPage: '/user',
@@ -36,7 +43,7 @@ export const API_CONFIG = {
       addCalendar: '/user/calendar',
       updateCalendar: '/user/calendar/:id',
     },
-    
+
     // 미션
     mission: {
       create: '/mission',
@@ -55,7 +62,7 @@ export const API_CONFIG = {
       verifyByGPS: '/mission/:id/verify-by-gps',
       weeklyStats: '/mission/weekly-stats',
     },
-    
+
     // 커뮤니티
     community: {
       createPost: '/community',
@@ -76,7 +83,7 @@ export const API_CONFIG = {
       myMissionGroups: '/community/my-mission-groups',
       postsByMission: '/community/mission/:missionId/posts',
     },
-    
+
     // 펫
     pet: {
       selectName: '/pet',
@@ -87,14 +94,14 @@ export const API_CONFIG = {
       saveStats: '/pet/stats',
       getStats: '/pet/stats',
     },
-    
+
     // 파일
     file: {
       upload: '/file',
       delete: '/file/:id',
       get: '/file/:id',
     },
-    
+
     // AI
     ai: {
       llmCall: '/ai/llm',
@@ -104,8 +111,7 @@ export const API_CONFIG = {
       generateMission: '/ai/generate-mission',
     },
   },
-  
+
   // 요청 타임아웃 (ms)
   timeout: 10000,
 } as const;
-

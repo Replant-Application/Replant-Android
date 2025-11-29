@@ -226,6 +226,7 @@ export interface UseMissionReturn {
   missions: Mission[];
   loading: boolean;
   error: string | null;
+  loadMissions: () => Promise<void>;
   saveMissionPhoto: (missionId: string, photoUrl: string) => Promise<ServiceResult<void>>;
   deleteMissionPhoto: (missionId: string) => Promise<ServiceResult<void>>;
   completeMissionWithPhoto: (missionId: string, photoUrl: string | null) => Promise<MissionCompletionResult>;
@@ -275,8 +276,8 @@ export interface UseCommunityPostReturn {
   comments: CommunityComment[];
   loading: boolean;
   error: string | null;
-  loadPost: (postId: string) => Promise<void>;
-  loadComments: (postId: string) => Promise<void>;
+  loadPost: () => Promise<void>;
+  loadComments: () => Promise<void>;
   createComment: (content: string, parentCommentId?: string) => Promise<ServiceResult<CommunityComment>>;
   updateComment: (commentId: string, content: string) => Promise<ServiceResult<CommunityComment>>;
   deleteComment: (commentId: string) => Promise<ServiceResult<void>>;
@@ -419,4 +420,8 @@ export enum ScreenNames {
   CALENDAR = 'Calendar',
   MISSION_GROUP = 'MissionGroup',
   AI_MISSION_GENERATE = 'AIMissionGenerate',
+  ADMIN_DASHBOARD = 'AdminDashboard',
+  ADMIN_USER_LIST = 'AdminUserList',
+  ADMIN_USER_DETAIL = 'AdminUserDetail',
+  ADMIN_USER_EDIT = 'AdminUserEdit',
 }

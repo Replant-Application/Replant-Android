@@ -7,6 +7,7 @@ import { Card, Loading, ErrorBoundary, Button, Header, EmptyState, SectionTitle 
 import { colors, spacing, typography, borderRadius } from '../utils/designTokens';
 import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../types/navigation';
+import { ScreenNames } from '../types';
 import { useUser } from '../contexts/UserContext';
 import { Mission } from '../types';
 import { checkVerificationStatus } from '../api/missionApi';
@@ -23,12 +24,12 @@ type MissionFilter = 'all' | 'daily' | 'completed';
 const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
   const { addExperienceByCategory } = useCharacter();
   const { missions, loading, error, saveMissionPhoto, deleteMissionPhoto, completeMissionWithPhoto, uncompleteMission, loadMissions } = useMission(addExperienceByCategory);
-  
+
   // route params에서 사진 정보 확인
   const routeParams = route?.params;
   const processedPhotoRef = useRef<string | null>(null);
   const [selectedFilter, setSelectedFilter] = useState<MissionFilter>('all');
-  
+
   // 인증 모달 상태
   const [verificationModalVisible, setVerificationModalVisible] = useState(false);
   const [selectedMissionForVerification, setSelectedMissionForVerification] = useState<Mission | null>(null);
@@ -116,8 +117,8 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
   // 좋아요 인증 선택 시 (커뮤니티 공유 화면으로 이동)
   const handleLikeVerification = useCallback(() => {
     if (!selectedMissionForVerification) return;
-    
-    navigation.navigate('CommunityPostCreate', {
+
+    (navigation as any).navigate(ScreenNames.COMMUNITY_POST_CREATE, {
       missionId: selectedMissionForVerification.mission_id,
       missionTitle: selectedMissionForVerification.title,
       missionEmoji: selectedMissionForVerification.emoji,
@@ -128,7 +129,7 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
   // 인증 상태 확인 (게시글 작성 후 복귀 시)
   const checkVerificationOnReturn = useCallback(async () => {
     if (!selectedMissionForVerification) return;
-    
+
     try {
       const result = await checkVerificationStatus(selectedMissionForVerification.mission_id);
       if (result.success && result.data?.verified) {
@@ -155,7 +156,7 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
   const handlePhotoUpload = (missionId: string) => {
     const mission = missions.find(m => m.mission_id === missionId);
     // 사진 선택 화면으로 이동
-    navigation.navigate('PhotoSelect', {
+    (navigation as any).navigate(ScreenNames.PHOTO_SELECT, {
       missionId,
       missionTitle: mission?.title || '미션',
     });
@@ -166,7 +167,7 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
     const mission = missions.find(m => m.mission_id === missionId);
     if (!mission) return;
 
-    navigation.navigate('CommunityPostCreate', {
+    (navigation as any).navigate(ScreenNames.COMMUNITY_POST_CREATE, {
       missionId: mission.mission_id,
       missionTitle: mission.title,
       missionEmoji: mission.emoji,
@@ -226,17 +227,17 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
     const selectedPhotoUri = routeParams?.selectedPhotoUri;
     const missionId = routeParams?.missionId;
     const timestamp = routeParams?.timestamp;
-    
+
     if (selectedPhotoUri && missionId && timestamp) {
       // 이미 처리한 사진인지 확인 (타임스탬프 포함)
       const photoKey = `${missionId}_${selectedPhotoUri}_${timestamp}`;
       if (processedPhotoRef.current !== photoKey) {
         processedPhotoRef.current = photoKey;
         handlePhotoSelected(missionId, selectedPhotoUri);
-        
+
         // 처리 후 params 초기화를 위해 빈 params로 navigate
         setTimeout(() => {
-          navigation.navigate('Mission', {});
+          (navigation as any).navigate(ScreenNames.MISSION, {});
         }, 0);
       }
     }
@@ -332,7 +333,7 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
         {/* 미션 목록 */}
         <View style={styles.missionSection}>
           <View style={styles.sectionHeader}>
-            <SectionTitle 
+            <SectionTitle
               title={
                 selectedFilter === 'all' ? `성장 미션 (${totalGrowthMissions}개)` :
                 selectedFilter === 'daily' ? `오늘의 미션 (${totalGrowthMissions}개)` :
@@ -373,13 +374,13 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
               <View style={styles.createButtonsContainer}>
                 <Button
                   title="미션 만들기"
-                  onPress={() => navigation.navigate('CustomMissionCreate')}
+                  onPress={() => (navigation as any).navigate(ScreenNames.CUSTOM_MISSION_CREATE)}
                   style={styles.createButton}
                   textStyle={{ color: colors.white }}
                 />
                 <Button
                   title="🤖 AI로 미션 만들기"
-                  onPress={() => navigation.navigate('AIMissionGenerate')}
+                  onPress={() => (navigation as any).navigate(ScreenNames.AI_MISSION_GENERATE)}
                   style={styles.aiCreateButton}
                   variant="outline"
                 />
