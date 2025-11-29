@@ -3,8 +3,7 @@
  * 프로젝트 전체에서 사용되는 기본 타입들
  */
 
-// 기본 서비스 결과 타입
-export interface ServiceResult<T = any> {
+export interface ServiceResult<T = unknown> {
   success: boolean;
   data?: T;
   error?: string;
