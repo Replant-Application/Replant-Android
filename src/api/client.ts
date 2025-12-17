@@ -37,34 +37,80 @@ export class ApiClient {
 
   /**
    * API 요청 실행
-   * TODO: 실제 HTTP 요청 구현 필요
    */
   async request<T>(
     endpoint: string,
     options: ApiRequestOptions = {}
   ): Promise<ServiceResult<T>> {
-    // TODO: 백엔드 개발자가 실제 구현
-    // 예시:
-    // const url = `${this.baseURL}${endpoint}`;
-    // const headers = {
-    //   'Content-Type': 'application/json',
-    //   ...(this.accessToken && { Authorization: `Bearer ${this.accessToken}` }),
-    //   ...options.headers,
-    // };
-    // 
-    // const response = await fetch(url, {
-    //   method: options.method || 'GET',
-    //   headers,
-    //   body: options.body ? JSON.stringify(options.body) : undefined,
-    // });
-    // 
-    // const data = await response.json();
-    // return { success: response.ok, data, error: response.ok ? undefined : data.message };
+    try {
+      // URL 구성 (params가 있으면 query string 추가)
+      let url = `${this.baseURL}${endpoint}`;
+      if (options.params) {
+        const queryString = new URLSearchParams(
+          Object.entries(options.params).reduce((acc, [key, value]) => {
+            acc[key] = String(value);
+            return acc;
+          }, {} as Record<string, string>)
+        ).toString();
+        url = `${url}?${queryString}`;
+      }
 
-    return {
-      success: false,
-      error: 'API 클라이언트가 구현되지 않았습니다.',
-    };
+      // 헤더 구성
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+        ...options.headers,
+      };
+
+      // 토큰이 있으면 Authorization 헤더 추가
+      if (this.accessToken) {
+        headers['Authorization'] = `Bearer ${this.accessToken}`;
+      }
+
+      // fetch 요청
+      const response = await fetch(url, {
+        method: options.method || 'GET',
+        headers,
+        body: options.body ? JSON.stringify(options.body) : undefined,
+      });
+
+      // 응답 처리
+      let data: any = null;
+      const contentType = response.headers.get('content-type');
+
+      if (contentType && contentType.includes('application/json')) {
+        data = await response.json();
+      } else {
+        const text = await response.text();
+        if (text) {
+          try {
+            data = JSON.parse(text);
+          } catch {
+            data = text;
+          }
+        }
+      }
+
+      // 성공 응답
+      if (response.ok) {
+        return {
+          success: true,
+          data: data as T,
+        };
+      }
+
+      // 에러 응답
+      return {
+        success: false,
+        error: data?.message || data?.error || `HTTP ${response.status}: ${response.statusText}`,
+        data: data as T,
+      };
+    } catch (error) {
+      // 네트워크 에러 등
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : '알 수 없는 오류가 발생했습니다.',
+      };
+    }
   }
 
   /**

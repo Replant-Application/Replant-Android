@@ -1,136 +1,554 @@
 /**
- * 미션 API 인터페이스
- * 백엔드 연동 시 실제 구현 필요
+ * 미션 관련 API 인터페이스
+ * Mission (시스템 미션), CustomMission, UserMission, Verification 포함
  */
 
 import { apiClient } from './client';
 import { API_CONFIG } from '../config/apiConfig';
-import { ServiceResult, Mission, MissionData, MissionVerificationStatus, VerificationRequirements, GPSVerificationData } from '../types';
+import { ServiceResult } from '../types';
+
+// ============================================
+// 타입 정의
+// ============================================
+
+export type MissionType = 'DAILY' | 'WEEKLY' | 'MONTHLY';
+export type VerificationType = 'COMMUNITY' | 'GPS' | 'TIME';
+export type UserMissionStatus = 'ASSIGNED' | 'PENDING' | 'COMPLETED' | 'EXPIRED';
+export type VerificationStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
+export type VoteType = 'APPROVE' | 'REJECT';
+
+// ============================================
+// 시스템 미션 (Mission)
+// ============================================
+
+export interface SystemMission {
+  id: number;
+  title: string;
+  description: string;
+  type: MissionType;
+  verificationType: VerificationType;
+  requiredMinutes?: number;
+  gpsLatitude?: number;
+  gpsLongitude?: number;
+  gpsRadiusMeters?: number;
+  expReward: number;
+  badgeDurationDays: number;
+  reviewCount?: number;
+  qnaCount?: number;
+}
+
+export interface SystemMissionListResponse {
+  content: SystemMission[];
+  totalElements: number;
+  totalPages: number;
+  number: number;
+}
 
 /**
- * 미션 추가
- * POST /mission
+ * 시스템 미션 목록 조회
+ * GET /api/missions
  */
-export const createMission = async (data: MissionData): Promise<ServiceResult<Mission>> => {
-  // TODO: 백엔드 개발자가 실제 구현
-  return apiClient.post<Mission>(API_CONFIG.endpoints.mission.create, data);
+export const getSystemMissions = async (params?: {
+  type?: MissionType;
+  verificationType?: VerificationType;
+  page?: number;
+  size?: number;
+}): Promise<ServiceResult<SystemMissionListResponse>> => {
+  return apiClient.get<SystemMissionListResponse>(API_CONFIG.endpoints.mission.list, params);
 };
 
 /**
- * 미션 수정
- * PATCH /mission/:id
+ * 시스템 미션 상세 조회
+ * GET /api/missions/{missionId}
  */
-export const updateMission = async (id: string, data: Partial<MissionData>): Promise<ServiceResult<Mission>> => {
-  // TODO: 백엔드 개발자가 실제 구현
-  const endpoint = API_CONFIG.endpoints.mission.update.replace(':id', id);
-  return apiClient.patch<Mission>(endpoint, data);
+export const getSystemMission = async (
+  missionId: number
+): Promise<ServiceResult<SystemMission>> => {
+  const endpoint = API_CONFIG.endpoints.mission.detail.replace(':missionId', String(missionId));
+  return apiClient.get<SystemMission>(endpoint);
+};
+
+// ============================================
+// 시스템 미션 리뷰
+// ============================================
+
+export interface MissionReview {
+  id: number;
+  userId: number;
+  userNickname: string;
+  userProfileImg?: string;
+  content: string;
+  createdAt: string;
+}
+
+export interface MissionReviewListResponse {
+  content: MissionReview[];
+  totalElements: number;
+  totalPages: number;
+  number: number;
+}
+
+/**
+ * 미션 리뷰 목록 조회
+ * GET /api/missions/{missionId}/reviews
+ */
+export const getMissionReviews = async (
+  missionId: number,
+  params?: { page?: number; size?: number }
+): Promise<ServiceResult<MissionReviewListResponse>> => {
+  const endpoint = API_CONFIG.endpoints.mission.reviews.replace(':missionId', String(missionId));
+  return apiClient.get<MissionReviewListResponse>(endpoint, params);
 };
 
 /**
- * 미션 삭제
- * POST /mission/:id (명세서에 POST로 명시됨)
+ * 미션 리뷰 작성
+ * POST /api/missions/{missionId}/reviews
+ * 인증 필요, 뱃지 필요
  */
-export const deleteMission = async (id: string): Promise<ServiceResult<void>> => {
-  // TODO: 백엔드 개발자가 실제 구현
-  const endpoint = API_CONFIG.endpoints.mission.delete.replace(':id', id);
-  return apiClient.post<void>(endpoint);
+export const createMissionReview = async (
+  missionId: number,
+  data: { content: string }
+): Promise<ServiceResult<MissionReview>> => {
+  const endpoint = API_CONFIG.endpoints.mission.createReview.replace(':missionId', String(missionId));
+  return apiClient.post<MissionReview>(endpoint, data);
+};
+
+// ============================================
+// 시스템 미션 QnA
+// ============================================
+
+export interface MissionQnA {
+  id: number;
+  questionerId: number;
+  questionerNickname: string;
+  question: string;
+  isResolved: boolean;
+  answerCount: number;
+  createdAt: string;
+}
+
+export interface MissionQnADetail extends MissionQnA {
+  answers: MissionQnAAnswer[];
+}
+
+export interface MissionQnAAnswer {
+  id: number;
+  answererId: number;
+  answererNickname: string;
+  content: string;
+  isAccepted: boolean;
+  createdAt: string;
+}
+
+export interface MissionQnAListResponse {
+  content: MissionQnA[];
+  totalElements: number;
+  totalPages: number;
+  number: number;
+}
+
+/**
+ * 미션 QnA 목록 조회
+ * GET /api/missions/{missionId}/qna
+ */
+export const getMissionQnAs = async (
+  missionId: number,
+  params?: { page?: number; size?: number }
+): Promise<ServiceResult<MissionQnAListResponse>> => {
+  const endpoint = API_CONFIG.endpoints.mission.qnaList.replace(':missionId', String(missionId));
+  return apiClient.get<MissionQnAListResponse>(endpoint, params);
 };
 
 /**
- * 미션 인증
- * POST /mission/:id/verify
+ * 미션 QnA 상세 조회
+ * GET /api/missions/{missionId}/qna/{qnaId}
  */
-export const verifyMission = async (id: string, data: { photoUrl?: string }): Promise<ServiceResult<Mission>> => {
-  // TODO: 백엔드 개발자가 실제 구현
-  const endpoint = API_CONFIG.endpoints.mission.verify.replace(':id', id);
-  return apiClient.post<Mission>(endpoint, data);
+export const getMissionQnADetail = async (
+  missionId: number,
+  qnaId: number
+): Promise<ServiceResult<MissionQnADetail>> => {
+  const endpoint = API_CONFIG.endpoints.mission.qnaDetail
+    .replace(':missionId', String(missionId))
+    .replace(':qnaId', String(qnaId));
+  return apiClient.get<MissionQnADetail>(endpoint);
 };
 
 /**
- * 미션 수행 여부 반환
- * GET /mission/:id/completion
+ * 미션 QnA 질문 작성
+ * POST /api/missions/{missionId}/qna
+ * 인증 필요, 뱃지 불필요
  */
-export const checkMissionCompletion = async (id: string): Promise<ServiceResult<{ completed: boolean }>> => {
-  // TODO: 백엔드 개발자가 실제 구현
-  const endpoint = API_CONFIG.endpoints.mission.checkCompletion.replace(':id', id);
-  return apiClient.get<{ completed: boolean }>(endpoint);
+export const createMissionQuestion = async (
+  missionId: number,
+  data: { question: string }
+): Promise<ServiceResult<MissionQnA>> => {
+  const endpoint = API_CONFIG.endpoints.mission.createQuestion.replace(':missionId', String(missionId));
+  return apiClient.post<MissionQnA>(endpoint, data);
 };
 
 /**
- * 일일 미션 불러오기
- * GET /mission/daily
+ * 미션 QnA 답변 작성
+ * POST /api/missions/{missionId}/qna/{qnaId}/answers
+ * 인증 필요, 뱃지 필요
  */
-export const getDailyMissions = async (date?: string): Promise<ServiceResult<Mission[]>> => {
-  // TODO: 백엔드 개발자가 실제 구현
-  const params = date ? { date } : undefined;
-  return apiClient.get<Mission[]>(API_CONFIG.endpoints.mission.getDailyMissions, params);
+export const createMissionAnswer = async (
+  missionId: number,
+  qnaId: number,
+  data: { content: string }
+): Promise<ServiceResult<MissionQnAAnswer>> => {
+  const endpoint = API_CONFIG.endpoints.mission.createAnswer
+    .replace(':missionId', String(missionId))
+    .replace(':qnaId', String(qnaId));
+  return apiClient.post<MissionQnAAnswer>(endpoint, data);
 };
 
 /**
- * 수행한 미션 불러오기
- * GET /mission/completed
+ * 미션 QnA 답변 채택
+ * PUT /api/missions/{missionId}/qna/{qnaId}/answers/{answerId}/accept
+ * 질문자만 가능
  */
-export const getCompletedMissions = async (): Promise<ServiceResult<Mission[]>> => {
-  // TODO: 백엔드 개발자가 실제 구현
-  return apiClient.get<Mission[]>(API_CONFIG.endpoints.mission.getCompletedMissions);
+export const acceptMissionAnswer = async (
+  missionId: number,
+  qnaId: number,
+  answerId: number
+): Promise<ServiceResult<{ id: number; qnaId: number; isAccepted: boolean; message: string }>> => {
+  const endpoint = API_CONFIG.endpoints.mission.acceptAnswer
+    .replace(':missionId', String(missionId))
+    .replace(':qnaId', String(qnaId))
+    .replace(':answerId', String(answerId));
+  return apiClient.put(endpoint);
+};
+
+// ============================================
+// 커스텀 미션 (CustomMission)
+// ============================================
+
+export interface CustomMission {
+  id: number;
+  title: string;
+  description: string;
+  creatorId: number;
+  creatorNickname: string;
+  durationDays: number;
+  isPublic: boolean;
+  verificationType: VerificationType;
+  requiredMinutes?: number;
+  gpsLatitude?: number;
+  gpsLongitude?: number;
+  gpsRadiusMeters?: number;
+  expReward: number;
+  badgeDurationDays: number;
+  participantCount?: number;
+  completionCount?: number;
+  createdAt: string;
+}
+
+export interface CustomMissionListResponse {
+  content: CustomMission[];
+  totalElements: number;
+  totalPages: number;
+  number: number;
+}
+
+export interface CreateCustomMissionRequest {
+  title: string;
+  description: string;
+  durationDays: number;
+  isPublic: boolean;
+  verificationType: VerificationType;
+  requiredMinutes?: number;
+  gpsLatitude?: number;
+  gpsLongitude?: number;
+  gpsRadiusMeters?: number;
+  expReward: number;
+  badgeDurationDays: number;
+}
+
+/**
+ * 커스텀 미션 목록 조회
+ * GET /api/custom-missions
+ */
+export const getCustomMissions = async (params?: {
+  verificationType?: VerificationType;
+  page?: number;
+  size?: number;
+}): Promise<ServiceResult<CustomMissionListResponse>> => {
+  return apiClient.get<CustomMissionListResponse>(API_CONFIG.endpoints.customMission.list, params);
 };
 
 /**
- * to-do list 저장
- * POST /mission/todo
+ * 커스텀 미션 상세 조회
+ * GET /api/custom-missions/{customMissionId}
  */
-export const saveTodoList = async (data: { missions: string[] }): Promise<ServiceResult<void>> => {
-  // TODO: 백엔드 개발자가 실제 구현
-  return apiClient.post<void>(API_CONFIG.endpoints.mission.saveTodoList, data);
+export const getCustomMission = async (
+  customMissionId: number
+): Promise<ServiceResult<CustomMission>> => {
+  const endpoint = API_CONFIG.endpoints.customMission.detail.replace(':customMissionId', String(customMissionId));
+  return apiClient.get<CustomMission>(endpoint);
 };
 
 /**
- * to-do list 불러오기
- * GET /mission/todo
+ * 커스텀 미션 생성
+ * POST /api/custom-missions
+ * 인증 필요
  */
-export const getTodoList = async (): Promise<ServiceResult<{ missions: string[] }>> => {
-  // TODO: 백엔드 개발자가 실제 구현
-  return apiClient.get<{ missions: string[] }>(API_CONFIG.endpoints.mission.getTodoList);
+export const createCustomMission = async (
+  data: CreateCustomMissionRequest
+): Promise<ServiceResult<CustomMission>> => {
+  return apiClient.post<CustomMission>(API_CONFIG.endpoints.customMission.create, data);
 };
 
 /**
- * 인증 상태 확인
- * GET /mission/:id/verification-status
+ * 커스텀 미션 수정
+ * PUT /api/custom-missions/{customMissionId}
+ * 생성자만 가능
  */
-export const checkVerificationStatus = async (missionId: string): Promise<ServiceResult<MissionVerificationStatus>> => {
-  // TODO: 백엔드 개발자가 실제 구현
-  const endpoint = API_CONFIG.endpoints.mission.verificationStatus.replace(':id', missionId);
-  return apiClient.get<MissionVerificationStatus>(endpoint);
+export const updateCustomMission = async (
+  customMissionId: number,
+  data: Partial<CreateCustomMissionRequest>
+): Promise<ServiceResult<CustomMission>> => {
+  const endpoint = API_CONFIG.endpoints.customMission.update.replace(':customMissionId', String(customMissionId));
+  return apiClient.put<CustomMission>(endpoint, data);
 };
 
 /**
- * 좋아요 기반 인증 요청
- * POST /mission/:id/verify-by-likes
+ * 커스텀 미션 삭제
+ * DELETE /api/custom-missions/{customMissionId}
+ * 생성자만 가능
  */
-export const verifyMissionByLikes = async (missionId: string, postId: string): Promise<ServiceResult<Mission>> => {
-  // TODO: 백엔드 개발자가 실제 구현
-  const endpoint = API_CONFIG.endpoints.mission.verifyByLikes.replace(':id', missionId);
-  return apiClient.post<Mission>(endpoint, { postId });
+export const deleteCustomMission = async (
+  customMissionId: number
+): Promise<ServiceResult<{ message: string }>> => {
+  const endpoint = API_CONFIG.endpoints.customMission.delete.replace(':customMissionId', String(customMissionId));
+  return apiClient.delete(endpoint);
+};
+
+// ============================================
+// 내 미션 (UserMission)
+// ============================================
+
+export interface UserMission {
+  id: number;
+  missionType: 'SYSTEM' | 'CUSTOM';
+  mission?: SystemMission;
+  customMission?: CustomMission;
+  assignedAt: string;
+  dueDate: string;
+  status: UserMissionStatus;
+  verification?: MissionVerification;
+}
+
+export interface UserMissionListResponse {
+  content: UserMission[];
+  totalElements: number;
+  totalPages: number;
+  number: number;
+}
+
+export interface MissionVerification {
+  gpsLatitude?: number;
+  gpsLongitude?: number;
+  gpsDistanceMeters?: number;
+  timeStartedAt?: string;
+  timeEndedAt?: string;
+  timeActualMinutes?: number;
+  verifiedAt: string;
+}
+
+export interface VerifyMissionRequest {
+  type: 'GPS' | 'TIME';
+  latitude?: number;
+  longitude?: number;
+  startedAt?: string;
+  endedAt?: string;
+}
+
+export interface VerifyMissionResponse {
+  userMissionId: number;
+  status: UserMissionStatus;
+  verification: MissionVerification;
+  rewards: {
+    expEarned: number;
+    badge?: {
+      id: number;
+      expiresAt: string;
+    };
+  };
+  recommendation?: {
+    id: number;
+    recommendedUserId: number;
+    recommendedUserNickname: string;
+  };
+}
+
+/**
+ * 내 미션 목록 조회
+ * GET /api/user-missions
+ * 인증 필요
+ */
+export const getUserMissions = async (params?: {
+  status?: UserMissionStatus;
+  missionType?: 'SYSTEM' | 'CUSTOM';
+  page?: number;
+  size?: number;
+}): Promise<ServiceResult<UserMissionListResponse>> => {
+  return apiClient.get<UserMissionListResponse>(API_CONFIG.endpoints.userMission.list, params);
 };
 
 /**
- * 인증 요구사항 조회
- * GET /mission/:id/verification-requirements
+ * 내 미션 상세 조회
+ * GET /api/user-missions/{userMissionId}
+ * 인증 필요
  */
-export const getVerificationRequirements = async (missionId: string): Promise<ServiceResult<VerificationRequirements>> => {
-  // TODO: 백엔드 개발자가 실제 구현
-  const endpoint = API_CONFIG.endpoints.mission.verificationRequirements.replace(':id', missionId);
-  return apiClient.get<VerificationRequirements>(endpoint);
+export const getUserMission = async (
+  userMissionId: number
+): Promise<ServiceResult<UserMission>> => {
+  const endpoint = API_CONFIG.endpoints.userMission.detail.replace(':userMissionId', String(userMissionId));
+  return apiClient.get<UserMission>(endpoint);
 };
 
 /**
- * GPS 기반 인증 요청
- * POST /mission/:id/verify-by-gps
+ * 커스텀 미션 추가 (내 미션에)
+ * POST /api/user-missions
+ * 인증 필요
  */
-export const verifyMissionByGPS = async (missionId: string, data: GPSVerificationData): Promise<ServiceResult<Mission>> => {
-  // TODO: 백엔드 개발자가 실제 구현
-  const endpoint = API_CONFIG.endpoints.mission.verifyByGPS.replace(':id', missionId);
-  return apiClient.post<Mission>(endpoint, data);
+export const addCustomMissionToMyMissions = async (data: {
+  customMissionId: number;
+}): Promise<ServiceResult<UserMission>> => {
+  return apiClient.post<UserMission>(API_CONFIG.endpoints.userMission.add, data);
 };
 
+/**
+ * 미션 인증 (GPS/TIME)
+ * POST /api/user-missions/{userMissionId}/verify
+ * 인증 필요
+ */
+export const verifyUserMission = async (
+  userMissionId: number,
+  data: VerifyMissionRequest
+): Promise<ServiceResult<VerifyMissionResponse>> => {
+  const endpoint = API_CONFIG.endpoints.userMission.verify.replace(':userMissionId', String(userMissionId));
+  return apiClient.post<VerifyMissionResponse>(endpoint, data);
+};
 
+// ============================================
+// 인증 게시판 (Verification)
+// ============================================
+
+export interface VerificationPost {
+  id: number;
+  userId: number;
+  userNickname: string;
+  userProfileImg?: string;
+  userMissionId: number;
+  missionType: 'SYSTEM' | 'CUSTOM';
+  mission?: {
+    id: number;
+    title: string;
+    type?: MissionType;
+  };
+  missionTitle: string;
+  content: string;
+  imageUrls: string[];
+  status: VerificationStatus;
+  approveCount: number;
+  rejectCount: number;
+  createdAt: string;
+  myVote?: VoteType;
+}
+
+export interface VerificationPostListResponse {
+  content: VerificationPost[];
+  totalElements: number;
+  totalPages: number;
+  number: number;
+}
+
+export interface CreateVerificationRequest {
+  userMissionId: number;
+  content: string;
+  imageUrls: string[];
+}
+
+export interface VoteVerificationResponse {
+  verificationId: number;
+  vote: VoteType;
+  approveCount: number;
+  rejectCount: number;
+  status: VerificationStatus;
+  message: string;
+}
+
+/**
+ * 인증글 목록 조회
+ * GET /api/verifications
+ */
+export const getVerifications = async (params?: {
+  status?: VerificationStatus;
+  missionId?: number;
+  customMissionId?: number;
+  page?: number;
+  size?: number;
+}): Promise<ServiceResult<VerificationPostListResponse>> => {
+  return apiClient.get<VerificationPostListResponse>(API_CONFIG.endpoints.verification.list, params);
+};
+
+/**
+ * 인증글 상세 조회
+ * GET /api/verifications/{verificationId}
+ */
+export const getVerification = async (
+  verificationId: number
+): Promise<ServiceResult<VerificationPost>> => {
+  const endpoint = API_CONFIG.endpoints.verification.detail.replace(':verificationId', String(verificationId));
+  return apiClient.get<VerificationPost>(endpoint);
+};
+
+/**
+ * 인증글 작성
+ * POST /api/verifications
+ * 인증 필요
+ */
+export const createVerification = async (
+  data: CreateVerificationRequest
+): Promise<ServiceResult<VerificationPost>> => {
+  return apiClient.post<VerificationPost>(API_CONFIG.endpoints.verification.create, data);
+};
+
+/**
+ * 인증글 수정
+ * PUT /api/verifications/{verificationId}
+ * PENDING 상태만 가능
+ */
+export const updateVerification = async (
+  verificationId: number,
+  data: { content?: string; imageUrls?: string[] }
+): Promise<ServiceResult<VerificationPost>> => {
+  const endpoint = API_CONFIG.endpoints.verification.update.replace(':verificationId', String(verificationId));
+  return apiClient.put<VerificationPost>(endpoint, data);
+};
+
+/**
+ * 인증글 삭제
+ * DELETE /api/verifications/{verificationId}
+ * PENDING 상태만 가능
+ */
+export const deleteVerification = async (
+  verificationId: number
+): Promise<ServiceResult<{ message: string }>> => {
+  const endpoint = API_CONFIG.endpoints.verification.delete.replace(':verificationId', String(verificationId));
+  return apiClient.delete(endpoint);
+};
+
+/**
+ * 인증 투표
+ * POST /api/verifications/{verificationId}/votes
+ * 본인 글 투표 불가
+ */
+export const voteVerification = async (
+  verificationId: number,
+  data: { vote: VoteType }
+): Promise<ServiceResult<VoteVerificationResponse>> => {
+  const endpoint = API_CONFIG.endpoints.verification.vote.replace(':verificationId', String(verificationId));
+  return apiClient.post<VoteVerificationResponse>(endpoint, data);
+};
