@@ -5,6 +5,8 @@
 
 import { API_CONFIG } from '../config/apiConfig';
 import { ServiceResult } from '../types';
+import { getAccessToken, saveTokens } from '../utils/tokenStorage';
+import { refreshToken as refreshTokenApi } from './authApi';
 
 /**
  * API 요청 옵션
@@ -23,9 +25,27 @@ export interface ApiRequestOptions {
 export class ApiClient {
   private baseURL: string;
   private accessToken: string | null = null;
+  private isRefreshing: boolean = false;
+  private refreshSubscribers: Array<(token: string) => void> = [];
 
   constructor(baseURL: string = API_CONFIG.baseURL) {
     this.baseURL = baseURL;
+    // 초기화 시 저장된 토큰 로드
+    this.loadAccessToken();
+  }
+
+  /**
+   * 저장된 Access Token 로드
+   */
+  private async loadAccessToken(): Promise<void> {
+    try {
+      const token = await getAccessToken();
+      if (token) {
+        this.accessToken = token;
+      }
+    } catch (error) {
+      console.error('Failed to load access token:', error);
+    }
   }
 
   /**
@@ -33,6 +53,66 @@ export class ApiClient {
    */
   setAccessToken(token: string | null): void {
     this.accessToken = token;
+  }
+
+  /**
+   * 토큰 갱신 대기열에 구독자 추가
+   */
+  private subscribeTokenRefresh(callback: (token: string) => void): void {
+    this.refreshSubscribers.push(callback);
+  }
+
+  /**
+   * 토큰 갱신 완료 알림
+   */
+  private onTokenRefreshed(token: string): void {
+    this.refreshSubscribers.forEach(callback => callback(token));
+    this.refreshSubscribers = [];
+  }
+
+  /**
+   * 토큰 갱신 처리
+   */
+  private async handleTokenRefresh(): Promise<string | null> {
+    if (this.isRefreshing) {
+      // 이미 토큰 갱신 중이면 대기
+      return new Promise((resolve) => {
+        this.subscribeTokenRefresh((token: string) => {
+          resolve(token);
+        });
+      });
+    }
+
+    this.isRefreshing = true;
+
+    try {
+      const { getRefreshToken } = await import('../utils/tokenStorage');
+      const refreshToken = await getRefreshToken();
+
+      if (!refreshToken) {
+        throw new Error('No refresh token available');
+      }
+
+      const result = await refreshTokenApi({ refreshToken });
+
+      if (result.success && result.data) {
+        const { accessToken, refreshToken: newRefreshToken } = result.data;
+        await saveTokens(accessToken, newRefreshToken);
+        this.setAccessToken(accessToken);
+        this.onTokenRefreshed(accessToken);
+        return accessToken;
+      }
+
+      return null;
+    } catch (error) {
+      console.error('Token refresh failed:', error);
+      // 토큰 갱신 실패 시 로그아웃 처리
+      const { clearAuthData } = await import('../utils/tokenStorage');
+      await clearAuthData();
+      return null;
+    } finally {
+      this.isRefreshing = false;
+    }
   }
 
   /**
@@ -96,6 +176,15 @@ export class ApiClient {
           success: true,
           data: data as T,
         };
+      }
+
+      // 401 Unauthorized - 토큰 갱신 후 재시도
+      if (response.status === 401 && !url.includes('/auth/refresh')) {
+        const newToken = await this.handleTokenRefresh();
+        if (newToken) {
+          // 새 토큰으로 재시도
+          return this.request<T>(endpoint, options);
+        }
       }
 
       // 에러 응답

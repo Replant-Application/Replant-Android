@@ -3,9 +3,11 @@
  * 백엔드 API 연동 시 사용할 설정값들
  */
 
+import { API_BASE_URL, API_TIMEOUT } from '@env';
+
 export const API_CONFIG = {
-  // 백엔드 API 기본 URL
-  baseURL: process.env.API_BASE_URL || 'http://localhost:8080/api',
+  // 백엔드 API 기본 URL (환경변수에서 읽어옴)
+  baseURL: API_BASE_URL || 'http://localhost:8080/api',
 
   endpoints: {
     // 인증 (Auth)
@@ -111,7 +113,7 @@ export const API_CONFIG = {
     },
   },
 
-  // 요청 타임아웃 (ms)
-  timeout: 10000,
+  // 요청 타임아웃 (ms) (환경변수에서 읽어옴)
+  timeout: API_TIMEOUT ? parseInt(API_TIMEOUT, 10) : 10000,
 } as const;
 

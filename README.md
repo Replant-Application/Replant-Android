@@ -27,25 +27,39 @@ Replant는 청년들이 자신만의 미션을 만들고 수행하며 성장할 
 ## 🛠️ 기술 스택
 
 - **Frontend**: React Native
+- **Backend API**: RESTful API with JWT Authentication
 - **Navigation**: Custom Navigation System
 - **State Management**: React Context API
-- **Storage**: AsyncStorage
+- **Storage**: AsyncStorage (Token & User Data)
 - **Styling**: StyleSheet with Design Tokens
+- **Environment**: react-native-dotenv
 
 ## 📁 프로젝트 구조
 
 ```
 src/
-├── components/          # 재사용 가능한 컴포넌트
-│   ├── ui/             # 기본 UI 컴포넌트
-│   └── specialized/    # 특화된 컴포넌트
-├── screens/            # 화면 컴포넌트
-├── navigation/         # 네비게이션 로직
-├── services/           # 비즈니스 로직
-├── hooks/              # 커스텀 훅
-├── contexts/           # React Context
-├── utils/              # 유틸리티 함수
-└── data/               # 정적 데이터
+├── api/                # 백엔드 API 연동
+│   ├── client.ts       # API 클라이언트 (자동 토큰 갱신)
+│   ├── authApi.ts      # 인증 API
+│   ├── userApi.ts      # 사용자 API
+│   ├── petApi.ts       # 펫 API
+│   ├── missionApi.ts   # 미션 API
+│   ├── communityApi.ts # 커뮤니티 API
+│   └── ...            # 기타 API
+├── components/         # 재사용 가능한 컴포넌트
+│   ├── ui/            # 기본 UI 컴포넌트
+│   └── specialized/   # 특화된 컴포넌트
+├── config/            # 설정 파일
+│   └── apiConfig.ts   # API 엔드포인트 설정
+├── screens/           # 화면 컴포넌트
+├── navigation/        # 네비게이션 로직
+├── services/          # 비즈니스 로직
+│   └── authService.ts # OAuth 인증 서비스
+├── hooks/             # 커스텀 훅
+├── contexts/          # React Context
+├── utils/             # 유틸리티 함수
+│   └── tokenStorage.ts # 토큰 저장소
+└── data/              # 정적 데이터
 ```
 
 ## 🚀 시작하기
@@ -55,9 +69,22 @@ src/
 # 의존성 설치
 npm install
 
+# react-native-dotenv 설치 (환경변수 관리)
+npm install react-native-dotenv
+
 # iOS 설정 (macOS만)
 cd ios && pod install && cd ..
 ```
+
+### 환경 설정
+
+1. `.env` 파일에서 백엔드 API URL 설정:
+```env
+API_BASE_URL=http://113.198.66.75:13150/api
+API_TIMEOUT=10000
+```
+
+2. 자세한 백엔드 연동 가이드는 [BACKEND_INTEGRATION.md](./BACKEND_INTEGRATION.md) 참고
 
 ### 실행
 ```bash
