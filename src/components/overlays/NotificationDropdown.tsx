@@ -1,0 +1,397 @@
+/**
+ * NotificationDropdown
+ * 우측 상단에 표시되는 알림 드롭다운 모달
+ *
+ * 특징:
+ * - 최근 알림 5개 미리보기
+ * - 읽지 않은 알림 강조
+ * - 전체 보기 버튼으로 NotificationScreen 이동
+ * - 외부 터치 시 자동 닫힘
+ */
+
+import React, { useEffect, useState, useCallback } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+  ScrollView,
+  Animated,
+  Dimensions,
+} from 'react-native';
+import { useOverlay } from '../../contexts/OverlayContext';
+import { getNotifications, markNotificationAsRead } from '../../api/notificationApi';
+import { colors, spacing, typography, borderRadius, shadows } from '../../utils/designTokens';
+
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const DROPDOWN_WIDTH = Math.min(SCREEN_WIDTH - 32, 340);
+
+interface Notification {
+  id: number;
+  type: string;
+  title: string;
+  content: string;
+  isRead: boolean;
+  createdAt: string;
+  referenceType?: string;
+  referenceId?: number;
+}
+
+interface NotificationDropdownProps {
+  onNavigate?: (screen: string, params?: any) => void;
+  onViewAll?: () => void;
+}
+
+const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
+  onNavigate,
+  onViewAll,
+}) => {
+  const { activeOverlay, closeOverlay, overlayPosition, setUnreadNotificationCount } = useOverlay();
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [fadeAnim] = useState(new Animated.Value(0));
+  const [scaleAnim] = useState(new Animated.Value(0.95));
+
+  const isVisible = activeOverlay === 'notification';
+
+  // 알림 데이터 로드
+  const loadNotifications = useCallback(async () => {
+    try {
+      setLoading(true);
+      const result = await getNotifications({ size: 5 });
+      if (result.success && result.data) {
+        setNotifications(result.data.content || []);
+        setUnreadNotificationCount(result.data.unreadCount || 0);
+      }
+    } catch (error) {
+      console.error('알림 로드 실패:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [setUnreadNotificationCount]);
+
+  // 표시/숨김 애니메이션
+  useEffect(() => {
+    if (isVisible) {
+      loadNotifications();
+      Animated.parallel([
+        Animated.timing(fadeAnim, {
+          toValue: 1,
+          duration: 200,
+          useNativeDriver: true,
+        }),
+        Animated.spring(scaleAnim, {
+          toValue: 1,
+          friction: 8,
+          tension: 100,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    } else {
+      Animated.parallel([
+        Animated.timing(fadeAnim, {
+          toValue: 0,
+          duration: 150,
+          useNativeDriver: true,
+        }),
+        Animated.timing(scaleAnim, {
+          toValue: 0.95,
+          duration: 150,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    }
+  }, [isVisible, fadeAnim, scaleAnim, loadNotifications]);
+
+  // 알림 아이콘 반환
+  const getNotificationIcon = (type: string) => {
+    switch (type) {
+      case 'MISSION': case 'MISSION_ASSIGNED': return '🎯';
+      case 'VERIFICATION_APPROVED': return '✅';
+      case 'VERIFICATION_REJECTED': return '❌';
+      case 'USER_RECOMMENDED': return '👋';
+      case 'CHAT_MESSAGE': return '💬';
+      case 'BADGE_EXPIRING': return '🏅';
+      default: return '📢';
+    }
+  };
+
+  // 상대 시간 표시
+  const formatTimeAgo = (dateString: string) => {
+    const now = new Date();
+    const date = new Date(dateString);
+    const diff = now.getTime() - date.getTime();
+    const minutes = Math.floor(diff / 60000);
+    const hours = Math.floor(diff / 3600000);
+    const days = Math.floor(diff / 86400000);
+
+    if (minutes < 1) return '방금';
+    if (minutes < 60) return `${minutes}분 전`;
+    if (hours < 24) return `${hours}시간 전`;
+    if (days < 7) return `${days}일 전`;
+    return `${date.getMonth() + 1}/${date.getDate()}`;
+  };
+
+  // 알림 클릭 핸들러
+  const handleNotificationPress = async (notification: Notification) => {
+    // 읽음 처리
+    if (!notification.isRead) {
+      try {
+        await markNotificationAsRead(notification.id);
+        setNotifications(prev =>
+          prev.map(n => n.id === notification.id ? { ...n, isRead: true } : n)
+        );
+        setUnreadNotificationCount(prev => Math.max(0, prev - 1));
+      } catch (error) {
+        console.error('읽음 처리 실패:', error);
+      }
+    }
+
+    closeOverlay();
+
+    // 화면 이동
+    if (onNavigate && notification.referenceType) {
+      const screenMap: Record<string, string> = {
+        'MISSION': 'Mission',
+        'VERIFICATION': 'Community',
+        'RECOMMENDATION': 'Connections',
+        'CHAT': 'Connections',
+        'BADGE': 'MyPage',
+      };
+      const screen = screenMap[notification.referenceType];
+      if (screen) {
+        onNavigate(screen, { referenceId: notification.referenceId });
+      }
+    }
+  };
+
+  // 전체 보기 클릭
+  const handleViewAll = () => {
+    closeOverlay();
+    onViewAll?.();
+  };
+
+  if (!isVisible) return null;
+
+  return (
+    <TouchableWithoutFeedback onPress={closeOverlay}>
+      <View style={styles.overlay}>
+        <TouchableWithoutFeedback>
+          <Animated.View
+            style={[
+              styles.dropdown,
+              {
+                top: overlayPosition.top,
+                right: overlayPosition.right,
+                opacity: fadeAnim,
+                transform: [{ scale: scaleAnim }],
+              },
+            ]}
+          >
+            {/* 헤더 */}
+            <View style={styles.header}>
+              <Text style={styles.headerTitle}>알림</Text>
+              {notifications.filter(n => !n.isRead).length > 0 && (
+                <View style={styles.unreadBadge}>
+                  <Text style={styles.unreadBadgeText}>
+                    {notifications.filter(n => !n.isRead).length}
+                  </Text>
+                </View>
+              )}
+            </View>
+
+            {/* 알림 목록 */}
+            <ScrollView
+              style={styles.scrollView}
+              showsVerticalScrollIndicator={false}
+              bounces={false}
+            >
+              {loading ? (
+                <View style={styles.loadingContainer}>
+                  <Text style={styles.loadingText}>로딩 중...</Text>
+                </View>
+              ) : notifications.length === 0 ? (
+                <View style={styles.emptyContainer}>
+                  <Text style={styles.emptyIcon}>🔔</Text>
+                  <Text style={styles.emptyText}>새로운 알림이 없습니다</Text>
+                </View>
+              ) : (
+                notifications.map((notification) => (
+                  <TouchableOpacity
+                    key={notification.id}
+                    style={[
+                      styles.notificationItem,
+                      !notification.isRead && styles.unreadItem,
+                    ]}
+                    onPress={() => handleNotificationPress(notification)}
+                    activeOpacity={0.7}
+                  >
+                    <Text style={styles.notificationIcon}>
+                      {getNotificationIcon(notification.type)}
+                    </Text>
+                    <View style={styles.notificationContent}>
+                      <View style={styles.notificationHeader}>
+                        <Text
+                          style={[
+                            styles.notificationTitle,
+                            !notification.isRead && styles.unreadTitle,
+                          ]}
+                          numberOfLines={1}
+                        >
+                          {notification.title}
+                        </Text>
+                        {!notification.isRead && <View style={styles.unreadDot} />}
+                      </View>
+                      <Text style={styles.notificationBody} numberOfLines={1}>
+                        {notification.content}
+                      </Text>
+                      <Text style={styles.notificationTime}>
+                        {formatTimeAgo(notification.createdAt)}
+                      </Text>
+                    </View>
+                  </TouchableOpacity>
+                ))
+              )}
+            </ScrollView>
+
+            {/* 푸터 */}
+            <TouchableOpacity style={styles.footer} onPress={handleViewAll}>
+              <Text style={styles.footerText}>전체 보기</Text>
+            </TouchableOpacity>
+          </Animated.View>
+        </TouchableWithoutFeedback>
+      </View>
+    </TouchableWithoutFeedback>
+  );
+};
+
+const styles = StyleSheet.create({
+  overlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    zIndex: 1000,
+  },
+  dropdown: {
+    position: 'absolute',
+    width: DROPDOWN_WIDTH,
+    maxHeight: 400,
+    backgroundColor: colors.background.primary,
+    borderRadius: borderRadius.lg,
+    ...shadows.lg,
+    overflow: 'hidden',
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: spacing[4],
+    paddingVertical: spacing[3],
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border.light,
+  },
+  headerTitle: {
+    fontSize: typography.fontSize.lg,
+    fontWeight: typography.fontWeight.semibold as any,
+    color: colors.text.primary,
+  },
+  unreadBadge: {
+    backgroundColor: colors.error,
+    borderRadius: borderRadius.full,
+    paddingHorizontal: spacing[2],
+    paddingVertical: 2,
+    minWidth: 20,
+    alignItems: 'center',
+  },
+  unreadBadgeText: {
+    fontSize: typography.fontSize.xs,
+    fontWeight: typography.fontWeight.bold as any,
+    color: colors.white,
+  },
+  scrollView: {
+    maxHeight: 280,
+  },
+  loadingContainer: {
+    padding: spacing[8],
+    alignItems: 'center',
+  },
+  loadingText: {
+    fontSize: typography.fontSize.sm,
+    color: colors.text.secondary,
+  },
+  emptyContainer: {
+    padding: spacing[8],
+    alignItems: 'center',
+  },
+  emptyIcon: {
+    fontSize: 32,
+    marginBottom: spacing[2],
+  },
+  emptyText: {
+    fontSize: typography.fontSize.sm,
+    color: colors.text.secondary,
+  },
+  notificationItem: {
+    flexDirection: 'row',
+    paddingHorizontal: spacing[4],
+    paddingVertical: spacing[3],
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border.light,
+  },
+  unreadItem: {
+    backgroundColor: colors.primary[50],
+  },
+  notificationIcon: {
+    fontSize: 20,
+    marginRight: spacing[3],
+  },
+  notificationContent: {
+    flex: 1,
+  },
+  notificationHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  notificationTitle: {
+    flex: 1,
+    fontSize: typography.fontSize.sm,
+    color: colors.text.primary,
+  },
+  unreadTitle: {
+    fontWeight: typography.fontWeight.semibold as any,
+  },
+  unreadDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: colors.primary[500],
+    marginLeft: spacing[2],
+  },
+  notificationBody: {
+    fontSize: typography.fontSize.xs,
+    color: colors.text.secondary,
+    marginTop: 2,
+  },
+  notificationTime: {
+    fontSize: 10,
+    color: colors.text.tertiary,
+    marginTop: spacing[1],
+  },
+  footer: {
+    paddingVertical: spacing[3],
+    alignItems: 'center',
+    borderTopWidth: 1,
+    borderTopColor: colors.border.light,
+    backgroundColor: colors.background.secondary,
+  },
+  footerText: {
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.medium as any,
+    color: colors.primary[600],
+  },
+});
+
+export default NotificationDropdown;
