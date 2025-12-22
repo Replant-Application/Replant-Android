@@ -12,6 +12,8 @@ export const API_CONFIG = {
   endpoints: {
     // 인증 (Auth)
     auth: {
+      login: '/auth/login',
+      join: '/auth/join',
       oauthLogin: '/auth/oauth/:provider', // provider: KAKAO, GOOGLE, APPLE, NAVER
       refresh: '/auth/refresh',
       logout: '/auth/logout',

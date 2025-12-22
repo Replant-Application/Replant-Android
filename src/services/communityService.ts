@@ -1,53 +1,44 @@
 /**
  * 커뮤니티 서비스
- * 게시글 및 댓글 CRUD 기능 제공
+ * 백엔드 API를 통한 게시글 및 댓글 CRUD 기능 제공
  */
 
-import { getData, setData, getStorageKeys, addData, deleteData, updateData } from './storage';
+import { apiClient } from '../api/client';
+import { API_CONFIG } from '../config/apiConfig';
+import { getData, setData, getStorageKeys } from './storage';
 import { logError } from '../utils/logger';
 import { CommunityPost, CommunityComment, CommunityPostData, ServiceResult } from '../types';
 
 /**
- * 게시글 생성
+ * 게시글 생성 - 백엔드 API 사용
  */
 export const createPost = async (
   postData: CommunityPostData,
   nickname: string
 ): Promise<ServiceResult<CommunityPost>> => {
   try {
-    const storageKeys = getStorageKeys(nickname);
-    const posts: CommunityPost[] = await getData(storageKeys.COMMUNITY_POSTS) || [];
-
-    // 새로운 게시글 ID 생성
-    const newId = posts.length + 1;
-    const postId = `post_${Date.now()}_${newId}`;
-
-    const newPost: CommunityPost = {
-      id: Date.now().toString(),
-      post_id: postId,
-      mission_id: postData.mission_id,
-      mission_title: postData.mission_title,
-      mission_emoji: postData.mission_emoji,
-      title: postData.title || postData.mission_title, // 제목이 없으면 미션 제목 사용
+    // 백엔드 API로 게시글 생성
+    const result = await apiClient.post<CommunityPost>(API_CONFIG.endpoints.post.create, {
+      title: postData.title || postData.mission_title,
       content: postData.content,
-      author: nickname,
-      author_nickname: nickname,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      like_count: 0,
-      comment_count: 0,
-      scrap_count: 0,
+      missionId: postData.mission_id,
+      missionTitle: postData.mission_title,
+      missionEmoji: postData.mission_emoji,
       images: postData.images || [],
       tags: postData.tags || [],
       category: postData.category,
-    };
+    });
 
-    const updatedPosts: CommunityPost[] = [...posts, newPost];
-    await setData(storageKeys.COMMUNITY_POSTS, updatedPosts);
+    if (result.success && result.data) {
+      return {
+        success: true,
+        data: result.data
+      };
+    }
 
     return {
-      success: true,
-      data: newPost
+      success: false,
+      error: result.error || '게시글 생성에 실패했습니다.'
     };
   } catch (error) {
     logError('게시글 생성 실패', error as Error, { postData, nickname });
@@ -59,7 +50,7 @@ export const createPost = async (
 };
 
 /**
- * 게시글 수정
+ * 게시글 수정 - 백엔드 API 사용
  */
 export const updatePost = async (
   postId: string,
@@ -67,36 +58,25 @@ export const updatePost = async (
   nickname: string
 ): Promise<ServiceResult<CommunityPost>> => {
   try {
-    const storageKeys = getStorageKeys(nickname);
-    const posts: CommunityPost[] = await getData(storageKeys.COMMUNITY_POSTS) || [];
+    const endpoint = API_CONFIG.endpoints.post.update.replace(':postId', postId);
+    const result = await apiClient.put<CommunityPost>(endpoint, {
+      title: updateData.title,
+      content: updateData.content,
+      images: updateData.images,
+      tags: updateData.tags,
+      category: updateData.category,
+    });
 
-    const postIndex = posts.findIndex(p => p.post_id === postId);
-    if (postIndex === -1) {
-      throw new Error('게시글을 찾을 수 없습니다.');
+    if (result.success && result.data) {
+      return {
+        success: true,
+        data: result.data
+      };
     }
-
-    const post = posts[postIndex];
-    if (post.author !== nickname) {
-      throw new Error('본인의 게시글만 수정할 수 있습니다.');
-    }
-
-    const updatedPost: CommunityPost = {
-      ...post,
-      title: updateData.title ?? post.title,
-      content: updateData.content ?? post.content,
-      images: updateData.images ?? post.images,
-      tags: updateData.tags ?? post.tags,
-      category: updateData.category ?? post.category,
-      updated_at: new Date().toISOString(),
-      // mission 관련 필드는 수정 불가
-    };
-
-    posts[postIndex] = updatedPost;
-    await setData(storageKeys.COMMUNITY_POSTS, posts);
 
     return {
-      success: true,
-      data: updatedPost
+      success: false,
+      error: result.error || '게시글 수정에 실패했습니다.'
     };
   } catch (error) {
     logError('게시글 수정 실패', error as Error, { postId, updateData, nickname });
@@ -108,35 +88,23 @@ export const updatePost = async (
 };
 
 /**
- * 게시글 삭제
+ * 게시글 삭제 - 백엔드 API 사용
  */
 export const deletePost = async (
   postId: string,
   nickname: string
 ): Promise<ServiceResult<void>> => {
   try {
-    const storageKeys = getStorageKeys(nickname);
-    const posts: CommunityPost[] = await getData(storageKeys.COMMUNITY_POSTS) || [];
+    const endpoint = API_CONFIG.endpoints.post.delete.replace(':postId', postId);
+    const result = await apiClient.delete<void>(endpoint);
 
-    const post = posts.find(p => p.post_id === postId);
-    if (!post) {
-      throw new Error('게시글을 찾을 수 없습니다.');
+    if (result.success) {
+      return { success: true };
     }
-
-    if (post.author !== nickname) {
-      throw new Error('본인의 게시글만 삭제할 수 있습니다.');
-    }
-
-    const filteredPosts = posts.filter(p => p.post_id !== postId);
-    await setData(storageKeys.COMMUNITY_POSTS, filteredPosts);
-
-    // 관련 댓글도 삭제
-    const comments: CommunityComment[] = await getData(storageKeys.COMMUNITY_COMMENTS) || [];
-    const filteredComments = comments.filter(c => c.post_id !== postId);
-    await setData(storageKeys.COMMUNITY_COMMENTS, filteredComments);
 
     return {
-      success: true
+      success: false,
+      error: result.error || '게시글 삭제에 실패했습니다.'
     };
   } catch (error) {
     logError('게시글 삭제 실패', error as Error, { postId, nickname });
@@ -148,23 +116,31 @@ export const deletePost = async (
 };
 
 /**
- * 게시글 목록 조회
+ * 게시글 목록 조회 - 백엔드 API 사용
  */
 export const getPosts = async (nickname: string): Promise<CommunityPost[]> => {
   try {
-    const storageKeys = getStorageKeys(nickname);
-    const posts: CommunityPost[] = await getData(storageKeys.COMMUNITY_POSTS) || [];
-    
-    // 사용자의 좋아요/스크랩 정보 가져오기
-    const userLikes: string[] = await getData(storageKeys.USER_LIKES) || [];
-    const userScraps: string[] = await getData(storageKeys.USER_SCRAPS) || [];
+    const result = await apiClient.get<CommunityPost[]>(API_CONFIG.endpoints.post.list);
 
-    // 좋아요/스크랩 상태 추가
-    return posts.map(post => ({
-      ...post,
-      is_liked: userLikes.includes(post.post_id),
-      is_scrapped: userScraps.includes(post.post_id),
-    }));
+    if (result.success && result.data) {
+      // 배열인지 확인
+      const posts = Array.isArray(result.data) ? result.data : [];
+
+      // 사용자의 좋아요/스크랩 정보 가져오기 (로컬)
+      const storageKeys = getStorageKeys(nickname);
+      const userLikes: string[] = await getData(storageKeys.USER_LIKES) || [];
+      const userScraps: string[] = await getData(storageKeys.USER_SCRAPS) || [];
+
+      // 좋아요/스크랩 상태 추가
+      return posts.map(post => ({
+        ...post,
+        post_id: post.post_id || post.id?.toString(),
+        is_liked: userLikes.includes(post.post_id || post.id?.toString() || ''),
+        is_scrapped: userScraps.includes(post.post_id || post.id?.toString() || ''),
+      }));
+    }
+
+    return [];
   } catch (error) {
     logError('게시글 목록 조회 실패', error as Error, { nickname });
     return [];
@@ -172,30 +148,32 @@ export const getPosts = async (nickname: string): Promise<CommunityPost[]> => {
 };
 
 /**
- * 게시글 상세 조회
+ * 게시글 상세 조회 - 백엔드 API 사용
  */
 export const getPost = async (
   postId: string,
   nickname: string
 ): Promise<CommunityPost | null> => {
   try {
-    const storageKeys = getStorageKeys(nickname);
-    const posts: CommunityPost[] = await getData(storageKeys.COMMUNITY_POSTS) || [];
-    const post = posts.find(p => p.post_id === postId);
+    const endpoint = API_CONFIG.endpoints.post.detail.replace(':postId', postId);
+    const result = await apiClient.get<CommunityPost>(endpoint);
 
-    if (!post) {
-      return null;
+    if (result.success && result.data) {
+      // 사용자의 좋아요/스크랩 정보 가져오기 (로컬)
+      const storageKeys = getStorageKeys(nickname);
+      const userLikes: string[] = await getData(storageKeys.USER_LIKES) || [];
+      const userScraps: string[] = await getData(storageKeys.USER_SCRAPS) || [];
+
+      const post = result.data;
+      return {
+        ...post,
+        post_id: post.post_id || post.id?.toString(),
+        is_liked: userLikes.includes(post.post_id || post.id?.toString() || ''),
+        is_scrapped: userScraps.includes(post.post_id || post.id?.toString() || ''),
+      };
     }
 
-    // 사용자의 좋아요/스크랩 정보 가져오기
-    const userLikes: string[] = await getData(storageKeys.USER_LIKES) || [];
-    const userScraps: string[] = await getData(storageKeys.USER_SCRAPS) || [];
-
-    return {
-      ...post,
-      is_liked: userLikes.includes(post.post_id),
-      is_scrapped: userScraps.includes(post.post_id),
-    };
+    return null;
   } catch (error) {
     logError('게시글 상세 조회 실패', error as Error, { postId, nickname });
     return null;
@@ -203,7 +181,7 @@ export const getPost = async (
 };
 
 /**
- * 댓글 생성
+ * 댓글 생성 - 백엔드 API 사용
  */
 export const createComment = async (
   postId: string,
@@ -212,44 +190,22 @@ export const createComment = async (
   parentCommentId?: string
 ): Promise<ServiceResult<CommunityComment>> => {
   try {
-    const storageKeys = getStorageKeys(nickname);
-    const comments: CommunityComment[] = await getData(storageKeys.COMMUNITY_COMMENTS) || [];
-    const posts: CommunityPost[] = await getData(storageKeys.COMMUNITY_POSTS) || [];
-
-    // 게시글 존재 확인
-    const post = posts.find(p => p.post_id === postId);
-    if (!post) {
-      throw new Error('게시글을 찾을 수 없습니다.');
-    }
-
-    const newId = comments.length + 1;
-    const commentId = `comment_${Date.now()}_${newId}`;
-
-    const newComment: CommunityComment = {
-      id: Date.now().toString(),
-      comment_id: commentId,
-      post_id: postId,
+    const endpoint = API_CONFIG.endpoints.post.createComment.replace(':postId', postId);
+    const result = await apiClient.post<CommunityComment>(endpoint, {
       content: content.trim(),
-      author: nickname,
-      author_nickname: nickname,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      parent_comment_id: parentCommentId,
-    };
+      parentCommentId,
+    });
 
-    const updatedComments = [...comments, newComment];
-    await setData(storageKeys.COMMUNITY_COMMENTS, updatedComments);
-
-    // 게시글의 댓글 수 증가
-    const postIndex = posts.findIndex(p => p.post_id === postId);
-    if (postIndex !== -1) {
-      posts[postIndex].comment_count += 1;
-      await setData(storageKeys.COMMUNITY_POSTS, posts);
+    if (result.success && result.data) {
+      return {
+        success: true,
+        data: result.data
+      };
     }
 
     return {
-      success: true,
-      data: newComment
+      success: false,
+      error: result.error || '댓글 생성에 실패했습니다.'
     };
   } catch (error) {
     logError('댓글 생성 실패', error as Error, { postId, content, nickname });
@@ -261,39 +217,34 @@ export const createComment = async (
 };
 
 /**
- * 댓글 수정
+ * 댓글 수정 - 백엔드 API 사용
  */
 export const updateComment = async (
   commentId: string,
   content: string,
-  nickname: string
+  nickname: string,
+  postId?: string
 ): Promise<ServiceResult<CommunityComment>> => {
   try {
-    const storageKeys = getStorageKeys(nickname);
-    const comments: CommunityComment[] = await getData(storageKeys.COMMUNITY_COMMENTS) || [];
+    // postId가 필요한 경우를 대비
+    const endpoint = API_CONFIG.endpoints.post.updateComment
+      .replace(':postId', postId || '0')
+      .replace(':commentId', commentId);
 
-    const commentIndex = comments.findIndex(c => c.comment_id === commentId);
-    if (commentIndex === -1) {
-      throw new Error('댓글을 찾을 수 없습니다.');
-    }
-
-    const comment = comments[commentIndex];
-    if (comment.author !== nickname) {
-      throw new Error('본인의 댓글만 수정할 수 있습니다.');
-    }
-
-    const updatedComment: CommunityComment = {
-      ...comment,
+    const result = await apiClient.put<CommunityComment>(endpoint, {
       content: content.trim(),
-      updated_at: new Date().toISOString(),
-    };
+    });
 
-    comments[commentIndex] = updatedComment;
-    await setData(storageKeys.COMMUNITY_COMMENTS, comments);
+    if (result.success && result.data) {
+      return {
+        success: true,
+        data: result.data
+      };
+    }
 
     return {
-      success: true,
-      data: updatedComment
+      success: false,
+      error: result.error || '댓글 수정에 실패했습니다.'
     };
   } catch (error) {
     logError('댓글 수정 실패', error as Error, { commentId, content, nickname });
@@ -305,38 +256,27 @@ export const updateComment = async (
 };
 
 /**
- * 댓글 삭제
+ * 댓글 삭제 - 백엔드 API 사용
  */
 export const deleteComment = async (
   commentId: string,
-  nickname: string
+  nickname: string,
+  postId?: string
 ): Promise<ServiceResult<void>> => {
   try {
-    const storageKeys = getStorageKeys(nickname);
-    const comments: CommunityComment[] = await getData(storageKeys.COMMUNITY_COMMENTS) || [];
-    const posts: CommunityPost[] = await getData(storageKeys.COMMUNITY_POSTS) || [];
+    const endpoint = API_CONFIG.endpoints.post.deleteComment
+      .replace(':postId', postId || '0')
+      .replace(':commentId', commentId);
 
-    const comment = comments.find(c => c.comment_id === commentId);
-    if (!comment) {
-      throw new Error('댓글을 찾을 수 없습니다.');
-    }
+    const result = await apiClient.delete<void>(endpoint);
 
-    if (comment.author !== nickname) {
-      throw new Error('본인의 댓글만 삭제할 수 있습니다.');
-    }
-
-    const filteredComments = comments.filter(c => c.comment_id !== commentId);
-    await setData(storageKeys.COMMUNITY_COMMENTS, filteredComments);
-
-    // 게시글의 댓글 수 감소
-    const postIndex = posts.findIndex(p => p.post_id === comment.post_id);
-    if (postIndex !== -1) {
-      posts[postIndex].comment_count = Math.max(0, posts[postIndex].comment_count - 1);
-      await setData(storageKeys.COMMUNITY_POSTS, posts);
+    if (result.success) {
+      return { success: true };
     }
 
     return {
-      success: true
+      success: false,
+      error: result.error || '댓글 삭제에 실패했습니다.'
     };
   } catch (error) {
     logError('댓글 삭제 실패', error as Error, { commentId, nickname });
@@ -348,18 +288,25 @@ export const deleteComment = async (
 };
 
 /**
- * 댓글 목록 조회
+ * 댓글 목록 조회 - 백엔드 API 사용
  */
 export const getComments = async (
   postId: string,
   nickname: string
 ): Promise<CommunityComment[]> => {
   try {
-    const storageKeys = getStorageKeys(nickname);
-    const comments: CommunityComment[] = await getData(storageKeys.COMMUNITY_COMMENTS) || [];
-    return comments
-      .filter(c => c.post_id === postId)
-      .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+    const endpoint = API_CONFIG.endpoints.post.comments.replace(':postId', postId);
+    const result = await apiClient.get<CommunityComment[]>(endpoint);
+
+    if (result.success && result.data) {
+      const comments = Array.isArray(result.data) ? result.data : [];
+      return comments.sort((a, b) =>
+        new Date(a.created_at || a.createdAt || 0).getTime() -
+        new Date(b.created_at || b.createdAt || 0).getTime()
+      );
+    }
+
+    return [];
   } catch (error) {
     logError('댓글 목록 조회 실패', error as Error, { postId, nickname });
     return [];
@@ -367,7 +314,7 @@ export const getComments = async (
 };
 
 /**
- * 좋아요 토글
+ * 좋아요 토글 - 로컬 저장 + 백엔드 연동 (백엔드 API 있으면 사용)
  */
 export const toggleLike = async (
   postId: string,
@@ -375,34 +322,23 @@ export const toggleLike = async (
 ): Promise<ServiceResult<void>> => {
   try {
     const storageKeys = getStorageKeys(nickname);
-    const posts: CommunityPost[] = await getData(storageKeys.COMMUNITY_POSTS) || [];
     const userLikes: string[] = await getData(storageKeys.USER_LIKES) || [];
 
-    const postIndex = posts.findIndex(p => p.post_id === postId);
-    if (postIndex === -1) {
-      throw new Error('게시글을 찾을 수 없습니다.');
-    }
-
     const isLiked = userLikes.includes(postId);
-    const post = posts[postIndex];
 
     if (isLiked) {
       // 좋아요 취소
       const filteredLikes = userLikes.filter(id => id !== postId);
       await setData(storageKeys.USER_LIKES, filteredLikes);
-      post.like_count = Math.max(0, post.like_count - 1);
     } else {
       // 좋아요 추가
       await setData(storageKeys.USER_LIKES, [...userLikes, postId]);
-      post.like_count += 1;
     }
 
-    posts[postIndex] = post;
-    await setData(storageKeys.COMMUNITY_POSTS, posts);
+    // TODO: 백엔드에 좋아요 API가 있으면 호출
+    // await apiClient.post(`/posts/${postId}/like`);
 
-    return {
-      success: true
-    };
+    return { success: true };
   } catch (error) {
     logError('좋아요 토글 실패', error as Error, { postId, nickname });
     return {
@@ -413,7 +349,7 @@ export const toggleLike = async (
 };
 
 /**
- * 스크랩 토글
+ * 스크랩 토글 - 로컬 저장
  */
 export const toggleScrap = async (
   postId: string,
@@ -421,34 +357,20 @@ export const toggleScrap = async (
 ): Promise<ServiceResult<void>> => {
   try {
     const storageKeys = getStorageKeys(nickname);
-    const posts: CommunityPost[] = await getData(storageKeys.COMMUNITY_POSTS) || [];
     const userScraps: string[] = await getData(storageKeys.USER_SCRAPS) || [];
 
-    const postIndex = posts.findIndex(p => p.post_id === postId);
-    if (postIndex === -1) {
-      throw new Error('게시글을 찾을 수 없습니다.');
-    }
-
     const isScrapped = userScraps.includes(postId);
-    const post = posts[postIndex];
 
     if (isScrapped) {
       // 스크랩 취소
       const filteredScraps = userScraps.filter(id => id !== postId);
       await setData(storageKeys.USER_SCRAPS, filteredScraps);
-      post.scrap_count = Math.max(0, post.scrap_count - 1);
     } else {
       // 스크랩 추가
       await setData(storageKeys.USER_SCRAPS, [...userScraps, postId]);
-      post.scrap_count += 1;
     }
 
-    posts[postIndex] = post;
-    await setData(storageKeys.COMMUNITY_POSTS, posts);
-
-    return {
-      success: true
-    };
+    return { success: true };
   } catch (error) {
     logError('스크랩 토글 실패', error as Error, { postId, nickname });
     return {
@@ -457,4 +379,3 @@ export const toggleScrap = async (
     };
   }
 };
-

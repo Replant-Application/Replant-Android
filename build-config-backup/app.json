@@ -1,0 +1,15 @@
+{
+  "name": "ReplantMobileApp",
+  "displayName": "ReplantMobileApp",
+  "expo": {
+    "name": "ReplantMobileApp",
+    "slug": "replantmobileapp",
+    "scheme": "replant",
+    "android": {
+      "package": "com.anonymous.replantmobileapp"
+    }
+  },
+  "android": {
+    "package": "com.anonymous.replantmobileapp"
+  }
+}

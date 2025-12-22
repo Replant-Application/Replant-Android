@@ -172,6 +172,14 @@ export class ApiClient {
 
       // 성공 응답
       if (response.ok) {
+        // 백엔드가 { data: {...}, message: "...", code: ... } 형태로 응답하는 경우
+        // data 필드를 추출하여 반환
+        if (data && typeof data === 'object' && 'data' in data) {
+          return {
+            success: true,
+            data: data.data as T,
+          };
+        }
         return {
           success: true,
           data: data as T,

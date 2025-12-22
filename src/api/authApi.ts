@@ -1,11 +1,55 @@
 /**
  * 인증 API 인터페이스
- * OAuth 기반 인증 시스템
+ * 일반 로그인 및 OAuth 기반 인증 시스템
  */
 
 import { apiClient } from './client';
 import { API_CONFIG } from '../config/apiConfig';
 import { ServiceResult } from '../types';
+
+/**
+ * 일반 로그인 요청
+ */
+export interface LoginRequest {
+  id: string;
+  password: string;
+}
+
+/**
+ * 일반 로그인 응답
+ */
+export interface LoginResponse {
+  name: string;
+  accessToken?: string;
+  refreshToken?: string;
+  tokens?: {
+    accessToken: string;
+    refreshToken: string;
+  };
+}
+
+/**
+ * 회원가입 요청
+ */
+export interface JoinRequest {
+  id: string;
+  password: string;
+  name: string;
+  phone: string;
+}
+
+/**
+ * 회원가입 응답
+ */
+export interface JoinResponse {
+  name: string;
+  accessToken?: string;
+  refreshToken?: string;
+  tokens?: {
+    accessToken: string;
+    refreshToken: string;
+  };
+}
 
 /**
  * OAuth Provider 타입
@@ -57,6 +101,30 @@ export interface LogoutResponse {
 }
 
 /**
+ * 일반 로그인
+ * POST /api/auth/login
+ *
+ * @param data 로그인 정보 (id, password)
+ */
+export const login = async (
+  data: LoginRequest
+): Promise<ServiceResult<LoginResponse>> => {
+  return apiClient.post<LoginResponse>(API_CONFIG.endpoints.auth.login, data);
+};
+
+/**
+ * 회원가입
+ * POST /api/auth/join
+ *
+ * @param data 회원가입 정보 (id, password, name, phone)
+ */
+export const join = async (
+  data: JoinRequest
+): Promise<ServiceResult<JoinResponse>> => {
+  return apiClient.post<JoinResponse>(API_CONFIG.endpoints.auth.join, data);
+};
+
+/**
  * OAuth 로그인/회원가입
  * POST /api/auth/oauth/{provider}
  *
@@ -91,4 +159,3 @@ export const refreshToken = async (
 export const logout = async (): Promise<ServiceResult<LogoutResponse>> => {
   return apiClient.post<LogoutResponse>(API_CONFIG.endpoints.auth.logout);
 };
-
