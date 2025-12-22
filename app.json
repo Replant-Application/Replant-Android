@@ -1,4 +1,7 @@
 {
   "name": "ReplantMobileApp",
-  "displayName": "ReplantMobileApp"
+  "displayName": "ReplantMobileApp",
+  "android": {
+    "package": "com.anonymous.replantmobileapp"
+  }
 }

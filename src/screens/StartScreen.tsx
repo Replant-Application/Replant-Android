@@ -10,9 +10,15 @@ interface StartScreenProps {
 
 const StartScreen: React.FC<StartScreenProps> = ({ onNavigate }) => {
 
-  const handleGetStarted = () => {
+  const handleSignUp = () => {
     if (onNavigate) {
-      onNavigate(SCREEN_NAMES.NICKNAME as string);
+      onNavigate(SCREEN_NAMES.SIGNUP as string);
+    }
+  };
+
+  const handleLogin = () => {
+    if (onNavigate) {
+      onNavigate(SCREEN_NAMES.LOGIN as string);
     }
   };
 
@@ -74,10 +80,18 @@ const StartScreen: React.FC<StartScreenProps> = ({ onNavigate }) => {
           <View style={styles.dividerLine} />
         </View>
 
-        {/* 기존 닉네임 입력 버튼 */}
+        {/* 회원가입 버튼 */}
         <Button
-          title="새로운 시작하기"
-          onPress={handleGetStarted}
+          title="새로 시작하기 (회원가입)"
+          onPress={handleSignUp}
+          size="lg"
+          style={styles.button}
+        />
+
+        {/* 로그인 버튼 */}
+        <Button
+          title="로그인"
+          onPress={handleLogin}
           size="lg"
           variant="outline"
           style={styles.button}

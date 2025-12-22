@@ -151,3 +151,4 @@ mcp.json
 
 # CSpell Configuration
 cspell.json
+*.apk

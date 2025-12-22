@@ -178,7 +178,7 @@ const CharacterDetailScreen: React.FC<CharacterDetailScreenProps> = ({ route, na
               <Text style={styles.downloadButtonIcon}>⏳</Text>
             ) : (
               <Image
-                source={require('../assets/images/download-icon.png')}
+                source={require('../assets/images/download-icon.jpg')}
                 style={styles.downloadIconImage}
                 resizeMode="contain"
               />

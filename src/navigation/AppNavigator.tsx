@@ -7,6 +7,8 @@ import { RootStackParamList } from '../types/navigation';
 
 // 화면 컴포넌트들
 import StartScreen from '../screens/StartScreen';
+import SignUpScreen from '../screens/SignUpScreen';
+import LoginScreen from '../screens/LoginScreen';
 import NicknameScreen from '../screens/NicknameScreen';
 import HomeScreen from '../screens/HomeScreen';
 import DiaryScreen from '../screens/DiaryScreen';
@@ -52,6 +54,10 @@ const AppNavigator = () => {
       switch (currentScreen) {
         case SCREEN_NAMES.START:
           return <StartScreen onNavigate={setCurrentScreen} />;
+        case SCREEN_NAMES.SIGNUP:
+          return <SignUpScreen onNavigate={setCurrentScreen} />;
+        case SCREEN_NAMES.LOGIN:
+          return <LoginScreen onNavigate={setCurrentScreen} />;
         case SCREEN_NAMES.NICKNAME:
           return <NicknameScreen onNavigate={setCurrentScreen} />;
         default:

@@ -5,6 +5,8 @@
 // 네비게이션 상수
 export const SCREEN_NAMES: Record<string, string> = {
   START: 'Start',
+  SIGNUP: 'SignUp',
+  LOGIN: 'Login',
   NICKNAME: 'Nickname',
   HOME: 'Home',
   DIARY: 'Diary',
