@@ -114,20 +114,6 @@ const CustomMissionCreateScreen: React.FC<CustomMissionCreateScreenProps> = ({ n
       <Header />
 
       <ScrollView style={styles.content}>
-        {/* AI 미션 생성 버튼 */}
-        <FormCard style={{ marginBottom: spacing[4] }}>
-          <SectionTitle title="AI로 미션 만들기" size="lg" marginBottom={spacing[3]} />
-          <Text style={styles.aiDescription}>
-            지난 1주일간 완료한 미션을 분석하여 나만의 맞춤형 미션을 추천받을 수 있어요.
-          </Text>
-          <Button
-            title="🤖 AI 미션 생성하기"
-            onPress={() => navigation.navigate('AIMissionGenerate')}
-            style={styles.aiButton}
-            variant="outline"
-          />
-        </FormCard>
-
         <FormCard>
           <SectionTitle title="미션 제목" size="lg" marginBottom={spacing[3]} />
           <TextInput
@@ -344,15 +330,6 @@ const styles = StyleSheet.create({
   },
   createButton: {
     backgroundColor: colors.primary[500],
-  },
-  aiDescription: {
-    fontSize: typography.fontSize.sm,
-    color: colors.text.secondary,
-    marginBottom: spacing[3],
-    lineHeight: typography.lineHeight.normal * typography.fontSize.sm,
-  },
-  aiButton: {
-    borderColor: colors.primary[500],
   },
 });
 

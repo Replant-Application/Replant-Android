@@ -173,9 +173,14 @@ const PhotoSelectScreen: React.FC<PhotoSelectScreenProps> = ({ navigation, route
     <View style={styles.container}>
       <Header 
         title="사진 선택"
+        titleStyle={styles.headerTitle}
         leftButton={
           <TouchableOpacity onPress={handleGoBack} style={styles.backButton}>
-            <Text style={styles.backButtonText}>← 뒤로</Text>
+            <Image
+              source={require('../assets/images/left.png')}
+              style={styles.backButtonIcon}
+              resizeMode="contain"
+            />
           </TouchableOpacity>
         }
       />
@@ -197,7 +202,11 @@ const PhotoSelectScreen: React.FC<PhotoSelectScreenProps> = ({ navigation, route
                 activeOpacity={0.7}
               >
                 <View style={styles.optionIconContainer}>
-                  <Text style={styles.optionIcon}>📷</Text>
+                  <Image
+                    source={require('../assets/images/camera.png')}
+                    style={styles.optionIconImage}
+                    resizeMode="contain"
+                  />
                 </View>
                 <Text style={styles.optionTitle}>카메라로 촬영</Text>
                 <Text style={styles.optionDescription}>
@@ -212,7 +221,11 @@ const PhotoSelectScreen: React.FC<PhotoSelectScreenProps> = ({ navigation, route
                 activeOpacity={0.7}
               >
                 <View style={styles.optionIconContainer}>
-                  <Text style={styles.optionIcon}>🖼️</Text>
+                  <Image
+                    source={require('../assets/images/picture.png')}
+                    style={styles.optionIconImage}
+                    resizeMode="contain"
+                  />
                 </View>
                 <Text style={styles.optionTitle}>갤러리에서 선택</Text>
                 <Text style={styles.optionDescription}>
@@ -266,9 +279,9 @@ const styles = StyleSheet.create({
   backButton: {
     padding: spacing[2],
   },
-  backButtonText: {
-    fontSize: typography.fontSize.base,
-    color: colors.text.primary,
+  backButtonIcon: {
+    width: 24,
+    height: 24,
   },
   content: {
     flex: 1,
@@ -278,8 +291,12 @@ const styles = StyleSheet.create({
     marginBottom: spacing[6],
     alignItems: 'center',
   },
+  headerTitle: {
+    fontSize: typography.fontSize.base,
+    fontWeight: typography.fontWeight.medium,
+  },
   instructionText: {
-    fontSize: typography.fontSize.lg,
+    fontSize: typography.fontSize.base,
     color: colors.text.secondary,
     textAlign: 'center',
   },
@@ -297,8 +314,9 @@ const styles = StyleSheet.create({
   optionIconContainer: {
     marginBottom: spacing[3],
   },
-  optionIcon: {
-    fontSize: 48,
+  optionIconImage: {
+    width: 48,
+    height: 48,
   },
   optionTitle: {
     fontSize: typography.fontSize.xl,

@@ -91,7 +91,11 @@ const CommunityPostEditScreen: React.FC<CommunityPostEditScreenProps> = ({
           title="게시글 수정"
           leftButton={
             <TouchableOpacity onPress={() => navigation.goBack()}>
-              <Text style={styles.backButtonText}>← 취소</Text>
+              <Image
+                source={require('../assets/images/left.png')}
+                style={styles.backButtonIcon}
+                resizeMode="contain"
+              />
             </TouchableOpacity>
           }
         />
@@ -197,10 +201,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  backButtonText: {
-    fontSize: typography.fontSize.base,
-    color: colors.primary[600],
-    fontWeight: typography.fontWeight.medium,
+  backButtonIcon: {
+    width: 24,
+    height: 24,
   },
   missionInfo: {
     flexDirection: 'row',

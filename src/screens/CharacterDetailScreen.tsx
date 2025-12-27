@@ -97,9 +97,8 @@ const CharacterDetailScreen: React.FC<CharacterDetailScreenProps> = ({ route, na
     const levelFolder = `level${Math.min(level, 6)}`;
     switch (levelFolder) {
       case 'level1':
-        return emotion === 'happy' ? require('../assets/images/characters/level1/happy.png') :
-               emotion === 'waving' ? require('../assets/images/characters/level1/waving.png') :
-               require('../assets/images/characters/level1/default.png');
+        return emotion === 'happy' ? require('../assets/images/characters/level1/happy.gif') :
+               require('../assets/images/characters/level1/default.gif');
       case 'level2':
         return emotion === 'happy' ? require('../assets/images/characters/level2/happy.png') :
                emotion === 'waving' ? require('../assets/images/characters/level2/waving.png') :
@@ -121,7 +120,7 @@ const CharacterDetailScreen: React.FC<CharacterDetailScreenProps> = ({ route, na
                emotion === 'waving' ? require('../assets/images/characters/level6/waving.png') :
                require('../assets/images/characters/level6/default.png');
       default:
-        return require('../assets/images/characters/level1/default.png');
+        return require('../assets/images/characters/level1/default.gif');
     }
   };
 

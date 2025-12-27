@@ -11,10 +11,11 @@ import {
   FlatList,
   TouchableOpacity,
   RefreshControl,
+  Image,
 } from 'react-native';
 import { getNotifications, markNotificationAsRead, markAllNotificationsAsRead } from '../api/notificationApi';
-import { Loading, Header, EmptyState } from '../components/ui';
-import { colors, spacing, typography, borderRadius } from '../utils/designTokens';
+import { Loading, EmptyState } from '../components/ui';
+import { colors, spacing, typography, borderRadius, shadows } from '../utils/designTokens';
 import { NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '../types/navigation';
 import { SCREEN_NAMES } from '../utils/constants';
@@ -153,8 +154,10 @@ const NotificationScreen: React.FC<NotificationScreenProps> = ({ navigation }) =
         !item.isRead && styles.unreadCard,
       ]}
       onPress={() => handleNotificationPress(item)}
+      activeOpacity={0.7}
     >
-      <View style={styles.iconContainer}>
+      {!item.isRead && <View style={styles.unreadIndicator} />}
+      <View style={[styles.iconContainer, !item.isRead && styles.iconContainerUnread]}>
         <Text style={styles.icon}>{getNotificationIcon(item.type)}</Text>
       </View>
 
@@ -163,12 +166,14 @@ const NotificationScreen: React.FC<NotificationScreenProps> = ({ navigation }) =
           <Text style={[styles.title, !item.isRead && styles.unreadTitle]}>
             {item.title}
           </Text>
-          {!item.isRead && <View style={styles.unreadDot} />}
         </View>
         <Text style={styles.content} numberOfLines={2}>
           {item.content}
         </Text>
-        <Text style={styles.time}>{formatTimeAgo(item.createdAt)}</Text>
+        <View style={styles.footerRow}>
+          <Text style={styles.time}>{formatTimeAgo(item.createdAt)}</Text>
+          {!item.isRead && <View style={styles.unreadBadge} />}
+        </View>
       </View>
     </TouchableOpacity>
   );
@@ -181,21 +186,20 @@ const NotificationScreen: React.FC<NotificationScreenProps> = ({ navigation }) =
 
   return (
     <View style={styles.container}>
-      <Header
-        title="알림"
-        leftButton={
-          <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Text style={{ fontSize: 24 }}>←</Text>
-          </TouchableOpacity>
-        }
-        rightButton={
-          unreadCount > 0 ? (
-            <TouchableOpacity onPress={handleMarkAllAsRead}>
+      {/* 헤더 섹션 */}
+      <View style={styles.headerSection}>
+        <View style={styles.headerContent}>
+          <Text style={styles.headerTitle}>알림</Text>
+          {unreadCount > 0 && (
+            <TouchableOpacity 
+              style={styles.markAllButton}
+              onPress={handleMarkAllAsRead}
+            >
               <Text style={styles.markAllReadText}>모두 읽음</Text>
             </TouchableOpacity>
-          ) : undefined
-        }
-      />
+          )}
+        </View>
+      </View>
 
       {/* 필터 탭 */}
       <View style={styles.filterContainer}>
@@ -244,66 +248,110 @@ const NotificationScreen: React.FC<NotificationScreenProps> = ({ navigation }) =
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background.primary,
+    backgroundColor: colors.background.secondary,
+  },
+  headerSection: {
+    backgroundColor: colors.white,
+    paddingHorizontal: spacing[5],
+    paddingTop: spacing[6],
+    paddingBottom: spacing[4],
+    borderBottomWidth: 1,
+    borderBottomColor: colors.gray[100],
+  },
+  headerContent: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  headerTitle: {
+    fontSize: typography.fontSize['3xl'],
+    fontWeight: typography.fontWeight.bold,
+    color: colors.text.primary,
+    letterSpacing: -0.5,
+  },
+  markAllButton: {
+    paddingHorizontal: spacing[4],
+    paddingVertical: spacing[2],
+    borderRadius: borderRadius.full,
+    backgroundColor: colors.green[500],
   },
   markAllReadText: {
     fontSize: typography.fontSize.sm,
-    color: colors.primary[600],
-    fontWeight: typography.fontWeight.medium as any,
+    color: colors.white,
+    fontWeight: typography.fontWeight.semibold as any,
   },
   filterContainer: {
     flexDirection: 'row',
-    paddingHorizontal: spacing[4],
-    paddingVertical: spacing[2],
-    backgroundColor: colors.background.primary,
+    paddingHorizontal: spacing[5],
+    paddingVertical: spacing[4],
+    backgroundColor: colors.white,
+    gap: spacing[2],
     borderBottomWidth: 1,
-    borderBottomColor: colors.border.light,
+    borderBottomColor: colors.gray[100],
   },
   filterTab: {
     flex: 1,
-    paddingVertical: spacing[2],
+    paddingVertical: spacing[3],
     alignItems: 'center',
-    borderRadius: borderRadius.md,
-    marginHorizontal: spacing[1],
+    borderRadius: borderRadius.full,
+    backgroundColor: colors.gray[50],
   },
   filterTabActive: {
-    backgroundColor: colors.primary[500],
+    backgroundColor: colors.green[500],
+    ...shadows.sm,
   },
   filterText: {
     fontSize: typography.fontSize.sm,
     color: colors.text.secondary,
+    fontWeight: typography.fontWeight.medium as any,
   },
   filterTextActive: {
-    color: colors.text.inverse,
-    fontWeight: typography.fontWeight.semibold as any,
+    color: colors.white,
+    fontWeight: typography.fontWeight.bold as any,
   },
   listContent: {
-    padding: spacing[4],
+    padding: spacing[5],
+    paddingTop: spacing[4],
   },
   notificationCard: {
     flexDirection: 'row',
-    backgroundColor: colors.background.primary,
-    borderRadius: borderRadius.lg,
-    padding: spacing[4],
-    marginBottom: spacing[3],
+    backgroundColor: colors.white,
+    borderRadius: borderRadius.xl,
+    padding: spacing[5],
+    marginBottom: spacing[4],
+    ...shadows.base,
     borderWidth: 1,
-    borderColor: colors.border.light,
+    borderColor: colors.gray[200],
+    position: 'relative',
+    overflow: 'hidden',
   },
   unreadCard: {
-    backgroundColor: colors.primary[50],
-    borderColor: colors.primary[200],
+    backgroundColor: colors.green[50],
+    borderColor: colors.green[300],
+    borderWidth: 2,
+  },
+  unreadIndicator: {
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    bottom: 0,
+    width: 4,
+    backgroundColor: colors.green[500],
   },
   iconContainer: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: colors.background.secondary,
+    width: 52,
+    height: 52,
+    borderRadius: borderRadius.full,
+    backgroundColor: colors.gray[100],
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: spacing[3],
+    marginRight: spacing[4],
+  },
+  iconContainerUnread: {
+    backgroundColor: colors.green[200],
   },
   icon: {
-    fontSize: 20,
+    fontSize: 26,
   },
   contentContainer: {
     flex: 1,
@@ -311,32 +359,39 @@ const styles = StyleSheet.create({
   headerRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    marginBottom: spacing[2],
   },
   title: {
     fontSize: typography.fontSize.base,
     color: colors.text.primary,
     flex: 1,
+    fontWeight: typography.fontWeight.semibold as any,
+    lineHeight: 22,
   },
   unreadTitle: {
-    fontWeight: typography.fontWeight.semibold as any,
-  },
-  unreadDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: colors.primary[500],
-    marginLeft: spacing[2],
+    fontWeight: typography.fontWeight.bold as any,
+    color: colors.green[700],
   },
   content: {
     fontSize: typography.fontSize.sm,
     color: colors.text.secondary,
-    marginTop: spacing[1],
     lineHeight: 20,
+    marginBottom: spacing[2],
+  },
+  footerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   time: {
     fontSize: typography.fontSize.xs,
     color: colors.text.tertiary,
-    marginTop: spacing[2],
+  },
+  unreadBadge: {
+    width: 8,
+    height: 8,
+    borderRadius: borderRadius.full,
+    backgroundColor: colors.green[500],
   },
 });
 

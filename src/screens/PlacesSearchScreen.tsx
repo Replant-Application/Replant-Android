@@ -11,6 +11,7 @@ import {
   ActivityIndicator,
   PermissionsAndroid,
   Platform,
+  Image,
 } from 'react-native';
 import { Header } from '../components/ui';
 import { colors, spacing, typography, borderRadius } from '../utils/designTokens';
@@ -245,7 +246,11 @@ const PlacesSearchScreen: React.FC<PlacesSearchScreenProps> = ({ navigation }) =
         title="근처 상담센터"
         leftButton={
           <TouchableOpacity onPress={handleGoBack} style={styles.backButton}>
-            <Text style={styles.backButtonText}>← 뒤로</Text>
+            <Image
+              source={require('../assets/images/left.png')}
+              style={styles.backButtonIcon}
+              resizeMode="contain"
+            />
           </TouchableOpacity>
         }
       />
@@ -449,10 +454,9 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.md,
     backgroundColor: colors.primary[100],
   },
-  backButtonText: {
-    fontSize: typography.fontSize.sm,
-    color: colors.primary[600],
-    fontWeight: typography.fontWeight.medium,
+  backButtonIcon: {
+    width: 24,
+    height: 24,
   },
   content: {
     flex: 1,

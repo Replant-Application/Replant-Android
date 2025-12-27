@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Alert, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, StyleSheet, Alert, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform, Image } from 'react-native';
 import { Button, Input, Header } from '../components/ui';
 import { colors, spacing, typography } from '../utils/designTokens';
 import { SCREEN_NAMES } from '../utils/constants';
@@ -117,7 +117,20 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onNavigate }) => {
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-      <Header />
+      <Header
+        leftButton={
+          <TouchableOpacity
+            onPress={() => onNavigate(SCREEN_NAMES.START as string)}
+            style={styles.backButton}
+          >
+            <Image
+              source={require('../assets/images/left.png')}
+              style={styles.backButtonIcon}
+              resizeMode="contain"
+            />
+          </TouchableOpacity>
+        }
+      />
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
         <View style={styles.content}>
           <Text style={styles.title}>회원가입</Text>
@@ -188,18 +201,13 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onNavigate }) => {
           loading={isLoading}
           size="lg"
           style={styles.button}
+          textStyle={styles.buttonText}
         />
         <TouchableOpacity
           onPress={() => onNavigate(SCREEN_NAMES.LOGIN as string)}
           style={styles.linkButton}
         >
           <Text style={styles.linkText}>이미 계정이 있으신가요? 로그인</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => onNavigate(SCREEN_NAMES.START as string)}
-          style={styles.linkButton}
-        >
-          <Text style={styles.linkText}>돌아가기</Text>
         </TouchableOpacity>
       </View>
     </KeyboardAvoidingView>
@@ -216,7 +224,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: spacing[5],
-    paddingBottom: spacing[20],
+    paddingBottom: spacing[24],
   },
   content: {
     flex: 1,
@@ -249,7 +257,13 @@ const styles = StyleSheet.create({
     gap: spacing[3],
   },
   button: {
+    height: 42,
     width: '100%',
+    borderRadius: 28,
+    backgroundColor: '#166534',
+  },
+  buttonText: {
+    fontSize: typography.fontSize.sm,
   },
   linkButton: {
     paddingVertical: spacing[2],
@@ -258,6 +272,16 @@ const styles = StyleSheet.create({
   linkText: {
     fontSize: typography.fontSize.sm,
     color: colors.primary.main,
+    textDecorationLine: 'underline',
+  },
+  backButton: {
+    padding: spacing[2],
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  backButtonIcon: {
+    width: 24,
+    height: 24,
   },
 });
 
