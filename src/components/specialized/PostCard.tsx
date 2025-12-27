@@ -43,25 +43,36 @@ const PostCard: React.FC<PostCardProps> = ({
     <TouchableOpacity
       style={[styles.container, style]}
       onPress={() => onPress?.(post.post_id)}
-      activeOpacity={0.7}
+      activeOpacity={0.8}
     >
       <View style={styles.header}>
         <View style={styles.authorInfo}>
-          <Text style={styles.authorName}>{post.author_nickname}</Text>
-          {post.category && (
-            <View style={styles.categoryBadge}>
-              <Text style={styles.categoryText}>{post.category}</Text>
-            </View>
-          )}
+          <View style={styles.authorAvatar}>
+            <Text style={styles.authorAvatarText}>
+              {post.author_nickname.charAt(0).toUpperCase()}
+            </Text>
+          </View>
+          <View>
+            <Text style={styles.authorName}>{post.author_nickname}</Text>
+            {post.category && (
+              <View style={styles.categoryBadge}>
+                <Text style={styles.categoryText}>{post.category}</Text>
+              </View>
+            )}
+          </View>
         </View>
         <Text style={styles.date}>{formatDate(post.created_at)}</Text>
       </View>
 
       <View style={styles.content}>
-        <View style={styles.missionInfo}>
-          <Text style={styles.missionEmoji}>{post.mission_emoji}</Text>
-          <Text style={styles.missionTitle}>{post.mission_title}</Text>
-        </View>
+        {post.mission_title && (
+          <View style={styles.missionInfo}>
+            <Text style={styles.missionEmoji}>{post.mission_emoji || '🎯'}</Text>
+            <Text style={styles.missionTitle} numberOfLines={1}>
+              {post.mission_title}
+            </Text>
+          </View>
+        )}
         <Text style={styles.title} numberOfLines={2}>
           {post.title}
         </Text>
@@ -103,7 +114,9 @@ const PostCard: React.FC<PostCardProps> = ({
             <Text style={[styles.statIcon, post.is_liked && styles.likedIcon]}>
               {post.is_liked ? '❤️' : '🤍'}
             </Text>
-            <Text style={styles.statText}>{post.like_count}</Text>
+            <Text style={[styles.statText, post.is_liked && styles.statTextActive]}>
+              {post.like_count}
+            </Text>
           </TouchableOpacity>
 
           <View style={styles.statButton}>
@@ -123,7 +136,9 @@ const PostCard: React.FC<PostCardProps> = ({
               {post.is_scrapped ? '🔖' : '📌'}
             </Text>
             {post.scrap_count > 0 && (
-              <Text style={styles.statText}>{post.scrap_count}</Text>
+              <Text style={[styles.statText, post.is_scrapped && styles.statTextActive]}>
+                {post.scrap_count}
+              </Text>
             )}
           </TouchableOpacity>
         </View>
@@ -135,79 +150,101 @@ const PostCard: React.FC<PostCardProps> = ({
 const styles = StyleSheet.create({
   container: {
     backgroundColor: colors.background.primary,
-    borderRadius: borderRadius.lg,
-    padding: spacing[4],
-    marginVertical: spacing[2],
-    borderWidth: 1,
-    borderColor: colors.border.light,
-    ...shadows.base,
+    borderRadius: borderRadius.xl,
+    padding: spacing[5],
+    marginBottom: spacing[3],
+    borderWidth: 0,
+    ...shadows.lg,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: spacing[3],
+    alignItems: 'flex-start',
+    marginBottom: spacing[4],
   },
   authorInfo: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing[2],
+    gap: spacing[3],
+    flex: 1,
+  },
+  authorAvatar: {
+    width: 40,
+    height: 40,
+    borderRadius: borderRadius.full,
+    backgroundColor: colors.green[500],
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  authorAvatarText: {
+    fontSize: typography.fontSize.base,
+    fontWeight: typography.fontWeight.bold,
+    color: colors.white,
   },
   authorName: {
-    fontSize: typography.fontSize.sm,
+    fontSize: typography.fontSize.base,
     fontWeight: typography.fontWeight.semibold,
     color: colors.text.primary,
+    marginBottom: spacing[1],
   },
   categoryBadge: {
-    backgroundColor: colors.primary[100],
+    backgroundColor: colors.green[100],
     paddingHorizontal: spacing[2],
     paddingVertical: spacing[1],
     borderRadius: borderRadius.sm,
+    alignSelf: 'flex-start',
   },
   categoryText: {
     fontSize: typography.fontSize.xs,
-    color: colors.primary[700],
+    color: colors.green[700],
     fontWeight: typography.fontWeight.medium,
   },
   date: {
     fontSize: typography.fontSize.xs,
     color: colors.text.tertiary,
+    marginTop: spacing[1],
   },
   content: {
-    marginBottom: spacing[3],
+    marginBottom: spacing[4],
   },
   missionInfo: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing[2],
-    marginBottom: spacing[2],
-    padding: spacing[2],
-    backgroundColor: colors.background.secondary,
+    marginBottom: spacing[3],
+    paddingHorizontal: spacing[3],
+    paddingVertical: spacing[2],
+    backgroundColor: colors.green[50],
     borderRadius: borderRadius.md,
+    borderLeftWidth: 3,
+    borderLeftColor: colors.green[500],
   },
   missionEmoji: {
-    fontSize: typography.fontSize.lg,
+    fontSize: typography.fontSize.xl,
   },
   missionTitle: {
+    flex: 1,
     fontSize: typography.fontSize.sm,
     fontWeight: typography.fontWeight.semibold,
-    color: colors.primary[600],
+    color: colors.green[700],
   },
   title: {
-    fontSize: typography.fontSize.lg,
+    fontSize: typography.fontSize.xl,
     fontWeight: typography.fontWeight.bold,
     color: colors.text.primary,
     marginBottom: spacing[2],
+    lineHeight: typography.lineHeight.tight * typography.fontSize.xl,
   },
   text: {
     fontSize: typography.fontSize.base,
     color: colors.text.secondary,
-    lineHeight: typography.lineHeight.normal * typography.fontSize.base,
+    lineHeight: typography.lineHeight.relaxed * typography.fontSize.base,
   },
   imageContainer: {
-    marginBottom: spacing[3],
-    borderRadius: borderRadius.md,
+    marginBottom: spacing[4],
+    borderRadius: borderRadius.lg,
     overflow: 'hidden',
+    ...shadows.sm,
   },
   thumbnail: {
     width: '100%',
@@ -218,17 +255,20 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: spacing[2],
-    marginBottom: spacing[3],
+    marginBottom: spacing[4],
   },
   tag: {
-    backgroundColor: colors.background.secondary,
-    paddingHorizontal: spacing[2],
+    backgroundColor: colors.green[50],
+    paddingHorizontal: spacing[3],
     paddingVertical: spacing[1],
-    borderRadius: borderRadius.sm,
+    borderRadius: borderRadius.md,
+    borderWidth: 1,
+    borderColor: colors.green[200],
   },
   tagText: {
     fontSize: typography.fontSize.xs,
-    color: colors.primary[600],
+    color: colors.green[700],
+    fontWeight: typography.fontWeight.medium,
   },
   footer: {
     borderTopWidth: 1,
@@ -237,15 +277,18 @@ const styles = StyleSheet.create({
   },
   stats: {
     flexDirection: 'row',
-    gap: spacing[4],
+    gap: spacing[6],
   },
   statButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing[1],
+    gap: spacing[2],
+    paddingVertical: spacing[1],
+    paddingHorizontal: spacing[2],
+    borderRadius: borderRadius.md,
   },
   statIcon: {
-    fontSize: typography.fontSize.base,
+    fontSize: typography.fontSize.lg,
   },
   likedIcon: {
     // 이미 이모지로 표시됨
@@ -256,6 +299,11 @@ const styles = StyleSheet.create({
   statText: {
     fontSize: typography.fontSize.sm,
     color: colors.text.secondary,
+    fontWeight: typography.fontWeight.medium,
+  },
+  statTextActive: {
+    color: colors.green[600],
+    fontWeight: typography.fontWeight.semibold,
   },
 });
 

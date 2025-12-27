@@ -1,9 +1,10 @@
 import React from 'react';
-import { View, Text, StyleSheet, ViewStyle, TextStyle } from 'react-native';
+import { View, Text, StyleSheet, ViewStyle, TextStyle, Image, ImageSourcePropType } from 'react-native';
 import { colors, spacing, typography } from '../../utils/designTokens';
 
 interface EmptyStateProps {
-  icon: string;
+  icon?: string;
+  iconImage?: ImageSourcePropType;
   title: string;
   description: string;
   actionButton?: React.ReactNode;
@@ -19,6 +20,7 @@ interface EmptyStateProps {
  */
 const EmptyState: React.FC<EmptyStateProps> = ({
   icon,
+  iconImage,
   title,
   description,
   actionButton,
@@ -29,7 +31,11 @@ const EmptyState: React.FC<EmptyStateProps> = ({
 }) => {
   return (
     <View style={[styles.container, style]}>
-      <Text style={[styles.icon, iconStyle]}>{icon}</Text>
+      {iconImage ? (
+        <Image source={iconImage} style={styles.iconImage} resizeMode="contain" />
+      ) : icon ? (
+        <Text style={[styles.icon, iconStyle]}>{icon}</Text>
+      ) : null}
       <Text style={[styles.title, titleStyle]}>{title}</Text>
       <Text style={[styles.description, descriptionStyle]}>{description}</Text>
       {actionButton && (
@@ -48,6 +54,11 @@ const styles = StyleSheet.create({
   },
   icon: {
     fontSize: typography.fontSize['4xl'],
+    marginBottom: spacing[4],
+  },
+  iconImage: {
+    width: 40,
+    height: 40,
     marginBottom: spacing[4],
   },
   title: {
