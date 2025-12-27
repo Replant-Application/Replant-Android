@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
 import { useUser } from '../contexts/UserContext';
 import { SCREEN_NAMES } from '../utils/constants';
 import { colors, spacing, typography } from '../utils/designTokens';
@@ -27,12 +27,12 @@ import CommunityPostDetailScreen from '../screens/CommunityPostDetailScreen';
 import CommunityPostEditScreen from '../screens/CommunityPostEditScreen';
 import MyPageScreen from '../screens/MyPageScreen';
 import CalendarScreen from '../screens/CalendarScreen';
+import StatisticsScreen from '../screens/StatisticsScreen';
 import AdminDashboardScreen from '../screens/AdminDashboardScreen';
 import AdminUserListScreen from '../screens/AdminUserListScreen';
 import AdminUserDetailScreen from '../screens/AdminUserDetailScreen';
 import AdminUserEditScreen from '../screens/AdminUserEditScreen';
 import MissionGroupScreen from '../screens/MissionGroupScreen';
-import AIMissionGenerateScreen from '../screens/AIMissionGenerateScreen';
 
 // 간단한 상태 기반 네비게이션 (React Navigation 없이)
 const AppNavigator = () => {
@@ -87,8 +87,6 @@ const AppNavigator = () => {
     } else if (currentScreen === SCREEN_NAMES.COUNSELING_SELECT || currentScreen === SCREEN_NAMES.INFO) {
       setCurrentScreen(SCREEN_NAMES.SETTINGS);
     } else if (currentScreen === SCREEN_NAMES.PHOTO_SELECT) {
-      setCurrentScreen(SCREEN_NAMES.MISSION);
-    } else if (currentScreen === SCREEN_NAMES.AI_MISSION_GENERATE) {
       setCurrentScreen(SCREEN_NAMES.MISSION);
     } else if (
       currentScreen === SCREEN_NAMES.COMMUNITY_POST_CREATE ||
@@ -162,6 +160,8 @@ const AppNavigator = () => {
         return <MyPageScreen navigation={navigation} />;
       case SCREEN_NAMES.CALENDAR:
         return <CalendarScreen />;
+      case SCREEN_NAMES.STATISTICS:
+        return <StatisticsScreen navigation={navigation} />;
       case SCREEN_NAMES.ADMIN_DASHBOARD:
         return <AdminDashboardScreen navigation={navigation} />;
       case SCREEN_NAMES.ADMIN_USER_LIST:
@@ -172,8 +172,6 @@ const AppNavigator = () => {
         return <AdminUserEditScreen navigation={navigation} route={route} />;
       case SCREEN_NAMES.MISSION_GROUP:
         return <MissionGroupScreen navigation={navigation} />;
-      case SCREEN_NAMES.AI_MISSION_GENERATE:
-        return <AIMissionGenerateScreen navigation={navigation} />;
       default:
         return <HomeScreen navigation={navigation} />;
     }
@@ -191,49 +189,96 @@ const AppNavigator = () => {
         <TouchableOpacity
           style={[styles.tab, currentScreen === SCREEN_NAMES.HOME && styles.activeTab]}
           onPress={() => setCurrentScreen(SCREEN_NAMES.HOME)}
+          activeOpacity={0.7}
         >
-          <Text style={styles.tabIcon}>🏠</Text>
-          <Text style={styles.tabLabel}>홈</Text>
+          <Image
+            source={require('../assets/images/home.png')}
+            style={[
+              styles.tabIconImage,
+              currentScreen === SCREEN_NAMES.HOME && styles.tabIconImageActive
+            ]}
+            resizeMode="contain"
+          />
+          <Text style={[
+            styles.tabLabel,
+            currentScreen === SCREEN_NAMES.HOME && styles.tabLabelActive
+          ]}>홈</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
           style={[styles.tab, currentScreen === SCREEN_NAMES.MISSION && styles.activeTab]}
           onPress={() => setCurrentScreen(SCREEN_NAMES.MISSION)}
+          activeOpacity={0.7}
         >
-          <Text style={styles.tabIcon}>🎯</Text>
-          <Text style={styles.tabLabel}>미션</Text>
+          <Image
+            source={require('../assets/images/goal.png')}
+            style={[
+              styles.tabIconImage,
+              currentScreen === SCREEN_NAMES.MISSION && styles.tabIconImageActive
+            ]}
+            resizeMode="contain"
+          />
+          <Text style={[
+            styles.tabLabel,
+            currentScreen === SCREEN_NAMES.MISSION && styles.tabLabelActive
+          ]}>미션</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
           style={[styles.tab, currentScreen === SCREEN_NAMES.COMMUNITY && styles.activeTab]}
           onPress={() => setCurrentScreen(SCREEN_NAMES.COMMUNITY)}
+          activeOpacity={0.7}
         >
-          <Text style={styles.tabIcon}>💬</Text>
-          <Text style={styles.tabLabel}>커뮤니티</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[styles.tab, currentScreen === SCREEN_NAMES.COUNSELING_SELECT && styles.activeTab]}
-          onPress={() => setCurrentScreen(SCREEN_NAMES.COUNSELING_SELECT)}
-        >
-          <Text style={styles.tabIcon}>🤖</Text>
-          <Text style={styles.tabLabel}>상담</Text>
+          <Image
+            source={require('../assets/images/chat.png')}
+            style={[
+              styles.tabIconImage,
+              currentScreen === SCREEN_NAMES.COMMUNITY && styles.tabIconImageActive
+            ]}
+            resizeMode="contain"
+          />
+          <Text style={[
+            styles.tabLabel,
+            currentScreen === SCREEN_NAMES.COMMUNITY && styles.tabLabelActive
+          ]}>커뮤니티</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
           style={[styles.tab, currentScreen === SCREEN_NAMES.DIARY && styles.activeTab]}
           onPress={() => setCurrentScreen(SCREEN_NAMES.DIARY)}
+          activeOpacity={0.7}
         >
-          <Text style={styles.tabIcon}>📝</Text>
-          <Text style={styles.tabLabel}>다이어리</Text>
+          <Image
+            source={require('../assets/images/books.png')}
+            style={[
+              styles.tabIconImage,
+              currentScreen === SCREEN_NAMES.DIARY && styles.tabIconImageActive
+            ]}
+            resizeMode="contain"
+          />
+          <Text style={[
+            styles.tabLabel,
+            currentScreen === SCREEN_NAMES.DIARY && styles.tabLabelActive
+          ]}>다이어리</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
           style={[styles.tab, currentScreen === SCREEN_NAMES.SETTINGS && styles.activeTab]}
           onPress={() => setCurrentScreen(SCREEN_NAMES.SETTINGS)}
+          activeOpacity={0.7}
         >
-          <Text style={styles.tabIcon}>⚙️</Text>
-          <Text style={styles.tabLabel}>설정</Text>
+          <Image
+            source={require('../assets/images/settings.png')}
+            style={[
+              styles.tabIconImage,
+              currentScreen === SCREEN_NAMES.SETTINGS && styles.tabIconImageActive
+            ]}
+            resizeMode="contain"
+          />
+          <Text style={[
+            styles.tabLabel,
+            currentScreen === SCREEN_NAMES.SETTINGS && styles.tabLabelActive
+          ]}>설정</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -255,27 +300,49 @@ const styles = StyleSheet.create({
   },
   tabBar: {
     flexDirection: 'row',
-    backgroundColor: colors.background.primary,
-    borderTopWidth: 1,
-    borderTopColor: colors.border.light,
-    paddingBottom: spacing[5],
+    backgroundColor: colors.white,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingBottom: spacing[3],
     paddingTop: spacing[2],
+    paddingHorizontal: spacing[2],
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: -2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 8,
   },
   tab: {
     flex: 1,
     alignItems: 'center',
+    justifyContent: 'center',
     paddingVertical: spacing[2],
+    borderRadius: 12,
   },
   activeTab: {
-    backgroundColor: colors.background.secondary,
+    backgroundColor: colors.green[50],
   },
-  tabIcon: {
-    fontSize: typography.fontSize.xl,
+  tabIconImage: {
+    width: 24,
+    height: 24,
     marginBottom: spacing[1],
+    opacity: 0.6,
+  },
+  tabIconImageActive: {
+    opacity: 1,
+    tintColor: colors.green[600],
   },
   tabLabel: {
     fontSize: typography.fontSize.xs,
     color: colors.text.secondary,
+    fontWeight: typography.fontWeight.medium,
+  },
+  tabLabelActive: {
+    color: colors.green[600],
+    fontWeight: typography.fontWeight.bold,
   },
 });
 

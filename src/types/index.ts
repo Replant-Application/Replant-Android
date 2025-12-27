@@ -417,6 +417,7 @@ export enum ScreenNames {
   COMMUNITY_POST_DETAIL = 'CommunityPostDetail',
   MY_PAGE = 'MyPage',
   CALENDAR = 'Calendar',
+  STATISTICS = 'Statistics',
   MISSION_GROUP = 'MissionGroup',
   AI_MISSION_GENERATE = 'AIMissionGenerate',
 }
