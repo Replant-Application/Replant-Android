@@ -6,6 +6,7 @@
 import React, { useEffect } from 'react';
 import { StatusBar } from 'react-native';
 import { UserProvider } from './src/contexts/UserContext';
+import { OverlayProvider } from './src/contexts/OverlayContext';
 import AppNavigator from './src/navigation/AppNavigator';
 import { initializeLogger } from './src/utils/logger';
 
@@ -17,8 +18,10 @@ function App() {
 
   return (
     <UserProvider>
-      <StatusBar barStyle="dark-content" backgroundColor="#fff" />
-      <AppNavigator />
+      <OverlayProvider>
+        <StatusBar barStyle="dark-content" backgroundColor="#fff" />
+        <AppNavigator />
+      </OverlayProvider>
     </UserProvider>
   );
 }
