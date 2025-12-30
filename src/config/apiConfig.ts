@@ -125,6 +125,11 @@ export const API_CONFIG = {
       read: '/notifications/:notificationId/read',
       readAll: '/notifications/read-all',
     },
+
+    // SSE (Server-Sent Events)
+    sse: {
+      connect: '/sse/connect',
+    },
   },
 
   // 요청 타임아웃 (ms) (환경변수에서 읽어옴)
