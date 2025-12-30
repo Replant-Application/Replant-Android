@@ -7,6 +7,22 @@ import { API_CONFIG } from '../config/apiConfig';
 import { ServiceResult } from '../types';
 
 /**
+ * 고민 종류 (미션 필터링용)
+ */
+export type WorryType =
+  | 'RE_EMPLOYMENT'    // 재취업
+  | 'JOB_PREPARATION'  // 취업준비
+  | 'ENTRANCE_EXAM'    // 입시
+  | 'ADVANCEMENT'      // 진학
+  | 'RETURN_TO_SCHOOL' // 복학
+  | 'RELATIONSHIP';    // 연애
+
+/**
+ * 선호 장소 타입
+ */
+export type PlaceType = 'HOME' | 'OUTDOOR' | 'INDOOR';
+
+/**
  * 내 정보 조회 응답
  */
 export interface MyInfoResponse {
@@ -17,6 +33,10 @@ export interface MyInfoResponse {
   gender?: 'MALE' | 'FEMALE';
   profileImg?: string;
   createdAt: string;
+  // ============ 사용자 맞춤 정보 필드들 ============
+  worryType?: WorryType;
+  region?: string;
+  preferredPlaceType?: PlaceType;
 }
 
 /**
@@ -27,6 +47,10 @@ export interface UpdateMyInfoRequest {
   birthDate?: string; // ISO 8601 형식 (YYYY-MM-DD)
   gender?: 'MALE' | 'FEMALE';
   profileImg?: string;
+  // ============ 사용자 맞춤 정보 필드들 ============
+  worryType?: WorryType;
+  region?: string;
+  preferredPlaceType?: PlaceType;
 }
 
 /**
@@ -39,7 +63,11 @@ export interface UpdateMyInfoResponse {
   birthDate?: string;
   gender?: 'MALE' | 'FEMALE';
   profileImg?: string;
-  updatedAt: string;
+  createdAt: string;
+  // ============ 사용자 맞춤 정보 필드들 ============
+  worryType?: WorryType;
+  region?: string;
+  preferredPlaceType?: PlaceType;
 }
 
 /**
