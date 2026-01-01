@@ -5,6 +5,8 @@ import { getDeviceId } from '../services/storage';
 import { logError, logUserAction } from '../utils/logger';
 import { executeWithErrorHandling } from '../utils/errorHandler';
 import { User } from '../types';
+import { checkAutoLogin, getUserInfo, clearAuthData } from '../utils/tokenStorage';
+import { apiClient } from '../api/client';
 
 // UserContext 타입 정의
 interface UserContextType {
@@ -44,7 +46,38 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
 
   const loadUser = async () => {
     try {
-      // 기존 기기별 데이터에서 닉네임 찾기
+      // 자동 로그인 체크 (로그인 유지가 false면 토큰 삭제)
+      const shouldAutoLogin = await checkAutoLogin();
+
+      // 저장된 사용자 정보 확인 (API 토큰 기반)
+      const storedUserInfo = await getUserInfo();
+      if (shouldAutoLogin && storedUserInfo) {
+        // API 기반 로그인 유지
+        const nickname = storedUserInfo.nickname;
+        const storageKeys = getStorageKeys(nickname);
+
+        // User 객체 생성 또는 로드
+        let userData: User | null = null;
+        const existingData = await AsyncStorage.getItem(storageKeys.USER);
+        if (existingData) {
+          userData = JSON.parse(existingData);
+        } else {
+          userData = {
+            nickname,
+            id: `user_${storedUserInfo.id}`,
+            createdAt: new Date().toISOString(),
+            role: 'user'
+          };
+          await AsyncStorage.setItem(storageKeys.USER, JSON.stringify(userData));
+        }
+
+        setUser(userData);
+        setCurrentNickname(nickname);
+        setIsLoading(false);
+        return;
+      }
+
+      // 기존 기기별 데이터에서 닉네임 찾기 (레거시 지원)
       const deviceId = await getDeviceId();
       const oldNicknameKey = `userNickname_${deviceId}`;
       const nickname = await AsyncStorage.getItem(oldNicknameKey);
@@ -205,6 +238,11 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         const storageKeys = getStorageKeys(currentNickname);
         await AsyncStorage.removeItem(storageKeys.USER_NICKNAME);
       }
+
+      // API 토큰 및 사용자 정보 정리
+      await clearAuthData();
+      apiClient.setAccessToken(null);
+
       setUser(null);
       setCurrentNickname(null);
     } catch (error) {

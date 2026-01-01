@@ -34,7 +34,7 @@ interface MissionGroupScreenProps {
 }
 
 const MissionGroupScreen: React.FC<MissionGroupScreenProps> = ({ navigation }) => {
-  const { userId } = useUser();
+  const { user } = useUser();
   const [missions, setMissions] = useState<SystemMission[]>([]);
   const [selectedMission, setSelectedMission] = useState<SystemMission | null>(null);
   const [reviews, setReviews] = useState<MissionReview[]>([]);

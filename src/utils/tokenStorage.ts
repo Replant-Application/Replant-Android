@@ -10,6 +10,7 @@ const STORAGE_KEYS = {
   ACCESS_TOKEN: '@replant:accessToken',
   REFRESH_TOKEN: '@replant:refreshToken',
   USER_INFO: '@replant:userInfo',
+  KEEP_LOGGED_IN: '@replant:keepLoggedIn',
 } as const;
 
 /**
@@ -144,6 +145,59 @@ export const isLoggedIn = async (): Promise<boolean> => {
     return !!accessToken;
   } catch (error) {
     console.error('Failed to check login status:', error);
+    return false;
+  }
+};
+
+/**
+ * 로그인 유지 설정 저장
+ */
+export const saveKeepLoggedIn = async (keepLoggedIn: boolean): Promise<void> => {
+  try {
+    await AsyncStorage.setItem(
+      STORAGE_KEYS.KEEP_LOGGED_IN,
+      JSON.stringify(keepLoggedIn)
+    );
+  } catch (error) {
+    console.error('Failed to save keep logged in setting:', error);
+    throw error;
+  }
+};
+
+/**
+ * 로그인 유지 설정 조회
+ */
+export const getKeepLoggedIn = async (): Promise<boolean> => {
+  try {
+    const value = await AsyncStorage.getItem(STORAGE_KEYS.KEEP_LOGGED_IN);
+    if (!value) {
+      return false;
+    }
+    return JSON.parse(value);
+  } catch (error) {
+    console.error('Failed to get keep logged in setting:', error);
+    return false;
+  }
+};
+
+/**
+ * 앱 시작 시 자동 로그인 체크
+ * keepLoggedIn이 false이면 토큰 삭제
+ */
+export const checkAutoLogin = async (): Promise<boolean> => {
+  try {
+    const keepLoggedIn = await getKeepLoggedIn();
+    const accessToken = await getAccessToken();
+
+    if (!keepLoggedIn && accessToken) {
+      // 로그인 유지가 false이면 토큰 삭제
+      await clearAuthData();
+      return false;
+    }
+
+    return !!accessToken;
+  } catch (error) {
+    console.error('Failed to check auto login:', error);
     return false;
   }
 };

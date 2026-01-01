@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, KeyboardAvoidingView, Platfor
 import { spacing, typography, borderRadius } from '../utils/designTokens';
 import { SCREEN_NAMES } from '../utils/constants';
 import { login as loginApi } from '../api/authApi';
-import { saveTokens, saveUserInfo } from '../utils/tokenStorage';
+import { saveTokens, saveUserInfo, saveKeepLoggedIn } from '../utils/tokenStorage';
 import { apiClient } from '../api/client';
 import { useUser } from '../contexts/UserContext';
 import { AlertModal } from '../components/ui';
@@ -52,6 +52,9 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onNavigate }) => {
         const finalRefreshToken = tokens?.refreshToken || refreshToken || '';
 
         await saveTokens(finalAccessToken, finalRefreshToken);
+
+        // 로그인 유지 설정 저장
+        await saveKeepLoggedIn(keepLoggedIn);
 
         // 사용자 정보 저장
         await saveUserInfo({
