@@ -162,7 +162,7 @@ const PlacesSearchScreen: React.FC<PlacesSearchScreenProps> = () => {
             ))}
           </ScrollView>
         )}
-      </View>
+      </ScrollView>
     </View>
   );
 };

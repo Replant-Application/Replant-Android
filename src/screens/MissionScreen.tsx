@@ -3,10 +3,11 @@ import { View, StyleSheet, ScrollView, Alert } from 'react-native';
 import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { useMission } from '../hooks/useMission';
 import { useCharacter } from '../hooks/useCharacter';
+import { useMissionFilters } from '../hooks/useMissionFilters';
+import { useMissionHandlers } from '../hooks/useMissionHandlers';
 import { MissionCard, MissionVerificationModal } from '../components/specialized';
 import { Card, Loading, ErrorBoundary, Button, Header, EmptyState, SectionTitle, ConfirmModal } from '../components/ui';
 import { colors, spacing, typography, borderRadius, shadows } from '../utils/designTokens';
-import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../types/navigation';
 import { ScreenNames } from '../types';
 import { Mission } from '../types';
@@ -68,37 +69,8 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
     setVerificationModalVisible(true);
   }, []);
 
-  // 필터링된 미션 목록
-  const filteredMissions = useMemo(() => {
-    switch (selectedFilter) {
-      case 'daily':
-        // 오늘 완료한 미션만 표시
-        return missions.filter(mission => {
-          if (mission.completed && mission.completed_at) {
-            const completedDate = mission.completed_at.split('T')[0];
-            return completedDate === today;
-          }
-          return false;
-        });
-      case 'completed':
-        return missions.filter(mission => mission.completed);
-      case 'all':
-      default:
-        return missions;
-    }
-  }, [missions, selectedFilter, today]);
-
   const totalGrowthMissions = filteredMissions.length;
   const displayedMissions = filteredMissions;
-
-
-  // 진행률 계산
-  const completedMissions = useMemo(() =>
-    missions.filter(mission => mission.completed).length,
-    [missions]
-  );
-  const totalMissions = missions.length;
-  const progressPercentage = totalMissions > 0 ? (completedMissions / totalMissions) * 100 : 0;
 
   // 미션 완료 (사진이 있으면 그 사진으로, 없으면 null로)
   const handleMissionComplete = async (missionId: string) => {
