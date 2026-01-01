@@ -3,7 +3,7 @@ import { View, StyleSheet, ScrollView, Alert } from 'react-native';
 import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { useMission } from '../hooks/useMission';
 import { useCharacter } from '../hooks/useCharacter';
-import { useMissionFilters } from '../hooks/useMissionFilters';
+import { useMissionFilters, MissionFilter } from '../hooks/useMissionFilters';
 import { useMissionHandlers } from '../hooks/useMissionHandlers';
 import { MissionCard, MissionVerificationModal } from '../components/specialized';
 import { Card, Loading, ErrorBoundary, Button, Header, EmptyState, SectionTitle, ConfirmModal } from '../components/ui';

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, Image, TextInput } from 'react-native';
 import { useUser } from '../contexts/UserContext';
+import { useAdmin } from '../hooks/useAdmin';
 import { Header, ConfirmModal } from '../components/ui';
 import { colors, spacing, typography, borderRadius, shadows } from '../utils/designTokens';
 import { NavigationProp } from '@react-navigation/native';
