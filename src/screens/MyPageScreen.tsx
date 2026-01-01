@@ -18,12 +18,10 @@ const MyPageScreen: React.FC<MyPageScreenProps> = ({ navigation }) => {
   const { characters } = useCharacter();
   const currentCharacter = characters.length > 0 ? characters[0] : null;
 
-  // 에러 처리
   if (error) {
     return <ErrorBoundary error={error} />;
   }
 
-  // 로딩 처리
   if (loading || !profile) {
     return (
       <ScrollView style={styles.container}>
@@ -35,7 +33,6 @@ const MyPageScreen: React.FC<MyPageScreenProps> = ({ navigation }) => {
     );
   }
 
-  // 가입일 포맷팅
   const formatDate = (dateString: string): string => {
     try {
       const date = new Date(dateString);
@@ -49,7 +46,6 @@ const MyPageScreen: React.FC<MyPageScreenProps> = ({ navigation }) => {
     }
   };
 
-  // 캐릭터 상세 페이지로 이동
   const handleCharacterPress = (character: Character): void => {
     navigation.navigate('CharacterDetail', { character });
   };
@@ -58,7 +54,6 @@ const MyPageScreen: React.FC<MyPageScreenProps> = ({ navigation }) => {
     <ScrollView style={styles.container}>
       <Header />
       <View style={styles.content}>
-        {/* 사용자 정보 섹션 */}
         <Card style={styles.profileCard}>
           <SectionTitle title="👤 프로필" size="lg" marginBottom={spacing[4]} />
           <View style={styles.profileInfo}>
@@ -71,7 +66,6 @@ const MyPageScreen: React.FC<MyPageScreenProps> = ({ navigation }) => {
           </View>
         </Card>
 
-        {/* 캐릭터 정보 섹션 */}
         {currentCharacter && (
           <View style={styles.characterSection}>
             <SectionTitle title="🌱 나의 캐릭터" size="lg" marginBottom={spacing[4]} />
@@ -83,7 +77,6 @@ const MyPageScreen: React.FC<MyPageScreenProps> = ({ navigation }) => {
           </View>
         )}
 
-        {/* 통계 정보 섹션 */}
         <Card style={styles.statsCard}>
           <SectionTitle title="📊 통계" size="lg" marginBottom={spacing[4]} />
           <View style={styles.statsGrid}>
@@ -176,4 +169,3 @@ const styles = StyleSheet.create({
 });
 
 export default MyPageScreen;
-

@@ -18,7 +18,7 @@ import {
 import { useCommunityPost } from '../hooks/useCommunityPost';
 import { useCommunity } from '../hooks/useCommunity';
 import { CommentCard } from '../components/specialized';
-import { Loading, ErrorBoundary, Header, EmptyState, Button } from '../components/ui';
+import { Loading, ErrorBoundary, Header, EmptyState } from '../components/ui';
 import { colors, spacing, typography, borderRadius } from '../utils/designTokens';
 import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../types/navigation';
@@ -37,7 +37,7 @@ const CommunityPostDetailScreen: React.FC<CommunityPostDetailScreenProps> = ({
   const { currentNickname } = useUser();
   const { post, comments, loading, error, createComment, updateComment, deleteComment, loadPost } =
     useCommunityPost(postId);
-  const { toggleLike, toggleScrap, deletePost } = useCommunity();
+  const { toggleLike, deletePost } = useCommunity();
   const [commentContent, setCommentContent] = useState('');
   const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
   const [editingContent, setEditingContent] = useState('');
@@ -47,13 +47,6 @@ const CommunityPostDetailScreen: React.FC<CommunityPostDetailScreenProps> = ({
   const handleLike = async () => {
     if (post) {
       await toggleLike(post.post_id);
-      await loadPost(); // 게시글 정보 새로고침
-    }
-  };
-
-  const handleScrap = async () => {
-    if (post) {
-      await toggleScrap(post.post_id);
       await loadPost(); // 게시글 정보 새로고침
     }
   };
@@ -201,13 +194,6 @@ const CommunityPostDetailScreen: React.FC<CommunityPostDetailScreenProps> = ({
               <Text style={styles.actionIcon}>💬</Text>
               <Text style={styles.actionText}>{post.comment_count}</Text>
             </View>
-
-            <TouchableOpacity style={styles.actionButton} onPress={handleScrap}>
-              <Text style={styles.actionIcon}>{post.is_scrapped ? '🔖' : '📌'}</Text>
-              {post.scrap_count > 0 && (
-                <Text style={styles.actionText}>{post.scrap_count}</Text>
-              )}
-            </TouchableOpacity>
 
             {isAuthor && (
               <TouchableOpacity
@@ -499,4 +485,3 @@ const styles = StyleSheet.create({
 });
 
 export default CommunityPostDetailScreen;
-

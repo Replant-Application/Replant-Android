@@ -8,13 +8,10 @@ import { ServiceResult } from '../types';
 import { getAccessToken, saveTokens } from '../utils/tokenStorage';
 import { refreshToken as refreshTokenApi } from './authApi';
 
-/**
- * API 요청 옵션
- */
 export interface ApiRequestOptions {
   method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
   headers?: Record<string, string>;
-  body?: any;
+  body?: unknown;
   params?: Record<string, string | number>;
 }
 
@@ -120,7 +117,7 @@ export class ApiClient {
    */
   async request<T>(
     endpoint: string,
-    options: ApiRequestOptions = {}
+    _options: ApiRequestOptions = {}
   ): Promise<ServiceResult<T>> {
     try {
       // URL 구성 (params가 있으면 query string 추가)
@@ -217,24 +214,15 @@ export class ApiClient {
     return this.request<T>(endpoint, { method: 'GET', params });
   }
 
-  /**
-   * POST 요청
-   */
-  async post<T>(endpoint: string, body?: any): Promise<ServiceResult<T>> {
+  async post<T>(endpoint: string, body?: unknown): Promise<ServiceResult<T>> {
     return this.request<T>(endpoint, { method: 'POST', body });
   }
 
-  /**
-   * PUT 요청
-   */
-  async put<T>(endpoint: string, body?: any): Promise<ServiceResult<T>> {
+  async put<T>(endpoint: string, body?: unknown): Promise<ServiceResult<T>> {
     return this.request<T>(endpoint, { method: 'PUT', body });
   }
 
-  /**
-   * PATCH 요청
-   */
-  async patch<T>(endpoint: string, body?: any): Promise<ServiceResult<T>> {
+  async patch<T>(endpoint: string, body?: unknown): Promise<ServiceResult<T>> {
     return this.request<T>(endpoint, { method: 'PATCH', body });
   }
 
@@ -248,4 +236,3 @@ export class ApiClient {
 
 // 싱글톤 인스턴스
 export const apiClient = new ApiClient();
-

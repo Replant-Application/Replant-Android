@@ -1,5 +1,4 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { getData, setData, getStorageKeys, addData, updateData, deleteData } from './storage';
+import { getData, setData, getStorageKeys } from './storage';
 import { logError } from '../utils/logger';
 import { ServiceResult, Character, UserProfile, UserInfoUpdateData, CalendarEvent, CalendarEventData, User, Mission, Diary, CommunityPost } from '../types';
 import { generateUserCharacterName } from '../utils/characterNameGenerator';
@@ -29,55 +28,70 @@ export const initializeUserData = async (
     // 미션 템플릿에서 초기 미션 생성
     const storageKeys = getStorageKeys(nickname);
 
-    // 항상 JSON 파일에서 최신 템플릿 로드
-    const missionTemplates = require('../data/missionTemplates.json');
-    // 모든 미션 사용 (7개)
-    const essentialIds: string[] = ['1', '2', '3', '4', '5', '6', '7'];
-    const selectedTemplates = missionTemplates.filter((t: any) => essentialIds.includes(t.mission_id));
-    const missions = selectedTemplates.map((template: any) => ({
-      id: `mission_${Date.now()}_${template.mission_id}`,
-      mission_id: template.mission_id,
-      title: template.title,
-      description: template.description,
-      emoji: template.emoji,
-      category_id: 'growth',
-      difficulty: template.difficulty,
-      experience: template.experience,
-      completed: false
-    }));
-    await setData(storageKeys.MISSIONS, missions);
+    // 기존 미션 데이터 확인
+    const existingMissions = await getData(storageKeys.MISSIONS);
 
-    // 캐릭터 템플릿에서 초기 캐릭터 생성 (단일 캐릭터)
-    // 항상 JSON 파일에서 최신 템플릿 로드
-    const characterTemplatesData = require('../data/characterTemplates.json');
-    await setData(storageKeys.CHARACTER_TEMPLATES, characterTemplatesData);
-    const characterTemplates: any[] = characterTemplatesData;
-    if (characterTemplates.length > 0) {
-      const now = Date.now();
-      const initialCharacter: Character = {
-        id: `character_${now}_growth`,
-        character_id: `character_${now}_growth`,
-        user_id: userId,
-        name: generateUserCharacterName(userId, 'growth'),
-        title: characterTemplates[0].title,
-        description: getCategoryDescription('growth'),
-        emoji: characterTemplates[0].emoji || '🌱',
-        level: 1,
-        experience: 0,
-        max_experience: 100,
-        total_experience: 0,
-        unlocked: true,
-        unlocked_date: new Date().toISOString(),
+    // 기존 미션이 없거나 빈 배열인 경우에만 초기화
+    if (!existingMissions || (Array.isArray(existingMissions) && existingMissions.length === 0)) {
+      // 항상 JSON 파일에서 최신 템플릿 로드
+      const missionTemplates = require('../data/missionTemplates.json');
+      // 모든 미션 사용 (7개)
+      const essentialIds: string[] = ['1', '2', '3', '4', '5', '6', '7'];
+      const selectedTemplates = missionTemplates.filter((t: any) => essentialIds.includes(t.mission_id));
+      const missions = selectedTemplates.map((template: any) => ({
+        id: `mission_${Date.now()}_${template.mission_id}`,
+        mission_id: template.mission_id,
+        title: template.title,
+        description: template.description,
+        emoji: template.emoji,
         category_id: 'growth',
-        completed_missions: 0,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      };
-      await setData(storageKeys.CHARACTERS, [initialCharacter]);
+        difficulty: template.difficulty,
+        experience: template.experience,
+        completed: false
+      }));
+      await setData(storageKeys.MISSIONS, missions);
     }
 
-    // 다이어리는 빈 배열로 시작
-    await setData(storageKeys.DIARIES, []);
+    // 캐릭터 템플릿 저장 (템플릿은 항상 업데이트)
+    const characterTemplatesData = require('../data/characterTemplates.json');
+    await setData(storageKeys.CHARACTER_TEMPLATES, characterTemplatesData);
+
+    // 기존 캐릭터 데이터 확인
+    const existingCharacters = await getData(storageKeys.CHARACTERS);
+
+    // 기존 캐릭터가 없거나 빈 배열인 경우에만 초기 캐릭터 생성
+    if (!existingCharacters || (Array.isArray(existingCharacters) && existingCharacters.length === 0)) {
+      const characterTemplates: any[] = characterTemplatesData;
+      if (characterTemplates.length > 0) {
+        const now = Date.now();
+        const initialCharacter: Character = {
+          id: `character_${now}_growth`,
+          character_id: `character_${now}_growth`,
+          user_id: userId,
+          name: generateUserCharacterName(userId, 'growth'),
+          title: characterTemplates[0].title,
+          description: getCategoryDescription('growth'),
+          emoji: characterTemplates[0].emoji || '🌱',
+          level: 1,
+          experience: 0,
+          max_experience: 100,
+          total_experience: 0,
+          unlocked: true,
+          unlocked_date: new Date().toISOString(),
+          category_id: 'growth',
+          completed_missions: 0,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        };
+        await setData(storageKeys.CHARACTERS, [initialCharacter]);
+      }
+    }
+
+    // 다이어리는 기존 데이터가 있으면 유지, 없으면 빈 배열로 시작
+    const existingDiaries = await getData(storageKeys.DIARIES);
+    if (!existingDiaries || (Array.isArray(existingDiaries) && existingDiaries.length === 0)) {
+      await setData(storageKeys.DIARIES, []);
+    }
 
     return {
       success: true,
@@ -100,7 +114,7 @@ export const initializeUserData = async (
 export const getUserProfile = async (nickname: string): Promise<ServiceResult<UserProfile>> => {
   try {
     const storageKeys = getStorageKeys(nickname);
-    
+
     // User 정보 로드
     const userData: User | null = await getData(storageKeys.USER);
     if (!userData) {
@@ -114,9 +128,9 @@ export const getUserProfile = async (nickname: string): Promise<ServiceResult<Us
     // 미션 통계
     const missions: Mission[] = await getData(storageKeys.MISSIONS) || [];
     const completedMissions = missions.filter(m => m.completed).length;
-    
+
     // 경험치 통계 (캐릭터의 total_experience 사용)
-    const totalExperience = character?.total_experience || 0;
+    const totalExperience = (character && 'total_experience' in character) ? character.total_experience || 0 : 0;
 
     // 다이어리 통계
     const diaries: Diary[] = await getData(storageKeys.DIARIES) || [];
@@ -130,7 +144,7 @@ export const getUserProfile = async (nickname: string): Promise<ServiceResult<Us
     const profile: UserProfile = {
       nickname: userData.nickname,
       createdAt: userData.createdAt || new Date().toISOString(),
-      character,
+      character: character || null,
       stats: {
         completedMissions,
         totalExperience,
@@ -162,7 +176,7 @@ export const updateUserInfo = async (
   try {
     const storageKeys = getStorageKeys(nickname);
     const userData: User | null = await getData(storageKeys.USER);
-    
+
     if (!userData) {
       return { success: false, error: '사용자 정보를 찾을 수 없습니다.' };
     }
@@ -192,9 +206,9 @@ export const getCalendarEvents = async (nickname: string): Promise<ServiceResult
   try {
     const storageKeys = getStorageKeys(nickname);
     const events: CalendarEvent[] = await getData(storageKeys.CALENDAR_EVENTS) || [];
-    
+
     // 날짜순 정렬
-    const sortedEvents = events.sort((a, b) => 
+    const sortedEvents = events.sort((a, b) =>
       new Date(a.date).getTime() - new Date(b.date).getTime()
     );
 
@@ -258,15 +272,24 @@ export const updateCalendarEvent = async (
   try {
     const storageKeys = getStorageKeys(nickname);
     const events: CalendarEvent[] = await getData(storageKeys.CALENDAR_EVENTS) || [];
-    
+
     const eventIndex = events.findIndex(e => e.id === eventId);
     if (eventIndex === -1) {
       return { success: false, error: '이벤트를 찾을 수 없습니다.' };
     }
 
+    const existingEvent = events[eventIndex];
+    if (!existingEvent) {
+      return { success: false, error: '이벤트를 찾을 수 없습니다.' };
+    }
+
     const updatedEvent: CalendarEvent = {
-      ...events[eventIndex],
-      ...eventData,
+      id: existingEvent.id,
+      title: eventData.title ?? existingEvent.title,
+      description: eventData.description ?? existingEvent.description,
+      date: eventData.date ?? existingEvent.date,
+      time: eventData.time ?? existingEvent.time,
+      created_at: existingEvent.created_at,
       updated_at: new Date().toISOString(),
     };
 
@@ -297,9 +320,9 @@ export const deleteCalendarEvent = async (
   try {
     const storageKeys = getStorageKeys(nickname);
     const events: CalendarEvent[] = await getData(storageKeys.CALENDAR_EVENTS) || [];
-    
+
     const filteredEvents = events.filter(e => e.id !== eventId);
-    
+
     if (filteredEvents.length === events.length) {
       return { success: false, error: '이벤트를 찾을 수 없습니다.' };
     }

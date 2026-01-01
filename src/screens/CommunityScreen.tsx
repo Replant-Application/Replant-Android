@@ -5,6 +5,8 @@
 import React, { useState, useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Image, Modal } from 'react-native';
 import { useCommunity } from '../hooks/useCommunity';
+import { useMission } from '../hooks/useMission';
+import { useUser } from '../contexts/UserContext';
 import { PostCard } from '../components/specialized';
 import { Loading, ErrorBoundary, EmptyState } from '../components/ui';
 import { colors, spacing, typography, borderRadius, shadows } from '../utils/designTokens';
@@ -14,8 +16,6 @@ import { RootStackParamList } from '../types/navigation';
 interface CommunityScreenProps {
   navigation: NavigationProp<RootStackParamList>;
 }
-
-type CommunityTab = 'all' | 'mission-group';
 
 const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation }) => {
   const { posts, loading, error, toggleLike, toggleScrap } = useCommunity();
@@ -34,6 +34,19 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation }) => {
   // 검색 및 필터링
   const filteredPosts = useMemo(() => {
     let filtered = posts;
+
+    // 내가 수행한 미션만 필터 (작성자도 내가 작성한 것만)
+    if (showMyMissionsOnly && completedMissionIds.length > 0 && currentNickname) {
+      filtered = filtered.filter(post => {
+        // 작성자가 현재 사용자와 일치하는지 확인
+        const isMyPost = post.author === currentNickname || post.author_nickname === currentNickname;
+        if (!isMyPost) return false;
+
+        // 미션 ID가 내가 완료한 미션 목록에 포함되는지 확인
+        const postMissionId = post.mission_id?.toString();
+        return completedMissionIds.some(id => id.toString() === postMissionId);
+      });
+    }
 
     // 검색
     if (searchQuery.trim()) {
@@ -72,10 +85,6 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation }) => {
     await toggleLike(postId);
   };
 
-  const handleScrap = async (postId: string) => {
-    await toggleScrap(postId);
-  };
-
   if (loading) {
     return <Loading text="게시글을 불러오는 중..." />;
   }
@@ -84,18 +93,12 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation }) => {
     return <ErrorBoundary error={error} />;
   }
 
-  // 미션 그룹 화면으로 이동
-  const handleMissionGroupPress = () => {
-    navigation.navigate('MissionGroup');
-  };
-
   return (
     <View style={styles.container}>
       {/* 헤더 */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>커뮤니티</Text>
       </View>
-
       {/* 탭 */}
       <View style={styles.tabContainer}>
         <View style={styles.tabWrapper}>
@@ -148,7 +151,6 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation }) => {
         </View>
       )}
 
-      {activeTab === 'all' && (
       <ScrollView style={styles.content}>
         {filteredPosts.length === 0 ? (
           <EmptyState
@@ -164,7 +166,6 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation }) => {
                 post={post}
                 onPress={handlePostPress}
                 onLike={handleLike}
-                onScrap={handleScrap}
               />
             ))}
           </View>
@@ -380,4 +381,3 @@ const styles = StyleSheet.create({
 });
 
 export default CommunityScreen;
-

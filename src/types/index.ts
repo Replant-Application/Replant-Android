@@ -3,8 +3,7 @@
  * 프로젝트 전체에서 사용되는 기본 타입들
  */
 
-// 기본 서비스 결과 타입
-export interface ServiceResult<T = any> {
+export interface ServiceResult<T = unknown> {
   success: boolean;
   data?: T;
   error?: string;
@@ -227,6 +226,7 @@ export interface UseMissionReturn {
   missions: Mission[];
   loading: boolean;
   error: string | null;
+  loadMissions: () => Promise<void>;
   saveMissionPhoto: (missionId: string, photoUrl: string) => Promise<ServiceResult<void>>;
   deleteMissionPhoto: (missionId: string) => Promise<ServiceResult<void>>;
   completeMissionWithPhoto: (missionId: string, photoUrl: string | null) => Promise<MissionCompletionResult>;
@@ -267,7 +267,6 @@ export interface UseCommunityReturn {
   updatePost: (postId: string, postData: Partial<CommunityPostData>) => Promise<ServiceResult<CommunityPost>>;
   deletePost: (postId: string) => Promise<ServiceResult<void>>;
   toggleLike: (postId: string) => Promise<ServiceResult<void>>;
-  toggleScrap: (postId: string) => Promise<ServiceResult<void>>;
   searchPosts: (query: string) => CommunityPost[];
   filterPosts: (category?: string, sortBy?: 'latest' | 'popular') => CommunityPost[];
 }
@@ -277,8 +276,8 @@ export interface UseCommunityPostReturn {
   comments: CommunityComment[];
   loading: boolean;
   error: string | null;
-  loadPost: (postId: string) => Promise<void>;
-  loadComments: (postId: string) => Promise<void>;
+  loadPost: () => Promise<void>;
+  loadComments: () => Promise<void>;
   createComment: (content: string, parentCommentId?: string) => Promise<ServiceResult<CommunityComment>>;
   updateComment: (commentId: string, content: string) => Promise<ServiceResult<CommunityComment>>;
   deleteComment: (commentId: string) => Promise<ServiceResult<void>>;
@@ -422,4 +421,8 @@ export enum ScreenNames {
   STATISTICS = 'Statistics',
   MISSION_GROUP = 'MissionGroup',
   AI_MISSION_GENERATE = 'AIMissionGenerate',
+  ADMIN_DASHBOARD = 'AdminDashboard',
+  ADMIN_USER_LIST = 'AdminUserList',
+  ADMIN_USER_DETAIL = 'AdminUserDetail',
+  ADMIN_USER_EDIT = 'AdminUserEdit',
 }

@@ -17,8 +17,7 @@ import { Header, Button } from '../components/ui';
 import { colors, spacing, typography, borderRadius } from '../utils/designTokens';
 import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../types/navigation';
-import { analyzeImage, getAnalysisType, saveAnalysisResult } from '../services/aiService';
-import { useUser } from '../contexts/UserContext';
+// useUser는 사용하지 않음
 
 interface PhotoSelectScreenProps {
   navigation: NavigationProp<RootStackParamList>;
@@ -26,20 +25,17 @@ interface PhotoSelectScreenProps {
 }
 
 const PhotoSelectScreen: React.FC<PhotoSelectScreenProps> = ({ navigation, route }) => {
-  const { currentNickname } = useUser();
   const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null);
   const [showPreview, setShowPreview] = useState(false);
-  const [analyzing, setAnalyzing] = useState(false);
-  const [analysisResult, setAnalysisResult] = useState<{ verified: boolean } | null>(null);
+  const [analyzing] = useState(false);
 
   const missionId = route?.params?.missionId;
-  const missionTitle = route?.params?.missionTitle || '미션';
 
   // 카메라로 사진 촬영
   const handleTakePhoto = () => {
     const options = {
       mediaType: 'photo' as MediaType,
-      quality: 0.8,
+      quality: 0.8 as any,
       saveToPhotos: true,
     };
 
@@ -72,7 +68,7 @@ const PhotoSelectScreen: React.FC<PhotoSelectScreenProps> = ({ navigation, route
   const handlePickFromGallery = () => {
     const options = {
       mediaType: 'photo' as MediaType,
-      quality: 0.8,
+      quality: 0.8 as any,
       selectionLimit: 1,
       includeBase64: false,
     };
@@ -98,62 +94,21 @@ const PhotoSelectScreen: React.FC<PhotoSelectScreenProps> = ({ navigation, route
 
   // AI 분석하기
   const handleAnalyzePhoto = async () => {
-    if (!selectedPhoto || !missionId || !currentNickname) {
-      Alert.alert('오류', '분석할 사진이 없습니다.');
-      return;
-    }
-
-    try {
-      setAnalyzing(true);
-      setAnalysisResult(null);
-
-      // 분석 타입 결정
-      const analysisType = getAnalysisType(missionTitle);
-
-      // 이미지 분석 요청
-      const result = await analyzeImage(selectedPhoto, missionTitle, analysisType);
-
-      if (result.success && result.data) {
-        // 분석 결과 저장
-        await saveAnalysisResult(currentNickname, missionId, result.data);
-
-        // 분석 결과 상태 업데이트
-        setAnalysisResult({
-          verified: result.data.verified,
-        });
-
-        // 결과 알림
-        if (result.data.verified) {
-          Alert.alert(
-            '✅ 분석 완료',
-            '미션 수행이 확인되었습니다.',
-            [{ text: '확인' }]
-          );
-        } else {
-          Alert.alert(
-            '❌ 분석 완료',
-            '미션 수행이 확인되지 않았습니다.',
-            [{ text: '확인' }]
-          );
-        }
-      } else {
-        Alert.alert('오류', result.error || '이미지 분석에 실패했습니다.');
-      }
-    } catch (analyzeError) {
-      Alert.alert('오류', '이미지 분석 중 오류가 발생했습니다.');
-    } finally {
-      setAnalyzing(false);
-    }
+    Alert.alert(
+      '준비중',
+      'AI 분석 기능은 현재 준비중입니다.\n곧 만나보실 수 있습니다!',
+      [{ text: '확인' }]
+    );
   };
 
   // 사진 선택 확인
   const handleConfirm = () => {
     if (selectedPhoto && missionId) {
-      navigation.navigate('Mission', { 
-        selectedPhotoUri: selectedPhoto, 
+      navigation.navigate('Mission', {
+        selectedPhotoUri: selectedPhoto,
         missionId,
         timestamp: Date.now(),
-        analysisResult: analysisResult, // 분석 결과도 함께 전달
+        analysisResult: null, // 분석 결과는 현재 사용하지 않음
       });
     }
   };
@@ -171,7 +126,7 @@ const PhotoSelectScreen: React.FC<PhotoSelectScreenProps> = ({ navigation, route
 
   return (
     <View style={styles.container}>
-      <Header 
+      <Header
         title="사진 선택"
         titleStyle={styles.headerTitle}
         leftButton={
@@ -254,7 +209,7 @@ const PhotoSelectScreen: React.FC<PhotoSelectScreenProps> = ({ navigation, route
               <Button
                 title={analyzing ? '🤖 분석중...' : '🤖 AI 분석'}
                 onPress={handleAnalyzePhoto}
-                style={[styles.analyzeButton, analyzing && styles.analyzingButton]}
+                style={[styles.analyzeButton, analyzing ? styles.analyzingButton : undefined].filter(Boolean) as any}
                 textStyle={styles.analyzeButtonText}
                 disabled={analyzing}
               />
@@ -373,4 +328,3 @@ const styles = StyleSheet.create({
 });
 
 export default PhotoSelectScreen;
-

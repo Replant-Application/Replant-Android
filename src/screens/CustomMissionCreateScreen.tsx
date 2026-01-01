@@ -16,6 +16,7 @@ import { createCustomMission } from '../services/missionService';
 import { useUser } from '../contexts/UserContext';
 import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../types/navigation';
+import { ScreenNames } from '../types';
 
 interface CustomMissionCreateScreenProps {
   navigation: NavigationProp<RootStackParamList>;
@@ -32,14 +33,14 @@ const DIFFICULTY_OPTIONS = [
 const CustomMissionCreateScreen: React.FC<CustomMissionCreateScreenProps> = ({ navigation, route }) => {
   const { currentNickname } = useUser();
   const generatedMission = route?.params?.generatedMission;
-  
+
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [selectedEmoji, setSelectedEmoji] = useState('🎯');
   const [difficulty, setDifficulty] = useState('medium');
   const [customExp, setCustomExp] = useState(50);
   const [loading, setLoading] = useState(false);
-  
+
   // AI 생성 미션이 있으면 초기값 설정
   useEffect(() => {
     if (generatedMission) {
@@ -83,7 +84,7 @@ const CustomMissionCreateScreen: React.FC<CustomMissionCreateScreenProps> = ({ n
           [
             {
               text: '확인',
-              onPress: () => navigation.navigate('Mission')
+              onPress: () => (navigation as any).navigate(ScreenNames.MISSION)
             }
           ]
         );
@@ -114,6 +115,20 @@ const CustomMissionCreateScreen: React.FC<CustomMissionCreateScreenProps> = ({ n
       <Header />
 
       <ScrollView style={styles.content}>
+        {/* AI 미션 생성 버튼 */}
+        <FormCard style={{ marginBottom: spacing[4] }}>
+          <SectionTitle title="AI로 미션 만들기" size="lg" marginBottom={spacing[3]} />
+          <Text style={styles.aiDescription}>
+            지난 1주일간 완료한 미션을 분석하여 나만의 맞춤형 미션을 추천받을 수 있어요.
+          </Text>
+          <Button
+            title="🤖 AI 미션 생성하기"
+            onPress={() => (navigation as any).navigate(ScreenNames.AI_MISSION_GENERATE)}
+            style={styles.aiButton}
+            variant="outline"
+          />
+        </FormCard>
+
         <FormCard>
           <SectionTitle title="미션 제목" size="lg" marginBottom={spacing[3]} />
           <TextInput
@@ -188,7 +203,7 @@ const CustomMissionCreateScreen: React.FC<CustomMissionCreateScreenProps> = ({ n
       <View style={styles.buttonContainer}>
         <Button
           title="취소"
-          onPress={() => navigation.navigate('Mission')}
+          onPress={() => (navigation as any).navigate(ScreenNames.MISSION)}
           style={StyleSheet.flatten([styles.button, styles.cancelButton])}
           textStyle={styles.cancelButtonText}
         />

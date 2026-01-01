@@ -2,8 +2,8 @@
  * 관리자 대시보드 화면
  */
 
-import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import React, { useEffect, useState, useCallback } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { NavigationProp } from '@react-navigation/native';
 import { useAdmin } from '../hooks/useAdmin';
 import { Card, Header, Loading, ErrorBoundary, SectionTitle } from '../components/ui';
@@ -16,7 +16,7 @@ interface AdminDashboardScreenProps {
 }
 
 const AdminDashboardScreen: React.FC<AdminDashboardScreenProps> = ({ navigation }) => {
-  const { getAllUsers, loading, error } = useAdmin();
+  const { getAllUsers, deleteAllUsers, loading, error } = useAdmin();
   const [stats, setStats] = useState({
     totalUsers: 0,
     activeUsers: 0,
@@ -24,11 +24,7 @@ const AdminDashboardScreen: React.FC<AdminDashboardScreenProps> = ({ navigation 
   });
   const [recentUsers, setRecentUsers] = useState<UserInfo[]>([]);
 
-  useEffect(() => {
-    loadDashboardData();
-  }, []);
-
-  const loadDashboardData = async () => {
+  const loadDashboardData = useCallback(async () => {
     const result = await getAllUsers({ page: 1, limit: 100 });
     if (result.success && result.data) {
       const users = result.data;
@@ -49,6 +45,42 @@ const AdminDashboardScreen: React.FC<AdminDashboardScreenProps> = ({ navigation 
       });
       setRecentUsers(sorted.slice(0, 5));
     }
+  }, [getAllUsers]);
+
+  useEffect(() => {
+    loadDashboardData();
+  }, [loadDashboardData]);
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _handleDeleteAllUsers = () => {
+    Alert.alert(
+      '⚠️ 경고',
+      `모든 유저 데이터가 삭제됩니다.\n\n이 작업은 되돌릴 수 없습니다.\n정말로 모든 유저를 삭제하시겠습니까?`,
+      [
+        { text: '취소', style: 'cancel' },
+        {
+          text: '삭제',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              const result = await deleteAllUsers();
+              if (result.success) {
+                Alert.alert(
+                  '✅ 완료',
+                  `${result.data?.deletedCount || 0}명의 유저가 삭제되었습니다.`
+                );
+                // 데이터 새로고침
+                loadDashboardData();
+              } else {
+                Alert.alert('오류', result.error || '유저 삭제에 실패했습니다.');
+              }
+            } catch (err) {
+              Alert.alert('오류', '유저 삭제 중 오류가 발생했습니다.');
+            }
+          }
+        }
+      ]
+    );
   };
 
   if (error) {
@@ -58,7 +90,7 @@ const AdminDashboardScreen: React.FC<AdminDashboardScreenProps> = ({ navigation 
   return (
     <ScrollView style={styles.container}>
       <Header title="관리자 대시보드" />
-      
+
       <View style={styles.content}>
         {loading ? (
           <Loading text="데이터를 불러오는 중..." />
@@ -107,16 +139,6 @@ const AdminDashboardScreen: React.FC<AdminDashboardScreenProps> = ({ navigation 
               </Card>
             )}
 
-            {/* 빠른 액션 */}
-            <Card style={styles.actionsCard}>
-              <SectionTitle title="⚡ 빠른 액션" size="lg" marginBottom={spacing[4]} />
-              <TouchableOpacity
-                style={styles.actionButton}
-                onPress={() => navigation.navigate('AdminUserList')}
-              >
-                <Text style={styles.actionButtonText}>전체 유저 목록 보기</Text>
-              </TouchableOpacity>
-            </Card>
           </>
         )}
       </View>
@@ -211,7 +233,18 @@ const styles = StyleSheet.create({
     fontWeight: typography.fontWeight.semibold,
     color: colors.text.inverse,
   },
+  dangerButton: {
+    backgroundColor: colors.error,
+    padding: spacing[4],
+    borderRadius: borderRadius.md,
+    alignItems: 'center',
+    marginTop: spacing[3],
+  },
+  dangerButtonText: {
+    fontSize: typography.fontSize.base,
+    fontWeight: typography.fontWeight.semibold,
+    color: colors.text.inverse,
+  },
 });
 
 export default AdminDashboardScreen;
-

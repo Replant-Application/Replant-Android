@@ -14,10 +14,10 @@
  */
 
 import React from 'react';
-import { TouchableOpacity, Text, StyleSheet, ActivityIndicator, ViewStyle, TextStyle } from 'react-native';
+import { TouchableOpacity, Text, StyleSheet, ActivityIndicator, ViewStyle, TextStyle, TouchableOpacityProps } from 'react-native';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
 
-interface ButtonProps {
+interface ButtonProps extends Omit<TouchableOpacityProps, 'onPress' | 'style'> {
   title: string;
   onPress: () => void;
   variant?: 'primary' | 'secondary' | 'outline' | 'ghost';
@@ -26,7 +26,6 @@ interface ButtonProps {
   loading?: boolean;
   style?: ViewStyle;
   textStyle?: TextStyle;
-  [key: string]: any;
 }
 
 const Button: React.FC<ButtonProps> = ({

@@ -24,6 +24,10 @@ const StartScreen: React.FC<StartScreenProps> = ({ onNavigate }) => {
     onNavigate(SCREEN_NAMES.LOGIN as string);
   };
 
+  const handleNaverLogin = () => {
+    Alert.alert('네이버 로그인', '네이버 로그인 기능은 준비 중입니다.');
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.content}>
@@ -81,6 +85,20 @@ const StartScreen: React.FC<StartScreenProps> = ({ onNavigate }) => {
             activeOpacity={0.8}
           >
             <Text style={styles.textButtonText}>로그인</Text>
+          </TouchableOpacity>
+
+          {/* 네이버 로그인 */}
+          <TouchableOpacity
+            style={[styles.socialButton, styles.naverButton]}
+            onPress={handleNaverLogin}
+            activeOpacity={0.8}
+          >
+            <Image
+              source={require('../assets/images/naver_logo.png')}
+              style={styles.socialLogo}
+              resizeMode="contain"
+            />
+            <Text style={[styles.socialButtonText, styles.naverButtonText]}>네이버로 시작하기</Text>
           </TouchableOpacity>
         </View>
       </View>

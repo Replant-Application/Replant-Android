@@ -31,7 +31,7 @@ const CharacterDetailScreen: React.FC<CharacterDetailScreenProps> = ({ route, na
 
   if (!character) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <View style={styles.emptyContainer}>
         <Text>캐릭터 정보를 불러올 수 없습니다.</Text>
       </View>
     );
@@ -418,7 +418,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background.primary,
     borderRadius: borderRadius.xl,
     padding: spacing[6],
-    ...shadows.xl,
+    ...shadows.lg,
   },
   modalTitle: {
     fontSize: typography.fontSize.xl,
@@ -513,6 +513,11 @@ const styles = StyleSheet.create({
   downloadIconImage: {
     width: 20,
     height: 20,
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   downloadButtonText: {
     fontSize: typography.fontSize.sm,

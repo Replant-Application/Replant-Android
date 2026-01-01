@@ -6,6 +6,7 @@ import { useMission } from '../hooks/useMission';
 import { Loading, ErrorBoundary, EmptyState, AppHeader } from '../components/ui';
 import { colors, spacing, typography, borderRadius, shadows } from '../utils/designTokens';
 import { RootStackParamList } from '../types/navigation';
+import { ScreenNames } from '../types';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 

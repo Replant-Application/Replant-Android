@@ -15,7 +15,7 @@ import { NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '../types/navigation';
 import { Header, Loading, ErrorBoundary, Card, Button, SectionTitle } from '../components/ui';
 import { colors, spacing, typography, borderRadius } from '../utils/designTokens';
-import { getWeeklyMissionStats, analyzeWeeklyMissions, generateCustomMission } from '../api/aiApi';
+// API 호출하지 않음 - 로컬 전용 앱
 import { WeeklyMissionStats, MissionAnalysis, AIGeneratedMission } from '../types';
 
 interface AIMissionGenerateScreenProps {
@@ -33,59 +33,19 @@ const AIMissionGenerateScreen: React.FC<AIMissionGenerateScreenProps> = ({ navig
 
   // 주간 통계 로드
   const loadStats = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const result = await getWeeklyMissionStats();
-      if (result.success && result.data) {
-        setStats(result.data);
-      } else {
-        setError(result.error || '통계를 불러올 수 없습니다.');
-      }
-    } catch (err) {
-      setError((err as Error).message);
-    } finally {
-      setLoading(false);
-    }
+    setLoading(true);
+    setError('AI 미션 생성 기능은 준비중입니다.');
+    setLoading(false);
   };
 
   // 미션 분석
   const handleAnalyze = async () => {
-    try {
-      setAnalyzing(true);
-      const result = await analyzeWeeklyMissions();
-      if (result.success && result.data) {
-        setAnalysis(result.data);
-      } else {
-        Alert.alert('오류', result.error || '미션 분석에 실패했습니다.');
-      }
-    } catch (err) {
-      Alert.alert('오류', '미션 분석 중 오류가 발생했습니다.');
-    } finally {
-      setAnalyzing(false);
-    }
+    Alert.alert('준비중', 'AI 미션 분석 기능은 준비중입니다.');
   };
 
   // AI 미션 생성
   const handleGenerateMission = async () => {
-    if (!analysis) {
-      Alert.alert('알림', '먼저 미션을 분석해주세요.');
-      return;
-    }
-
-    try {
-      setGenerating(true);
-      const result = await generateCustomMission(analysis);
-      if (result.success && result.data) {
-        setGeneratedMission(result.data);
-      } else {
-        Alert.alert('오류', result.error || '미션 생성에 실패했습니다.');
-      }
-    } catch (err) {
-      Alert.alert('오류', '미션 생성 중 오류가 발생했습니다.');
-    } finally {
-      setGenerating(false);
-    }
+    Alert.alert('준비중', 'AI 미션 생성 기능은 준비중입니다.');
   };
 
   // 생성된 미션을 커스텀 미션 생성 화면으로 전달
@@ -365,4 +325,3 @@ const styles = StyleSheet.create({
 });
 
 export default AIMissionGenerateScreen;
-

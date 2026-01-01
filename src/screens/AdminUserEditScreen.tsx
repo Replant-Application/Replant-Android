@@ -24,11 +24,7 @@ const AdminUserEditScreen: React.FC<AdminUserEditScreenProps> = ({ navigation, r
   const [email, setEmail] = useState('');
   const [role, setRole] = useState('user');
 
-  useEffect(() => {
-    loadUserDetail();
-  }, [userId]);
-
-  const loadUserDetail = async () => {
+  const loadUserDetail = useCallback(async () => {
     const result = await getUserDetail(userId);
     if (result.success && result.data) {
       const userData = result.data;
@@ -37,7 +33,11 @@ const AdminUserEditScreen: React.FC<AdminUserEditScreenProps> = ({ navigation, r
       setEmail(userData.email || '');
       setRole(userData.role || 'user');
     }
-  };
+  }, [userId, getUserDetail]);
+
+  useEffect(() => {
+    loadUserDetail();
+  }, [loadUserDetail]);
 
   const handleSave = async () => {
     if (!nickname.trim()) {
@@ -93,7 +93,7 @@ const AdminUserEditScreen: React.FC<AdminUserEditScreenProps> = ({ navigation, r
           </TouchableOpacity>
         }
       />
-      
+
       <ScrollView style={styles.content} keyboardShouldPersistTaps="handled">
         <View style={styles.formContainer}>
           {/* 닉네임 */}
@@ -228,4 +228,3 @@ const styles = StyleSheet.create({
 });
 
 export default AdminUserEditScreen;
-

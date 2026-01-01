@@ -92,7 +92,27 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     logUserAction('login_attempt', { nickname });
 
     const result = await executeWithErrorHandling(async () => {
-      // 사용자 상태 업데이트
+      const storageKeys = getStorageKeys(nickname);
+
+      // 기존 사용자 확인
+      const existingUserData: User | null = await AsyncStorage.getItem(storageKeys.USER)
+        ? JSON.parse(await AsyncStorage.getItem(storageKeys.USER) || 'null')
+        : null;
+
+      if (existingUserData) {
+        // 기존 사용자인 경우 - 데이터 초기화하지 않음
+        // role이 없고 닉네임이 "admin"이면 admin 역할 부여
+        if (!existingUserData.role && nickname.toLowerCase() === 'admin') {
+          existingUserData.role = 'admin';
+          await AsyncStorage.setItem(storageKeys.USER, JSON.stringify(existingUserData));
+        }
+        setUser(existingUserData);
+        setCurrentNickname(nickname);
+        logUserAction('login_success', { nickname, userId: existingUserData.id, isExistingUser: true });
+        return true;
+      }
+
+      // 신규 사용자인 경우 - 데이터 초기화
       const userId = `user_${Date.now()}`;
       const createdAt = new Date().toISOString();
       // 닉네임이 "admin"이면 admin 역할 부여
@@ -103,50 +123,74 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         createdAt,
         role
       };
-      
+
       // User 객체를 스토리지에 저장
-      const storageKeys = getStorageKeys(nickname);
       await AsyncStorage.setItem(storageKeys.USER, JSON.stringify(newUser));
-      
+
       setUser(newUser);
       setCurrentNickname(nickname);
 
-      // 미션 데이터 초기화
+      // 미션 데이터 초기화 (신규 사용자만)
       await initializeUserData(userId, nickname);
 
-      logUserAction('login_success', { nickname, userId });
+      logUserAction('login_success', { nickname, userId, isExistingUser: false });
       return true;
     }, '사용자 로그인');
 
     // 에러가 발생해도 강제로 성공 처리
     if (!result.success) {
-      const userId = `user_${Date.now()}`;
-      const createdAt = new Date().toISOString();
-      // 닉네임이 "admin"이면 admin 역할 부여
-      const role = nickname.toLowerCase() === 'admin' ? 'admin' : 'user';
-      const newUser: User = {
-        nickname,
-        id: userId,
-        createdAt,
-        role
-      };
-      
-      // User 객체를 스토리지에 저장
       const storageKeys = getStorageKeys(nickname);
-      try {
-        await AsyncStorage.setItem(storageKeys.USER, JSON.stringify(newUser));
-      } catch (storageError) {
-        logError('User 저장 실패', storageError as Error);
-      }
-      
-      setUser(newUser);
-      setCurrentNickname(nickname);
 
-      // 미션 데이터 초기화 (에러가 발생해도)
+      // 기존 사용자 확인
+      let existingUserData: User | null = null;
       try {
-        await initializeUserData(userId, nickname);
-      } catch (initError) {
-        logError('데이터 초기화 실패', initError as Error, { nickname, userId });
+        const userDataString = await AsyncStorage.getItem(storageKeys.USER);
+        if (userDataString) {
+          existingUserData = JSON.parse(userDataString);
+        }
+      } catch (error) {
+        logError('기존 사용자 확인 실패', error as Error);
+      }
+
+      if (existingUserData) {
+        // 기존 사용자인 경우
+        if (!existingUserData.role && nickname.toLowerCase() === 'admin') {
+          existingUserData.role = 'admin';
+          try {
+            await AsyncStorage.setItem(storageKeys.USER, JSON.stringify(existingUserData));
+          } catch (storageError) {
+            logError('User 저장 실패', storageError as Error);
+          }
+        }
+        setUser(existingUserData);
+        setCurrentNickname(nickname);
+      } else {
+        // 신규 사용자인 경우
+        const userId = `user_${Date.now()}`;
+        const createdAt = new Date().toISOString();
+        const role = nickname.toLowerCase() === 'admin' ? 'admin' : 'user';
+        const newUser: User = {
+          nickname,
+          id: userId,
+          createdAt,
+          role
+        };
+
+        try {
+          await AsyncStorage.setItem(storageKeys.USER, JSON.stringify(newUser));
+        } catch (storageError) {
+          logError('User 저장 실패', storageError as Error);
+        }
+
+        setUser(newUser);
+        setCurrentNickname(nickname);
+
+        // 미션 데이터 초기화 (신규 사용자만)
+        try {
+          await initializeUserData(userId, nickname);
+        } catch (initError) {
+          logError('데이터 초기화 실패', initError as Error, { nickname, userId });
+        }
       }
     }
 
@@ -216,11 +260,11 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         id: user?.id || `user_${Date.now()}`,
         createdAt: user?.createdAt || new Date().toISOString()
       };
-      
+
       // 새 닉네임으로 User 객체 저장
       const newStorageKeys = getStorageKeys(newNickname);
       await AsyncStorage.setItem(newStorageKeys.USER, JSON.stringify(updatedUser));
-      
+
       setUser(updatedUser);
       setCurrentNickname(newNickname);
 
@@ -230,7 +274,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
       logError('닉네임 변경 실패', error as Error);
       return { success: false, error: (error as Error).message };
     }
-  }, [currentNickname, user?.id]);
+  }, [currentNickname, user?.id, user?.createdAt]);
 
   // 메모이제이션된 Context 값
   const value = useMemo(() => ({

@@ -2,7 +2,7 @@
  * 전체 유저 목록 화면
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput } from 'react-native';
 import { NavigationProp } from '@react-navigation/native';
 import { useAdmin } from '../hooks/useAdmin';
@@ -22,26 +22,26 @@ const AdminUserListScreen: React.FC<AdminUserListScreenProps> = ({ navigation })
   const [users, setUsers] = useState<UserInfo[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState<FilterType>('all');
-  const [page, setPage] = useState(1);
+  const [page] = useState(1);
   const limit = 20;
 
-  useEffect(() => {
-    loadUsers();
-  }, [page, filter]);
-
-  const loadUsers = async () => {
+  const loadUsers = useCallback(async () => {
     const result = await getAllUsers({ page, limit });
     if (result.success && result.data) {
       setUsers(result.data);
     }
-  };
+  }, [page, limit, getAllUsers]);
+
+  useEffect(() => {
+    loadUsers();
+  }, [loadUsers]);
 
   // 필터링된 유저 목록
   const filteredUsers = users.filter(user => {
     // 검색 필터
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
-      const matchesSearch = 
+      const matchesSearch =
         user.nickname.toLowerCase().includes(query) ||
         (user.email && user.email.toLowerCase().includes(query)) ||
         (user.username && user.username.toLowerCase().includes(query));
@@ -70,7 +70,7 @@ const AdminUserListScreen: React.FC<AdminUserListScreenProps> = ({ navigation })
   return (
     <View style={styles.container}>
       <Header title="전체 유저 목록" />
-      
+
       <View style={styles.content}>
         {/* 검색 및 필터 */}
         <View style={styles.searchContainer}>
@@ -272,4 +272,3 @@ const styles = StyleSheet.create({
 });
 
 export default AdminUserListScreen;
-

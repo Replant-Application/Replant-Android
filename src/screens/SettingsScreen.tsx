@@ -5,6 +5,7 @@ import { Header, ConfirmModal } from '../components/ui';
 import { colors, spacing, typography, borderRadius, shadows } from '../utils/designTokens';
 import { NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '../types/navigation';
+import { clearAllCommunityPosts } from '../services/storage';
 
 const TERMS_OF_SERVICE = `Replant 이용약관
 
@@ -68,7 +69,7 @@ const TERMS_OF_SERVICE = `Replant 이용약관
 • 기타 관련 법령에 위배되는 행위
 
 
-시행일자: 2024년 1월 1일`;
+시행일자: 2025년 11월 29일`;
 
 const PRIVACY_POLICY = `Replant 개인정보처리방침
 
@@ -104,7 +105,13 @@ const PRIVACY_POLICY = `Replant 개인정보처리방침
   • 필수항목: 닉네임, 가입일
   • 선택항목: 없음
 
-② 서비스 이용 과정에서 자동 수집되는 정보
+② 소셜 로그인 시 수집되는 정보
+  • 카카오 로그인: oauthId, 이메일, 닉네임, 프로필 이미지 URL
+  • 구글 로그인: oauthId, 이메일, 닉네임, 프로필 이미지 URL
+  • 네이버 로그인: oauthId, 이메일, 닉네임, 프로필 이미지 URL
+  ※ 소셜 로그인 제공자(카카오, 구글, 네이버)로부터 위 정보를 제공받아 서비스 제공에 활용합니다.
+
+③ 서비스 이용 과정에서 자동 수집되는 정보
   • IP 주소, 쿠키, 접속 로그, 기기 정보
 
 
@@ -146,13 +153,13 @@ const PRIVACY_POLICY = `Replant 개인정보처리방침
 파기 방법: 전자적 파일 형태는 복구 및 재생되지 않도록 안전하게 삭제하며, 기록물은 분쇄하거나 소각합니다.
 
 
-시행일자: 2024년 1월 1일`;
+시행일자: 2025년 11월 29일`;
 
 const OPEN_SOURCE_LICENSE = `본 프로젝트는 다음과 같은 오픈소스 라이선스 하에 배포됩니다:
 
 MIT License
 
-Copyright (c) 2024 Replant
+Copyright (c) 2025 Replant
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -180,13 +187,33 @@ React Native
 - 라이선스: MIT
 - 링크: https://github.com/facebook/react-native
 
-React Navigation
-- 라이선스: MIT
-- 링크: https://github.com/react-navigation/react-navigation
-
-AsyncStorage
+@react-native-async-storage/async-storage
 - 라이선스: MIT
 - 링크: https://github.com/react-native-async-storage/async-storage
+
+@react-native-google-signin/google-signin
+- 라이선스: MIT
+- 링크: https://github.com/react-native-google-signin/google-signin
+
+@react-native-seoul/kakao-login
+- 라이선스: MIT
+- 링크: https://github.com/react-native-seoul/kakao-login
+
+@react-native-seoul/naver-login
+- 라이선스: MIT
+- 링크: https://github.com/react-native-seoul/naver-login
+
+react-native-image-picker
+- 라이선스: MIT
+- 링크: https://github.com/react-native-image-picker/react-native-image-picker
+
+react-native-view-shot
+- 라이선스: MIT
+- 링크: https://github.com/gre/react-native-view-shot
+
+@react-native-camera-roll/camera-roll
+- 라이선스: MIT
+- 링크: https://github.com/react-native-camera-roll/camera-roll
 
 기타 사용된 오픈소스 라이브러리들은 각각의 라이선스를 따릅니다.`;
 
@@ -232,6 +259,7 @@ const SettingItem: React.FC<SettingItemProps> = ({
 
 const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
   const { user, logout, updateNickname } = useUser();
+  const { deleteAllUsers } = useAdmin();
   const [showNicknameForm, setShowNicknameForm] = useState(false);
   const [newNickname, setNewNickname] = useState('');
   const [showLogoutModal, setShowLogoutModal] = useState(false);
@@ -271,6 +299,66 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
       navigation.navigate('Info', { title, content });
     }
   };
+
+  const handleClearAllPosts = () => {
+    Alert.alert(
+      '⚠️ 경고',
+      '모든 커뮤니티 게시글과 댓글이 삭제됩니다.\n이 작업은 되돌릴 수 없습니다.\n정말 삭제하시겠습니까?',
+      [
+        { text: '취소', style: 'cancel' },
+        {
+          text: '삭제',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              const result = await clearAllCommunityPosts();
+              if (result.success) {
+                Alert.alert(
+                  '✅ 완료',
+                  `${result.deletedCount}개의 게시글이 삭제되었습니다.`
+                );
+              } else {
+                Alert.alert('오류', '게시글 삭제에 실패했습니다.');
+              }
+            } catch (error) {
+              Alert.alert('오류', '게시글 삭제 중 오류가 발생했습니다.');
+            }
+          }
+        }
+      ]
+    );
+  };
+
+  const handleDeleteAllUsers = () => {
+    Alert.alert(
+      '⚠️ 경고',
+      '모든 유저 데이터가 삭제됩니다.\n\n이 작업은 되돌릴 수 없습니다.\n정말로 모든 유저를 삭제하시겠습니까?',
+      [
+        { text: '취소', style: 'cancel' },
+        {
+          text: '삭제',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              const result = await deleteAllUsers();
+              if (result.success) {
+                Alert.alert(
+                  '✅ 완료',
+                  `${result.data?.deletedCount || 0}명의 유저가 삭제되었습니다.`
+                );
+              } else {
+                Alert.alert('오류', result.error || '유저 삭제에 실패했습니다.');
+              }
+            } catch (error) {
+              Alert.alert('오류', '유저 삭제 중 오류가 발생했습니다.');
+            }
+          }
+        }
+      ]
+    );
+  };
+
+
 
   return (
     <View style={styles.container}>

@@ -54,7 +54,7 @@ export const createPost = async (
  */
 export const updatePost = async (
   postId: string,
-  updateData: Partial<CommunityPostData>,
+  updateDataParam: Partial<CommunityPostData>,
   nickname: string
 ): Promise<ServiceResult<CommunityPost>> => {
   try {
@@ -79,7 +79,7 @@ export const updatePost = async (
       error: result.error || '게시글 수정에 실패했습니다.'
     };
   } catch (error) {
-    logError('게시글 수정 실패', error as Error, { postId, updateData, nickname });
+    logError('게시글 수정 실패', error as Error, { postId, updateData: updateDataParam, nickname });
     return {
       success: false,
       error: (error as Error).message

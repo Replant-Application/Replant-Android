@@ -2,8 +2,8 @@
  * 유저 상세 조회 화면
  */
 
-import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import React, { useEffect, useState, useCallback } from 'react';
+import { View, Text, StyleSheet, ScrollView, Alert } from 'react-native';
 import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { useAdmin } from '../hooks/useAdmin';
 import { Card, Header, Loading, ErrorBoundary, SectionTitle, Button } from '../components/ui';
@@ -21,16 +21,16 @@ const AdminUserDetailScreen: React.FC<AdminUserDetailScreenProps> = ({ navigatio
   const { getUserDetail, deactivateUser, activateUser, loading, error } = useAdmin();
   const [user, setUser] = useState<UserInfo | null>(null);
 
-  useEffect(() => {
-    loadUserDetail();
-  }, [userId]);
-
-  const loadUserDetail = async () => {
+  const loadUserDetail = useCallback(async () => {
     const result = await getUserDetail(userId);
     if (result.success && result.data) {
       setUser(result.data);
     }
-  };
+  }, [userId, getUserDetail]);
+
+  useEffect(() => {
+    loadUserDetail();
+  }, [loadUserDetail]);
 
   const handleEdit = () => {
     if (user) {
@@ -54,7 +54,7 @@ const AdminUserDetailScreen: React.FC<AdminUserDetailScreenProps> = ({ navigatio
             const result = user.isActive === false
               ? await activateUser(user.id)
               : await deactivateUser(user.id);
-            
+
             if (result.success) {
               Alert.alert('성공', `유저가 ${action}되었습니다.`);
               loadUserDetail();
@@ -85,12 +85,12 @@ const AdminUserDetailScreen: React.FC<AdminUserDetailScreenProps> = ({ navigatio
   return (
     <ScrollView style={styles.container}>
       <Header title="유저 상세" />
-      
+
       <View style={styles.content}>
         {/* 기본 정보 */}
         <Card style={styles.infoCard}>
           <SectionTitle title="👤 기본 정보" size="lg" marginBottom={spacing[4]} />
-          
+
           <View style={styles.infoRow}>
             <Text style={styles.infoLabel}>ID</Text>
             <Text style={styles.infoValue}>{user.id}</Text>
@@ -165,8 +165,8 @@ const AdminUserDetailScreen: React.FC<AdminUserDetailScreenProps> = ({ navigatio
             variant={user.isActive === false ? 'primary' : 'outline'}
             style={[
               styles.toggleButton,
-              user.isActive === false && styles.activateButton
-            ]}
+              user.isActive === false ? styles.activateButton : null
+            ].filter(Boolean) as any}
             size="lg"
           />
         </View>
@@ -253,4 +253,3 @@ const styles = StyleSheet.create({
 });
 
 export default AdminUserDetailScreen;
-

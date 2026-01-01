@@ -5,12 +5,12 @@
 
 import { ServiceResult } from '../types';
 import { logError } from '../utils/logger';
-import { Platform } from 'react-native';
+// Platform은 사용하지 않음
 
 /**
  * 펫 이미지 다운로드
  * 캐릭터 이미지를 기기 갤러리에 저장
- * 
+ *
  * @param imageRef - Image 컴포넌트의 ref
  * @param characterName - 캐릭터 이름 (파일명에 사용)
  * @param level - 캐릭터 레벨 (파일명에 사용)
@@ -68,4 +68,3 @@ export const downloadPetImage = async (
     };
   }
 };
-

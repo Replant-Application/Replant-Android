@@ -7,7 +7,6 @@ interface PostCardProps {
   post: CommunityPost;
   onPress?: (postId: string) => void;
   onLike?: (postId: string) => void;
-  onScrap?: (postId: string) => void;
   style?: ViewStyle;
 }
 
@@ -15,7 +14,6 @@ const PostCard: React.FC<PostCardProps> = ({
   post,
   onPress,
   onLike,
-  onScrap,
   style
 }) => {
   if (!post) return null;
@@ -293,9 +291,6 @@ const styles = StyleSheet.create({
   likedIcon: {
     // 이미 이모지로 표시됨
   },
-  scrappedIcon: {
-    // 이미 이모지로 표시됨
-  },
   statText: {
     fontSize: typography.fontSize.sm,
     color: colors.text.secondary,
@@ -308,4 +303,3 @@ const styles = StyleSheet.create({
 });
 
 export default PostCard;
-

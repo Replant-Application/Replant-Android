@@ -3,7 +3,7 @@
  * 미션 완료 후 인증 방법을 선택하는 모달
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import {
   View,
   Text,
@@ -17,8 +17,6 @@ import {
 } from 'react-native';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
 import { Mission } from '../../types';
-import { getLocationWithPermission, getCurrentTimestamp } from '../../services/gpsService';
-import { verifyMissionByGPS, getVerificationRequirements } from '../../api/missionApi';
 
 interface MissionVerificationModalProps {
   visible: boolean;
@@ -32,84 +30,19 @@ const MissionVerificationModal: React.FC<MissionVerificationModalProps> = ({
   visible,
   mission,
   onClose,
-  onLikeVerification,
-  onVerificationSuccess,
+  onLikeVerification: _onLikeVerification,
+  onVerificationSuccess: _onVerificationSuccess,
 }) => {
-  const [gpsLoading, setGpsLoading] = useState(false);
-
   if (!mission) return null;
 
   // GPS 인증 처리
   const handleGPSVerification = async () => {
-    if (!mission) return;
-
-    try {
-      setGpsLoading(true);
-
-      // 인증 요구사항 조회
-      const requirementsResult = await getVerificationRequirements(mission.mission_id);
-      if (!requirementsResult.success) {
-        Alert.alert('오류', '인증 요구사항을 불러올 수 없습니다.');
-        return;
-      }
-
-      // 위치 가져오기
-      const location = await getLocationWithPermission();
-      const timestamp = getCurrentTimestamp();
-
-      // GPS 인증 요청
-      const result = await verifyMissionByGPS(mission.mission_id, {
-        location,
-        timestamp,
-      });
-
-      if (result.success) {
-        Alert.alert(
-          '✅ 인증 완료',
-          'GPS 인증이 완료되었습니다!',
-          [
-            {
-              text: '확인',
-              onPress: () => {
-                onClose();
-                onVerificationSuccess?.(); // 미션 목록 새로고침
-              },
-            },
-          ]
-        );
-      } else {
-        Alert.alert('인증 실패', result.error || 'GPS 인증에 실패했습니다.');
-      }
-    } catch (error: any) {
-      console.error('GPS 인증 오류:', error);
-      
-      if (error.code === 'PERMISSION_DENIED') {
-        Alert.alert(
-          '위치 권한 필요',
-          'GPS 인증을 위해 위치 권한이 필요합니다. 설정에서 권한을 허용해주세요.',
-          [
-            { text: '취소', style: 'cancel' },
-            {
-              text: '좋아요 인증으로 변경',
-              onPress: () => {
-                onClose();
-                onLikeVerification();
-              },
-            },
-          ]
-        );
-      } else {
-        Alert.alert('오류', error.message || 'GPS 인증 중 오류가 발생했습니다.');
-      }
-    } finally {
-      setGpsLoading(false);
-    }
+    Alert.alert('기능 준비중', 'GPS 인증 기능은 준비 중입니다.');
   };
 
   // 좋아요 인증 선택
   const handleLikeVerification = () => {
-    onClose();
-    onLikeVerification();
+    Alert.alert('기능 준비중', '좋아요 인증 기능은 준비 중입니다.');
   };
 
   return (
@@ -133,7 +66,6 @@ const MissionVerificationModal: React.FC<MissionVerificationModalProps> = ({
             <TouchableOpacity
               style={styles.optionButton}
               onPress={handleLikeVerification}
-              disabled={gpsLoading}
               activeOpacity={0.7}
             >
               <View style={styles.optionIconContainer}>
@@ -153,9 +85,8 @@ const MissionVerificationModal: React.FC<MissionVerificationModalProps> = ({
 
             {/* GPS 인증 */}
             <TouchableOpacity
-              style={[styles.optionButton, gpsLoading && styles.optionButtonDisabled]}
+              style={styles.optionButton}
               onPress={handleGPSVerification}
-              disabled={gpsLoading}
               activeOpacity={0.7}
             >
               <View style={styles.optionIconContainer}>
@@ -170,9 +101,7 @@ const MissionVerificationModal: React.FC<MissionVerificationModalProps> = ({
                 )}
               </View>
               <View style={styles.optionContent}>
-                <Text style={styles.optionTitle}>
-                  {gpsLoading ? 'GPS 인증 중...' : 'GPS 인증'}
-                </Text>
+                <Text style={styles.optionTitle}>GPS 인증</Text>
                 <Text style={styles.optionDescription}>
                   현재 위치와 시간으로 즉시 인증하기
                 </Text>
@@ -183,7 +112,6 @@ const MissionVerificationModal: React.FC<MissionVerificationModalProps> = ({
           <TouchableOpacity
             style={styles.cancelButton}
             onPress={onClose}
-            disabled={gpsLoading}
           >
             <Text style={styles.cancelButtonText}>나중에</Text>
           </TouchableOpacity>
@@ -235,9 +163,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border.light,
   },
-  optionButtonDisabled: {
-    opacity: 0.6,
-  },
   optionIconContainer: {
     width: 48,
     height: 48,
@@ -280,4 +205,3 @@ const styles = StyleSheet.create({
 });
 
 export default MissionVerificationModal;
-
