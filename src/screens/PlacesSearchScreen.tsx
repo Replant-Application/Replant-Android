@@ -40,7 +40,7 @@ const FILTERS = [
   { key: 'mental_health' as const, label: '정신건강' },
 ];
 
-const PlacesSearchScreen: React.FC<PlacesSearchScreenProps> = () => {
+const PlacesSearchScreen: React.FC<PlacesSearchScreenProps> = ({ navigation }) => {
   const { userLocation, requestLocationPermission } = useLocation();
   const {
     places,
@@ -53,6 +53,10 @@ const PlacesSearchScreen: React.FC<PlacesSearchScreenProps> = () => {
     setSelectedRegion,
     searchPlaces,
   } = usePlacesSearch();
+
+  const handleGoBack = () => {
+    navigation.goBack();
+  };
 
   useEffect(() => {
     requestLocationPermission();

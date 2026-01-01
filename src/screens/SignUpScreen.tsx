@@ -77,10 +77,12 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onNavigate }) => {
         const { accessToken, refreshToken, name, tokens } = result.data;
 
         // 토큰 저장
-        const finalAccessToken = tokens?.accessToken || accessToken;
-        const finalRefreshToken = tokens?.refreshToken || refreshToken;
+        const finalAccessToken = tokens?.accessToken || accessToken || '';
+        const finalRefreshToken = tokens?.refreshToken || refreshToken || '';
 
-        await saveTokens(finalAccessToken, finalRefreshToken);
+        if (finalAccessToken && finalRefreshToken) {
+          await saveTokens(finalAccessToken, finalRefreshToken);
+        }
 
         // 사용자 정보 저장
         await saveUserInfo({
@@ -90,7 +92,7 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onNavigate }) => {
         });
 
         // API 클라이언트에 토큰 설정
-        apiClient.setAccessToken(finalAccessToken);
+        apiClient.setAccessToken(finalAccessToken || null);
 
         // 로컬 로그인 처리
         await login(name);
@@ -271,7 +273,7 @@ const styles = StyleSheet.create({
   },
   linkText: {
     fontSize: typography.fontSize.sm,
-    color: colors.primary.main,
+    color: colors.primary[600],
     textDecorationLine: 'underline',
   },
   backButton: {

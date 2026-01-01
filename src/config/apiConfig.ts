@@ -30,6 +30,7 @@ export const API_CONFIG = {
       refresh: '/auth/refresh',
       logout: '/auth/logout',
     },
+
     // 사용자 (User)
     user: {
       me: '/users/me',
@@ -42,6 +43,7 @@ export const API_CONFIG = {
       get: '/reant',
       update: '/reant',
     },
+
     // 시스템 미션 (Mission)
     mission: {
       list: '/missions',
@@ -54,6 +56,7 @@ export const API_CONFIG = {
       createAnswer: '/missions/:missionId/qna/:qnaId/answers',
       acceptAnswer: '/missions/:missionId/qna/:qnaId/answers/:answerId/accept',
     },
+
     // 커스텀 미션 (CustomMission)
     customMission: {
       list: '/custom-missions',
@@ -132,3 +135,4 @@ export const API_CONFIG = {
   // 요청 타임아웃 (ms) (환경변수에서 읽어옴)
   timeout: API_TIMEOUT ? parseInt(API_TIMEOUT, 10) : 10000,
 } as const;
+
