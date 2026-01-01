@@ -115,29 +115,90 @@ export const deletePost = async (
   }
 };
 
+// 백엔드 API 응답 타입
+interface BackendPostResponse {
+  id: number;
+  userId: number;
+  userNickname: string;
+  userProfileImg?: string;
+  missionTag?: {
+    id: number;
+    title: string;
+    type: 'SYSTEM' | 'CUSTOM';
+  };
+  title: string;
+  content: string;
+  imageUrls: string[];
+  hasValidBadge: boolean;
+  commentCount: number;
+  createdAt: string;
+  updatedAt?: string;
+}
+
+interface BackendPageResponse {
+  content: BackendPostResponse[];
+  totalElements: number;
+  totalPages: number;
+  number: number;
+}
+
+/**
+ * 백엔드 응답을 프론트엔드 형식으로 변환
+ */
+const transformBackendPost = (post: BackendPostResponse): CommunityPost => ({
+  id: post.id.toString(),
+  post_id: post.id.toString(),
+  mission_id: post.missionTag?.id?.toString() || '',
+  mission_title: post.missionTag?.title || '자유 게시글',
+  mission_emoji: '📝', // 기본 이모지
+  title: post.title || post.missionTag?.title || '제목 없음',
+  content: post.content,
+  author: post.userId.toString(),
+  author_nickname: post.userNickname,
+  created_at: post.createdAt,
+  updated_at: post.updatedAt,
+  like_count: 0, // 백엔드에서 제공하지 않음 - 로컬 관리
+  comment_count: post.commentCount || 0,
+  scrap_count: 0, // 백엔드에서 제공하지 않음 - 로컬 관리
+  images: post.imageUrls || [],
+  tags: post.missionTag ? [post.missionTag.title] : [],
+  category: post.missionTag?.type || 'GENERAL',
+});
+
 /**
  * 게시글 목록 조회 - 백엔드 API 사용
  */
 export const getPosts = async (nickname: string): Promise<CommunityPost[]> => {
   try {
-    const result = await apiClient.get<CommunityPost[]>(API_CONFIG.endpoints.post.list);
+    // 백엔드는 Page 객체를 반환
+    const result = await apiClient.get<BackendPageResponse | BackendPostResponse[]>(API_CONFIG.endpoints.post.list);
 
     if (result.success && result.data) {
-      // 배열인지 확인
-      const posts = Array.isArray(result.data) ? result.data : [];
+      let backendPosts: BackendPostResponse[] = [];
+
+      // Page 객체인지 배열인지 확인
+      if (result.data && typeof result.data === 'object' && 'content' in result.data) {
+        // Page 객체
+        backendPosts = (result.data as BackendPageResponse).content || [];
+      } else if (Array.isArray(result.data)) {
+        // 배열
+        backendPosts = result.data;
+      }
 
       // 사용자의 좋아요/스크랩 정보 가져오기 (로컬)
       const storageKeys = getStorageKeys(nickname);
       const userLikes: string[] = await getData(storageKeys.USER_LIKES) || [];
       const userScraps: string[] = await getData(storageKeys.USER_SCRAPS) || [];
 
-      // 좋아요/스크랩 상태 추가
-      return posts.map(post => ({
-        ...post,
-        post_id: post.post_id || post.id?.toString(),
-        is_liked: userLikes.includes(post.post_id || post.id?.toString() || ''),
-        is_scrapped: userScraps.includes(post.post_id || post.id?.toString() || ''),
-      }));
+      // 백엔드 응답을 프론트엔드 형식으로 변환 + 좋아요/스크랩 상태 추가
+      return backendPosts.map(post => {
+        const transformed = transformBackendPost(post);
+        return {
+          ...transformed,
+          is_liked: userLikes.includes(transformed.post_id),
+          is_scrapped: userScraps.includes(transformed.post_id),
+        };
+      });
     }
 
     return [];
@@ -156,7 +217,7 @@ export const getPost = async (
 ): Promise<CommunityPost | null> => {
   try {
     const endpoint = API_CONFIG.endpoints.post.detail.replace(':postId', postId);
-    const result = await apiClient.get<CommunityPost>(endpoint);
+    const result = await apiClient.get<BackendPostResponse>(endpoint);
 
     if (result.success && result.data) {
       // 사용자의 좋아요/스크랩 정보 가져오기 (로컬)
@@ -164,12 +225,12 @@ export const getPost = async (
       const userLikes: string[] = await getData(storageKeys.USER_LIKES) || [];
       const userScraps: string[] = await getData(storageKeys.USER_SCRAPS) || [];
 
-      const post = result.data;
+      // 백엔드 응답을 프론트엔드 형식으로 변환
+      const transformed = transformBackendPost(result.data);
       return {
-        ...post,
-        post_id: post.post_id || post.id?.toString(),
-        is_liked: userLikes.includes(post.post_id || post.id?.toString() || ''),
-        is_scrapped: userScraps.includes(post.post_id || post.id?.toString() || ''),
+        ...transformed,
+        is_liked: userLikes.includes(transformed.post_id),
+        is_scrapped: userScraps.includes(transformed.post_id),
       };
     }
 

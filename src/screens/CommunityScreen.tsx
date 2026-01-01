@@ -114,7 +114,7 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation }) => {
             activeOpacity={0.7}
           >
             <Text style={[styles.tabText, activeTab === 'mission-group' && styles.tabTextActive]}>
-              미션 그룹
+              미션 도감
             </Text>
           </TouchableOpacity>
         </View>

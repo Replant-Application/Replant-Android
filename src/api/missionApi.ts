@@ -552,3 +552,194 @@ export const voteVerification = async (
   const endpoint = API_CONFIG.endpoints.verification.vote.replace(':verificationId', String(verificationId));
   return apiClient.post<VoteVerificationResponse>(endpoint, data);
 };
+
+// ============================================
+// GPS 인증 관련
+// ============================================
+
+export interface VerificationRequirements {
+  verificationType: VerificationType;
+  gpsLatitude?: number;
+  gpsLongitude?: number;
+  gpsRadiusMeters?: number;
+  requiredMinutes?: number;
+}
+
+/**
+ * 미션 인증 요구사항 조회
+ * 미션의 인증 타입과 필요 조건 반환
+ */
+export const getVerificationRequirements = async (
+  userMissionId: number
+): Promise<ServiceResult<VerificationRequirements>> => {
+  const endpoint = API_CONFIG.endpoints.userMission.detail.replace(':userMissionId', String(userMissionId));
+  const result = await apiClient.get<UserMission>(endpoint);
+
+  if (!result.success || !result.data) {
+    return { success: false, error: result.error || '미션 정보를 가져올 수 없습니다.' };
+  }
+
+  const mission = result.data.mission || result.data.customMission;
+  if (!mission) {
+    return { success: false, error: '미션 정보가 없습니다.' };
+  }
+
+  return {
+    success: true,
+    data: {
+      verificationType: mission.verificationType,
+      gpsLatitude: mission.gpsLatitude,
+      gpsLongitude: mission.gpsLongitude,
+      gpsRadiusMeters: mission.gpsRadiusMeters,
+      requiredMinutes: mission.requiredMinutes,
+    },
+  };
+};
+
+/**
+ * GPS로 미션 인증
+ * userMissionId와 현재 위치로 인증
+ */
+export const verifyMissionByGPS = async (
+  userMissionId: number,
+  data: { location: { latitude: number; longitude: number }; timestamp: string }
+): Promise<ServiceResult<VerifyMissionResponse>> => {
+  const verifyRequest: VerifyMissionRequest = {
+    type: 'GPS',
+    latitude: data.location.latitude,
+    longitude: data.location.longitude,
+  };
+
+  return verifyUserMission(userMissionId, verifyRequest);
+};
+
+/**
+ * TIME으로 미션 인증
+ * userMissionId와 시작/종료 시간으로 인증
+ */
+export const verifyMissionByTime = async (
+  userMissionId: number,
+  data: { startedAt: string; endedAt: string }
+): Promise<ServiceResult<VerifyMissionResponse>> => {
+  const verifyRequest: VerifyMissionRequest = {
+    type: 'TIME',
+    startedAt: data.startedAt,
+    endedAt: data.endedAt,
+  };
+
+  return verifyUserMission(userMissionId, verifyRequest);
+};
+
+// ============================================
+// 미션 그룹 (같은 미션 수행자 게시판)
+// ============================================
+
+export interface MissionGroup {
+  mission_id: string;
+  mission_title: string;
+  mission_description: string;
+  mission_emoji: string;
+  member_count: number;
+  post_count: number;
+  verification_type: string;
+}
+
+export interface MissionGroupPost {
+  post_id: string;
+  user_id: string;
+  user_nickname: string;
+  user_profile_img?: string;
+  title: string;
+  content: string;
+  image_urls: string[];
+  created_at: string;
+  comment_count: number;
+  like_count: number;
+}
+
+/**
+ * 내가 완료한 미션 그룹 목록 조회
+ * GET /api/user-missions/groups
+ */
+export const getMissionGroups = async (): Promise<ServiceResult<MissionGroup[]>> => {
+  // 완료된 미션 목록 조회
+  const result = await getUserMissions({ status: 'COMPLETED' });
+
+  if (!result.success || !result.data) {
+    return { success: false, error: result.error || '미션 그룹을 불러올 수 없습니다.' };
+  }
+
+  // 미션별로 그룹화
+  const groupMap = new Map<string, MissionGroup>();
+
+  for (const userMission of result.data.content) {
+    const mission = userMission.mission || userMission.customMission;
+    if (!mission) continue;
+
+    const missionId = String(mission.id);
+    const existing = groupMap.get(missionId);
+
+    if (existing) {
+      existing.member_count++;
+    } else {
+      groupMap.set(missionId, {
+        mission_id: missionId,
+        mission_title: mission.title,
+        mission_description: mission.description || '',
+        mission_emoji: getMissionEmoji(mission.title),
+        member_count: 1,
+        post_count: 0, // 서버에서 별도 조회 필요
+        verification_type: mission.verificationType || 'COMMUNITY',
+      });
+    }
+  }
+
+  return { success: true, data: Array.from(groupMap.values()) };
+};
+
+/**
+ * 특정 미션의 게시글 조회
+ * GET /api/posts?missionId={missionId}
+ */
+export const getPostsByMission = async (
+  missionId: string
+): Promise<ServiceResult<MissionGroupPost[]>> => {
+  const { getPosts } = await import('./communityApi');
+  const result = await getPosts({ missionId: Number(missionId) });
+
+  if (!result.success || !result.data) {
+    return { success: false, error: result.error || '게시글을 불러올 수 없습니다.' };
+  }
+
+  const posts: MissionGroupPost[] = result.data.content.map(post => ({
+    post_id: String(post.id),
+    user_id: String(post.userId),
+    user_nickname: post.userNickname,
+    user_profile_img: post.userProfileImg,
+    title: post.title,
+    content: post.content,
+    image_urls: post.imageUrls,
+    created_at: post.createdAt,
+    comment_count: post.commentCount,
+    like_count: 0, // 게시글에는 좋아요 기능이 없음
+  }));
+
+  return { success: true, data: posts };
+};
+
+/**
+ * 미션 제목으로 이모지 반환
+ */
+function getMissionEmoji(title: string): string {
+  if (title.includes('운동') || title.includes('헬스') || title.includes('걷기')) return '🏃';
+  if (title.includes('독서') || title.includes('책')) return '📚';
+  if (title.includes('물') || title.includes('마시')) return '💧';
+  if (title.includes('명상') || title.includes('휴식')) return '🧘';
+  if (title.includes('아침') || title.includes('기상')) return '🌅';
+  if (title.includes('영어') || title.includes('단어') || title.includes('외국어')) return '📝';
+  if (title.includes('잠') || title.includes('수면')) return '😴';
+  if (title.includes('식사') || title.includes('밥')) return '🍽️';
+  if (title.includes('저축') || title.includes('돈')) return '💰';
+  if (title.includes('공부')) return '📖';
+  return '🎯';
+}

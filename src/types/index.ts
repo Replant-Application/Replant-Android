@@ -195,6 +195,8 @@ export interface CommunityPost {
   images?: string[]; // 미션 인증 사진
   tags?: string[];
   category?: string;
+  is_liked?: boolean; // 현재 사용자가 좋아요 했는지
+  is_scrapped?: boolean; // 현재 사용자가 스크랩 했는지
 }
 
 export interface CommunityComment {
