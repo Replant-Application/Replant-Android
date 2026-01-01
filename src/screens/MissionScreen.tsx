@@ -2,6 +2,7 @@ import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react'
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { useMission } from '../hooks/useMission';
 import { useCharacter } from '../hooks/useCharacter';
+import { useLocation } from '../hooks/useLocation';
 import { MissionCard, MissionVerificationModal } from '../components/specialized';
 import { Card, Loading, ErrorBoundary, Button, Header, EmptyState, SectionTitle, ConfirmModal } from '../components/ui';
 import { colors, spacing, typography, borderRadius, shadows } from '../utils/designTokens';
@@ -9,7 +10,7 @@ import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../types/navigation';
 import { useUser } from '../contexts/UserContext';
 import { Mission } from '../types';
-import { checkVerificationStatus } from '../api/missionApi';
+import { checkVerificationStatus, verifyByGps, verifyByTime } from '../api/missionApi';
 
 // 단일 카테고리: 성장
 
@@ -23,16 +24,17 @@ type MissionFilter = 'all' | 'daily' | 'completed';
 const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
   const { addExperienceByCategory } = useCharacter();
   const { missions, loading, error, saveMissionPhoto, deleteMissionPhoto, completeMissionWithPhoto, uncompleteMission, loadMissions } = useMission(addExperienceByCategory);
-  
+  const { userLocation, requestLocationPermission } = useLocation();
+
   // route params에서 사진 정보 확인
   const routeParams = route?.params;
   const processedPhotoRef = useRef<string | null>(null);
   const [selectedFilter, setSelectedFilter] = useState<MissionFilter>('all');
-  
+
   // 인증 모달 상태
   const [verificationModalVisible, setVerificationModalVisible] = useState(false);
   const [selectedMissionForVerification, setSelectedMissionForVerification] = useState<Mission | null>(null);
-  
+
   // 미션 완료 모달 상태
   const [showCompleteModal, setShowCompleteModal] = useState(false);
   const [completeModalTitle, setCompleteModalTitle] = useState('');
@@ -114,7 +116,7 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
   // 좋아요 인증 선택 시 (커뮤니티 공유 화면으로 이동)
   const handleLikeVerification = useCallback(() => {
     if (!selectedMissionForVerification) return;
-    
+
     navigation.navigate('CommunityPostCreate', {
       missionId: selectedMissionForVerification.mission_id,
       missionTitle: selectedMissionForVerification.title,
@@ -122,6 +124,62 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
       photoUrl: selectedMissionForVerification.photo_url || undefined,
     });
   }, [selectedMissionForVerification, navigation]);
+
+  // GPS 인증 선택 시
+  const handleGPSVerification = useCallback(async () => {
+    if (!selectedMissionForVerification) return;
+
+    // 위치 권한 요청
+    await requestLocationPermission();
+
+    if (!userLocation) {
+      Alert.alert('위치 오류', '현재 위치를 가져올 수 없습니다. 위치 권한을 확인해주세요.');
+      return;
+    }
+
+    try {
+      const userMissionId = parseInt(selectedMissionForVerification.mission_id, 10);
+      const result = await verifyByGps(userMissionId, userLocation.lat, userLocation.lng);
+
+      if (result.success && result.data) {
+        Alert.alert(
+          '인증 완료!',
+          `GPS 인증이 완료되었습니다.\n+${result.data.expReward} EXP 획득!`
+        );
+        setVerificationModalVisible(false);
+        setSelectedMissionForVerification(null);
+        await loadMissions();
+      } else {
+        Alert.alert('인증 실패', result.error || 'GPS 인증에 실패했습니다.');
+      }
+    } catch (error) {
+      Alert.alert('오류', 'GPS 인증 중 오류가 발생했습니다.');
+    }
+  }, [selectedMissionForVerification, userLocation, requestLocationPermission, loadMissions]);
+
+  // 시간 인증 선택 시
+  const handleTimeVerification = useCallback(async () => {
+    if (!selectedMissionForVerification) return;
+
+    try {
+      const userMissionId = parseInt(selectedMissionForVerification.mission_id, 10);
+      const result = await verifyByTime(userMissionId);
+
+      if (result.success && result.data) {
+        Alert.alert(
+          '인증 완료!',
+          `시간 인증이 완료되었습니다.\n+${result.data.expReward} EXP 획득!`
+        );
+        setVerificationModalVisible(false);
+        setSelectedMissionForVerification(null);
+        await loadMissions();
+      } else {
+        Alert.alert('인증 실패', result.error || '시간 인증에 실패했습니다.');
+      }
+    } catch (error) {
+      Alert.alert('오류', '시간 인증 중 오류가 발생했습니다.');
+    }
+  }, [selectedMissionForVerification, loadMissions]);
 
   // 인증 상태 확인 (게시글 작성 후 복귀 시)
   const checkVerificationOnReturn = useCallback(async () => {
@@ -295,6 +353,8 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
           setSelectedMissionForVerification(null);
         }}
         onLikeVerification={handleLikeVerification}
+        onGPSVerification={handleGPSVerification}
+        onTimeVerification={handleTimeVerification}
         onVerificationSuccess={async () => {
           await loadMissions();
         }}

@@ -241,6 +241,31 @@ export const getPost = async (
   }
 };
 
+// 백엔드 댓글 응답 타입
+interface BackendCommentResponse {
+  id: number;
+  userId: number;
+  userNickname: string;
+  userProfileImg?: string;
+  content: string;
+  createdAt: string;
+  updatedAt?: string;
+}
+
+/**
+ * 백엔드 댓글 응답을 프론트엔드 형식으로 변환
+ */
+const transformBackendComment = (comment: BackendCommentResponse | any, postId?: string): CommunityComment => ({
+  id: (comment.id || comment.comment_id || '').toString(),
+  comment_id: (comment.id || comment.comment_id || '').toString(),
+  post_id: postId || '',
+  content: comment.content || '',
+  author: (comment.userId || comment.author || '').toString(),
+  author_nickname: comment.userNickname || comment.author_nickname || '알 수 없음',
+  created_at: comment.createdAt || comment.created_at || new Date().toISOString(),
+  updated_at: comment.updatedAt || comment.updated_at,
+});
+
 /**
  * 댓글 생성 - 백엔드 API 사용
  */
@@ -252,15 +277,21 @@ export const createComment = async (
 ): Promise<ServiceResult<CommunityComment>> => {
   try {
     const endpoint = API_CONFIG.endpoints.post.createComment.replace(':postId', postId);
-    const result = await apiClient.post<CommunityComment>(endpoint, {
+    const result = await apiClient.post<BackendCommentResponse>(endpoint, {
       content: content.trim(),
       parentCommentId,
     });
 
     if (result.success && result.data) {
+      // 백엔드 응답을 프론트엔드 형식으로 변환
+      const transformedComment = transformBackendComment(result.data, postId);
+      // 백엔드에서 사용자 닉네임이 없으면 현재 사용자 닉네임 사용
+      if (!transformedComment.author_nickname || transformedComment.author_nickname === '알 수 없음') {
+        transformedComment.author_nickname = nickname;
+      }
       return {
         success: true,
-        data: result.data
+        data: transformedComment
       };
     }
 
@@ -292,14 +323,19 @@ export const updateComment = async (
       .replace(':postId', postId || '0')
       .replace(':commentId', commentId);
 
-    const result = await apiClient.put<CommunityComment>(endpoint, {
+    const result = await apiClient.put<BackendCommentResponse>(endpoint, {
       content: content.trim(),
     });
 
     if (result.success && result.data) {
+      // 백엔드 응답을 프론트엔드 형식으로 변환
+      const transformedComment = transformBackendComment(result.data, postId);
+      if (!transformedComment.author_nickname || transformedComment.author_nickname === '알 수 없음') {
+        transformedComment.author_nickname = nickname;
+      }
       return {
         success: true,
-        data: result.data
+        data: transformedComment
       };
     }
 
@@ -357,13 +393,22 @@ export const getComments = async (
 ): Promise<CommunityComment[]> => {
   try {
     const endpoint = API_CONFIG.endpoints.post.comments.replace(':postId', postId);
-    const result = await apiClient.get<CommunityComment[]>(endpoint);
+    const result = await apiClient.get<BackendCommentResponse[] | any>(endpoint);
 
     if (result.success && result.data) {
-      const comments = Array.isArray(result.data) ? result.data : [];
-      return comments.sort((a, b) =>
-        new Date(a.created_at || a.createdAt || 0).getTime() -
-        new Date(b.created_at || b.createdAt || 0).getTime()
+      let rawComments = result.data;
+      // Page 객체인 경우 content 추출
+      if (result.data && typeof result.data === 'object' && 'content' in result.data) {
+        rawComments = result.data.content || [];
+      }
+      const comments = Array.isArray(rawComments) ? rawComments : [];
+
+      // 백엔드 응답을 프론트엔드 형식으로 변환
+      const transformedComments = comments.map(comment => transformBackendComment(comment, postId));
+
+      return transformedComments.sort((a, b) =>
+        new Date(a.created_at || 0).getTime() -
+        new Date(b.created_at || 0).getTime()
       );
     }
 

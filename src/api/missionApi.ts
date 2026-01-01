@@ -17,6 +17,13 @@ export type UserMissionStatus = 'ASSIGNED' | 'PENDING' | 'COMPLETED' | 'EXPIRED'
 export type VerificationStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
 export type VoteType = 'APPROVE' | 'REJECT';
 
+// 사용자 맞춤 필터링 타입
+export type WorryType = 'RE_EMPLOYMENT' | 'JOB_PREPARATION' | 'ENTRANCE_EXAM' | 'ADVANCEMENT' | 'RETURN_TO_SCHOOL' | 'RELATIONSHIP' | 'SELF_MANAGEMENT';
+export type AgeRange = 'LATE_TEENS' | 'EARLY_TWENTIES' | 'MID_TWENTIES' | 'LATE_TWENTIES' | 'EARLY_THIRTIES' | 'MID_THIRTIES' | 'LATE_THIRTIES' | 'FORTIES_PLUS';
+export type GenderType = 'MALE' | 'FEMALE' | 'ALL';
+export type DifficultyLevel = 'LEVEL1' | 'LEVEL2' | 'LEVEL3';
+export type PlaceType = 'HOME' | 'OUTDOOR' | 'INDOOR';
+
 // ============================================
 // 시스템 미션 (Mission)
 // ============================================
@@ -35,6 +42,13 @@ export interface SystemMission {
   badgeDurationDays: number;
   reviewCount?: number;
   qnaCount?: number;
+  // 사용자 맞춤 필드
+  worryType?: WorryType;
+  ageRanges?: AgeRange[];
+  genderType?: GenderType;
+  regionType?: string;
+  placeType?: PlaceType;
+  difficultyLevel?: DifficultyLevel;
 }
 
 export interface SystemMissionListResponse {
@@ -55,6 +69,24 @@ export const getSystemMissions = async (params?: {
   size?: number;
 }): Promise<ServiceResult<SystemMissionListResponse>> => {
   return apiClient.get<SystemMissionListResponse>(API_CONFIG.endpoints.mission.list, params);
+};
+
+/**
+ * 사용자 맞춤 미션 목록 조회 (필터링)
+ * GET /api/missions/filtered
+ */
+export const getFilteredSystemMissions = async (params?: {
+  type?: MissionType;
+  verificationType?: VerificationType;
+  worryType?: WorryType;
+  ageRange?: AgeRange;
+  genderType?: GenderType;
+  regionType?: string;
+  difficultyLevel?: DifficultyLevel;
+  page?: number;
+  size?: number;
+}): Promise<ServiceResult<SystemMissionListResponse>> => {
+  return apiClient.get<SystemMissionListResponse>(API_CONFIG.endpoints.mission.filtered, params);
 };
 
 /**
@@ -743,3 +775,82 @@ function getMissionEmoji(title: string): string {
   if (title.includes('공부')) return '📖';
   return '🎯';
 }
+
+// ============================================
+// 직접 인증 API (GPS/시간)
+// ============================================
+
+export interface DirectVerificationResponse {
+  success: boolean;
+  message: string;
+  expReward: number;
+}
+
+/**
+ * GPS 직접 인증
+ * POST /api/verifications/gps
+ */
+export const verifyByGps = async (
+  userMissionId: number,
+  latitude: number,
+  longitude: number
+): Promise<ServiceResult<DirectVerificationResponse>> => {
+  return apiClient.post<DirectVerificationResponse>(API_CONFIG.endpoints.verification.gps, {
+    userMissionId,
+    latitude,
+    longitude,
+  });
+};
+
+/**
+ * 시간 직접 인증
+ * POST /api/verifications/time
+ */
+export const verifyByTime = async (
+  userMissionId: number
+): Promise<ServiceResult<DirectVerificationResponse>> => {
+  return apiClient.post<DirectVerificationResponse>(API_CONFIG.endpoints.verification.time, {
+    userMissionId,
+  });
+};
+
+// ============================================
+// 파일 업로드 (S3)
+// ============================================
+
+export interface UploadedFileInfo {
+  fileName: string;
+  fileUrl: string;
+  fileSize: number;
+  contentType: string;
+}
+
+/**
+ * 파일 업로드 (S3)
+ * POST /api/files/upload
+ * 인증 필요
+ */
+export const uploadFile = async (
+  file: { uri: string; name: string; type: string }
+): Promise<ServiceResult<UploadedFileInfo>> => {
+  const formData = new FormData();
+  formData.append('file', {
+    uri: file.uri,
+    name: file.name,
+    type: file.type,
+  } as any);
+
+  return apiClient.upload<UploadedFileInfo>(API_CONFIG.endpoints.file.upload, formData);
+};
+
+/**
+ * 파일 삭제 (S3)
+ * DELETE /api/files/{fileName}
+ * 인증 필요
+ */
+export const deleteFile = async (
+  fileName: string
+): Promise<ServiceResult<{ message: string }>> => {
+  const endpoint = API_CONFIG.endpoints.file.delete.replace(':fileName', fileName);
+  return apiClient.delete(endpoint);
+};

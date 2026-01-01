@@ -47,6 +47,7 @@ export const API_CONFIG = {
     // 시스템 미션 (Mission)
     mission: {
       list: '/missions',
+      filtered: '/missions/filtered',
       detail: '/missions/:missionId',
       reviews: '/missions/:missionId/reviews',
       createReview: '/missions/:missionId/reviews',
@@ -55,6 +56,12 @@ export const API_CONFIG = {
       createQuestion: '/missions/:missionId/qna',
       createAnswer: '/missions/:missionId/qna/:qnaId/answers',
       acceptAnswer: '/missions/:missionId/qna/:qnaId/answers/:answerId/accept',
+    },
+
+    // 파일 업로드 (File)
+    file: {
+      upload: '/files/upload',
+      delete: '/files/:fileName',
     },
 
     // 커스텀 미션 (CustomMission)
@@ -82,6 +89,8 @@ export const API_CONFIG = {
       update: '/verifications/:verificationId',
       delete: '/verifications/:verificationId',
       vote: '/verifications/:verificationId/votes',
+      gps: '/verifications/gps',
+      time: '/verifications/time',
     },
 
     // 자유 게시판 (Post)
