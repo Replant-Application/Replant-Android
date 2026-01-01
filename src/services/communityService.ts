@@ -60,11 +60,11 @@ export const updatePost = async (
   try {
     const endpoint = API_CONFIG.endpoints.post.update.replace(':postId', postId);
     const result = await apiClient.put<CommunityPost>(endpoint, {
-      title: updateData.title,
-      content: updateData.content,
-      images: updateData.images,
-      tags: updateData.tags,
-      category: updateData.category,
+      title: updateDataParam.title,
+      content: updateDataParam.content,
+      images: updateDataParam.images,
+      tags: updateDataParam.tags,
+      category: updateDataParam.category,
     });
 
     if (result.success && result.data) {

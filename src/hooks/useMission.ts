@@ -19,6 +19,41 @@ import { useUser } from '../contexts/UserContext';
 import { logError } from '../utils/logger';
 import { sortMissionsByTitle, removeDuplicateMissions } from '../utils/missionUtils';
 import { Mission, MissionData, UseMissionReturn, MissionCompletionResult, ServiceResult, ExperienceResult, MissionCategory } from '../types';
+import { getSystemMissions, SystemMission, MissionType } from '../api/missionApi';
+
+/**
+ * 백엔드 시스템 미션을 로컬 미션 형식으로 변환
+ */
+const transformSystemMission = (systemMission: SystemMission, missionType: MissionType): Mission => {
+  const getMissionEmoji = (title: string): string => {
+    if (title.includes('운동') || title.includes('헬스') || title.includes('걷기')) return '🏃';
+    if (title.includes('독서') || title.includes('책')) return '📚';
+    if (title.includes('물') || title.includes('마시')) return '💧';
+    if (title.includes('명상') || title.includes('휴식')) return '🧘';
+    if (title.includes('아침') || title.includes('기상')) return '🌅';
+    if (title.includes('영어') || title.includes('단어') || title.includes('외국어')) return '📝';
+    if (title.includes('잠') || title.includes('수면')) return '😴';
+    if (title.includes('식사') || title.includes('밥')) return '🍽️';
+    if (title.includes('저축') || title.includes('돈')) return '💰';
+    if (title.includes('공부')) return '📖';
+    return '🎯';
+  };
+
+  return {
+    id: systemMission.id.toString(),
+    mission_id: systemMission.id.toString(),
+    title: systemMission.title,
+    description: systemMission.description,
+    emoji: getMissionEmoji(systemMission.title),
+    experience: systemMission.expReward || 10,
+    category_id: 'growth',
+    type: missionType,
+    completed: false,
+    created_at: new Date().toISOString(),
+    is_custom: false,
+    verification_type: systemMission.verificationType,
+  };
+};
 
 export const useMission = (
   addExperienceByCategory?: (categoryId: MissionCategory, experience: number) => Promise<ExperienceResult>
@@ -28,7 +63,7 @@ export const useMission = (
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  // 미션 데이터 로드
+  // 미션 데이터 로드 - 백엔드 API에서 불러옴
   const loadMissions = useCallback(async (): Promise<void> => {
     if (!currentNickname) return;
 
@@ -37,19 +72,65 @@ export const useMission = (
       setError(null);
 
       const storageKeys = getStorageKeys(currentNickname);
-      const missionsData: Mission[] = await getData(storageKeys.MISSIONS) || [];
+
+      // 로컬 스토리지에서 기존 미션 상태 가져오기 (완료 상태 보존용)
+      const localMissions: Mission[] = await getData(storageKeys.MISSIONS) || [];
+      const localMissionMap = new Map<string, Mission>();
+      localMissions.forEach(m => localMissionMap.set(m.mission_id, m));
+
+      // 백엔드 API에서 DAILY, WEEKLY, MONTHLY 미션 불러오기
+      const missionTypes: MissionType[] = ['DAILY', 'WEEKLY', 'MONTHLY'];
+      const allMissions: Mission[] = [];
+
+      for (const missionType of missionTypes) {
+        try {
+          const result = await getSystemMissions({ type: missionType, size: 50 });
+
+          if (result.success && result.data && result.data.content) {
+            const transformedMissions = result.data.content.map(systemMission => {
+              const transformed = transformSystemMission(systemMission, missionType);
+
+              // 로컬에 저장된 완료 상태 병합
+              const localMission = localMissionMap.get(transformed.mission_id);
+              if (localMission) {
+                return {
+                  ...transformed,
+                  completed: localMission.completed,
+                  completed_at: localMission.completed_at,
+                  photo_url: localMission.photo_url,
+                  verified: localMission.verified,
+                  verification_method: localMission.verification_method,
+                };
+              }
+              return transformed;
+            });
+
+            allMissions.push(...transformedMissions);
+          }
+        } catch (apiError) {
+          logError(`${missionType} 미션 API 호출 실패`, apiError as Error, { missionType });
+        }
+      }
+
+      // API에서 미션을 불러오지 못한 경우 로컬 데이터 사용
+      let finalMissions: Mission[];
+      if (allMissions.length > 0) {
+        // 커스텀 미션 유지 (is_custom이 true인 것들)
+        const customMissions = localMissions.filter(m => m.is_custom === true);
+        finalMissions = [...allMissions, ...customMissions];
+
+        // 새로운 미션 목록을 로컬 스토리지에 저장
+        await setData(storageKeys.MISSIONS, finalMissions);
+      } else {
+        // API 실패 시 로컬 데이터 사용
+        finalMissions = localMissions;
+      }
 
       // 단일 카테고리로 normalize
-      const normalizedMissions: Mission[] = missionsData.map(m => ({
+      const normalizedMissions: Mission[] = finalMissions.map(m => ({
         ...m,
         category_id: 'growth'
       }));
-
-      // category_id가 변경된 경우에만 저장 (JSON.stringify 비교 최적화)
-      const needsUpdate = missionsData.some(mission => mission.category_id !== 'growth');
-      if (needsUpdate) {
-        await setData(storageKeys.MISSIONS, normalizedMissions);
-      }
 
       // 중복 제거 및 정렬
       const uniqueMissions = removeDuplicateMissions(normalizedMissions);
@@ -80,7 +161,6 @@ export const useMission = (
 
     try {
       const storageKeys = getStorageKeys(currentNickname);
-      // 스토리지에서 직접 미션 찾기 (로컬 스토리지만 사용)
       const missionsData: Mission[] = await getData(storageKeys.MISSIONS) || [];
       const mission: Mission | undefined = missionsData.find(m => m.mission_id === missionId);
 
@@ -93,7 +173,6 @@ export const useMission = (
         return { success: false, error: '미션을 찾을 수 없습니다.' };
       }
 
-      // 사진만 저장 (완료 상태는 변경하지 않음)
       const updatedMission: Mission = {
         ...mission,
         photo_url: photoUrl,
@@ -105,7 +184,6 @@ export const useMission = (
       );
       await setData(storageKeys.MISSIONS, updatedMissions);
 
-      // 로컬 상태 업데이트
       setMissions(prev =>
         prev.map(m =>
           m.mission_id === missionId
@@ -133,7 +211,6 @@ export const useMission = (
       const result = await deleteMissionPhotoService(missionId, currentNickname);
 
       if (result.success) {
-        // 로컬 상태 업데이트
         setMissions(prev =>
           prev.map(m =>
             m.mission_id === missionId
@@ -165,26 +242,22 @@ export const useMission = (
         throw new Error('미션을 찾을 수 없습니다.');
       }
 
-      // 미션 완료 상태 업데이트
-      // 인증은 아직 안 된 상태이므로 verified는 false로 명시적 설정
       const updatedMission: Mission = {
         ...mission,
         completed: true,
         completed_at: new Date().toISOString(),
         photo_url: photoUrl || undefined,
-        verified: false, // 미션 완료 시점에는 아직 인증 안 됨
-        verification_method: undefined, // 인증 방법도 아직 선택 안 됨
+        verified: false,
+        verification_method: undefined,
       };
 
       const storageKeys = getStorageKeys(currentNickname);
-      // mission_id로 찾아서 업데이트 (더 안전함)
       const missionsData: Mission[] = await getData(storageKeys.MISSIONS) || [];
       const updatedMissions = missionsData.map(m =>
         m.mission_id === missionId ? updatedMission : m
       );
       await setData(storageKeys.MISSIONS, updatedMissions);
 
-      // 로컬 상태 업데이트
       setMissions(prev =>
         prev.map(m =>
           m.mission_id === missionId
@@ -193,7 +266,6 @@ export const useMission = (
         )
       );
 
-      // 경험치 추가 (캐릭터 시스템과 연동)
       let experienceResult: ExperienceResult | null = null;
       if (addExperienceByCategory && mission.category_id) {
         experienceResult = await addExperienceByCategory(mission.category_id, mission.experience);
@@ -204,7 +276,7 @@ export const useMission = (
         experienceGained: experienceResult?.experienceGained || mission.experience,
         levelUp: experienceResult?.levelUp || false,
         newLevel: experienceResult?.newLevel,
-        unlocked: false // 나중에 캐릭터 해제 로직 추가
+        unlocked: false
       };
     } catch (completeError) {
       logError('미션 완료 실패', completeError as Error, { missionId, photoUrl });
@@ -234,7 +306,6 @@ export const useMission = (
       const storageKeys = getStorageKeys(currentNickname);
       await updateData(storageKeys.MISSIONS, mission.id, updatedMission);
 
-      // 로컬 상태 업데이트
       setMissions(prev =>
         prev.map(m =>
           m.mission_id === missionId
@@ -260,7 +331,6 @@ export const useMission = (
       const result = await createCustomMissionService(missionData, currentNickname);
 
       if (result.success && result.data) {
-        // 로컬 상태에 새 미션 추가
         setMissions(prev => [...prev, result.data!]);
       }
 
@@ -281,7 +351,6 @@ export const useMission = (
       const result = await updateCustomMissionService(missionId, missionData, currentNickname);
 
       if (result.success && result.data) {
-        // 로컬 상태 업데이트
         setMissions(prev =>
           prev.map(m =>
             m.mission_id === missionId
@@ -308,7 +377,6 @@ export const useMission = (
       const result = await deleteCustomMissionService(missionId, currentNickname);
 
       if (result.success) {
-        // 로컬 상태에서 미션 제거
         setMissions(prev => prev.filter(m => m.mission_id !== missionId));
       }
 
@@ -319,7 +387,6 @@ export const useMission = (
     }
   }, [currentNickname]);
 
-  // 메모이제이션된 반환 객체
   return useMemo(() => ({
     missions,
     loading,
