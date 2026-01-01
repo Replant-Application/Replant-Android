@@ -47,6 +47,10 @@ export interface Mission {
   completed: boolean;
   completed_at?: string | undefined;
   photo_url?: string | undefined;
+  // 미션 기간 타입 (DAILY, WEEKLY, MONTHLY)
+  type?: 'DAILY' | 'WEEKLY' | 'MONTHLY';
+  // 인증 타입 (COMMUNITY, GPS, TIME)
+  verification_type?: 'COMMUNITY' | 'GPS' | 'TIME';
   // 인증 관련 필드
   verification_method?: 'like' | 'gps' | 'manual';
   verified?: boolean;

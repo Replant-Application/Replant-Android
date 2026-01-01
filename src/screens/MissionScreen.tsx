@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, RefreshControl } from 'react-native';
 import { useMission } from '../hooks/useMission';
 import { useCharacter } from '../hooks/useCharacter';
 import { useLocation } from '../hooks/useLocation';
@@ -10,7 +10,7 @@ import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../types/navigation';
 import { useUser } from '../contexts/UserContext';
 import { Mission } from '../types';
-import { checkVerificationStatus, verifyByGps, verifyByTime } from '../api/missionApi';
+import { checkVerificationStatus, verifyByGps, verifyByTime, MissionType } from '../api/missionApi';
 
 // 단일 카테고리: 성장
 
@@ -19,7 +19,7 @@ interface MissionScreenProps {
   route?: RouteProp<RootStackParamList, 'Mission'>;
 }
 
-type MissionFilter = 'all' | 'daily' | 'completed';
+type MissionPeriodFilter = 'DAILY' | 'WEEKLY' | 'MONTHLY';
 
 const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
   const { addExperienceByCategory } = useCharacter();
@@ -29,7 +29,8 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
   // route params에서 사진 정보 확인
   const routeParams = route?.params;
   const processedPhotoRef = useRef<string | null>(null);
-  const [selectedFilter, setSelectedFilter] = useState<MissionFilter>('all');
+  const [selectedPeriod, setSelectedPeriod] = useState<MissionPeriodFilter>('DAILY');
+  const [refreshing, setRefreshing] = useState(false);
 
   // 인증 모달 상태
   const [verificationModalVisible, setVerificationModalVisible] = useState(false);
@@ -51,28 +52,48 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
     return `${year}-${month}-${day}`;
   }, []);
 
-  // 필터링된 미션 목록
+  // 기간별 필터링된 미션 목록
   const filteredMissions = useMemo(() => {
-    switch (selectedFilter) {
-      case 'daily':
-        // 오늘 완료한 미션만 표시
-        return missions.filter(mission => {
-          if (mission.completed && mission.completed_at) {
-            const completedDate = mission.completed_at.split('T')[0];
-            return completedDate === today;
-          }
-          return false;
-        });
-      case 'completed':
-        return missions.filter(mission => mission.completed);
-      case 'all':
-      default:
-        return missions;
-    }
-  }, [missions, selectedFilter, today]);
+    return missions.filter(mission => {
+      // mission.type이 있으면 해당 타입으로 필터링, 없으면 DAILY로 간주
+      const missionType = mission.type || 'DAILY';
+      return missionType === selectedPeriod;
+    });
+  }, [missions, selectedPeriod]);
 
   const totalGrowthMissions = filteredMissions.length;
   const displayedMissions = filteredMissions;
+
+  // 미션 초기화 (새로고침)
+  const handleRefreshMissions = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      await loadMissions();
+    } catch (err) {
+      Alert.alert('오류', '미션을 새로고침하는 데 실패했습니다.');
+    } finally {
+      setRefreshing(false);
+    }
+  }, [loadMissions]);
+
+  // 미션 초기화 버튼 핸들러
+  const handleResetMissions = useCallback(() => {
+    Alert.alert(
+      '미션 초기화',
+      '새로운 미션을 불러옵니다. 진행 중인 미션은 초기화됩니다.',
+      [
+        { text: '취소', style: 'cancel' },
+        {
+          text: '초기화',
+          style: 'destructive',
+          onPress: async () => {
+            await handleRefreshMissions();
+            Alert.alert('완료', '미션이 초기화되었습니다.');
+          }
+        }
+      ]
+    );
+  }, [handleRefreshMissions]);
 
 
   // 진행률 계산
@@ -360,9 +381,17 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
         }}
       />
 
-      <ScrollView 
+      <ScrollView
         style={styles.content}
         contentContainerStyle={styles.scrollContent}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefreshMissions}
+            colors={[colors.primary[500]]}
+            tintColor={colors.primary[500]}
+          />
+        }
       >
         {/* 진행률 표시 */}
         {totalMissions > 0 && (
@@ -389,34 +418,34 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
           </View>
         )}
 
-        {/* 필터 탭 */}
+        {/* 기간별 탭 (일간/주간/월간) */}
         <View style={styles.filterTabs}>
           <View style={styles.filterTabsWrapper}>
             <TouchableOpacity
-              style={[styles.filterTab, selectedFilter === 'all' && styles.filterTabActive]}
-              onPress={() => setSelectedFilter('all')}
+              style={[styles.filterTab, selectedPeriod === 'DAILY' && styles.filterTabActive]}
+              onPress={() => setSelectedPeriod('DAILY')}
               activeOpacity={0.7}
             >
-              <Text style={[styles.filterTabText, selectedFilter === 'all' && styles.filterTabTextActive]}>
-                전체
+              <Text style={[styles.filterTabText, selectedPeriod === 'DAILY' && styles.filterTabTextActive]}>
+                일간
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
-              style={[styles.filterTab, selectedFilter === 'daily' && styles.filterTabActive]}
-              onPress={() => setSelectedFilter('daily')}
+              style={[styles.filterTab, selectedPeriod === 'WEEKLY' && styles.filterTabActive]}
+              onPress={() => setSelectedPeriod('WEEKLY')}
               activeOpacity={0.7}
             >
-              <Text style={[styles.filterTabText, selectedFilter === 'daily' && styles.filterTabTextActive]}>
-                진행중
+              <Text style={[styles.filterTabText, selectedPeriod === 'WEEKLY' && styles.filterTabTextActive]}>
+                주간
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
-              style={[styles.filterTab, selectedFilter === 'completed' && styles.filterTabActive]}
-              onPress={() => setSelectedFilter('completed')}
+              style={[styles.filterTab, selectedPeriod === 'MONTHLY' && styles.filterTabActive]}
+              onPress={() => setSelectedPeriod('MONTHLY')}
               activeOpacity={0.7}
             >
-              <Text style={[styles.filterTabText, selectedFilter === 'completed' && styles.filterTabTextActive]}>
-                완료
+              <Text style={[styles.filterTabText, selectedPeriod === 'MONTHLY' && styles.filterTabTextActive]}>
+                월간
               </Text>
             </TouchableOpacity>
           </View>
@@ -425,28 +454,35 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
         {/* 미션 목록 */}
         <View style={styles.missionSection}>
           <View style={styles.sectionHeader}>
-            <SectionTitle 
+            <SectionTitle
               title={
-                selectedFilter === 'all' ? `성장 미션 (${totalGrowthMissions}개)` :
-                selectedFilter === 'daily' ? `오늘의 미션 (${totalGrowthMissions}개)` :
-                `완료한 미션 (${totalGrowthMissions}개)`
+                selectedPeriod === 'DAILY' ? `일간 미션 (${totalGrowthMissions}개)` :
+                selectedPeriod === 'WEEKLY' ? `주간 미션 (${totalGrowthMissions}개)` :
+                `월간 미션 (${totalGrowthMissions}개)`
               }
               marginBottom={spacing[3]}
             />
+            <TouchableOpacity
+              style={styles.resetButton}
+              onPress={handleResetMissions}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.resetButtonText}>🔄 초기화</Text>
+            </TouchableOpacity>
           </View>
 
           {displayedMissions.length === 0 ? (
             <EmptyState
               iconImage={require('../assets/images/clover.png')}
               title={
-                selectedFilter === 'all' ? '아직 미션이 없어요' :
-                selectedFilter === 'daily' ? '오늘의 미션이 없어요' :
-                '완료한 미션이 없어요'
+                selectedPeriod === 'DAILY' ? '일간 미션이 없어요' :
+                selectedPeriod === 'WEEKLY' ? '주간 미션이 없어요' :
+                '월간 미션이 없어요'
               }
               description={
-                selectedFilter === 'all' ? '새로운 미션이 곧 추가될 예정입니다!' :
-                selectedFilter === 'daily' ? '오늘 완료한 미션이 없습니다.' :
-                '아직 완료한 미션이 없습니다.'
+                selectedPeriod === 'DAILY' ? '새로운 일간 미션이 곧 추가될 예정입니다!' :
+                selectedPeriod === 'WEEKLY' ? '새로운 주간 미션이 곧 추가될 예정입니다!' :
+                '새로운 월간 미션이 곧 추가될 예정입니다!'
               }
             />
           ) : (
@@ -582,7 +618,21 @@ const styles = StyleSheet.create({
   sectionHeader: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     marginBottom: spacing[1],
+  },
+  resetButton: {
+    backgroundColor: colors.gray[100],
+    paddingVertical: spacing[1],
+    paddingHorizontal: spacing[3],
+    borderRadius: borderRadius.full,
+    borderWidth: 1,
+    borderColor: colors.gray[200],
+  },
+  resetButtonText: {
+    fontSize: typography.fontSize.sm,
+    color: colors.text.secondary,
+    fontWeight: typography.fontWeight.medium,
   },
   createButton: {
     backgroundColor: colors.green[700],
