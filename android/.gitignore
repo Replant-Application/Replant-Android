@@ -17,3 +17,6 @@ local.properties
 
 replant-release.keystore
 upload_certificate.pem
+
+# Keystore properties (민감한 정보)
+keystore.properties

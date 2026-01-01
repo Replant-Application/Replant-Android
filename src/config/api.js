@@ -1,11 +1,12 @@
 /**
  * API 설정 파일
- * 실제 배포 시에는 환경변수로 관리해야 합니다.
+ * 환경변수로 관리되는 API 키들
  */
 
-// 카카오맵 API 키
-export const KAKAO_MAP_API_KEY =
-  process.env.KAKAO_MAP_API_KEY || 'f94a71dffa5ef5f8b9e839d918b860cc';
+import { KAKAO_MAP_API_KEY as ENV_KAKAO_KEY } from '@env';
+
+// 카카오맵 API 키 (환경변수에서 읽어옴)
+export const KAKAO_MAP_API_KEY = ENV_KAKAO_KEY || '';
 
 // API 키가 설정되었는지 확인
 export const HAS_KAKAO_API_KEY =
