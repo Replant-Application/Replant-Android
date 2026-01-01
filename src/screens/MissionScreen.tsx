@@ -139,9 +139,9 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
     if (!selectedMissionForVerification) return;
 
     navigation.navigate('CommunityPostCreate', {
-      missionId: selectedMissionForVerification.mission_id,
-      missionTitle: selectedMissionForVerification.title,
-      missionEmoji: selectedMissionForVerification.emoji,
+      missionId: selectedMissionForVerification.mission_id || '',
+      missionTitle: selectedMissionForVerification.title || '미션',
+      missionEmoji: selectedMissionForVerification.emoji || '🎯',
       photoUrl: selectedMissionForVerification.photo_url || undefined,
     });
   }, [selectedMissionForVerification, navigation]);
@@ -244,9 +244,9 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
     if (!mission) return;
 
     navigation.navigate('CommunityPostCreate', {
-      missionId: mission.mission_id,
-      missionTitle: mission.title,
-      missionEmoji: mission.emoji,
+      missionId: mission.mission_id || '',
+      missionTitle: mission.title || '미션',
+      missionEmoji: mission.emoji || '🎯',
       photoUrl: mission.photo_url || undefined,
     });
   };

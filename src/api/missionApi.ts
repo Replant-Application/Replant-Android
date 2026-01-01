@@ -854,3 +854,25 @@ export const deleteFile = async (
   const endpoint = API_CONFIG.endpoints.file.delete.replace(':fileName', fileName);
   return apiClient.delete(endpoint);
 };
+
+// ============================================
+// 인증 상태 확인
+// ============================================
+
+/**
+ * 미션 인증 상태 확인
+ * 미션이 인증되었는지 확인
+ */
+export const checkVerificationStatus = async (
+  missionId: string
+): Promise<ServiceResult<{ verified: boolean; verificationMethod?: string }>> => {
+  // 로컬 미션의 경우 인증 상태 확인 - 현재는 항상 미인증 상태 반환
+  // 백엔드 연동 시 실제 API 호출로 대체
+  return {
+    success: true,
+    data: {
+      verified: false,
+      verificationMethod: undefined,
+    },
+  };
+};

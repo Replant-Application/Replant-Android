@@ -47,6 +47,9 @@ const transformSystemMission = (systemMission: SystemMission, missionType: Missi
     emoji: getMissionEmoji(systemMission.title),
     experience: systemMission.expReward || 10,
     category_id: 'growth',
+        type: m.type || 'DAILY',
+        emoji: m.emoji || '🎯',
+        verification_type: m.verification_type || 'COMMUNITY',
     type: missionType,
     completed: false,
     created_at: new Date().toISOString(),
@@ -129,7 +132,10 @@ export const useMission = (
       // 단일 카테고리로 normalize
       const normalizedMissions: Mission[] = finalMissions.map(m => ({
         ...m,
-        category_id: 'growth'
+        category_id: 'growth',
+        type: m.type || 'DAILY',
+        emoji: m.emoji || '🎯',
+        verification_type: m.verification_type || 'COMMUNITY'
       }));
 
       // 중복 제거 및 정렬
