@@ -3,115 +3,132 @@
  * 백엔드 API 연동 시 사용할 설정값들
  */
 
+import { API_BASE_URL, API_TIMEOUT } from '@env';
+
+// 백엔드 기본 URL: localhost:8080
+const getBaseURL = () => {
+  if (API_BASE_URL) {
+    return API_BASE_URL;
+  }
+  // 기본값: localhost:8080
+  // 참고: Android 에뮬레이터에서는 localhost가 에뮬레이터 자체를 가리키므로
+  // 호스트 머신의 백엔드에 접근하려면 환경변수로 10.0.2.2:8080을 설정하거나
+  // 실제 Android 기기에서는 호스트 머신의 IP 주소를 사용해야 합니다.
+  return 'http://localhost:8080/api';
+};
+
 export const API_CONFIG = {
-  // TODO: 백엔드 개발자와 협의하여 실제 baseURL 설정
-  baseURL: (() => {
-    try {
-      // @ts-ignore - process는 런타임에 존재할 수 있음
-      return typeof process !== 'undefined' && process.env?.API_BASE_URL ? process.env.API_BASE_URL : 'http://localhost:3000/api';
-    } catch {
-      return 'http://localhost:3000/api';
-    }
-  })(),
+  // 백엔드 API 기본 URL (환경변수에서 읽어옴)
+  baseURL: getBaseURL(),
 
   endpoints: {
-    // 인증
+    // 인증 (Auth)
     auth: {
-      signup: '/auth/signup',
-      signin: '/auth/singin',
-      signout: '/auth/signout',
+      login: '/auth/login',
+      join: '/auth/join',
+      oauthLogin: '/auth/oauth/:provider', // provider: KAKAO, GOOGLE, APPLE, NAVER
       refresh: '/auth/refresh',
-      findUsername: '/auth/find-username',
-      resetPassword: '/auth/reset-password',
-      resetPasswordConfirm: '/auth/reset-password/confirm',
-      me: '/auth/me',
+      logout: '/auth/logout',
     },
-
-    // 관리자
-    manage: {
-      updateUser: '/manag/users/:id',
-      deactivateUser: '/manag/users/:id',
-      getAllUsers: '/manag/users',
-      getUserDetail: '/manag/users/:id',
-    },
-
-    // 사용자
+    // 사용자 (User)
     user: {
-      myPage: '/user',
-      changePassword: '/user/password',
-      updateProfile: '/user',
-      addCalendar: '/user/calendar',
-      updateCalendar: '/user/calendar/:id',
+      me: '/users/me',
+      updateMe: '/users/me',
+      getUser: '/users/:userId',
     },
 
-    // 미션
+    // 펫 (Reant)
+    reant: {
+      get: '/reant',
+      update: '/reant',
+    },
+    // 시스템 미션 (Mission)
     mission: {
-      create: '/mission',
-      update: '/mission/:id',
-      delete: '/mission/:id', // 명세서에 POST로 명시됨
-      verify: '/mission/:id/verify',
-      checkCompletion: '/mission/:id/completion',
-      getDailyMissions: '/mission/daily',
-      getCompletedMissions: '/mission/completed',
-      saveTodoList: '/mission/todo',
-      getTodoList: '/mission/todo',
-      // 인증 관련
-      verificationStatus: '/mission/:id/verification-status',
-      verifyByLikes: '/mission/:id/verify-by-likes',
-      verificationRequirements: '/mission/:id/verification-requirements',
-      verifyByGPS: '/mission/:id/verify-by-gps',
-      weeklyStats: '/mission/weekly-stats',
+      list: '/missions',
+      detail: '/missions/:missionId',
+      reviews: '/missions/:missionId/reviews',
+      createReview: '/missions/:missionId/reviews',
+      qnaList: '/missions/:missionId/qna',
+      qnaDetail: '/missions/:missionId/qna/:qnaId',
+      createQuestion: '/missions/:missionId/qna',
+      createAnswer: '/missions/:missionId/qna/:qnaId/answers',
+      acceptAnswer: '/missions/:missionId/qna/:qnaId/answers/:answerId/accept',
+    },
+    // 커스텀 미션 (CustomMission)
+    customMission: {
+      list: '/custom-missions',
+      detail: '/custom-missions/:customMissionId',
+      create: '/custom-missions',
+      update: '/custom-missions/:customMissionId',
+      delete: '/custom-missions/:customMissionId',
     },
 
-    // 커뮤니티
-    community: {
-      createPost: '/community',
-      updatePost: '/community/:id',
-      deletePost: '/community/:id',
-      createComment: '/community/:postId/comments',
-      updateComment: '/community/:postId/comments/:id',
-      deleteComment: '/community/:postId/comments/:id',
-      like: '/community/:id/like',
-      unlike: '/community/:id/unlike',
-      scrap: '/community/:id/scrap',
-      filter: '/community/filter',
-      search: '/community/search',
-      getPosts: '/community',
-      getPost: '/community/:id',
-      getComments: '/community/:id/comments',
-      // 미션 그룹 관련
-      myMissionGroups: '/community/my-mission-groups',
-      postsByMission: '/community/mission/:missionId/posts',
+    // 내 미션 (UserMission)
+    userMission: {
+      list: '/user-missions',
+      detail: '/user-missions/:userMissionId',
+      add: '/user-missions',
+      verify: '/user-missions/:userMissionId/verify',
     },
 
-    // 펫
-    pet: {
-      selectName: '/pet',
-      evolve: '/pet/evolve',
-      downloadImage: '/pet', // 명세서에 POST /pet로 명시됨 (펫 이름 선택과 동일 엔드포인트, body로 구분)
-      getImage: '/pet/image',
-      getName: '/pet/name',
-      saveStats: '/pet/stats',
-      getStats: '/pet/stats',
+    // 인증 게시판 (Verification)
+    verification: {
+      list: '/verifications',
+      detail: '/verifications/:verificationId',
+      create: '/verifications',
+      update: '/verifications/:verificationId',
+      delete: '/verifications/:verificationId',
+      vote: '/verifications/:verificationId/votes',
     },
 
-    // 파일
-    file: {
-      upload: '/file',
-      delete: '/file/:id',
-      get: '/file/:id',
+    // 자유 게시판 (Post)
+    post: {
+      list: '/posts',
+      detail: '/posts/:postId',
+      create: '/posts',
+      update: '/posts/:postId',
+      delete: '/posts/:postId',
+      comments: '/posts/:postId/comments',
+      createComment: '/posts/:postId/comments',
+      updateComment: '/posts/:postId/comments/:commentId',
+      deleteComment: '/posts/:postId/comments/:commentId',
     },
 
-    // AI
-    ai: {
-      llmCall: '/ai/llm',
-      llmResult: '/ai/llm/result',
-      imageAnalysis: '/ai/image',
-      analyzeMissions: '/ai/analyze-missions',
-      generateMission: '/ai/generate-mission',
+    // 뱃지 (Badge)
+    badge: {
+      list: '/badges',
+      history: '/badges/history',
+    },
+
+    // 유저 추천 (Recommendation)
+    recommendation: {
+      list: '/recommendations',
+      accept: '/recommendations/:recommendationId/accept',
+      reject: '/recommendations/:recommendationId/reject',
+    },
+
+    // 채팅 (Chat)
+    chat: {
+      rooms: '/chat/rooms',
+      roomDetail: '/chat/rooms/:roomId',
+      messages: '/chat/rooms/:roomId/messages',
+      sendMessage: '/chat/rooms/:roomId/messages',
+      readMessages: '/chat/rooms/:roomId/messages/read',
+    },
+
+    // 알림 (Notification)
+    notification: {
+      list: '/notifications',
+      read: '/notifications/:notificationId/read',
+      readAll: '/notifications/read-all',
+    },
+
+    // SSE (Server-Sent Events)
+    sse: {
+      connect: '/sse/connect',
     },
   },
 
-  // 요청 타임아웃 (ms)
-  timeout: 10000,
+  // 요청 타임아웃 (ms) (환경변수에서 읽어옴)
+  timeout: API_TIMEOUT ? parseInt(API_TIMEOUT, 10) : 10000,
 } as const;

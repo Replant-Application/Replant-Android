@@ -2,8 +2,8 @@
  * 유저 수정 화면
  */
 
-import React, { useEffect, useState, useCallback } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Platform, KeyboardAvoidingView } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Platform, KeyboardAvoidingView, Image } from 'react-native';
 import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { useAdmin } from '../hooks/useAdmin';
 import { Header, Loading, ErrorBoundary, Button, Input } from '../components/ui';
@@ -85,7 +85,11 @@ const AdminUserEditScreen: React.FC<AdminUserEditScreenProps> = ({ navigation, r
         title="유저 수정"
         leftButton={
           <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Text style={styles.backButtonText}>← 취소</Text>
+            <Image
+              source={require('../assets/images/left.png')}
+              style={styles.backButtonIcon}
+              resizeMode="contain"
+            />
           </TouchableOpacity>
         }
       />
@@ -217,10 +221,9 @@ const styles = StyleSheet.create({
   saveButton: {
     width: '100%',
   },
-  backButtonText: {
-    fontSize: typography.fontSize.base,
-    color: colors.primary[600],
-    fontWeight: typography.fontWeight.medium,
+  backButtonIcon: {
+    width: 24,
+    height: 24,
   },
 });
 

@@ -22,7 +22,7 @@ interface MissionCardProps {
 const MissionCard: React.FC<MissionCardProps> = ({
   mission,
   onComplete,
-  onUncomplete,
+  onUncomplete: _onUncomplete,
   onUploadPhoto,
   onDeletePhoto,
   onShareToCommunity,
@@ -34,12 +34,12 @@ const MissionCard: React.FC<MissionCardProps> = ({
 }) => {
   if (!mission) return null;
 
-  const getCategoryEmoji = (categoryId: string): string => {
-    const emojiMap: Record<string, string> = {
-      growth: '🌱',
+  const getCategoryImage = (categoryId: string): any => {
+    const imageMap: Record<string, any> = {
+      growth: require('../../assets/images/clover.png'),
       custom: '✨',
     };
-    return emojiMap[categoryId] || '🌱';
+    return imageMap[categoryId] || require('../../assets/images/clover.png');
   };
 
   const getCategoryName = (categoryId: string): string => {
@@ -50,21 +50,21 @@ const MissionCard: React.FC<MissionCardProps> = ({
     return nameMap[categoryId] || '성장';
   };
 
-  const handleToggleComplete = (): void => {
-    if (mission.completed) {
-      onUncomplete?.(mission.mission_id);
-    } else {
-      onComplete?.(mission.mission_id);
-    }
-  };
-
   return (
     <View style={[styles.container, style]}>
       <View style={styles.header}>
         <View style={styles.categoryInfo}>
-          <Text style={styles.categoryEmoji}>
-            {getCategoryEmoji(mission.category_id || '')}
-          </Text>
+          {typeof getCategoryImage(mission.category_id || '') === 'string' ? (
+            <Text style={styles.categoryEmoji}>
+              {getCategoryImage(mission.category_id || '')}
+            </Text>
+          ) : (
+            <Image
+              source={getCategoryImage(mission.category_id || '')}
+              style={styles.categoryImage}
+              resizeMode="contain"
+            />
+          )}
           <Text style={styles.categoryName}>
             {getCategoryName(mission.category_id || '')}
           </Text>
@@ -76,11 +76,25 @@ const MissionCard: React.FC<MissionCardProps> = ({
               {mission.verified === true ? (
                 <Badge tier="bronze" size="sm" />
               ) : (
-                <Text style={styles.pendingVerificationText}>⏳ 인증 대기</Text>
+                <View style={styles.statusWrapper}>
+                  <Image
+                    source={require('../../assets/images/alarm.png')}
+                    style={styles.statusIcon}
+                    resizeMode="contain"
+                  />
+                  <Text style={styles.pendingVerificationText}>인증 대기</Text>
+                </View>
               )}
             </>
           ) : (
-            <Text style={styles.pendingText}>⏳ 진행중</Text>
+            <View style={styles.statusWrapper}>
+              <Image
+                source={require('../../assets/images/alarm.png')}
+                style={styles.statusIcon}
+                resizeMode="contain"
+              />
+              <Text style={styles.pendingText}>진행중</Text>
+            </View>
           )}
         </View>
       </View>
@@ -138,7 +152,11 @@ const MissionCard: React.FC<MissionCardProps> = ({
                 disabled={disabled}
                 activeOpacity={disabled ? 1 : 0.7}
               >
-                <Text style={styles.photoIcon}>➕</Text>
+                <Image
+                  source={require('../../assets/images/plus.png')}
+                  style={styles.photoIcon}
+                  resizeMode="contain"
+                />
               </TouchableOpacity>
             )}
             {mission.completed && onShareToCommunity && (
@@ -148,27 +166,34 @@ const MissionCard: React.FC<MissionCardProps> = ({
                 disabled={disabled}
                 activeOpacity={disabled ? 1 : 0.7}
               >
-                <Text style={styles.shareButtonText}>💬 공유</Text>
+                <Image
+                  source={require('../../assets/images/chat.png')}
+                  style={styles.shareIcon}
+                  resizeMode="contain"
+                />
+                <Text style={styles.shareButtonText}>공유</Text>
               </TouchableOpacity>
             )}
-          <TouchableOpacity
-            style={[
-              styles.actionButton,
-              mission.completed ? styles.uncompleteButton : styles.completeButton,
-              disabled && styles.disabledButton
-            ]}
-            onPress={disabled ? undefined : handleToggleComplete}
-            disabled={loading || disabled}
-            activeOpacity={disabled ? 1 : 0.7}
-          >
-            <Text style={[
-              styles.actionText,
-              mission.completed ? styles.uncompleteText : styles.completeText,
-              disabled && styles.disabledText
-            ]}>
-              {disabled ? '비활성화' : loading ? '처리중...' : mission.completed ? '완료 취소' : '완료하기'}
-            </Text>
-          </TouchableOpacity>
+          {!mission.completed && (
+            <TouchableOpacity
+              style={[
+                styles.actionButton,
+                styles.completeButton,
+                disabled && styles.disabledButton
+              ]}
+              onPress={disabled ? undefined : () => onComplete?.(mission.mission_id)}
+              disabled={loading || disabled}
+              activeOpacity={disabled ? 1 : 0.7}
+            >
+              <Text style={[
+                styles.actionText,
+                styles.completeText,
+                disabled && styles.disabledText
+              ]}>
+                {disabled ? '비활성화' : loading ? '처리중...' : '완료하기'}
+              </Text>
+            </TouchableOpacity>
+          )}
           </View>
         )}
       </View>
@@ -179,12 +204,11 @@ const MissionCard: React.FC<MissionCardProps> = ({
 const styles = StyleSheet.create({
   container: {
     backgroundColor: colors.background.primary,
-    borderRadius: borderRadius.lg,
-    padding: spacing[4],
+    borderRadius: borderRadius.xl,
+    padding: spacing[5],
     marginVertical: spacing[2],
-    borderWidth: 1,
-    borderColor: colors.border.light,
-    ...shadows.base,
+    borderWidth: 0,
+    ...shadows.lg,
   },
 
   header: {
@@ -202,6 +226,20 @@ const styles = StyleSheet.create({
   categoryEmoji: {
     fontSize: typography.fontSize.xl,
     marginRight: spacing[2],
+  },
+  categoryImage: {
+    width: 24,
+    height: 24,
+    marginRight: spacing[2],
+  },
+  statusWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing[1],
+  },
+  statusIcon: {
+    width: 16,
+    height: 16,
   },
 
   categoryName: {
@@ -297,7 +335,7 @@ const styles = StyleSheet.create({
   actionButton: {
     paddingHorizontal: spacing[4],
     paddingVertical: spacing[2],
-    borderRadius: borderRadius.base,
+    borderRadius: borderRadius.xl,
     minHeight: 40,
     justifyContent: 'center',
     alignItems: 'center',
@@ -344,18 +382,25 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   photoIcon: {
-    fontSize: typography.fontSize.xl,
+    width: 20,
+    height: 20,
   },
   shareButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingHorizontal: spacing[3],
     paddingVertical: spacing[2],
-    borderRadius: borderRadius.base,
+    borderRadius: borderRadius.xl,
     backgroundColor: colors.primary[100],
     borderWidth: 1,
     borderColor: colors.primary[300],
     minHeight: 40,
     justifyContent: 'center',
-    alignItems: 'center',
+    gap: spacing[1],
+  },
+  shareIcon: {
+    width: 16,
+    height: 16,
   },
   shareButtonText: {
     fontSize: typography.fontSize.sm,

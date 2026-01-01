@@ -11,6 +11,9 @@ import {
   Modal,
   TouchableOpacity,
   Alert,
+  ActivityIndicator,
+  Image,
+  ImageSourcePropType,
 } from 'react-native';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
 import { Mission } from '../../types';
@@ -66,7 +69,11 @@ const MissionVerificationModal: React.FC<MissionVerificationModalProps> = ({
               activeOpacity={0.7}
             >
               <View style={styles.optionIconContainer}>
-                <Text style={styles.optionIcon}>👍</Text>
+                <Image
+                  source={require('../../assets/images/like.png')}
+                  style={styles.optionIconImage}
+                  resizeMode="contain"
+                />
               </View>
               <View style={styles.optionContent}>
                 <Text style={styles.optionTitle}>좋아요 인증</Text>
@@ -83,7 +90,15 @@ const MissionVerificationModal: React.FC<MissionVerificationModalProps> = ({
               activeOpacity={0.7}
             >
               <View style={styles.optionIconContainer}>
-                <Text style={styles.optionIcon}>📍</Text>
+                {gpsLoading ? (
+                  <ActivityIndicator size="small" color={colors.primary[500]} />
+                ) : (
+                  <Image
+                    source={require('../../assets/images/location.png')}
+                    style={styles.optionIconImage}
+                    resizeMode="contain"
+                  />
+                )}
               </View>
               <View style={styles.optionContent}>
                 <Text style={styles.optionTitle}>GPS 인증</Text>
@@ -159,6 +174,10 @@ const styles = StyleSheet.create({
   },
   optionIcon: {
     fontSize: typography.fontSize['2xl'],
+  },
+  optionIconImage: {
+    width: 32,
+    height: 32,
   },
   optionContent: {
     flex: 1,

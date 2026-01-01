@@ -1,9 +1,9 @@
 /**
- * 미션 그룹 화면
- * 내가 완료한 미션별 완료자 게시판
+ * 미션 도감 화면
+ * 모든 미션 목록 + 미션 상세 정보 + 후기 기능
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -11,84 +11,180 @@ import {
   ScrollView,
   TouchableOpacity,
   ActivityIndicator,
+  TextInput,
+  Modal,
+  Alert,
+  RefreshControl,
 } from 'react-native';
 import { NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '../types/navigation';
 import { Header, Loading, ErrorBoundary, EmptyState } from '../components/ui';
-import { PostCard } from '../components/specialized';
-import { colors, spacing, typography, borderRadius } from '../utils/designTokens';
-import { getMissionGroups, getPostsByMission } from '../api/communityApi';
-import { MissionGroup, CommunityPost } from '../types';
+import { colors, spacing, typography, borderRadius, shadows } from '../utils/designTokens';
+import {
+  getSystemMissions,
+  getMissionReviews,
+  createMissionReview,
+  SystemMission,
+  MissionReview,
+} from '../api/missionApi';
+import { useUser } from '../contexts/UserContext';
 
 interface MissionGroupScreenProps {
   navigation: NavigationProp<RootStackParamList>;
 }
 
 const MissionGroupScreen: React.FC<MissionGroupScreenProps> = ({ navigation }) => {
-  const [missionGroups, setMissionGroups] = useState<MissionGroup[]>([]);
-  const [selectedMissionId, setSelectedMissionId] = useState<string | null>(null);
-  const [posts, setPosts] = useState<CommunityPost[]>([]);
+  const { userId } = useUser();
+  const [missions, setMissions] = useState<SystemMission[]>([]);
+  const [selectedMission, setSelectedMission] = useState<SystemMission | null>(null);
+  const [reviews, setReviews] = useState<MissionReview[]>([]);
   const [loading, setLoading] = useState(true);
-  const [postsLoading, setPostsLoading] = useState(false);
+  const [reviewsLoading, setReviewsLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // 미션 그룹 목록 로드
-  const loadMissionGroups = async () => {
+  // 후기 작성 모달
+  const [showReviewModal, setShowReviewModal] = useState(false);
+  const [reviewContent, setReviewContent] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+
+  // 미션 목록 로드
+  const loadMissions = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
-      const result = await getMissionGroups();
+      const result = await getSystemMissions();
       if (result.success && result.data) {
-        setMissionGroups(result.data);
+        setMissions(result.data.content || []);
       } else {
-        setError(result.error || '미션 그룹을 불러올 수 없습니다.');
+        setError(result.error || '미션 목록을 불러올 수 없습니다.');
       }
     } catch (err) {
       setError((err as Error).message);
     } finally {
       setLoading(false);
     }
-  };
-
-  // 특정 미션의 게시글 로드
-  const loadPostsByMission = async (missionId: string) => {
-    try {
-      setPostsLoading(true);
-      const result = await getPostsByMission(missionId);
-      if (result.success && result.data) {
-        setPosts(result.data);
-      }
-    } catch (err) {
-      console.error('게시글 로드 오류:', err);
-    } finally {
-      setPostsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    loadMissionGroups();
   }, []);
 
-  // 미션 선택 시 게시글 로드
-  useEffect(() => {
-    if (selectedMissionId) {
-      loadPostsByMission(selectedMissionId);
-    } else {
-      setPosts([]);
+  // 리뷰 목록 로드
+  const loadReviews = useCallback(async (missionId: number) => {
+    try {
+      setReviewsLoading(true);
+      const result = await getMissionReviews(missionId);
+      if (result.success && result.data) {
+        setReviews(result.data.content || []);
+      } else {
+        setReviews([]);
+      }
+    } catch (err) {
+      console.error('리뷰 로드 오류:', err);
+      setReviews([]);
+    } finally {
+      setReviewsLoading(false);
     }
-  }, [selectedMissionId]);
+  }, []);
 
-  const handlePostPress = (postId: string) => {
-    navigation.navigate('CommunityPostDetail', { postId });
+  // 새로고침
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await loadMissions();
+    if (selectedMission) {
+      await loadReviews(selectedMission.id);
+    }
+    setRefreshing(false);
+  }, [loadMissions, loadReviews, selectedMission]);
+
+  useEffect(() => {
+    loadMissions();
+  }, [loadMissions]);
+
+  // 미션 선택 시 리뷰 로드
+  useEffect(() => {
+    if (selectedMission) {
+      loadReviews(selectedMission.id);
+    } else {
+      setReviews([]);
+    }
+  }, [selectedMission, loadReviews]);
+
+  // 후기 제출
+  const handleSubmitReview = async () => {
+    if (!reviewContent.trim() || !selectedMission) return;
+
+    try {
+      setSubmitting(true);
+      const result = await createMissionReview(selectedMission.id, {
+        content: reviewContent.trim(),
+      });
+
+      if (result.success) {
+        Alert.alert('성공', '후기가 등록되었습니다.');
+        setReviewContent('');
+        setShowReviewModal(false);
+        // 리뷰 목록 새로고침
+        await loadReviews(selectedMission.id);
+      } else {
+        if (result.error?.includes('뱃지') || result.error?.includes('badge')) {
+          Alert.alert(
+            '후기 작성 불가',
+            '이 미션을 완료하고 뱃지를 획득해야 후기를 작성할 수 있습니다.'
+          );
+        } else {
+          Alert.alert('오류', result.error || '후기 등록에 실패했습니다.');
+        }
+      }
+    } catch (err) {
+      Alert.alert('오류', '후기 등록 중 오류가 발생했습니다.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
-  const handleLike = async (postId: string) => {
-    // 좋아요 기능은 CommunityPostDetail에서 처리
-    navigation.navigate('CommunityPostDetail', { postId });
+  // 인증 타입 한글 변환
+  const getVerificationTypeLabel = (type?: string) => {
+    switch (type) {
+      case 'GPS':
+        return '📍 GPS 인증';
+      case 'TIME':
+        return '⏱️ 시간 인증';
+      case 'COMMUNITY':
+        return '👥 커뮤니티 인증';
+      default:
+        return '✅ 일반 인증';
+    }
+  };
+
+  // 미션 타입 한글 변환
+  const getMissionTypeLabel = (type?: string) => {
+    switch (type) {
+      case 'DAILY':
+        return '일일';
+      case 'WEEKLY':
+        return '주간';
+      case 'MONTHLY':
+        return '월간';
+      default:
+        return '';
+    }
+  };
+
+  // 미션 이모지
+  const getMissionEmoji = (title: string): string => {
+    if (title.includes('운동') || title.includes('헬스') || title.includes('걷기')) return '🏃';
+    if (title.includes('독서') || title.includes('책')) return '📚';
+    if (title.includes('물') || title.includes('마시')) return '💧';
+    if (title.includes('명상') || title.includes('휴식')) return '🧘';
+    if (title.includes('아침') || title.includes('기상')) return '🌅';
+    if (title.includes('영어') || title.includes('단어') || title.includes('외국어')) return '📝';
+    if (title.includes('잠') || title.includes('수면')) return '😴';
+    if (title.includes('식사') || title.includes('밥')) return '🍽️';
+    if (title.includes('저축') || title.includes('돈')) return '💰';
+    if (title.includes('공부')) return '📖';
+    return '🎯';
   };
 
   if (loading) {
-    return <Loading text="미션 그룹을 불러오는 중..." />;
+    return <Loading text="미션 도감을 불러오는 중..." />;
   }
 
   if (error) {
@@ -99,77 +195,222 @@ const MissionGroupScreen: React.FC<MissionGroupScreenProps> = ({ navigation }) =
     <View style={styles.container}>
       <Header />
 
-      <ScrollView style={styles.content}>
-        {missionGroups.length === 0 ? (
+      <ScrollView
+        style={styles.content}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
+        {missions.length === 0 ? (
           <EmptyState
             icon="🎯"
-            title="완료한 미션이 없어요"
-            description="미션을 완료하면 같은 미션을 완료한 사람들과 소통할 수 있어요!"
+            title="미션이 없어요"
+            description="현재 등록된 미션이 없습니다."
           />
         ) : (
           <>
-            {/* 미션 그룹 목록 */}
-            <View style={styles.missionGroupsContainer}>
-              <Text style={styles.sectionTitle}>내가 완료한 미션</Text>
-              {missionGroups.map((group) => (
+            {/* 미션 목록 */}
+            <View style={styles.missionListContainer}>
+              <Text style={styles.sectionTitle}>미션 도감</Text>
+              <Text style={styles.sectionSubtitle}>
+                미션을 선택하면 상세 정보와 후기를 볼 수 있어요
+              </Text>
+
+              {missions.map((mission) => (
                 <TouchableOpacity
-                  key={group.mission_id}
+                  key={mission.id}
                   style={[
-                    styles.missionGroupCard,
-                    selectedMissionId === group.mission_id && styles.missionGroupCardSelected,
+                    styles.missionCard,
+                    selectedMission?.id === mission.id && styles.missionCardSelected,
                   ]}
                   onPress={() => {
-                    setSelectedMissionId(
-                      selectedMissionId === group.mission_id ? null : group.mission_id
+                    setSelectedMission(
+                      selectedMission?.id === mission.id ? null : mission
                     );
                   }}
+                  activeOpacity={0.7}
                 >
-                  <View style={styles.missionGroupHeader}>
-                    <Text style={styles.missionEmoji}>{group.mission_emoji}</Text>
-                    <View style={styles.missionGroupInfo}>
-                      <Text style={styles.missionTitle}>{group.mission_title}</Text>
-                      <Text style={styles.missionStats}>
-                        멤버 {group.member_count}명 · 게시글 {group.post_count}개
+                  <View style={styles.missionHeader}>
+                    <Text style={styles.missionEmoji}>{getMissionEmoji(mission.title)}</Text>
+                    <View style={styles.missionInfo}>
+                      <View style={styles.missionTitleRow}>
+                        <Text style={styles.missionTitle}>{mission.title}</Text>
+                        <View style={styles.missionTypeBadge}>
+                          <Text style={styles.missionTypeText}>
+                            {getMissionTypeLabel(mission.type)}
+                          </Text>
+                        </View>
+                      </View>
+                      <Text style={styles.missionDescription} numberOfLines={2}>
+                        {mission.description}
                       </Text>
+                      <View style={styles.missionMeta}>
+                        <Text style={styles.missionMetaText}>
+                          {getVerificationTypeLabel(mission.verificationType)}
+                        </Text>
+                        <Text style={styles.missionMetaText}>
+                          💎 {mission.expReward} EXP
+                        </Text>
+                        <Text style={styles.missionMetaText}>
+                          📝 후기 {mission.reviewCount || 0}개
+                        </Text>
+                      </View>
                     </View>
                   </View>
                 </TouchableOpacity>
               ))}
             </View>
 
-            {/* 선택된 미션의 게시글 목록 */}
-            {selectedMissionId && (
-              <View style={styles.postsContainer}>
-                <Text style={styles.sectionTitle}>
-                  {missionGroups.find((g) => g.mission_id === selectedMissionId)?.mission_title} 게시판
-                </Text>
-                {postsLoading ? (
-                  <View style={styles.loadingContainer}>
-                    <ActivityIndicator size="large" color={colors.primary[500]} />
+            {/* 선택된 미션 상세 정보 + 후기 */}
+            {selectedMission && (
+              <View style={styles.detailContainer}>
+                {/* 미션 상세 정보 */}
+                <View style={styles.detailCard}>
+                  <Text style={styles.detailTitle}>미션 정보</Text>
+                  <View style={styles.detailRow}>
+                    <Text style={styles.detailLabel}>미션명</Text>
+                    <Text style={styles.detailValue}>{selectedMission.title}</Text>
                   </View>
-                ) : posts.length === 0 ? (
-                  <EmptyState
-                    icon="📝"
-                    title="아직 게시글이 없어요"
-                    description="첫 번째 게시글을 작성해보세요!"
-                  />
-                ) : (
-                  <View style={styles.postsList}>
-                    {posts.map((post) => (
-                      <PostCard
-                        key={post.post_id}
-                        post={post}
-                        onPress={handlePostPress}
-                        onLike={handleLike}
-                      />
-                    ))}
+                  <View style={styles.detailRow}>
+                    <Text style={styles.detailLabel}>설명</Text>
+                    <Text style={styles.detailValue}>{selectedMission.description}</Text>
                   </View>
-                )}
+                  <View style={styles.detailRow}>
+                    <Text style={styles.detailLabel}>인증 방식</Text>
+                    <Text style={styles.detailValue}>
+                      {getVerificationTypeLabel(selectedMission.verificationType)}
+                    </Text>
+                  </View>
+                  <View style={styles.detailRow}>
+                    <Text style={styles.detailLabel}>보상</Text>
+                    <Text style={styles.detailValue}>
+                      {selectedMission.expReward} EXP + 뱃지 ({selectedMission.badgeDurationDays}일)
+                    </Text>
+                  </View>
+                  {selectedMission.requiredMinutes && (
+                    <View style={styles.detailRow}>
+                      <Text style={styles.detailLabel}>필요 시간</Text>
+                      <Text style={styles.detailValue}>{selectedMission.requiredMinutes}분</Text>
+                    </View>
+                  )}
+                </View>
+
+                {/* 후기 섹션 */}
+                <View style={styles.reviewSection}>
+                  <View style={styles.reviewSectionHeader}>
+                    <Text style={styles.sectionTitle}>미션 후기</Text>
+                    <TouchableOpacity
+                      style={styles.writeReviewButton}
+                      onPress={() => setShowReviewModal(true)}
+                      activeOpacity={0.7}
+                    >
+                      <Text style={styles.writeReviewButtonText}>후기 작성</Text>
+                    </TouchableOpacity>
+                  </View>
+                  <Text style={styles.reviewHint}>
+                    ※ 미션을 완료하고 뱃지를 획득해야 후기를 작성할 수 있습니다
+                  </Text>
+
+                  {reviewsLoading ? (
+                    <View style={styles.loadingContainer}>
+                      <ActivityIndicator size="large" color={colors.primary[500]} />
+                    </View>
+                  ) : reviews.length === 0 ? (
+                    <EmptyState
+                      icon="📝"
+                      title="아직 후기가 없어요"
+                      description="첫 번째 후기를 남겨보세요!"
+                    />
+                  ) : (
+                    <View style={styles.reviewList}>
+                      {reviews.map((review) => (
+                        <View key={review.id} style={styles.reviewCard}>
+                          <View style={styles.reviewHeader}>
+                            <View style={styles.reviewAvatar}>
+                              <Text style={styles.reviewAvatarText}>
+                                {review.userNickname.charAt(0).toUpperCase()}
+                              </Text>
+                            </View>
+                            <View style={styles.reviewAuthorInfo}>
+                              <Text style={styles.reviewAuthor}>{review.userNickname}</Text>
+                              <Text style={styles.reviewDate}>
+                                {new Date(review.createdAt).toLocaleDateString('ko-KR')}
+                              </Text>
+                            </View>
+                          </View>
+                          <Text style={styles.reviewContent}>{review.content}</Text>
+                        </View>
+                      ))}
+                    </View>
+                  )}
+                </View>
               </View>
             )}
           </>
         )}
       </ScrollView>
+
+      {/* 후기 작성 모달 */}
+      <Modal
+        visible={showReviewModal}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setShowReviewModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>후기 작성</Text>
+              <TouchableOpacity
+                onPress={() => setShowReviewModal(false)}
+                style={styles.modalCloseButton}
+              >
+                <Text style={styles.modalCloseText}>✕</Text>
+              </TouchableOpacity>
+            </View>
+
+            <Text style={styles.modalMissionTitle}>
+              {selectedMission?.title}
+            </Text>
+
+            <TextInput
+              style={styles.reviewInput}
+              multiline
+              numberOfLines={5}
+              placeholder="미션을 수행하면서 느낀 점, 팁 등을 공유해주세요..."
+              placeholderTextColor={colors.text.tertiary}
+              value={reviewContent}
+              onChangeText={setReviewContent}
+              textAlignVertical="top"
+            />
+
+            <View style={styles.modalButtons}>
+              <TouchableOpacity
+                style={styles.cancelButton}
+                onPress={() => setShowReviewModal(false)}
+                activeOpacity={0.7}
+              >
+                <Text style={styles.cancelButtonText}>취소</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[
+                  styles.submitButton,
+                  (!reviewContent.trim() || submitting) && styles.submitButtonDisabled,
+                ]}
+                onPress={handleSubmitReview}
+                disabled={!reviewContent.trim() || submitting}
+                activeOpacity={0.7}
+              >
+                {submitting ? (
+                  <ActivityIndicator size="small" color={colors.white} />
+                ) : (
+                  <Text style={styles.submitButtonText}>등록</Text>
+                )}
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -181,60 +422,267 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    padding: spacing[5],
+    padding: spacing[4],
   },
   sectionTitle: {
     fontSize: typography.fontSize.xl,
     fontWeight: typography.fontWeight.bold,
     color: colors.text.primary,
+  },
+  sectionSubtitle: {
+    fontSize: typography.fontSize.sm,
+    color: colors.text.secondary,
+    marginTop: spacing[1],
     marginBottom: spacing[4],
   },
-  missionGroupsContainer: {
-    marginBottom: spacing[6],
+  missionListContainer: {
+    marginBottom: spacing[4],
   },
-  missionGroupCard: {
+  missionCard: {
     backgroundColor: colors.background.primary,
     borderRadius: borderRadius.lg,
     padding: spacing[4],
     marginBottom: spacing[3],
     borderWidth: 1,
     borderColor: colors.border.light,
+    ...shadows.sm,
   },
-  missionGroupCardSelected: {
+  missionCardSelected: {
     borderColor: colors.primary[500],
     borderWidth: 2,
     backgroundColor: colors.primary[50],
   },
-  missionGroupHeader: {
+  missionHeader: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-start',
   },
   missionEmoji: {
-    fontSize: typography.fontSize['2xl'],
+    fontSize: 32,
     marginRight: spacing[3],
   },
-  missionGroupInfo: {
+  missionInfo: {
     flex: 1,
+  },
+  missionTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: spacing[1],
   },
   missionTitle: {
     fontSize: typography.fontSize.lg,
     fontWeight: typography.fontWeight.semibold,
     color: colors.text.primary,
-    marginBottom: spacing[1],
+    flex: 1,
   },
-  missionStats: {
+  missionTypeBadge: {
+    backgroundColor: colors.primary[100],
+    paddingHorizontal: spacing[2],
+    paddingVertical: spacing[1],
+    borderRadius: borderRadius.sm,
+  },
+  missionTypeText: {
+    fontSize: typography.fontSize.xs,
+    color: colors.primary[700],
+    fontWeight: typography.fontWeight.medium,
+  },
+  missionDescription: {
     fontSize: typography.fontSize.sm,
     color: colors.text.secondary,
+    lineHeight: typography.lineHeight.relaxed * typography.fontSize.sm,
+    marginBottom: spacing[2],
   },
-  postsContainer: {
-    marginTop: spacing[6],
+  missionMeta: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing[2],
+  },
+  missionMetaText: {
+    fontSize: typography.fontSize.xs,
+    color: colors.text.tertiary,
+  },
+  detailContainer: {
+    marginTop: spacing[4],
+  },
+  detailCard: {
+    backgroundColor: colors.background.primary,
+    borderRadius: borderRadius.lg,
+    padding: spacing[4],
+    marginBottom: spacing[4],
+    borderWidth: 1,
+    borderColor: colors.border.light,
+  },
+  detailTitle: {
+    fontSize: typography.fontSize.lg,
+    fontWeight: typography.fontWeight.bold,
+    color: colors.text.primary,
+    marginBottom: spacing[4],
+  },
+  detailRow: {
+    marginBottom: spacing[3],
+  },
+  detailLabel: {
+    fontSize: typography.fontSize.sm,
+    color: colors.text.tertiary,
+    marginBottom: spacing[1],
+  },
+  detailValue: {
+    fontSize: typography.fontSize.base,
+    color: colors.text.primary,
+  },
+  reviewSection: {
+    marginBottom: spacing[6],
+  },
+  reviewSectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: spacing[2],
+  },
+  writeReviewButton: {
+    backgroundColor: colors.primary[500],
+    paddingHorizontal: spacing[4],
+    paddingVertical: spacing[2],
+    borderRadius: borderRadius.md,
+  },
+  writeReviewButtonText: {
+    color: colors.text.inverse,
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.semibold,
+  },
+  reviewHint: {
+    fontSize: typography.fontSize.xs,
+    color: colors.text.tertiary,
+    marginBottom: spacing[4],
   },
   loadingContainer: {
     padding: spacing[8],
     alignItems: 'center',
   },
-  postsList: {
+  reviewList: {
     gap: spacing[3],
+  },
+  reviewCard: {
+    backgroundColor: colors.background.primary,
+    borderRadius: borderRadius.lg,
+    padding: spacing[4],
+    borderWidth: 1,
+    borderColor: colors.border.light,
+  },
+  reviewHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: spacing[3],
+  },
+  reviewAvatar: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: colors.primary[100],
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: spacing[3],
+  },
+  reviewAvatarText: {
+    fontSize: typography.fontSize.base,
+    fontWeight: typography.fontWeight.bold,
+    color: colors.primary[600],
+  },
+  reviewAuthorInfo: {
+    flex: 1,
+  },
+  reviewAuthor: {
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.semibold,
+    color: colors.text.primary,
+  },
+  reviewDate: {
+    fontSize: typography.fontSize.xs,
+    color: colors.text.tertiary,
+    marginTop: spacing[1],
+  },
+  reviewContent: {
+    fontSize: typography.fontSize.sm,
+    color: colors.text.secondary,
+    lineHeight: typography.lineHeight.relaxed * typography.fontSize.sm,
+  },
+  // Modal styles
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-end',
+  },
+  modalContent: {
+    backgroundColor: colors.background.primary,
+    borderTopLeftRadius: borderRadius.xl,
+    borderTopRightRadius: borderRadius.xl,
+    padding: spacing[5],
+    paddingBottom: spacing[8],
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: spacing[4],
+  },
+  modalTitle: {
+    fontSize: typography.fontSize.xl,
+    fontWeight: typography.fontWeight.bold,
+    color: colors.text.primary,
+  },
+  modalCloseButton: {
+    padding: spacing[2],
+  },
+  modalCloseText: {
+    fontSize: typography.fontSize.xl,
+    color: colors.text.tertiary,
+  },
+  modalMissionTitle: {
+    fontSize: typography.fontSize.base,
+    color: colors.primary[600],
+    fontWeight: typography.fontWeight.medium,
+    marginBottom: spacing[4],
+  },
+  reviewInput: {
+    backgroundColor: colors.gray[50],
+    borderRadius: borderRadius.lg,
+    padding: spacing[4],
+    fontSize: typography.fontSize.base,
+    color: colors.text.primary,
+    minHeight: 150,
+    borderWidth: 1,
+    borderColor: colors.border.light,
+    marginBottom: spacing[4],
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    gap: spacing[3],
+  },
+  cancelButton: {
+    flex: 1,
+    backgroundColor: colors.gray[100],
+    paddingVertical: spacing[4],
+    borderRadius: borderRadius.lg,
+    alignItems: 'center',
+  },
+  cancelButtonText: {
+    fontSize: typography.fontSize.base,
+    fontWeight: typography.fontWeight.semibold,
+    color: colors.text.secondary,
+  },
+  submitButton: {
+    flex: 1,
+    backgroundColor: colors.primary[500],
+    paddingVertical: spacing[4],
+    borderRadius: borderRadius.lg,
+    alignItems: 'center',
+  },
+  submitButtonDisabled: {
+    backgroundColor: colors.gray[300],
+  },
+  submitButtonText: {
+    fontSize: typography.fontSize.base,
+    fontWeight: typography.fontWeight.semibold,
+    color: colors.text.inverse,
   },
 });
 

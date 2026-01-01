@@ -142,7 +142,11 @@ const CommunityPostDetailScreen: React.FC<CommunityPostDetailScreenProps> = ({
         title="게시글"
         leftButton={
           <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Text style={styles.backButtonText}>← 뒤로</Text>
+            <Image
+              source={require('../assets/images/left.png')}
+              style={styles.backButtonIcon}
+              resizeMode="contain"
+            />
           </TouchableOpacity>
         }
       />
@@ -297,10 +301,9 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: spacing[4],
   },
-  backButtonText: {
-    fontSize: typography.fontSize.base,
-    color: colors.primary[600],
-    fontWeight: typography.fontWeight.medium,
+  backButtonIcon: {
+    width: 24,
+    height: 24,
   },
   postContainer: {
     backgroundColor: colors.background.primary,

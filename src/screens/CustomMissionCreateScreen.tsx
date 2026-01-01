@@ -346,15 +346,6 @@ const styles = StyleSheet.create({
   createButton: {
     backgroundColor: colors.primary[500],
   },
-  aiDescription: {
-    fontSize: typography.fontSize.sm,
-    color: colors.text.secondary,
-    marginBottom: spacing[3],
-    lineHeight: typography.lineHeight.normal * typography.fontSize.sm,
-  },
-  aiButton: {
-    borderColor: colors.primary[500],
-  },
 });
 
 export default CustomMissionCreateScreen;

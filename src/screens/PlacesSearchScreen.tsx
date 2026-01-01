@@ -7,6 +7,9 @@ import {
   ScrollView,
   TextInput,
   ActivityIndicator,
+  PermissionsAndroid,
+  Platform,
+  Image,
 } from 'react-native';
 import { NavigationProp } from '@react-navigation/native';
 import { Header, EmptyState } from '../components/ui';
@@ -63,8 +66,21 @@ const PlacesSearchScreen: React.FC<PlacesSearchScreenProps> = () => {
 
   return (
     <View style={styles.container}>
-      <Header />
-      <View style={styles.content}>
+      <Header
+        title="근처 상담센터"
+        leftButton={
+          <TouchableOpacity onPress={handleGoBack} style={styles.backButton}>
+            <Image
+              source={require('../assets/images/left.png')}
+              style={styles.backButtonIcon}
+              resizeMode="contain"
+            />
+          </TouchableOpacity>
+        }
+      />
+
+      <ScrollView style={styles.content}>
+        {/* 검색 바 */}
         <View style={styles.searchContainer}>
           <TextInput
             style={styles.searchInput}
@@ -155,6 +171,16 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background.secondary,
+  },
+  backButton: {
+    paddingVertical: spacing[2],
+    paddingHorizontal: spacing[3],
+    borderRadius: borderRadius.md,
+    backgroundColor: colors.primary[100],
+  },
+  backButtonIcon: {
+    width: 24,
+    height: 24,
   },
   content: {
     flex: 1,

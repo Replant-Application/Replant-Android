@@ -5,6 +5,8 @@
 // 네비게이션 상수
 export const SCREEN_NAMES: Record<string, string> = {
   START: 'Start',
+  SIGNUP: 'SignUp',
+  LOGIN: 'Login',
   NICKNAME: 'Nickname',
   HOME: 'Home',
   DIARY: 'Diary',
@@ -23,10 +25,12 @@ export const SCREEN_NAMES: Record<string, string> = {
   COMMUNITY_POST_DETAIL: 'CommunityPostDetail',
   MY_PAGE: 'MyPage',
   CALENDAR: 'Calendar',
+  STATISTICS: 'Statistics',
   ADMIN_DASHBOARD: 'AdminDashboard',
   ADMIN_USER_LIST: 'AdminUserList',
   ADMIN_USER_DETAIL: 'AdminUserDetail',
   ADMIN_USER_EDIT: 'AdminUserEdit',
   MISSION_GROUP: 'MissionGroup',
   AI_MISSION_GENERATE: 'AIMissionGenerate',
+  NOTIFICATION: 'Notification',
 } as const;

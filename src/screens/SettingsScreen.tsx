@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, Image, TextInput } from 'react-native';
 import { useUser } from '../contexts/UserContext';
-import { useAdmin } from '../hooks/useAdmin';
-import { Card, Input, Header, SectionTitle } from '../components/ui';
-import { colors, spacing, typography, borderRadius } from '../utils/designTokens';
+import { Header, ConfirmModal } from '../components/ui';
+import { colors, spacing, typography, borderRadius, shadows } from '../utils/designTokens';
 import { NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '../types/navigation';
 import { clearAllCommunityPosts } from '../services/storage';
@@ -222,25 +221,52 @@ interface SettingsScreenProps {
   navigation?: NavigationProp<RootStackParamList>;
 }
 
+interface SettingItemProps {
+  icon: any;
+  title: string;
+  onPress: () => void;
+  showArrow?: boolean;
+  danger?: boolean;
+}
+
+const SettingItem: React.FC<SettingItemProps> = ({ 
+  icon, 
+  title, 
+  onPress, 
+  showArrow = true,
+  danger = false 
+}) => (
+  <TouchableOpacity
+    style={[styles.settingItem, danger && styles.settingItemDanger]}
+    onPress={onPress}
+    activeOpacity={0.7}
+  >
+    <View style={styles.settingItemLeft}>
+      <Image source={icon} style={styles.settingIcon} resizeMode="contain" />
+      <Text style={[styles.settingItemText, danger && styles.settingItemTextDanger]}>
+        {title}
+      </Text>
+    </View>
+    {showArrow && (
+      <Image
+        source={require('../assets/images/left.png')}
+        style={[styles.arrowIcon, { transform: [{ rotate: '180deg' }] }]}
+        resizeMode="contain"
+      />
+    )}
+  </TouchableOpacity>
+);
+
 const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
   const { user, logout, updateNickname } = useUser();
   const { deleteAllUsers } = useAdmin();
   const [showNicknameForm, setShowNicknameForm] = useState(false);
   const [newNickname, setNewNickname] = useState('');
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   const handleLogout = () => {
-    Alert.alert(
-      '로그아웃',
-      '정말로 로그아웃하시겠습니까?',
-      [
-        { text: '취소', style: 'cancel' },
-        {
-          text: '로그아웃',
-          style: 'destructive',
-          onPress: logout
-        }
-      ]
-    );
+    setShowLogoutModal(false);
+    logout();
   };
 
   const handleNicknameChange = async () => {
@@ -335,122 +361,182 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
 
 
   return (
-    <ScrollView style={[styles.container, { backgroundColor: colors.background.secondary }]}>
+    <View style={styles.container}>
       <Header />
-
-      <View style={styles.content}>
-        {/* 사용자 정보 */}
-        <Card style={styles.userCard}>
-          <Text style={styles.userTitle}>👤 사용자 정보</Text>
-          <Text style={styles.userInfo}>닉네임: {user?.nickname}</Text>
-          <Text style={styles.userInfo}>가입일: {user?.createdAt ? new Date(user.createdAt).toLocaleDateString('ko-KR') : '알 수 없음'}</Text>
-
-          {showNicknameForm ? (
-            <View style={styles.nicknameForm}>
-              <Input
-                label="새 닉네임"
-                placeholder="새 닉네임을 입력하세요"
-                value={newNickname}
-                onChangeText={setNewNickname}
-                style={styles.nicknameInput}
+      <ScrollView 
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* 사용자 정보 섹션 */}
+        <View style={styles.section}>
+          <View style={styles.userCard}>
+            <View style={styles.userInfo}>
+              <Image
+                source={require('../assets/images/home.png')}
+                style={styles.userIcon}
+                resizeMode="contain"
               />
-              <View style={styles.nicknameActions}>
-                <TouchableOpacity
-                  style={styles.cancelButton}
-                  onPress={() => {
-                    setShowNicknameForm(false);
-                    setNewNickname('');
-                  }}
-                >
-                  <Text style={styles.cancelButtonText}>취소</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.saveButton}
-                  onPress={handleNicknameChange}
-                >
-                  <Text style={styles.saveButtonText}>변경</Text>
-                </TouchableOpacity>
+              <View style={styles.userDetails}>
+                <Text style={styles.userName}>{user?.nickname || '사용자'}</Text>
+                <Text style={styles.userSubtext}>
+                  가입일: {user?.createdAt ? new Date(user.createdAt).toLocaleDateString('ko-KR') : '알 수 없음'}
+                </Text>
               </View>
             </View>
-          ) : (
-            <TouchableOpacity
-              style={styles.changeNicknameButton}
-              onPress={() => setShowNicknameForm(true)}
-            >
-              <Text style={styles.changeNicknameText}>✏️ 닉네임 변경</Text>
-            </TouchableOpacity>
-          )}
-        </Card>
+            
+            {showNicknameForm ? (
+              <View style={styles.nicknameForm}>
+                <View style={styles.inputContainer}>
+                  <Text style={styles.inputLabel}>새 닉네임</Text>
+                  <View style={styles.textInputWrapper}>
+                    <TextInput
+                      style={styles.textInput}
+                      value={newNickname}
+                      onChangeText={setNewNickname}
+                      placeholder="새 닉네임을 입력하세요"
+                      placeholderTextColor={colors.text.tertiary}
+                    />
+                  </View>
+                </View>
+                <View style={styles.nicknameActions}>
+                  <TouchableOpacity
+                    style={styles.cancelButton}
+                    onPress={() => {
+                      setShowNicknameForm(false);
+                      setNewNickname('');
+                    }}
+                    activeOpacity={0.7}
+                  >
+                    <Text style={styles.cancelButtonText}>취소</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={styles.saveButton}
+                    onPress={handleNicknameChange}
+                    activeOpacity={0.7}
+                  >
+                    <Text style={styles.saveButtonText}>변경</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            ) : (
+              <TouchableOpacity
+                style={styles.changeNicknameButton}
+                onPress={() => setShowNicknameForm(true)}
+                activeOpacity={0.7}
+              >
+                <Image
+                  source={require('../assets/images/pencil.png')}
+                  style={styles.editIcon}
+                  resizeMode="contain"
+                />
+                <Text style={styles.changeNicknameText}>닉네임 변경</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        </View>
 
-        {/* 기능 */}
-        <Card style={styles.featuresCard}>
-          <SectionTitle title="✨ 기능" size="lg" marginBottom={spacing[3]} />
-          <TouchableOpacity
-            style={styles.infoOption}
-            onPress={() => navigation?.navigate('MyPage')}
-          >
-            <Text style={styles.infoOptionText}>👤 마이페이지</Text>
-          </TouchableOpacity>
-        </Card>
+        {/* 기능 섹션 */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>기능</Text>
+          <View style={styles.settingsCard}>
+            <SettingItem
+              icon={require('../assets/images/chat.png')}
+              title="상담 서비스"
+              onPress={() => navigation?.navigate('CounselingSelect')}
+            />
+            <View style={styles.divider} />
+            <SettingItem
+              icon={require('../assets/images/home.png')}
+              title="마이페이지"
+              onPress={() => navigation?.navigate('MyPage')}
+            />
+            <View style={styles.divider} />
+            <SettingItem
+              icon={require('../assets/images/day.png')}
+              title="캘린더"
+              onPress={() => navigation?.navigate('Calendar')}
+            />
+            <View style={styles.divider} />
+            <SettingItem
+              icon={require('../assets/images/search.png')}
+              title="통계"
+              onPress={() => navigation?.navigate('Statistics')}
+            />
+          </View>
+        </View>
 
         {/* 관리자 메뉴 */}
         {user?.role === 'admin' && (
-          <Card style={styles.adminCard}>
-            <SectionTitle title="👨‍💼 관리자" size="lg" marginBottom={spacing[3]} />
-            <TouchableOpacity
-              style={styles.infoOption}
-              onPress={() => navigation?.navigate('AdminUserList')}
-            >
-              <Text style={styles.infoOptionText}>👥 전체 유저 목록</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.infoOption, styles.dangerOption]}
-              onPress={handleClearAllPosts}
-            >
-              <Text style={[styles.infoOptionText, styles.dangerText]}>🗑️ 모든 커뮤니티 게시글 삭제</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.infoOption, styles.dangerOption]}
-              onPress={handleDeleteAllUsers}
-            >
-              <Text style={[styles.infoOptionText, styles.dangerText]}>🗑️ 전체 유저 삭제</Text>
-            </TouchableOpacity>
-          </Card>
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>관리자</Text>
+            <View style={styles.settingsCard}>
+              <SettingItem
+                icon={require('../assets/images/alarm.png')}
+                title="관리자 대시보드"
+                onPress={() => navigation?.navigate('AdminDashboard')}
+              />
+              <View style={styles.divider} />
+              <SettingItem
+                icon={require('../assets/images/notes.png')}
+                title="전체 유저 목록"
+                onPress={() => navigation?.navigate('AdminUserList')}
+              />
+            </View>
+          </View>
         )}
 
-        {/* 정보 */}
-        <Card style={styles.infoCard}>
-          <SectionTitle title="ℹ️ 정보" size="lg" marginBottom={spacing[3]} />
-          <TouchableOpacity
-            style={styles.infoOption}
-            onPress={() => openInfoScreen('이용약관', TERMS_OF_SERVICE)}
-          >
-            <Text style={styles.infoOptionText}>📄 이용약관</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.infoOption}
-            onPress={() => openInfoScreen('개인정보처리방침', PRIVACY_POLICY)}
-          >
-            <Text style={styles.infoOptionText}>🔒 개인정보처리방침</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.infoOption}
-            onPress={() => openInfoScreen('오픈소스 라이선스', OPEN_SOURCE_LICENSE)}
-          >
-            <Text style={styles.infoOptionText}>📚 오픈소스 라이선스</Text>
-          </TouchableOpacity>
-        </Card>
+        {/* 정보 섹션 */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>정보</Text>
+          <View style={styles.settingsCard}>
+            <SettingItem
+              icon={require('../assets/images/notes.png')}
+              title="이용약관"
+              onPress={() => openInfoScreen('이용약관', TERMS_OF_SERVICE)}
+            />
+            <View style={styles.divider} />
+            <SettingItem
+              icon={require('../assets/images/notes.png')}
+              title="개인정보처리방침"
+              onPress={() => openInfoScreen('개인정보처리방침', PRIVACY_POLICY)}
+            />
+            <View style={styles.divider} />
+            <SettingItem
+              icon={require('../assets/images/books.png')}
+              title="오픈소스 라이선스"
+              onPress={() => openInfoScreen('오픈소스 라이선스', OPEN_SOURCE_LICENSE)}
+            />
+          </View>
+        </View>
 
         {/* 계정 설정 */}
-        <Card style={styles.accountCard}>
-          <SectionTitle title="🔐 계정" size="lg" marginBottom={spacing[3]} />
-          <TouchableOpacity style={styles.logoutOption} onPress={handleLogout}>
-            <Text style={styles.logoutText}>🚪 로그아웃</Text>
-          </TouchableOpacity>
-        </Card>
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>계정</Text>
+          <View style={styles.settingsCard}>
+            <SettingItem
+              icon={require('../assets/images/left.png')}
+              title="로그아웃"
+              onPress={() => setShowLogoutModal(true)}
+              showArrow={false}
+              danger={true}
+            />
+          </View>
+        </View>
+      </ScrollView>
 
-      </View>
-    </ScrollView>
+      {/* 로그아웃 확인 모달 */}
+      <ConfirmModal
+        visible={showLogoutModal}
+        title="로그아웃"
+        message="정말로 로그아웃하시겠습니까?"
+        confirmText="로그아웃"
+        cancelText="취소"
+        onConfirm={handleLogout}
+        onCancel={() => setShowLogoutModal(false)}
+        confirmButtonColor={colors.error}
+      />
+    </View>
   );
 };
 
@@ -459,84 +545,74 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.background.secondary,
   },
-  title: {
-    fontSize: typography.fontSize['2xl'],
-    fontWeight: typography.fontWeight.bold,
-    color: colors.text.primary,
+  scrollView: {
+    flex: 1,
   },
-  content: {
-    padding: spacing[5],
+  scrollContent: {
+    padding: spacing[4],
+    paddingBottom: spacing[6],
   },
-  userCard: {
-    marginBottom: spacing[6],
+  section: {
+    marginBottom: spacing[5],
   },
-  userTitle: {
+  sectionTitle: {
     fontSize: typography.fontSize.lg,
     fontWeight: typography.fontWeight.bold,
     color: colors.text.primary,
     marginBottom: spacing[3],
+    paddingHorizontal: spacing[2],
+  },
+  userCard: {
+    backgroundColor: colors.background.primary,
+    borderRadius: borderRadius.xl,
+    padding: spacing[5],
+    ...shadows.lg,
   },
   userInfo: {
-    fontSize: typography.fontSize.base,
-    color: colors.text.secondary,
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: spacing[4],
+  },
+  userIcon: {
+    width: 48,
+    height: 48,
+    marginRight: spacing[3],
+  },
+  userDetails: {
+    flex: 1,
+  },
+  userName: {
+    fontSize: typography.fontSize.xl,
+    fontWeight: typography.fontWeight.bold,
+    color: colors.text.primary,
     marginBottom: spacing[1],
   },
-  themeCard: {
-    marginBottom: spacing[6],
-  },
-  featuresCard: {
-    marginBottom: spacing[6],
-  },
-  adminCard: {
-    marginBottom: spacing[6],
-  },
-  infoCard: {
-    marginBottom: spacing[6],
-  },
-  accountCard: {
-    marginBottom: spacing[6],
-  },
-  option: {
-    backgroundColor: colors.background.primary,
-    padding: spacing[4],
-    borderRadius: borderRadius.base,
-    borderWidth: 1,
-    borderColor: colors.border.light,
-  },
-  optionText: {
-    fontSize: typography.fontSize.base,
-    color: colors.text.primary,
-  },
-  infoOption: {
-    backgroundColor: colors.background.primary,
-    padding: spacing[4],
-    borderRadius: borderRadius.base,
-    borderWidth: 1,
-    borderColor: colors.border.light,
-    marginBottom: spacing[2],
-  },
-  infoOptionText: {
-    fontSize: typography.fontSize.base,
-    color: colors.text.primary,
-    fontWeight: typography.fontWeight.medium,
-  },
-  logoutOption: {
-    backgroundColor: colors.error[50],
-    padding: spacing[4],
-    borderRadius: borderRadius.base,
-    borderWidth: 1,
-    borderColor: colors.border.light,
-  },
-  logoutText: {
-    fontSize: typography.fontSize.base,
-    color: colors.error[600],
-    fontWeight: typography.fontWeight.medium,
+  userSubtext: {
+    fontSize: typography.fontSize.sm,
+    color: colors.text.secondary,
   },
   nicknameForm: {
-    marginTop: spacing[4],
+    marginTop: spacing[2],
   },
-  nicknameInput: {
+  inputContainer: {
     marginBottom: spacing[3],
+  },
+  inputLabel: {
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.medium,
+    color: colors.text.secondary,
+    marginBottom: spacing[2],
+  },
+  textInputWrapper: {
+    backgroundColor: colors.background.secondary,
+    borderRadius: borderRadius.md,
+    borderWidth: 1,
+    borderColor: colors.border.light,
+  },
+  textInput: {
+    padding: spacing[3],
+    fontSize: typography.fontSize.base,
+    color: colors.text.primary,
   },
   nicknameActions: {
     flexDirection: 'row',
@@ -545,8 +621,8 @@ const styles = StyleSheet.create({
   cancelButton: {
     flex: 1,
     backgroundColor: colors.background.secondary,
-    padding: spacing[3],
-    borderRadius: borderRadius.base,
+    paddingVertical: spacing[2],
+    borderRadius: borderRadius.xl,
     borderWidth: 1,
     borderColor: colors.border.medium,
     alignItems: 'center',
@@ -558,36 +634,78 @@ const styles = StyleSheet.create({
   },
   saveButton: {
     flex: 1,
-    backgroundColor: colors.primary[500],
-    padding: spacing[3],
-    borderRadius: borderRadius.base,
+    backgroundColor: colors.green[500],
+    paddingVertical: spacing[2],
+    borderRadius: borderRadius.xl,
     alignItems: 'center',
   },
   saveButtonText: {
     fontSize: typography.fontSize.base,
-    color: colors.text.inverse,
-    fontWeight: typography.fontWeight.medium,
+    color: colors.white,
+    fontWeight: typography.fontWeight.semibold,
   },
   changeNicknameButton: {
-    backgroundColor: colors.background.secondary,
-    padding: spacing[3],
-    borderRadius: borderRadius.base,
-    borderWidth: 1,
-    borderColor: colors.border.light,
-    marginTop: spacing[3],
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.primary[50],
+    paddingVertical: spacing[3],
+    borderRadius: borderRadius.md,
+    borderWidth: 1,
+    borderColor: colors.primary[200],
+  },
+  editIcon: {
+    width: 16,
+    height: 16,
+    marginRight: spacing[2],
   },
   changeNicknameText: {
     fontSize: typography.fontSize.base,
-    color: colors.primary[500],
+    color: colors.primary[600],
     fontWeight: typography.fontWeight.medium,
   },
-  dangerOption: {
-    backgroundColor: colors.error[50],
-    borderColor: colors.error[300],
+  settingsCard: {
+    backgroundColor: colors.background.primary,
+    borderRadius: borderRadius.xl,
+    overflow: 'hidden',
+    ...shadows.lg,
   },
-  dangerText: {
-    color: colors.error[700],
+  settingItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: spacing[4],
+    backgroundColor: colors.background.primary,
+  },
+  settingItemDanger: {
+    backgroundColor: colors.background.primary,
+  },
+  settingItemLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  settingIcon: {
+    width: 24,
+    height: 24,
+    marginRight: spacing[3],
+  },
+  settingItemText: {
+    fontSize: typography.fontSize.base,
+    color: colors.text.primary,
+    fontWeight: typography.fontWeight.medium,
+  },
+  settingItemTextDanger: {
+    color: colors.error,
+  },
+  arrowIcon: {
+    width: 20,
+    height: 20,
+  },
+  divider: {
+    height: 1,
+    backgroundColor: colors.border.light,
+    marginLeft: spacing[4] + 24 + spacing[3], // icon width + margin + text margin
   },
 });
 

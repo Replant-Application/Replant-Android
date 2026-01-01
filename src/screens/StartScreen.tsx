@@ -1,28 +1,27 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Alert, Image } from 'react-native';
+import { spacing } from '../utils/designTokens';
 import { SCREEN_NAMES } from '../utils/constants';
-import { Button, Header } from '../components/ui';
-import { colors, spacing, typography, borderRadius } from '../utils/designTokens';
 
 interface StartScreenProps {
   onNavigate: (screen: string) => void;
 }
 
 const StartScreen: React.FC<StartScreenProps> = ({ onNavigate }) => {
-
-  const handleGetStarted = () => {
-    if (onNavigate) {
-      onNavigate(SCREEN_NAMES.NICKNAME as string);
-    }
-  };
-
-  // 소셜 로그인 핸들러 (화면만 구현, 기능은 나중에)
   const handleKakaoLogin = () => {
-    Alert.alert('카카오 로그인', '카카오 로그인 기능은 준비 중입니다.');
+    Alert.alert('Kakao 계정으로 로그인', '카카오 로그인 기능은 준비 중입니다.');
   };
 
   const handleGoogleLogin = () => {
-    Alert.alert('구글 로그인', '구글 로그인 기능은 준비 중입니다.');
+    Alert.alert('Google 계정으로 로그인', '구글 로그인 기능은 준비 중입니다.');
+  };
+
+  const handleSignUp = () => {
+    onNavigate(SCREEN_NAMES.SIGNUP as string);
+  };
+
+  const handleLogin = () => {
+    onNavigate(SCREEN_NAMES.LOGIN as string);
   };
 
   const handleNaverLogin = () => {
@@ -31,43 +30,61 @@ const StartScreen: React.FC<StartScreenProps> = ({ onNavigate }) => {
 
   return (
     <View style={styles.container}>
-      <Header />
       <View style={styles.content}>
-        <Text style={styles.title}>🌱 Replant</Text>
-        <Text style={styles.subtitle}>사회로의 첫 걸음</Text>
+        <Image
+          source={require('../assets/images/RePlant_Logo.png')}
+          style={styles.logoImage}
+          resizeMode="contain"
+        />
+        <Text style={styles.title}>RePlant</Text>
+        <View style={styles.subtitleContainer}>
+          <Text style={styles.subtitle}>다시 살아갈 당신에게 희망을</Text>
+          <Text style={styles.clover}>🍀</Text>
+        </View>
       </View>
 
       <View style={styles.buttonContainer}>
-        {/* 소셜 로그인 버튼들 */}
-        <View style={styles.socialLoginContainer}>
-          <Text style={styles.socialLoginTitle}>소셜 로그인</Text>
+        <TouchableOpacity
+          style={styles.kakaoButton}
+          onPress={handleKakaoLogin}
+          activeOpacity={0.8}
+        >
+          <Image
+            source={require('../assets/images/kakao_logo.png')}
+            style={styles.kakaoLogo}
+            resizeMode="contain"
+          />
+          <Text style={styles.kakaoButtonText}>Kakao 계정으로 로그인</Text>
+        </TouchableOpacity>
 
-          {/* 카카오 로그인 */}
+        <TouchableOpacity
+          style={styles.googleButton}
+          onPress={handleGoogleLogin}
+          activeOpacity={0.8}
+        >
+          <Image
+            source={require('../assets/images/google_logo.png')}
+            style={styles.googleLogo}
+            resizeMode="contain"
+          />
+          <Text style={styles.googleButtonText}>Google 계정으로 로그인</Text>
+        </TouchableOpacity>
+
+        <View style={styles.textButtonContainer}>
           <TouchableOpacity
-            style={[styles.socialButton, styles.kakaoButton]}
-            onPress={handleKakaoLogin}
+            style={styles.textButton}
+            onPress={handleSignUp}
             activeOpacity={0.8}
           >
-            <Image
-              source={require('../assets/images/kakao_logo.png')}
-              style={styles.socialLogo}
-              resizeMode="contain"
-            />
-            <Text style={styles.socialButtonText}>카카오로 시작하기</Text>
+            <Text style={styles.textButtonText}>회원가입</Text>
           </TouchableOpacity>
-
-          {/* 구글 로그인 */}
+          <Text style={styles.dividerText}>|</Text>
           <TouchableOpacity
-            style={[styles.socialButton, styles.googleButton]}
-            onPress={handleGoogleLogin}
+            style={styles.textButton}
+            onPress={handleLogin}
             activeOpacity={0.8}
           >
-            <Image
-              source={require('../assets/images/google_logo.png')}
-              style={styles.socialLogo}
-              resizeMode="contain"
-            />
-            <Text style={styles.socialButtonText}>구글로 시작하기</Text>
+            <Text style={styles.textButtonText}>로그인</Text>
           </TouchableOpacity>
 
           {/* 네이버 로그인 */}
@@ -84,22 +101,6 @@ const StartScreen: React.FC<StartScreenProps> = ({ onNavigate }) => {
             <Text style={[styles.socialButtonText, styles.naverButtonText]}>네이버로 시작하기</Text>
           </TouchableOpacity>
         </View>
-
-        {/* 구분선 */}
-        <View style={styles.dividerContainer}>
-          <View style={styles.dividerLine} />
-          <Text style={styles.dividerText}>또는</Text>
-          <View style={styles.dividerLine} />
-        </View>
-
-        {/* 기존 닉네임 입력 버튼 */}
-        <Button
-          title="새로운 시작하기"
-          onPress={handleGetStarted}
-          size="lg"
-          variant="outline"
-          style={styles.button}
-        />
       </View>
     </View>
   );
@@ -108,90 +109,111 @@ const StartScreen: React.FC<StartScreenProps> = ({ onNavigate }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background.secondary,
+    backgroundColor: '#ffffff',
+    paddingHorizontal: spacing[6],
+    paddingTop: spacing[1],
+    paddingBottom: spacing[10],
     justifyContent: 'space-between',
-    padding: spacing[5],
   },
   content: {
-    flex: 1,
-    justifyContent: 'center',
     alignItems: 'center',
+    paddingTop: spacing[24] + spacing[12],
+  },
+  logoImage: {
+    width: 160,
+    height: 160,
+    marginBottom: spacing[1],
   },
   title: {
-    fontSize: typography.fontSize['4xl'],
-    fontWeight: typography.fontWeight.bold,
-    color: colors.text.primary,
-    marginBottom: spacing[4],
+    fontSize: 66,
+    fontWeight: '400',
+    color: '#166534',
+    marginBottom: spacing[2],
+    letterSpacing: 2,
+    fontFamily: 'Maplestory Bold',
+  },
+  subtitleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing[1],
   },
   subtitle: {
-    fontSize: typography.fontSize['2xl'],
-    fontWeight: typography.fontWeight.semibold,
-    color: colors.text.primary,
+    fontSize: 15,
+    fontWeight: '300',
+    color: '#666666',
+    letterSpacing: 0.2,
+    fontFamily: 'Maplestory Light',
+  },
+  clover: {
+    fontSize: 15,
   },
   buttonContainer: {
-    paddingBottom: spacing[10],
-    gap: spacing[4],
-  },
-  socialLoginContainer: {
     width: '100%',
     gap: spacing[3],
+    paddingBottom: spacing[8],
+    paddingTop: spacing[4],
+    alignItems: 'center',
   },
-  socialLoginTitle: {
-    fontSize: typography.fontSize.base,
-    fontWeight: typography.fontWeight.medium,
-    color: colors.text.secondary,
-    textAlign: 'center',
-    marginBottom: spacing[2],
-  },
-  socialButton: {
+  kakaoButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    height: 48,
-    borderRadius: borderRadius.base,
-    paddingHorizontal: spacing[4],
-    gap: spacing[3],
+    width: '90%',
+    height: 45,
+    backgroundColor: '#FEE500',
+    borderRadius: 28,
+    gap: spacing[5],
   },
-  kakaoButton: {
-    backgroundColor: '#FEE500', // 카카오 노란색
-  },
-  googleButton: {
-    backgroundColor: colors.background.primary,
-    borderWidth: 1,
-    borderColor: colors.border.light,
-  },
-  naverButton: {
-    backgroundColor: '#03C75A', // 네이버 그린 컬러
-  },
-  socialLogo: {
+  kakaoLogo: {
     width: 24,
     height: 24,
   },
-  socialButtonText: {
-    fontSize: typography.fontSize.base,
-    fontWeight: typography.fontWeight.semibold,
-    color: colors.text.primary,
+  kakaoButtonText: {
+    fontSize: 16,
+    fontWeight: '400',
+    color: '#000000',
+    letterSpacing: 0.3,
   },
-  naverButtonText: {
-    color: colors.text.inverse,
-  },
-  dividerContainer: {
+  googleButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginVertical: spacing[2],
-    gap: spacing[3],
+    justifyContent: 'center',
+    width: '90%',
+    height: 45,
+    backgroundColor: '#000000',
+    borderWidth: 0,
+    borderRadius: 28,
+    gap: spacing[5],
   },
-  dividerLine: {
-    flex: 1,
-    height: 1,
-    backgroundColor: colors.border.light,
+  googleLogo: {
+    width: 19,
+    height: 19,
+  },
+  googleButtonText: {
+    fontSize: 15,
+    fontWeight: '400',
+    color: '#ffffff',
+    letterSpacing: 0.3,
+  },
+  textButtonContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing[2],
+    marginTop: spacing[2],
+  },
+  textButton: {
+    paddingVertical: spacing[2],
+    paddingHorizontal: spacing[4],
+  },
+  textButtonText: {
+    fontSize: 14,
+    fontWeight: '400',
+    color: '#666666',
   },
   dividerText: {
-    fontSize: typography.fontSize.sm,
-    color: colors.text.tertiary,
-  },
-  button: {
-    width: '100%',
+    fontSize: 14,
+    color: '#CCCCCC',
   },
 });
 

@@ -1,7 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
-import { Header } from '../components/ui';
-import { colors, spacing, typography } from '../utils/designTokens';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image } from 'react-native';
+import { colors, spacing, typography, borderRadius, shadows } from '../utils/designTokens';
 import { NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '../types/navigation';
 
@@ -20,21 +19,29 @@ const InfoScreen: React.FC<InfoScreenProps> = ({ navigation, route }) => {
 
   return (
     <View style={styles.container}>
-      <Header />
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.backButton}
           onPress={() => navigation.goBack()}
+          activeOpacity={0.7}
         >
-          <Text style={styles.backButtonText}>←</Text>
+          <Image
+            source={require('../assets/images/left.png')}
+            style={styles.backButtonIcon}
+            resizeMode="contain"
+          />
         </TouchableOpacity>
         <Text style={styles.title}>{title}</Text>
+        <View style={styles.placeholder} />
       </View>
       <ScrollView
         style={styles.content}
         contentContainerStyle={styles.contentContainer}
+        showsVerticalScrollIndicator={false}
       >
-        <Text style={styles.contentText}>{content}</Text>
+        <View style={styles.contentCard}>
+          <Text style={styles.contentText}>{content}</Text>
+        </View>
       </ScrollView>
     </View>
   );
@@ -48,35 +55,48 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: spacing[5],
-    paddingVertical: spacing[4],
+    justifyContent: 'space-between',
+    paddingHorizontal: spacing[4],
+    paddingTop: spacing[16],
+    paddingBottom: spacing[4],
+    backgroundColor: colors.background.primary,
     borderBottomWidth: 1,
     borderBottomColor: colors.border.light,
-    backgroundColor: colors.background.primary,
+    ...shadows.sm,
   },
   backButton: {
+    width: 40,
+    height: 40,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingVertical: spacing[2],
-    paddingHorizontal: spacing[3],
-    marginRight: spacing[3],
+    borderRadius: borderRadius.full,
+    backgroundColor: colors.background.secondary,
   },
-  backButtonText: {
-    fontSize: typography.fontSize.xl,
-    color: colors.text.primary,
-    fontWeight: typography.fontWeight.medium,
+  backButtonIcon: {
+    width: 24,
+    height: 24,
   },
   title: {
     fontSize: typography.fontSize.xl,
     fontWeight: typography.fontWeight.bold,
     color: colors.text.primary,
     flex: 1,
+    textAlign: 'center',
+  },
+  placeholder: {
+    width: 40,
   },
   content: {
     flex: 1,
   },
   contentContainer: {
+    padding: spacing[4],
+  },
+  contentCard: {
+    backgroundColor: colors.background.primary,
+    borderRadius: borderRadius.xl,
     padding: spacing[5],
+    ...shadows.lg,
   },
   contentText: {
     fontSize: typography.fontSize.base,

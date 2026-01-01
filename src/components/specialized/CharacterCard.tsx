@@ -27,7 +27,7 @@ const CharacterCard: React.FC<CharacterCardProps> = ({
 
   // 캐릭터 이미지 미리 import
   const characterImages = {
-    level1: require('../../assets/images/characters/level1/default.png'),
+    level1: require('../../assets/images/characters/level1/default.gif'),
     level2: require('../../assets/images/characters/level2/default.png'),
     level3: require('../../assets/images/characters/level3/default.png'),
     level4: require('../../assets/images/characters/level4/default.png'),

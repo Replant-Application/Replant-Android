@@ -50,6 +50,7 @@ export type RootStackParamList = {
   };
   MyPage: undefined;
   Calendar: undefined;
+  Statistics: undefined;
   AdminDashboard: undefined;
   AdminUserList: undefined;
   AdminUserDetail: {
@@ -62,6 +63,7 @@ export type RootStackParamList = {
   AIMissionGenerate: {
     generatedMission?: any;
   };
+  Notification: undefined;
 };
 
 // 네비게이션 파라미터 타입
@@ -105,6 +107,7 @@ export interface NavigationParams {
   };
   [ScreenNames.MY_PAGE]: undefined;
   [ScreenNames.CALENDAR]: undefined;
+  [ScreenNames.STATISTICS]: undefined;
   [ScreenNames.ADMIN_DASHBOARD]: undefined;
   [ScreenNames.ADMIN_USER_LIST]: undefined;
   [ScreenNames.ADMIN_USER_DETAIL]: {
@@ -117,6 +120,7 @@ export interface NavigationParams {
   [ScreenNames.AI_MISSION_GENERATE]: {
     generatedMission?: any;
   };
+  [ScreenNames.NOTIFICATION]: undefined;
 }
 
 // 네비게이션 Props 타입

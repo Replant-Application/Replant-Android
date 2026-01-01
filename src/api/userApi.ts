@@ -1,6 +1,5 @@
 /**
  * 사용자 API 인터페이스
- * 백엔드 연동 시 실제 구현 필요
  */
 
 import { apiClient } from './client';
@@ -8,84 +7,116 @@ import { API_CONFIG } from '../config/apiConfig';
 import { ServiceResult } from '../types';
 
 /**
- * 마이페이지
- * POST /user
+ * 고민 종류 (미션 필터링용)
  */
-export const getMyPage = async (): Promise<ServiceResult<{
-  id: number;
-  nickname: string;
-  email?: string;
-  profileImage?: string;
-  stats?: {
-    completedMissions: number;
-    totalExperience: number;
-  };
-}>> => {
-  // TODO: 백엔드 개발자가 실제 구현
-  return apiClient.post(API_CONFIG.endpoints.user.myPage);
-};
+export type WorryType =
+  | 'RE_EMPLOYMENT'    // 재취업
+  | 'JOB_PREPARATION'  // 취업준비
+  | 'ENTRANCE_EXAM'    // 입시
+  | 'ADVANCEMENT'      // 진학
+  | 'RETURN_TO_SCHOOL' // 복학
+  | 'RELATIONSHIP';    // 연애
 
 /**
- * 비밀번호 변경
- * POST /user/password
+ * 선호 장소 타입
  */
-export const changePassword = async (data: {
-  currentPassword: string;
-  newPassword: string;
-}): Promise<ServiceResult<void>> => {
-  // TODO: 백엔드 개발자가 실제 구현
-  return apiClient.post<void>(API_CONFIG.endpoints.user.changePassword, data);
+export type PlaceType = 'HOME' | 'OUTDOOR' | 'INDOOR';
+
+/**
+ * 내 정보 조회 응답
+ */
+export interface MyInfoResponse {
+  id: number;
+  email: string;
+  nickname: string;
+  birthDate?: string; // ISO 8601 형식 (YYYY-MM-DD)
+  gender?: 'MALE' | 'FEMALE';
+  profileImg?: string;
+  createdAt: string;
+  // ============ 사용자 맞춤 정보 필드들 ============
+  worryType?: WorryType;
+  region?: string;
+  preferredPlaceType?: PlaceType;
+}
+
+/**
+ * 내 정보 수정 요청
+ */
+export interface UpdateMyInfoRequest {
+  nickname?: string;
+  birthDate?: string; // ISO 8601 형식 (YYYY-MM-DD)
+  gender?: 'MALE' | 'FEMALE';
+  profileImg?: string;
+  // ============ 사용자 맞춤 정보 필드들 ============
+  worryType?: WorryType;
+  region?: string;
+  preferredPlaceType?: PlaceType;
+}
+
+/**
+ * 내 정보 수정 응답
+ */
+export interface UpdateMyInfoResponse {
+  id: number;
+  email: string;
+  nickname: string;
+  birthDate?: string;
+  gender?: 'MALE' | 'FEMALE';
+  profileImg?: string;
+  createdAt: string;
+  // ============ 사용자 맞춤 정보 필드들 ============
+  worryType?: WorryType;
+  region?: string;
+  preferredPlaceType?: PlaceType;
+}
+
+/**
+ * 다른 유저 프로필 조회 응답
+ */
+export interface UserProfileResponse {
+  id: number;
+  nickname: string;
+  profileImg?: string;
+  reant?: {
+    name: string;
+    level: number;
+    stage: 'EGG' | 'BABY' | 'ADULT';
+  };
+}
+
+/**
+ * 내 정보 조회
+ * GET /api/users/me
+ * 인증 필요
+ */
+export const getMyInfo = async (): Promise<ServiceResult<MyInfoResponse>> => {
+  return apiClient.get<MyInfoResponse>(API_CONFIG.endpoints.user.me);
 };
 
 /**
  * 내 정보 수정
- * POST /user
+ * PUT /api/users/me
+ * 인증 필요
+ *
+ * @param data 수정할 사용자 정보
  */
-export const updateProfile = async (data: {
-  nickname?: string;
-  email?: string;
-  profileImage?: string;
-}): Promise<ServiceResult<{
-  id: number;
-  nickname: string;
-  email?: string;
-  profileImage?: string;
-}>> => {
-  // TODO: 백엔드 개발자가 실제 구현
-  return apiClient.post(API_CONFIG.endpoints.user.updateProfile, data);
+export const updateMyInfo = async (
+  data: UpdateMyInfoRequest
+): Promise<ServiceResult<UpdateMyInfoResponse>> => {
+  return apiClient.put<UpdateMyInfoResponse>(API_CONFIG.endpoints.user.updateMe, data);
 };
 
 /**
- * 캘린더 추가
- * POST /user/calendar
+ * 다른 유저 프로필 조회
+ * GET /api/users/{userId}
+ * 공개 정보만 조회
+ *
+ * @param userId 조회할 사용자 ID
  */
-export const addCalendar = async (data: {
-  date: string;
-  content: string;
-  emotion?: string;
-}): Promise<ServiceResult<{
-  id: string;
-  date: string;
-  content: string;
-}>> => {
-  // TODO: 백엔드 개발자가 실제 구현
-  return apiClient.post(API_CONFIG.endpoints.user.addCalendar, data);
-};
-
-/**
- * 캘린더 수정
- * PATCH /user/calendar/:id
- */
-export const updateCalendar = async (id: string, data: {
-  content?: string;
-  emotion?: string;
-}): Promise<ServiceResult<{
-  id: string;
-  date: string;
-  content: string;
-}>> => {
-  // TODO: 백엔드 개발자가 실제 구현
-  const endpoint = API_CONFIG.endpoints.user.updateCalendar.replace(':id', id);
-  return apiClient.patch(endpoint, data);
+export const getUserProfile = async (
+  userId: number
+): Promise<ServiceResult<UserProfileResponse>> => {
+  const endpoint = API_CONFIG.endpoints.user.getUser.replace(':userId', String(userId));
+  return apiClient.get<UserProfileResponse>(endpoint);
 };
 

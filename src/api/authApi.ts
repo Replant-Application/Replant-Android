@@ -1,6 +1,6 @@
 /**
  * 인증 API 인터페이스
- * 백엔드 연동 시 실제 구현 필요
+ * 일반 로그인 및 OAuth 기반 인증 시스템
  */
 
 import { apiClient } from './client';
@@ -8,124 +8,154 @@ import { API_CONFIG } from '../config/apiConfig';
 import { ServiceResult } from '../types';
 
 /**
- * 로그인 요청 데이터
+ * 일반 로그인 요청
  */
-export interface SignInRequest {
-  username: string;
+export interface LoginRequest {
+  id: string;
   password: string;
 }
 
 /**
- * 로그인 응답 데이터
+ * 일반 로그인 응답
  */
-export interface SignInResponse {
-  accessToken: string;
-  user: {
-    id: number;
-    nickname: string;
-    role: string;
+export interface LoginResponse {
+  name: string;
+  accessToken?: string;
+  refreshToken?: string;
+  tokens?: {
+    accessToken: string;
+    refreshToken: string;
   };
 }
 
 /**
- * 회원가입 요청 데이터
+ * 회원가입 요청
  */
-export interface SignUpRequest {
-  username: string;
+export interface JoinRequest {
+  id: string;
   password: string;
-  nickname?: string;
+  name: string;
+  phone: string;
 }
 
 /**
- * 회원가입 응답 데이터
+ * 회원가입 응답
  */
-export interface SignUpResponse {
-  accessToken: string;
-  user: {
-    id: number;
-    nickname: string;
-    role: string;
+export interface JoinResponse {
+  name: string;
+  accessToken?: string;
+  refreshToken?: string;
+  tokens?: {
+    accessToken: string;
+    refreshToken: string;
   };
 }
 
 /**
- * 현재 사용자 정보 응답
+ * OAuth Provider 타입
  */
-export interface MeResponse {
-  id: number;
-  nickname: string;
-  role: string;
+export type OAuthProvider = 'KAKAO' | 'GOOGLE' | 'APPLE' | 'NAVER';
+
+/**
+ * OAuth 로그인/회원가입 요청
+ */
+export interface OAuthLoginRequest {
+  accessToken: string; // OAuth Provider의 Access Token
 }
+
+/**
+ * OAuth 로그인/회원가입 응답
+ */
+export interface OAuthLoginResponse {
+  accessToken: string; // JWT Access Token
+  refreshToken: string; // JWT Refresh Token
+  user: {
+    id: number;
+    email: string;
+    nickname: string;
+    profileImg?: string;
+  };
+  isNewUser: boolean; // 신규 회원 여부
+}
+
+/**
+ * 토큰 갱신 요청
+ */
+export interface RefreshTokenRequest {
+  refreshToken: string;
+}
+
+/**
+ * 토큰 갱신 응답
+ */
+export interface RefreshTokenResponse {
+  accessToken: string;
+  refreshToken: string;
+}
+
+/**
+ * 로그아웃 응답
+ */
+export interface LogoutResponse {
+  message: string;
+}
+
+/**
+ * 일반 로그인
+ * POST /api/auth/login
+ *
+ * @param data 로그인 정보 (id, password)
+ */
+export const login = async (
+  data: LoginRequest
+): Promise<ServiceResult<LoginResponse>> => {
+  return apiClient.post<LoginResponse>(API_CONFIG.endpoints.auth.login, data);
+};
 
 /**
  * 회원가입
- * POST /auth/signup
+ * POST /api/auth/join
+ *
+ * @param data 회원가입 정보 (id, password, name, phone)
  */
-export const signUp = async (data: SignUpRequest): Promise<ServiceResult<SignUpResponse>> => {
-  // TODO: 백엔드 개발자가 실제 구현
-  return apiClient.post<SignUpResponse>(API_CONFIG.endpoints.auth.signup, data);
+export const join = async (
+  data: JoinRequest
+): Promise<ServiceResult<JoinResponse>> => {
+  return apiClient.post<JoinResponse>(API_CONFIG.endpoints.auth.join, data);
 };
 
 /**
- * 로그인
- * POST /auth/singin
+ * OAuth 로그인/회원가입
+ * POST /api/auth/oauth/{provider}
+ *
+ * @param provider OAuth Provider (KAKAO, GOOGLE, APPLE, NAVER)
+ * @param data OAuth Access Token
  */
-export const signIn = async (data: SignInRequest): Promise<ServiceResult<SignInResponse>> => {
-  // TODO: 백엔드 개발자가 실제 구현
-  return apiClient.post<SignInResponse>(API_CONFIG.endpoints.auth.signin, data);
-};
-
-/**
- * 로그아웃
- * POST /auth/signout
- */
-export const signOut = async (): Promise<ServiceResult<void>> => {
-  // TODO: 백엔드 개발자가 실제 구현
-  return apiClient.post<void>(API_CONFIG.endpoints.auth.signout);
+export const oauthLogin = async (
+  provider: OAuthProvider,
+  data: OAuthLoginRequest
+): Promise<ServiceResult<OAuthLoginResponse>> => {
+  const endpoint = API_CONFIG.endpoints.auth.oauthLogin.replace(':provider', provider);
+  return apiClient.post<OAuthLoginResponse>(endpoint, data);
 };
 
 /**
  * 토큰 갱신
- * POST /auth/refresh
+ * POST /api/auth/refresh
+ *
+ * @param data Refresh Token
  */
-export const refreshToken = async (): Promise<ServiceResult<{ accessToken: string }>> => {
-  // TODO: 백엔드 개발자가 실제 구현
-  return apiClient.post<{ accessToken: string }>(API_CONFIG.endpoints.auth.refresh);
+export const refreshToken = async (
+  data: RefreshTokenRequest
+): Promise<ServiceResult<RefreshTokenResponse>> => {
+  return apiClient.post<RefreshTokenResponse>(API_CONFIG.endpoints.auth.refresh, data);
 };
 
 /**
- * 아이디 찾기
- * POST /auth/find-username
+ * 로그아웃
+ * POST /api/auth/logout
+ * 인증 필요
  */
-export const findUsername = async (data: { email?: string; phone?: string }): Promise<ServiceResult<{ username: string }>> => {
-  // TODO: 백엔드 개발자가 실제 구현
-  return apiClient.post<{ username: string }>(API_CONFIG.endpoints.auth.findUsername, data);
+export const logout = async (): Promise<ServiceResult<LogoutResponse>> => {
+  return apiClient.post<LogoutResponse>(API_CONFIG.endpoints.auth.logout);
 };
-
-/**
- * 비밀번호 재설정 요청
- * POST /auth/reset-password
- */
-export const requestPasswordReset = async (data: { username: string; email?: string }): Promise<ServiceResult<void>> => {
-  // TODO: 백엔드 개발자가 실제 구현
-  return apiClient.post<void>(API_CONFIG.endpoints.auth.resetPassword, data);
-};
-
-/**
- * 비밀번호 재설정 확인
- * POST /auth/reset-password/confirm
- */
-export const confirmPasswordReset = async (data: { token: string; newPassword: string }): Promise<ServiceResult<void>> => {
-  // TODO: 백엔드 개발자가 실제 구현
-  return apiClient.post<void>(API_CONFIG.endpoints.auth.resetPasswordConfirm, data);
-};
-
-/**
- * 현재 사용자 정보 조회
- * GET /auth/me
- */
-export const getMe = async (): Promise<ServiceResult<MeResponse>> => {
-  // TODO: 백엔드 개발자가 실제 구현
-  return apiClient.get<MeResponse>(API_CONFIG.endpoints.auth.me);
-};
-
