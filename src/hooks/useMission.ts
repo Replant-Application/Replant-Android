@@ -122,8 +122,9 @@ export const useMission = (
         // 새로운 미션 목록을 로컬 스토리지에 저장
         await setData(storageKeys.MISSIONS, finalMissions);
       } else {
-        // API 실패 시 로컬 데이터 사용
-        finalMissions = localMissions;
+        // API 실패 시 빈 배열 반환 (더미 데이터 사용 안함)
+        // 커스텀 미션만 유지
+        finalMissions = localMissions.filter(m => m.is_custom === true);
       }
 
       // 단일 카테고리로 normalize

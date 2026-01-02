@@ -28,29 +28,8 @@ export const initializeUserData = async (
     // 미션 템플릿에서 초기 미션 생성
     const storageKeys = getStorageKeys(nickname);
 
-    // 기존 미션 데이터 확인
-    const existingMissions = await getData(storageKeys.MISSIONS);
-
-    // 기존 미션이 없거나 빈 배열인 경우에만 초기화
-    if (!existingMissions || (Array.isArray(existingMissions) && existingMissions.length === 0)) {
-      // 항상 JSON 파일에서 최신 템플릿 로드
-      const missionTemplates = require('../data/missionTemplates.json');
-      // 모든 미션 사용 (7개)
-      const essentialIds: string[] = ['1', '2', '3', '4', '5', '6', '7'];
-      const selectedTemplates = missionTemplates.filter((t: any) => essentialIds.includes(t.mission_id));
-      const missions = selectedTemplates.map((template: any) => ({
-        id: `mission_${Date.now()}_${template.mission_id}`,
-        mission_id: template.mission_id,
-        title: template.title,
-        description: template.description,
-        emoji: template.emoji,
-        category_id: 'growth',
-        difficulty: template.difficulty,
-        experience: template.experience,
-        completed: false
-      }));
-      await setData(storageKeys.MISSIONS, missions);
-    }
+    // 미션은 백엔드 API에서 불러옴 (더미 데이터 로딩 제거됨)
+    // useMission hook에서 API를 통해 미션을 로드함
 
     // 캐릭터 템플릿 저장 (템플릿은 항상 업데이트)
     const characterTemplatesData = require('../data/characterTemplates.json');

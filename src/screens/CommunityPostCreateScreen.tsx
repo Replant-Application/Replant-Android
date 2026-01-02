@@ -31,7 +31,12 @@ const CommunityPostCreateScreen: React.FC<CommunityPostCreateScreenProps> = ({
   navigation,
   route,
 }) => {
-  const { missionId, missionTitle, missionEmoji, photoUrl } = route.params;
+  // 안전한 기본값 설정 (크래시 방지)
+  const params = route.params || {};
+  const missionId = params.missionId || '';
+  const missionTitle = params.missionTitle || '미션';
+  const missionEmoji = params.missionEmoji || '🎯';
+  const photoUrl = params.photoUrl;
   const { createPost } = useCommunity();
   const [title, setTitle] = useState(missionTitle);
   const [content, setContent] = useState('');
