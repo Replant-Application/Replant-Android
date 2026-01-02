@@ -57,6 +57,14 @@ export const API_CONFIG = {
       acceptAnswer: '/missions/:missionId/qna/:qnaId/answers/:answerId/accept',
     },
 
+    // 파일 업로드 (File)
+    file: {
+      upload: '/files/upload',
+      uploadMissionVerify: '/files/upload/mission-verify',
+      uploadToFolder: '/files/upload/:folder',
+      delete: '/files/:fileName',
+    },
+
     // 커스텀 미션 (CustomMission)
     customMission: {
       list: '/custom-missions',
@@ -129,6 +137,18 @@ export const API_CONFIG = {
     // SSE (Server-Sent Events)
     sse: {
       connect: '/sse/connect',
+    },
+
+    // 다이어리 (Diary)
+    diary: {
+      list: '/diaries',
+      detail: '/diaries/:diaryId',
+      create: '/diaries',
+      update: '/diaries/:diaryId',
+      delete: '/diaries/:diaryId',
+      byDate: '/diaries/by-date',
+      range: '/diaries/range',
+      stats: '/diaries/stats',
     },
   },
 

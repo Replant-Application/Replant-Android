@@ -30,8 +30,9 @@ export const useLocation = () => {
 
   /**
    * 위치 권한 요청 및 현재 위치 가져오기
+   * 위치 좌표 또는 null 반환
    */
-  const requestLocationPermission = useCallback(async (): Promise<boolean> => {
+  const requestLocationPermission = useCallback(async (): Promise<LocationCoords | null> => {
     try {
       setLocationState(prev => ({ ...prev, loading: true, error: null }));
 
@@ -46,7 +47,7 @@ export const useLocation = () => {
         }));
         Alert.alert('권한 필요', 'GPS 인증을 위해 위치 권한이 필요합니다.');
         setUserLocation(DEFAULT_LOCATION);
-        return false;
+        return null;
       }
 
       // 현재 위치 가져오기
@@ -66,7 +67,7 @@ export const useLocation = () => {
         error: null,
       });
 
-      return true;
+      return coords;
     } catch (error) {
       console.error('위치 가져오기 오류:', error);
       const errorMessage = error instanceof Error ? error.message : '위치를 가져올 수 없습니다.';
@@ -76,7 +77,7 @@ export const useLocation = () => {
         error: errorMessage,
       }));
       setUserLocation(DEFAULT_LOCATION);
-      return false;
+      return null;
     }
   }, []);
 
@@ -105,6 +106,28 @@ export const useLocation = () => {
   );
 
   /**
+   * 두 좌표 간의 거리 계산 (직접 좌표 입력)
+   * Haversine 공식 사용
+   */
+  const calculateDistanceBetween = useCallback(
+    (currentLat: number, currentLng: number, targetLat: number, targetLng: number): number => {
+      const R = 6371000; // 지구 반지름 (미터)
+      const lat1 = (currentLat * Math.PI) / 180;
+      const lat2 = (targetLat * Math.PI) / 180;
+      const deltaLat = ((targetLat - currentLat) * Math.PI) / 180;
+      const deltaLng = ((targetLng - currentLng) * Math.PI) / 180;
+
+      const a =
+        Math.sin(deltaLat / 2) * Math.sin(deltaLat / 2) +
+        Math.cos(lat1) * Math.cos(lat2) * Math.sin(deltaLng / 2) * Math.sin(deltaLng / 2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+      return R * c; // 거리 (미터)
+    },
+    []
+  );
+
+  /**
    * GPS 인증 확인
    * 현재 위치가 목표 위치 반경 내에 있는지 확인
    */
@@ -115,10 +138,10 @@ export const useLocation = () => {
       withinRadius: boolean;
       message: string;
     }> => {
-      // 먼저 현재 위치를 갱신
-      const hasPermission = await requestLocationPermission();
+      // 먼저 현재 위치를 갱신하고 좌표를 직접 받음
+      const currentCoords = await requestLocationPermission();
 
-      if (!hasPermission || !userLocation) {
+      if (!currentCoords) {
         return {
           success: false,
           distance: null,
@@ -127,16 +150,13 @@ export const useLocation = () => {
         };
       }
 
-      const distance = calculateDistance(targetLat, targetLng);
-
-      if (distance === null) {
-        return {
-          success: false,
-          distance: null,
-          withinRadius: false,
-          message: '거리 계산에 실패했습니다.',
-        };
-      }
+      // 직접 반환된 좌표로 거리 계산
+      const distance = calculateDistanceBetween(
+        currentCoords.lat,
+        currentCoords.lng,
+        targetLat,
+        targetLng
+      );
 
       const withinRadius = distance <= radiusMeters;
 
@@ -149,7 +169,7 @@ export const useLocation = () => {
           : `목표 위치에서 ${Math.round(distance)}m 떨어져 있습니다. (필요: ${radiusMeters}m 이내)`,
       };
     },
-    [userLocation, calculateDistance, requestLocationPermission]
+    [calculateDistanceBetween, requestLocationPermission]
   );
 
   return {

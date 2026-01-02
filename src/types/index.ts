@@ -186,6 +186,7 @@ export interface CommunityPost {
   title: string; // 게시글 제목 (미션 제목을 기본값으로 사용 가능)
   content: string; // 사용자가 작성한 내용
   author: string;
+  author_id: string; // 작성자 ID
   author_nickname: string;
   created_at: string;
   updated_at?: string;
@@ -197,6 +198,7 @@ export interface CommunityPost {
   category?: string;
   is_liked?: boolean; // 현재 사용자가 좋아요 했는지
   is_scrapped?: boolean; // 현재 사용자가 스크랩 했는지
+  verified?: boolean; // 인증 완료 여부 (false일 때만 수정/삭제 가능)
 }
 
 export interface CommunityComment {

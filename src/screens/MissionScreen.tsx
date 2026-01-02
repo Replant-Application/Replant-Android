@@ -397,6 +397,46 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
           </View>
         )}
 
+        {/* 미션 만들기 버튼 */}
+        <TouchableOpacity
+          style={styles.createButtonTop}
+          onPress={() => navigation.navigate('CustomMissionCreate')}
+          activeOpacity={0.7}
+        >
+          <Text style={styles.createButtonTopText}>+ 미션 만들기</Text>
+        </TouchableOpacity>
+
+        {/* 기간 탭 (일간/주간/월간) */}
+        <View style={styles.periodTabContainer}>
+          <TouchableOpacity
+            style={[styles.periodTab, selectedPeriod === 'DAILY' && styles.periodTabActive]}
+            onPress={() => setSelectedPeriod('DAILY')}
+            activeOpacity={0.7}
+          >
+            <Text style={[styles.periodTabText, selectedPeriod === 'DAILY' && styles.periodTabTextActive]}>
+              일간
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.periodTab, selectedPeriod === 'WEEKLY' && styles.periodTabActive]}
+            onPress={() => setSelectedPeriod('WEEKLY')}
+            activeOpacity={0.7}
+          >
+            <Text style={[styles.periodTabText, selectedPeriod === 'WEEKLY' && styles.periodTabTextActive]}>
+              주간
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.periodTab, selectedPeriod === 'MONTHLY' && styles.periodTabActive]}
+            onPress={() => setSelectedPeriod('MONTHLY')}
+            activeOpacity={0.7}
+          >
+            <Text style={[styles.periodTabText, selectedPeriod === 'MONTHLY' && styles.periodTabTextActive]}>
+              월간
+            </Text>
+          </TouchableOpacity>
+        </View>
+
         {/* 일반/커스텀 미션 탭 */}
         <View style={styles.sourceTabContainer}>
           <TouchableOpacity
@@ -499,13 +539,6 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
                   style={styles.missionCard}
                 />
               ))}
-              <TouchableOpacity
-                style={styles.createButton}
-                onPress={() => navigation.navigate('CustomMissionCreate')}
-                activeOpacity={0.7}
-              >
-                <Text style={styles.createButtonText}>미션 만들기</Text>
-              </TouchableOpacity>
             </View>
           )}
         </View>
@@ -572,6 +605,47 @@ const styles = StyleSheet.create({
     height: '100%',
     backgroundColor: colors.primary[500],
     borderRadius: borderRadius.full,
+  },
+  createButtonTop: {
+    backgroundColor: colors.green[600],
+    borderRadius: borderRadius.lg,
+    paddingVertical: spacing[3],
+    paddingHorizontal: spacing[5],
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: spacing[4],
+    ...shadows.base,
+  },
+  createButtonTopText: {
+    fontSize: typography.fontSize.base,
+    fontWeight: typography.fontWeight.semibold,
+    color: colors.white,
+  },
+  periodTabContainer: {
+    flexDirection: 'row',
+    backgroundColor: colors.background.primary,
+    borderRadius: borderRadius.lg,
+    padding: spacing[1],
+    marginBottom: spacing[3],
+    ...shadows.sm,
+  },
+  periodTab: {
+    flex: 1,
+    paddingVertical: spacing[3],
+    alignItems: 'center',
+    borderRadius: borderRadius.md,
+  },
+  periodTabActive: {
+    backgroundColor: colors.primary[500],
+  },
+  periodTabText: {
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.medium,
+    color: colors.text.secondary,
+  },
+  periodTabTextActive: {
+    color: colors.white,
+    fontWeight: typography.fontWeight.semibold,
   },
   categorySection: {
     marginBottom: spacing[6],

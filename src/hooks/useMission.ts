@@ -20,6 +20,7 @@ import { logError } from '../utils/logger';
 import { sortMissionsByTitle, removeDuplicateMissions } from '../utils/missionUtils';
 import { Mission, MissionData, UseMissionReturn, MissionCompletionResult, ServiceResult, ExperienceResult, MissionCategory } from '../types';
 import { getSystemMissions, SystemMission, MissionType } from '../api/missionApi';
+import { uploadMissionVerifyPhoto } from '../api/fileApi';
 
 /**
  * 백엔드 시스템 미션을 로컬 미션 형식으로 변환
@@ -105,16 +106,32 @@ export const useMission = (
     loadMissions();
   }, [loadMissions]);
 
-  // 미션에 사진만 저장 (완료하지 않음)
+  // 미션에 사진 저장 (S3 업로드 후 URL 저장)
   const saveMissionPhoto = useCallback(async (
     missionId: string,
-    photoUrl: string
+    photoUri: string
   ): Promise<ServiceResult<void>> => {
     if (!currentNickname) {
       return { success: false, error: '사용자 정보가 없습니다.' };
     }
 
     try {
+      // 1. S3에 사진 업로드
+      const fileName = `mission_${missionId}_${Date.now()}.jpg`;
+      const uploadResult = await uploadMissionVerifyPhoto({
+        uri: photoUri,
+        type: 'image/jpeg',
+        name: fileName,
+      });
+
+      if (!uploadResult.success || !uploadResult.data) {
+        logError('S3 업로드 실패', new Error(uploadResult.error || 'Unknown error'), { missionId, photoUri });
+        return { success: false, error: uploadResult.error || 'S3 업로드에 실패했습니다.' };
+      }
+
+      const s3PhotoUrl = uploadResult.data.fileUrl;
+
+      // 2. 로컬 스토리지에 S3 URL 저장
       const storageKeys = getStorageKeys(currentNickname);
       // 스토리지에서 직접 미션 찾기 (로컬 스토리지만 사용)
       const missionsData: Mission[] = await getData(storageKeys.MISSIONS) || [];
@@ -132,7 +149,7 @@ export const useMission = (
       // 사진만 저장 (완료 상태는 변경하지 않음)
       const updatedMission: Mission = {
         ...mission,
-        photo_url: photoUrl,
+        photo_url: s3PhotoUrl,
         updated_at: new Date().toISOString()
       };
 
@@ -152,7 +169,7 @@ export const useMission = (
 
       return { success: true };
     } catch (err) {
-      logError('사진 저장 실패', err as Error, { missionId, photoUrl });
+      logError('사진 저장 실패', err as Error, { missionId, photoUri });
       return { success: false, error: (err as Error).message };
     }
   }, [currentNickname]);

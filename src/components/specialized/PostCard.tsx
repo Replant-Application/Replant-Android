@@ -1,23 +1,56 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, ViewStyle } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Image, ViewStyle, Modal, Alert } from 'react-native';
 import { colors, spacing, typography, borderRadius, shadows } from '../../utils/designTokens';
 import { CommunityPost } from '../../types';
 
 interface PostCardProps {
   post: CommunityPost;
+  currentUserId?: string;
   onPress?: (postId: string) => void;
   onLike?: (postId: string) => void;
   onScrap?: (postId: string) => void;
+  onEdit?: (postId: string) => void;
+  onDelete?: (postId: string) => void;
   style?: ViewStyle;
 }
 
 const PostCard: React.FC<PostCardProps> = ({
   post,
+  currentUserId,
   onPress,
   onLike,
   onScrap,
+  onEdit,
+  onDelete,
   style
 }) => {
+  const [showMenu, setShowMenu] = useState(false);
+
+  // 본인 게시글인지 확인
+  const isOwnPost = currentUserId && post.author_id === currentUserId;
+  // 인증되지 않은 게시글인지 확인 (verified가 false이거나 undefined인 경우)
+  const canEditDelete = isOwnPost && !post.verified;
+
+  const handleEdit = () => {
+    setShowMenu(false);
+    onEdit?.(post.post_id);
+  };
+
+  const handleDelete = () => {
+    setShowMenu(false);
+    Alert.alert(
+      '게시글 삭제',
+      '정말 이 게시글을 삭제하시겠습니까?',
+      [
+        { text: '취소', style: 'cancel' },
+        {
+          text: '삭제',
+          style: 'destructive',
+          onPress: () => onDelete?.(post.post_id)
+        }
+      ]
+    );
+  };
   if (!post) return null;
 
   const formatDate = (dateString: string): string => {
@@ -61,8 +94,48 @@ const PostCard: React.FC<PostCardProps> = ({
             )}
           </View>
         </View>
-        <Text style={styles.date}>{formatDate(post.created_at)}</Text>
+        <View style={styles.headerRight}>
+          <Text style={styles.date}>{formatDate(post.created_at)}</Text>
+          {canEditDelete && (
+            <TouchableOpacity
+              style={styles.menuButton}
+              onPress={(e) => {
+                e.stopPropagation();
+                setShowMenu(true);
+              }}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.menuIcon}>⋮</Text>
+            </TouchableOpacity>
+          )}
+        </View>
       </View>
+
+      {/* 수정/삭제 메뉴 모달 */}
+      <Modal
+        visible={showMenu}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowMenu(false)}
+      >
+        <TouchableOpacity
+          style={styles.modalOverlay}
+          activeOpacity={1}
+          onPress={() => setShowMenu(false)}
+        >
+          <View style={styles.menuContainer}>
+            <TouchableOpacity style={styles.menuItem} onPress={handleEdit}>
+              <Text style={styles.menuItemIcon}>✏️</Text>
+              <Text style={styles.menuItemText}>수정</Text>
+            </TouchableOpacity>
+            <View style={styles.menuDivider} />
+            <TouchableOpacity style={styles.menuItem} onPress={handleDelete}>
+              <Text style={styles.menuItemIcon}>🗑️</Text>
+              <Text style={[styles.menuItemText, styles.deleteText]}>삭제</Text>
+            </TouchableOpacity>
+          </View>
+        </TouchableOpacity>
+      </Modal>
 
       <View style={styles.content}>
         {post.mission_title && (
@@ -203,6 +276,54 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.xs,
     color: colors.text.tertiary,
     marginTop: spacing[1],
+  },
+  headerRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing[2],
+  },
+  menuButton: {
+    padding: spacing[2],
+    marginRight: -spacing[2],
+  },
+  menuIcon: {
+    fontSize: typography.fontSize.xl,
+    color: colors.text.secondary,
+    fontWeight: typography.fontWeight.bold,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  menuContainer: {
+    backgroundColor: colors.background.primary,
+    borderRadius: borderRadius.lg,
+    minWidth: 150,
+    ...shadows.xl,
+  },
+  menuItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: spacing[4],
+    paddingHorizontal: spacing[5],
+    gap: spacing[3],
+  },
+  menuItemIcon: {
+    fontSize: typography.fontSize.lg,
+  },
+  menuItemText: {
+    fontSize: typography.fontSize.base,
+    color: colors.text.primary,
+    fontWeight: typography.fontWeight.medium,
+  },
+  menuDivider: {
+    height: 1,
+    backgroundColor: colors.border.light,
+  },
+  deleteText: {
+    color: colors.red[500],
   },
   content: {
     marginBottom: spacing[4],
