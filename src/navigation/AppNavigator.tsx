@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
+import React, { useState, useCallback, useEffect } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, Image, Platform, BackHandler, ToastAndroid } from 'react-native';
 import { useUser } from '../contexts/UserContext';
 import { SCREEN_NAMES } from '../utils/constants';
 import { colors, spacing, typography } from '../utils/designTokens';
@@ -33,12 +33,72 @@ import AdminUserListScreen from '../screens/AdminUserListScreen';
 import AdminUserDetailScreen from '../screens/AdminUserDetailScreen';
 import AdminUserEditScreen from '../screens/AdminUserEditScreen';
 import MissionGroupScreen from '../screens/MissionGroupScreen';
+import MissionDetailScreen from '../screens/MissionDetailScreen';
 
 // 간단한 상태 기반 네비게이션 (React Navigation 없이)
 const AppNavigator = () => {
   const { isLoggedIn, isLoading } = useUser();
   const [currentScreen, setCurrentScreen] = useState(SCREEN_NAMES.START);
   const [navigationParams, setNavigationParams] = useState({});
+  const [backPressedOnce, setBackPressedOnce] = useState(false);
+
+  // 메인 탭 화면인지 확인
+  const isMainTabScreen = useCallback((screen: string) => {
+    return [
+      SCREEN_NAMES.HOME,
+      SCREEN_NAMES.MISSION,
+      SCREEN_NAMES.COMMUNITY,
+      SCREEN_NAMES.DIARY,
+      SCREEN_NAMES.SETTINGS,
+    ].includes(screen);
+  }, []);
+
+  // 뒤로가기 버튼 처리
+  useEffect(() => {
+    if (Platform.OS !== 'android' || !isLoggedIn) return;
+
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+      // 메인 탭 화면이면 두 번 눌러서 종료
+      if (isMainTabScreen(currentScreen)) {
+        if (backPressedOnce) {
+          BackHandler.exitApp();
+          return true;
+        }
+        setBackPressedOnce(true);
+        ToastAndroid.show('뒤로가기를 한번 더 누르면 앱이 종료됩니다.', ToastAndroid.SHORT);
+        setTimeout(() => setBackPressedOnce(false), 2000);
+        return true;
+      }
+
+      // 상세 화면이면 goBack 호출
+      // 화면별 뒤로가기 목적지 정의
+      if (currentScreen === SCREEN_NAMES.CHATBOT || currentScreen === SCREEN_NAMES.PLACES_SEARCH) {
+        setCurrentScreen(SCREEN_NAMES.COUNSELING_SELECT);
+      } else if (currentScreen === SCREEN_NAMES.COUNSELING_SELECT || currentScreen === SCREEN_NAMES.INFO) {
+        setCurrentScreen(SCREEN_NAMES.SETTINGS);
+      } else if (currentScreen === SCREEN_NAMES.PHOTO_SELECT || currentScreen === SCREEN_NAMES.MISSION_DETAIL) {
+        setCurrentScreen(SCREEN_NAMES.MISSION);
+      } else if (
+        currentScreen === SCREEN_NAMES.COMMUNITY_POST_CREATE ||
+        currentScreen === SCREEN_NAMES.COMMUNITY_POST_DETAIL ||
+        currentScreen === SCREEN_NAMES.COMMUNITY_POST_EDIT ||
+        currentScreen === SCREEN_NAMES.MISSION_GROUP
+      ) {
+        setCurrentScreen(SCREEN_NAMES.COMMUNITY);
+      } else if (
+        currentScreen === SCREEN_NAMES.MY_PAGE ||
+        currentScreen === SCREEN_NAMES.CALENDAR
+      ) {
+        setCurrentScreen(SCREEN_NAMES.SETTINGS);
+      } else {
+        setCurrentScreen(SCREEN_NAMES.HOME);
+      }
+      setNavigationParams({});
+      return true;
+    });
+
+    return () => backHandler.remove();
+  }, [currentScreen, isLoggedIn, backPressedOnce, isMainTabScreen]);
 
   if (isLoading) {
     return (
@@ -86,7 +146,7 @@ const AppNavigator = () => {
       setCurrentScreen(SCREEN_NAMES.COUNSELING_SELECT);
     } else if (currentScreen === SCREEN_NAMES.COUNSELING_SELECT || currentScreen === SCREEN_NAMES.INFO) {
       setCurrentScreen(SCREEN_NAMES.SETTINGS);
-    } else if (currentScreen === SCREEN_NAMES.PHOTO_SELECT) {
+    } else if (currentScreen === SCREEN_NAMES.PHOTO_SELECT || currentScreen === SCREEN_NAMES.MISSION_DETAIL) {
       setCurrentScreen(SCREEN_NAMES.MISSION);
     } else if (
       currentScreen === SCREEN_NAMES.COMMUNITY_POST_CREATE ||
@@ -172,6 +232,8 @@ const AppNavigator = () => {
         return <AdminUserEditScreen navigation={navigation} route={route} />;
       case SCREEN_NAMES.MISSION_GROUP:
         return <MissionGroupScreen navigation={navigation} />;
+      case SCREEN_NAMES.MISSION_DETAIL:
+        return <MissionDetailScreen navigation={navigation} route={route} />;
       default:
         return <HomeScreen navigation={navigation} />;
     }

@@ -9,7 +9,7 @@ import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../types/navigation';
 import { useUser } from '../contexts/UserContext';
 import { Mission } from '../types';
-import { checkVerificationStatus } from '../api/missionApi';
+import { checkVerificationStatus, MissionType } from '../api/missionApi';
 
 // 단일 카테고리: 성장
 
@@ -19,16 +19,21 @@ interface MissionScreenProps {
 }
 
 type MissionFilter = 'all' | 'daily' | 'completed';
+type MissionPeriodFilter = 'DAILY' | 'WEEKLY' | 'MONTHLY';
+type MissionSourceFilter = 'REGULAR' | 'CUSTOM';
 
 const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
   const { addExperienceByCategory } = useCharacter();
   const { missions, loading, error, saveMissionPhoto, deleteMissionPhoto, completeMissionWithPhoto, uncompleteMission, loadMissions } = useMission(addExperienceByCategory);
-  
+
   // route params에서 사진 정보 확인
   const routeParams = route?.params;
   const processedPhotoRef = useRef<string | null>(null);
   const [selectedFilter, setSelectedFilter] = useState<MissionFilter>('all');
-  
+  const [selectedPeriod, setSelectedPeriod] = useState<MissionPeriodFilter>('DAILY');
+  const [selectedSource, setSelectedSource] = useState<MissionSourceFilter>('REGULAR');
+  const [refreshing, setRefreshing] = useState(false);
+
   // 인증 모달 상태
   const [verificationModalVisible, setVerificationModalVisible] = useState(false);
   const [selectedMissionForVerification, setSelectedMissionForVerification] = useState<Mission | null>(null);
@@ -49,12 +54,27 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
     return `${year}-${month}-${day}`;
   }, []);
 
-  // 필터링된 미션 목록
+  // 기간별 + 일반/커스텀 필터링된 미션 목록
   const filteredMissions = useMemo(() => {
+    let filtered = missions.filter(mission => {
+      // mission.type이 있으면 해당 타입으로 필터링, 없으면 DAILY로 간주
+      const missionType = mission.type || 'DAILY';
+      const isCustomMission = mission.is_custom === true;
+
+      // 기간 필터
+      const periodMatch = missionType === selectedPeriod;
+
+      // 일반/커스텀 필터
+      const sourceMatch = selectedSource === 'CUSTOM' ? isCustomMission : !isCustomMission;
+
+      return periodMatch && sourceMatch;
+    });
+
+    // 추가 필터 적용 (전체/진행중/완료)
     switch (selectedFilter) {
       case 'daily':
         // 오늘 완료한 미션만 표시
-        return missions.filter(mission => {
+        return filtered.filter(mission => {
           if (mission.completed && mission.completed_at) {
             const completedDate = mission.completed_at.split('T')[0];
             return completedDate === today;
@@ -62,12 +82,12 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
           return false;
         });
       case 'completed':
-        return missions.filter(mission => mission.completed);
+        return filtered.filter(mission => mission.completed);
       case 'all':
       default:
-        return missions;
+        return filtered;
     }
-  }, [missions, selectedFilter, today]);
+  }, [missions, selectedPeriod, selectedSource, selectedFilter, today]);
 
   const totalGrowthMissions = filteredMissions.length;
   const displayedMissions = filteredMissions;
@@ -122,6 +142,54 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
       photoUrl: selectedMissionForVerification.photo_url || undefined,
     });
   }, [selectedMissionForVerification, navigation]);
+
+  // GPS 인증 성공 시 (MissionVerificationModal에서 호출)
+  const handleGPSVerification = useCallback(async () => {
+    if (!selectedMissionForVerification) return;
+
+    try {
+      // 경험치 지급
+      const experienceToGrant = selectedMissionForVerification.experience || 50;
+      if (addExperienceByCategory && selectedMissionForVerification.category_id) {
+        const expResult = await addExperienceByCategory(selectedMissionForVerification.category_id, experienceToGrant);
+        if (expResult.levelUp) {
+          Alert.alert('🎉 레벨업!', `레벨 ${expResult.newLevel}이 되었습니다!\n+${experienceToGrant} EXP 획득!`);
+        } else {
+          Alert.alert('✅ GPS 인증 완료', `+${experienceToGrant} EXP를 획득했습니다!`);
+        }
+      }
+
+      setVerificationModalVisible(false);
+      setSelectedMissionForVerification(null);
+      await loadMissions();
+    } catch (error) {
+      console.error('GPS 인증 처리 오류:', error);
+    }
+  }, [selectedMissionForVerification, addExperienceByCategory, loadMissions]);
+
+  // 시간 인증 성공 시 (MissionVerificationModal에서 호출)
+  const handleTimeVerification = useCallback(async () => {
+    if (!selectedMissionForVerification) return;
+
+    try {
+      // 경험치 지급
+      const experienceToGrant = selectedMissionForVerification.experience || 50;
+      if (addExperienceByCategory && selectedMissionForVerification.category_id) {
+        const expResult = await addExperienceByCategory(selectedMissionForVerification.category_id, experienceToGrant);
+        if (expResult.levelUp) {
+          Alert.alert('🎉 레벨업!', `레벨 ${expResult.newLevel}이 되었습니다!\n+${experienceToGrant} EXP 획득!`);
+        } else {
+          Alert.alert('✅ 시간 인증 완료', `+${experienceToGrant} EXP를 획득했습니다!`);
+        }
+      }
+
+      setVerificationModalVisible(false);
+      setSelectedMissionForVerification(null);
+      await loadMissions();
+    } catch (error) {
+      console.error('시간 인증 처리 오류:', error);
+    }
+  }, [selectedMissionForVerification, addExperienceByCategory, loadMissions]);
 
   // 인증 상태 확인 (게시글 작성 후 복귀 시)
   const checkVerificationOnReturn = useCallback(async () => {
@@ -329,7 +397,29 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
           </View>
         )}
 
-        {/* 필터 탭 */}
+        {/* 일반/커스텀 미션 탭 */}
+        <View style={styles.sourceTabContainer}>
+          <TouchableOpacity
+            style={[styles.sourceTab, selectedSource === 'REGULAR' && styles.sourceTabActive]}
+            onPress={() => setSelectedSource('REGULAR')}
+            activeOpacity={0.7}
+          >
+            <Text style={[styles.sourceTabText, selectedSource === 'REGULAR' && styles.sourceTabTextActive]}>
+              일반 미션
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.sourceTab, selectedSource === 'CUSTOM' && styles.sourceTabActive]}
+            onPress={() => setSelectedSource('CUSTOM')}
+            activeOpacity={0.7}
+          >
+            <Text style={[styles.sourceTabText, selectedSource === 'CUSTOM' && styles.sourceTabTextActive]}>
+              커스텀 미션
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* 필터 탭 (전체/진행중/완료) */}
         <View style={styles.filterTabs}>
           <View style={styles.filterTabsWrapper}>
             <TouchableOpacity
@@ -365,11 +455,13 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
         {/* 미션 목록 */}
         <View style={styles.missionSection}>
           <View style={styles.sectionHeader}>
-            <SectionTitle 
+            <SectionTitle
               title={
-                selectedFilter === 'all' ? `성장 미션 (${totalGrowthMissions}개)` :
-                selectedFilter === 'daily' ? `오늘의 미션 (${totalGrowthMissions}개)` :
-                `완료한 미션 (${totalGrowthMissions}개)`
+                `${selectedSource === 'CUSTOM' ? '커스텀 ' : ''}${
+                  selectedFilter === 'all' ? '전체' :
+                  selectedFilter === 'daily' ? '오늘의' :
+                  '완료한'
+                } 미션 (${totalGrowthMissions}개)`
               }
               marginBottom={spacing[3]}
             />
@@ -379,14 +471,18 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
             <EmptyState
               iconImage={require('../assets/images/clover.png')}
               title={
-                selectedFilter === 'all' ? '아직 미션이 없어요' :
-                selectedFilter === 'daily' ? '오늘의 미션이 없어요' :
-                '완료한 미션이 없어요'
+                selectedSource === 'CUSTOM'
+                  ? '커스텀 미션이 없어요'
+                  : selectedFilter === 'all' ? '아직 미션이 없어요' :
+                    selectedFilter === 'daily' ? '오늘의 미션이 없어요' :
+                    '완료한 미션이 없어요'
               }
               description={
-                selectedFilter === 'all' ? '새로운 미션이 곧 추가될 예정입니다!' :
-                selectedFilter === 'daily' ? '오늘 완료한 미션이 없습니다.' :
-                '아직 완료한 미션이 없습니다.'
+                selectedSource === 'CUSTOM'
+                  ? '아래 버튼을 눌러 나만의 미션을 만들어보세요!'
+                  : selectedFilter === 'all' ? '새로운 미션이 곧 추가될 예정입니다!' :
+                    selectedFilter === 'daily' ? '오늘 완료한 미션이 없습니다.' :
+                    '아직 완료한 미션이 없습니다.'
               }
             />
           ) : (
@@ -433,7 +529,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: spacing[4],
-    paddingBottom: spacing[1],
+    paddingBottom: spacing[20], // 하단 탭바 높이 + 여유 공간
   },
   progressCard: {
     backgroundColor: colors.background.primary,
@@ -553,6 +649,31 @@ const styles = StyleSheet.create({
 
   missionCard: {
     marginBottom: spacing[3],
+  },
+  sourceTabContainer: {
+    flexDirection: 'row',
+    marginBottom: spacing[4],
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border.light,
+  },
+  sourceTab: {
+    flex: 1,
+    paddingVertical: spacing[3],
+    alignItems: 'center',
+    borderBottomWidth: 2,
+    borderBottomColor: 'transparent',
+  },
+  sourceTabActive: {
+    borderBottomColor: colors.primary[600],
+  },
+  sourceTabText: {
+    fontSize: typography.fontSize.base,
+    fontWeight: typography.fontWeight.medium,
+    color: colors.text.tertiary,
+  },
+  sourceTabTextActive: {
+    color: colors.primary[600],
+    fontWeight: typography.fontWeight.bold,
   },
   filterTabs: {
     marginBottom: spacing[5],

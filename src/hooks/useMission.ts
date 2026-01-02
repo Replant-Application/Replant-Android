@@ -19,6 +19,42 @@ import { useUser } from '../contexts/UserContext';
 import { logError } from '../utils/logger';
 import { sortMissionsByTitle, removeDuplicateMissions } from '../utils/missionUtils';
 import { Mission, MissionData, UseMissionReturn, MissionCompletionResult, ServiceResult, ExperienceResult, MissionCategory } from '../types';
+import { getSystemMissions, SystemMission, MissionType } from '../api/missionApi';
+
+/**
+ * 백엔드 시스템 미션을 로컬 미션 형식으로 변환
+ */
+const transformSystemMission = (systemMission: SystemMission, missionType: MissionType): Mission => {
+  const getMissionEmoji = (title: string): string => {
+    if (title.includes('운동') || title.includes('헬스') || title.includes('걷기')) return '🏃';
+    if (title.includes('독서') || title.includes('책')) return '📚';
+    if (title.includes('물') || title.includes('마시')) return '💧';
+    if (title.includes('명상') || title.includes('휴식')) return '🧘';
+    if (title.includes('아침') || title.includes('기상')) return '🌅';
+    if (title.includes('영어') || title.includes('단어') || title.includes('외국어')) return '📝';
+    if (title.includes('잠') || title.includes('수면')) return '😴';
+    if (title.includes('식사') || title.includes('밥')) return '🍽️';
+    if (title.includes('저축') || title.includes('돈')) return '💰';
+    if (title.includes('공부')) return '📖';
+    return '🎯';
+  };
+
+  return {
+    id: systemMission.id,
+    mission_id: systemMission.id.toString(),
+    title: systemMission.title,
+    description: systemMission.description,
+    emoji: getMissionEmoji(systemMission.title),
+    experience: systemMission.expReward || 10,
+    category_id: 'growth',
+    type: missionType,
+    difficulty: 'medium' as const,
+    completed: false,
+    created_at: new Date().toISOString(),
+    is_custom: false,
+    verification_type: systemMission.verificationType || 'COMMUNITY',
+  };
+};
 
 export const useMission = (
   addExperienceByCategory?: (categoryId: MissionCategory, experience: number) => Promise<ExperienceResult>
@@ -194,17 +230,24 @@ export const useMission = (
       );
 
       // 경험치 추가 (캐릭터 시스템과 연동)
+      // COMMUNITY 인증 타입은 좋아요를 받은 후에 XP 지급
+      const verificationType = mission.verification_type || 'COMMUNITY';
       let experienceResult: ExperienceResult | null = null;
-      if (addExperienceByCategory && mission.category_id) {
-        experienceResult = await addExperienceByCategory(mission.category_id, mission.experience);
+
+      if (verificationType !== 'COMMUNITY') {
+        // COMMUNITY 타입이 아닌 경우에만 즉시 XP 지급
+        if (addExperienceByCategory && mission.category_id) {
+          experienceResult = await addExperienceByCategory(mission.category_id, mission.experience);
+        }
       }
 
       return {
         success: true,
-        experienceGained: experienceResult?.experienceGained || mission.experience,
+        experienceGained: experienceResult?.experienceGained || (verificationType === 'COMMUNITY' ? 0 : mission.experience),
         levelUp: experienceResult?.levelUp || false,
         newLevel: experienceResult?.newLevel,
-        unlocked: false // 나중에 캐릭터 해제 로직 추가
+        unlocked: false, // 나중에 캐릭터 해제 로직 추가
+        pendingVerification: verificationType === 'COMMUNITY'
       };
     } catch (completeError) {
       logError('미션 완료 실패', completeError as Error, { missionId, photoUrl });

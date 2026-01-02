@@ -4,13 +4,18 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
+import { Alert } from 'react-native';
 import {
   getPost as getPostService,
   getComments as getCommentsService,
   createComment as createCommentService,
   updateComment as updateCommentService,
   deleteComment as deleteCommentService,
+  toggleLike as toggleLikeService,
+  checkLikeVerification,
 } from '../services/communityService';
+import { autoLevelupCharacter } from '../services/characterService';
+import { getData, getStorageKeys } from '../services/storage';
 import { useUser } from '../contexts/UserContext';
 import { logError } from '../utils/logger';
 import {
@@ -18,6 +23,7 @@ import {
   CommunityComment,
   UseCommunityPostReturn,
   ServiceResult,
+  Character,
 } from '../types';
 
 export const useCommunityPost = (postId: string): UseCommunityPostReturn => {
@@ -62,6 +68,75 @@ export const useCommunityPost = (postId: string): UseCommunityPostReturn => {
     loadPost();
     loadComments();
   }, [loadPost, loadComments]);
+
+  // 좋아요 토글
+  const toggleLike = useCallback(
+    async (): Promise<ServiceResult<void>> => {
+      if (!currentNickname || !post) {
+        return { success: false, error: '사용자 정보가 없습니다.' };
+      }
+
+      try {
+        const result = await toggleLikeService(postId, currentNickname);
+
+        if (result.success) {
+          // 좋아요가 추가되는 경우에만 인증 확인 (취소가 아닌 경우)
+          const isAddingLike = !post.is_liked;
+          const newLikeCount = isAddingLike ? post.like_count + 1 : Math.max(0, post.like_count - 1);
+
+          // 로컬 상태 즉시 업데이트 (UI 반응성 향상)
+          setPost(prev => {
+            if (!prev) return prev;
+            return {
+              ...prev,
+              is_liked: !prev.is_liked,
+              like_count: newLikeCount,
+            };
+          });
+
+          // 좋아요 추가 시 인증 확인 (게시글 작성자의 미션 인증)
+          if (isAddingLike && post.mission_id && post.author !== currentNickname) {
+            const verificationResult = await checkLikeVerification(
+              postId,
+              newLikeCount,
+              post.mission_id,
+              post.author // 게시글 작성자의 미션 인증
+            );
+
+            if (verificationResult.success && verificationResult.data?.verified && verificationResult.data.experience > 0) {
+              // XP 지급 처리: 작성자의 캐릭터에 경험치 추가
+              const authorNickname = post.author;
+              const storageKeys = getStorageKeys(authorNickname);
+
+              // 작성자의 캐릭터 찾기 (첫 번째 캐릭터에 경험치 추가)
+              const characters: Character[] = await getData(storageKeys.CHARACTERS) || [];
+              const character = characters[0]; // 기본 캐릭터
+              if (character && character.id) {
+                const levelUpResult = await autoLevelupCharacter(
+                  character.id,
+                  verificationResult.data.experience,
+                  authorNickname
+                );
+
+                // 알림: 게시글 작성자에게 알림 (현재는 로컬 알림만)
+                const message = levelUpResult.levelUp
+                  ? `게시글이 인증되었습니다!\n+${verificationResult.data.experience} EXP 획득!\n🎉 레벨 ${levelUpResult.newLevel}로 레벨업!`
+                  : `게시글이 좋아요 인증되었습니다!\n+${verificationResult.data.experience} EXP가 작성자에게 지급되었습니다.`;
+
+                Alert.alert('🎉 인증 완료!', message);
+              }
+            }
+          }
+        }
+
+        return result;
+      } catch (toggleError) {
+        logError('좋아요 토글 실패', toggleError as Error, { postId, currentNickname });
+        return { success: false, error: (toggleError as Error).message };
+      }
+    },
+    [postId, currentNickname, post]
+  );
 
   // 댓글 생성
   const createComment = useCallback(
@@ -152,6 +227,7 @@ export const useCommunityPost = (postId: string): UseCommunityPostReturn => {
     error,
     loadPost,
     loadComments,
+    toggleLike,
     createComment,
     updateComment,
     deleteComment,

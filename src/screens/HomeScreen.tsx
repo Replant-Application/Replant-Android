@@ -430,7 +430,7 @@ const styles = StyleSheet.create({
   },
   contentScrollContent: {
     paddingHorizontal: spacing[5],
-    paddingBottom: spacing[8],
+    paddingBottom: spacing[20], // 하단 탭바 높이 + 여유 공간
   },
   mainHeader: {
     flexDirection: 'row',

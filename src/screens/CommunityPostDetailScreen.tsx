@@ -35,9 +35,9 @@ const CommunityPostDetailScreen: React.FC<CommunityPostDetailScreenProps> = ({
 }) => {
   const { postId } = route.params;
   const { currentNickname } = useUser();
-  const { post, comments, loading, error, createComment, updateComment, deleteComment, loadPost } =
+  const { post, comments, loading, error, createComment, updateComment, deleteComment, toggleLike } =
     useCommunityPost(postId);
-  const { toggleLike, deletePost } = useCommunity();
+  const { deletePost } = useCommunity();
   const [commentContent, setCommentContent] = useState('');
   const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
   const [editingContent, setEditingContent] = useState('');
@@ -46,8 +46,8 @@ const CommunityPostDetailScreen: React.FC<CommunityPostDetailScreenProps> = ({
 
   const handleLike = async () => {
     if (post) {
-      await toggleLike(post.post_id);
-      await loadPost(); // 게시글 정보 새로고침
+      await toggleLike();
+      // toggleLike가 내부적으로 post 상태를 업데이트하므로 loadPost 불필요
     }
   };
 

@@ -84,6 +84,7 @@ export interface MissionCompletionResult {
   newLevel?: number;
   unlocked?: boolean;
   error?: string;
+  pendingVerification?: boolean; // COMMUNITY 인증 타입 - 좋아요 인증 대기 중
 }
 
 // Character 관련 타입
@@ -278,6 +279,7 @@ export interface UseCommunityPostReturn {
   error: string | null;
   loadPost: () => Promise<void>;
   loadComments: () => Promise<void>;
+  toggleLike: () => Promise<ServiceResult<void>>;
   createComment: (content: string, parentCommentId?: string) => Promise<ServiceResult<CommunityComment>>;
   updateComment: (commentId: string, content: string) => Promise<ServiceResult<CommunityComment>>;
   deleteComment: (commentId: string) => Promise<ServiceResult<void>>;
