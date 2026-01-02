@@ -33,4 +33,5 @@ export const SCREEN_NAMES: Record<string, string> = {
   MISSION_GROUP: 'MissionGroup',
   AI_MISSION_GENERATE: 'AIMissionGenerate',
   NOTIFICATION: 'Notification',
+  MISSION_DETAIL: 'MissionDetail',
 } as const;

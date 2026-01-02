@@ -14,9 +14,3 @@ local.properties
 
 # Bundle artifacts
 *.jsbundle
-
-replant-release.keystore
-upload_certificate.pem
-
-# Keystore properties (민감한 정보)
-keystore.properties

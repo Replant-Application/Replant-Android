@@ -368,9 +368,11 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     padding: spacing[4],
+    paddingBottom: spacing[20], // 하단 탭바 높이 + 여유 공간
   },
   postsList: {
     gap: spacing[3],
+    paddingBottom: spacing[16], // 추가 하단 여백
   },
 });
 

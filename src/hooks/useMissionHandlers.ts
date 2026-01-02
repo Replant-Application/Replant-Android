@@ -11,6 +11,7 @@ interface UseMissionHandlersProps {
     levelUp?: boolean;
     newLevel?: number;
     experienceGained?: number;
+    pendingVerification?: boolean;
   } | null>;
   uncompleteMission: (missionId: string) => Promise<void>;
   loadMissions: () => Promise<void>;
@@ -42,22 +43,34 @@ export const useMissionHandlers = ({
         const completedMission = missions.find(m => m.mission_id === missionId);
         if (!completedMission) return;
 
-        const alertTitle = result.levelUp ? '🎉 레벨업!' : '✅ 미션 완료';
-        const alertMessage = result.levelUp
-          ? `축하합니다! 레벨 ${result.newLevel}이 되었습니다!`
-          : `+${result.experienceGained} EXP를 획득했습니다!`;
+        // COMMUNITY 인증 타입은 좋아요 인증 후 XP 지급
+        if (result.pendingVerification) {
+          Alert.alert(
+            '✅ 미션 완료',
+            '커뮤니티에 공유하고 좋아요를 받으면 경험치가 지급됩니다!',
+            [
+              { text: '나중에', style: 'cancel' },
+              {
+                text: '커뮤니티 공유',
+                onPress: () => onVerificationRequired(completedMission),
+              },
+            ]
+          );
+        } else {
+          // 즉시 XP 지급 (GPS, TIME 타입)
+          const alertTitle = result.levelUp ? '🎉 레벨업!' : '✅ 미션 완료';
+          const alertMessage = result.levelUp
+            ? `축하합니다! 레벨 ${result.newLevel}이 되었습니다!`
+            : `+${result.experienceGained} EXP를 획득했습니다!`;
 
-        Alert.alert(
-          alertTitle,
-          alertMessage,
-          [
-            { text: '나중에', style: 'cancel' },
-            {
-              text: '인증하기',
-              onPress: () => onVerificationRequired(completedMission),
-            },
-          ]
-        );
+          Alert.alert(
+            alertTitle,
+            alertMessage,
+            [
+              { text: '확인' },
+            ]
+          );
+        }
       }
     } catch (error) {
       Alert.alert('오류', '미션 완료에 실패했습니다.');

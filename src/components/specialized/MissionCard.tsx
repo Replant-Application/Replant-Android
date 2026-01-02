@@ -190,7 +190,7 @@ const MissionCard: React.FC<MissionCardProps> = ({
                 styles.completeText,
                 disabled && styles.disabledText
               ]}>
-                {disabled ? '비활성화' : loading ? '처리중...' : '완료하기'}
+                {disabled ? '비활성화' : loading ? '처리중...' : '인증하기'}
               </Text>
             </TouchableOpacity>
           )}

@@ -40,7 +40,7 @@ const transformSystemMission = (systemMission: SystemMission, missionType: Missi
   };
 
   return {
-    id: systemMission.id.toString(),
+    id: systemMission.id,
     mission_id: systemMission.id.toString(),
     title: systemMission.title,
     description: systemMission.description,
@@ -48,6 +48,7 @@ const transformSystemMission = (systemMission: SystemMission, missionType: Missi
     experience: systemMission.expReward || 10,
     category_id: 'growth',
     type: missionType,
+    difficulty: 'medium' as const,
     completed: false,
     created_at: new Date().toISOString(),
     is_custom: false,
@@ -267,17 +268,25 @@ export const useMission = (
         )
       );
 
+      // 경험치 추가 (캐릭터 시스템과 연동)
+      // COMMUNITY 인증 타입은 좋아요를 받은 후에 XP 지급
+      const verificationType = mission.verification_type || 'COMMUNITY';
       let experienceResult: ExperienceResult | null = null;
-      if (addExperienceByCategory && mission.category_id) {
-        experienceResult = await addExperienceByCategory(mission.category_id, mission.experience);
+
+      if (verificationType !== 'COMMUNITY') {
+        // COMMUNITY 타입이 아닌 경우에만 즉시 XP 지급
+        if (addExperienceByCategory && mission.category_id) {
+          experienceResult = await addExperienceByCategory(mission.category_id, mission.experience);
+        }
       }
 
       return {
         success: true,
-        experienceGained: experienceResult?.experienceGained || mission.experience,
+        experienceGained: experienceResult?.experienceGained || (verificationType === 'COMMUNITY' ? 0 : mission.experience),
         levelUp: experienceResult?.levelUp || false,
         newLevel: experienceResult?.newLevel,
-        unlocked: false
+        unlocked: false, // 나중에 캐릭터 해제 로직 추가
+        pendingVerification: verificationType === 'COMMUNITY'
       };
     } catch (completeError) {
       logError('미션 완료 실패', completeError as Error, { missionId, photoUrl });

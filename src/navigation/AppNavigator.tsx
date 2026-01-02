@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Image, BackHandler, ToastAndroid, Platform } from 'react-native';
+import React, { useState, useCallback, useEffect } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, Image, Platform, BackHandler, ToastAndroid } from 'react-native';
 import { useUser } from '../contexts/UserContext';
 import { SCREEN_NAMES } from '../utils/constants';
 import { colors, spacing, typography } from '../utils/designTokens';
@@ -33,6 +33,7 @@ import AdminUserListScreen from '../screens/AdminUserListScreen';
 import AdminUserDetailScreen from '../screens/AdminUserDetailScreen';
 import AdminUserEditScreen from '../screens/AdminUserEditScreen';
 import MissionGroupScreen from '../screens/MissionGroupScreen';
+import MissionDetailScreen from '../screens/MissionDetailScreen';
 
 // 간단한 상태 기반 네비게이션 (React Navigation 없이)
 const AppNavigator = () => {
@@ -75,7 +76,7 @@ const AppNavigator = () => {
         setCurrentScreen(SCREEN_NAMES.COUNSELING_SELECT);
       } else if (currentScreen === SCREEN_NAMES.COUNSELING_SELECT || currentScreen === SCREEN_NAMES.INFO) {
         setCurrentScreen(SCREEN_NAMES.SETTINGS);
-      } else if (currentScreen === SCREEN_NAMES.PHOTO_SELECT) {
+      } else if (currentScreen === SCREEN_NAMES.PHOTO_SELECT || currentScreen === SCREEN_NAMES.MISSION_DETAIL) {
         setCurrentScreen(SCREEN_NAMES.MISSION);
       } else if (
         currentScreen === SCREEN_NAMES.COMMUNITY_POST_CREATE ||
@@ -145,7 +146,7 @@ const AppNavigator = () => {
       setCurrentScreen(SCREEN_NAMES.COUNSELING_SELECT);
     } else if (currentScreen === SCREEN_NAMES.COUNSELING_SELECT || currentScreen === SCREEN_NAMES.INFO) {
       setCurrentScreen(SCREEN_NAMES.SETTINGS);
-    } else if (currentScreen === SCREEN_NAMES.PHOTO_SELECT) {
+    } else if (currentScreen === SCREEN_NAMES.PHOTO_SELECT || currentScreen === SCREEN_NAMES.MISSION_DETAIL) {
       setCurrentScreen(SCREEN_NAMES.MISSION);
     } else if (
       currentScreen === SCREEN_NAMES.COMMUNITY_POST_CREATE ||
@@ -231,6 +232,8 @@ const AppNavigator = () => {
         return <AdminUserEditScreen navigation={navigation} route={route} />;
       case SCREEN_NAMES.MISSION_GROUP:
         return <MissionGroupScreen navigation={navigation} />;
+      case SCREEN_NAMES.MISSION_DETAIL:
+        return <MissionDetailScreen navigation={navigation} route={route} />;
       default:
         return <HomeScreen navigation={navigation} />;
     }

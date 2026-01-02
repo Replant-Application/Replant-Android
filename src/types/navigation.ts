@@ -64,6 +64,9 @@ export type RootStackParamList = {
     generatedMission?: any;
   };
   Notification: undefined;
+  MissionDetail: {
+    missionId: string;
+  };
 };
 
 // 네비게이션 파라미터 타입
