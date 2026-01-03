@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Image } from 'react-native';
 import { useMission } from '../hooks/useMission';
 import { useCharacter } from '../hooks/useCharacter';
 import { MissionCard, MissionVerificationModal } from '../components/specialized';
@@ -10,6 +10,7 @@ import { RootStackParamList } from '../types/navigation';
 import { useUser } from '../contexts/UserContext';
 import { Mission } from '../types';
 import { checkVerificationStatus, MissionType } from '../api/missionApi';
+import { getMyBadges, getBadgeHistory, Badge } from '../api/badgeApi';
 
 // 단일 카테고리: 성장
 
@@ -44,6 +45,12 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
   const [completeModalMessage, setCompleteModalMessage] = useState('');
   const [completedMissionForVerification, setCompletedMissionForVerification] = useState<Mission | null>(null);
   const [isLevelUp, setIsLevelUp] = useState(false);
+
+  // 뱃지 상태
+  const [validBadges, setValidBadges] = useState<Badge[]>([]);
+  const [allBadges, setAllBadges] = useState<Badge[]>([]);
+  const [showAllBadges, setShowAllBadges] = useState(false);
+  const [badgesLoading, setBadgesLoading] = useState(false);
 
   // 오늘 날짜 (YYYY-MM-DD 형식)
   const today = useMemo(() => {
@@ -317,6 +324,38 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
     }
   };
 
+  // 뱃지 로딩
+  const loadBadges = useCallback(async () => {
+    setBadgesLoading(true);
+    try {
+      const [validResult, historyResult] = await Promise.all([
+        getMyBadges(),
+        getBadgeHistory({ page: 0, size: 50 })
+      ]);
+
+      if (validResult.success && validResult.data) {
+        setValidBadges(validResult.data.badges || []);
+      }
+      if (historyResult.success && historyResult.data) {
+        setAllBadges(historyResult.data.content || []);
+      }
+    } catch (error) {
+      console.error('뱃지 로딩 오류:', error);
+    } finally {
+      setBadgesLoading(false);
+    }
+  }, []);
+
+  // 화면 로드 시 뱃지 로딩
+  useEffect(() => {
+    loadBadges();
+  }, [loadBadges]);
+
+  // 뱃지 상세 화면으로 이동
+  const handleBadgePress = (badge: Badge) => {
+    navigation.navigate('BadgeDetail', { badge });
+  };
+
   if (loading) {
     return <Loading text="미션을 불러오는 중..." />;
   }
@@ -396,6 +435,69 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
             </View>
           </View>
         )}
+
+        {/* 나의 뱃지 섹션 */}
+        <View style={styles.badgeSection}>
+          <View style={styles.badgeSectionHeader}>
+            <Text style={styles.badgeSectionTitle}>나의 뱃지</Text>
+            <TouchableOpacity onPress={() => setShowAllBadges(!showAllBadges)}>
+              <Text style={styles.badgeToggleText}>
+                {showAllBadges ? '유효한 뱃지만' : '전체 보기'}
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          {badgesLoading ? (
+            <Text style={styles.badgeLoadingText}>뱃지를 불러오는 중...</Text>
+          ) : (
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.badgeList}
+            >
+              {(showAllBadges ? allBadges : validBadges).length === 0 ? (
+                <View style={styles.noBadgeContainer}>
+                  <Text style={styles.noBadgeText}>
+                    {showAllBadges ? '아직 획득한 뱃지가 없습니다' : '유효한 뱃지가 없습니다'}
+                  </Text>
+                </View>
+              ) : (
+                (showAllBadges ? allBadges : validBadges).map((badge) => {
+                  const missionTitle = badge.mission?.title || badge.customMission?.title || '미션';
+                  const isExpired = badge.isExpired || new Date(badge.expiresAt) < new Date();
+
+                  return (
+                    <TouchableOpacity
+                      key={badge.id}
+                      style={[styles.badgeItem, isExpired && styles.badgeItemExpired]}
+                      onPress={() => handleBadgePress(badge)}
+                      activeOpacity={0.7}
+                    >
+                      <View style={[styles.badgeIcon, isExpired && styles.badgeIconExpired]}>
+                        <Image
+                          source={require('../assets/images/check2.png')}
+                          style={styles.badgeIconImage}
+                          resizeMode="contain"
+                        />
+                      </View>
+                      <Text style={[styles.badgeTitle, isExpired && styles.badgeTitleExpired]} numberOfLines={2}>
+                        {missionTitle}
+                      </Text>
+                      {!isExpired && badge.remainingDays !== undefined && (
+                        <Text style={styles.badgeRemaining}>
+                          D-{badge.remainingDays}
+                        </Text>
+                      )}
+                      {isExpired && (
+                        <Text style={styles.badgeExpiredText}>만료됨</Text>
+                      )}
+                    </TouchableOpacity>
+                  );
+                })
+              )}
+            </ScrollView>
+          )}
+        </View>
 
         {/* 미션 만들기 버튼 */}
         <TouchableOpacity
@@ -779,6 +881,96 @@ const styles = StyleSheet.create({
   filterTabTextActive: {
     color: colors.white,
     fontWeight: typography.fontWeight.semibold,
+  },
+  // 뱃지 섹션 스타일
+  badgeSection: {
+    backgroundColor: colors.background.primary,
+    borderRadius: borderRadius.xl,
+    padding: spacing[4],
+    marginBottom: spacing[4],
+    ...shadows.base,
+  },
+  badgeSectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: spacing[3],
+  },
+  badgeSectionTitle: {
+    fontSize: typography.fontSize.lg,
+    fontWeight: typography.fontWeight.bold,
+    color: colors.text.primary,
+  },
+  badgeToggleText: {
+    fontSize: typography.fontSize.sm,
+    color: colors.primary[600],
+    fontWeight: typography.fontWeight.medium,
+  },
+  badgeLoadingText: {
+    fontSize: typography.fontSize.sm,
+    color: colors.text.tertiary,
+    textAlign: 'center',
+    paddingVertical: spacing[4],
+  },
+  badgeList: {
+    paddingVertical: spacing[2],
+    gap: spacing[3],
+  },
+  noBadgeContainer: {
+    flex: 1,
+    paddingVertical: spacing[4],
+    alignItems: 'center',
+    minWidth: 200,
+  },
+  noBadgeText: {
+    fontSize: typography.fontSize.sm,
+    color: colors.text.tertiary,
+  },
+  badgeItem: {
+    alignItems: 'center',
+    width: 80,
+    padding: spacing[2],
+    backgroundColor: colors.gray[50],
+    borderRadius: borderRadius.lg,
+    marginRight: spacing[2],
+  },
+  badgeItemExpired: {
+    opacity: 0.5,
+  },
+  badgeIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: borderRadius.full,
+    backgroundColor: colors.primary[100],
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: spacing[2],
+  },
+  badgeIconExpired: {
+    backgroundColor: colors.gray[200],
+  },
+  badgeIconImage: {
+    width: 28,
+    height: 28,
+  },
+  badgeTitle: {
+    fontSize: typography.fontSize.xs,
+    fontWeight: typography.fontWeight.medium,
+    color: colors.text.primary,
+    textAlign: 'center',
+    marginBottom: spacing[1],
+  },
+  badgeTitleExpired: {
+    color: colors.text.tertiary,
+  },
+  badgeRemaining: {
+    fontSize: typography.fontSize.xs,
+    fontWeight: typography.fontWeight.semibold,
+    color: colors.primary[600],
+  },
+  badgeExpiredText: {
+    fontSize: typography.fontSize.xs,
+    color: colors.text.tertiary,
   },
 });
 

@@ -34,4 +34,5 @@ export const SCREEN_NAMES: Record<string, string> = {
   AI_MISSION_GENERATE: 'AIMissionGenerate',
   NOTIFICATION: 'Notification',
   MISSION_DETAIL: 'MissionDetail',
+  BADGE_DETAIL: 'BadgeDetail',
 } as const;

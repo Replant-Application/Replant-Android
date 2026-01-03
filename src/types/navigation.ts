@@ -67,6 +67,18 @@ export type RootStackParamList = {
   MissionDetail: {
     missionId: string;
   };
+  BadgeDetail: {
+    badge: {
+      id: number;
+      missionType: 'SYSTEM' | 'CUSTOM';
+      mission?: { id: number; title: string };
+      customMission?: { id: number; title: string };
+      issuedAt: string;
+      expiresAt: string;
+      remainingDays?: number;
+      isExpired?: boolean;
+    };
+  };
 };
 
 // 네비게이션 파라미터 타입

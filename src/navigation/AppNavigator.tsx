@@ -34,6 +34,7 @@ import AdminUserDetailScreen from '../screens/AdminUserDetailScreen';
 import AdminUserEditScreen from '../screens/AdminUserEditScreen';
 import MissionGroupScreen from '../screens/MissionGroupScreen';
 import MissionDetailScreen from '../screens/MissionDetailScreen';
+import BadgeDetailScreen from '../screens/BadgeDetailScreen';
 
 // 간단한 상태 기반 네비게이션 (React Navigation 없이)
 const AppNavigator = () => {
@@ -76,7 +77,7 @@ const AppNavigator = () => {
         setCurrentScreen(SCREEN_NAMES.COUNSELING_SELECT);
       } else if (currentScreen === SCREEN_NAMES.COUNSELING_SELECT || currentScreen === SCREEN_NAMES.INFO) {
         setCurrentScreen(SCREEN_NAMES.SETTINGS);
-      } else if (currentScreen === SCREEN_NAMES.PHOTO_SELECT || currentScreen === SCREEN_NAMES.MISSION_DETAIL) {
+      } else if (currentScreen === SCREEN_NAMES.PHOTO_SELECT || currentScreen === SCREEN_NAMES.MISSION_DETAIL || currentScreen === SCREEN_NAMES.BADGE_DETAIL) {
         setCurrentScreen(SCREEN_NAMES.MISSION);
       } else if (
         currentScreen === SCREEN_NAMES.COMMUNITY_POST_CREATE ||
@@ -146,7 +147,7 @@ const AppNavigator = () => {
       setCurrentScreen(SCREEN_NAMES.COUNSELING_SELECT);
     } else if (currentScreen === SCREEN_NAMES.COUNSELING_SELECT || currentScreen === SCREEN_NAMES.INFO) {
       setCurrentScreen(SCREEN_NAMES.SETTINGS);
-    } else if (currentScreen === SCREEN_NAMES.PHOTO_SELECT || currentScreen === SCREEN_NAMES.MISSION_DETAIL) {
+    } else if (currentScreen === SCREEN_NAMES.PHOTO_SELECT || currentScreen === SCREEN_NAMES.MISSION_DETAIL || currentScreen === SCREEN_NAMES.BADGE_DETAIL) {
       setCurrentScreen(SCREEN_NAMES.MISSION);
     } else if (
       currentScreen === SCREEN_NAMES.COMMUNITY_POST_CREATE ||
@@ -234,6 +235,8 @@ const AppNavigator = () => {
         return <MissionGroupScreen navigation={navigation} />;
       case SCREEN_NAMES.MISSION_DETAIL:
         return <MissionDetailScreen navigation={navigation} route={route} />;
+      case SCREEN_NAMES.BADGE_DETAIL:
+        return <BadgeDetailScreen navigation={navigation} route={route} />;
       default:
         return <HomeScreen navigation={navigation} />;
     }
