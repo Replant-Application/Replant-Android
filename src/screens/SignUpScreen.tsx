@@ -159,6 +159,8 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onNavigate }) => {
               value={password}
               onChangeText={setPassword}
               secureTextEntry
+              autoCapitalize="none"
+              autoCorrect={false}
             />
           </View>
 
@@ -169,6 +171,8 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onNavigate }) => {
               value={confirmPassword}
               onChangeText={setConfirmPassword}
               secureTextEntry
+              autoCapitalize="none"
+              autoCorrect={false}
             />
           </View>
 

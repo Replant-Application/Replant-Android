@@ -141,6 +141,8 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onNavigate }) => {
               value={password}
               onChangeText={setPassword}
               secureTextEntry
+              autoCapitalize="none"
+              autoCorrect={false}
               onSubmitEditing={handleLogin}
               style={styles.input}
             />

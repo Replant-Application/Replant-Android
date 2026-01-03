@@ -34,20 +34,24 @@ export type Emotion = 'happy' | 'excited' | 'calm' | 'grateful' | 'sad' | 'angry
 export interface Mission {
   id: number;
   mission_id: string;
+  user_mission_id?: number; // 백엔드 UserMission ID
   title: string;
   description: string;
   emoji: string;
   difficulty: Difficulty;
   experience: number;
   category_id: MissionCategory;
+  type?: 'DAILY' | 'WEEKLY' | 'MONTHLY'; // 미션 타입
   is_custom?: boolean;
   created_by?: string;
   created_at?: string;
   updated_at?: string;
+  due_date?: string; // 마감일
   completed: boolean;
   completed_at?: string | undefined;
   photo_url?: string | undefined;
   // 인증 관련 필드
+  verification_type?: 'COMMUNITY' | 'GPS' | 'TIME'; // 백엔드 인증 타입
   verification_method?: 'like' | 'gps' | 'manual';
   verified?: boolean;
   verified_at?: string;
@@ -67,13 +71,18 @@ export interface MissionTemplate {
 
 export interface MissionData {
   title: string;
-  description: string;
-  emoji: string;
-  difficulty: Difficulty;
-  experience: number;
-  category_id: MissionCategory;
+  description?: string;
+  emoji?: string;
+  difficulty?: Difficulty;
+  experience?: number;
+  category_id?: MissionCategory;
   is_custom?: boolean;
   created_by?: string;
+  // 백엔드 API 필드
+  durationDays?: number;
+  isPublic?: boolean;
+  verificationType?: 'COMMUNITY' | 'GPS' | 'TIME';
+  badgeDurationDays?: number;
 }
 
 export interface MissionCompletionResult {

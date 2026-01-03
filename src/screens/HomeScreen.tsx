@@ -249,10 +249,12 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
         {/* 드래그 핸들 */}
         <View style={styles.dragHandle} />
         
-        <ScrollView 
+        <ScrollView
           style={styles.contentScroll}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.contentScrollContent}
+          nestedScrollEnabled={true}
+          bounces={true}
         >
           {/* 메인 제목과 추가 버튼 */}
           <View style={styles.mainHeader}>
@@ -430,7 +432,8 @@ const styles = StyleSheet.create({
   },
   contentScrollContent: {
     paddingHorizontal: spacing[5],
-    paddingBottom: spacing[20], // 하단 탭바 높이 + 여유 공간
+    paddingBottom: 120, // 하단 탭바 높이 + 네비게이션바 + 여유 공간
+    flexGrow: 1,
   },
   mainHeader: {
     flexDirection: 'row',

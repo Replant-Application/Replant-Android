@@ -9,7 +9,7 @@ def projectRoot = rootDir.getAbsoluteFile().getParentFile().getAbsolutePath()
  * By default you don't need to apply any configuration, just uncomment the lines you need.
  */
 react {
-    // React Native CLI ?�용
+    // React Native CLI ?�용
     entryFile = file("$projectRoot/index.js")
     root = file("$projectRoot")
     reactNativeDir = new File(["node", "--print", "require.resolve('react-native/package.json')"].execute(null, rootDir).text.trim()).getParentFile().getAbsoluteFile()
@@ -43,8 +43,11 @@ android {
         applicationId 'com.anonymous.replantmobileapp'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 9
-        versionName "0.0.9"
+        versionCode 15
+        versionName "0.0.15"
+
+        // APK 파일명 설정
+        archivesBaseName = "replant-release-${versionName}"
 
         buildConfigField "String", "REACT_NATIVE_RELEASE_LEVEL", "\"${findProperty('reactNativeReleaseLevel') ?: 'stable'}\""
     }
@@ -56,7 +59,7 @@ android {
             keyPassword 'android'
         }
         release {
-            // keystore.properties ?�일?�서 ?�거??gradle ?�성?�서 ?�음
+            // keystore.properties ?�일?�서 ?�거??gradle ?�성?�서 ?�음
             def keystorePropertiesFile = rootProject.file("keystore.properties")
             if (keystorePropertiesFile.exists()) {
                 def keystoreProperties = new Properties()
@@ -66,7 +69,7 @@ android {
                 keyAlias keystoreProperties['RELEASE_KEY_ALIAS'] ?: ''
                 keyPassword keystoreProperties['RELEASE_KEY_PASSWORD'] ?: ''
             } else {
-                // ?�경변???�는 gradle ?�성?�서 ?�음
+                // ?�경변???�는 gradle ?�성?�서 ?�음
                 storeFile file(findProperty('RELEASE_STORE_FILE') ?: 'replant-release.keystore')
                 storePassword findProperty('RELEASE_STORE_PASSWORD') ?: System.getenv('RELEASE_STORE_PASSWORD') ?: ''
                 keyAlias findProperty('RELEASE_KEY_ALIAS') ?: System.getenv('RELEASE_KEY_ALIAS') ?: ''
@@ -122,7 +125,7 @@ dependencies {
     // The version of react-native is set by the React Native Gradle Plugin
     implementation("com.facebook.react:react-android")
 
-    // GIF �?WebP 지??(?�션)
+    // GIF �?WebP 지??(?�션)
     def isGifEnabled = (findProperty('rn.gif.enabled') ?: "") == "true";
     def isWebpEnabled = (findProperty('rn.webp.enabled') ?: "") == "true";
     def isWebpAnimatedEnabled = (findProperty('rn.webp.animated') ?: "") == "true";
