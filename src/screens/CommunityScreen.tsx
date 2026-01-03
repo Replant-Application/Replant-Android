@@ -2,8 +2,8 @@
  * 커뮤니티 게시판 목록 화면
  */
 
-import React, { useState, useMemo } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Image, Modal } from 'react-native';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Image, Modal, RefreshControl } from 'react-native';
 import { useCommunity } from '../hooks/useCommunity';
 import { PostCard } from '../components/specialized';
 import { Loading, ErrorBoundary, EmptyState } from '../components/ui';
@@ -18,11 +18,31 @@ interface CommunityScreenProps {
 type CommunityTab = 'all' | 'mission-group';
 
 const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation }) => {
-  const { posts, loading, error, toggleLike } = useCommunity();
+  const { posts, loading, error, toggleLike, loadPosts } = useCommunity();
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState<'all' | 'popular'>('all');
   const [activeTab, setActiveTab] = useState<CommunityTab>('all');
   const [showFilterModal, setShowFilterModal] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
+
+  // 검색어 디바운싱 (300ms)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  // Pull-to-Refresh 핸들러
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      await loadPosts();
+    } finally {
+      setRefreshing(false);
+    }
+  }, [loadPosts]);
 
   const filterOptions = [
     { value: 'all', label: '전체' },
@@ -31,13 +51,13 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation }) => {
 
   const selectedFilterLabel = filterOptions.find(opt => opt.value === filter)?.label || '전체';
 
-  // 검색 및 필터링
+  // 검색 및 필터링 (디바운싱된 검색어 사용)
   const filteredPosts = useMemo(() => {
     let filtered = posts;
 
-    // 검색
-    if (searchQuery.trim()) {
-      const lowerQuery = searchQuery.toLowerCase();
+    // 검색 (디바운싱 적용)
+    if (debouncedSearchQuery.trim()) {
+      const lowerQuery = debouncedSearchQuery.toLowerCase();
       filtered = filtered.filter(
         post =>
           post.title.toLowerCase().includes(lowerQuery) ||
@@ -62,7 +82,7 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation }) => {
     }
 
     return filtered;
-  }, [posts, searchQuery, filter]);
+  }, [posts, debouncedSearchQuery, filter]);
 
   const handlePostPress = (postId: string) => {
     navigation.navigate('CommunityPostDetail', { postId });
@@ -145,7 +165,17 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation }) => {
       )}
 
       {activeTab === 'all' && (
-      <ScrollView style={styles.content}>
+      <ScrollView
+        style={styles.content}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={[colors.green[500]]}
+            tintColor={colors.green[500]}
+          />
+        }
+      >
         {filteredPosts.length === 0 ? (
           <EmptyState
             iconImage={require('../assets/images/notes.png')}

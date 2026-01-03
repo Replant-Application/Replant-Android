@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Image } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Image, RefreshControl } from 'react-native';
 import { useMission } from '../hooks/useMission';
 import { useCharacter } from '../hooks/useCharacter';
 import { MissionCard, MissionVerificationModal } from '../components/specialized';
@@ -11,6 +11,7 @@ import { useUser } from '../contexts/UserContext';
 import { Mission } from '../types';
 import { checkVerificationStatus, MissionType } from '../api/missionApi';
 import { getMyBadges, getBadgeHistory, Badge } from '../api/badgeApi';
+import { logError } from '../utils/logger';
 
 // 단일 카테고리: 성장
 
@@ -170,7 +171,8 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
       setSelectedMissionForVerification(null);
       await loadMissions();
     } catch (error) {
-      console.error('GPS 인증 처리 오류:', error);
+      logError('GPS 인증 처리 오류', error as Error);
+      Alert.alert('오류', 'GPS 인증 처리 중 문제가 발생했습니다.');
     }
   }, [selectedMissionForVerification, addExperienceByCategory, loadMissions]);
 
@@ -194,7 +196,8 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
       setSelectedMissionForVerification(null);
       await loadMissions();
     } catch (error) {
-      console.error('시간 인증 처리 오류:', error);
+      logError('시간 인증 처리 오류', error as Error);
+      Alert.alert('오류', '시간 인증 처리 중 문제가 발생했습니다.');
     }
   }, [selectedMissionForVerification, addExperienceByCategory, loadMissions]);
 
@@ -210,7 +213,7 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
         Alert.alert('✅ 인증 완료', '미션이 인증되었습니다!');
       }
     } catch (error) {
-      console.error('인증 상태 확인 오류:', error);
+      logError('인증 상태 확인 오류', error as Error);
     }
   }, [selectedMissionForVerification, loadMissions]);
 
@@ -340,7 +343,7 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
         setAllBadges(historyResult.data.content || []);
       }
     } catch (error) {
-      console.error('뱃지 로딩 오류:', error);
+      logError('뱃지 로딩 오류', error as Error);
     } finally {
       setBadgesLoading(false);
     }
@@ -350,6 +353,16 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
   useEffect(() => {
     loadBadges();
   }, [loadBadges]);
+
+  // Pull-to-Refresh 핸들러
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      await Promise.all([loadMissions(), loadBadges()]);
+    } finally {
+      setRefreshing(false);
+    }
+  }, [loadMissions, loadBadges]);
 
   // 뱃지 상세 화면으로 이동
   const handleBadgePress = (badge: Badge) => {
@@ -407,9 +420,17 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
         }}
       />
 
-      <ScrollView 
+      <ScrollView
         style={styles.content}
         contentContainerStyle={styles.scrollContent}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={[colors.primary[500]]}
+            tintColor={colors.primary[500]}
+          />
+        }
       >
         {/* 진행률 표시 */}
         {totalMissions > 0 && (
