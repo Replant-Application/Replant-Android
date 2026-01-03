@@ -90,6 +90,8 @@ export const API_CONFIG = {
       update: '/verifications/:verificationId',
       delete: '/verifications/:verificationId',
       vote: '/verifications/:verificationId/votes',
+      gps: '/verifications/gps',
+      time: '/verifications/time',
     },
 
     // 자유 게시판 (Post)

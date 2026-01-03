@@ -631,6 +631,50 @@ export const verifyMissionByTime = async (
 };
 
 // ============================================
+// 새로운 인증 API (/verifications/gps, /verifications/time)
+// ============================================
+
+export interface GpsVerifyResponse {
+  success: boolean;
+  message: string;
+  expReward: number;
+}
+
+export interface TimeVerifyResponse {
+  success: boolean;
+  message: string;
+  expReward: number;
+}
+
+/**
+ * GPS 인증 (백엔드 /api/verifications/gps)
+ * POST /api/verifications/gps
+ */
+export const verifyByGps = async (
+  userMissionId: number,
+  latitude: number,
+  longitude: number
+): Promise<ServiceResult<GpsVerifyResponse>> => {
+  return apiClient.post<GpsVerifyResponse>(API_CONFIG.endpoints.verification.gps, {
+    userMissionId,
+    latitude,
+    longitude,
+  });
+};
+
+/**
+ * 시간 인증 (백엔드 /api/verifications/time)
+ * POST /api/verifications/time
+ */
+export const verifyByTime = async (
+  userMissionId: number
+): Promise<ServiceResult<TimeVerifyResponse>> => {
+  return apiClient.post<TimeVerifyResponse>(API_CONFIG.endpoints.verification.time, {
+    userMissionId,
+  });
+};
+
+// ============================================
 // 미션 그룹 (같은 미션 수행자 게시판)
 // ============================================
 

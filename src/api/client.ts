@@ -244,6 +244,80 @@ export class ApiClient {
   async delete<T>(endpoint: string): Promise<ServiceResult<T>> {
     return this.request<T>(endpoint, { method: 'DELETE' });
   }
+
+  /**
+   * 파일 업로드 (FormData)
+   */
+  async upload<T>(endpoint: string, formData: FormData): Promise<ServiceResult<T>> {
+    try {
+      const url = `${this.baseURL}${endpoint}`;
+
+      // 헤더 구성 (Content-Type은 FormData에서 자동 설정됨)
+      const headers: Record<string, string> = {};
+
+      // 토큰이 있으면 Authorization 헤더 추가
+      if (this.accessToken) {
+        headers['Authorization'] = `Bearer ${this.accessToken}`;
+      }
+
+      // fetch 요청
+      const response = await fetch(url, {
+        method: 'POST',
+        headers,
+        body: formData,
+      });
+
+      // 응답 처리
+      let data: any = null;
+      const contentType = response.headers.get('content-type');
+
+      if (contentType && contentType.includes('application/json')) {
+        data = await response.json();
+      } else {
+        const text = await response.text();
+        if (text) {
+          try {
+            data = JSON.parse(text);
+          } catch {
+            data = text;
+          }
+        }
+      }
+
+      // 성공 응답
+      if (response.ok) {
+        if (data && typeof data === 'object' && 'data' in data) {
+          return {
+            success: true,
+            data: data.data as T,
+          };
+        }
+        return {
+          success: true,
+          data: data as T,
+        };
+      }
+
+      // 401 Unauthorized - 토큰 갱신 후 재시도
+      if (response.status === 401) {
+        const newToken = await this.handleTokenRefresh();
+        if (newToken) {
+          return this.upload<T>(endpoint, formData);
+        }
+      }
+
+      // 에러 응답
+      return {
+        success: false,
+        error: data?.message || data?.error || `HTTP ${response.status}: ${response.statusText}`,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : '파일 업로드 중 오류가 발생했습니다.',
+      };
+    }
+  }
 }
 
 // 싱글톤 인스턴스

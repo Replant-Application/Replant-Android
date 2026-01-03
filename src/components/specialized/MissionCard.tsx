@@ -13,6 +13,7 @@ interface MissionCardProps {
   onDeletePhoto?: (missionId: string) => void;
   onShareToCommunity?: (missionId: string) => void;
   onViewDetails?: (missionId: string) => void;
+  onVerify?: (mission: Mission, type: 'COMMUNITY' | 'GPS' | 'TIME') => void;
   loading?: boolean;
   disabled?: boolean;
   readonly?: boolean;
@@ -27,12 +28,38 @@ const MissionCard: React.FC<MissionCardProps> = ({
   onDeletePhoto,
   onShareToCommunity,
   onViewDetails,
+  onVerify,
   loading = false,
   disabled = false,
   readonly = false,
   style
 }) => {
   if (!mission) return null;
+
+  // 인증 유형 결정 (verification_type 또는 기본값 COMMUNITY)
+  const verificationType = mission.verification_type || 'COMMUNITY';
+
+  // 인증하기 버튼 라벨
+  const getVerifyButtonLabel = (): string => {
+    switch (verificationType) {
+      case 'GPS':
+        return '위치 인증';
+      case 'TIME':
+        return '시간 인증';
+      case 'COMMUNITY':
+      default:
+        return '인증하기';
+    }
+  };
+
+  // 인증하기 버튼 핸들러
+  const handleVerifyPress = () => {
+    if (onVerify) {
+      onVerify(mission, verificationType);
+    } else if (onComplete) {
+      onComplete(mission.mission_id);
+    }
+  };
 
   const getCategoryImage = (categoryId: string): any => {
     const imageMap: Record<string, any> = {
@@ -145,7 +172,8 @@ const MissionCard: React.FC<MissionCardProps> = ({
           </TouchableOpacity>
         ) : (
           <View style={styles.actionButtonsContainer}>
-            {!mission.completed && onUploadPhoto && (
+            {/* 사진 추가 버튼: COMMUNITY 인증이고 미완료 상태일 때만 */}
+            {!mission.completed && verificationType === 'COMMUNITY' && onUploadPhoto && (
               <TouchableOpacity
                 style={[styles.photoIconButton]}
                 onPress={() => onUploadPhoto(mission.mission_id)}
@@ -159,7 +187,8 @@ const MissionCard: React.FC<MissionCardProps> = ({
                 />
               </TouchableOpacity>
             )}
-            {mission.completed && onShareToCommunity && (
+            {/* 공유 버튼: 완료 후 COMMUNITY 인증일 때 */}
+            {mission.completed && verificationType === 'COMMUNITY' && onShareToCommunity && (
               <TouchableOpacity
                 style={[styles.shareButton]}
                 onPress={() => onShareToCommunity(mission.mission_id)}
@@ -174,26 +203,29 @@ const MissionCard: React.FC<MissionCardProps> = ({
                 <Text style={styles.shareButtonText}>공유</Text>
               </TouchableOpacity>
             )}
-          {!mission.completed && (
-            <TouchableOpacity
-              style={[
-                styles.actionButton,
-                styles.completeButton,
-                disabled && styles.disabledButton
-              ]}
-              onPress={disabled ? undefined : () => onComplete?.(mission.mission_id)}
-              disabled={loading || disabled}
-              activeOpacity={disabled ? 1 : 0.7}
-            >
-              <Text style={[
-                styles.actionText,
-                styles.completeText,
-                disabled && styles.disabledText
-              ]}>
-                {disabled ? '비활성화' : loading ? '처리중...' : '인증하기'}
-              </Text>
-            </TouchableOpacity>
-          )}
+            {/* 인증 버튼: 미완료 상태일 때 */}
+            {!mission.completed && (
+              <TouchableOpacity
+                style={[
+                  styles.actionButton,
+                  verificationType === 'GPS' ? styles.gpsButton :
+                  verificationType === 'TIME' ? styles.timeButton :
+                  styles.completeButton,
+                  disabled && styles.disabledButton
+                ]}
+                onPress={disabled ? undefined : handleVerifyPress}
+                disabled={loading || disabled}
+                activeOpacity={disabled ? 1 : 0.7}
+              >
+                <Text style={[
+                  styles.actionText,
+                  styles.completeText,
+                  disabled && styles.disabledText
+                ]}>
+                  {disabled ? '비활성화' : loading ? '처리중...' : getVerifyButtonLabel()}
+                </Text>
+              </TouchableOpacity>
+            )}
           </View>
         )}
       </View>
@@ -343,6 +375,14 @@ const styles = StyleSheet.create({
 
   completeButton: {
     backgroundColor: colors.primary[500],
+  },
+
+  gpsButton: {
+    backgroundColor: colors.blue[500],
+  },
+
+  timeButton: {
+    backgroundColor: colors.orange[500],
   },
 
   uncompleteButton: {

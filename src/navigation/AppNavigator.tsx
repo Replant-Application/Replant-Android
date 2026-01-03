@@ -35,6 +35,7 @@ import AdminUserEditScreen from '../screens/AdminUserEditScreen';
 import MissionGroupScreen from '../screens/MissionGroupScreen';
 import MissionDetailScreen from '../screens/MissionDetailScreen';
 import BadgeDetailScreen from '../screens/BadgeDetailScreen';
+import VerificationPostCreateScreen from '../screens/VerificationPostCreateScreen';
 
 // 간단한 상태 기반 네비게이션 (React Navigation 없이)
 const AppNavigator = () => {
@@ -77,7 +78,7 @@ const AppNavigator = () => {
         setCurrentScreen(SCREEN_NAMES.COUNSELING_SELECT);
       } else if (currentScreen === SCREEN_NAMES.COUNSELING_SELECT || currentScreen === SCREEN_NAMES.INFO) {
         setCurrentScreen(SCREEN_NAMES.SETTINGS);
-      } else if (currentScreen === SCREEN_NAMES.PHOTO_SELECT || currentScreen === SCREEN_NAMES.MISSION_DETAIL || currentScreen === SCREEN_NAMES.BADGE_DETAIL) {
+      } else if (currentScreen === SCREEN_NAMES.PHOTO_SELECT || currentScreen === SCREEN_NAMES.MISSION_DETAIL || currentScreen === SCREEN_NAMES.BADGE_DETAIL || currentScreen === SCREEN_NAMES.VERIFICATION_POST_CREATE) {
         setCurrentScreen(SCREEN_NAMES.MISSION);
       } else if (
         currentScreen === SCREEN_NAMES.COMMUNITY_POST_CREATE ||
@@ -147,7 +148,7 @@ const AppNavigator = () => {
       setCurrentScreen(SCREEN_NAMES.COUNSELING_SELECT);
     } else if (currentScreen === SCREEN_NAMES.COUNSELING_SELECT || currentScreen === SCREEN_NAMES.INFO) {
       setCurrentScreen(SCREEN_NAMES.SETTINGS);
-    } else if (currentScreen === SCREEN_NAMES.PHOTO_SELECT || currentScreen === SCREEN_NAMES.MISSION_DETAIL || currentScreen === SCREEN_NAMES.BADGE_DETAIL) {
+    } else if (currentScreen === SCREEN_NAMES.PHOTO_SELECT || currentScreen === SCREEN_NAMES.MISSION_DETAIL || currentScreen === SCREEN_NAMES.BADGE_DETAIL || currentScreen === SCREEN_NAMES.VERIFICATION_POST_CREATE) {
       setCurrentScreen(SCREEN_NAMES.MISSION);
     } else if (
       currentScreen === SCREEN_NAMES.COMMUNITY_POST_CREATE ||
@@ -237,6 +238,8 @@ const AppNavigator = () => {
         return <MissionDetailScreen navigation={navigation} route={route} />;
       case SCREEN_NAMES.BADGE_DETAIL:
         return <BadgeDetailScreen navigation={navigation} route={route} />;
+      case SCREEN_NAMES.VERIFICATION_POST_CREATE:
+        return <VerificationPostCreateScreen navigation={navigation} route={route} />;
       default:
         return <HomeScreen navigation={navigation} />;
     }
