@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions, ImageBackground, Animated, Image } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions, ImageBackground, Animated, Image, PanResponder } from 'react-native';
 import { NavigationProp } from '@react-navigation/native';
 import { useCharacter } from '../hooks/useCharacter';
 import { useMission } from '../hooks/useMission';
@@ -37,7 +37,60 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   
   // 캐릭터 감정 상태
   const [characterEmotion, setCharacterEmotion] = useState<'default' | 'happy'>('default');
-  
+
+  // 캐릭터 영역 슬라이딩 상태
+  const MIN_HERO_HEIGHT = SCREEN_HEIGHT * 0.2;  // 최소 높이
+  const MAX_HERO_HEIGHT = SCREEN_HEIGHT * 0.45; // 최대 높이 (기본값)
+  const heroHeightAnim = useRef(new Animated.Value(MAX_HERO_HEIGHT)).current;
+
+  // PanResponder 설정
+  const panResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponder: (_, gestureState) => {
+        // 수직 움직임이 더 클 때만 반응
+        return Math.abs(gestureState.dy) > Math.abs(gestureState.dx) && Math.abs(gestureState.dy) > 10;
+      },
+      onPanResponderMove: (_, gestureState) => {
+        // 현재 높이에서 드래그 거리만큼 변경
+        const currentHeight = (heroHeightAnim as any)._value;
+        let newHeight = currentHeight + gestureState.dy * 0.5;
+
+        // 범위 제한
+        newHeight = Math.max(MIN_HERO_HEIGHT, Math.min(MAX_HERO_HEIGHT, newHeight));
+        heroHeightAnim.setValue(newHeight);
+      },
+      onPanResponderRelease: (_, gestureState) => {
+        const currentHeight = (heroHeightAnim as any)._value;
+
+        // 드래그 방향에 따라 스냅
+        if (gestureState.dy < -30) {
+          // 위로 드래그: 축소
+          Animated.spring(heroHeightAnim, {
+            toValue: MIN_HERO_HEIGHT,
+            useNativeDriver: false,
+            friction: 8,
+          }).start();
+        } else if (gestureState.dy > 30) {
+          // 아래로 드래그: 확대
+          Animated.spring(heroHeightAnim, {
+            toValue: MAX_HERO_HEIGHT,
+            useNativeDriver: false,
+            friction: 8,
+          }).start();
+        } else {
+          // 중간 상태면 가까운 쪽으로 스냅
+          const midPoint = (MIN_HERO_HEIGHT + MAX_HERO_HEIGHT) / 2;
+          Animated.spring(heroHeightAnim, {
+            toValue: currentHeight < midPoint ? MIN_HERO_HEIGHT : MAX_HERO_HEIGHT,
+            useNativeDriver: false,
+            friction: 8,
+          }).start();
+        }
+      },
+    })
+  ).current;
+
   // 단일 캐릭터 시스템이므로 첫 번째 캐릭터 사용
   const currentCharacter = characters.length > 0 ? characters[0] : null;
 
@@ -196,13 +249,16 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
       >
         <AppHeader navigation={navigation} />
         
-        {/* 상단: 큰 캐릭터 영역 */}
-        <View style={styles.heroSection}>
+        {/* 상단: 큰 캐릭터 영역 (드래그로 크기 조절 가능) */}
+        <Animated.View
+          style={[styles.heroSection, { height: heroHeightAnim }]}
+          {...panResponder.panHandlers}
+        >
           {currentCharacter && (
             <>
               {/* 말풍선 - 클릭 시에만 표시 */}
               {showSpeechBubble && (
-                <Animated.View 
+                <Animated.View
                   style={[
                     styles.speechBubble,
                     {
@@ -223,24 +279,36 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                   </Text>
                 </Animated.View>
               )}
-              
+
               {/* 큰 캐릭터 이미지 - 중앙에 배치 */}
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={styles.characterImageContainer}
                 onPress={handleCharacterPress}
                 onLongPress={handleCharacterDoublePress}
                 activeOpacity={0.9}
               >
-                <Image
+                <Animated.Image
                   key={`character-${currentCharacter.level || 1}-${characterEmotion}`}
                   source={getCharacterImage(currentCharacter.level || 1, characterEmotion)}
-                  style={styles.characterImage}
+                  style={[
+                    styles.characterImage,
+                    {
+                      // 높이에 따라 캐릭터 크기도 조절
+                      transform: [{
+                        scale: heroHeightAnim.interpolate({
+                          inputRange: [MIN_HERO_HEIGHT, MAX_HERO_HEIGHT],
+                          outputRange: [0.6, 1],
+                          extrapolate: 'clamp',
+                        }),
+                      }],
+                    },
+                  ]}
                   resizeMode="contain"
                 />
               </TouchableOpacity>
             </>
           )}
-        </View>
+        </Animated.View>
 
       {/* 하단: 바텀 시트 스타일 */}
       <View style={styles.bottomSheet}>
@@ -358,11 +426,11 @@ const styles = StyleSheet.create({
     height: '100%',
   },
   heroSection: {
-    height: SCREEN_HEIGHT * 0.45,
     width: '100%',
     justifyContent: 'center',
     alignItems: 'center',
     position: 'relative',
+    overflow: 'hidden',
   },
   speechBubble: {
     position: 'absolute',

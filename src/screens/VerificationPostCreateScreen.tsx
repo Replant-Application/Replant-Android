@@ -291,7 +291,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: spacing[4],
-    paddingBottom: spacing[8],
+    paddingBottom: spacing[20], // 하단 탭바 높이 + 여유 공간
   },
   backButtonIcon: {
     width: 24,
