@@ -45,7 +45,6 @@ const CommentCard: React.FC<CommentCardProps> = ({
 
   return (
     <View style={[styles.container, isReply && styles.replyContainer, style]}>
-      {isReply && <View style={styles.replyIndicator} />}
       <View style={styles.header}>
         <View style={styles.authorInfo}>
           <Text style={styles.authorName}>{comment.author_nickname}</Text>
@@ -114,18 +113,12 @@ const styles = StyleSheet.create({
     borderColor: colors.border.light,
   },
   replyContainer: {
-    marginLeft: spacing[6],
-    backgroundColor: colors.background.primary,
+    marginLeft: spacing[4],
+    backgroundColor: colors.gray[50],
     borderLeftWidth: 3,
-    borderLeftColor: colors.primary[300],
-  },
-  replyIndicator: {
-    position: 'absolute',
-    left: -spacing[6],
-    top: spacing[4],
-    width: spacing[4],
-    height: 2,
-    backgroundColor: colors.primary[300],
+    borderLeftColor: colors.primary[400],
+    borderWidth: 0,
+    borderRadius: borderRadius.md,
   },
   header: {
     flexDirection: 'row',

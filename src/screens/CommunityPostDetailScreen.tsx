@@ -165,7 +165,12 @@ const CommunityPostDetailScreen: React.FC<CommunityPostDetailScreenProps> = ({
         }
       />
 
-      <ScrollView style={styles.content} keyboardShouldPersistTaps="handled">
+      <ScrollView
+        style={styles.content}
+        contentContainerStyle={styles.scrollContent}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={true}
+      >
         {/* 게시글 내용 */}
         <View style={styles.postContainer}>
           <View style={styles.header}>
@@ -393,7 +398,10 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
+  },
+  scrollContent: {
     padding: spacing[4],
+    paddingBottom: spacing[24], // 하단 댓글 입력란에 가려지지 않도록 여유 공간 추가
   },
   backButtonIcon: {
     width: 24,
@@ -583,7 +591,7 @@ const styles = StyleSheet.create({
     color: colors.white,
   },
   replyEditContainer: {
-    marginLeft: spacing[6],
+    marginLeft: spacing[4],
   },
   commentInputWrapper: {
     backgroundColor: colors.background.primary,

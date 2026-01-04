@@ -35,17 +35,19 @@ const VerificationPostCreateScreen: React.FC<VerificationPostCreateScreenProps> 
   navigation,
   route,
 }) => {
+  // route.params가 없을 경우 안전하게 처리
+  const params = route?.params || {};
   const {
     userMissionId,
     missionId,
-    missionTitle,
-    missionEmoji,
+    missionTitle = '미션',
+    missionEmoji = '🎯',
     photoUrl: initialPhotoUrl,
     // 수정 모드용 params
     mode = 'create',
     verificationId,
     initialContent,
-  } = route.params as any;
+  } = params as any;
 
   const isEditMode = mode === 'edit' && verificationId;
   const [content, setContent] = useState(initialContent || '');
@@ -54,6 +56,16 @@ const VerificationPostCreateScreen: React.FC<VerificationPostCreateScreenProps> 
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [loadingData, setLoadingData] = useState(isEditMode);
+
+  // 필수 파라미터 체크
+  useEffect(() => {
+    if (!isEditMode && !userMissionId) {
+      logError('VerificationPostCreate: userMissionId 누락', new Error('Missing userMissionId'), { params });
+      Alert.alert('오류', '미션 정보가 올바르지 않습니다.', [
+        { text: '확인', onPress: () => navigation.goBack() }
+      ]);
+    }
+  }, [userMissionId, isEditMode, navigation]);
 
   // 수정 모드일 때 기존 데이터 로드
   useEffect(() => {
@@ -89,6 +101,21 @@ const VerificationPostCreateScreen: React.FC<VerificationPostCreateScreenProps> 
         maxHeight: 1024,
       });
 
+      // 사용자가 취소했거나 에러가 있는 경우 무시
+      if (result.didCancel) {
+        return;
+      }
+
+      if (result.errorCode) {
+        logError('갤러리 오류', new Error(result.errorMessage || result.errorCode));
+        if (result.errorCode === 'permission') {
+          Alert.alert('권한 필요', '사진을 선택하려면 갤러리 접근 권한이 필요합니다. 설정에서 권한을 허용해주세요.');
+        } else {
+          Alert.alert('오류', '사진을 불러오는 중 오류가 발생했습니다.');
+        }
+        return;
+      }
+
       if (result.assets && result.assets[0]?.uri) {
         await uploadPhoto(result.assets[0]);
       }
@@ -107,6 +134,23 @@ const VerificationPostCreateScreen: React.FC<VerificationPostCreateScreenProps> 
         maxWidth: 1024,
         maxHeight: 1024,
       });
+
+      // 사용자가 취소했거나 에러가 있는 경우 무시
+      if (result.didCancel) {
+        return;
+      }
+
+      if (result.errorCode) {
+        logError('카메라 오류', new Error(result.errorMessage || result.errorCode));
+        if (result.errorCode === 'permission') {
+          Alert.alert('권한 필요', '사진을 촬영하려면 카메라 권한이 필요합니다. 설정에서 권한을 허용해주세요.');
+        } else if (result.errorCode === 'camera_unavailable') {
+          Alert.alert('오류', '카메라를 사용할 수 없습니다.');
+        } else {
+          Alert.alert('오류', '카메라를 사용하는 중 오류가 발생했습니다.');
+        }
+        return;
+      }
 
       if (result.assets && result.assets[0]?.uri) {
         await uploadPhoto(result.assets[0]);
@@ -334,7 +378,7 @@ const VerificationPostCreateScreen: React.FC<VerificationPostCreateScreenProps> 
           ? "인증글이 수정되었습니다."
           : "인증글이 등록되었습니다. 다른 사용자들의 좋아요를 받으면 미션이 인증됩니다!"
         }
-        onConfirm={() => {
+        onClose={() => {
           setShowSuccessModal(false);
           navigation.goBack();
         }}
