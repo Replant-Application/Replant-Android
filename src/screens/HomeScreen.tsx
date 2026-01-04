@@ -314,8 +314,25 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
       <View style={styles.bottomSheet}>
         {/* 그라데이션 보더 효과 */}
         <View style={styles.gradientBorder} />
-        {/* 드래그 핸들 */}
-        <View style={styles.dragHandle} />
+        {/* 드래그 핸들 - 터치하면 토글 */}
+        <TouchableOpacity
+          style={styles.dragHandleArea}
+          onPress={() => {
+            // 현재 높이에 따라 접거나 펼치기
+            const currentHeight = (heroHeightAnim as any)._value;
+            const targetHeight = currentHeight > (MIN_HERO_HEIGHT + MAX_HERO_HEIGHT) / 2
+              ? MIN_HERO_HEIGHT
+              : MAX_HERO_HEIGHT;
+            Animated.spring(heroHeightAnim, {
+              toValue: targetHeight,
+              useNativeDriver: false,
+              friction: 8,
+            }).start();
+          }}
+          activeOpacity={0.7}
+        >
+          <View style={styles.dragHandle} />
+        </TouchableOpacity>
         
         <ScrollView
           style={styles.contentScroll}
@@ -486,21 +503,23 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: borderRadius.xl + 8,
     borderTopRightRadius: borderRadius.xl + 8,
   },
+  dragHandleArea: {
+    paddingVertical: spacing[3],
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   dragHandle: {
-    width: 36,
-    height: 4,
-    backgroundColor: colors.gray[300],
+    width: 50,
+    height: 5,
+    backgroundColor: colors.gray[400],
     borderRadius: borderRadius.full,
-    alignSelf: 'center',
-    marginTop: spacing[2],
-    marginBottom: spacing[5],
   },
   contentScroll: {
     flex: 1,
   },
   contentScrollContent: {
     paddingHorizontal: spacing[5],
-    paddingBottom: 120, // 하단 탭바 높이 + 네비게이션바 + 여유 공간
+    paddingBottom: 150, // 하단 탭바 높이 + 네비게이션바 + 여유 공간
     flexGrow: 1,
   },
   mainHeader: {

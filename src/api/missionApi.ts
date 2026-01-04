@@ -409,11 +409,22 @@ export const getUserMission = async (
 
 /**
  * 커스텀 미션 추가 (내 미션에)
- * POST /api/user-missions
+ * POST /api/user-missions/custom
  * 인증 필요
  */
 export const addCustomMissionToMyMissions = async (data: {
   customMissionId: number;
+}): Promise<ServiceResult<UserMission>> => {
+  return apiClient.post<UserMission>('/user-missions/custom', data);
+};
+
+/**
+ * 시스템 미션 추가 (내 미션에 할당)
+ * POST /api/user-missions
+ * 인증 필요
+ */
+export const addSystemMissionToMyMissions = async (data: {
+  missionId: number;
 }): Promise<ServiceResult<UserMission>> => {
   return apiClient.post<UserMission>(API_CONFIG.endpoints.userMission.add, data);
 };

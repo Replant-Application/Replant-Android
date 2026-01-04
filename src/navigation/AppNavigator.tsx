@@ -371,8 +371,8 @@ const styles = StyleSheet.create({
     backgroundColor: colors.white,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
-    paddingBottom: Platform.OS === 'android' ? spacing[6] : spacing[3], // Android 네비게이션 바 대응
-    paddingTop: spacing[2],
+    paddingBottom: Platform.OS === 'android' ? spacing[8] : spacing[5], // Android 네비게이션 바 대응 (증가)
+    paddingTop: spacing[3],
     paddingHorizontal: spacing[2],
     shadowColor: '#000',
     shadowOffset: {

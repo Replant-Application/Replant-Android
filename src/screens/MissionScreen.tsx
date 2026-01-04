@@ -9,7 +9,7 @@ import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../types/navigation';
 import { useUser } from '../contexts/UserContext';
 import { Mission } from '../types';
-import { checkVerificationStatus, MissionType, verifyByGps, verifyByTime, createVerification } from '../api/missionApi';
+import { checkVerificationStatus, MissionType, verifyByGps, verifyByTime, createVerification, addSystemMissionToMyMissions } from '../api/missionApi';
 import { uploadMissionVerifyPhoto } from '../api/fileApi';
 import * as Location from 'expo-location';
 import { getMyBadges, getBadgeHistory, Badge } from '../api/badgeApi';
@@ -134,16 +134,39 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
 
   // 미션 유형별 인증 처리
   const handleVerify = useCallback(async (mission: Mission, verificationType: 'COMMUNITY' | 'GPS' | 'TIME') => {
-    if (!mission.user_mission_id) {
-      Alert.alert('오류', '미션 정보가 올바르지 않습니다.');
-      return;
+    let userMissionId = mission.user_mission_id;
+
+    // user_mission_id가 없으면 자동으로 미션 할당
+    if (!userMissionId) {
+      try {
+        // 시스템 미션인 경우 미션 할당 API 호출
+        const missionId = parseInt(mission.mission_id, 10);
+        if (isNaN(missionId)) {
+          Alert.alert('오류', '미션 정보가 올바르지 않습니다.');
+          return;
+        }
+
+        const assignResult = await addSystemMissionToMyMissions({ missionId });
+        if (assignResult.success && assignResult.data) {
+          userMissionId = assignResult.data.id;
+          // 미션 목록 새로고침하여 user_mission_id 업데이트
+          await loadMissions();
+        } else {
+          Alert.alert('오류', assignResult.error || '미션 할당에 실패했습니다.');
+          return;
+        }
+      } catch (error) {
+        logError('미션 할당 오류', error as Error);
+        Alert.alert('오류', '미션을 시작하는 중 문제가 발생했습니다.');
+        return;
+      }
     }
 
     switch (verificationType) {
       case 'COMMUNITY':
         // 인증글 작성 화면으로 이동 (VerificationPostCreate)
         navigation.navigate('VerificationPostCreate' as any, {
-          userMissionId: mission.user_mission_id,
+          userMissionId: userMissionId,
           missionId: mission.mission_id,
           missionTitle: mission.title,
           missionEmoji: mission.emoji,
@@ -162,13 +185,13 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
 
           const location = await Location.getCurrentPositionAsync({});
           const result = await verifyByGps(
-            mission.user_mission_id,
+            userMissionId,
             location.coords.latitude,
             location.coords.longitude
           );
 
           if (result.success) {
-            Alert.alert('✅ GPS 인증 완료', `+${result.data?.expReward || 50} EXP를 획득했습니다!`);
+            Alert.alert('GPS 인증 완료', `+${result.data?.expReward || 50} EXP를 획득했습니다!`);
             await loadMissions();
           } else {
             Alert.alert('인증 실패', result.error || 'GPS 인증에 실패했습니다.');
@@ -182,10 +205,10 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
       case 'TIME':
         // 시간 인증
         try {
-          const result = await verifyByTime(mission.user_mission_id);
+          const result = await verifyByTime(userMissionId);
 
           if (result.success) {
-            Alert.alert('✅ 시간 인증 완료', `+${result.data?.expReward || 50} EXP를 획득했습니다!`);
+            Alert.alert('시간 인증 완료', `+${result.data?.expReward || 50} EXP를 획득했습니다!`);
             await loadMissions();
           } else {
             Alert.alert('인증 실패', result.error || '시간 인증에 실패했습니다.');
