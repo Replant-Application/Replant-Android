@@ -1,9 +1,9 @@
 /**
- * 인증글 작성 화면
- * COMMUNITY 인증 타입 미션의 인증글 작성
+ * 인증글 작성/수정 화면
+ * COMMUNITY 인증 타입 미션의 인증글 작성 및 수정
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -19,7 +19,7 @@ import {
 } from 'react-native';
 import { Header, AlertModal } from '../components/ui';
 import { colors, spacing, typography, borderRadius } from '../utils/designTokens';
-import { createVerification } from '../api/missionApi';
+import { createVerification, updateVerification, getVerification } from '../api/missionApi';
 import { uploadMissionVerifyPhoto } from '../api/fileApi';
 import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../types/navigation';
@@ -35,12 +35,49 @@ const VerificationPostCreateScreen: React.FC<VerificationPostCreateScreenProps> 
   navigation,
   route,
 }) => {
-  const { userMissionId, missionId, missionTitle, missionEmoji, photoUrl: initialPhotoUrl } = route.params as any;
-  const [content, setContent] = useState('');
+  const {
+    userMissionId,
+    missionId,
+    missionTitle,
+    missionEmoji,
+    photoUrl: initialPhotoUrl,
+    // 수정 모드용 params
+    mode = 'create',
+    verificationId,
+    initialContent,
+  } = route.params as any;
+
+  const isEditMode = mode === 'edit' && verificationId;
+  const [content, setContent] = useState(initialContent || '');
   const [photoUrl, setPhotoUrl] = useState<string | null>(initialPhotoUrl || null);
   const [loading, setLoading] = useState(false);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [loadingData, setLoadingData] = useState(isEditMode);
+
+  // 수정 모드일 때 기존 데이터 로드
+  useEffect(() => {
+    if (isEditMode && verificationId) {
+      loadVerificationData();
+    }
+  }, [isEditMode, verificationId]);
+
+  const loadVerificationData = async () => {
+    try {
+      setLoadingData(true);
+      const result = await getVerification(verificationId);
+      if (result.success && result.data) {
+        setContent(result.data.content || '');
+        if (result.data.imageUrls && result.data.imageUrls.length > 0) {
+          setPhotoUrl(result.data.imageUrls[0]);
+        }
+      }
+    } catch (error) {
+      logError('인증글 데이터 로드 오류', error as Error);
+    } finally {
+      setLoadingData(false);
+    }
+  };
 
   // 사진 선택 (갤러리)
   const handleSelectPhoto = async () => {
@@ -122,14 +159,14 @@ const VerificationPostCreateScreen: React.FC<VerificationPostCreateScreenProps> 
     );
   };
 
-  // 인증글 작성
-  const handleCreateVerification = async () => {
+  // 인증글 작성 또는 수정
+  const handleSubmitVerification = async () => {
     if (!content.trim()) {
       Alert.alert('오류', '인증 내용을 입력해주세요.');
       return;
     }
 
-    if (!userMissionId) {
+    if (!isEditMode && !userMissionId) {
       Alert.alert('오류', '미션 정보가 올바르지 않습니다.');
       return;
     }
@@ -137,21 +174,41 @@ const VerificationPostCreateScreen: React.FC<VerificationPostCreateScreenProps> 
     try {
       setLoading(true);
 
-      const verificationData = {
-        userMissionId: userMissionId,
-        content: content.trim(),
-        imageUrls: photoUrl ? [photoUrl] : [],
-      };
+      if (isEditMode) {
+        // 수정 모드
+        const result = await updateVerification(verificationId, {
+          content: content.trim(),
+          imageUrls: photoUrl ? [photoUrl] : [],
+        });
 
-      const result = await createVerification(verificationData);
-
-      if (result.success) {
-        setShowSuccessModal(true);
+        if (result.success) {
+          setShowSuccessModal(true);
+        } else {
+          // 인증 통과 후 수정 불가 에러 처리
+          if (result.error?.includes('수정') || result.error?.includes('MODIFICATION')) {
+            Alert.alert('수정 불가', '인증이 완료된 게시글은 수정할 수 없습니다.');
+          } else {
+            Alert.alert('오류', result.error || '인증글 수정에 실패했습니다.');
+          }
+        }
       } else {
-        Alert.alert('오류', result.error || '인증글 작성에 실패했습니다.');
+        // 작성 모드
+        const verificationData = {
+          userMissionId: userMissionId,
+          content: content.trim(),
+          imageUrls: photoUrl ? [photoUrl] : [],
+        };
+
+        const result = await createVerification(verificationData);
+
+        if (result.success) {
+          setShowSuccessModal(true);
+        } else {
+          Alert.alert('오류', result.error || '인증글 작성에 실패했습니다.');
+        }
       }
     } catch (error) {
-      logError('인증글 작성 오류', error as Error);
+      logError('인증글 작성/수정 오류', error as Error);
       Alert.alert('오류', '인증글 작성 중 오류가 발생했습니다.');
     } finally {
       setLoading(false);
@@ -165,7 +222,7 @@ const VerificationPostCreateScreen: React.FC<VerificationPostCreateScreenProps> 
       keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
     >
       <Header
-        title="인증글 작성"
+        title={isEditMode ? "인증글 수정" : "인증글 작성"}
         leftButton={
           <TouchableOpacity onPress={() => navigation.goBack()}>
             <Image
@@ -250,19 +307,21 @@ const VerificationPostCreateScreen: React.FC<VerificationPostCreateScreenProps> 
           )}
         </View>
 
-        {/* 작성 버튼 */}
+        {/* 작성/수정 버튼 */}
         <TouchableOpacity
           style={[
             styles.submitButton,
-            (loading || !content.trim()) && styles.submitButtonDisabled
+            (loading || loadingData || !content.trim()) && styles.submitButtonDisabled
           ]}
-          onPress={handleCreateVerification}
-          disabled={loading || !content.trim()}
+          onPress={handleSubmitVerification}
+          disabled={loading || loadingData || !content.trim()}
         >
           {loading ? (
             <ActivityIndicator color={colors.white} />
           ) : (
-            <Text style={styles.submitButtonText}>인증글 작성</Text>
+            <Text style={styles.submitButtonText}>
+              {isEditMode ? '인증글 수정' : '인증글 작성'}
+            </Text>
           )}
         </TouchableOpacity>
       </ScrollView>
@@ -270,8 +329,11 @@ const VerificationPostCreateScreen: React.FC<VerificationPostCreateScreenProps> 
       {/* 성공 모달 */}
       <AlertModal
         visible={showSuccessModal}
-        title="인증글 작성 완료"
-        message="인증글이 등록되었습니다. 다른 사용자들의 좋아요를 받으면 미션이 인증됩니다!"
+        title={isEditMode ? "인증글 수정 완료" : "인증글 작성 완료"}
+        message={isEditMode
+          ? "인증글이 수정되었습니다."
+          : "인증글이 등록되었습니다. 다른 사용자들의 좋아요를 받으면 미션이 인증됩니다!"
+        }
         onConfirm={() => {
           setShowSuccessModal(false);
           navigation.goBack();
