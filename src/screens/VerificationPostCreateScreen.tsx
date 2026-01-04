@@ -248,7 +248,18 @@ const VerificationPostCreateScreen: React.FC<VerificationPostCreateScreenProps> 
         if (result.success) {
           setShowSuccessModal(true);
         } else {
-          Alert.alert('오류', result.error || '인증글 작성에 실패했습니다.');
+          // 이미 인증글이 존재하는 경우 처리
+          if (result.error?.includes('이미 인증') || result.error?.includes('ALREADY_EXISTS') || result.error?.includes('V013')) {
+            Alert.alert(
+              '인증글이 이미 존재합니다',
+              '이미 작성한 인증글이 있습니다. 커뮤니티에서 다른 사용자들의 투표를 기다려주세요!',
+              [
+                { text: '확인', onPress: () => navigation.goBack() }
+              ]
+            );
+          } else {
+            Alert.alert('오류', result.error || '인증글 작성에 실패했습니다.');
+          }
         }
       }
     } catch (error) {
