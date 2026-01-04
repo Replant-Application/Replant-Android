@@ -38,6 +38,9 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   // 캐릭터 감정 상태
   const [characterEmotion, setCharacterEmotion] = useState<'default' | 'happy'>('default');
 
+  // 히어로 섹션 접힘 상태
+  const [isHeroCollapsed, setIsHeroCollapsed] = useState(false);
+
   // 캐릭터 영역 슬라이딩 상태
   const MIN_HERO_HEIGHT = SCREEN_HEIGHT * 0.2;  // 최소 높이
   const MAX_HERO_HEIGHT = SCREEN_HEIGHT * 0.45; // 최대 높이 (기본값)
@@ -66,6 +69,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
         // 드래그 방향에 따라 스냅
         if (gestureState.dy < -30) {
           // 위로 드래그: 축소
+          setIsHeroCollapsed(true);
           Animated.spring(heroHeightAnim, {
             toValue: MIN_HERO_HEIGHT,
             useNativeDriver: false,
@@ -73,6 +77,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
           }).start();
         } else if (gestureState.dy > 30) {
           // 아래로 드래그: 확대
+          setIsHeroCollapsed(false);
           Animated.spring(heroHeightAnim, {
             toValue: MAX_HERO_HEIGHT,
             useNativeDriver: false,
@@ -81,8 +86,10 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
         } else {
           // 중간 상태면 가까운 쪽으로 스냅
           const midPoint = (MIN_HERO_HEIGHT + MAX_HERO_HEIGHT) / 2;
+          const willCollapse = currentHeight < midPoint;
+          setIsHeroCollapsed(willCollapse);
           Animated.spring(heroHeightAnim, {
-            toValue: currentHeight < midPoint ? MIN_HERO_HEIGHT : MAX_HERO_HEIGHT,
+            toValue: willCollapse ? MIN_HERO_HEIGHT : MAX_HERO_HEIGHT,
             useNativeDriver: false,
             friction: 8,
           }).start();
@@ -320,9 +327,9 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
           onPress={() => {
             // 현재 높이에 따라 접거나 펼치기
             const currentHeight = (heroHeightAnim as any)._value;
-            const targetHeight = currentHeight > (MIN_HERO_HEIGHT + MAX_HERO_HEIGHT) / 2
-              ? MIN_HERO_HEIGHT
-              : MAX_HERO_HEIGHT;
+            const willCollapse = currentHeight > (MIN_HERO_HEIGHT + MAX_HERO_HEIGHT) / 2;
+            const targetHeight = willCollapse ? MIN_HERO_HEIGHT : MAX_HERO_HEIGHT;
+            setIsHeroCollapsed(willCollapse);
             Animated.spring(heroHeightAnim, {
               toValue: targetHeight,
               useNativeDriver: false,
@@ -331,7 +338,9 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
           }}
           activeOpacity={0.7}
         >
-          <View style={styles.dragHandle} />
+          <Text style={styles.dragHandleIcon}>
+            {isHeroCollapsed ? '∨' : '∧'}
+          </Text>
         </TouchableOpacity>
         
         <ScrollView
@@ -504,9 +513,14 @@ const styles = StyleSheet.create({
     borderTopRightRadius: borderRadius.xl + 8,
   },
   dragHandleArea: {
-    paddingVertical: spacing[3],
+    paddingVertical: spacing[2],
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  dragHandleIcon: {
+    fontSize: typography.fontSize.xl,
+    color: colors.gray[500],
+    fontWeight: typography.fontWeight.bold,
   },
   dragHandle: {
     width: 50,

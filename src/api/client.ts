@@ -28,10 +28,22 @@ export class ApiClient {
   private isRefreshing: boolean = false;
   private refreshSubscribers: Array<(token: string) => void> = [];
 
+  private tokenLoaded: boolean = false;
+
   constructor(baseURL: string = API_CONFIG.baseURL) {
     this.baseURL = baseURL;
     // 초기화 시 저장된 토큰 로드
     this.loadAccessToken();
+  }
+
+  /**
+   * 토큰이 로드될 때까지 대기
+   */
+  private async ensureTokenLoaded(): Promise<void> {
+    if (this.tokenLoaded) return;
+
+    // 토큰 로드가 아직 완료되지 않았으면 다시 시도
+    await this.loadAccessToken();
   }
 
   /**
@@ -43,8 +55,10 @@ export class ApiClient {
       if (token) {
         this.accessToken = token;
       }
+      this.tokenLoaded = true;
     } catch (error) {
       console.error('Failed to load access token:', error);
+      this.tokenLoaded = true; // 실패해도 로드 시도 완료로 표시
     }
   }
 
@@ -123,6 +137,9 @@ export class ApiClient {
     options: ApiRequestOptions = {}
   ): Promise<ServiceResult<T>> {
     try {
+      // 토큰이 로드될 때까지 대기
+      await this.ensureTokenLoaded();
+
       // URL 구성 (params가 있으면 query string 추가)
       let url = `${this.baseURL}${endpoint}`;
       if (options.params) {
@@ -250,6 +267,9 @@ export class ApiClient {
    */
   async upload<T>(endpoint: string, formData: FormData): Promise<ServiceResult<T>> {
     try {
+      // 토큰이 로드될 때까지 대기
+      await this.ensureTokenLoaded();
+
       const url = `${this.baseURL}${endpoint}`;
 
       // 헤더 구성 (Content-Type은 FormData에서 자동 설정됨)

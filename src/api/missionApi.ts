@@ -798,3 +798,40 @@ function getMissionEmoji(title: string): string {
   if (title.includes('공부')) return '📖';
   return '🎯';
 }
+
+/**
+ * 인증 상태 확인
+ * 미션 ID로 해당 미션의 인증글 상태 확인
+ */
+export const checkVerificationStatus = async (
+  missionId: string
+): Promise<ServiceResult<{ verified: boolean; status?: VerificationStatus }>> => {
+  try {
+    const result = await getVerifications({ missionId: Number(missionId) });
+
+    if (!result.success || !result.data) {
+      return { success: false, error: result.error || '인증 상태를 확인할 수 없습니다.' };
+    }
+
+    const verifications = result.data.content;
+    if (!verifications || verifications.length === 0) {
+      return { success: true, data: { verified: false } };
+    }
+
+    // 가장 최근 인증글의 상태 확인
+    const latestVerification = verifications[0];
+    if (!latestVerification) {
+      return { success: true, data: { verified: false } };
+    }
+
+    return {
+      success: true,
+      data: {
+        verified: latestVerification.status === 'APPROVED',
+        status: latestVerification.status,
+      },
+    };
+  } catch (error) {
+    return { success: false, error: '인증 상태 확인 중 오류가 발생했습니다.' };
+  }
+};
