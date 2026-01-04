@@ -185,6 +185,18 @@ const CommunityPostDetailScreen: React.FC<CommunityPostDetailScreenProps> = ({
           <View style={styles.missionInfo}>
             <Text style={styles.missionEmoji}>{post.mission_emoji}</Text>
             <Text style={styles.missionTitle}>{post.mission_title}</Text>
+            {/* 인증 상태 뱃지 */}
+            {post.verified === true ? (
+              <View style={styles.verifiedBadge}>
+                <Text style={styles.verifiedIcon}>✓</Text>
+                <Text style={styles.verifiedText}>인증완료</Text>
+              </View>
+            ) : post.verified === false ? (
+              <View style={styles.pendingBadge}>
+                <Text style={styles.pendingIcon}>⏳</Text>
+                <Text style={styles.pendingText}>인증대기</Text>
+              </View>
+            ) : null}
           </View>
 
           <Text style={styles.title}>{post.title}</Text>
@@ -439,6 +451,44 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.base,
     fontWeight: typography.fontWeight.semibold,
     color: colors.primary[700],
+  },
+  verifiedBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.green[100],
+    paddingHorizontal: spacing[2],
+    paddingVertical: spacing[1],
+    borderRadius: borderRadius.full,
+    gap: 2,
+    marginLeft: spacing[2],
+  },
+  verifiedIcon: {
+    fontSize: typography.fontSize.xs,
+    color: colors.green[600],
+    fontWeight: typography.fontWeight.bold,
+  },
+  verifiedText: {
+    fontSize: typography.fontSize.xs,
+    color: colors.green[700],
+    fontWeight: typography.fontWeight.medium,
+  },
+  pendingBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.orange[100],
+    paddingHorizontal: spacing[2],
+    paddingVertical: spacing[1],
+    borderRadius: borderRadius.full,
+    gap: 2,
+    marginLeft: spacing[2],
+  },
+  pendingIcon: {
+    fontSize: typography.fontSize.xs,
+  },
+  pendingText: {
+    fontSize: typography.fontSize.xs,
+    color: colors.orange[700],
+    fontWeight: typography.fontWeight.medium,
   },
   title: {
     fontSize: typography.fontSize.xl,
