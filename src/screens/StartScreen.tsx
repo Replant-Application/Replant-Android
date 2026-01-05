@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Alert, Image } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Alert, Image, Platform } from 'react-native';
 import { spacing } from '../utils/designTokens';
 import { SCREEN_NAMES } from '../utils/constants';
 
@@ -108,11 +108,14 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 66,
-    fontWeight: '400',
+    fontWeight: '600',
     color: '#166534',
     marginBottom: spacing[2],
     letterSpacing: 2,
-    fontFamily: 'Maplestory Bold',
+    fontFamily: Platform.select({
+      ios: 'Maplestory Bold',
+      android: 'MaplestoryBold',
+    }),
   },
   subtitleContainer: {
     flexDirection: 'row',
@@ -124,7 +127,10 @@ const styles = StyleSheet.create({
     fontWeight: '300',
     color: '#666666',
     letterSpacing: 0.2,
-    fontFamily: 'Maplestory Light',
+    fontFamily: Platform.select({
+      ios: 'Maplestory Light',
+      android: 'MaplestoryLight',
+    }),
   },
   clover: {
     fontSize: 15,

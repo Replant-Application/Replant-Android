@@ -151,25 +151,20 @@ const DiaryScreen: React.FC = () => {
         return emotion === 'happy' ? require('../assets/images/characters/level1/happy.gif') :
                require('../assets/images/characters/level1/default.gif');
       case 'level2':
-        return emotion === 'happy' ? require('../assets/images/characters/level2/happy.png') :
-               emotion === 'waving' ? require('../assets/images/characters/level2/waving.png') :
-               require('../assets/images/characters/level2/default.png');
+        return emotion === 'happy' ? require('../assets/images/characters/level2/happy.gif') :
+               require('../assets/images/characters/level2/default.gif');
       case 'level3':
-        return emotion === 'happy' ? require('../assets/images/characters/level3/happy.png') :
-               emotion === 'waving' ? require('../assets/images/characters/level3/waving.png') :
-               require('../assets/images/characters/level3/default.png');
+        return emotion === 'happy' ? require('../assets/images/characters/level3/happy.gif') :
+               require('../assets/images/characters/level3/default.gif');
       case 'level4':
-        return emotion === 'happy' ? require('../assets/images/characters/level4/happy.png') :
-               emotion === 'waving' ? require('../assets/images/characters/level4/waving.png') :
-               require('../assets/images/characters/level4/default.png');
+        return emotion === 'happy' ? require('../assets/images/characters/level4/happy.gif') :
+               require('../assets/images/characters/level4/default.gif');
       case 'level5':
-        return emotion === 'happy' ? require('../assets/images/characters/level5/happy.png') :
-               emotion === 'waving' ? require('../assets/images/characters/level5/waving.png') :
-               require('../assets/images/characters/level5/default.png');
+        return emotion === 'happy' ? require('../assets/images/characters/level5/happy.gif') :
+               require('../assets/images/characters/level5/default.gif');
       case 'level6':
-        return emotion === 'happy' ? require('../assets/images/characters/level6/happy.png') :
-               emotion === 'waving' ? require('../assets/images/characters/level6/waving.png') :
-               require('../assets/images/characters/level6/default.png');
+        return emotion === 'happy' ? require('../assets/images/characters/level6/happy.gif') :
+               require('../assets/images/characters/level6/default.gif');
       default:
         return require('../assets/images/characters/level1/default.gif');
     }
