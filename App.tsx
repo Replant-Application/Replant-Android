@@ -10,11 +10,14 @@ import { OverlayProvider } from './src/contexts/OverlayContext';
 import { SseProvider } from './src/contexts/SseContext';
 import AppNavigator from './src/navigation/AppNavigator';
 import { initializeLogger } from './src/utils/logger';
+import { initializeGoogleSignIn } from './src/services/googleSignIn';
 
 function App() {
   useEffect(() => {
     // 앱 시작 시 로거 초기화
     initializeLogger();
+    // Google Sign-In 초기화
+    initializeGoogleSignIn();
   }, []);
 
   return (
