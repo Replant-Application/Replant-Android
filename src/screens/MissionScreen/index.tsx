@@ -2,9 +2,9 @@ import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react'
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Image, RefreshControl } from 'react-native';
 import { useMission } from '../../hooks/useMission';
 import { useCharacter } from '../../hooks/useCharacter';
-import { MissionCard, MissionVerificationModal } from '../../components/specialized';
-import { Card, Loading, ErrorBoundary, Button, Header, EmptyState, SectionTitle, ConfirmModal, FilterBar, TabBar } from '../../components/ui';
-import { colors, spacing, typography, borderRadius, shadows } from '../../utils/designTokens';
+import { MissionCard, MissionVerificationModal, MissionProgressCard } from '../../components/specialized';
+import { Loading, ErrorBoundary, Header, EmptyState, ConfirmModal, SimpleTabBar } from '../../components/ui';
+import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
 import { useUser } from '../../contexts/UserContext';
 import { Mission } from '../../types';
 import { checkVerificationStatus, MissionType, verifyByGps, verifyByTime, createVerification, addSystemMissionToMyMissions } from '../../api/missionApi';
@@ -13,7 +13,7 @@ import * as Location from 'expo-location';
 import { formatDateYYYYMMDD } from '../../utils/dateUtils';
 import { getMyBadges, getBadgeHistory, Badge } from '../../api/badgeApi';
 import { logError } from '../../utils/logger';
-import { MissionScreenProps, MissionFilter, MissionPeriodFilter, MissionSourceFilter } from './MissionScreen.types';
+import { MissionScreenProps, MissionFilter } from './MissionScreen.types';
 
 // 단일 카테고리: 성장
 
@@ -25,8 +25,6 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
   const routeParams = route?.params;
   const processedPhotoRef = useRef<string | null>(null);
   const [selectedFilter, setSelectedFilter] = useState<MissionFilter>('inProgress');
-  const [selectedPeriod, setSelectedPeriod] = useState<MissionPeriodFilter>('DAILY');
-  const [selectedSource, setSelectedSource] = useState<MissionSourceFilter>('REGULAR');
   const [refreshing, setRefreshing] = useState(false);
 
   // 인증 모달 상태
@@ -46,43 +44,21 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
   const [showAllBadges, setShowAllBadges] = useState(false);
   const [badgesLoading, setBadgesLoading] = useState(false);
 
-  // 오늘 날짜 (YYYY-MM-DD 형식)
-  const today = useMemo(() => formatDateYYYYMMDD(new Date()), []);
 
-  // 기간별 + 일반/커스텀 필터링된 미션 목록
+  // 필터링된 미션 목록 (진행중/완료만)
   const filteredMissions = useMemo(() => {
-    let filtered = missions.filter(mission => {
-      // mission.type이 있으면 해당 타입으로 필터링, 없으면 DAILY로 간주
-      const missionType = mission.type || 'DAILY';
-      const isCustomMission = mission.is_custom === true;
-
-      // 기간 필터
-      const periodMatch = missionType === selectedPeriod;
-
-      // 일반/커스텀 필터
-      const sourceMatch = selectedSource === 'CUSTOM' ? isCustomMission : !isCustomMission;
-
-      return periodMatch && sourceMatch;
-    });
-
-    // 추가 필터 적용 (진행중/인증대기/완료)
     switch (selectedFilter) {
       case 'completed':
-        // 완료 & 인증완료된 미션
-        return filtered.filter(mission => mission.completed && mission.verified === true);
-      case 'pendingVerification':
-        // 완료했지만 인증 대기중인 미션 (verified가 false이거나 undefined)
-        return filtered.filter(mission => mission.completed && mission.verified !== true);
+        // 완료된 미션
+        return missions.filter(mission => mission.completed);
       case 'inProgress':
       default:
         // 아직 완료하지 않은 미션
-        return filtered.filter(mission => !mission.completed);
+        return missions.filter(mission => !mission.completed);
     }
-  }, [missions, selectedPeriod, selectedSource, selectedFilter, today]);
+  }, [missions, selectedFilter]);
 
-  const totalGrowthMissions = filteredMissions.length;
   const displayedMissions = filteredMissions;
-
 
   // 진행률 계산
   const completedMissions = useMemo(() =>
@@ -90,7 +66,6 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
     [missions]
   );
   const totalMissions = missions.length;
-  const progressPercentage = totalMissions > 0 ? (completedMissions / totalMissions) * 100 : 0;
 
   // 미션 완료 (사진이 있으면 그 사진으로, 없으면 null로)
   const handleMissionComplete = async (missionId: string) => {
@@ -167,7 +142,6 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
             missionEmoji: mission.emoji || '🎯',
             photoUrl: mission.photo_url,
           };
-          logError('인증하기 네비게이션', new Error('Debug'), { navParams });
           navigation.navigate('VerificationPostCreate' as any, navParams);
         } catch (navError) {
           logError('네비게이션 오류', navError as Error);
@@ -470,25 +444,6 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
     return <ErrorBoundary error={error} />;
   }
 
-  // 날짜 표시 함수
-  const getDateDisplay = () => {
-    const now = new Date();
-    const month = now.getMonth() + 1; // 1~12
-    const day = now.getDate();
-
-    switch (selectedPeriod) {
-      case 'DAILY':
-        return `${month}월 ${day}일`;
-      case 'WEEKLY':
-        // 해당 월의 몇 주차인지 계산
-        const weekOfMonth = Math.ceil(day / 7);
-        return `${month}월 ${weekOfMonth}주차`;
-      case 'MONTHLY':
-        return `${month}월`;
-      default:
-        return '';
-    }
-  };
 
   return (
     <View style={styles.container}>
@@ -545,29 +500,15 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
           />
         }
       >
-        {/* 진행률 표시 */}
+        {/* 오늘의 미션 제목 */}
+        <Text style={styles.title}>오늘의 미션</Text>
+
+        {/* 진행률 카드 */}
         {totalMissions > 0 && (
-          <View style={styles.progressCard}>
-            <View style={styles.progressHeader}>
-              <Text style={styles.progressTitle}>나의 진행률</Text>
-              <Text style={styles.progressPercentage}>
-                {Math.round(progressPercentage)}%
-              </Text>
-            </View>
-            <View style={styles.progressInfo}>
-              <Text style={styles.progressText}>
-                진행 중 {totalMissions - completedMissions} · 완료 {completedMissions}
-              </Text>
-            </View>
-            <View style={styles.progressBar}>
-              <View
-                style={[
-                  styles.progressFill,
-                  { width: `${progressPercentage}%` }
-                ]}
-              />
-            </View>
-          </View>
+          <MissionProgressCard
+            completedMissions={completedMissions}
+            totalMissions={totalMissions}
+          />
         )}
 
         {/* 나의 뱃지 섹션 */}
@@ -587,13 +528,14 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
             <ScrollView
               horizontal
               showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.badgeList}
+              contentContainerStyle={[
+                styles.badgeList,
+                (showAllBadges ? allBadges : validBadges).length === 0 && styles.badgeListEmpty
+              ]}
             >
               {(showAllBadges ? allBadges : validBadges).length === 0 ? (
                 <View style={styles.noBadgeContainer}>
-                  <Text style={styles.noBadgeText}>
-                    {showAllBadges ? '아직 획득한 뱃지가 없습니다' : '유효한 뱃지가 없습니다'}
-                  </Text>
+                  <Text style={styles.noBadgeText}>유효한 뱃지가 없습니다</Text>
                 </View>
               ) : (
                 (showAllBadges ? allBadges : validBadges).map((badge) => {
@@ -609,7 +551,7 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
                     >
                       <View style={[styles.badgeIcon, isExpired && styles.badgeIconExpired]}>
                         <Image
-                          source={require('../assets/images/check2.png')}
+                          source={require('../../assets/images/check2.png')}
                           style={styles.badgeIconImage}
                           resizeMode="contain"
                         />
@@ -633,129 +575,68 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
           )}
         </View>
 
-        {/* 미션 만들기 버튼 */}
-        <TouchableOpacity
-          style={styles.createButtonTop}
-          onPress={() => navigation.navigate('CustomMissionCreate')}
-          activeOpacity={0.7}
-        >
-          <Text style={styles.createButtonTopText}>+ 미션 만들기</Text>
-        </TouchableOpacity>
-
-        {/* 기간 탭 (일간/주간/월간) */}
-        <View style={styles.periodHeader}>
-          <Text style={styles.periodDateText}>{getDateDisplay()}</Text>
-        </View>
-        <View style={styles.periodTabContainer}>
-          <TouchableOpacity
-            style={[styles.periodTab, selectedPeriod === 'DAILY' && styles.periodTabActive]}
-            onPress={() => setSelectedPeriod('DAILY')}
-            activeOpacity={0.7}
-          >
-            <Text style={[styles.periodTabText, selectedPeriod === 'DAILY' && styles.periodTabTextActive]}>
-              일간
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.periodTab, selectedPeriod === 'WEEKLY' && styles.periodTabActive]}
-            onPress={() => setSelectedPeriod('WEEKLY')}
-            activeOpacity={0.7}
-          >
-            <Text style={[styles.periodTabText, selectedPeriod === 'WEEKLY' && styles.periodTabTextActive]}>
-              주간
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.periodTab, selectedPeriod === 'MONTHLY' && styles.periodTabActive]}
-            onPress={() => setSelectedPeriod('MONTHLY')}
-            activeOpacity={0.7}
-          >
-            <Text style={[styles.periodTabText, selectedPeriod === 'MONTHLY' && styles.periodTabTextActive]}>
-              월간
-            </Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* 일반/커스텀 미션 탭 */}
-        <TabBar
+        {/* 진행중/완료 탭 */}
+        <SimpleTabBar
           tabs={[
-            { key: 'REGULAR', label: '일반 미션' },
-            { key: 'CUSTOM', label: '커스텀 미션' },
-          ]}
-          activeTab={selectedSource}
-          onTabChange={(key) => setSelectedSource(key as MissionSourceFilter)}
-          variant="underline"
-          containerStyle={{
-            marginBottom: spacing[4],
-          }}
-        />
-
-        {/* 필터 탭 (진행중/인증대기/완료) */}
-        <FilterBar
-          filters={[
             { key: 'inProgress', label: '진행중' },
-            { key: 'pendingVerification', label: '인증대기' },
             { key: 'completed', label: '완료' },
           ]}
-          selectedFilter={selectedFilter}
-          onFilterChange={setSelectedFilter}
-          variant="pill"
+          activeTab={selectedFilter}
+          onTabChange={(key) => setSelectedFilter(key as MissionFilter)}
+          style={styles.tabBar}
         />
 
         {/* 미션 목록 */}
-        <View style={styles.missionSection}>
-          <View style={styles.sectionHeader}>
-            <SectionTitle
-              title={
-                `${selectedSource === 'CUSTOM' ? '커스텀 ' : ''}${
-                  selectedFilter === 'inProgress' ? '진행중' :
-                  selectedFilter === 'pendingVerification' ? '인증대기' : '완료한'
-                } 미션 (${totalGrowthMissions}개)`
-              }
-              marginBottom={spacing[3]}
-            />
-          </View>
-
-          {displayedMissions.length === 0 ? (
-            <EmptyState
-              iconImage={require('../../assets/images/clover.png')}
-              title={
-                selectedSource === 'CUSTOM'
-                  ? '커스텀 미션이 없어요'
-                  : selectedFilter === 'inProgress'
-                    ? '모든 미션을 완료했어요!'
-                    : selectedFilter === 'pendingVerification'
-                      ? '인증 대기 중인 미션이 없어요'
-                      : '완료한 미션이 없어요'
-              }
-              description={
-                selectedSource === 'CUSTOM'
-                  ? '아래 버튼을 눌러 나만의 미션을 만들어보세요!'
-                  : selectedFilter === 'inProgress'
-                    ? '새로운 미션에 도전해보세요!'
-                    : selectedFilter === 'pendingVerification'
-                      ? '미션을 완료하고 인증하면 여기에 표시됩니다.'
-                      : '미션을 완료하면 여기에 표시됩니다.'
-              }
-            />
-          ) : (
-            <View style={styles.missionList}>
-              {displayedMissions.map((mission, index) => (
-                <MissionCard
+        {displayedMissions.length === 0 ? (
+          <EmptyState
+            iconImage={require('../../assets/images/clover.png')}
+            title={selectedFilter === 'inProgress' ? '완료할 미션이 없어' : '완료한 미션이 없어요'}
+            description={
+              selectedFilter === 'inProgress'
+                ? '새로운 미션에 도전해보세요!'
+                : '미션을 완료하면 여기에 표시됩니다.'
+            }
+          />
+        ) : (
+          <View style={styles.missionList}>
+            {displayedMissions.map((mission, index) => {
+              const verificationType = mission.verification_type || 'COMMUNITY';
+              return (
+                <TouchableOpacity
                   key={`${mission.mission_id}-${mission.id || index}`}
-                  mission={mission}
-                  onComplete={handleMissionComplete}
-                  onUncomplete={handleMissionUncomplete}
-                  onUploadPhoto={handlePhotoUpload}
-                  onDeletePhoto={handleDeletePhoto}
-                  onShareToCommunity={handleShareToCommunity}
-                  onVerify={handleVerify}
-                  style={styles.missionCard}
-                />
-              ))}
-            </View>
-          )}
-        </View>
+                  activeOpacity={0.7}
+                  onPress={() => {
+                    if (!mission.completed) {
+                      handleVerify(mission, verificationType as 'COMMUNITY' | 'GPS' | 'TIME');
+                    } else {
+                      navigation.navigate('MissionDetail', { missionId: mission.mission_id || mission.id || '' });
+                    }
+                  }}
+                >
+                  <MissionCard
+                    mission={mission}
+                    onComplete={handleMissionComplete}
+                    onUncomplete={handleMissionUncomplete}
+                    onUploadPhoto={handlePhotoUpload}
+                    onDeletePhoto={handleDeletePhoto}
+                    onShareToCommunity={handleShareToCommunity}
+                    onVerify={handleVerify}
+                    onViewDetails={() => navigation.navigate('MissionDetail', { missionId: mission.mission_id || mission.id || '' })}
+                  />
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        )}
+
+        {/* 미션 만들기 버튼 */}
+        <TouchableOpacity
+          style={styles.createButtonTop}
+          onPress={() => navigation.navigate('CustomMissionCreate' as any)}
+          activeOpacity={0.7}
+        >
+          <Text style={styles.createButtonTopText}>미션 만들기</Text>
+        </TouchableOpacity>
       </ScrollView>
     </View>
   );
@@ -768,8 +649,12 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: typography.fontSize['2xl'],
-    fontWeight: typography.fontWeight.bold,
+    fontWeight: typography.fontWeight.normal,
     color: colors.text.primary,
+    marginBottom: spacing[4],
+  },
+  tabBar: {
+    marginBottom: spacing[4],
   },
   content: {
     flex: 1,
@@ -778,182 +663,31 @@ const styles = StyleSheet.create({
     padding: spacing[4],
     paddingBottom: spacing[20], // 하단 탭바 높이 + 여유 공간
   },
-  progressCard: {
-    backgroundColor: colors.background.primary,
-    borderRadius: borderRadius.xl,
-    padding: spacing[5],
-    marginBottom: spacing[5],
-    ...shadows.lg,
-  },
-  progressHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: spacing[3],
-  },
-  progressTitle: {
-    fontSize: typography.fontSize.xl,
-    fontWeight: typography.fontWeight.bold,
-    color: colors.text.primary,
-  },
-  progressPercentage: {
-    fontSize: typography.fontSize['2xl'],
-    fontWeight: typography.fontWeight.bold,
-    color: colors.primary[600],
-  },
-  progressInfo: {
-    marginBottom: spacing[3],
-  },
-  progressText: {
-    fontSize: typography.fontSize.base,
-    color: colors.text.secondary,
-    fontWeight: typography.fontWeight.medium,
-  },
-  progressBar: {
-    height: 12,
-    backgroundColor: colors.gray[100],
-    borderRadius: borderRadius.full,
-    overflow: 'hidden',
-  },
-  progressFill: {
-    height: '100%',
-    backgroundColor: colors.primary[500],
-    borderRadius: borderRadius.full,
-  },
   createButtonTop: {
-    backgroundColor: colors.green[600],
-    borderRadius: borderRadius.lg,
-    paddingVertical: spacing[3],
-    paddingHorizontal: spacing[5],
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: spacing[4],
-    ...shadows.base,
-  },
-  createButtonTopText: {
-    fontSize: typography.fontSize.base,
-    fontWeight: typography.fontWeight.semibold,
-    color: colors.white,
-  },
-  periodHeader: {
-    marginBottom: spacing[2],
-  },
-  periodDateText: {
-    fontSize: typography.fontSize.xl,
-    fontWeight: typography.fontWeight.bold,
-    color: colors.text.primary,
-    textAlign: 'center',
-  },
-  periodTabContainer: {
-    flexDirection: 'row',
-    backgroundColor: colors.background.primary,
-    borderRadius: borderRadius.lg,
-    padding: spacing[1],
-    marginBottom: spacing[3],
-    ...shadows.sm,
-  },
-  periodTab: {
-    flex: 1,
-    paddingVertical: spacing[3],
-    alignItems: 'center',
-    borderRadius: borderRadius.md,
-  },
-  periodTabActive: {
-    backgroundColor: colors.primary[500],
-  },
-  periodTabText: {
-    fontSize: typography.fontSize.sm,
-    fontWeight: typography.fontWeight.medium,
-    color: colors.text.secondary,
-  },
-  periodTabTextActive: {
-    color: colors.white,
-    fontWeight: typography.fontWeight.semibold,
-  },
-  categorySection: {
-    marginBottom: spacing[6],
-  },
-  missionCount: {
-    fontSize: typography.fontSize.lg,
-    fontWeight: typography.fontWeight.medium,
-    color: colors.text.secondary,
-  },
-  categoryList: {
-    paddingHorizontal: spacing[1],
-  },
-  categoryButton: {
-    alignItems: 'center',
-    padding: spacing[3],
-    marginHorizontal: spacing[1],
-    borderRadius: borderRadius.md,
-    backgroundColor: colors.background.primary,
+    backgroundColor: colors.white,
     borderWidth: 1,
-    borderColor: colors.border.light,
-    minWidth: 80,
-  },
-  selectedCategory: {
-    backgroundColor: colors.primary[100],
     borderColor: colors.primary[500],
-  },
-  categoryEmoji: {
-    fontSize: typography.fontSize.xl,
-    marginBottom: spacing[1],
-  },
-  categoryName: {
-    fontSize: typography.fontSize.sm,
-    fontWeight: typography.fontWeight.medium,
-    color: colors.text.secondary,
-    textAlign: 'center',
-  },
-  selectedCategoryText: {
-    color: colors.primary[500],
-    fontWeight: typography.fontWeight.semibold,
-  },
-  missionSection: {
-    marginBottom: spacing[6],
-  },
-  sectionHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: spacing[1],
-  },
-  createButton: {
-    backgroundColor: colors.green[700],
-    borderRadius: borderRadius.full,
-    paddingVertical: spacing[3],
-    paddingHorizontal: spacing[24],
+    borderRadius: borderRadius.base,
+    paddingVertical: spacing[2],
+    paddingHorizontal: spacing[3],
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: spacing[4],
-    marginBottom: spacing[6],
-    alignSelf: 'center',
-    ...shadows.base,
   },
-  createButtonText: {
-    fontSize: typography.fontSize.base,
-    fontWeight: typography.fontWeight.semibold,
-    color: colors.white,
+  createButtonTopText: {
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.normal,
+    color: colors.primary[500],
   },
-
-  missionListContainer: {
-    gap: spacing[4],
-  },
-
-
   missionList: {
-    gap: spacing[3],
-  },
-
-  missionCard: {
-    marginBottom: spacing[3],
+    gap: spacing[1],
   },
   // 뱃지 섹션 스타일
   badgeSection: {
     backgroundColor: colors.background.primary,
-    borderRadius: borderRadius.xl,
+    borderRadius: borderRadius.base,
     padding: spacing[4],
     marginBottom: spacing[4],
-    ...shadows.base,
   },
   badgeSectionHeader: {
     flexDirection: 'row',
@@ -962,14 +696,14 @@ const styles = StyleSheet.create({
     marginBottom: spacing[3],
   },
   badgeSectionTitle: {
-    fontSize: typography.fontSize.lg,
-    fontWeight: typography.fontWeight.bold,
+    fontSize: typography.fontSize.xl,
+    fontWeight: typography.fontWeight.normal,
     color: colors.text.primary,
   },
   badgeToggleText: {
     fontSize: typography.fontSize.sm,
     color: colors.primary[600],
-    fontWeight: typography.fontWeight.medium,
+    fontWeight: typography.fontWeight.normal,
   },
   badgeLoadingText: {
     fontSize: typography.fontSize.sm,
@@ -981,11 +715,16 @@ const styles = StyleSheet.create({
     paddingVertical: spacing[2],
     gap: spacing[3],
   },
+  badgeListEmpty: {
+    flexGrow: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%',
+  },
   noBadgeContainer: {
-    flex: 1,
+    width: '100%',
     paddingVertical: spacing[4],
     alignItems: 'center',
-    minWidth: 200,
   },
   noBadgeText: {
     fontSize: typography.fontSize.sm,
