@@ -12,83 +12,17 @@ import {
   Dimensions,
   PanResponder
 } from 'react-native';
-import { useDiary } from '../hooks/useDiary';
-import { useCharacter } from '../hooks/useCharacter';
-import { Loading, ErrorBoundary, ConfirmModal, AlertModal } from '../components/ui';
-import { colors, spacing, typography, borderRadius, shadows } from '../utils/designTokens';
-import { SimpleDiaryData } from '../types';
-import { formatDateYYYYMMDD } from '../utils/dateUtils';
+import { useDiary } from '../../hooks/useDiary';
+import { useCharacter } from '../../hooks/useCharacter';
+import { Loading, ErrorBoundary, ConfirmModal, AlertModal } from '../../components/ui';
+import { colors, spacing, typography, borderRadius, shadows } from '../../utils/designTokens';
+import { SimpleDiaryData } from '../../types';
+import { formatDateYYYYMMDD } from '../../utils/dateUtils';
+import { EMOTION_TAGS } from './DiaryScreen.constants';
+import { DiaryStep } from './DiaryScreen.types';
+import { getEmotionColor, addOpacity, getCharacterImage } from './DiaryScreen.utils';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
-
-// 감정 태그 목록 (핵심 감정만 선택)
-const EMOTION_TAGS = [
-  '행복', '기쁨', '사랑', '만족', '감사', '희망', '평온', '평화',
-  '슬픔', '우울', '외로움', '피곤', '지루함',
-  '화남', '짜증', '불안', '걱정', '스트레스',
-  '흥분', '자신감', '열정', '용기', '긍정'
-];
-
-// 감정별 색상 매핑
-const getEmotionColor = (emotion: string): string => {
-  const colorMap: { [key: string]: string } = {
-    '행복': colors.orange[400],
-    '기쁨': colors.orange[300],
-    '사랑': colors.purple[400],
-    '만족': colors.green[400],
-    '감사': colors.purple[300],
-    '희망': colors.blue[400],
-    '흥분': colors.orange[500],
-    '자신감': colors.blue[500],
-    '열정': colors.orange[600],
-    '평화': colors.blue[300],
-    '자유': colors.purple[500],
-    '용기': colors.blue[600],
-    '긍정': colors.green[500],
-    '평온': colors.blue[200],
-    '슬픔': colors.gray[400],
-    '우울': colors.gray[500],
-    '외로움': colors.gray[600],
-    '피곤': colors.gray[500],
-    '지루함': colors.gray[400],
-    '무관심': colors.gray[300],
-    '중립': colors.gray[400],
-    '화남': colors.error,
-    '짜증': colors.orange[700],
-    '불만': colors.orange[600],
-    '부정': colors.gray[700],
-    '불안': colors.orange[500],
-    '걱정': colors.orange[400],
-    '스트레스': colors.orange[600],
-    '혼란': colors.purple[400],
-    '당황': colors.orange[500],
-    '후회': colors.gray[600],
-    '죄책감': colors.gray[700],
-    '부끄러움': colors.purple[500],
-    '놀람': colors.blue[400],
-  };
-  return colorMap[emotion] || colors.gray[500];
-};
-
-// hex 색상에 투명도 추가
-const addOpacity = (color: string, opacity: number): string => {
-  // 이미 rgba 형식인 경우
-  if (color.startsWith('rgba')) {
-    return color.replace(/[\d.]+\)$/g, `${opacity})`);
-  }
-  // hex 색상인 경우
-  if (color.startsWith('#')) {
-    const hex = color.replace('#', '');
-    const r = parseInt(hex.substring(0, 2), 16);
-    const g = parseInt(hex.substring(2, 4), 16);
-    const b = parseInt(hex.substring(4, 6), 16);
-    return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-  }
-  // 기본값 반환
-  return color;
-};
-
-type DiaryStep = 'welcome' | 'mood' | 'emotions' | 'factors' | 'expression' | 'confirm' | 'view' | 'detail';
 
 const DiaryScreen: React.FC = () => {
   const { diaries, loading, error, saveDiary, deleteDiary } = useDiary();
@@ -139,33 +73,6 @@ const DiaryScreen: React.FC = () => {
     const dateString = formatDateYYYYMMDD(new Date());
     return diaries.find(d => d.date === dateString);
   }, [diaries]);
-
-  // 레벨별 캐릭터 이미지 가져오기
-  const getCharacterImage = (level: number, emotion: string = 'default') => {
-    const levelFolder = `level${Math.min(level, 6)}`;
-    switch (levelFolder) {
-      case 'level1':
-        return emotion === 'happy' ? require('../assets/images/characters/level1/happy.gif') :
-               require('../assets/images/characters/level1/default.gif');
-      case 'level2':
-        return emotion === 'happy' ? require('../assets/images/characters/level2/happy.gif') :
-               require('../assets/images/characters/level2/default.gif');
-      case 'level3':
-        return emotion === 'happy' ? require('../assets/images/characters/level3/happy.gif') :
-               require('../assets/images/characters/level3/default.gif');
-      case 'level4':
-        return emotion === 'happy' ? require('../assets/images/characters/level4/happy.gif') :
-               require('../assets/images/characters/level4/default.gif');
-      case 'level5':
-        return emotion === 'happy' ? require('../assets/images/characters/level5/happy.gif') :
-               require('../assets/images/characters/level5/default.gif');
-      case 'level6':
-        return emotion === 'happy' ? require('../assets/images/characters/level6/happy.gif') :
-               require('../assets/images/characters/level6/default.gif');
-      default:
-        return require('../assets/images/characters/level1/default.gif');
-    }
-  };
 
   // 말풍선 애니메이션
   useEffect(() => {
@@ -339,14 +246,14 @@ const DiaryScreen: React.FC = () => {
   if (currentStep === 'detail' && selectedDiary) {
     return (
       <ImageBackground
-        source={require('../assets/images/night.png')}
+        source={require('../../assets/images/night.png')}
         style={styles.container}
         resizeMode="cover"
       >
         <View style={styles.detailContainer}>
           <TouchableOpacity style={styles.backButton} onPress={handleBack}>
             <Image
-              source={require('../assets/images/left.png')}
+              source={require('../../assets/images/left.png')}
               style={styles.backButtonIcon}
               resizeMode="contain"
             />
@@ -428,14 +335,14 @@ const DiaryScreen: React.FC = () => {
   if (currentStep === 'view') {
     return (
       <ImageBackground
-        source={require('../assets/images/night.png')}
+        source={require('../../assets/images/night.png')}
         style={styles.container}
         resizeMode="cover"
       >
         <View style={styles.viewContainer}>
           <TouchableOpacity style={styles.backButton} onPress={handleBack}>
             <Image
-              source={require('../assets/images/left.png')}
+              source={require('../../assets/images/left.png')}
               style={styles.backButtonIcon}
               resizeMode="contain"
             />
@@ -450,7 +357,7 @@ const DiaryScreen: React.FC = () => {
                   activeOpacity={0.8}
                 >
                   <Image
-                    source={require('../assets/images/book.png')}
+                    source={require('../../assets/images/book.png')}
                     style={styles.bookImage}
                     resizeMode="contain"
                   />
@@ -524,7 +431,7 @@ const DiaryScreen: React.FC = () => {
   // 일기 작성 플로우
   return (
     <ImageBackground
-      source={require('../assets/images/night.png')}
+      source={require('../../assets/images/night.png')}
       style={styles.container}
       resizeMode="cover"
     >
@@ -838,7 +745,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing[6],
     paddingVertical: spacing[2],
     borderRadius: borderRadius.xl,
-    backgroundColor: 'rgba(255, 255, 255, 0.8)', // colors.gray[700] with opacity
+    backgroundColor: 'rgba(255, 255, 255, 0.8)',
     alignItems: 'center',
   },
   cancelButtonText: {
@@ -850,7 +757,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing[6],
     paddingVertical: spacing[2],
     borderRadius: borderRadius.xl,
-    backgroundColor: 'rgba(255, 255, 255, 0.8)', // colors.gray[700] with opacity
+    backgroundColor: 'rgba(255, 255, 255, 0.8)',
     alignItems: 'center',
   },
   skipButtonText: {
@@ -862,11 +769,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing[6],
     paddingVertical: spacing[2],
     borderRadius: borderRadius.xl,
-    backgroundColor: 'rgba(255, 255, 255, 0.8)', // colors.white with opacity
+    backgroundColor: 'rgba(255, 255, 255, 0.8)',
     alignItems: 'center',
   },
   confirmButtonDisabled: {
-    backgroundColor: 'rgba(75, 85, 99, 0.5)', // colors.gray[600] with opacity
+    backgroundColor: 'rgba(75, 85, 99, 0.5)',
     opacity: 0.5,
   },
   confirmButtonText: {
@@ -876,7 +783,7 @@ const styles = StyleSheet.create({
   },
   characterContainer: {
     position: 'absolute',
-    bottom: SCREEN_HEIGHT * 0.15 + 40, // 탭바 높이를 고려하여 추가 여백
+    bottom: SCREEN_HEIGHT * 0.15 + 40,
     left: '40%',
     transform: [{ translateX: -(SCREEN_WIDTH * 0.6) / 2 }],
     width: SCREEN_WIDTH * 0.8,
@@ -906,7 +813,7 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: spacing[3],
     borderRadius: borderRadius.lg,
-    backgroundColor: 'rgba(255, 255, 255, 0.9)', // colors.white with opacity
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
     alignItems: 'center',
   },
   writeButtonText: {
@@ -918,7 +825,7 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: spacing[3],
     borderRadius: borderRadius.lg,
-    backgroundColor: 'rgba(55, 65, 81, 0.8)', // colors.gray[700] with opacity
+    backgroundColor: 'rgba(55, 65, 81, 0.8)',
     alignItems: 'center',
   },
   viewButtonText: {
@@ -930,7 +837,7 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: spacing[3],
     borderRadius: borderRadius.lg,
-    backgroundColor: 'rgba(255, 255, 255, 0.9)', // colors.white with opacity
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
     alignItems: 'center',
   },
   nextButtonText: {
@@ -938,7 +845,6 @@ const styles = StyleSheet.create({
     color: colors.gray[900],
     fontWeight: typography.fontWeight.bold,
   },
-  // 일기 보기 모드
   viewContainer: {
     flex: 1,
     paddingTop: spacing[1],
@@ -1019,7 +925,6 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.lg,
     color: colors.white,
   },
-  // 일기 상세 보기
   detailContainer: {
     flex: 1,
     paddingTop: spacing[8],
@@ -1086,3 +991,4 @@ const styles = StyleSheet.create({
 });
 
 export default DiaryScreen;
+
