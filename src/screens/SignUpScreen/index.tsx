@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, Alert, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform, Image } from 'react-native';
-import { Button, Input, Header } from '../components/ui';
-import { colors, spacing, typography } from '../utils/designTokens';
-import { SCREEN_NAMES } from '../utils/constants';
-import { join } from '../api/authApi';
-import { saveTokens, saveUserInfo } from '../utils/tokenStorage';
-import { apiClient } from '../api/client';
-import { useUser } from '../contexts/UserContext';
+import { Button, Input, Header } from '../../components/ui';
+import { colors, spacing, typography } from '../../utils/designTokens';
+import { SCREEN_NAMES } from '../../utils/constants';
+import { join } from '../../api/authApi';
+import { saveTokens, saveUserInfo } from '../../utils/tokenStorage';
+import { apiClient } from '../../api/client';
+import { useUser } from '../../contexts/UserContext';
 
 interface SignUpScreenProps {
   onNavigate: (screen: string) => void;
@@ -126,7 +126,7 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onNavigate }) => {
             style={styles.backButton}
           >
             <Image
-              source={require('../assets/images/left.png')}
+              source={require('../../assets/images/left.png')}
               style={styles.backButtonIcon}
               resizeMode="contain"
             />

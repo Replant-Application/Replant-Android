@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, Alert, TouchableOpacity } from 'react-native';
-import { useUser } from '../contexts/UserContext';
-import { Button, Input, Header } from '../components/ui';
-import { colors, spacing, typography } from '../utils/designTokens';
-import { SCREEN_NAMES } from '../utils/constants';
+import { useUser } from '../../contexts/UserContext';
+import { Button, Input, Header } from '../../components/ui';
+import { colors, spacing, typography } from '../../utils/designTokens';
+import { SCREEN_NAMES } from '../../utils/constants';
 
 interface NicknameScreenProps {
   onNavigate: (screen: string) => void;

@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Alert, Image, Platform } from 'react-native';
-import { spacing } from '../utils/designTokens';
-import { SCREEN_NAMES } from '../utils/constants';
+import { spacing } from '../../utils/designTokens';
+import { SCREEN_NAMES } from '../../utils/constants';
 
 interface StartScreenProps {
   onNavigate: (screen: string) => void;
@@ -28,7 +28,7 @@ const StartScreen: React.FC<StartScreenProps> = ({ onNavigate }) => {
     <View style={styles.container}>
       <View style={styles.content}>
         <Image
-          source={require('../assets/images/RePlant_Logo.png')}
+          source={require('../../assets/images/RePlant_Logo.png')}
           style={styles.logoImage}
           resizeMode="contain"
         />
@@ -46,7 +46,7 @@ const StartScreen: React.FC<StartScreenProps> = ({ onNavigate }) => {
           activeOpacity={0.8}
         >
           <Image
-            source={require('../assets/images/kakao_logo.png')}
+            source={require('../../assets/images/kakao_logo.png')}
             style={styles.kakaoLogo}
             resizeMode="contain"
           />
@@ -59,7 +59,7 @@ const StartScreen: React.FC<StartScreenProps> = ({ onNavigate }) => {
           activeOpacity={0.8}
         >
           <Image
-            source={require('../assets/images/google_logo.png')}
+            source={require('../../assets/images/google_logo.png')}
             style={styles.googleLogo}
             resizeMode="contain"
           />

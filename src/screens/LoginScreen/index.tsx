@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, KeyboardAvoidingView, Platform, Image, TextInput, Modal } from 'react-native';
-import { spacing, typography, borderRadius } from '../utils/designTokens';
-import { SCREEN_NAMES } from '../utils/constants';
-import { login as loginApi } from '../api/authApi';
-import { saveTokens, saveUserInfo, saveKeepLoggedIn } from '../utils/tokenStorage';
-import { apiClient } from '../api/client';
-import { useUser } from '../contexts/UserContext';
-import { AlertModal } from '../components/ui';
-import { signInWithKakao } from '../services/kakaoSignIn';
-import { signInWithGoogle } from '../services/googleSignIn';
-import { loginWithOAuth } from '../services/authService';
+import { spacing, typography, borderRadius } from '../../utils/designTokens';
+import { SCREEN_NAMES } from '../../utils/constants';
+import { login as loginApi } from '../../api/authApi';
+import { saveTokens, saveUserInfo, saveKeepLoggedIn } from '../../utils/tokenStorage';
+import { apiClient } from '../../api/client';
+import { useUser } from '../../contexts/UserContext';
+import { AlertModal } from '../../components/ui';
+import { signInWithKakao } from '../../services/kakaoSignIn';
+import { signInWithGoogle } from '../../services/googleSignIn';
+import { loginWithOAuth } from '../../services/authService';
 
 interface LoginScreenProps {
   onNavigate: (screen: string) => void;
@@ -205,7 +205,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onNavigate }) => {
         <View style={styles.topSection}>
           <View style={styles.logoContainer}>
             <Image
-              source={require('../assets/images/RePlant_Logo.png')}
+              source={require('../../assets/images/RePlant_Logo.png')}
               style={styles.logo}
               resizeMode="contain"
             />
@@ -287,7 +287,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onNavigate }) => {
               >
                 <View style={[styles.socialIconCircle, { backgroundColor: '#FEE500' }]}>
                   <Image
-                    source={require('../assets/images/kakao_logo.png')}
+                    source={require('../../assets/images/kakao_logo.png')}
                     style={styles.socialIconImage}
                     resizeMode="contain"
                   />
@@ -301,7 +301,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onNavigate }) => {
               >
                 <View style={[styles.socialIconCircle, { backgroundColor: '#ffffff', borderWidth: 1, borderColor: '#E0E0E0' }]}>
                   <Image
-                    source={require('../assets/images/google_logo.png')}
+                    source={require('../../assets/images/google_logo.png')}
                     style={styles.socialIconImage}
                     resizeMode="contain"
                   />
@@ -324,7 +324,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onNavigate }) => {
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <Image
-              source={require('../assets/images/check.png')}
+              source={require('../../assets/images/check.png')}
               style={styles.modalIcon}
               resizeMode="contain"
             />
