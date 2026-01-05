@@ -11,6 +11,8 @@
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		761780ED2CA45674006654EE /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 761780EC2CA45674006654EE /* AppDelegate.swift */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
+		F0BD78928E4A4769B53C78A4 /* Maplestory Light.ttf in Resources */ = {isa = PBXBuildFile; fileRef = B025865663FA4E7C9CD52A01 /* Maplestory Light.ttf */; };
+		BE2379E10B204718BC4329DA /* Maplestory Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = E89836C3ECE74AD3A4C043E6 /* Maplestory Bold.ttf */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -24,6 +26,8 @@
 		761780EC2CA45674006654EE /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = TempRNProject/AppDelegate.swift; sourceTree = "<group>"; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = TempRNProject/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
+		B025865663FA4E7C9CD52A01 /* Maplestory Light.ttf */ = {isa = PBXFileReference; name = "Maplestory Light.ttf"; path = "../src/assets/fonts/Maplestory Light.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		E89836C3ECE74AD3A4C043E6 /* Maplestory Bold.ttf */ = {isa = PBXFileReference; name = "Maplestory Bold.ttf"; path = "../src/assets/fonts/Maplestory Bold.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -74,6 +78,7 @@
 				83CBBA001A601CBA00E9B192 /* Products */,
 				2D16E6871FA4F8E400B85C8A /* Frameworks */,
 				BBD78D7AC51CEA395F1C20DB /* Pods */,
+				53634D2EB9A04B25AB19AB5D /* Resources */,
 			);
 			indentWidth = 2;
 			sourceTree = "<group>";
@@ -96,6 +101,16 @@
 			);
 			path = Pods;
 			sourceTree = "<group>";
+		};
+		53634D2EB9A04B25AB19AB5D /* Resources */ = {
+			isa = "PBXGroup";
+			children = (
+				B025865663FA4E7C9CD52A01 /* Maplestory Light.ttf */,
+				E89836C3ECE74AD3A4C043E6 /* Maplestory Bold.ttf */,
+			);
+			name = Resources;
+			sourceTree = "<group>";
+			path = "";
 		};
 /* End PBXGroup section */
 
@@ -159,6 +174,8 @@
 			files = (
 				81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
+				F0BD78928E4A4769B53C78A4 /* Maplestory Light.ttf in Resources */,
+				BE2379E10B204718BC4329DA /* Maplestory Bold.ttf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

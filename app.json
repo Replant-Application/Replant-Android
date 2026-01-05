@@ -1,6 +1,7 @@
 {
   "name": "ReplantMobileApp",
   "displayName": "ReplantMobileApp",
+  "main": "index.js",
   "android": {
     "package": "com.anonymous.replantmobileapp"
   },
