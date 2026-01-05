@@ -5,11 +5,11 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Platform, KeyboardAvoidingView, Image } from 'react-native';
 import { NavigationProp, RouteProp } from '@react-navigation/native';
-import { useAdmin } from '../hooks/useAdmin';
-import { Header, Loading, ErrorBoundary, Button, Input } from '../components/ui';
-import { colors, spacing, typography, borderRadius } from '../utils/designTokens';
-import { RootStackParamList } from '../types/navigation';
-import { UserInfo } from '../api/manageApi';
+import { useAdmin } from '../../hooks/useAdmin';
+import { Header, Loading, ErrorBoundary, Button, Input } from '../../components/ui';
+import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
+import { RootStackParamList } from '../../types/navigation';
+import { UserInfo } from '../../api/manageApi';
 
 interface AdminUserEditScreenProps {
   navigation: NavigationProp<RootStackParamList>;
@@ -86,7 +86,7 @@ const AdminUserEditScreen: React.FC<AdminUserEditScreenProps> = ({ navigation, r
         leftButton={
           <TouchableOpacity onPress={() => navigation.goBack()}>
             <Image
-              source={require('../assets/images/left.png')}
+              source={require('../../assets/images/left.png')}
               style={styles.backButtonIcon}
               resizeMode="contain"
             />

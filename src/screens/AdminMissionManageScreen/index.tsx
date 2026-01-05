@@ -16,9 +16,9 @@ import {
   Modal,
 } from 'react-native';
 import { NavigationProp } from '@react-navigation/native';
-import { Card, Header, Loading, SectionTitle } from '../components/ui';
-import { colors, spacing, typography, borderRadius, shadows } from '../utils/designTokens';
-import { RootStackParamList } from '../types/navigation';
+import { Card, Header, Loading, SectionTitle } from '../../components/ui';
+import { colors, spacing, typography, borderRadius, shadows } from '../../utils/designTokens';
+import { RootStackParamList } from '../../types/navigation';
 
 interface Mission {
   id: string;

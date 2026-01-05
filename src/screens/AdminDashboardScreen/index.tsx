@@ -5,11 +5,11 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { NavigationProp } from '@react-navigation/native';
-import { useAdmin } from '../hooks/useAdmin';
-import { Card, Header, Loading, ErrorBoundary, SectionTitle } from '../components/ui';
-import { colors, spacing, typography, borderRadius, shadows } from '../utils/designTokens';
-import { RootStackParamList } from '../types/navigation';
-import { UserInfo } from '../api/manageApi';
+import { useAdmin } from '../../hooks/useAdmin';
+import { Card, Header, Loading, ErrorBoundary, SectionTitle } from '../../components/ui';
+import { colors, spacing, typography, borderRadius, shadows } from '../../utils/designTokens';
+import { RootStackParamList } from '../../types/navigation';
+import { UserInfo } from '../../api/manageApi';
 
 interface AdminDashboardScreenProps {
   navigation: NavigationProp<RootStackParamList>;
