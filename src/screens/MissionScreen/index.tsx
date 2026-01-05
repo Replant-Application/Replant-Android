@@ -648,7 +648,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background.secondary,
   },
   title: {
-    fontSize: typography.fontSize['2xl'],
+    fontSize: typography.fontSize.xl,
     fontWeight: typography.fontWeight.normal,
     color: colors.text.primary,
     marginBottom: spacing[4],
