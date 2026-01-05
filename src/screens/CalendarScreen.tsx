@@ -4,6 +4,7 @@ import { useCalendar } from '../hooks/useCalendar';
 import { Card, Loading, ErrorBoundary, Header, SectionTitle, Button, FAB } from '../components/ui';
 import { colors, spacing, typography, borderRadius, shadows } from '../utils/designTokens';
 import { CalendarEventData } from '../types';
+import { formatDateKorean } from '../utils/dateUtils';
 
 const CalendarScreen: React.FC = () => {
   const { loading, error, addEvent, updateEvent, deleteEvent, getEventsByDate } = useCalendar();
@@ -20,20 +21,7 @@ const CalendarScreen: React.FC = () => {
     return <ErrorBoundary error={error} />;
   }
 
-  // 날짜 포맷팅
-  const formatDate = (dateString: string): string => {
-    try {
-      const date = new Date(dateString);
-      return date.toLocaleDateString('ko-KR', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        weekday: 'long',
-      });
-    } catch {
-      return dateString;
-    }
-  };
+  // 날짜 포맷팅 (formatDateKorean의 includeWeekday 옵션 사용)
 
   // 시간 포맷팅
   const formatTime = (timeString?: string): string => {
@@ -175,7 +163,7 @@ const CalendarScreen: React.FC = () => {
                 </Text>
               </TouchableOpacity>
             </View>
-            <Text style={styles.selectedDateText}>{formatDate(selectedDate)}</Text>
+            <Text style={styles.selectedDateText}>{formatDateKorean(selectedDate, true)}</Text>
           </Card>
 
           {/* 선택된 날짜의 이벤트 */}
@@ -237,7 +225,7 @@ const CalendarScreen: React.FC = () => {
             <Text style={styles.modalTitle}>
               {editingEvent ? '이벤트 수정' : '이벤트 추가'}
             </Text>
-            <Text style={styles.modalDate}>{formatDate(selectedDate)}</Text>
+            <Text style={styles.modalDate}>{formatDateKorean(selectedDate, true)}</Text>
 
             <TextInput
               style={styles.input}

@@ -12,6 +12,7 @@ import { Mission } from '../types';
 import { checkVerificationStatus, MissionType, verifyByGps, verifyByTime, createVerification, addSystemMissionToMyMissions } from '../api/missionApi';
 import { uploadMissionVerifyPhoto } from '../api/fileApi';
 import * as Location from 'expo-location';
+import { formatDateYYYYMMDD } from '../utils/dateUtils';
 import { getMyBadges, getBadgeHistory, Badge } from '../api/badgeApi';
 import { logError } from '../utils/logger';
 
@@ -56,13 +57,7 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
   const [badgesLoading, setBadgesLoading] = useState(false);
 
   // 오늘 날짜 (YYYY-MM-DD 형식)
-  const today = useMemo(() => {
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    const day = String(now.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
-  }, []);
+  const today = useMemo(() => formatDateYYYYMMDD(new Date()), []);
 
   // 기간별 + 일반/커스텀 필터링된 미션 목록
   const filteredMissions = useMemo(() => {

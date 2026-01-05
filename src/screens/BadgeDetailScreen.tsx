@@ -4,6 +4,7 @@ import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../types/navigation';
 import { colors, spacing, typography, borderRadius, shadows } from '../utils/designTokens';
 import { Header } from '../components/ui';
+import { formatDateKorean } from '../utils/dateUtils';
 
 interface BadgeDetailScreenProps {
   navigation: NavigationProp<RootStackParamList>;
@@ -17,11 +18,7 @@ const BadgeDetailScreen: React.FC<BadgeDetailScreenProps> = ({ navigation, route
   const missionType = badge.missionType === 'CUSTOM' ? '커스텀 미션' : '일반 미션';
   const isExpired = badge.isExpired || new Date(badge.expiresAt) < new Date();
 
-  // 날짜 포맷팅
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일`;
-  };
+  // 날짜 포맷팅 (formatDateKorean 사용)
 
   return (
     <View style={styles.container}>
@@ -56,13 +53,13 @@ const BadgeDetailScreen: React.FC<BadgeDetailScreenProps> = ({ navigation, route
 
           <View style={styles.infoRow}>
             <Text style={styles.infoLabel}>발급일</Text>
-            <Text style={styles.infoValue}>{formatDate(badge.issuedAt)}</Text>
+            <Text style={styles.infoValue}>{formatDateKorean(badge.issuedAt)}</Text>
           </View>
 
           <View style={styles.infoRow}>
             <Text style={styles.infoLabel}>만료일</Text>
             <Text style={[styles.infoValue, isExpired && styles.expiredText]}>
-              {formatDate(badge.expiresAt)}
+              {formatDateKorean(badge.expiresAt)}
             </Text>
           </View>
 

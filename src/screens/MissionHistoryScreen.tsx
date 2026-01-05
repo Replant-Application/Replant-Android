@@ -94,10 +94,6 @@ const MissionHistoryScreen: React.FC<MissionHistoryScreenProps> = ({ navigation 
     }
   };
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, '0')}.${String(date.getDate()).padStart(2, '0')}`;
-  };
 
   const renderMissionItem = ({ item }: { item: UserMission }) => {
     const mission = item.mission || item.customMission;
@@ -121,10 +117,10 @@ const MissionHistoryScreen: React.FC<MissionHistoryScreenProps> = ({ navigation 
 
         <View style={styles.missionFooter}>
           <Text style={styles.dateText}>
-            배정: {formatDate(item.assignedAt)}
+            배정: {formatDateDot(item.assignedAt)}
           </Text>
           <Text style={styles.dateText}>
-            마감: {formatDate(item.dueDate)}
+            마감: {formatDateDot(item.dueDate)}
           </Text>
         </View>
 

@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ViewStyle } from 'react-native';
 import { colors, spacing, typography, borderRadius, shadows } from '../../utils/designTokens';
 import { SimpleDiaryData } from '../../types';
+import { formatDateKorean } from '../../utils/dateUtils';
 
 interface DiaryCardProps {
   diary: SimpleDiaryData & { id: string };
@@ -46,14 +47,6 @@ const DiaryCard: React.FC<DiaryCardProps> = ({
     return nameMap[emotion] || emotion;
   };
 
-  const formatDate = (dateString: string): string => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('ko-KR', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
-  };
 
   return (
     <View style={[styles.container, style]}>
@@ -67,7 +60,7 @@ const DiaryCard: React.FC<DiaryCardProps> = ({
           </Text>
         </View>
         <Text style={styles.date}>
-          {formatDate(diary.date)}
+          {formatDateKorean(diary.date)}
         </Text>
       </View>
 
