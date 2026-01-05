@@ -1,10 +1,10 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity } from 'react-native';
 import { NavigationProp, RouteProp } from '@react-navigation/native';
-import { RootStackParamList } from '../types/navigation';
-import { colors, spacing, typography, borderRadius, shadows } from '../utils/designTokens';
-import { Header } from '../components/ui';
-import { formatDateKorean } from '../utils/dateUtils';
+import { RootStackParamList } from '../../types/navigation';
+import { colors, spacing, typography, borderRadius, shadows } from '../../utils/designTokens';
+import { Header } from '../../components/ui';
+import { formatDateKorean } from '../../utils/dateUtils';
 
 interface BadgeDetailScreenProps {
   navigation: NavigationProp<RootStackParamList>;
@@ -32,7 +32,7 @@ const BadgeDetailScreen: React.FC<BadgeDetailScreenProps> = ({ navigation, route
         <View style={styles.badgeIconContainer}>
           <View style={[styles.badgeIcon, isExpired && styles.badgeIconExpired]}>
             <Image
-              source={require('../assets/images/check2.png')}
+              source={require('../../assets/images/check2.png')}
               style={styles.badgeImage}
               resizeMode="contain"
             />

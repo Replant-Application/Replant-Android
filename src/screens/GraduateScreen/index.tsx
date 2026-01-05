@@ -14,10 +14,10 @@ import {
   Image,
 } from 'react-native';
 import { NavigationProp } from '@react-navigation/native';
-import { Card, Header, Loading, SectionTitle } from '../components/ui';
-import { colors, spacing, typography, borderRadius, shadows } from '../utils/designTokens';
-import { RootStackParamList } from '../types/navigation';
-import { useUser } from '../contexts/UserContext';
+import { Card, Header, Loading, SectionTitle } from '../../components/ui';
+import { colors, spacing, typography, borderRadius, shadows } from '../../utils/designTokens';
+import { RootStackParamList } from '../../types/navigation';
+import { useUser } from '../../contexts/UserContext';
 
 interface MentoringStats {
   totalHelpedUsers: number;

@@ -8,11 +8,11 @@ import {
   Image,
 } from 'react-native';
 import { NavigationProp } from '@react-navigation/native';
-import { Header } from '../components/ui';
-import { colors, spacing, typography, borderRadius, shadows } from '../utils/designTokens';
-import { RootStackParamList } from '../types/navigation';
-import { useMission } from '../hooks/useMission';
-import { Mission } from '../types';
+import { Header } from '../../components/ui';
+import { colors, spacing, typography, borderRadius, shadows } from '../../utils/designTokens';
+import { RootStackParamList } from '../../types/navigation';
+import { useMission } from '../../hooks/useMission';
+import { Mission } from '../../types';
 
 interface StatisticsScreenProps {
   navigation: NavigationProp<RootStackParamList>;
@@ -143,11 +143,11 @@ const StatisticsScreen: React.FC<StatisticsScreenProps> = ({ navigation }) => {
   };
 
   const categoryFilters = [
-    { id: 'all' as CategoryFilter, label: '전체', icon: require('../assets/images/search.png') },
-    { id: 'health' as CategoryFilter, label: '건강 챙기기', icon: require('../assets/images/home.png') },
-    { id: 'selfcare' as CategoryFilter, label: '나 돌보기', icon: require('../assets/images/like.png') },
-    { id: 'daily' as CategoryFilter, label: '정돈된 일상', icon: require('../assets/images/home.png') },
-    { id: 'regular' as CategoryFilter, label: '규칙적인', icon: require('../assets/images/day.png') },
+    { id: 'all' as CategoryFilter, label: '전체', icon: require('../../assets/images/search.png') },
+    { id: 'health' as CategoryFilter, label: '건강 챙기기', icon: require('../../assets/images/home.png') },
+    { id: 'selfcare' as CategoryFilter, label: '나 돌보기', icon: require('../../assets/images/like.png') },
+    { id: 'daily' as CategoryFilter, label: '정돈된 일상', icon: require('../../assets/images/home.png') },
+    { id: 'regular' as CategoryFilter, label: '규칙적인', icon: require('../../assets/images/day.png') },
   ];
 
   return (
@@ -193,7 +193,7 @@ const StatisticsScreen: React.FC<StatisticsScreenProps> = ({ navigation }) => {
             activeOpacity={0.7}
           >
             <Image
-              source={require('../assets/images/left.png')}
+              source={require('../../assets/images/left.png')}
               style={styles.arrowIcon}
               resizeMode="contain"
             />
@@ -207,7 +207,7 @@ const StatisticsScreen: React.FC<StatisticsScreenProps> = ({ navigation }) => {
             activeOpacity={0.7}
           >
             <Image
-              source={require('../assets/images/left.png')}
+              source={require('../../assets/images/left.png')}
               style={[styles.arrowIcon, { transform: [{ rotate: '180deg' }] }]}
               resizeMode="contain"
             />
@@ -255,7 +255,7 @@ const StatisticsScreen: React.FC<StatisticsScreenProps> = ({ navigation }) => {
         <View style={styles.achievementCard}>
           <View style={styles.achievementHeader}>
             <Image
-              source={require('../assets/images/search.png')}
+              source={require('../../assets/images/search.png')}
               style={styles.achievementIcon}
               resizeMode="contain"
             />
@@ -288,7 +288,7 @@ const StatisticsScreen: React.FC<StatisticsScreenProps> = ({ navigation }) => {
                 <Text style={styles.missionStatPercentage}>{stat.completionRate}%</Text>
                 <View style={styles.missionStatCheck}>
                   <Image
-                    source={require('../assets/images/check2.png')}
+                    source={require('../../assets/images/check2.png')}
                     style={styles.checkIcon}
                     resizeMode="contain"
                   />

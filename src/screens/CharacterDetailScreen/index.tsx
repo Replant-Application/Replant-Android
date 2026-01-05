@@ -1,12 +1,12 @@
 import React, { useState, useMemo, useRef } from 'react';
 import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, Modal, TextInput, Alert } from 'react-native';
-import { colors, spacing, typography, borderRadius, shadows } from '../utils/designTokens';
+import { colors, spacing, typography, borderRadius, shadows } from '../../utils/designTokens';
 import { NavigationProp, RouteProp } from '@react-navigation/native';
-import { RootStackParamList } from '../types/navigation';
-import { ProgressBar, Header, SectionTitle, Button } from '../components/ui';
-import { useCharacter } from '../hooks/useCharacter';
-import { downloadPetImage } from '../services/petService';
-import { getCharacterImage } from '../utils/characterUtils';
+import { RootStackParamList } from '../../types/navigation';
+import { ProgressBar, Header, SectionTitle, Button } from '../../components/ui';
+import { useCharacter } from '../../hooks/useCharacter';
+import { downloadPetImage } from '../../services/petService';
+import { getCharacterImage } from '../../utils/characterUtils';
 
 interface CharacterDetailScreenProps {
   route: RouteProp<RootStackParamList, 'CharacterDetail'>;
@@ -147,7 +147,7 @@ const CharacterDetailScreen: React.FC<CharacterDetailScreenProps> = ({ route, na
               <Text style={styles.downloadButtonIcon}>⏳</Text>
             ) : (
               <Image
-                source={require('../assets/images/download-icon.jpg')}
+                source={require('../../assets/images/download-icon.jpg')}
                 style={styles.downloadIconImage}
                 resizeMode="contain"
               />

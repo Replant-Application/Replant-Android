@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Modal, TextInput } from 'react-native';
-import { useCalendar } from '../hooks/useCalendar';
-import { Card, Loading, ErrorBoundary, Header, SectionTitle, Button, FAB } from '../components/ui';
-import { colors, spacing, typography, borderRadius, shadows } from '../utils/designTokens';
-import { CalendarEventData } from '../types';
-import { formatDateKorean } from '../utils/dateUtils';
+import { useCalendar } from '../../hooks/useCalendar';
+import { Card, Loading, ErrorBoundary, Header, SectionTitle, Button, FAB } from '../../components/ui';
+import { colors, spacing, typography, borderRadius, shadows } from '../../utils/designTokens';
+import { CalendarEventData } from '../../types';
+import { formatDateKorean } from '../../utils/dateUtils';
 
 const CalendarScreen: React.FC = () => {
   const { loading, error, addEvent, updateEvent, deleteEvent, getEventsByDate } = useCalendar();

@@ -12,12 +12,12 @@ import {
   Image,
 } from 'react-native';
 import { NavigationProp } from '@react-navigation/native';
-import { Header, EmptyState } from '../components/ui';
-import { PlaceCard } from '../components/specialized/PlaceCard';
-import { useLocation } from '../hooks/useLocation';
-import { usePlacesSearch } from '../hooks/usePlacesSearch';
-import { colors, spacing, typography, borderRadius } from '../utils/designTokens';
-import { RootStackParamList } from '../types/navigation';
+import { Header, EmptyState } from '../../components/ui';
+import { PlaceCard } from '../../components/specialized/PlaceCard';
+import { useLocation } from '../../hooks/useLocation';
+import { usePlacesSearch } from '../../hooks/usePlacesSearch';
+import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
+import { RootStackParamList } from '../../types/navigation';
 
 interface PlacesSearchScreenProps {
   navigation: NavigationProp<RootStackParamList>;
@@ -75,7 +75,7 @@ const PlacesSearchScreen: React.FC<PlacesSearchScreenProps> = ({ navigation }) =
         leftButton={
           <TouchableOpacity onPress={handleGoBack} style={styles.backButton}>
             <Image
-              source={require('../assets/images/left.png')}
+              source={require('../../assets/images/left.png')}
               style={styles.backButtonIcon}
               resizeMode="contain"
             />

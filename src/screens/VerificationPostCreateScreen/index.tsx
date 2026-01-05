@@ -17,14 +17,14 @@ import {
   TouchableOpacity,
   ActivityIndicator,
 } from 'react-native';
-import { Header, AlertModal } from '../components/ui';
-import { colors, spacing, typography, borderRadius } from '../utils/designTokens';
-import { createVerification, updateVerification, getVerification } from '../api/missionApi';
-import { uploadMissionVerifyPhoto } from '../api/fileApi';
+import { Header, AlertModal } from '../../components/ui';
+import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
+import { createVerification, updateVerification, getVerification } from '../../api/missionApi';
+import { uploadMissionVerifyPhoto } from '../../api/fileApi';
 import { NavigationProp, RouteProp } from '@react-navigation/native';
-import { RootStackParamList } from '../types/navigation';
+import { RootStackParamList } from '../../types/navigation';
 import { launchImageLibrary, launchCamera } from 'react-native-image-picker';
-import { logError } from '../utils/logger';
+import { logError } from '../../utils/logger';
 
 interface VerificationPostCreateScreenProps {
   navigation: NavigationProp<RootStackParamList>;
@@ -281,7 +281,7 @@ const VerificationPostCreateScreen: React.FC<VerificationPostCreateScreenProps> 
         leftButton={
           <TouchableOpacity onPress={() => navigation.goBack()}>
             <Image
-              source={require('../assets/images/left.png')}
+              source={require('../../assets/images/left.png')}
               style={styles.backButtonIcon}
               resizeMode="contain"
             />
@@ -361,7 +361,7 @@ const VerificationPostCreateScreen: React.FC<VerificationPostCreateScreenProps> 
               ) : (
                 <>
                   <Image
-                    source={require('../assets/images/camera.png')}
+                    source={require('../../assets/images/camera.png')}
                     style={styles.addPhotoIcon}
                     resizeMode="contain"
                   />

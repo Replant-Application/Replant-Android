@@ -6,10 +6,10 @@ import {
   TouchableOpacity,
   ScrollView,
 } from 'react-native';
-import { Header } from '../components/ui';
-import { colors, spacing, typography, borderRadius } from '../utils/designTokens';
+import { Header } from '../../components/ui';
+import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
 import { NavigationProp } from '@react-navigation/native';
-import { RootStackParamList } from '../types/navigation';
+import { RootStackParamList } from '../../types/navigation';
 
 interface CounselingSelectScreenProps {
   navigation: NavigationProp<RootStackParamList>;

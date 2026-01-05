@@ -1,14 +1,14 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { NavigationProp } from '@react-navigation/native';
-import { useUserProfile } from '../hooks/useUserProfile';
-import { useCharacter } from '../hooks/useCharacter';
-import { CharacterCard } from '../components/specialized';
-import { Card, Loading, ErrorBoundary, Header, SectionTitle } from '../components/ui';
-import { colors, spacing, typography, borderRadius, shadows } from '../utils/designTokens';
-import { RootStackParamList } from '../types/navigation';
-import { Character } from '../types';
-import { formatDateKorean } from '../utils/dateUtils';
+import { useUserProfile } from '../../hooks/useUserProfile';
+import { useCharacter } from '../../hooks/useCharacter';
+import { CharacterCard } from '../../components/specialized';
+import { Card, Loading, ErrorBoundary, Header, SectionTitle } from '../../components/ui';
+import { colors, spacing, typography, borderRadius, shadows } from '../../utils/designTokens';
+import { RootStackParamList } from '../../types/navigation';
+import { Character } from '../../types';
+import { formatDateKorean } from '../../utils/dateUtils';
 
 interface MyPageScreenProps {
   navigation: NavigationProp<RootStackParamList>;

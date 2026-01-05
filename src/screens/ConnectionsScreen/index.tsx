@@ -15,14 +15,14 @@ import {
   Image,
   Alert,
 } from 'react-native';
-import { getRecommendations, acceptRecommendation, rejectRecommendation } from '../api/recommendationApi';
-import { getChatRooms } from '../api/chatApi';
-import { Loading, Header, EmptyState, TabBar } from '../components/ui';
-import { colors, spacing, typography, borderRadius } from '../utils/designTokens';
+import { getRecommendations, acceptRecommendation, rejectRecommendation } from '../../api/recommendationApi';
+import { getChatRooms } from '../../api/chatApi';
+import { Loading, Header, EmptyState, TabBar } from '../../components/ui';
+import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
 import { NavigationProp } from '@react-navigation/native';
-import { RootStackParamList } from '../types/navigation';
-import { SCREEN_NAMES } from '../utils/constants';
-import { formatTimeAgo } from '../utils/dateUtils';
+import { RootStackParamList } from '../../types/navigation';
+import { SCREEN_NAMES } from '../../utils/constants';
+import { formatTimeAgo } from '../../utils/dateUtils';
 
 interface ConnectionsScreenProps {
   navigation: NavigationProp<RootStackParamList>;

@@ -1,8 +1,8 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image } from 'react-native';
-import { colors, spacing, typography, borderRadius, shadows } from '../utils/designTokens';
+import { colors, spacing, typography, borderRadius, shadows } from '../../utils/designTokens';
 import { NavigationProp } from '@react-navigation/native';
-import { RootStackParamList } from '../types/navigation';
+import { RootStackParamList } from '../../types/navigation';
 
 interface InfoScreenProps {
   navigation: NavigationProp<RootStackParamList>;
@@ -26,7 +26,7 @@ const InfoScreen: React.FC<InfoScreenProps> = ({ navigation, route }) => {
           activeOpacity={0.7}
         >
           <Image
-            source={require('../assets/images/left.png')}
+            source={require('../../assets/images/left.png')}
             style={styles.backButtonIcon}
             resizeMode="contain"
           />

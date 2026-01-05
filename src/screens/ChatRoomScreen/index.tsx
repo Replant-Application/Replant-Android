@@ -15,12 +15,12 @@ import {
   Platform,
   Image,
 } from 'react-native';
-import { getChatRoom, getChatMessages, sendMessage, markMessagesAsRead } from '../api/chatApi';
-import { Loading, Header } from '../components/ui';
-import { colors, spacing, typography, borderRadius } from '../utils/designTokens';
+import { getChatRoom, getChatMessages, sendMessage, markMessagesAsRead } from '../../api/chatApi';
+import { Loading, Header } from '../../components/ui';
+import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
 import { NavigationProp, RouteProp } from '@react-navigation/native';
-import { RootStackParamList } from '../types/navigation';
-import { formatDateDivider } from '../utils/dateUtils';
+import { RootStackParamList } from '../../types/navigation';
+import { formatDateDivider } from '../../utils/dateUtils';
 
 interface ChatRoomScreenProps {
   navigation: NavigationProp<RootStackParamList>;

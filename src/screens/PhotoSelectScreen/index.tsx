@@ -13,10 +13,10 @@ import {
   Alert,
 } from 'react-native';
 import { launchCamera, launchImageLibrary, ImagePickerResponse, MediaType } from 'react-native-image-picker';
-import { Header, Button } from '../components/ui';
-import { colors, spacing, typography, borderRadius } from '../utils/designTokens';
+import { Header, Button } from '../../components/ui';
+import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
 import { NavigationProp, RouteProp } from '@react-navigation/native';
-import { RootStackParamList } from '../types/navigation';
+import { RootStackParamList } from '../../types/navigation';
 // useUser는 사용하지 않음
 
 interface PhotoSelectScreenProps {
@@ -132,7 +132,7 @@ const PhotoSelectScreen: React.FC<PhotoSelectScreenProps> = ({ navigation, route
         leftButton={
           <TouchableOpacity onPress={handleGoBack} style={styles.backButton}>
             <Image
-              source={require('../assets/images/left.png')}
+              source={require('../../assets/images/left.png')}
               style={styles.backButtonIcon}
               resizeMode="contain"
             />
@@ -158,7 +158,7 @@ const PhotoSelectScreen: React.FC<PhotoSelectScreenProps> = ({ navigation, route
               >
                 <View style={styles.optionIconContainer}>
                   <Image
-                    source={require('../assets/images/camera.png')}
+                    source={require('../../assets/images/camera.png')}
                     style={styles.optionIconImage}
                     resizeMode="contain"
                   />
@@ -177,7 +177,7 @@ const PhotoSelectScreen: React.FC<PhotoSelectScreenProps> = ({ navigation, route
               >
                 <View style={styles.optionIconContainer}>
                   <Image
-                    source={require('../assets/images/picture.png')}
+                    source={require('../../assets/images/picture.png')}
                     style={styles.optionIconImage}
                     resizeMode="contain"
                   />

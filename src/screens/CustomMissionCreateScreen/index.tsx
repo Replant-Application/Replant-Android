@@ -10,13 +10,13 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
-import { Button, Header, SectionTitle, FormCard } from '../components/ui';
-import { colors, spacing, typography, borderRadius } from '../utils/designTokens';
-import { createCustomMission } from '../services/missionService';
-import { useUser } from '../contexts/UserContext';
+import { Button, Header, SectionTitle, FormCard } from '../../components/ui';
+import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
+import { createCustomMission } from '../../services/missionService';
+import { useUser } from '../../contexts/UserContext';
 import { NavigationProp, RouteProp } from '@react-navigation/native';
-import { RootStackParamList } from '../types/navigation';
-import { ScreenNames } from '../types';
+import { RootStackParamList } from '../../types/navigation';
+import { ScreenNames } from '../../types';
 
 interface CustomMissionCreateScreenProps {
   navigation: NavigationProp<RootStackParamList>;
