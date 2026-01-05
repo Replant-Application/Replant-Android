@@ -18,7 +18,7 @@ import {
 import { useCommunityPost } from '../../hooks/useCommunityPost';
 import { useCommunity } from '../../hooks/useCommunity';
 import { CommentCard } from '../../components/specialized';
-import { Loading, ErrorBoundary, Header, EmptyState } from '../../components/ui';
+import { Loading, ErrorBoundary, EmptyState } from '../../components/ui';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
 import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types/navigation';
@@ -152,18 +152,17 @@ const CommunityPostDetailScreen: React.FC<CommunityPostDetailScreenProps> = ({
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
     >
-      <Header
-        title="게시글"
-        leftButton={
-          <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Image
-              source={require('../../assets/images/left.png')}
-              style={styles.backButtonIcon}
-              resizeMode="contain"
-            />
-          </TouchableOpacity>
-        }
-      />
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+          <Image
+            source={require('../../assets/images/left.png')}
+            style={styles.backButtonIcon}
+            resizeMode="contain"
+          />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>게시글</Text>
+        <View style={styles.headerRight} />
+      </View>
 
       <ScrollView
         style={styles.content}
@@ -173,14 +172,21 @@ const CommunityPostDetailScreen: React.FC<CommunityPostDetailScreenProps> = ({
       >
         {/* 게시글 내용 */}
         <View style={styles.postContainer}>
-          <View style={styles.header}>
+          <View style={styles.postHeader}>
             <View style={styles.authorInfo}>
-              <Text style={styles.authorName}>{post.author_nickname}</Text>
-              {post.category && (
-                <View style={styles.categoryBadge}>
-                  <Text style={styles.categoryText}>{post.category}</Text>
-                </View>
-              )}
+              <View style={styles.authorAvatar}>
+                <Text style={styles.authorAvatarText}>
+                  {post.author_nickname.charAt(0).toUpperCase()}
+                </Text>
+              </View>
+              <View>
+                <Text style={styles.authorName}>{post.author_nickname}</Text>
+                {post.category && (
+                  <View style={styles.categoryBadge}>
+                    <Text style={styles.categoryText}>{post.category}</Text>
+                  </View>
+                )}
+              </View>
             </View>
             <Text style={styles.date}>
               {new Date(post.created_at).toLocaleDateString('ko-KR')}
@@ -401,43 +407,86 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: spacing[4],
-    paddingBottom: spacing[24], // 하단 댓글 입력란에 가려지지 않도록 여유 공간 추가
+    paddingBottom: spacing[24],
+  },
+  header: {
+    backgroundColor: colors.background.primary,
+    paddingTop: spacing[16],
+    paddingBottom: spacing[3],
+    paddingHorizontal: spacing[4],
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border.light,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  backButton: {
+    padding: spacing[1],
   },
   backButtonIcon: {
-    width: 24,
-    height: 24,
+    width: 20,
+    height: 20,
+  },
+  headerTitle: {
+    fontSize: typography.fontSize['2xl'],
+    fontWeight: typography.fontWeight.normal,
+    color: colors.text.primary,
+    flex: 1,
+    textAlign: 'center',
+  },
+  headerRight: {
+    width: 28,
   },
   postContainer: {
     backgroundColor: colors.background.primary,
-    borderRadius: borderRadius.lg,
-    padding: spacing[4],
-    marginBottom: spacing[4],
+    borderRadius: borderRadius.base,
+    padding: spacing[3],
+    marginBottom: spacing[2],
+    borderWidth: 1,
+    borderColor: colors.border.light,
   },
-  header: {
+  postHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: spacing[3],
+    alignItems: 'flex-start',
+    marginBottom: spacing[2],
   },
   authorInfo: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing[2],
+    flex: 1,
+  },
+  authorAvatar: {
+    width: 32,
+    height: 32,
+    borderRadius: borderRadius.full,
+    backgroundColor: colors.primary[500],
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  authorAvatarText: {
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.normal,
+    color: colors.white,
   },
   authorName: {
-    fontSize: typography.fontSize.base,
-    fontWeight: typography.fontWeight.semibold,
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.normal,
     color: colors.text.primary,
+    marginBottom: 2,
   },
   categoryBadge: {
     backgroundColor: colors.primary[100],
     paddingHorizontal: spacing[2],
-    paddingVertical: spacing[1],
-    borderRadius: borderRadius.sm,
+    paddingVertical: 2,
+    borderRadius: borderRadius.base,
+    alignSelf: 'flex-start',
   },
   categoryText: {
     fontSize: typography.fontSize.xs,
     color: colors.primary[700],
+    fontWeight: typography.fontWeight.normal,
   },
   date: {
     fontSize: typography.fontSize.xs,
@@ -446,39 +495,43 @@ const styles = StyleSheet.create({
   missionInfo: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing[2],
-    padding: spacing[3],
-    backgroundColor: colors.primary[50],
-    borderRadius: borderRadius.md,
-    marginBottom: spacing[3],
+    gap: spacing[1.5],
+    marginBottom: spacing[2],
+    paddingHorizontal: spacing[2],
+    paddingVertical: spacing[1],
+    backgroundColor: colors.primary[100],
+    borderRadius: borderRadius.base,
+    borderWidth: 1.5,
+    borderColor: colors.primary[500],
   },
   missionEmoji: {
-    fontSize: typography.fontSize['2xl'],
+    fontSize: typography.fontSize.base,
   },
   missionTitle: {
-    fontSize: typography.fontSize.base,
-    fontWeight: typography.fontWeight.semibold,
-    color: colors.primary[700],
+    flex: 1,
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.normal,
+    color: colors.primary[800],
   },
   verifiedBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.green[100],
+    backgroundColor: colors.primary[100],
     paddingHorizontal: spacing[2],
     paddingVertical: spacing[1],
-    borderRadius: borderRadius.full,
+    borderRadius: borderRadius.base,
     gap: 2,
     marginLeft: spacing[2],
   },
   verifiedIcon: {
     fontSize: typography.fontSize.xs,
-    color: colors.green[600],
-    fontWeight: typography.fontWeight.bold,
+    color: colors.primary[600],
+    fontWeight: typography.fontWeight.normal,
   },
   verifiedText: {
     fontSize: typography.fontSize.xs,
-    color: colors.green[700],
-    fontWeight: typography.fontWeight.medium,
+    color: colors.primary[700],
+    fontWeight: typography.fontWeight.normal,
   },
   pendingBadge: {
     flexDirection: 'row',
@@ -486,7 +539,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.orange[100],
     paddingHorizontal: spacing[2],
     paddingVertical: spacing[1],
-    borderRadius: borderRadius.full,
+    borderRadius: borderRadius.base,
     gap: 2,
     marginLeft: spacing[2],
   },
@@ -496,34 +549,37 @@ const styles = StyleSheet.create({
   pendingText: {
     fontSize: typography.fontSize.xs,
     color: colors.orange[700],
-    fontWeight: typography.fontWeight.medium,
+    fontWeight: typography.fontWeight.normal,
   },
   title: {
-    fontSize: typography.fontSize.xl,
-    fontWeight: typography.fontWeight.bold,
+    fontSize: typography.fontSize.base,
+    fontWeight: typography.fontWeight.normal,
     color: colors.text.primary,
-    marginBottom: spacing[3],
+    marginBottom: spacing[1],
+    lineHeight: 20,
   },
   contentText: {
-    fontSize: typography.fontSize.base,
-    color: colors.text.primary,
-    lineHeight: typography.lineHeight.normal * typography.fontSize.base,
-    marginBottom: spacing[4],
+    fontSize: typography.fontSize.sm,
+    color: colors.text.secondary,
+    lineHeight: 18,
+    marginBottom: spacing[2],
   },
   imageContainer: {
-    marginBottom: spacing[4],
+    marginBottom: spacing[2],
     gap: spacing[2],
   },
   image: {
     width: '100%',
-    height: 300,
-    borderRadius: borderRadius.md,
+    height: 200,
+    borderRadius: borderRadius.base,
     backgroundColor: colors.background.secondary,
+    borderWidth: 1,
+    borderColor: colors.border.light,
   },
   actions: {
     flexDirection: 'row',
     gap: spacing[4],
-    paddingTop: spacing[3],
+    paddingTop: spacing[2],
     borderTopWidth: 1,
     borderTopColor: colors.border.light,
   },
@@ -538,36 +594,39 @@ const styles = StyleSheet.create({
   actionText: {
     fontSize: typography.fontSize.sm,
     color: colors.text.secondary,
+    fontWeight: typography.fontWeight.normal,
   },
   deleteText: {
     color: colors.error,
   },
   commentsSection: {
-    marginTop: spacing[4],
+    marginTop: spacing[2],
   },
   commentsTitle: {
-    fontSize: typography.fontSize.lg,
-    fontWeight: typography.fontWeight.bold,
+    fontSize: typography.fontSize.base,
+    fontWeight: typography.fontWeight.normal,
     color: colors.text.primary,
-    marginBottom: spacing[3],
+    marginBottom: spacing[2],
   },
   commentsList: {
-    gap: spacing[2],
+    gap: spacing[1],
   },
   editCommentContainer: {
     backgroundColor: colors.background.primary,
-    borderRadius: borderRadius.md,
-    padding: spacing[3],
-    marginBottom: spacing[2],
+    borderRadius: borderRadius.base,
+    padding: spacing[2],
+    marginBottom: spacing[1],
+    borderWidth: 1,
+    borderColor: colors.border.light,
   },
   editCommentInput: {
     backgroundColor: colors.background.secondary,
-    borderRadius: borderRadius.md,
-    padding: spacing[3],
-    fontSize: typography.fontSize.base,
+    borderRadius: borderRadius.base,
+    padding: spacing[2],
+    fontSize: typography.fontSize.sm,
     color: colors.text.primary,
-    minHeight: 80,
-    marginBottom: spacing[2],
+    minHeight: 60,
+    marginBottom: spacing[1],
   },
   editCommentActions: {
     flexDirection: 'row',
@@ -575,20 +634,25 @@ const styles = StyleSheet.create({
     gap: spacing[2],
   },
   editCommentButton: {
-    paddingHorizontal: spacing[3],
-    paddingVertical: spacing[2],
-    borderRadius: borderRadius.sm,
-    backgroundColor: colors.background.secondary,
+    paddingHorizontal: spacing[2],
+    paddingVertical: spacing[1],
+    borderRadius: borderRadius.base,
+    backgroundColor: colors.white,
+    borderWidth: 1,
+    borderColor: colors.border.light,
   },
   editCommentButtonSave: {
-    backgroundColor: colors.primary[600],
+    backgroundColor: colors.primary[500],
+    borderColor: colors.primary[500],
   },
   editCommentButtonText: {
-    fontSize: typography.fontSize.sm,
+    fontSize: typography.fontSize.xs,
     color: colors.text.secondary,
+    fontWeight: typography.fontWeight.normal,
   },
   editCommentButtonTextSave: {
     color: colors.white,
+    fontWeight: typography.fontWeight.normal,
   },
   replyEditContainer: {
     marginLeft: spacing[4],
@@ -609,46 +673,50 @@ const styles = StyleSheet.create({
     borderBottomColor: colors.border.light,
   },
   replyingToText: {
-    fontSize: typography.fontSize.sm,
+    fontSize: typography.fontSize.xs,
     color: colors.primary[700],
-    fontWeight: typography.fontWeight.medium,
+    fontWeight: typography.fontWeight.normal,
   },
   cancelReplyButton: {
     padding: spacing[1],
   },
   cancelReplyText: {
-    fontSize: typography.fontSize.base,
+    fontSize: typography.fontSize.sm,
     color: colors.text.secondary,
-    fontWeight: typography.fontWeight.bold,
+    fontWeight: typography.fontWeight.normal,
   },
   commentInputContainer: {
     flexDirection: 'row',
-    padding: spacing[4],
+    padding: spacing[3],
     gap: spacing[2],
+    alignItems: 'center',
   },
   commentInput: {
     flex: 1,
-    backgroundColor: colors.background.secondary,
-    borderRadius: borderRadius.md,
-    padding: spacing[3],
-    fontSize: typography.fontSize.base,
+    backgroundColor: colors.white,
+    borderRadius: borderRadius.base,
+    padding: spacing[2],
+    fontSize: typography.fontSize.sm,
     color: colors.text.primary,
-    maxHeight: 100,
+    maxHeight: 80,
+    borderWidth: 1,
+    borderColor: colors.border.light,
   },
   submitButton: {
-    paddingHorizontal: spacing[4],
-    paddingVertical: spacing[3],
-    backgroundColor: colors.primary[600],
-    borderRadius: borderRadius.md,
+    paddingHorizontal: spacing[3],
+    paddingVertical: spacing[2],
+    backgroundColor: colors.primary[500],
+    borderRadius: borderRadius.base,
     justifyContent: 'center',
+    minHeight: 36,
   },
   submitButtonDisabled: {
-    backgroundColor: colors.background.secondary,
+    backgroundColor: colors.gray[200],
   },
   submitButtonText: {
-    fontSize: typography.fontSize.base,
+    fontSize: typography.fontSize.sm,
     color: colors.white,
-    fontWeight: typography.fontWeight.medium,
+    fontWeight: typography.fontWeight.normal,
   },
 });
 
