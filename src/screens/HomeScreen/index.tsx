@@ -1,25 +1,16 @@
 import React, { useMemo, useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions, ImageBackground, Animated, Image, PanResponder } from 'react-native';
 import FastImage from 'react-native-fast-image';
-import { NavigationProp } from '@react-navigation/native';
-import { useCharacter } from '../hooks/useCharacter';
-import { useMission } from '../hooks/useMission';
-import { Loading, ErrorBoundary, EmptyState, AppHeader } from '../components/ui';
-import { colors, spacing, typography, borderRadius, shadows } from '../utils/designTokens';
-import { RootStackParamList } from '../types/navigation';
-import { ScreenNames } from '../types';
+import { useCharacter } from '../../hooks/useCharacter';
+import { useMission } from '../../hooks/useMission';
+import { Loading, ErrorBoundary, EmptyState, AppHeader } from '../../components/ui';
+import { colors, spacing, typography, borderRadius, shadows } from '../../utils/designTokens';
+import { ScreenNames } from '../../types';
+import { getCharacterImage } from '../../utils/characterUtils';
+import { HomeScreenProps } from './HomeScreen.types';
+import { getBackgroundImage } from './HomeScreen.utils';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
-
-// 시간대에 따른 배경 결정 (6시~18시: 낮, 18시~6시: 밤)
-const getBackgroundImage = (): 'day' | 'night' => {
-  const hour = new Date().getHours();
-  return hour >= 6 && hour < 18 ? 'day' : 'night';
-};
-
-interface HomeScreenProps {
-  navigation: NavigationProp<RootStackParamList>;
-}
 
 const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const { characters, error: characterError } = useCharacter();
@@ -101,33 +92,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
 
   // 단일 캐릭터 시스템이므로 첫 번째 캐릭터 사용
   const currentCharacter = characters.length > 0 ? characters[0] : null;
-
-  // 레벨별 캐릭터 이미지 가져오기
-  const getCharacterImage = (level: number, emotion: string = 'default') => {
-    const levelFolder = `level${Math.min(level, 6)}`;
-    switch (levelFolder) {
-      case 'level1':
-        return emotion === 'happy' ? require('../assets/images/characters/level1/happy.gif') :
-               require('../assets/images/characters/level1/default.gif');
-      case 'level2':
-        return emotion === 'happy' ? require('../assets/images/characters/level2/happy.gif') :
-               require('../assets/images/characters/level2/default.gif');
-      case 'level3':
-        return emotion === 'happy' ? require('../assets/images/characters/level3/happy.gif') :
-               require('../assets/images/characters/level3/default.gif');
-      case 'level4':
-        return emotion === 'happy' ? require('../assets/images/characters/level4/happy.gif') :
-               require('../assets/images/characters/level4/default.gif');
-      case 'level5':
-        return emotion === 'happy' ? require('../assets/images/characters/level5/happy.gif') :
-               require('../assets/images/characters/level5/default.gif');
-      case 'level6':
-        return emotion === 'happy' ? require('../assets/images/characters/level6/happy.gif') :
-               require('../assets/images/characters/level6/default.gif');
-      default:
-        return require('../assets/images/characters/level1/default.gif');
-    }
-  };
 
   // 시간에 따른 배경 변경 감지
   useEffect(() => {
@@ -227,8 +191,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
       <Animated.View style={[styles.container, { opacity: fadeAnim }]}>
         <ImageBackground
           source={backgroundType === 'day' 
-            ? require('../assets/images/day.png')
-            : require('../assets/images/night.png')
+            ? require('../../assets/images/day.png')
+            : require('../../assets/images/night.png')
           }
           style={styles.fullBackground}
           resizeMode="cover"
@@ -416,7 +380,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                   <View style={styles.missionListItemLeft}>
                     {mission.completed ? (
                       <Image
-                        source={require('../assets/images/check2.png')}
+                        source={require('../../assets/images/check2.png')}
                         style={styles.missionCompletedIcon}
                         resizeMode="contain"
                       />

@@ -1,18 +1,18 @@
 import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Image, RefreshControl } from 'react-native';
-import { useMission } from '../hooks/useMission';
-import { useCharacter } from '../hooks/useCharacter';
-import { MissionCard, MissionVerificationModal } from '../components/specialized';
-import { Card, Loading, ErrorBoundary, Button, Header, EmptyState, SectionTitle, ConfirmModal, FilterBar, TabBar } from '../components/ui';
-import { colors, spacing, typography, borderRadius, shadows } from '../utils/designTokens';
-import { useUser } from '../contexts/UserContext';
-import { Mission } from '../types';
-import { checkVerificationStatus, MissionType, verifyByGps, verifyByTime, createVerification, addSystemMissionToMyMissions } from '../api/missionApi';
-import { uploadMissionVerifyPhoto } from '../api/fileApi';
+import { useMission } from '../../hooks/useMission';
+import { useCharacter } from '../../hooks/useCharacter';
+import { MissionCard, MissionVerificationModal } from '../../components/specialized';
+import { Card, Loading, ErrorBoundary, Button, Header, EmptyState, SectionTitle, ConfirmModal, FilterBar, TabBar } from '../../components/ui';
+import { colors, spacing, typography, borderRadius, shadows } from '../../utils/designTokens';
+import { useUser } from '../../contexts/UserContext';
+import { Mission } from '../../types';
+import { checkVerificationStatus, MissionType, verifyByGps, verifyByTime, createVerification, addSystemMissionToMyMissions } from '../../api/missionApi';
+import { uploadMissionVerifyPhoto } from '../../api/fileApi';
 import * as Location from 'expo-location';
-import { formatDateYYYYMMDD } from '../utils/dateUtils';
-import { getMyBadges, getBadgeHistory, Badge } from '../api/badgeApi';
-import { logError } from '../utils/logger';
+import { formatDateYYYYMMDD } from '../../utils/dateUtils';
+import { getMyBadges, getBadgeHistory, Badge } from '../../api/badgeApi';
+import { logError } from '../../utils/logger';
 import { MissionScreenProps, MissionFilter, MissionPeriodFilter, MissionSourceFilter } from './MissionScreen.types';
 
 // 단일 카테고리: 성장
@@ -516,7 +516,7 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
           setIsLevelUp(false);
         }}
         confirmButtonColor={colors.primary[500]}
-        image={isLevelUp ? require('../assets/images/gift.png') : require('../assets/images/check2.png')}
+        image={isLevelUp ? require('../../assets/images/gift.png') : require('../../assets/images/check2.png')}
       />
 
       {/* 인증 방법 선택 모달 */}
@@ -718,7 +718,7 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
 
           {displayedMissions.length === 0 ? (
             <EmptyState
-              iconImage={require('../assets/images/clover.png')}
+              iconImage={require('../../assets/images/clover.png')}
               title={
                 selectedSource === 'CUSTOM'
                   ? '커스텀 미션이 없어요'
