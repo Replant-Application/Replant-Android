@@ -1,5 +1,6 @@
 import React, { useMemo, useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions, ImageBackground, Animated, Image, PanResponder } from 'react-native';
+import FastImage from 'react-native-fast-image';
 import { NavigationProp } from '@react-navigation/native';
 import { useCharacter } from '../hooks/useCharacter';
 import { useMission } from '../hooks/useMission';
@@ -289,24 +290,29 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                 onLongPress={handleCharacterDoublePress}
                 activeOpacity={0.9}
               >
-                <Animated.Image
-                  key={`character-${currentCharacter.level || 1}-${characterEmotion}`}
-                  source={getCharacterImage(currentCharacter.level || 1, characterEmotion)}
-                  style={[
-                    styles.characterImage,
-                    {
-                      // 높이에 따라 캐릭터 크기도 조절
-                      transform: [{
-                        scale: heroHeightAnim.interpolate({
-                          inputRange: [MIN_HERO_HEIGHT, MAX_HERO_HEIGHT],
-                          outputRange: [0.6, 1],
-                          extrapolate: 'clamp',
-                        }),
-                      }],
-                    },
-                  ]}
-                  resizeMode="contain"
-                />
+                <Animated.View
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    // 높이에 따라 캐릭터 크기도 조절
+                    transform: [{
+                      scale: heroHeightAnim.interpolate({
+                        inputRange: [MIN_HERO_HEIGHT, MAX_HERO_HEIGHT],
+                        outputRange: [0.6, 1],
+                        extrapolate: 'clamp',
+                      }),
+                    }],
+                  }}
+                >
+                  <FastImage
+                    key={`character-${currentCharacter.level || 1}-${characterEmotion}`}
+                    source={getCharacterImage(currentCharacter.level || 1, characterEmotion)}
+                    style={styles.characterImage}
+                    resizeMode={FastImage.resizeMode.contain}
+                  />
+                </Animated.View>
               </TouchableOpacity>
             </>
           )}
