@@ -296,34 +296,44 @@ const VerificationPostCreateScreen: React.FC<VerificationPostCreateScreenProps> 
       >
         {/* 미션 정보 표시 */}
         <View style={styles.missionInfo}>
-          <Text style={styles.missionEmoji}>{missionEmoji || '🎯'}</Text>
+          <View style={styles.missionEmojiContainer}>
+            <Text style={styles.missionEmoji}>{missionEmoji || '🎯'}</Text>
+          </View>
           <View style={styles.missionTextContainer}>
-            <Text style={styles.missionLabel}>인증할 미션</Text>
+            <Text style={styles.missionLabel}>미션</Text>
             <Text style={styles.missionTitle}>{missionTitle}</Text>
           </View>
         </View>
 
         {/* 안내 메시지 */}
         <View style={styles.infoBox}>
+          <Text style={styles.infoIcon}>💡</Text>
           <Text style={styles.infoText}>
-            인증글을 작성하면 다른 사용자들이 투표합니다.{'\n'}
-            좋아요를 받으면 미션이 인증됩니다!
+            인증글을 작성하면 커뮤니티에 공개됩니다.{'\n'}
+            다른 사용자들의 좋아요를 받으면 미션이 완료됩니다.
           </Text>
         </View>
 
         {/* 내용 입력 */}
         <View style={styles.inputSection}>
           <Text style={styles.label}>인증 내용 *</Text>
-          <TextInput
-            style={styles.contentInput}
-            value={content}
-            onChangeText={setContent}
-            placeholder="미션을 어떻게 완료했는지 설명해주세요..."
-            placeholderTextColor={colors.text.tertiary}
-            multiline
-            numberOfLines={8}
-            textAlignVertical="top"
-          />
+          <View style={styles.notebookContainer}>
+            <View style={styles.notebookLines}>
+              {[...Array(20)].map((_, i) => (
+                <View key={i} style={styles.notebookLine} />
+              ))}
+            </View>
+            <TextInput
+              style={styles.contentInput}
+              value={content}
+              onChangeText={setContent}
+              placeholder="미션을 완료한 과정을 자유롭게 작성해주세요"
+              placeholderTextColor={colors.text.tertiary}
+              multiline
+              numberOfLines={8}
+              textAlignVertical="top"
+            />
+          </View>
         </View>
 
         {/* 사진 섹션 */}
@@ -337,7 +347,7 @@ const VerificationPostCreateScreen: React.FC<VerificationPostCreateScreenProps> 
                 style={styles.changePhotoButton}
                 onPress={showPhotoOptions}
               >
-                <Text style={styles.changePhotoText}>사진 변경</Text>
+                <Text style={styles.changePhotoText}>변경</Text>
               </TouchableOpacity>
             </View>
           ) : (
@@ -351,18 +361,21 @@ const VerificationPostCreateScreen: React.FC<VerificationPostCreateScreenProps> 
               ) : (
                 <>
                   <Image
-                    source={require('../assets/images/plus.png')}
+                    source={require('../assets/images/camera.png')}
                     style={styles.addPhotoIcon}
                     resizeMode="contain"
                   />
-                  <Text style={styles.addPhotoText}>사진 추가</Text>
+                  <Text style={styles.addPhotoText}>사진 첨부</Text>
                 </>
               )}
             </TouchableOpacity>
           )}
         </View>
 
-        {/* 작성/수정 버튼 */}
+      </ScrollView>
+
+      {/* 작성/수정 버튼 - 하단 고정 */}
+      <View style={styles.buttonContainer}>
         <TouchableOpacity
           style={[
             styles.submitButton,
@@ -379,7 +392,7 @@ const VerificationPostCreateScreen: React.FC<VerificationPostCreateScreenProps> 
             </Text>
           )}
         </TouchableOpacity>
-      </ScrollView>
+      </View>
 
       {/* 성공 모달 */}
       <AlertModal
@@ -418,58 +431,100 @@ const styles = StyleSheet.create({
   missionInfo: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.green[50],
+    backgroundColor: colors.white,
     padding: spacing[4],
-    borderRadius: borderRadius.lg,
-    marginBottom: spacing[4],
+    borderRadius: borderRadius.base,
+    marginBottom: spacing[3],
+    borderWidth: 1,
+    borderColor: colors.border.light,
+  },
+  missionEmojiContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: borderRadius.base,
+    backgroundColor: colors.primary[50],
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: spacing[3],
   },
   missionEmoji: {
-    fontSize: 32,
-    marginRight: spacing[3],
+    fontSize: 24,
   },
   missionTextContainer: {
     flex: 1,
   },
   missionLabel: {
     fontSize: typography.fontSize.xs,
-    color: colors.text.secondary,
+    color: colors.text.tertiary,
     marginBottom: spacing[1],
   },
   missionTitle: {
     fontSize: typography.fontSize.base,
-    fontWeight: typography.fontWeight.semibold,
+    fontWeight: typography.fontWeight.normal,
     color: colors.text.primary,
   },
   infoBox: {
-    backgroundColor: colors.blue[50],
-    padding: spacing[4],
-    borderRadius: borderRadius.lg,
+    flexDirection: 'row',
+    backgroundColor: colors.primary[50],
+    padding: spacing[3],
+    borderRadius: borderRadius.base,
     marginBottom: spacing[4],
+    alignItems: 'flex-start',
+  },
+  infoIcon: {
+    fontSize: 18,
+    marginRight: spacing[2],
+    marginTop: 1,
   },
   infoText: {
-    fontSize: typography.fontSize.sm,
-    color: colors.blue[700],
-    lineHeight: 20,
+    flex: 1,
+    fontSize: typography.fontSize.xs,
+    color: colors.primary[700],
+    lineHeight: 18,
   },
   inputSection: {
     marginBottom: spacing[4],
   },
   label: {
     fontSize: typography.fontSize.sm,
-    fontWeight: typography.fontWeight.semibold,
+    fontWeight: typography.fontWeight.normal,
     color: colors.text.primary,
     marginBottom: spacing[2],
   },
-  contentInput: {
+  notebookContainer: {
     backgroundColor: colors.white,
     borderWidth: 1,
-    borderColor: colors.gray[200],
-    borderRadius: borderRadius.lg,
+    borderColor: colors.border.light,
+    borderRadius: borderRadius.base,
+    minHeight: 200,
+    overflow: 'hidden',
+    position: 'relative',
+  },
+  notebookLines: {
+    position: 'absolute',
+    top: 0,
+    left: -24,
+    right: 0,
+    bottom: 0,
+    paddingLeft: spacing[6],
+    paddingTop: spacing[4],
+    paddingBottom: spacing[4],
+  },
+  notebookLine: {
+    height: 24,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.gray[200],
+    marginBottom: 0,
+  },
+  contentInput: {
+    backgroundColor: 'transparent',
     padding: spacing[4],
-    fontSize: typography.fontSize.base,
+    paddingLeft: spacing[6],
+    fontSize: typography.fontSize.sm,
     color: colors.text.primary,
-    minHeight: 160,
+    minHeight: 200,
     textAlignVertical: 'top',
+    lineHeight: 24,
   },
   photoSection: {
     marginBottom: spacing[4],
@@ -479,55 +534,74 @@ const styles = StyleSheet.create({
   },
   previewImage: {
     width: '100%',
-    height: 200,
-    borderRadius: borderRadius.lg,
+    height: 240,
+    borderRadius: borderRadius.base,
   },
   changePhotoButton: {
     position: 'absolute',
     bottom: spacing[2],
     right: spacing[2],
-    backgroundColor: 'rgba(0,0,0,0.6)',
-    paddingHorizontal: spacing[3],
-    paddingVertical: spacing[2],
-    borderRadius: borderRadius.md,
+    backgroundColor: colors.white,
+    borderWidth: 1,
+    borderColor: colors.border.light,
+    paddingHorizontal: spacing[2],
+    paddingVertical: spacing[1],
+    borderRadius: borderRadius.base,
   },
   changePhotoText: {
-    color: colors.white,
-    fontSize: typography.fontSize.sm,
+    color: colors.text.primary,
+    fontSize: typography.fontSize.xs,
   },
   addPhotoButton: {
-    backgroundColor: colors.gray[100],
-    borderWidth: 2,
-    borderColor: colors.gray[300],
+    backgroundColor: colors.white,
+    borderWidth: 1,
+    borderColor: colors.border.light,
     borderStyle: 'dashed',
-    borderRadius: borderRadius.lg,
+    borderRadius: borderRadius.base,
     padding: spacing[6],
+    minHeight: 240,
     alignItems: 'center',
     justifyContent: 'center',
   },
   addPhotoIcon: {
     width: 32,
     height: 32,
-    tintColor: colors.gray[400],
     marginBottom: spacing[2],
   },
   addPhotoText: {
     fontSize: typography.fontSize.sm,
-    color: colors.text.secondary,
+    color: colors.primary[600],
+    fontWeight: typography.fontWeight.medium,
+  },
+  buttonContainer: {
+    padding: spacing[4],
+    paddingBottom: spacing[6],
+    backgroundColor: colors.background.primary,
+    borderTopWidth: 1,
+    borderTopColor: colors.border.light,
   },
   submitButton: {
     backgroundColor: colors.primary[500],
-    paddingVertical: spacing[4],
-    borderRadius: borderRadius.lg,
+    paddingVertical: spacing[3],
+    borderRadius: borderRadius.base,
     alignItems: 'center',
-    marginTop: spacing[4],
+    shadowColor: colors.primary[500],
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
   },
   submitButtonDisabled: {
     backgroundColor: colors.gray[300],
+    shadowOpacity: 0,
+    elevation: 0,
   },
   submitButtonText: {
     fontSize: typography.fontSize.base,
-    fontWeight: typography.fontWeight.semibold,
+    fontWeight: typography.fontWeight.medium,
     color: colors.white,
   },
 });
