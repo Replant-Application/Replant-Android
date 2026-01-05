@@ -544,7 +544,11 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
             <ScrollView
               horizontal
               showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.badgeList}
+              contentContainerStyle={
+                (showAllBadges ? allBadges : validBadges).length === 0
+                  ? styles.badgeListEmpty
+                  : styles.badgeList
+              }
             >
               {(showAllBadges ? allBadges : validBadges).length === 0 ? (
                 <View style={styles.noBadgeContainer}>
@@ -946,13 +950,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  badgeListEmpty: {
+    flexGrow: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%',
+  },
   noBadgeContainer: {
-    flex: 1,
+    width: '100%',
     paddingVertical: spacing[4],
     alignItems: 'center',
     justifyContent: 'center',
-    minWidth: 200,
-    width: '100%',
   },
   noBadgeText: {
     fontSize: typography.fontSize.sm,
