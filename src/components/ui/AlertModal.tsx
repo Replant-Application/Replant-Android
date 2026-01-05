@@ -28,6 +28,10 @@ const AlertModal: React.FC<AlertModalProps> = ({
   buttonText = '확인',
   onClose,
 }) => {
+  // message가 문자열이 아닌 경우 문자열로 변환
+  const messageText = typeof message === 'string' ? message : String(message || '');
+  const titleText = typeof title === 'string' ? title : String(title || '');
+
   return (
     <Modal
       visible={visible}
@@ -37,8 +41,8 @@ const AlertModal: React.FC<AlertModalProps> = ({
     >
       <View style={styles.overlay}>
         <View style={styles.modalContainer}>
-          <Text style={styles.title}>{title}</Text>
-          <Text style={styles.message}>{message}</Text>
+          <Text style={styles.title}>{titleText}</Text>
+          <Text style={styles.message}>{messageText}</Text>
           <TouchableOpacity
             style={styles.button}
             onPress={onClose}

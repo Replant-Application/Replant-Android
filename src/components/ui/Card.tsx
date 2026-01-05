@@ -34,13 +34,12 @@ const Card: React.FC<CardProps> = ({
 const styles = StyleSheet.create({
   base: {
     backgroundColor: colors.background.primary,
-    borderRadius: borderRadius.lg,
-    ...shadows.base,
+    borderRadius: borderRadius.base,
   },
 
   // Variants
   elevated: {
-    ...shadows.lg,
+    // 그림자 제거
   },
   flat: {
     borderWidth: 1,
