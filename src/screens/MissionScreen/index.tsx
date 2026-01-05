@@ -648,7 +648,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background.secondary,
   },
   title: {
-    fontSize: typography.fontSize.xl,
+    fontSize: typography.fontSize['2xl'],
     fontWeight: typography.fontWeight.normal,
     color: colors.text.primary,
     marginBottom: spacing[4],
@@ -696,7 +696,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing[3],
   },
   badgeSectionTitle: {
-    fontSize: typography.fontSize.xl,
+    fontSize: typography.fontSize.lg,
     fontWeight: typography.fontWeight.normal,
     color: colors.text.primary,
   },
