@@ -1,7 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, ViewStyle, TextStyle, TouchableOpacity, Image } from 'react-native';
 import { spacing, colors, typography, borderRadius } from '../../utils/designTokens';
-import { useNavigation } from '@react-navigation/native';
 
 interface HeaderProps {
   title?: string;
@@ -11,6 +10,9 @@ interface HeaderProps {
   titleStyle?: TextStyle;
   showBorder?: boolean;
   showBackButton?: boolean;
+  navigation?: {
+    goBack?: () => void;
+  };
 }
 
 /**
@@ -25,13 +27,14 @@ const Header: React.FC<HeaderProps> = ({
   titleStyle,
   showBorder = true,
   showBackButton = true,
+  navigation,
 }) => {
-  const navigation = useNavigation();
-
   // 뒤로가기 버튼 렌더링
   const renderBackButton = () => {
     if (!showBackButton) return null;
     if (leftButton) return leftButton;
+
+    if (!navigation?.goBack) return null;
 
     return (
       <TouchableOpacity

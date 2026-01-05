@@ -507,7 +507,7 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
 
   return (
     <View style={styles.container}>
-      <Header showBackButton={false} />
+      <Header showBackButton={false} navigation={navigation} />
 
       {/* 미션 완료 모달 */}
       <ConfirmModal
