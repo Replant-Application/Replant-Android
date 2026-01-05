@@ -62,7 +62,7 @@ const AppNavigator = () => {
 
     const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
       // 메인 탭 화면이면 두 번 눌러서 종료
-      if (isMainTabScreen(currentScreen)) {
+      if (currentScreen && isMainTabScreen(currentScreen)) {
         if (backPressedOnce) {
           BackHandler.exitApp();
           return true;
@@ -378,8 +378,8 @@ const styles = StyleSheet.create({
     backgroundColor: colors.white,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
-    paddingBottom: Platform.OS === 'android' ? spacing[6] : spacing[3], // Android 네비게이션 바 대응
-    paddingTop: spacing[2],
+    paddingBottom: Platform.OS === 'android' ? spacing[12] : spacing[5], // Android 네비게이션 바 대응 (48px)
+    paddingTop: spacing[3],
     paddingHorizontal: spacing[2],
     shadowColor: '#000',
     shadowOffset: {

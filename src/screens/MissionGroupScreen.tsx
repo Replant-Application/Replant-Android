@@ -15,6 +15,7 @@ import {
   Modal,
   Alert,
   RefreshControl,
+  Image,
 } from 'react-native';
 import { NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '../types/navigation';
@@ -193,7 +194,18 @@ const MissionGroupScreen: React.FC<MissionGroupScreenProps> = ({ navigation }) =
 
   return (
     <View style={styles.container}>
-      <Header />
+      <Header
+        title="미션 도감"
+        leftButton={
+          <TouchableOpacity onPress={() => navigation.goBack()}>
+            <Image
+              source={require('../assets/images/left.png')}
+              style={styles.backButtonIcon}
+              resizeMode="contain"
+            />
+          </TouchableOpacity>
+        }
+      />
 
       <ScrollView
         style={styles.content}
@@ -293,6 +305,15 @@ const MissionGroupScreen: React.FC<MissionGroupScreenProps> = ({ navigation }) =
                       <Text style={styles.detailValue}>{selectedMission.requiredMinutes}분</Text>
                     </View>
                   )}
+
+                  {/* 미션 상세 페이지로 이동 버튼 */}
+                  <TouchableOpacity
+                    style={styles.detailButton}
+                    onPress={() => navigation.navigate('MissionDetail', { missionId: selectedMission.id })}
+                    activeOpacity={0.7}
+                  >
+                    <Text style={styles.detailButtonText}>미션 상세 보기</Text>
+                  </TouchableOpacity>
                 </View>
 
                 {/* 후기 섹션 */}
@@ -420,9 +441,15 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.background.secondary,
   },
+  backButtonIcon: {
+    width: 24,
+    height: 24,
+    tintColor: colors.text.primary,
+  },
   content: {
     flex: 1,
     padding: spacing[4],
+    paddingBottom: spacing[20], // 하단 탭바 높이 + 여유 공간
   },
   sectionTitle: {
     fontSize: typography.fontSize.xl,
@@ -528,6 +555,19 @@ const styles = StyleSheet.create({
   detailValue: {
     fontSize: typography.fontSize.base,
     color: colors.text.primary,
+  },
+  detailButton: {
+    backgroundColor: colors.green[500],
+    paddingVertical: spacing[3],
+    paddingHorizontal: spacing[4],
+    borderRadius: borderRadius.md,
+    alignItems: 'center',
+    marginTop: spacing[4],
+  },
+  detailButtonText: {
+    color: colors.white,
+    fontSize: typography.fontSize.base,
+    fontWeight: typography.fontWeight.semibold,
   },
   reviewSection: {
     marginBottom: spacing[6],

@@ -1,6 +1,6 @@
 /**
- * 미션 상세 화면
- * 미션 정보와 리뷰를 표시
+ * 미션 도감 상세 화면
+ * 미션 정보와 리뷰를 표시 (API 연동)
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
@@ -15,79 +15,90 @@ import {
   Image,
   KeyboardAvoidingView,
   Platform,
+  RefreshControl,
 } from 'react-native';
 import { Loading, Header, EmptyState } from '../components/ui';
 import { colors, spacing, typography, borderRadius } from '../utils/designTokens';
 import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../types/navigation';
 import { useUser } from '../contexts/UserContext';
-import { getData, setData, getStorageKeys } from '../services/storage';
-import { Mission } from '../types';
-
-interface MissionReview {
-  id: string;
-  mission_id: string;
-  author: string;
-  author_nickname: string;
-  rating: number; // 1-5 별점
-  content: string;
-  created_at: string;
-}
+import {
+  getSystemMission,
+  getMissionReviews,
+  createMissionReview,
+  SystemMission,
+  MissionReview,
+  MissionReviewListResponse,
+} from '../api/missionApi';
+import { getMyBadges, Badge } from '../api/badgeApi';
 
 interface MissionDetailScreenProps {
   navigation: NavigationProp<RootStackParamList>;
   route: RouteProp<RootStackParamList, 'MissionDetail'>;
 }
 
-// 별점 컴포넌트
-const StarRating: React.FC<{
-  rating: number;
-  onRatingChange?: (rating: number) => void;
-  size?: number;
-  readonly?: boolean;
-}> = ({ rating, onRatingChange, size = 24, readonly = false }) => {
-  const stars = [1, 2, 3, 4, 5];
+// 난이도 라벨 반환
+const getDifficultyLabel = (type: string): { label: string; color: string } => {
+  switch (type) {
+    case 'DAILY':
+      return { label: '쉬움', color: colors.success };
+    case 'WEEKLY':
+      return { label: '보통', color: colors.warning };
+    case 'MONTHLY':
+      return { label: '어려움', color: colors.error };
+    default:
+      return { label: '일반', color: colors.text.secondary };
+  }
+};
 
-  return (
-    <View style={styles.starContainer}>
-      {stars.map((star) => (
-        <TouchableOpacity
-          key={star}
-          onPress={() => !readonly && onRatingChange?.(star)}
-          disabled={readonly}
-        >
-          <Text style={[styles.star, { fontSize: size }]}>
-            {star <= rating ? '★' : '☆'}
-          </Text>
-        </TouchableOpacity>
-      ))}
-    </View>
-  );
+// 미션 타입 라벨 반환
+const getMissionTypeLabel = (type: string): string => {
+  switch (type) {
+    case 'DAILY':
+      return '일일 미션';
+    case 'WEEKLY':
+      return '주간 미션';
+    case 'MONTHLY':
+      return '월간 미션';
+    default:
+      return '미션';
+  }
 };
 
 // 리뷰 카드 컴포넌트
 const ReviewCard: React.FC<{
   review: MissionReview;
-  isAuthor: boolean;
-  onDelete: () => void;
-}> = ({ review, isAuthor, onDelete }) => {
+}> = ({ review }) => {
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('ko-KR', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+  };
+
   return (
     <View style={styles.reviewCard}>
       <View style={styles.reviewHeader}>
         <View style={styles.reviewAuthorInfo}>
-          <Text style={styles.reviewAuthor}>{review.author_nickname}</Text>
-          <StarRating rating={review.rating} size={16} readonly />
+          {review.userProfileImg ? (
+            <Image
+              source={{ uri: review.userProfileImg }}
+              style={styles.reviewAuthorImage}
+            />
+          ) : (
+            <View style={styles.reviewAuthorImagePlaceholder}>
+              <Text style={styles.reviewAuthorImageText}>
+                {review.userNickname?.charAt(0) || '?'}
+              </Text>
+            </View>
+          )}
+          <Text style={styles.reviewAuthor}>{review.userNickname}</Text>
         </View>
-        <Text style={styles.reviewDate}>
-          {new Date(review.created_at).toLocaleDateString('ko-KR')}
-        </Text>
+        <Text style={styles.reviewDate}>{formatDate(review.createdAt)}</Text>
       </View>
       <Text style={styles.reviewContent}>{review.content}</Text>
-      {isAuthor && (
-        <TouchableOpacity style={styles.deleteButton} onPress={onDelete}>
-          <Text style={styles.deleteButtonText}>삭제</Text>
-        </TouchableOpacity>
-      )}
     </View>
   );
 };
@@ -97,38 +108,118 @@ const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
   route,
 }) => {
   const { missionId } = route.params;
-  const { currentNickname } = useUser();
-  const [mission, setMission] = useState<Mission | null>(null);
+  const { isLoggedIn } = useUser();
+
+  const [mission, setMission] = useState<SystemMission | null>(null);
   const [reviews, setReviews] = useState<MissionReview[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [newReviewContent, setNewReviewContent] = useState('');
-  const [newReviewRating, setNewReviewRating] = useState(5);
+  const [submitting, setSubmitting] = useState(false);
+  const [hasBadge, setHasBadge] = useState(false);
+  const [loadingBadge, setLoadingBadge] = useState(true);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [totalReviews, setTotalReviews] = useState(0);
 
-  // 미션 및 리뷰 로드
-  const loadData = useCallback(async () => {
-    if (!currentNickname || !missionId) return;
+  // 미션 데이터 로드
+  const loadMission = useCallback(async () => {
+    if (!missionId) return;
 
     try {
-      setLoading(true);
-      const storageKeys = getStorageKeys(currentNickname);
+      const numericMissionId = parseInt(missionId, 10);
+      if (isNaN(numericMissionId)) {
+        Alert.alert('오류', '잘못된 미션 ID입니다.');
+        return;
+      }
 
-      // 미션 데이터 로드
-      const missions: Mission[] = await getData(storageKeys.MISSIONS) || [];
-      const foundMission = missions.find(m => m.mission_id === missionId);
-      setMission(foundMission || null);
-
-      // 리뷰 데이터 로드 (전역 리뷰 저장소)
-      const allReviews: MissionReview[] = await getData('mission_reviews') || [];
-      const missionReviews = allReviews.filter(r => r.mission_id === missionId);
-      setReviews(missionReviews.sort((a, b) =>
-        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-      ));
+      const result = await getSystemMission(numericMissionId);
+      if (result.success && result.data) {
+        setMission(result.data);
+      } else {
+        Alert.alert('오류', result.error || '미션 정보를 불러올 수 없습니다.');
+      }
     } catch (error) {
-      Alert.alert('오류', '데이터를 불러오는데 실패했습니다.');
-    } finally {
-      setLoading(false);
+      Alert.alert('오류', '미션 정보를 불러오는데 실패했습니다.');
     }
-  }, [currentNickname, missionId]);
+  }, [missionId]);
+
+  // 리뷰 데이터 로드
+  const loadReviews = useCallback(async (page: number = 0) => {
+    if (!missionId) return;
+
+    try {
+      const numericMissionId = parseInt(missionId, 10);
+      if (isNaN(numericMissionId)) return;
+
+      const result = await getMissionReviews(numericMissionId, { page, size: 10 });
+      if (result.success && result.data) {
+        if (page === 0) {
+          setReviews(result.data.content);
+        } else {
+          setReviews(prev => [...prev, ...result.data!.content]);
+        }
+        setCurrentPage(result.data.number);
+        setTotalPages(result.data.totalPages);
+        setTotalReviews(result.data.totalElements);
+      }
+    } catch (error) {
+      console.error('리뷰 로드 실패:', error);
+    }
+  }, [missionId]);
+
+  // 뱃지 확인
+  const checkBadge = useCallback(async () => {
+    if (!missionId || !isLoggedIn) {
+      setLoadingBadge(false);
+      return;
+    }
+
+    try {
+      const numericMissionId = parseInt(missionId, 10);
+      if (isNaN(numericMissionId)) {
+        setLoadingBadge(false);
+        return;
+      }
+
+      const result = await getMyBadges();
+      if (result.success && result.data) {
+        // 해당 미션에 대한 유효한 뱃지가 있는지 확인
+        const missionBadge = result.data.badges.find(
+          (badge: Badge) =>
+            badge.missionType === 'SYSTEM' &&
+            badge.mission?.id === numericMissionId &&
+            !badge.isExpired
+        );
+        setHasBadge(!!missionBadge);
+      }
+    } catch (error) {
+      console.error('뱃지 확인 실패:', error);
+    } finally {
+      setLoadingBadge(false);
+    }
+  }, [missionId, isLoggedIn]);
+
+  // 초기 데이터 로드
+  const loadData = useCallback(async () => {
+    setLoading(true);
+    await Promise.all([loadMission(), loadReviews(0), checkBadge()]);
+    setLoading(false);
+  }, [loadMission, loadReviews, checkBadge]);
+
+  // 새로고침
+  const handleRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await Promise.all([loadMission(), loadReviews(0), checkBadge()]);
+    setRefreshing(false);
+  }, [loadMission, loadReviews, checkBadge]);
+
+  // 더 많은 리뷰 로드
+  const loadMoreReviews = useCallback(() => {
+    if (currentPage < totalPages - 1) {
+      loadReviews(currentPage + 1);
+    }
+  }, [currentPage, totalPages, loadReviews]);
 
   useEffect(() => {
     loadData();
@@ -141,68 +232,44 @@ const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
       return;
     }
 
-    if (!currentNickname || !mission) {
-      Alert.alert('오류', '사용자 정보가 없습니다.');
+    if (!isLoggedIn) {
+      Alert.alert('오류', '로그인이 필요합니다.');
       return;
     }
 
+    if (!hasBadge) {
+      Alert.alert(
+        '권한 없음',
+        '이 미션을 완료하고 뱃지를 획득한 후에 후기를 작성할 수 있습니다.'
+      );
+      return;
+    }
+
+    if (!missionId) return;
+
     try {
-      const newReview: MissionReview = {
-        id: `review_${Date.now()}`,
-        mission_id: missionId,
-        author: currentNickname,
-        author_nickname: currentNickname,
-        rating: newReviewRating,
+      setSubmitting(true);
+      const numericMissionId = parseInt(missionId, 10);
+
+      const result = await createMissionReview(numericMissionId, {
         content: newReviewContent.trim(),
-        created_at: new Date().toISOString(),
-      };
+      });
 
-      // 기존 리뷰 목록에 추가
-      const allReviews: MissionReview[] = await getData('mission_reviews') || [];
-      await setData('mission_reviews', [...allReviews, newReview]);
-
-      // 로컬 상태 업데이트
-      setReviews(prev => [newReview, ...prev]);
-      setNewReviewContent('');
-      setNewReviewRating(5);
-
-      Alert.alert('완료', '리뷰가 등록되었습니다.');
+      if (result.success && result.data) {
+        // 새 리뷰를 목록 맨 앞에 추가
+        setReviews(prev => [result.data!, ...prev]);
+        setTotalReviews(prev => prev + 1);
+        setNewReviewContent('');
+        Alert.alert('완료', '후기가 등록되었습니다.');
+      } else {
+        Alert.alert('오류', result.error || '후기 등록에 실패했습니다.');
+      }
     } catch (error) {
-      Alert.alert('오류', '리뷰 등록에 실패했습니다.');
+      Alert.alert('오류', '후기 등록에 실패했습니다.');
+    } finally {
+      setSubmitting(false);
     }
   };
-
-  // 리뷰 삭제
-  const handleDeleteReview = async (reviewId: string) => {
-    Alert.alert(
-      '리뷰 삭제',
-      '정말로 이 리뷰를 삭제하시겠습니까?',
-      [
-        { text: '취소', style: 'cancel' },
-        {
-          text: '삭제',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              const allReviews: MissionReview[] = await getData('mission_reviews') || [];
-              const filteredReviews = allReviews.filter(r => r.id !== reviewId);
-              await setData('mission_reviews', filteredReviews);
-
-              setReviews(prev => prev.filter(r => r.id !== reviewId));
-              Alert.alert('완료', '리뷰가 삭제되었습니다.');
-            } catch (error) {
-              Alert.alert('오류', '리뷰 삭제에 실패했습니다.');
-            }
-          },
-        },
-      ]
-    );
-  };
-
-  // 평균 별점 계산
-  const averageRating = reviews.length > 0
-    ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)
-    : '0.0';
 
   if (loading) {
     return <Loading text="미션 정보를 불러오는 중..." />;
@@ -223,10 +290,16 @@ const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
             </TouchableOpacity>
           }
         />
-        <EmptyState icon="📭" title="미션을 찾을 수 없습니다" description="해당 미션을 찾을 수 없습니다." />
+        <EmptyState
+          icon="📭"
+          title="미션을 찾을 수 없습니다"
+          description="해당 미션을 찾을 수 없습니다."
+        />
       </View>
     );
   }
+
+  const difficulty = getDifficultyLabel(mission.type);
 
   return (
     <KeyboardAvoidingView
@@ -247,18 +320,28 @@ const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
         }
       />
 
-      <ScrollView style={styles.content} keyboardShouldPersistTaps="handled">
+      <ScrollView
+        style={styles.content}
+        keyboardShouldPersistTaps="handled"
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+        }
+      >
         {/* 미션 정보 */}
         <View style={styles.missionContainer}>
           <View style={styles.missionHeader}>
-            <Text style={styles.missionEmoji}>{mission.emoji}</Text>
             <View style={styles.missionTitleContainer}>
               <Text style={styles.missionTitle}>{mission.title}</Text>
               <View style={styles.missionMeta}>
                 <Text style={styles.missionType}>
-                  {mission.type === 'DAILY' ? '일일' : mission.type === 'WEEKLY' ? '주간' : '월간'}
+                  {getMissionTypeLabel(mission.type)}
                 </Text>
-                <Text style={styles.missionExp}>+{mission.experience} EXP</Text>
+                <View style={[styles.difficultyBadge, { backgroundColor: difficulty.color + '20' }]}>
+                  <Text style={[styles.difficultyText, { color: difficulty.color }]}>
+                    {difficulty.label}
+                  </Text>
+                </View>
+                <Text style={styles.missionExp}>+{mission.expReward} EXP</Text>
               </View>
             </View>
           </View>
@@ -269,71 +352,105 @@ const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
 
           <View style={styles.missionStats}>
             <View style={styles.statItem}>
-              <Text style={styles.statValue}>★ {averageRating}</Text>
-              <Text style={styles.statLabel}>평균 별점</Text>
+              <Text style={styles.statValue}>{totalReviews}</Text>
+              <Text style={styles.statLabel}>후기</Text>
             </View>
             <View style={styles.statItem}>
-              <Text style={styles.statValue}>{reviews.length}</Text>
-              <Text style={styles.statLabel}>리뷰</Text>
+              <Text style={styles.statValue}>{mission.qnaCount || 0}</Text>
+              <Text style={styles.statLabel}>Q&A</Text>
             </View>
             <View style={styles.statItem}>
-              <Text style={styles.statValue}>
-                {mission.completed ? '완료' : '진행중'}
-              </Text>
-              <Text style={styles.statLabel}>상태</Text>
+              <Text style={styles.statValue}>{mission.badgeDurationDays}일</Text>
+              <Text style={styles.statLabel}>뱃지 유효기간</Text>
             </View>
+          </View>
+
+          {/* 인증 방식 표시 */}
+          <View style={styles.verificationInfo}>
+            <Text style={styles.verificationLabel}>인증 방식</Text>
+            <Text style={styles.verificationValue}>
+              {mission.verificationType === 'GPS'
+                ? 'GPS 위치 인증'
+                : mission.verificationType === 'TIME'
+                ? `시간 인증 (${mission.requiredMinutes}분)`
+                : '커뮤니티 인증'}
+            </Text>
           </View>
         </View>
 
         {/* 리뷰 작성 */}
         <View style={styles.reviewFormContainer}>
-          <Text style={styles.sectionTitle}>리뷰 작성</Text>
-          <View style={styles.ratingInput}>
-            <Text style={styles.ratingLabel}>별점</Text>
-            <StarRating
-              rating={newReviewRating}
-              onRatingChange={setNewReviewRating}
-              size={32}
-            />
-          </View>
-          <TextInput
-            style={styles.reviewInput}
-            value={newReviewContent}
-            onChangeText={setNewReviewContent}
-            placeholder="미션에 대한 리뷰를 작성해주세요..."
-            placeholderTextColor={colors.text.tertiary}
-            multiline
-            numberOfLines={3}
-          />
-          <TouchableOpacity
-            style={[styles.submitButton, !newReviewContent.trim() && styles.submitButtonDisabled]}
-            onPress={handleSubmitReview}
-            disabled={!newReviewContent.trim()}
-          >
-            <Text style={styles.submitButtonText}>리뷰 등록</Text>
-          </TouchableOpacity>
+          <Text style={styles.sectionTitle}>후기 작성</Text>
+
+          {!isLoggedIn ? (
+            <View style={styles.loginPrompt}>
+              <Text style={styles.loginPromptText}>
+                후기를 작성하려면 로그인이 필요합니다.
+              </Text>
+            </View>
+          ) : loadingBadge ? (
+            <View style={styles.loginPrompt}>
+              <Text style={styles.loginPromptText}>뱃지 확인 중...</Text>
+            </View>
+          ) : !hasBadge ? (
+            <View style={styles.noBadgePrompt}>
+              <Text style={styles.noBadgeIcon}>🔒</Text>
+              <Text style={styles.noBadgeText}>
+                이 미션을 완료하고 뱃지를 획득하면{'\n'}후기를 작성할 수 있습니다.
+              </Text>
+            </View>
+          ) : (
+            <>
+              <TextInput
+                style={styles.reviewInput}
+                value={newReviewContent}
+                onChangeText={setNewReviewContent}
+                placeholder="미션을 완료한 경험을 공유해주세요..."
+                placeholderTextColor={colors.text.tertiary}
+                multiline
+                numberOfLines={3}
+                editable={!submitting}
+              />
+              <TouchableOpacity
+                style={[
+                  styles.submitButton,
+                  (!newReviewContent.trim() || submitting) && styles.submitButtonDisabled,
+                ]}
+                onPress={handleSubmitReview}
+                disabled={!newReviewContent.trim() || submitting}
+              >
+                <Text style={styles.submitButtonText}>
+                  {submitting ? '등록 중...' : '후기 등록'}
+                </Text>
+              </TouchableOpacity>
+            </>
+          )}
         </View>
 
         {/* 리뷰 목록 */}
         <View style={styles.reviewsSection}>
-          <Text style={styles.sectionTitle}>리뷰 ({reviews.length})</Text>
+          <Text style={styles.sectionTitle}>후기 ({totalReviews})</Text>
 
           {reviews.length === 0 ? (
             <EmptyState
               icon="📝"
-              title="아직 리뷰가 없어요"
-              description="첫 리뷰를 남겨보세요!"
+              title="아직 후기가 없어요"
+              description="첫 후기를 남겨보세요!"
             />
           ) : (
             <View style={styles.reviewsList}>
               {reviews.map(review => (
-                <ReviewCard
-                  key={review.id}
-                  review={review}
-                  isAuthor={review.author === currentNickname}
-                  onDelete={() => handleDeleteReview(review.id)}
-                />
+                <ReviewCard key={review.id} review={review} />
               ))}
+
+              {currentPage < totalPages - 1 && (
+                <TouchableOpacity
+                  style={styles.loadMoreButton}
+                  onPress={loadMoreReviews}
+                >
+                  <Text style={styles.loadMoreText}>더 보기</Text>
+                </TouchableOpacity>
+              )}
             </View>
           )}
         </View>
@@ -350,6 +467,7 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     padding: spacing[4],
+    paddingBottom: spacing[20], // 하단 탭바 높이 + 여유 공간
   },
   backButtonIcon: {
     width: 24,
@@ -367,10 +485,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: spacing[3],
   },
-  missionEmoji: {
-    fontSize: 48,
-    marginRight: spacing[4],
-  },
   missionTitleContainer: {
     flex: 1,
   },
@@ -378,11 +492,13 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.xl,
     fontWeight: typography.fontWeight.bold,
     color: colors.text.primary,
-    marginBottom: spacing[1],
+    marginBottom: spacing[2],
   },
   missionMeta: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: spacing[2],
+    alignItems: 'center',
   },
   missionType: {
     fontSize: typography.fontSize.sm,
@@ -391,6 +507,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing[2],
     paddingVertical: spacing[1],
     borderRadius: borderRadius.sm,
+    overflow: 'hidden',
+  },
+  difficultyBadge: {
+    paddingHorizontal: spacing[2],
+    paddingVertical: spacing[1],
+    borderRadius: borderRadius.sm,
+  },
+  difficultyText: {
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.medium,
   },
   missionExp: {
     fontSize: typography.fontSize.sm,
@@ -399,6 +525,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing[2],
     paddingVertical: spacing[1],
     borderRadius: borderRadius.sm,
+    overflow: 'hidden',
   },
   missionDescription: {
     fontSize: typography.fontSize.base,
@@ -426,6 +553,24 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.xs,
     color: colors.text.tertiary,
   },
+  verificationInfo: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: spacing[4],
+    paddingTop: spacing[3],
+    borderTopWidth: 1,
+    borderTopColor: colors.border.light,
+  },
+  verificationLabel: {
+    fontSize: typography.fontSize.sm,
+    color: colors.text.secondary,
+  },
+  verificationValue: {
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.medium,
+    color: colors.text.primary,
+  },
   // 리뷰 작성
   reviewFormContainer: {
     backgroundColor: colors.background.primary,
@@ -439,22 +584,29 @@ const styles = StyleSheet.create({
     color: colors.text.primary,
     marginBottom: spacing[3],
   },
-  ratingInput: {
-    flexDirection: 'row',
+  loginPrompt: {
+    padding: spacing[4],
     alignItems: 'center',
-    marginBottom: spacing[3],
-    gap: spacing[3],
   },
-  ratingLabel: {
-    fontSize: typography.fontSize.base,
+  loginPromptText: {
+    fontSize: typography.fontSize.sm,
+    color: colors.text.tertiary,
+  },
+  noBadgePrompt: {
+    padding: spacing[4],
+    alignItems: 'center',
+    backgroundColor: colors.background.secondary,
+    borderRadius: borderRadius.md,
+  },
+  noBadgeIcon: {
+    fontSize: 32,
+    marginBottom: spacing[2],
+  },
+  noBadgeText: {
+    fontSize: typography.fontSize.sm,
     color: colors.text.secondary,
-  },
-  starContainer: {
-    flexDirection: 'row',
-    gap: spacing[1],
-  },
-  star: {
-    color: colors.warning,
+    textAlign: 'center',
+    lineHeight: typography.lineHeight.normal * typography.fontSize.sm,
   },
   reviewInput: {
     backgroundColor: colors.background.secondary,
@@ -495,13 +647,31 @@ const styles = StyleSheet.create({
   reviewHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: spacing[2],
+    alignItems: 'center',
+    marginBottom: spacing[3],
   },
   reviewAuthorInfo: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing[2],
+  },
+  reviewAuthorImage: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+  },
+  reviewAuthorImagePlaceholder: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: colors.primary[100],
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  reviewAuthorImageText: {
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.bold,
+    color: colors.primary[600],
   },
   reviewAuthor: {
     fontSize: typography.fontSize.sm,
@@ -517,13 +687,16 @@ const styles = StyleSheet.create({
     color: colors.text.primary,
     lineHeight: typography.lineHeight.normal * typography.fontSize.base,
   },
-  deleteButton: {
-    marginTop: spacing[2],
-    alignSelf: 'flex-end',
+  loadMoreButton: {
+    paddingVertical: spacing[3],
+    alignItems: 'center',
+    backgroundColor: colors.background.primary,
+    borderRadius: borderRadius.md,
   },
-  deleteButtonText: {
+  loadMoreText: {
     fontSize: typography.fontSize.sm,
-    color: colors.error,
+    color: colors.primary[600],
+    fontWeight: typography.fontWeight.medium,
   },
 });
 

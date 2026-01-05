@@ -1,6 +1,7 @@
 import React from 'react';
-import { View, Text, StyleSheet, ViewStyle, TextStyle } from 'react-native';
-import { spacing } from '../../utils/designTokens';
+import { View, Text, StyleSheet, ViewStyle, TextStyle, TouchableOpacity, Image } from 'react-native';
+import { spacing, colors, typography, borderRadius } from '../../utils/designTokens';
+import { useNavigation } from '@react-navigation/native';
 
 interface HeaderProps {
   title?: string;
@@ -9,6 +10,7 @@ interface HeaderProps {
   style?: ViewStyle;
   titleStyle?: TextStyle;
   showBorder?: boolean;
+  showBackButton?: boolean;
 }
 
 /**
@@ -22,7 +24,26 @@ const Header: React.FC<HeaderProps> = ({
   style,
   titleStyle,
   showBorder = true,
+  showBackButton = true,
 }) => {
+  const navigation = useNavigation();
+
+  // 뒤로가기 버튼 렌더링
+  const renderBackButton = () => {
+    if (!showBackButton) return null;
+    if (leftButton) return leftButton;
+
+    return (
+      <TouchableOpacity
+        style={styles.backButton}
+        onPress={() => navigation.goBack()}
+        activeOpacity={0.7}
+      >
+        <Text style={styles.backButtonText}>←</Text>
+      </TouchableOpacity>
+    );
+  };
+
   return (
     <View style={[
       styles.header,
@@ -30,7 +51,7 @@ const Header: React.FC<HeaderProps> = ({
       style
     ]}>
       <View style={styles.leftSection}>
-        {leftButton}
+        {renderBackButton()}
       </View>
 
       {title && (
@@ -71,7 +92,22 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
   },
   title: {
-    // 제목 스타일 제거
+    fontSize: typography.fontSize.lg,
+    fontWeight: typography.fontWeight.semibold,
+    color: colors.text.primary,
+  },
+  backButton: {
+    width: 40,
+    height: 40,
+    borderRadius: borderRadius.full,
+    backgroundColor: colors.gray[100],
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  backButtonText: {
+    fontSize: typography.fontSize.xl,
+    color: colors.text.primary,
+    fontWeight: typography.fontWeight.medium,
   },
 });
 

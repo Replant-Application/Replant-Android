@@ -41,6 +41,7 @@ const CommunityPostDetailScreen: React.FC<CommunityPostDetailScreenProps> = ({
   const [commentContent, setCommentContent] = useState('');
   const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
   const [editingContent, setEditingContent] = useState('');
+  const [replyingToComment, setReplyingToComment] = useState<{ id: string; nickname: string } | null>(null);
 
   const isAuthor = post?.author === currentNickname;
 
@@ -82,12 +83,25 @@ const CommunityPostDetailScreen: React.FC<CommunityPostDetailScreenProps> = ({
       return;
     }
 
-    const result = await createComment(commentContent.trim());
+    // 대댓글인 경우 parentCommentId 전달
+    const result = await createComment(commentContent.trim(), replyingToComment?.id);
     if (result.success) {
       setCommentContent('');
+      setReplyingToComment(null); // 답글 모드 해제
     } else {
       Alert.alert('오류', result.error || '댓글 작성에 실패했습니다.');
     }
+  };
+
+  // 답글 버튼 클릭 핸들러
+  const handleReplyComment = (comment: any) => {
+    setReplyingToComment({ id: comment.comment_id, nickname: comment.author_nickname });
+    // 답글 입력란에 포커스를 맞추기 위해 placeholder를 변경
+  };
+
+  // 답글 모드 취소 핸들러
+  const handleCancelReply = () => {
+    setReplyingToComment(null);
   };
 
   const handleEditComment = (comment: any) => {
@@ -151,7 +165,12 @@ const CommunityPostDetailScreen: React.FC<CommunityPostDetailScreenProps> = ({
         }
       />
 
-      <ScrollView style={styles.content} keyboardShouldPersistTaps="handled">
+      <ScrollView
+        style={styles.content}
+        contentContainerStyle={styles.scrollContent}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={true}
+      >
         {/* 게시글 내용 */}
         <View style={styles.postContainer}>
           <View style={styles.header}>
@@ -171,6 +190,18 @@ const CommunityPostDetailScreen: React.FC<CommunityPostDetailScreenProps> = ({
           <View style={styles.missionInfo}>
             <Text style={styles.missionEmoji}>{post.mission_emoji}</Text>
             <Text style={styles.missionTitle}>{post.mission_title}</Text>
+            {/* 인증 상태 뱃지 */}
+            {post.verified === true ? (
+              <View style={styles.verifiedBadge}>
+                <Text style={styles.verifiedIcon}>✓</Text>
+                <Text style={styles.verifiedText}>인증완료</Text>
+              </View>
+            ) : post.verified === false ? (
+              <View style={styles.pendingBadge}>
+                <Text style={styles.pendingIcon}>⏳</Text>
+                <Text style={styles.pendingText}>인증대기</Text>
+              </View>
+            ) : null}
           </View>
 
           <Text style={styles.title}>{post.title}</Text>
@@ -220,73 +251,141 @@ const CommunityPostDetailScreen: React.FC<CommunityPostDetailScreenProps> = ({
             <EmptyState icon="💬" title="아직 댓글이 없어요" description="첫 댓글을 남겨보세요!" />
           ) : (
             <View style={styles.commentsList}>
-              {comments.map(comment => (
-                <View key={comment.comment_id}>
-                  {editingCommentId === comment.comment_id ? (
-                    <View style={styles.editCommentContainer}>
-                      <TextInput
-                        style={styles.editCommentInput}
-                        value={editingContent}
-                        onChangeText={setEditingContent}
-                        multiline
-                      />
-                      <View style={styles.editCommentActions}>
-                        <TouchableOpacity
-                          style={styles.editCommentButton}
-                          onPress={() => {
-                            setEditingCommentId(null);
-                            setEditingContent('');
-                          }}
-                        >
-                          <Text style={styles.editCommentButtonText}>취소</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                          style={[styles.editCommentButton, styles.editCommentButtonSave]}
-                          onPress={handleUpdateComment}
-                        >
-                          <Text
-                            style={[
-                              styles.editCommentButtonText,
-                              styles.editCommentButtonTextSave,
-                            ]}
+              {/* 부모 댓글만 먼저 렌더링하고, 대댓글은 부모 댓글 아래에 표시 */}
+              {comments
+                .filter(comment => !comment.parent_comment_id)
+                .map(parentComment => (
+                  <View key={parentComment.comment_id}>
+                    {/* 부모 댓글 */}
+                    {editingCommentId === parentComment.comment_id ? (
+                      <View style={styles.editCommentContainer}>
+                        <TextInput
+                          style={styles.editCommentInput}
+                          value={editingContent}
+                          onChangeText={setEditingContent}
+                          multiline
+                        />
+                        <View style={styles.editCommentActions}>
+                          <TouchableOpacity
+                            style={styles.editCommentButton}
+                            onPress={() => {
+                              setEditingCommentId(null);
+                              setEditingContent('');
+                            }}
                           >
-                            저장
-                          </Text>
-                        </TouchableOpacity>
+                            <Text style={styles.editCommentButtonText}>취소</Text>
+                          </TouchableOpacity>
+                          <TouchableOpacity
+                            style={[styles.editCommentButton, styles.editCommentButtonSave]}
+                            onPress={handleUpdateComment}
+                          >
+                            <Text
+                              style={[
+                                styles.editCommentButtonText,
+                                styles.editCommentButtonTextSave,
+                              ]}
+                            >
+                              저장
+                            </Text>
+                          </TouchableOpacity>
+                        </View>
                       </View>
-                    </View>
-                  ) : (
-                    <CommentCard
-                      comment={comment}
-                      isAuthor={comment.author === currentNickname}
-                      onEdit={handleEditComment}
-                      onDelete={handleDeleteComment}
-                    />
-                  )}
-                </View>
-              ))}
+                    ) : (
+                      <CommentCard
+                        comment={parentComment}
+                        isAuthor={parentComment.author === currentNickname}
+                        onEdit={handleEditComment}
+                        onDelete={handleDeleteComment}
+                        onReply={handleReplyComment}
+                      />
+                    )}
+
+                    {/* 대댓글 (부모 댓글에 속한 댓글들) */}
+                    {comments
+                      .filter(reply => reply.parent_comment_id === parentComment.comment_id)
+                      .map(reply => (
+                        <View key={reply.comment_id}>
+                          {editingCommentId === reply.comment_id ? (
+                            <View style={[styles.editCommentContainer, styles.replyEditContainer]}>
+                              <TextInput
+                                style={styles.editCommentInput}
+                                value={editingContent}
+                                onChangeText={setEditingContent}
+                                multiline
+                              />
+                              <View style={styles.editCommentActions}>
+                                <TouchableOpacity
+                                  style={styles.editCommentButton}
+                                  onPress={() => {
+                                    setEditingCommentId(null);
+                                    setEditingContent('');
+                                  }}
+                                >
+                                  <Text style={styles.editCommentButtonText}>취소</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                  style={[styles.editCommentButton, styles.editCommentButtonSave]}
+                                  onPress={handleUpdateComment}
+                                >
+                                  <Text
+                                    style={[
+                                      styles.editCommentButtonText,
+                                      styles.editCommentButtonTextSave,
+                                    ]}
+                                  >
+                                    저장
+                                  </Text>
+                                </TouchableOpacity>
+                              </View>
+                            </View>
+                          ) : (
+                            <CommentCard
+                              comment={reply}
+                              isAuthor={reply.author === currentNickname}
+                              isReply={true}
+                              onEdit={handleEditComment}
+                              onDelete={handleDeleteComment}
+                            />
+                          )}
+                        </View>
+                      ))}
+                  </View>
+                ))}
             </View>
           )}
         </View>
       </ScrollView>
 
       {/* 댓글 입력 */}
-      <View style={styles.commentInputContainer}>
-        <TextInput
-          style={styles.commentInput}
-          value={commentContent}
-          onChangeText={setCommentContent}
-          placeholder="댓글을 입력하세요..."
-          placeholderTextColor={colors.text.tertiary}
-          multiline
-        />
-        <TouchableOpacity
-          style={[styles.submitButton, !commentContent.trim() && styles.submitButtonDisabled]}
-          onPress={handleSubmitComment}
-          disabled={!commentContent.trim()}
-        >
-          <Text style={styles.submitButtonText}>등록</Text>
-        </TouchableOpacity>
+      <View style={styles.commentInputWrapper}>
+        {/* 답글 모드 표시 */}
+        {replyingToComment && (
+          <View style={styles.replyingToContainer}>
+            <Text style={styles.replyingToText}>
+              @{replyingToComment.nickname}님에게 답글 작성 중
+            </Text>
+            <TouchableOpacity onPress={handleCancelReply} style={styles.cancelReplyButton}>
+              <Text style={styles.cancelReplyText}>X</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+        <View style={styles.commentInputContainer}>
+          <TextInput
+            style={styles.commentInput}
+            value={commentContent}
+            onChangeText={setCommentContent}
+            placeholder={replyingToComment ? `@${replyingToComment.nickname}님에게 답글...` : "댓글을 입력하세요..."}
+            placeholderTextColor={colors.text.tertiary}
+            multiline
+          />
+          <TouchableOpacity
+            style={[styles.submitButton, !commentContent.trim() && styles.submitButtonDisabled]}
+            onPress={handleSubmitComment}
+            disabled={!commentContent.trim()}
+          >
+            <Text style={styles.submitButtonText}>{replyingToComment ? '답글' : '등록'}</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </KeyboardAvoidingView>
   );
@@ -299,7 +398,10 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
+  },
+  scrollContent: {
     padding: spacing[4],
+    paddingBottom: spacing[24], // 하단 댓글 입력란에 가려지지 않도록 여유 공간 추가
   },
   backButtonIcon: {
     width: 24,
@@ -357,6 +459,44 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.base,
     fontWeight: typography.fontWeight.semibold,
     color: colors.primary[700],
+  },
+  verifiedBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.green[100],
+    paddingHorizontal: spacing[2],
+    paddingVertical: spacing[1],
+    borderRadius: borderRadius.full,
+    gap: 2,
+    marginLeft: spacing[2],
+  },
+  verifiedIcon: {
+    fontSize: typography.fontSize.xs,
+    color: colors.green[600],
+    fontWeight: typography.fontWeight.bold,
+  },
+  verifiedText: {
+    fontSize: typography.fontSize.xs,
+    color: colors.green[700],
+    fontWeight: typography.fontWeight.medium,
+  },
+  pendingBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.orange[100],
+    paddingHorizontal: spacing[2],
+    paddingVertical: spacing[1],
+    borderRadius: borderRadius.full,
+    gap: 2,
+    marginLeft: spacing[2],
+  },
+  pendingIcon: {
+    fontSize: typography.fontSize.xs,
+  },
+  pendingText: {
+    fontSize: typography.fontSize.xs,
+    color: colors.orange[700],
+    fontWeight: typography.fontWeight.medium,
   },
   title: {
     fontSize: typography.fontSize.xl,
@@ -450,12 +590,40 @@ const styles = StyleSheet.create({
   editCommentButtonTextSave: {
     color: colors.white,
   },
-  commentInputContainer: {
-    flexDirection: 'row',
-    padding: spacing[4],
+  replyEditContainer: {
+    marginLeft: spacing[4],
+  },
+  commentInputWrapper: {
     backgroundColor: colors.background.primary,
     borderTopWidth: 1,
     borderTopColor: colors.border.light,
+  },
+  replyingToContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: spacing[4],
+    paddingVertical: spacing[2],
+    backgroundColor: colors.primary[50],
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border.light,
+  },
+  replyingToText: {
+    fontSize: typography.fontSize.sm,
+    color: colors.primary[700],
+    fontWeight: typography.fontWeight.medium,
+  },
+  cancelReplyButton: {
+    padding: spacing[1],
+  },
+  cancelReplyText: {
+    fontSize: typography.fontSize.base,
+    color: colors.text.secondary,
+    fontWeight: typography.fontWeight.bold,
+  },
+  commentInputContainer: {
+    flexDirection: 'row',
+    padding: spacing[4],
     gap: spacing[2],
   },
   commentInput: {

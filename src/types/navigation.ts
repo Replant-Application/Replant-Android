@@ -79,6 +79,18 @@ export type RootStackParamList = {
       isExpired?: boolean;
     };
   };
+  VerificationPostCreate: {
+    userMissionId: number;
+    missionId: string;
+    missionTitle: string;
+    missionEmoji?: string;
+    photoUrl?: string;
+    mode?: 'create' | 'edit';
+    verificationId?: number;
+    initialContent?: string;
+  };
+  Login: undefined;
+  SignUp: undefined;
 };
 
 // 네비게이션 파라미터 타입

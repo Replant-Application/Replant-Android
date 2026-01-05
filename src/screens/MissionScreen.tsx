@@ -9,7 +9,7 @@ import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../types/navigation';
 import { useUser } from '../contexts/UserContext';
 import { Mission } from '../types';
-import { checkVerificationStatus, MissionType, verifyByGps, verifyByTime, createVerification } from '../api/missionApi';
+import { checkVerificationStatus, MissionType, verifyByGps, verifyByTime, createVerification, addSystemMissionToMyMissions } from '../api/missionApi';
 import { uploadMissionVerifyPhoto } from '../api/fileApi';
 import * as Location from 'expo-location';
 import { getMyBadges, getBadgeHistory, Badge } from '../api/badgeApi';
@@ -22,7 +22,7 @@ interface MissionScreenProps {
   route?: RouteProp<RootStackParamList, 'Mission'>;
 }
 
-type MissionFilter = 'inProgress' | 'completed';
+type MissionFilter = 'inProgress' | 'pendingVerification' | 'completed';
 type MissionPeriodFilter = 'DAILY' | 'WEEKLY' | 'MONTHLY';
 type MissionSourceFilter = 'REGULAR' | 'CUSTOM';
 
@@ -80,12 +80,17 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
       return periodMatch && sourceMatch;
     });
 
-    // 추가 필터 적용 (진행중/완료)
+    // 추가 필터 적용 (진행중/인증대기/완료)
     switch (selectedFilter) {
       case 'completed':
-        return filtered.filter(mission => mission.completed);
+        // 완료 & 인증완료된 미션
+        return filtered.filter(mission => mission.completed && mission.verified === true);
+      case 'pendingVerification':
+        // 완료했지만 인증 대기중인 미션 (verified가 false이거나 undefined)
+        return filtered.filter(mission => mission.completed && mission.verified !== true);
       case 'inProgress':
       default:
+        // 아직 완료하지 않은 미션
         return filtered.filter(mission => !mission.completed);
     }
   }, [missions, selectedPeriod, selectedSource, selectedFilter, today]);
@@ -134,26 +139,65 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
 
   // 미션 유형별 인증 처리
   const handleVerify = useCallback(async (mission: Mission, verificationType: 'COMMUNITY' | 'GPS' | 'TIME') => {
-    if (!mission.user_mission_id) {
-      Alert.alert('오류', '미션 정보가 올바르지 않습니다.');
-      return;
+    let userMissionId = mission.user_mission_id;
+
+    // user_mission_id가 없으면 자동으로 미션 할당
+    if (!userMissionId) {
+      try {
+        // 시스템 미션인 경우 미션 할당 API 호출
+        const missionId = parseInt(mission.mission_id, 10);
+        if (isNaN(missionId)) {
+          Alert.alert('오류', '미션 정보가 올바르지 않습니다.');
+          return;
+        }
+
+        const assignResult = await addSystemMissionToMyMissions({ missionId });
+        if (assignResult.success && assignResult.data) {
+          userMissionId = assignResult.data.id;
+          // 미션 목록 새로고침하여 user_mission_id 업데이트
+          await loadMissions();
+        } else {
+          Alert.alert('오류', assignResult.error || '미션 할당에 실패했습니다.');
+          return;
+        }
+      } catch (error) {
+        logError('미션 할당 오류', error as Error);
+        Alert.alert('오류', '미션을 시작하는 중 문제가 발생했습니다.');
+        return;
+      }
     }
 
     switch (verificationType) {
       case 'COMMUNITY':
         // 인증글 작성 화면으로 이동 (VerificationPostCreate)
-        navigation.navigate('VerificationPostCreate' as any, {
-          userMissionId: mission.user_mission_id,
-          missionId: mission.mission_id,
-          missionTitle: mission.title,
-          missionEmoji: mission.emoji,
-          photoUrl: mission.photo_url,
-        });
+        if (!userMissionId) {
+          Alert.alert('오류', '미션 정보가 올바르지 않습니다.');
+          return;
+        }
+        try {
+          const navParams = {
+            userMissionId: userMissionId,
+            missionId: mission.mission_id,
+            missionTitle: mission.title || '미션',
+            missionEmoji: mission.emoji || '🎯',
+            photoUrl: mission.photo_url,
+          };
+          logError('인증하기 네비게이션', new Error('Debug'), { navParams });
+          navigation.navigate('VerificationPostCreate' as any, navParams);
+        } catch (navError) {
+          logError('네비게이션 오류', navError as Error);
+          Alert.alert('오류', '화면 이동 중 문제가 발생했습니다.');
+        }
         break;
 
       case 'GPS':
         // GPS 인증
         try {
+          if (!userMissionId) {
+            Alert.alert('오류', '미션 정보가 올바르지 않습니다.');
+            return;
+          }
+
           const { status } = await Location.requestForegroundPermissionsAsync();
           if (status !== 'granted') {
             Alert.alert('권한 필요', '위치 권한이 필요합니다.');
@@ -162,13 +206,13 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
 
           const location = await Location.getCurrentPositionAsync({});
           const result = await verifyByGps(
-            mission.user_mission_id,
+            userMissionId,
             location.coords.latitude,
             location.coords.longitude
           );
 
           if (result.success) {
-            Alert.alert('✅ GPS 인증 완료', `+${result.data?.expReward || 50} EXP를 획득했습니다!`);
+            Alert.alert('GPS 인증 완료', `+${result.data?.expReward || 50} EXP를 획득했습니다!`);
             await loadMissions();
           } else {
             Alert.alert('인증 실패', result.error || 'GPS 인증에 실패했습니다.');
@@ -182,10 +226,15 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
       case 'TIME':
         // 시간 인증
         try {
-          const result = await verifyByTime(mission.user_mission_id);
+          if (!userMissionId) {
+            Alert.alert('오류', '미션 정보가 올바르지 않습니다.');
+            return;
+          }
+
+          const result = await verifyByTime(userMissionId);
 
           if (result.success) {
-            Alert.alert('✅ 시간 인증 완료', `+${result.data?.expReward || 50} EXP를 획득했습니다!`);
+            Alert.alert('시간 인증 완료', `+${result.data?.expReward || 50} EXP를 획득했습니다!`);
             await loadMissions();
           } else {
             Alert.alert('인증 실패', result.error || '시간 인증에 실패했습니다.');
@@ -436,9 +485,29 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
     return <ErrorBoundary error={error} />;
   }
 
+  // 날짜 표시 함수
+  const getDateDisplay = () => {
+    const now = new Date();
+    const month = now.getMonth() + 1; // 1~12
+    const day = now.getDate();
+
+    switch (selectedPeriod) {
+      case 'DAILY':
+        return `${month}월 ${day}일`;
+      case 'WEEKLY':
+        // 해당 월의 몇 주차인지 계산
+        const weekOfMonth = Math.ceil(day / 7);
+        return `${month}월 ${weekOfMonth}주차`;
+      case 'MONTHLY':
+        return `${month}월`;
+      default:
+        return '';
+    }
+  };
+
   return (
     <View style={styles.container}>
-      <Header />
+      <Header showBackButton={false} />
 
       {/* 미션 완료 모달 */}
       <ConfirmModal
@@ -589,6 +658,9 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
         </TouchableOpacity>
 
         {/* 기간 탭 (일간/주간/월간) */}
+        <View style={styles.periodHeader}>
+          <Text style={styles.periodDateText}>{getDateDisplay()}</Text>
+        </View>
         <View style={styles.periodTabContainer}>
           <TouchableOpacity
             style={[styles.periodTab, selectedPeriod === 'DAILY' && styles.periodTabActive]}
@@ -641,7 +713,7 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
           </TouchableOpacity>
         </View>
 
-        {/* 필터 탭 (진행중/완료) */}
+        {/* 필터 탭 (진행중/인증대기/완료) */}
         <View style={styles.filterTabs}>
           <View style={styles.filterTabsWrapper}>
             <TouchableOpacity
@@ -651,6 +723,15 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
             >
               <Text style={[styles.filterTabText, selectedFilter === 'inProgress' && styles.filterTabTextActive]}>
                 진행중
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.filterTab, selectedFilter === 'pendingVerification' && styles.filterTabActive]}
+              onPress={() => setSelectedFilter('pendingVerification')}
+              activeOpacity={0.7}
+            >
+              <Text style={[styles.filterTabText, selectedFilter === 'pendingVerification' && styles.filterTabTextActive]}>
+                인증대기
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
@@ -671,9 +752,8 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
             <SectionTitle
               title={
                 `${selectedSource === 'CUSTOM' ? '커스텀 ' : ''}${
-                  selectedFilter === 'all' ? '전체' :
-                  selectedFilter === 'daily' ? '오늘의' :
-                  '완료한'
+                  selectedFilter === 'inProgress' ? '진행중' :
+                  selectedFilter === 'pendingVerification' ? '인증대기' : '완료한'
                 } 미션 (${totalGrowthMissions}개)`
               }
               marginBottom={spacing[3]}
@@ -686,15 +766,20 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
               title={
                 selectedSource === 'CUSTOM'
                   ? '커스텀 미션이 없어요'
-                  : selectedFilter === 'all' ? '아직 미션이 없어요' :
-                    selectedFilter === 'daily' ? '오늘의 미션이 없어요' :
-                    '완료한 미션이 없어요'
+                  : selectedFilter === 'inProgress'
+                    ? '모든 미션을 완료했어요!'
+                    : selectedFilter === 'pendingVerification'
+                      ? '인증 대기 중인 미션이 없어요'
+                      : '완료한 미션이 없어요'
               }
               description={
                 selectedSource === 'CUSTOM'
                   ? '아래 버튼을 눌러 나만의 미션을 만들어보세요!'
-                  : selectedFilter === 'inProgress' ? '모든 미션을 완료했습니다!' :
-                    '아직 완료한 미션이 없습니다.'
+                  : selectedFilter === 'inProgress'
+                    ? '새로운 미션에 도전해보세요!'
+                    : selectedFilter === 'pendingVerification'
+                      ? '미션을 완료하고 인증하면 여기에 표시됩니다.'
+                      : '미션을 완료하면 여기에 표시됩니다.'
               }
             />
           ) : (
@@ -793,6 +878,15 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.base,
     fontWeight: typography.fontWeight.semibold,
     color: colors.white,
+  },
+  periodHeader: {
+    marginBottom: spacing[2],
+  },
+  periodDateText: {
+    fontSize: typography.fontSize.xl,
+    fontWeight: typography.fontWeight.bold,
+    color: colors.text.primary,
+    textAlign: 'center',
   },
   periodTabContainer: {
     flexDirection: 'row',

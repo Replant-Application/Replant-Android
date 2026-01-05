@@ -883,7 +883,7 @@ const styles = StyleSheet.create({
   },
   characterContainer: {
     position: 'absolute',
-    bottom: SCREEN_HEIGHT * 0.15,
+    bottom: SCREEN_HEIGHT * 0.15 + 40, // 탭바 높이를 고려하여 추가 여백
     left: '40%',
     transform: [{ translateX: -(SCREEN_WIDTH * 0.6) / 2 }],
     width: SCREEN_WIDTH * 0.8,

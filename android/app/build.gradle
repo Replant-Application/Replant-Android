@@ -43,8 +43,8 @@ android {
         applicationId 'com.anonymous.replantmobileapp'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1
-        versionName "0.0.1"
+        versionCode 19
+        versionName "0.0.19"
 
         // APK 파일명 설정 (archivesBaseName은 최신 AGP에서 지원되지 않음)
         // archivesBaseName = "replant-release-${versionName}"

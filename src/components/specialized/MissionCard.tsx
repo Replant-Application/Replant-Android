@@ -99,27 +99,22 @@ const MissionCard: React.FC<MissionCardProps> = ({
         <View style={styles.statusContainer}>
           {mission.completed ? (
             <>
-              {/* 인증 완료된 경우에만 인증 뱃지(badge_verified.png) 표시 */}
+              {/* 인증 완료된 경우 */}
               {mission.verified === true ? (
-                <Badge tier="bronze" size="sm" />
+                <View style={styles.verifiedBadge}>
+                  <Text style={styles.verifiedIcon}>✓</Text>
+                  <Text style={styles.verifiedText}>인증완료</Text>
+                </View>
               ) : (
-                <View style={styles.statusWrapper}>
-                  <Image
-                    source={require('../../assets/images/alarm.png')}
-                    style={styles.statusIcon}
-                    resizeMode="contain"
-                  />
-                  <Text style={styles.pendingVerificationText}>인증 대기</Text>
+                <View style={styles.pendingBadge}>
+                  <Text style={styles.pendingIcon}>⏳</Text>
+                  <Text style={styles.pendingVerificationText}>인증대기중</Text>
                 </View>
               )}
             </>
           ) : (
-            <View style={styles.statusWrapper}>
-              <Image
-                source={require('../../assets/images/alarm.png')}
-                style={styles.statusIcon}
-                resizeMode="contain"
-              />
+            <View style={styles.inProgressBadge}>
+              <Text style={styles.inProgressIcon}>▶</Text>
               <Text style={styles.pendingText}>진행중</Text>
             </View>
           )}
@@ -296,6 +291,51 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.xs,
     color: colors.warning,
     fontWeight: typography.fontWeight.medium,
+  },
+
+  verifiedBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.green[100],
+    paddingHorizontal: spacing[2],
+    paddingVertical: spacing[1],
+    borderRadius: borderRadius.full,
+    gap: spacing[1],
+  },
+  verifiedIcon: {
+    fontSize: typography.fontSize.xs,
+    color: colors.green[600],
+    fontWeight: typography.fontWeight.bold,
+  },
+  verifiedText: {
+    fontSize: typography.fontSize.xs,
+    color: colors.green[700],
+    fontWeight: typography.fontWeight.medium,
+  },
+  pendingBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.orange[100],
+    paddingHorizontal: spacing[2],
+    paddingVertical: spacing[1],
+    borderRadius: borderRadius.full,
+    gap: spacing[1],
+  },
+  pendingIcon: {
+    fontSize: typography.fontSize.xs,
+  },
+  inProgressBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.gray[100],
+    paddingHorizontal: spacing[2],
+    paddingVertical: spacing[1],
+    borderRadius: borderRadius.full,
+    gap: spacing[1],
+  },
+  inProgressIcon: {
+    fontSize: typography.fontSize.xs,
+    color: colors.gray[500],
   },
 
   content: {
