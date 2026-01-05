@@ -128,3 +128,23 @@ export const formatDateDot = (dateString: string): string => {
   return `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, '0')}.${String(date.getDate()).padStart(2, '0')}`;
 };
 
+/**
+ * 채팅방 날짜 구분선 포맷팅 (오늘/어제/날짜)
+ * 
+ * @param dateString - ISO 8601 형식의 날짜 문자열
+ * @returns "오늘", "어제", 또는 "YYYY년 M월 D일" 형식의 문자열
+ */
+export const formatDateDivider = (dateString: string): string => {
+  const date = new Date(dateString);
+  const today = new Date();
+  const yesterday = new Date(today);
+  yesterday.setDate(yesterday.getDate() - 1);
+
+  if (date.toDateString() === today.toDateString()) {
+    return '오늘';
+  } else if (date.toDateString() === yesterday.toDateString()) {
+    return '어제';
+  }
+  return `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일`;
+};
+

@@ -8,6 +8,7 @@ import { Card, Loading, ErrorBoundary, Header, SectionTitle } from '../component
 import { colors, spacing, typography, borderRadius, shadows } from '../utils/designTokens';
 import { RootStackParamList } from '../types/navigation';
 import { Character } from '../types';
+import { formatDateKorean } from '../utils/dateUtils';
 
 interface MyPageScreenProps {
   navigation: NavigationProp<RootStackParamList>;
@@ -33,18 +34,6 @@ const MyPageScreen: React.FC<MyPageScreenProps> = ({ navigation }) => {
     );
   }
 
-  const formatDate = (dateString: string): string => {
-    try {
-      const date = new Date(dateString);
-      return date.toLocaleDateString('ko-KR', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-      });
-    } catch {
-      return dateString;
-    }
-  };
 
   const handleCharacterPress = (character: Character): void => {
     navigation.navigate('CharacterDetail', { character });
@@ -62,7 +51,7 @@ const MyPageScreen: React.FC<MyPageScreenProps> = ({ navigation }) => {
           </View>
           <View style={styles.profileInfo}>
             <Text style={styles.profileLabel}>가입일</Text>
-            <Text style={styles.profileValue}>{formatDate(profile.createdAt)}</Text>
+            <Text style={styles.profileValue}>{formatDateKorean(profile.createdAt)}</Text>
           </View>
         </Card>
 

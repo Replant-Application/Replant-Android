@@ -18,6 +18,7 @@ import {
   RefreshControl,
 } from 'react-native';
 import { Loading, Header, EmptyState } from '../components/ui';
+import { formatDateKorean } from '../utils/dateUtils';
 import { colors, spacing, typography, borderRadius } from '../utils/designTokens';
 import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../types/navigation';
@@ -69,14 +70,6 @@ const getMissionTypeLabel = (type: string): string => {
 const ReviewCard: React.FC<{
   review: MissionReview;
 }> = ({ review }) => {
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('ko-KR', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
-  };
 
   return (
     <View style={styles.reviewCard}>
@@ -96,7 +89,7 @@ const ReviewCard: React.FC<{
           )}
           <Text style={styles.reviewAuthor}>{review.userNickname}</Text>
         </View>
-        <Text style={styles.reviewDate}>{formatDate(review.createdAt)}</Text>
+        <Text style={styles.reviewDate}>{formatDateKorean(review.createdAt)}</Text>
       </View>
       <Text style={styles.reviewContent}>{review.content}</Text>
     </View>

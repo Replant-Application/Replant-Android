@@ -17,6 +17,7 @@ import { useCharacter } from '../hooks/useCharacter';
 import { Loading, ErrorBoundary, ConfirmModal, AlertModal } from '../components/ui';
 import { colors, spacing, typography, borderRadius, shadows } from '../utils/designTokens';
 import { SimpleDiaryData } from '../types';
+import { formatDateYYYYMMDD } from '../utils/dateUtils';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -135,11 +136,7 @@ const DiaryScreen: React.FC = () => {
 
   // 오늘 일기 작성 여부 확인
   const todayDiary = useMemo(() => {
-    const today = new Date();
-    const year = today.getFullYear();
-    const month = String(today.getMonth() + 1).padStart(2, '0');
-    const day = String(today.getDate()).padStart(2, '0');
-    const dateString = `${year}-${month}-${day}`;
+    const dateString = formatDateYYYYMMDD(new Date());
     return diaries.find(d => d.date === dateString);
   }, [diaries]);
 
@@ -246,11 +243,7 @@ const DiaryScreen: React.FC = () => {
   // 일기 저장
   const handleSaveDiary = async () => {
     try {
-      const now = new Date();
-      const year = now.getFullYear();
-      const month = String(now.getMonth() + 1).padStart(2, '0');
-      const day = String(now.getDate()).padStart(2, '0');
-      const dateString = `${year}-${month}-${day}`;
+      const dateString = formatDateYYYYMMDD(new Date());
 
       const diaryData: SimpleDiaryData = {
         date: dateString,

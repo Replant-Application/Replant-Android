@@ -20,6 +20,7 @@ import { Loading, Header } from '../components/ui';
 import { colors, spacing, typography, borderRadius } from '../utils/designTokens';
 import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../types/navigation';
+import { formatDateDivider } from '../utils/dateUtils';
 
 interface ChatRoomScreenProps {
   navigation: NavigationProp<RootStackParamList>;
@@ -133,19 +134,6 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({ navigation, route }) =>
     return `${ampm} ${hour12}:${minutes}`;
   };
 
-  const formatDateDivider = (dateString: string) => {
-    const date = new Date(dateString);
-    const today = new Date();
-    const yesterday = new Date(today);
-    yesterday.setDate(yesterday.getDate() - 1);
-
-    if (date.toDateString() === today.toDateString()) {
-      return '오늘';
-    } else if (date.toDateString() === yesterday.toDateString()) {
-      return '어제';
-    }
-    return `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일`;
-  };
 
   const shouldShowDateDivider = (currentMsg: ChatMessage, prevMsg?: ChatMessage) => {
     if (!prevMsg) return true;
