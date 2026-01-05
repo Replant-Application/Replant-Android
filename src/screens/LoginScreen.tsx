@@ -7,6 +7,9 @@ import { saveTokens, saveUserInfo, saveKeepLoggedIn } from '../utils/tokenStorag
 import { apiClient } from '../api/client';
 import { useUser } from '../contexts/UserContext';
 import { AlertModal } from '../components/ui';
+import { signInWithKakao } from '../services/kakaoSignIn';
+import { signInWithGoogle } from '../services/googleSignIn';
+import { loginWithOAuth } from '../services/authService';
 
 interface LoginScreenProps {
   onNavigate: (screen: string) => void;
@@ -102,6 +105,97 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onNavigate }) => {
     }
   };
 
+  const handleOAuthLogin = async (provider: 'KAKAO' | 'GOOGLE') => {
+    console.log(`[LoginScreen] handleOAuthLogin called with provider: ${provider}`);
+    if (isLoading) {
+      console.log('[LoginScreen] Already loading, returning...');
+      return;
+    }
+
+    console.log('[LoginScreen] Setting loading state to true');
+    setIsLoading(true);
+
+    try {
+      // OAuth Provider에서 Access Token 가져오기
+      let providerAccessToken: string | null = null;
+
+      if (provider === 'KAKAO') {
+        console.log('[LoginScreen] Calling signInWithKakao...');
+        providerAccessToken = await signInWithKakao();
+        console.log('[LoginScreen] signInWithKakao result:', providerAccessToken ? 'got token' : 'no token');
+      } else if (provider === 'GOOGLE') {
+        console.log('[LoginScreen] Calling signInWithGoogle...');
+        providerAccessToken = await signInWithGoogle();
+        console.log('[LoginScreen] signInWithGoogle result:', providerAccessToken ? 'got token' : 'no token');
+      }
+
+      if (!providerAccessToken) {
+        // 사용자가 취소한 경우는 에러 메시지를 표시하지 않음
+        // (카카오 로그인 서비스에서 이미 처리됨)
+        setIsLoading(false);
+        return;
+      }
+
+      // 백엔드 OAuth 로그인 API 호출
+      const result = await loginWithOAuth(provider, providerAccessToken);
+
+      if (result.success && result.data) {
+        const { user } = result.data;
+
+        // 로그인 유지 설정 저장
+        await saveKeepLoggedIn(keepLoggedIn);
+
+        // 성공 모달 표시
+        setUserName(user.nickname || user.email);
+        setShowSuccessModal(true);
+      } else {
+        // 백엔드 에러 메시지 추출
+        let errorMessage = '로그인에 실패했습니다.';
+        if (typeof result.error === 'string') {
+          errorMessage = result.error;
+        } else if (result.error && typeof result.error === 'object') {
+          const errorObj = result.error as any;
+          errorMessage = errorObj.message || errorObj.error || errorObj.msg || errorMessage;
+        }
+        
+        // ACCOUNT-009 에러는 회원가입 실패
+        if (errorMessage.includes('회원가입에 실패') || errorMessage.includes('ACCOUNT-009')) {
+          errorMessage = '회원가입 처리 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.';
+        }
+        
+        showAlertModal('로그인 실패', errorMessage);
+      }
+    } catch (error) {
+      console.error('OAuth login error:', error);
+      const errorMessage = error instanceof Error 
+        ? error.message 
+        : '로그인 중 오류가 발생했습니다.';
+      showAlertModal('오류', errorMessage);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleKakaoLogin = () => {
+    console.log('[LoginScreen] Kakao login button pressed');
+    try {
+      handleOAuthLogin('KAKAO');
+    } catch (error) {
+      console.error('[LoginScreen] Error in handleKakaoLogin:', error);
+      showAlertModal('오류', '카카오 로그인을 시작할 수 없습니다.');
+    }
+  };
+  
+  const handleGoogleLogin = () => {
+    console.log('[LoginScreen] Google login button pressed');
+    try {
+      handleOAuthLogin('GOOGLE');
+    } catch (error) {
+      console.error('[LoginScreen] Error in handleGoogleLogin:', error);
+      showAlertModal('오류', '구글 로그인을 시작할 수 없습니다.');
+    }
+  };
+
   return (
     <KeyboardAvoidingView
       style={styles.container}
@@ -185,12 +279,12 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onNavigate }) => {
               <View style={styles.socialTitleLine} />
             </View>
             <View style={styles.socialIcons}>
-              <TouchableOpacity style={styles.socialIcon}>
-                <View style={[styles.socialIconCircle, { backgroundColor: '#03C75A' }]}>
-                  <Text style={styles.socialIconText}>N</Text>
-                </View>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.socialIcon}>
+              <TouchableOpacity 
+                style={styles.socialIcon}
+                onPress={handleKakaoLogin}
+                disabled={isLoading}
+                activeOpacity={0.8}
+              >
                 <View style={[styles.socialIconCircle, { backgroundColor: '#FEE500' }]}>
                   <Image
                     source={require('../assets/images/kakao_logo.png')}
@@ -199,7 +293,12 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onNavigate }) => {
                   />
                 </View>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.socialIcon}>
+              <TouchableOpacity 
+                style={styles.socialIcon}
+                onPress={handleGoogleLogin}
+                disabled={isLoading}
+                activeOpacity={0.8}
+              >
                 <View style={[styles.socialIconCircle, { backgroundColor: '#ffffff', borderWidth: 1, borderColor: '#E0E0E0' }]}>
                   <Image
                     source={require('../assets/images/google_logo.png')}
@@ -291,7 +390,10 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: '700',
     color: '#166534',
-    fontFamily: 'Maplestory Bold',
+    fontFamily: Platform.select({
+      ios: 'Maplestory Bold',
+      android: 'MaplestoryBold',
+    }),
   },
   title: {
     fontSize: 28,
