@@ -27,6 +27,7 @@ export class ApiClient {
   private accessToken: string | null = null;
   private isRefreshing: boolean = false;
   private refreshSubscribers: Array<(token: string) => void> = [];
+  private onTokenExpiredCallback: (() => void) | null = null;
 
   private tokenLoaded: boolean = false;
 
@@ -34,6 +35,13 @@ export class ApiClient {
     this.baseURL = baseURL;
     // 초기화 시 저장된 토큰 로드
     this.loadAccessToken();
+  }
+
+  /**
+   * 토큰 만료 콜백 설정
+   */
+  setOnTokenExpiredCallback(callback: () => void): void {
+    this.onTokenExpiredCallback = callback;
   }
 
   /**
@@ -123,6 +131,10 @@ export class ApiClient {
       // 토큰 갱신 실패 시 로그아웃 처리
       const { clearAuthData } = await import('../utils/tokenStorage');
       await clearAuthData();
+      // 토큰 만료 콜백 호출
+      if (this.onTokenExpiredCallback) {
+        this.onTokenExpiredCallback();
+      }
       return null;
     } finally {
       this.isRefreshing = false;

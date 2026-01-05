@@ -1,9 +1,12 @@
-import React, { useState, useCallback, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Image, Platform, BackHandler, ToastAndroid } from 'react-native';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, Image, Platform, BackHandler, ToastAndroid, Animated, Easing } from 'react-native';
 import { useUser } from '../contexts/UserContext';
 import { SCREEN_NAMES } from '../utils/constants';
 import { colors, spacing, typography } from '../utils/designTokens';
 import { RootStackParamList } from '../types/navigation';
+import { apiClient } from '../api/client';
+import { logout } from '../services/authService';
+import AlertModal from '../components/ui/AlertModal';
 
 // 화면 컴포넌트들
 import StartScreen from '../screens/StartScreen';
@@ -39,10 +42,13 @@ import NotificationScreen from '../screens/NotificationScreen';
 
 // 간단한 상태 기반 네비게이션 (React Navigation 없이)
 const AppNavigator = () => {
-  const { isLoggedIn, isLoading } = useUser();
+  const { isLoggedIn, isLoading, logout: userLogout } = useUser();
   const [currentScreen, setCurrentScreen] = useState(SCREEN_NAMES.START);
   const [navigationParams, setNavigationParams] = useState({});
   const [backPressedOnce, setBackPressedOnce] = useState(false);
+  const [showTokenExpiredModal, setShowTokenExpiredModal] = useState(false);
+  const fadeAnim = useRef(new Animated.Value(1)).current;
+  const slideAnim = useRef(new Animated.Value(0)).current;
 
   // 메인 탭 화면인지 확인
   const isMainTabScreen = useCallback((screen: string) => {
@@ -54,6 +60,44 @@ const AppNavigator = () => {
       SCREEN_NAMES.SETTINGS,
     ].includes(screen);
   }, []);
+
+  // 토큰 만료 콜백 설정
+  useEffect(() => {
+    apiClient.setOnTokenExpiredCallback(() => {
+      setShowTokenExpiredModal(true);
+    });
+  }, []);
+
+  // 토큰 만료 모달 닫기 및 로그아웃 처리
+  const handleTokenExpiredClose = useCallback(async () => {
+    setShowTokenExpiredModal(false);
+    await logout();
+    await userLogout();
+    setCurrentScreen(SCREEN_NAMES.START);
+  }, [userLogout]);
+
+  // 화면 전환 애니메이션 (모든 hooks는 조건부 렌더링 이전에 위치해야 함)
+  useEffect(() => {
+    // 초기값 설정 (새 화면이 약간 아래에서 시작)
+    fadeAnim.setValue(0.5);
+    slideAnim.setValue(10);
+    
+    // 부드러운 페이드와 슬라이드 인 (더 자연스러운 전환)
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 280,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: true,
+      }),
+      Animated.timing(slideAnim, {
+        toValue: 0,
+        duration: 280,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, [currentScreen, fadeAnim, slideAnim]);
 
   // 뒤로가기 버튼 처리
   useEffect(() => {
@@ -131,9 +175,17 @@ const AppNavigator = () => {
 
     return (
       <View style={styles.container}>
-        <View style={styles.screenContainer}>
+        <Animated.View 
+          style={[
+            styles.screenContainer,
+            {
+              opacity: fadeAnim,
+              transform: [{ translateY: slideAnim }],
+            }
+          ]}
+        >
           {renderAuthScreen()}
-        </View>
+        </Animated.View>
       </View>
     );
   }
@@ -255,6 +307,15 @@ const AppNavigator = () => {
       <View style={styles.screenContainer}>
         {renderScreen()}
       </View>
+
+      {/* 토큰 만료 모달 */}
+      <AlertModal
+        visible={showTokenExpiredModal}
+        title="세션이 만료되었습니다"
+        message="로그인 세션이 만료되었습니다. 다시 로그인해주세요."
+        buttonText="확인"
+        onClose={handleTokenExpiredClose}
+      />
 
       {/* 하단 탭 네비게이션 */}
       <View style={styles.tabBar}>
