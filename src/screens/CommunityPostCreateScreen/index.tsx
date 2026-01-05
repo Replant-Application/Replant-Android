@@ -16,11 +16,11 @@ import {
   Image,
   TouchableOpacity,
 } from 'react-native';
-import { Header, AlertModal } from '../components/ui';
-import { colors, spacing, typography, borderRadius } from '../utils/designTokens';
-import { useCommunity } from '../hooks/useCommunity';
+import { Header, AlertModal } from '../../components/ui';
+import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
+import { useCommunity } from '../../hooks/useCommunity';
 import { NavigationProp, RouteProp } from '@react-navigation/native';
-import { RootStackParamList } from '../types/navigation';
+import { RootStackParamList } from '../../types/navigation';
 
 interface CommunityPostCreateScreenProps {
   navigation: NavigationProp<RootStackParamList>;
@@ -81,7 +81,7 @@ const CommunityPostCreateScreen: React.FC<CommunityPostCreateScreenProps> = ({
         leftButton={
           <TouchableOpacity onPress={() => navigation.goBack()}>
             <Image
-              source={require('../assets/images/left.png')}
+              source={require('../../assets/images/left.png')}
               style={styles.backButtonIcon}
               resizeMode="contain"
             />
@@ -97,7 +97,7 @@ const CommunityPostCreateScreen: React.FC<CommunityPostCreateScreenProps> = ({
         {/* 미션 정보 표시 */}
         <View style={styles.missionInfo}>
           <Image
-            source={require('../assets/images/alarm.png')}
+            source={require('../../assets/images/alarm.png')}
             style={styles.missionIcon}
             resizeMode="contain"
           />

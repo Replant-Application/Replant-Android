@@ -5,15 +5,15 @@
 
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Image, Modal, RefreshControl, Alert } from 'react-native';
-import { useCommunity } from '../hooks/useCommunity';
-import { PostCard } from '../components/specialized';
-import { Loading, ErrorBoundary, EmptyState, TabBar, FilterBar } from '../components/ui';
-import { colors, spacing, typography, borderRadius, shadows } from '../utils/designTokens';
+import { useCommunity } from '../../hooks/useCommunity';
+import { PostCard } from '../../components/specialized';
+import { Loading, ErrorBoundary, EmptyState, TabBar, FilterBar } from '../../components/ui';
+import { colors, spacing, typography, borderRadius, shadows } from '../../utils/designTokens';
 import { NavigationProp } from '@react-navigation/native';
-import { RootStackParamList } from '../types/navigation';
-import { getVerifications, voteVerification, VerificationPost, VerificationStatus } from '../api/missionApi';
-import { CommunityPost } from '../types';
-import { logError } from '../utils/logger';
+import { RootStackParamList } from '../../types/navigation';
+import { getVerifications, voteVerification, VerificationPost, VerificationStatus } from '../../api/missionApi';
+import { CommunityPost } from '../../types';
+import { logError } from '../../utils/logger';
 
 interface CommunityScreenProps {
   navigation: NavigationProp<RootStackParamList>;
@@ -259,7 +259,7 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation }) => {
         <View style={styles.filterContainer}>
           <View style={styles.searchContainer}>
             <Image
-              source={require('../assets/images/search.png')}
+              source={require('../../assets/images/search.png')}
               style={styles.searchIcon}
               resizeMode="contain"
             />
@@ -309,7 +309,7 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation }) => {
       >
         {filteredPosts.length === 0 ? (
           <EmptyState
-            iconImage={require('../assets/images/notes.png')}
+            iconImage={require('../../assets/images/notes.png')}
             title="아직 게시글이 없어요"
             description="미션을 완료하고 커뮤니티에 공유해보세요!"
           />

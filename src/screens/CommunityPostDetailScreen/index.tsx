@@ -15,14 +15,14 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
-import { useCommunityPost } from '../hooks/useCommunityPost';
-import { useCommunity } from '../hooks/useCommunity';
-import { CommentCard } from '../components/specialized';
-import { Loading, ErrorBoundary, Header, EmptyState } from '../components/ui';
-import { colors, spacing, typography, borderRadius } from '../utils/designTokens';
+import { useCommunityPost } from '../../hooks/useCommunityPost';
+import { useCommunity } from '../../hooks/useCommunity';
+import { CommentCard } from '../../components/specialized';
+import { Loading, ErrorBoundary, Header, EmptyState } from '../../components/ui';
+import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
 import { NavigationProp, RouteProp } from '@react-navigation/native';
-import { RootStackParamList } from '../types/navigation';
-import { useUser } from '../contexts/UserContext';
+import { RootStackParamList } from '../../types/navigation';
+import { useUser } from '../../contexts/UserContext';
 
 interface CommunityPostDetailScreenProps {
   navigation: NavigationProp<RootStackParamList>;
@@ -157,7 +157,7 @@ const CommunityPostDetailScreen: React.FC<CommunityPostDetailScreenProps> = ({
         leftButton={
           <TouchableOpacity onPress={() => navigation.goBack()}>
             <Image
-              source={require('../assets/images/left.png')}
+              source={require('../../assets/images/left.png')}
               style={styles.backButtonIcon}
               resizeMode="contain"
             />

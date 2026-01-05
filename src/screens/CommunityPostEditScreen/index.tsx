@@ -15,13 +15,13 @@ import {
   Image,
   TouchableOpacity,
 } from 'react-native';
-import { useCommunity } from '../hooks/useCommunity';
-import { useCommunityPost } from '../hooks/useCommunityPost';
-import { Button, Header } from '../components/ui';
-import { colors, spacing, typography, borderRadius } from '../utils/designTokens';
+import { useCommunity } from '../../hooks/useCommunity';
+import { useCommunityPost } from '../../hooks/useCommunityPost';
+import { Button, Header } from '../../components/ui';
+import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
 import { NavigationProp, RouteProp } from '@react-navigation/native';
-import { RootStackParamList } from '../types/navigation';
-import { useUser } from '../contexts/UserContext';
+import { RootStackParamList } from '../../types/navigation';
+import { useUser } from '../../contexts/UserContext';
 
 interface CommunityPostEditScreenProps {
   navigation: NavigationProp<RootStackParamList>;
@@ -92,7 +92,7 @@ const CommunityPostEditScreen: React.FC<CommunityPostEditScreenProps> = ({
           leftButton={
             <TouchableOpacity onPress={() => navigation.goBack()}>
               <Image
-                source={require('../assets/images/left.png')}
+                source={require('../../assets/images/left.png')}
                 style={styles.backButtonIcon}
                 resizeMode="contain"
               />
