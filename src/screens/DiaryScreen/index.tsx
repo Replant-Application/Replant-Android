@@ -20,7 +20,8 @@ import { SimpleDiaryData } from '../../types';
 import { formatDateYYYYMMDD } from '../../utils/dateUtils';
 import { EMOTION_TAGS } from './DiaryScreen.constants';
 import { DiaryStep } from './DiaryScreen.types';
-import { getEmotionColor, addOpacity, getCharacterImage } from './DiaryScreen.utils';
+import { getEmotionColor, addOpacity } from './DiaryScreen.utils';
+import { getCharacterImage } from '../../utils/characterUtils';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
