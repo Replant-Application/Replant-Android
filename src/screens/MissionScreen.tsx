@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Image, Ref
 import { useMission } from '../hooks/useMission';
 import { useCharacter } from '../hooks/useCharacter';
 import { MissionCard, MissionVerificationModal } from '../components/specialized';
-import { Card, Loading, ErrorBoundary, Button, Header, EmptyState, SectionTitle, ConfirmModal } from '../components/ui';
+import { Card, Loading, ErrorBoundary, Button, Header, EmptyState, SectionTitle, ConfirmModal, FilterBar, TabBar } from '../components/ui';
 import { colors, spacing, typography, borderRadius, shadows } from '../utils/designTokens';
 import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../types/navigation';
@@ -687,59 +687,30 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
         </View>
 
         {/* 일반/커스텀 미션 탭 */}
-        <View style={styles.sourceTabContainer}>
-          <TouchableOpacity
-            style={[styles.sourceTab, selectedSource === 'REGULAR' && styles.sourceTabActive]}
-            onPress={() => setSelectedSource('REGULAR')}
-            activeOpacity={0.7}
-          >
-            <Text style={[styles.sourceTabText, selectedSource === 'REGULAR' && styles.sourceTabTextActive]}>
-              일반 미션
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.sourceTab, selectedSource === 'CUSTOM' && styles.sourceTabActive]}
-            onPress={() => setSelectedSource('CUSTOM')}
-            activeOpacity={0.7}
-          >
-            <Text style={[styles.sourceTabText, selectedSource === 'CUSTOM' && styles.sourceTabTextActive]}>
-              커스텀 미션
-            </Text>
-          </TouchableOpacity>
-        </View>
+        <TabBar
+          tabs={[
+            { key: 'REGULAR', label: '일반 미션' },
+            { key: 'CUSTOM', label: '커스텀 미션' },
+          ]}
+          activeTab={selectedSource}
+          onTabChange={(key) => setSelectedSource(key as MissionSourceFilter)}
+          variant="underline"
+          containerStyle={{
+            marginBottom: spacing[4],
+          }}
+        />
 
         {/* 필터 탭 (진행중/인증대기/완료) */}
-        <View style={styles.filterTabs}>
-          <View style={styles.filterTabsWrapper}>
-            <TouchableOpacity
-              style={[styles.filterTab, selectedFilter === 'inProgress' && styles.filterTabActive]}
-              onPress={() => setSelectedFilter('inProgress')}
-              activeOpacity={0.7}
-            >
-              <Text style={[styles.filterTabText, selectedFilter === 'inProgress' && styles.filterTabTextActive]}>
-                진행중
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.filterTab, selectedFilter === 'pendingVerification' && styles.filterTabActive]}
-              onPress={() => setSelectedFilter('pendingVerification')}
-              activeOpacity={0.7}
-            >
-              <Text style={[styles.filterTabText, selectedFilter === 'pendingVerification' && styles.filterTabTextActive]}>
-                인증대기
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.filterTab, selectedFilter === 'completed' && styles.filterTabActive]}
-              onPress={() => setSelectedFilter('completed')}
-              activeOpacity={0.7}
-            >
-              <Text style={[styles.filterTabText, selectedFilter === 'completed' && styles.filterTabTextActive]}>
-                완료
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </View>
+        <FilterBar
+          filters={[
+            { key: 'inProgress', label: '진행중' },
+            { key: 'pendingVerification', label: '인증대기' },
+            { key: 'completed', label: '완료' },
+          ]}
+          selectedFilter={selectedFilter}
+          onFilterChange={setSelectedFilter}
+          variant="pill"
+        />
 
         {/* 미션 목록 */}
         <View style={styles.missionSection}>
@@ -985,62 +956,6 @@ const styles = StyleSheet.create({
 
   missionCard: {
     marginBottom: spacing[3],
-  },
-  sourceTabContainer: {
-    flexDirection: 'row',
-    marginBottom: spacing[4],
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border.light,
-  },
-  sourceTab: {
-    flex: 1,
-    paddingVertical: spacing[3],
-    alignItems: 'center',
-    borderBottomWidth: 2,
-    borderBottomColor: 'transparent',
-  },
-  sourceTabActive: {
-    borderBottomColor: colors.primary[600],
-  },
-  sourceTabText: {
-    fontSize: typography.fontSize.base,
-    fontWeight: typography.fontWeight.medium,
-    color: colors.text.tertiary,
-  },
-  sourceTabTextActive: {
-    color: colors.primary[600],
-    fontWeight: typography.fontWeight.bold,
-  },
-  filterTabs: {
-    marginBottom: spacing[5],
-  },
-  filterTabsWrapper: {
-    flexDirection: 'row',
-    backgroundColor: colors.gray[100],
-    borderRadius: borderRadius.xl,
-    padding: spacing[1],
-  },
-  filterTab: {
-    flex: 1,
-    paddingVertical: spacing[2],
-    paddingHorizontal: spacing[3],
-    borderRadius: borderRadius.lg,
-    alignItems: 'center',
-    justifyContent: 'center',
-    minHeight: 40,
-  },
-  filterTabActive: {
-    backgroundColor: colors.primary[500],
-    ...shadows.sm,
-  },
-  filterTabText: {
-    fontSize: typography.fontSize.base,
-    fontWeight: typography.fontWeight.medium,
-    color: colors.text.secondary,
-  },
-  filterTabTextActive: {
-    color: colors.white,
-    fontWeight: typography.fontWeight.semibold,
   },
   // 뱃지 섹션 스타일
   badgeSection: {

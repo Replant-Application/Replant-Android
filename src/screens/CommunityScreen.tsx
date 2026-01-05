@@ -7,7 +7,7 @@ import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Image, Modal, RefreshControl, Alert } from 'react-native';
 import { useCommunity } from '../hooks/useCommunity';
 import { PostCard } from '../components/specialized';
-import { Loading, ErrorBoundary, EmptyState } from '../components/ui';
+import { Loading, ErrorBoundary, EmptyState, TabBar, FilterBar } from '../components/ui';
 import { colors, spacing, typography, borderRadius, shadows } from '../utils/designTokens';
 import { NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '../types/navigation';
@@ -238,28 +238,21 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation }) => {
       </View>
 
       {/* 탭 */}
-      <View style={styles.tabContainer}>
-        <View style={styles.tabWrapper}>
-          <TouchableOpacity
-            style={[styles.tab, activeTab === 'all' && styles.tabActive]}
-            onPress={() => setActiveTab('all')}
-            activeOpacity={0.7}
-          >
-            <Text style={[styles.tabText, activeTab === 'all' && styles.tabTextActive]}>
-              전체 게시판
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.tab, activeTab === 'mission-group' && styles.tabActive]}
-            onPress={handleMissionGroupPress}
-            activeOpacity={0.7}
-          >
-            <Text style={[styles.tabText, activeTab === 'mission-group' && styles.tabTextActive]}>
-              미션 도감
-            </Text>
-          </TouchableOpacity>
-        </View>
-      </View>
+      <TabBar
+        tabs={[
+          { key: 'all', label: '전체 게시판' },
+          { key: 'mission-group', label: '미션 도감' },
+        ]}
+        activeTab={activeTab}
+        onTabChange={(key) => {
+          if (key === 'mission-group') {
+            handleMissionGroupPress();
+          } else {
+            setActiveTab(key as CommunityTab);
+          }
+        }}
+        variant="pill"
+      />
 
       {/* 검색 및 정렬 */}
       {activeTab === 'all' && (
@@ -280,47 +273,16 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation }) => {
           </View>
 
           {/* 인증 필터 탭 */}
-          <View style={styles.verificationFilterContainer}>
-            <TouchableOpacity
-              style={[
-                styles.verificationFilterTab,
-                verificationFilter === 'all' && styles.verificationFilterTabActive
-              ]}
-              onPress={() => setVerificationFilter('all')}
-              activeOpacity={0.7}
-            >
-              <Text style={[
-                styles.verificationFilterText,
-                verificationFilter === 'all' && styles.verificationFilterTextActive
-              ]}>전체</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[
-                styles.verificationFilterTab,
-                verificationFilter === 'pending' && styles.verificationFilterTabActive
-              ]}
-              onPress={() => setVerificationFilter('pending')}
-              activeOpacity={0.7}
-            >
-              <Text style={[
-                styles.verificationFilterText,
-                verificationFilter === 'pending' && styles.verificationFilterTextActive
-              ]}>인증대기</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[
-                styles.verificationFilterTab,
-                verificationFilter === 'approved' && styles.verificationFilterTabActive
-              ]}
-              onPress={() => setVerificationFilter('approved')}
-              activeOpacity={0.7}
-            >
-              <Text style={[
-                styles.verificationFilterText,
-                verificationFilter === 'approved' && styles.verificationFilterTextActive
-              ]}>인증완료</Text>
-            </TouchableOpacity>
-          </View>
+          <FilterBar
+            filters={[
+              { key: 'all', label: '전체' },
+              { key: 'pending', label: '인증대기' },
+              { key: 'approved', label: '인증완료' },
+            ]}
+            selectedFilter={verificationFilter}
+            onFilterChange={(key) => setVerificationFilter(key as VerificationFilter)}
+            variant="button"
+          />
 
           <TouchableOpacity
             style={styles.filterSelector}
@@ -431,40 +393,6 @@ const styles = StyleSheet.create({
     fontWeight: typography.fontWeight.normal,
     color: colors.text.primary,
   },
-  tabContainer: {
-    backgroundColor: colors.background.primary,
-    paddingHorizontal: spacing[4],
-    paddingVertical: spacing[3],
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border.light,
-  },
-  tabWrapper: {
-    flexDirection: 'row',
-    backgroundColor: colors.gray[100],
-    borderRadius: borderRadius.xl,
-    padding: spacing[1],
-  },
-  tab: {
-    flex: 1,
-    paddingVertical: spacing[2],
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: borderRadius.lg,
-    minHeight: 40,
-  },
-  tabActive: {
-    backgroundColor: colors.green[500],
-    ...shadows.sm,
-  },
-  tabText: {
-    fontSize: typography.fontSize.base,
-    fontWeight: typography.fontWeight.medium,
-    color: colors.text.secondary,
-  },
-  tabTextActive: {
-    color: colors.white,
-    fontWeight: typography.fontWeight.semibold,
-  },
   filterContainer: {
     paddingHorizontal: spacing[4],
     paddingTop: spacing[4],
@@ -572,34 +500,6 @@ const styles = StyleSheet.create({
   postsList: {
     gap: spacing[3],
     paddingBottom: spacing[16], // 추가 하단 여백
-  },
-  // 인증 필터 탭 스타일
-  verificationFilterContainer: {
-    flexDirection: 'row',
-    marginBottom: spacing[3],
-    backgroundColor: colors.gray[100],
-    borderRadius: borderRadius.lg,
-    padding: spacing[1],
-  },
-  verificationFilterTab: {
-    flex: 1,
-    paddingVertical: spacing[2],
-    paddingHorizontal: spacing[2],
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: borderRadius.md,
-  },
-  verificationFilterTabActive: {
-    backgroundColor: colors.primary[500],
-  },
-  verificationFilterText: {
-    fontSize: typography.fontSize.sm,
-    fontWeight: typography.fontWeight.medium,
-    color: colors.text.secondary,
-  },
-  verificationFilterTextActive: {
-    color: colors.white,
-    fontWeight: typography.fontWeight.semibold,
   },
 });
 

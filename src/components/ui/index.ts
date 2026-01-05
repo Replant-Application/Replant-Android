@@ -12,3 +12,5 @@ export { default as ProgressBar } from './ProgressBar';
 export { default as SectionTitle } from './SectionTitle';
 export { default as ConfirmModal } from './ConfirmModal';
 export { default as AlertModal } from './AlertModal';
+export { TabBar } from './TabBar';
+export { FilterBar } from './FilterBar';

@@ -17,7 +17,7 @@ import {
 } from 'react-native';
 import { getRecommendations, acceptRecommendation, rejectRecommendation } from '../api/recommendationApi';
 import { getChatRooms } from '../api/chatApi';
-import { Loading, Header, EmptyState } from '../components/ui';
+import { Loading, Header, EmptyState, TabBar } from '../components/ui';
 import { colors, spacing, typography, borderRadius } from '../utils/designTokens';
 import { NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '../types/navigation';
@@ -283,36 +283,15 @@ const ConnectionsScreen: React.FC<ConnectionsScreenProps> = ({ navigation }) => 
       />
 
       {/* 탭 */}
-      <View style={styles.tabContainer}>
-        <TouchableOpacity
-          style={[styles.tab, activeTab === 'recommendations' && styles.tabActive]}
-          onPress={() => setActiveTab('recommendations')}
-        >
-          <Text style={[styles.tabText, activeTab === 'recommendations' && styles.tabTextActive]}>
-            새로운 인연
-          </Text>
-          {recommendations.length > 0 && (
-            <View style={styles.tabBadge}>
-              <Text style={styles.tabBadgeText}>{recommendations.length}</Text>
-            </View>
-          )}
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.tab, activeTab === 'chats' && styles.tabActive]}
-          onPress={() => setActiveTab('chats')}
-        >
-          <Text style={[styles.tabText, activeTab === 'chats' && styles.tabTextActive]}>
-            대화
-          </Text>
-          {chatRooms.reduce((sum, r) => sum + r.unreadCount, 0) > 0 && (
-            <View style={styles.tabBadge}>
-              <Text style={styles.tabBadgeText}>
-                {chatRooms.reduce((sum, r) => sum + r.unreadCount, 0)}
-              </Text>
-            </View>
-          )}
-        </TouchableOpacity>
-      </View>
+      <TabBar
+        tabs={[
+          { key: 'recommendations', label: '새로운 인연', badge: recommendations.length > 0 ? recommendations.length : undefined },
+          { key: 'chats', label: '대화', badge: chatRooms.reduce((sum, r) => sum + r.unreadCount, 0) > 0 ? chatRooms.reduce((sum, r) => sum + r.unreadCount, 0) : undefined },
+        ]}
+        activeTab={activeTab}
+        onTabChange={(key) => setActiveTab(key as TabType)}
+        variant="simple"
+      />
 
       {/* 안내 메시지 */}
       <View style={styles.infoBox}>
@@ -367,46 +346,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background.primary,
-  },
-  tabContainer: {
-    flexDirection: 'row',
-    paddingHorizontal: spacing[4],
-    paddingVertical: spacing[2],
-    backgroundColor: colors.background.primary,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border.light,
-  },
-  tab: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: spacing[3],
-    borderRadius: borderRadius.md,
-    marginHorizontal: spacing[1],
-  },
-  tabActive: {
-    backgroundColor: colors.primary[500],
-  },
-  tabText: {
-    fontSize: typography.fontSize.base,
-    color: colors.text.secondary,
-    fontWeight: typography.fontWeight.medium as any,
-  },
-  tabTextActive: {
-    color: colors.text.inverse,
-  },
-  tabBadge: {
-    backgroundColor: colors.error,
-    borderRadius: borderRadius.full,
-    paddingHorizontal: spacing[2],
-    paddingVertical: 2,
-    marginLeft: spacing[2],
-  },
-  tabBadgeText: {
-    fontSize: typography.fontSize.xs,
-    color: colors.text.inverse,
-    fontWeight: typography.fontWeight.bold as any,
   },
   infoBox: {
     backgroundColor: colors.primary[50],

@@ -6,7 +6,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, RefreshControl } from 'react-native';
 import { getMissionHistory, UserMission, UserMissionStatus } from '../api/missionApi';
-import { Loading, Header, EmptyState } from '../components/ui';
+import { Loading, Header, EmptyState, FilterBar } from '../components/ui';
 import { colors, spacing, typography, borderRadius } from '../utils/designTokens';
 import { NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '../types/navigation';
@@ -151,19 +151,22 @@ const MissionHistoryScreen: React.FC<MissionHistoryScreenProps> = ({ navigation 
       />
 
       {/* 필터 탭 */}
-      <View style={styles.filterContainer}>
-        {(['all', 'completed', 'expired'] as FilterType[]).map((f) => (
-          <TouchableOpacity
-            key={f}
-            style={[styles.filterTab, filter === f && styles.filterTabActive]}
-            onPress={() => setFilter(f)}
-          >
-            <Text style={[styles.filterText, filter === f && styles.filterTextActive]}>
-              {f === 'all' ? '전체' : f === 'completed' ? '완료' : '만료'}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </View>
+      <FilterBar
+        filters={[
+          { key: 'all', label: '전체' },
+          { key: 'completed', label: '완료' },
+          { key: 'expired', label: '만료' },
+        ]}
+        selectedFilter={filter}
+        onFilterChange={(key) => setFilter(key as FilterType)}
+        variant="button"
+        containerStyle={{
+          paddingHorizontal: spacing[4],
+          paddingVertical: spacing[2],
+          borderBottomWidth: 1,
+          borderBottomColor: colors.border.light,
+        }}
+      />
 
       {/* 통계 요약 */}
       <View style={styles.statsContainer}>
@@ -218,32 +221,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background.primary,
-  },
-  filterContainer: {
-    flexDirection: 'row',
-    paddingHorizontal: spacing[4],
-    paddingVertical: spacing[2],
-    backgroundColor: colors.background.primary,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border.light,
-  },
-  filterTab: {
-    flex: 1,
-    paddingVertical: spacing[2],
-    alignItems: 'center',
-    borderRadius: borderRadius.md,
-    marginHorizontal: spacing[1],
-  },
-  filterTabActive: {
-    backgroundColor: colors.primary[500],
-  },
-  filterText: {
-    fontSize: typography.fontSize.sm,
-    color: colors.text.secondary,
-  },
-  filterTextActive: {
-    color: colors.text.inverse,
-    fontWeight: typography.fontWeight.semibold as any,
   },
   statsContainer: {
     flexDirection: 'row',
