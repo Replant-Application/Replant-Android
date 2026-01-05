@@ -43,11 +43,11 @@ android {
         applicationId 'com.anonymous.replantmobileapp'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 15
-        versionName "0.0.15"
+        versionCode 1
+        versionName "0.0.1"
 
-        // APK 파일명 설정
-        archivesBaseName = "replant-release-${versionName}"
+        // APK 파일명 설정 (archivesBaseName은 최신 AGP에서 지원되지 않음)
+        // archivesBaseName = "replant-release-${versionName}"
 
         buildConfigField "String", "REACT_NATIVE_RELEASE_LEVEL", "\"${findProperty('reactNativeReleaseLevel') ?: 'stable'}\""
     }
