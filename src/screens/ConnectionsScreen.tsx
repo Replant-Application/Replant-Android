@@ -22,6 +22,7 @@ import { colors, spacing, typography, borderRadius } from '../utils/designTokens
 import { NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '../types/navigation';
 import { SCREEN_NAMES } from '../utils/constants';
+import { formatTimeAgo } from '../utils/dateUtils';
 
 interface ConnectionsScreenProps {
   navigation: NavigationProp<RootStackParamList>;
@@ -165,20 +166,6 @@ const ConnectionsScreen: React.FC<ConnectionsScreenProps> = ({ navigation }) => 
     navigation.navigate(SCREEN_NAMES.CHAT_ROOM as any, { roomId });
   };
 
-  const formatTimeAgo = (dateString: string) => {
-    const now = new Date();
-    const date = new Date(dateString);
-    const diff = now.getTime() - date.getTime();
-    const minutes = Math.floor(diff / 60000);
-    const hours = Math.floor(diff / 3600000);
-    const days = Math.floor(diff / 86400000);
-
-    if (minutes < 1) return '방금 전';
-    if (minutes < 60) return `${minutes}분 전`;
-    if (hours < 24) return `${hours}시간 전`;
-    if (days < 7) return `${days}일 전`;
-    return `${date.getMonth() + 1}/${date.getDate()}`;
-  };
 
   const renderRecommendationItem = ({ item }: { item: Recommendation }) => (
     <View style={styles.recommendationCard}>

@@ -28,49 +28,10 @@ import { NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '../types/navigation';
 import { SCREEN_NAMES } from '../utils/constants';
 import { useSse } from '../contexts/SseContext';
+import { formatTimeAgo } from '../utils/dateUtils';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const SWIPE_THRESHOLD = -80; // 삭제 버튼이 나타나는 슬라이드 거리
-
-// 시간 포맷 함수
-const formatTimeAgo = (dateString: string) => {
-  if (!dateString) return '알 수 없음';
-  
-  const now = new Date();
-  let date: Date;
-  
-  try {
-    // ISO 8601 형식 또는 다른 형식 처리
-    date = new Date(dateString);
-    
-    // 유효하지 않은 날짜인지 확인
-    if (isNaN(date.getTime())) {
-      console.warn('[NotificationScreen] 잘못된 날짜 형식:', dateString);
-      return '알 수 없음';
-    }
-    
-    const diff = now.getTime() - date.getTime();
-    
-    // 미래 날짜인 경우 (타임존 문제 등)
-    if (diff < 0) {
-      console.warn('[NotificationScreen] 미래 날짜:', dateString, '현재:', now.toISOString());
-      return '방금 전';
-    }
-    
-    const minutes = Math.floor(diff / 60000);
-    const hours = Math.floor(diff / 3600000);
-    const days = Math.floor(diff / 86400000);
-
-    if (minutes < 1) return '방금 전';
-    if (minutes < 60) return `${minutes}분 전`;
-    if (hours < 24) return `${hours}시간 전`;
-    if (days < 7) return `${days}일 전`;
-    return `${date.getMonth() + 1}/${date.getDate()}`;
-  } catch (error) {
-    console.error('[NotificationScreen] 날짜 파싱 에러:', dateString, error);
-    return '알 수 없음';
-  }
-};
 
 interface NotificationScreenProps {
   navigation: NavigationProp<RootStackParamList>;
