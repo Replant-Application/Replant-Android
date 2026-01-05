@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { colors, spacing, typography, borderRadius, shadows } from '../../utils/designTokens';
+import { colors, spacing, typography } from '../../utils/designTokens';
 
 export interface SimpleTabItem {
   key: string;
@@ -60,7 +60,7 @@ const styles = StyleSheet.create({
   },
   tab: {
     flex: 1,
-    paddingVertical: spacing[3],
+    paddingVertical: spacing[2],
     alignItems: 'center',
     justifyContent: 'center',
     position: 'relative',
@@ -70,12 +70,12 @@ const styles = StyleSheet.create({
   },
   tabText: {
     fontSize: typography.fontSize.sm,
-    fontWeight: typography.fontWeight.medium,
+    fontWeight: typography.fontWeight.normal,
     color: colors.text.tertiary,
   },
   tabTextActive: {
     color: colors.primary[500],
-    fontWeight: typography.fontWeight.medium,
+    fontWeight: typography.fontWeight.normal,
   },
   underline: {
     position: 'absolute',

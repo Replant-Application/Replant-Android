@@ -7,8 +7,8 @@ import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Image, Modal, RefreshControl, Alert } from 'react-native';
 import { useCommunity } from '../../hooks/useCommunity';
 import { PostCard } from '../../components/specialized';
-import { Loading, ErrorBoundary, EmptyState, TabBar, FilterBar } from '../../components/ui';
-import { colors, spacing, typography, borderRadius, shadows } from '../../utils/designTokens';
+import { Loading, ErrorBoundary, EmptyState, SimpleTabBar } from '../../components/ui';
+import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
 import { NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types/navigation';
 import { getVerifications, voteVerification, VerificationPost, VerificationStatus } from '../../api/missionApi';
@@ -238,7 +238,7 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation }) => {
       </View>
 
       {/* 탭 */}
-      <TabBar
+      <SimpleTabBar
         tabs={[
           { key: 'all', label: '전체 게시판' },
           { key: 'mission-group', label: '미션 도감' },
@@ -251,7 +251,7 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation }) => {
             setActiveTab(key as CommunityTab);
           }
         }}
-        variant="pill"
+        style={styles.tabBar}
       />
 
       {/* 검색 및 정렬 */}
@@ -273,15 +273,15 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation }) => {
           </View>
 
           {/* 인증 필터 탭 */}
-          <FilterBar
-            filters={[
+          <SimpleTabBar
+            tabs={[
               { key: 'all', label: '전체' },
               { key: 'pending', label: '인증대기' },
               { key: 'approved', label: '인증완료' },
             ]}
-            selectedFilter={verificationFilter}
-            onFilterChange={(key) => setVerificationFilter(key as VerificationFilter)}
-            variant="button"
+            activeTab={verificationFilter}
+            onTabChange={(key) => setVerificationFilter(key as VerificationFilter)}
+            style={styles.filterTabBar}
           />
 
           <TouchableOpacity
@@ -302,8 +302,8 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation }) => {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            colors={[colors.green[500]]}
-            tintColor={colors.green[500]}
+            colors={[colors.primary[500]]}
+            tintColor={colors.primary[500]}
           />
         }
       >
@@ -383,8 +383,8 @@ const styles = StyleSheet.create({
   header: {
     backgroundColor: colors.background.primary,
     paddingTop: spacing[16],
-    paddingBottom: spacing[4],
-    paddingHorizontal: spacing[5],
+    paddingBottom: spacing[3],
+    paddingHorizontal: spacing[4],
     borderBottomWidth: 1,
     borderBottomColor: colors.border.light,
   },
@@ -393,10 +393,16 @@ const styles = StyleSheet.create({
     fontWeight: typography.fontWeight.normal,
     color: colors.text.primary,
   },
+  tabBar: {
+    marginBottom: 0,
+  },
+  filterTabBar: {
+    marginBottom: spacing[2],
+  },
   filterContainer: {
     paddingHorizontal: spacing[4],
-    paddingTop: spacing[4],
-    paddingBottom: spacing[3],
+    paddingTop: spacing[3],
+    paddingBottom: spacing[2],
     backgroundColor: colors.background.primary,
     borderBottomWidth: 1,
     borderBottomColor: colors.border.light,
@@ -404,22 +410,22 @@ const styles = StyleSheet.create({
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.gray[50],
-    borderRadius: borderRadius.xl,
-    paddingHorizontal: spacing[4],
-    paddingVertical: spacing[3],
-    marginBottom: spacing[3],
+    backgroundColor: colors.white,
+    borderRadius: borderRadius.base,
+    paddingHorizontal: spacing[3],
+    paddingVertical: spacing[2],
+    marginBottom: spacing[2],
     borderWidth: 1,
     borderColor: colors.border.light,
   },
   searchIcon: {
-    width: 20,
-    height: 20,
+    width: 16,
+    height: 16,
     marginRight: spacing[2],
   },
   searchInput: {
     flex: 1,
-    fontSize: typography.fontSize.base,
+    fontSize: typography.fontSize.sm,
     color: colors.text.primary,
     padding: 0,
   },
@@ -427,21 +433,21 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: colors.gray[50],
-    borderRadius: borderRadius.lg,
-    paddingHorizontal: spacing[4],
-    paddingVertical: spacing[3],
+    backgroundColor: colors.white,
+    borderRadius: borderRadius.base,
+    paddingHorizontal: spacing[3],
+    paddingVertical: spacing[2],
     borderWidth: 1,
     borderColor: colors.border.light,
-    minHeight: 44,
+    minHeight: 36,
   },
   filterSelectorText: {
-    fontSize: typography.fontSize.base,
+    fontSize: typography.fontSize.sm,
     color: colors.text.primary,
-    fontWeight: typography.fontWeight.medium,
+    fontWeight: typography.fontWeight.normal,
   },
   filterSelectorIcon: {
-    fontSize: typography.fontSize.sm,
+    fontSize: typography.fontSize.xs,
     color: colors.text.secondary,
     marginLeft: spacing[2],
   },
@@ -453,15 +459,16 @@ const styles = StyleSheet.create({
   },
   modalContent: {
     backgroundColor: colors.background.primary,
-    borderRadius: borderRadius.xl,
+    borderRadius: borderRadius.base,
     padding: spacing[4],
     width: '80%',
     maxWidth: 300,
-    ...shadows.lg,
+    borderWidth: 1,
+    borderColor: colors.border.light,
   },
   modalTitle: {
     fontSize: typography.fontSize.lg,
-    fontWeight: typography.fontWeight.bold,
+    fontWeight: typography.fontWeight.normal,
     color: colors.text.primary,
     marginBottom: spacing[4],
   },
@@ -471,26 +478,29 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingVertical: spacing[3],
     paddingHorizontal: spacing[3],
-    borderRadius: borderRadius.md,
+    borderRadius: borderRadius.base,
     marginBottom: spacing[2],
-    backgroundColor: colors.gray[50],
+    backgroundColor: colors.white,
+    borderWidth: 1,
+    borderColor: colors.border.light,
   },
   filterOptionActive: {
-    backgroundColor: colors.green[50],
+    backgroundColor: colors.primary[50],
+    borderColor: colors.primary[500],
   },
   filterOptionText: {
     fontSize: typography.fontSize.base,
     color: colors.text.primary,
-    fontWeight: typography.fontWeight.medium,
+    fontWeight: typography.fontWeight.normal,
   },
   filterOptionTextActive: {
-    color: colors.green[700],
-    fontWeight: typography.fontWeight.semibold,
+    color: colors.primary[600],
+    fontWeight: typography.fontWeight.normal,
   },
   filterOptionCheck: {
     fontSize: typography.fontSize.base,
-    color: colors.green[600],
-    fontWeight: typography.fontWeight.bold,
+    color: colors.primary[600],
+    fontWeight: typography.fontWeight.normal,
   },
   content: {
     flex: 1,
