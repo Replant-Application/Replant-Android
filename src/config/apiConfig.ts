@@ -3,17 +3,24 @@
  * 백엔드 API 연동 시 사용할 설정값들
  */
 
+import { Platform } from 'react-native';
 import { API_BASE_URL, API_TIMEOUT } from '@env';
 
-// 백엔드 기본 URL: localhost:8080
+// 백엔드 기본 URL 설정
 const getBaseURL = () => {
   if (API_BASE_URL) {
+    // 환경변수에 localhost가 포함되어 있고 Android인 경우 자동 변환
+    if (Platform.OS === 'android' && API_BASE_URL.includes('localhost')) {
+      return API_BASE_URL.replace('localhost', '10.0.2.2');
+    }
     return API_BASE_URL;
   }
-  // 기본값: localhost:8080
-  // 참고: Android 에뮬레이터에서는 localhost가 에뮬레이터 자체를 가리키므로
-  // 호스트 머신의 백엔드에 접근하려면 환경변수로 10.0.2.2:8080을 설정하거나
-  // 실제 Android 기기에서는 호스트 머신의 IP 주소를 사용해야 합니다.
+  // 기본값: Platform에 따라 자동 설정
+  if (Platform.OS === 'android') {
+    // Android 에뮬레이터에서는 10.0.2.2를 사용
+    return 'http://10.0.2.2:8080/api';
+  }
+  // iOS 시뮬레이터나 실제 기기에서는 localhost 사용
   return 'http://localhost:8080/api';
 };
 
@@ -134,6 +141,7 @@ export const API_CONFIG = {
       list: '/notifications',
       read: '/notifications/:notificationId/read',
       readAll: '/notifications/read-all',
+      delete: '/notifications/:notificationId',
     },
 
     // SSE (Server-Sent Events)

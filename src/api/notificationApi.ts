@@ -92,3 +92,18 @@ export const markAllNotificationsAsRead = async (): Promise<
 > => {
   return apiClient.put<ReadAllNotificationsResponse>(API_CONFIG.endpoints.notification.readAll);
 };
+
+/**
+ * 알림 삭제
+ * DELETE /api/notifications/{notificationId}
+ * 인증 필요
+ */
+export const deleteNotification = async (
+  notificationId: number
+): Promise<ServiceResult<{ message: string }>> => {
+  const endpoint = API_CONFIG.endpoints.notification.delete.replace(
+    ':notificationId',
+    String(notificationId)
+  );
+  return apiClient.delete<{ message: string }>(endpoint);
+};
