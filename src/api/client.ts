@@ -148,12 +148,13 @@ export class ApiClient {
     endpoint: string,
     options: ApiRequestOptions = {}
   ): Promise<ServiceResult<T>> {
+    // URL 구성 (params가 있으면 query string 추가)
+    let url = `${this.baseURL}${endpoint}`;
+
     try {
       // 토큰이 로드될 때까지 대기
       await this.ensureTokenLoaded();
 
-      // URL 구성 (params가 있으면 query string 추가)
-      let url = `${this.baseURL}${endpoint}`;
       if (options.params) {
         // undefined 값은 쿼리 파라미터에서 제외
         const filteredParams = Object.entries(options.params).filter(

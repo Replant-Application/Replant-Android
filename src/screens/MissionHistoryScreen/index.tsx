@@ -5,9 +5,10 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, RefreshControl } from 'react-native';
-import { getMissionHistory, UserMission, UserMissionStatus } from '../../api/missionApi';
+import { getUserMissions, UserMission, UserMissionStatus } from '../../api/missionApi';
 import { Loading, Header, EmptyState, FilterBar } from '../../components/ui';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
+import { formatDateDot } from '../../utils/dateUtils';
 import { NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types/navigation';
 
@@ -33,7 +34,7 @@ const MissionHistoryScreen: React.FC<MissionHistoryScreenProps> = ({ navigation 
         setLoading(true);
       }
 
-      const result = await getMissionHistory({ page: pageNum, size: 20 });
+      const result = await getUserMissions({ page: pageNum, size: 20 });
 
       if (result.success && result.data) {
         const newMissions = result.data.content;

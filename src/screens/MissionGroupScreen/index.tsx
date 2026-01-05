@@ -309,7 +309,7 @@ const MissionGroupScreen: React.FC<MissionGroupScreenProps> = ({ navigation }) =
                   {/* 미션 상세 페이지로 이동 버튼 */}
                   <TouchableOpacity
                     style={styles.detailButton}
-                    onPress={() => navigation.navigate('MissionDetail', { missionId: selectedMission.id })}
+                    onPress={() => navigation.navigate('MissionDetail', { missionId: String(selectedMission.id) })}
                     activeOpacity={0.7}
                   >
                     <Text style={styles.detailButtonText}>미션 상세 보기</Text>

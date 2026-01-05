@@ -39,7 +39,7 @@ const Header: React.FC<HeaderProps> = ({
     return (
       <TouchableOpacity
         style={styles.backButton}
-        onPress={() => navigation.goBack()}
+        onPress={() => navigation?.goBack?.()}
         activeOpacity={0.7}
       >
         <Text style={styles.backButtonText}>←</Text>

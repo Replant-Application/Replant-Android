@@ -2,7 +2,7 @@
  * 유저 수정 화면
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Platform, KeyboardAvoidingView, Image } from 'react-native';
 import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { useAdmin } from '../../hooks/useAdmin';
