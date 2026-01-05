@@ -44,7 +44,7 @@ export const loginWithOAuth = async (
       };
     }
 
-    const { accessToken, refreshToken, user, isNewUser } = result.data;
+    const { accessToken, refreshToken, user, newUser } = result.data;
 
     // 토큰 저장
     await saveTokens(accessToken, refreshToken);
@@ -59,7 +59,7 @@ export const loginWithOAuth = async (
       success: true,
       data: {
         user,
-        isNewUser,
+        isNewUser: newUser, // 백엔드의 newUser를 isNewUser로 변환
       },
     };
   } catch (error) {

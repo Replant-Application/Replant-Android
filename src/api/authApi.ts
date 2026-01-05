@@ -73,9 +73,12 @@ export interface OAuthLoginResponse {
     id: number;
     email: string;
     nickname: string;
+    birthDate?: string;
+    gender?: 'MALE' | 'FEMALE' | 'OTHER';
     profileImg?: string;
+    createdAt?: string;
   };
-  isNewUser: boolean; // 신규 회원 여부
+  newUser: boolean; // 신규 회원 여부 (백엔드 응답과 일치)
 }
 
 /**
@@ -135,7 +138,9 @@ export const oauthLogin = async (
   provider: OAuthProvider,
   data: OAuthLoginRequest
 ): Promise<ServiceResult<OAuthLoginResponse>> => {
-  const endpoint = API_CONFIG.endpoints.auth.oauthLogin.replace(':provider', provider);
+  // API 엔드포인트는 소문자로 변환 (kakao, google)
+  const providerLower = provider.toLowerCase();
+  const endpoint = API_CONFIG.endpoints.auth.oauthLogin.replace(':provider', providerLower);
   return apiClient.post<OAuthLoginResponse>(endpoint, data);
 };
 
