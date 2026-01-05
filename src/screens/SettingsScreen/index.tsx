@@ -205,7 +205,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
             />
             <View style={styles.divider} />
             <SettingItem
-              icon={require('../../assets/images/day.png')}
+              icon={require('../../assets/images/calendar.png')}
               title="캘린더"
               onPress={() => navigation?.navigate('Calendar')}
             />
