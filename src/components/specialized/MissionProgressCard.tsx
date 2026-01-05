@@ -1,36 +1,33 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { Card, ProgressBar, SectionTitle } from '../ui';
-import { colors, spacing, typography } from '../../utils/designTokens';
+import Card from '../ui/Card';
+import CircularProgressBar from '../ui/CircularProgressBar';
+import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
 
 interface MissionProgressCardProps {
   completedMissions: number;
   totalMissions: number;
-  progressPercentage: number;
+  rewardThreshold?: number;
+  onRewardPress?: () => void;
+  onHomePress?: () => void;
 }
 
 export const MissionProgressCard: React.FC<MissionProgressCardProps> = ({
   completedMissions,
   totalMissions,
-  progressPercentage,
 }) => {
   return (
     <Card style={styles.card}>
-      <SectionTitle title="📈 진행률" size="lg" marginBottom={spacing[3]} />
-      <ProgressBar current={completedMissions} max={totalMissions} />
-      <View style={styles.statsRow}>
-        <Text style={styles.statText}>
-          완료: <Text style={styles.statValue}>{completedMissions}</Text>
-        </Text>
-        <Text style={styles.statText}>
-          전체: <Text style={styles.statValue}>{totalMissions}</Text>
-        </Text>
-        <Text style={styles.statText}>
-          진행률:{' '}
-          <Text style={styles.statValue}>
-            {progressPercentage.toFixed(0)}%
-          </Text>
-        </Text>
+      <View style={styles.header}>
+        <Text style={styles.title}>나의 진행률</Text>
+      </View>
+      <View style={styles.progressContainer}>
+        <CircularProgressBar
+          current={completedMissions}
+          total={totalMissions}
+          size={160}
+          strokeWidth={14}
+        />
       </View>
     </Card>
   );
@@ -39,18 +36,20 @@ export const MissionProgressCard: React.FC<MissionProgressCardProps> = ({
 const styles = StyleSheet.create({
   card: {
     marginBottom: spacing[4],
+    padding: spacing[5],
+    borderRadius: borderRadius.base,
   },
-  statsRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginTop: spacing[3],
+  header: {
+    marginBottom: spacing[5],
   },
-  statText: {
-    fontSize: typography.fontSize.sm,
-    color: colors.text.secondary,
+  title: {
+    fontSize: typography.fontSize.base,
+    fontWeight: typography.fontWeight.normal,
+    color: colors.text.primary,
   },
-  statValue: {
-    fontWeight: typography.fontWeight.bold,
-    color: colors.primary[600],
+  progressContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: spacing[1],
   },
 });
