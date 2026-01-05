@@ -1,8 +1,10 @@
 /**
  * SSE (Server-Sent Events) 서비스
- * 실시간 알림 수신을 위한 SSE 연결 관리
+ * react-native-sse를 사용한 실시간 알림 수신
  */
 
+import { Platform } from 'react-native';
+import EventSource, { EventSourceListener } from 'react-native-sse';
 import { API_BASE_URL } from '@env';
 import { getAccessToken } from '../utils/tokenStorage';
 
@@ -18,15 +20,21 @@ interface SSEHandlers {
 class SSEService {
   private eventSource: EventSource | null = null;
   private handlers: SSEHandlers = {};
-  private reconnectTimeout: NodeJS.Timeout | null = null;
+  private reconnectTimeout: ReturnType<typeof setTimeout> | null = null;
   private reconnectAttempts = 0;
-  private maxReconnectAttempts = 5;
+  private maxReconnectAttempts = 10;
   private reconnectDelay = 3000; // 3초
+  private isConnecting = false;
 
   /**
    * SSE 연결 시작
    */
   async connect(): Promise<boolean> {
+    if (this.isConnecting) {
+      console.log('[SSE] 이미 연결 중입니다.');
+      return false;
+    }
+
     try {
       const token = await getAccessToken();
       if (!token) {
@@ -38,104 +46,144 @@ class SSEService {
       this.disconnect();
 
       // SSE 엔드포인트 URL 생성
-      const baseUrl = API_BASE_URL || 'http://localhost:8080/api';
+      let baseUrl = API_BASE_URL || 'http://localhost:8080/api';
+      // Android 에뮬레이터에서 localhost를 10.0.2.2로 변환
+      if (Platform.OS === 'android' && baseUrl.includes('localhost')) {
+        baseUrl = baseUrl.replace('localhost', '10.0.2.2');
+      }
       // /api를 제거하고 /sse/connect 추가 (SSE는 별도 경로)
       const sseUrl = baseUrl.replace('/api', '') + '/sse/connect';
 
       console.log('[SSE] 연결 시도:', sseUrl);
 
-      // EventSource는 헤더 설정이 불가하므로 URL 파라미터로 토큰 전달
-      // 또는 fetch를 사용한 SSE 구현 필요
-      // React Native에서는 EventSource polyfill 또는 fetch 기반 구현 사용
+      this.isConnecting = true;
 
-      // fetch 기반 SSE 구현
-      this.startFetchSSE(sseUrl, token);
-      return true;
-    } catch (error) {
-      console.error('[SSE] 연결 실패:', error);
-      this.handlers.onError?.(error);
-      return false;
-    }
-  }
-
-  /**
-   * fetch 기반 SSE 연결 (React Native 호환)
-   */
-  private async startFetchSSE(url: string, token: string): Promise<void> {
-    try {
-      const response = await fetch(url, {
+      // react-native-sse를 사용한 연결
+      const options = {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${token}`,
-          'Accept': 'text/event-stream',
+          Authorization: `Bearer ${token}`,
+          Accept: 'text/event-stream',
           'Cache-Control': 'no-cache',
         },
-      });
+        debug: __DEV__, // 개발 모드에서만 디버그 활성화
+      };
 
-      if (!response.ok) {
-        throw new Error(`SSE 연결 실패: ${response.status}`);
-      }
+      const eventSource = new EventSource(sseUrl, options);
 
-      console.log('[SSE] 연결 성공');
-      this.reconnectAttempts = 0;
-      this.handlers.onConnect?.();
+      // 이벤트 리스너 설정
+      const listener: EventSourceListener = (event) => {
+        const eventAny = event as any;
+        console.log('[SSE] ========== 이벤트 수신 ==========');
+        console.log('[SSE] 이벤트 타입:', event.type);
+        console.log('[SSE] 이벤트 데이터:', eventAny.data);
+        console.log('[SSE] 전체 이벤트:', event);
+        console.log('[SSE] 이벤트 키:', Object.keys(event));
+        console.log('[SSE] =================================');
 
-      // 스트림 읽기
-      const reader = response.body?.getReader();
-      if (!reader) {
-        throw new Error('Response body reader를 생성할 수 없습니다');
-      }
-
-      const decoder = new TextDecoder();
-      let buffer = '';
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) {
-          console.log('[SSE] 스트림 종료');
-          break;
+        if (event.type === 'open') {
+          console.log('[SSE] 연결 성공');
+          this.isConnecting = false;
+          this.reconnectAttempts = 0;
+          this.handlers.onConnect?.();
+        } else if (event.type === 'message') {
+          const messageEvent = event as any;
+          console.log('[SSE] message 이벤트 처리 시작');
+          console.log('[SSE] messageEvent.data:', messageEvent.data);
+          console.log('[SSE] messageEvent.data 타입:', typeof messageEvent.data);
+          try {
+            let data = messageEvent.data;
+            if (typeof data === 'string') {
+              console.log('[SSE] 문자열 데이터 파싱 시도:', data);
+              data = JSON.parse(data);
+              console.log('[SSE] 파싱된 데이터:', data);
+            }
+            console.log('[SSE] 최종 알림 데이터:', data);
+            console.log('[SSE] onNotification 핸들러 호출');
+            this.handlers.onNotification?.(data);
+            console.log('[SSE] onNotification 핸들러 호출 완료');
+          } catch (error) {
+            console.error('[SSE] 메시지 파싱 실패:', messageEvent.data, error);
+            // 파싱 실패해도 문자열로 전달
+            console.log('[SSE] 원본 데이터로 알림 전달');
+            this.handlers.onNotification?.(messageEvent.data);
+          }
+        } else if (event.type === 'error') {
+          // error 이벤트는 ErrorEvent, TimeoutEvent, ExceptionEvent를 포함할 수 있음
+          const errorEvent = event as any;
+          if (errorEvent.error) {
+            // ExceptionEvent인 경우
+            console.error('[SSE] 예외 발생:', errorEvent.message, errorEvent.error);
+            this.handlers.onError?.(errorEvent.error || new Error(errorEvent.message || 'SSE 예외'));
+          } else {
+            // ErrorEvent 또는 TimeoutEvent인 경우
+            console.error('[SSE] 연결 에러:', errorEvent.message);
+            this.handlers.onError?.(new Error(errorEvent.message || 'SSE 연결 에러'));
+          }
+          this.isConnecting = false;
+          // 에러 발생 시 재연결 시도
+          this.scheduleReconnect();
+        } else {
+          // 커스텀 이벤트 타입 처리 (예: 'notification', 'diary', 'mission' 등)
+          const customEvent = event as any;
+          console.log('[SSE] ========== 커스텀 이벤트 수신 ==========');
+          console.log('[SSE] 커스텀 이벤트 타입:', event.type);
+          console.log('[SSE] 커스텀 이벤트 데이터:', customEvent.data);
+          console.log('[SSE] 커스텀 이벤트 전체:', customEvent);
+          console.log('[SSE] 커스텀 이벤트 키:', Object.keys(customEvent));
+          console.log('[SSE] =======================================');
+          
+          try {
+            let data = customEvent.data;
+            if (data && typeof data === 'string') {
+              console.log('[SSE] 커스텀 이벤트 문자열 파싱 시도:', data);
+              data = JSON.parse(data);
+              console.log('[SSE] 파싱된 커스텀 이벤트 데이터:', data);
+            }
+            console.log('[SSE] 커스텀 이벤트 최종 데이터:', data);
+            console.log('[SSE] 커스텀 이벤트 onNotification 핸들러 호출');
+            this.handlers.onNotification?.(data);
+            console.log('[SSE] 커스텀 이벤트 onNotification 핸들러 호출 완료');
+          } catch (error) {
+            console.error('[SSE] 커스텀 이벤트 파싱 실패:', customEvent.data, error);
+            console.log('[SSE] 커스텀 이벤트 원본 데이터로 알림 전달');
+            this.handlers.onNotification?.(customEvent.data);
+          }
         }
+      };
 
-        buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split('\n');
-        buffer = lines.pop() || '';
-
-        for (const line of lines) {
-          this.processLine(line);
-        }
-      }
-
-      // 연결 종료 시 재연결 시도
-      this.handlers.onDisconnect?.();
-      this.scheduleReconnect();
-    } catch (error) {
-      console.error('[SSE] 스트림 에러:', error);
-      this.handlers.onError?.(error);
-      this.scheduleReconnect();
-    }
-  }
-
-  /**
-   * SSE 메시지 라인 처리
-   */
-  private processLine(line: string): void {
-    if (line.startsWith('event:')) {
-      // 이벤트 타입은 다음 data 라인과 함께 처리
-      return;
-    }
-
-    if (line.startsWith('data:')) {
-      const data = line.substring(5).trim();
-      if (data) {
+      // 이벤트 리스너 등록
+      eventSource.addEventListener('open', listener);
+      eventSource.addEventListener('message', listener);
+      eventSource.addEventListener('error', listener);
+      
+      // 백엔드가 보낼 수 있는 커스텀 이벤트 타입들도 등록
+      // 백엔드가 'diary', 'notification', 'mission' 등의 커스텀 이벤트 타입을 사용할 수 있음
+      // react-native-sse는 커스텀 이벤트 타입을 동적으로 등록할 수 있음
+      const customEventTypes = ['diary', 'notification', 'mission', 'MISSION', 'DIARY', 'NOTIFICATION'];
+      customEventTypes.forEach(eventType => {
         try {
-          const parsed = JSON.parse(data);
-          console.log('[SSE] 알림 수신:', parsed);
-          this.handlers.onNotification?.(parsed);
-        } catch {
-          // JSON이 아닌 경우 문자열로 전달
-          console.log('[SSE] 메시지 수신:', data);
+          (eventSource as any).addEventListener(eventType, listener);
+          console.log(`[SSE] ✅ 커스텀 이벤트 타입 등록 성공: ${eventType}`);
+        } catch (error) {
+          console.warn(`[SSE] ⚠️ 커스텀 이벤트 타입 등록 실패 (${eventType}):`, error);
         }
-      }
+      });
+      
+      // 모든 이벤트를 캐치하기 위해 'message' 이벤트도 처리 (백엔드가 커스텀 타입 대신 message로 보낼 수 있음)
+      console.log('[SSE] ✅ 모든 이벤트 리스너 등록 완료');
+      
+      console.log('[SSE] 이벤트 리스너 등록 완료');
+
+      this.eventSource = eventSource;
+      return true;
+    } catch (error) {
+      console.error('[SSE] 연결 초기화 실패:', error);
+      this.isConnecting = false;
+      this.handlers.onError?.(error);
+      // 초기화 실패 시 재연결 시도
+      this.scheduleReconnect();
+      return false;
     }
   }
 
@@ -144,8 +192,13 @@ class SSEService {
    */
   private scheduleReconnect(): void {
     if (this.reconnectAttempts >= this.maxReconnectAttempts) {
-      console.log('[SSE] 최대 재연결 시도 횟수 초과');
+      console.log('[SSE] 최대 재연결 시도 횟수 초과. SSE 연결을 포기합니다.');
       return;
+    }
+
+    // 이미 재연결이 예약되어 있으면 취소
+    if (this.reconnectTimeout) {
+      clearTimeout(this.reconnectTimeout);
     }
 
     this.reconnectAttempts++;
@@ -153,7 +206,9 @@ class SSEService {
     console.log(`[SSE] ${delay}ms 후 재연결 시도 (${this.reconnectAttempts}/${this.maxReconnectAttempts})`);
 
     this.reconnectTimeout = setTimeout(() => {
-      this.connect();
+      this.connect().catch((error) => {
+        console.error('[SSE] 재연결 실패:', error);
+      });
     }, delay);
   }
 
@@ -167,11 +222,17 @@ class SSEService {
     }
 
     if (this.eventSource) {
-      this.eventSource.close();
+      try {
+        this.eventSource.removeAllEventListeners();
+        this.eventSource.close();
+      } catch (error) {
+        console.warn('[SSE] 연결 종료 중 에러 (무시):', error);
+      }
       this.eventSource = null;
     }
 
     this.reconnectAttempts = 0;
+    this.isConnecting = false;
     console.log('[SSE] 연결 종료');
   }
 
@@ -193,7 +254,7 @@ class SSEService {
    * 연결 상태 확인
    */
   isConnected(): boolean {
-    return this.eventSource !== null || this.reconnectAttempts > 0;
+    return this.eventSource !== null;
   }
 }
 
