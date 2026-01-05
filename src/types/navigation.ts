@@ -17,10 +17,9 @@ export type RootStackParamList = {
     analysisResult?: { verified: boolean } | null;
   };
   CustomMissionCreate: {
-    generatedMission?: any; // AIGeneratedMission 타입
+    generatedMission?: any;
   };
   CounselingSelect: undefined;
-  ChatBot: undefined;
   PlacesSearch: undefined;
   CharacterDetail: {
     character: Character;
@@ -60,9 +59,6 @@ export type RootStackParamList = {
     userId: number;
   };
   MissionGroup: undefined;
-  AIMissionGenerate: {
-    generatedMission?: any;
-  };
   Notification: undefined;
   MissionDetail: {
     missionId: string;
@@ -104,7 +100,6 @@ export interface NavigationParams {
     generatedMission?: any;
   };
   [ScreenNames.COUNSELING_SELECT]: undefined;
-  [ScreenNames.CHATBOT]: undefined;
   [ScreenNames.PLACES_SEARCH]: undefined;
   [ScreenNames.CHARACTER_DETAIL]: {
     character: Character;
@@ -144,9 +139,6 @@ export interface NavigationParams {
     userId: number;
   };
   [ScreenNames.MISSION_GROUP]: undefined;
-  [ScreenNames.AI_MISSION_GENERATE]: {
-    generatedMission?: any;
-  };
   [ScreenNames.NOTIFICATION]: undefined;
 }
 

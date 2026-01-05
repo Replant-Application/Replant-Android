@@ -15,7 +15,6 @@ import DiaryScreen from '../screens/DiaryScreen';
 import MissionScreen from '../screens/MissionScreen';
 import CustomMissionCreateScreen from '../screens/CustomMissionCreateScreen';
 import CounselingSelectScreen from '../screens/CounselingSelectScreen';
-import ChatBotScreen from '../screens/ChatBotScreen';
 import PlacesSearchScreen from '../screens/PlacesSearchScreen';
 import CharacterDetailScreen from '../screens/CharacterDetailScreen';
 import SettingsScreen from '../screens/SettingsScreen';
@@ -75,7 +74,7 @@ const AppNavigator = () => {
 
       // 상세 화면이면 goBack 호출
       // 화면별 뒤로가기 목적지 정의
-      if (currentScreen === SCREEN_NAMES.CHATBOT || currentScreen === SCREEN_NAMES.PLACES_SEARCH) {
+      if (currentScreen === SCREEN_NAMES.PLACES_SEARCH) {
         setCurrentScreen(SCREEN_NAMES.COUNSELING_SELECT);
       } else if (currentScreen === SCREEN_NAMES.COUNSELING_SELECT || currentScreen === SCREEN_NAMES.INFO) {
         setCurrentScreen(SCREEN_NAMES.SETTINGS);
@@ -147,7 +146,7 @@ const AppNavigator = () => {
 
   const goBack = () => {
     // 화면별 뒤로가기 목적지 정의
-    if (currentScreen === SCREEN_NAMES.CHATBOT || currentScreen === SCREEN_NAMES.PLACES_SEARCH) {
+    if (currentScreen === SCREEN_NAMES.PLACES_SEARCH) {
       setCurrentScreen(SCREEN_NAMES.COUNSELING_SELECT);
     } else if (currentScreen === SCREEN_NAMES.COUNSELING_SELECT || currentScreen === SCREEN_NAMES.INFO) {
       setCurrentScreen(SCREEN_NAMES.SETTINGS);
@@ -203,8 +202,6 @@ const AppNavigator = () => {
         return <CustomMissionCreateScreen navigation={navigation} route={route} />;
       case SCREEN_NAMES.COUNSELING_SELECT:
         return <CounselingSelectScreen navigation={navigation} />;
-      case SCREEN_NAMES.CHATBOT:
-        return <ChatBotScreen navigation={navigation} />;
       case SCREEN_NAMES.PLACES_SEARCH:
         return <PlacesSearchScreen navigation={navigation} />;
       case SCREEN_NAMES.CHARACTER_DETAIL:

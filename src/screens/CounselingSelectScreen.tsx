@@ -16,11 +16,6 @@ interface CounselingSelectScreenProps {
 }
 
 const CounselingSelectScreen: React.FC<CounselingSelectScreenProps> = ({ navigation }) => {
-  // 챗봇 상담으로 이동
-  const handleChatBotCounseling = () => {
-    navigation.navigate('ChatBot');
-  };
-
   // 근처 상담센터 찾기
   const handleFindCenter = () => {
     navigation.navigate('PlacesSearch');
@@ -34,20 +29,6 @@ const CounselingSelectScreen: React.FC<CounselingSelectScreenProps> = ({ navigat
       <View style={styles.content}>
         <Text style={styles.title}>상담 서비스</Text>
         <Text style={styles.subtitle}>어떤 도움이 필요하신가요?</Text>
-
-        {/* 챗봇 상담 카드 */}
-        <TouchableOpacity style={styles.counselingCard} onPress={handleChatBotCounseling}>
-          <View style={styles.cardIcon}>
-            <Text style={styles.iconText}>🤖</Text>
-          </View>
-          <View style={styles.cardContent}>
-            <Text style={styles.cardTitle}>챗봇 상담</Text>
-            <Text style={styles.cardDescription}>AI 챗봇과 24시간 상담해요.</Text>
-          </View>
-          <View style={styles.cardArrow}>
-            <Text style={styles.arrowText}>→</Text>
-          </View>
-        </TouchableOpacity>
 
         {/* 근처 상담센터 찾기 카드 */}
         <TouchableOpacity style={styles.counselingCard} onPress={handleFindCenter}>

@@ -385,31 +385,6 @@ export interface MissionGroup {
   member_count: number; // 해당 미션 완료자 수
 }
 
-// AI 미션 생성 관련 타입
-export interface WeeklyMissionStats {
-  total_completed: number;
-  category_stats: { [category: string]: number };
-  difficulty_stats: { [difficulty: string]: number };
-  completed_dates: string[];
-}
-
-export interface MissionAnalysis {
-  patterns: string[];
-  recommendations: string[];
-  strengths: string[];
-  areas_for_improvement: string[];
-}
-
-export interface AIGeneratedMission {
-  title: string;
-  description: string;
-  emoji: string;
-  difficulty: Difficulty;
-  experience: number;
-  category_id: MissionCategory;
-  reasoning: string; // AI가 이 미션을 추천한 이유
-}
-
 // Screen Names 타입
 export enum ScreenNames {
   START = 'Start',
@@ -420,7 +395,6 @@ export enum ScreenNames {
   CHARACTER_DETAIL = 'CharacterDetail',
   SETTINGS = 'Settings',
   CUSTOM_MISSION_CREATE = 'CustomMissionCreate',
-  CHATBOT = 'ChatBot',
   COUNSELING_SELECT = 'CounselingSelect',
   PLACES_SEARCH = 'PlacesSearch',
   INFO = 'Info',
@@ -433,7 +407,6 @@ export enum ScreenNames {
   CALENDAR = 'Calendar',
   STATISTICS = 'Statistics',
   MISSION_GROUP = 'MissionGroup',
-  AI_MISSION_GENERATE = 'AIMissionGenerate',
   ADMIN_DASHBOARD = 'AdminDashboard',
   ADMIN_USER_LIST = 'AdminUserList',
   ADMIN_USER_DETAIL = 'AdminUserDetail',

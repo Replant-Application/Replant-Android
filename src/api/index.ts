@@ -33,9 +33,6 @@ export * from './notificationApi';
 // 파일 API (프론트엔드 전용)
 export * from './fileApi';
 
-// AI API (프론트엔드 전용)
-export * from './aiApi';
-
 // 관리자 API (프론트엔드 전용)
 export * from './manageApi';
 
