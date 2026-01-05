@@ -3,17 +3,14 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Image, Ref
 import { useMission } from '../hooks/useMission';
 import { useCharacter } from '../hooks/useCharacter';
 import { MissionCard, MissionVerificationModal } from '../components/specialized';
-import { Card, Loading, ErrorBoundary, Button, Header, EmptyState, SectionTitle, ConfirmModal, FilterBar, TabBar } from '../components/ui';
+import { Loading, ErrorBoundary, Header, EmptyState, ConfirmModal, MissionProgressCard, SimpleTabBar } from '../components/ui';
 import { colors, spacing, typography, borderRadius, shadows } from '../utils/designTokens';
-import { useUser } from '../contexts/UserContext';
 import { Mission } from '../types';
-import { checkVerificationStatus, MissionType, verifyByGps, verifyByTime, createVerification, addSystemMissionToMyMissions } from '../api/missionApi';
-import { uploadMissionVerifyPhoto } from '../api/fileApi';
+import { checkVerificationStatus, verifyByGps, verifyByTime, addSystemMissionToMyMissions } from '../api/missionApi';
 import * as Location from 'expo-location';
-import { formatDateYYYYMMDD } from '../utils/dateUtils';
 import { getMyBadges, getBadgeHistory, Badge } from '../api/badgeApi';
 import { logError } from '../utils/logger';
-import { MissionScreenProps, MissionFilter, MissionPeriodFilter, MissionSourceFilter } from './MissionScreen.types';
+import { MissionScreenProps, MissionFilter, MissionPeriodFilter, MissionSourceFilter } from './MissionScreen/MissionScreen.types';
 
 // 단일 카테고리: 성장
 
@@ -25,8 +22,8 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
   const routeParams = route?.params;
   const processedPhotoRef = useRef<string | null>(null);
   const [selectedFilter, setSelectedFilter] = useState<MissionFilter>('inProgress');
-  const [selectedPeriod, setSelectedPeriod] = useState<MissionPeriodFilter>('DAILY');
-  const [selectedSource, setSelectedSource] = useState<MissionSourceFilter>('REGULAR');
+  const [selectedPeriod] = useState<MissionPeriodFilter>('DAILY');
+  const [selectedSource] = useState<MissionSourceFilter>('REGULAR');
   const [refreshing, setRefreshing] = useState(false);
 
   // 인증 모달 상태
@@ -46,9 +43,6 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
   const [showAllBadges, setShowAllBadges] = useState(false);
   const [badgesLoading, setBadgesLoading] = useState(false);
 
-  // 오늘 날짜 (YYYY-MM-DD 형식)
-  const today = useMemo(() => formatDateYYYYMMDD(new Date()), []);
-
   // 기간별 + 일반/커스텀 필터링된 미션 목록
   const filteredMissions = useMemo(() => {
     let filtered = missions.filter(mission => {
@@ -65,22 +59,18 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
       return periodMatch && sourceMatch;
     });
 
-    // 추가 필터 적용 (진행중/인증대기/완료)
+    // 추가 필터 적용 (진행중/완료) - 피그마 디자인에 맞게 2개만
     switch (selectedFilter) {
       case 'completed':
-        // 완료 & 인증완료된 미션
-        return filtered.filter(mission => mission.completed && mission.verified === true);
-      case 'pendingVerification':
-        // 완료했지만 인증 대기중인 미션 (verified가 false이거나 undefined)
-        return filtered.filter(mission => mission.completed && mission.verified !== true);
+        // 완료된 미션 (인증 여부와 관계없이)
+        return filtered.filter(mission => mission.completed);
       case 'inProgress':
       default:
         // 아직 완료하지 않은 미션
         return filtered.filter(mission => !mission.completed);
     }
-  }, [missions, selectedPeriod, selectedSource, selectedFilter, today]);
+  }, [missions, selectedPeriod, selectedSource, selectedFilter]);
 
-  const totalGrowthMissions = filteredMissions.length;
   const displayedMissions = filteredMissions;
 
 
@@ -90,7 +80,6 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
     [missions]
   );
   const totalMissions = missions.length;
-  const progressPercentage = totalMissions > 0 ? (completedMissions / totalMissions) * 100 : 0;
 
   // 미션 완료 (사진이 있으면 그 사진으로, 없으면 null로)
   const handleMissionComplete = async (missionId: string) => {
@@ -145,8 +134,8 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
           Alert.alert('오류', assignResult.error || '미션 할당에 실패했습니다.');
           return;
         }
-      } catch (error) {
-        logError('미션 할당 오류', error as Error);
+      } catch (err) {
+        logError('미션 할당 오류', err as Error);
         Alert.alert('오류', '미션을 시작하는 중 문제가 발생했습니다.');
         return;
       }
@@ -167,7 +156,6 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
             missionEmoji: mission.emoji || '🎯',
             photoUrl: mission.photo_url,
           };
-          logError('인증하기 네비게이션', new Error('Debug'), { navParams });
           navigation.navigate('VerificationPostCreate' as any, navParams);
         } catch (navError) {
           logError('네비게이션 오류', navError as Error);
@@ -202,8 +190,8 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
           } else {
             Alert.alert('인증 실패', result.error || 'GPS 인증에 실패했습니다.');
           }
-        } catch (error) {
-          logError('GPS 인증 오류', error as Error);
+        } catch (err) {
+          logError('GPS 인증 오류', err as Error);
           Alert.alert('오류', 'GPS 인증 중 문제가 발생했습니다.');
         }
         break;
@@ -224,8 +212,8 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
           } else {
             Alert.alert('인증 실패', result.error || '시간 인증에 실패했습니다.');
           }
-        } catch (error) {
-          logError('시간 인증 오류', error as Error);
+        } catch (err) {
+          logError('시간 인증 오류', err as Error);
           Alert.alert('오류', '시간 인증 중 문제가 발생했습니다.');
         }
         break;
@@ -254,17 +242,17 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
       if (addExperienceByCategory && selectedMissionForVerification.category_id) {
         const expResult = await addExperienceByCategory(selectedMissionForVerification.category_id, experienceToGrant);
         if (expResult.levelUp) {
-          Alert.alert('🎉 레벨업!', `레벨 ${expResult.newLevel}이 되었습니다!\n+${experienceToGrant} EXP 획득!`);
+          Alert.alert('레벨업!', `레벨 ${expResult.newLevel}이 되었습니다!\n+${experienceToGrant} EXP 획득!`);
         } else {
-          Alert.alert('✅ GPS 인증 완료', `+${experienceToGrant} EXP를 획득했습니다!`);
+          Alert.alert('GPS 인증 완료', `+${experienceToGrant} EXP를 획득했습니다!`);
         }
       }
 
       setVerificationModalVisible(false);
       setSelectedMissionForVerification(null);
       await loadMissions();
-    } catch (error) {
-      logError('GPS 인증 처리 오류', error as Error);
+    } catch (err) {
+      logError('GPS 인증 처리 오류', err as Error);
       Alert.alert('오류', 'GPS 인증 처리 중 문제가 발생했습니다.');
     }
   }, [selectedMissionForVerification, addExperienceByCategory, loadMissions]);
@@ -279,17 +267,17 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
       if (addExperienceByCategory && selectedMissionForVerification.category_id) {
         const expResult = await addExperienceByCategory(selectedMissionForVerification.category_id, experienceToGrant);
         if (expResult.levelUp) {
-          Alert.alert('🎉 레벨업!', `레벨 ${expResult.newLevel}이 되었습니다!\n+${experienceToGrant} EXP 획득!`);
+          Alert.alert('레벨업!', `레벨 ${expResult.newLevel}이 되었습니다!\n+${experienceToGrant} EXP 획득!`);
         } else {
-          Alert.alert('✅ 시간 인증 완료', `+${experienceToGrant} EXP를 획득했습니다!`);
+          Alert.alert('시간 인증 완료', `+${experienceToGrant} EXP를 획득했습니다!`);
         }
       }
 
       setVerificationModalVisible(false);
       setSelectedMissionForVerification(null);
       await loadMissions();
-    } catch (error) {
-      logError('시간 인증 처리 오류', error as Error);
+    } catch (err) {
+      logError('시간 인증 처리 오류', err as Error);
       Alert.alert('오류', '시간 인증 처리 중 문제가 발생했습니다.');
     }
   }, [selectedMissionForVerification, addExperienceByCategory, loadMissions]);
@@ -305,8 +293,8 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
         await loadMissions();
         Alert.alert('✅ 인증 완료', '미션이 인증되었습니다!');
       }
-    } catch (error) {
-      logError('인증 상태 확인 오류', error as Error);
+    } catch (err) {
+      logError('인증 상태 확인 오류', err as Error);
     }
   }, [selectedMissionForVerification, loadMissions]);
 
@@ -361,7 +349,7 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
               } else {
                 Alert.alert('오류', result.error || '사진 삭제에 실패했습니다.');
               }
-            } catch (error) {
+            } catch (err) {
               Alert.alert('오류', '사진 삭제 중 오류가 발생했습니다.');
             }
           }
@@ -385,7 +373,7 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
       } else {
         Alert.alert('오류', result?.error || '사진 저장에 실패했습니다.');
       }
-    } catch (error) {
+    } catch (err) {
       Alert.alert('오류', '사진 저장에 실패했습니다.');
     }
   }, [saveMissionPhoto]);
@@ -435,8 +423,8 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
       if (historyResult.success && historyResult.data) {
         setAllBadges(historyResult.data.content || []);
       }
-    } catch (error) {
-      logError('뱃지 로딩 오류', error as Error);
+    } catch (err) {
+      logError('뱃지 로딩 오류', err as Error);
     } finally {
       setBadgesLoading(false);
     }
@@ -470,25 +458,6 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
     return <ErrorBoundary error={error} />;
   }
 
-  // 날짜 표시 함수
-  const getDateDisplay = () => {
-    const now = new Date();
-    const month = now.getMonth() + 1; // 1~12
-    const day = now.getDate();
-
-    switch (selectedPeriod) {
-      case 'DAILY':
-        return `${month}월 ${day}일`;
-      case 'WEEKLY':
-        // 해당 월의 몇 주차인지 계산
-        const weekOfMonth = Math.ceil(day / 7);
-        return `${month}월 ${weekOfMonth}주차`;
-      case 'MONTHLY':
-        return `${month}월`;
-      default:
-        return '';
-    }
-  };
 
   return (
     <View style={styles.container}>
@@ -528,6 +497,8 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
           setSelectedMissionForVerification(null);
         }}
         onLikeVerification={handleLikeVerification}
+        onGPSVerification={handleGPSVerification}
+        onTimeVerification={handleTimeVerification}
         onVerificationSuccess={async () => {
           await loadMissions();
         }}
@@ -545,30 +516,16 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
           />
         }
       >
-        {/* 진행률 표시 */}
-        {totalMissions > 0 && (
-          <View style={styles.progressCard}>
-            <View style={styles.progressHeader}>
-              <Text style={styles.progressTitle}>나의 진행률</Text>
-              <Text style={styles.progressPercentage}>
-                {Math.round(progressPercentage)}%
-              </Text>
-            </View>
-            <View style={styles.progressInfo}>
-              <Text style={styles.progressText}>
-                진행 중 {totalMissions - completedMissions} · 완료 {completedMissions}
-              </Text>
-            </View>
-            <View style={styles.progressBar}>
-              <View
-                style={[
-                  styles.progressFill,
-                  { width: `${progressPercentage}%` }
-                ]}
-              />
-            </View>
-          </View>
-        )}
+        {/* 오늘의 미션 섹션 제목 - 맨 위로 이동 */}
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>오늘의 미션</Text>
+        </View>
+
+        {/* 진행률 표시 - MissionProgressCard 컴포넌트 사용 */}
+        <MissionProgressCard
+          completedMissions={completedMissions}
+          totalMissions={totalMissions}
+        />
 
         {/* 나의 뱃지 섹션 */}
         <View style={styles.badgeSection}>
@@ -633,109 +590,31 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
           )}
         </View>
 
-        {/* 미션 만들기 버튼 */}
-        <TouchableOpacity
-          style={styles.createButtonTop}
-          onPress={() => navigation.navigate('CustomMissionCreate')}
-          activeOpacity={0.7}
-        >
-          <Text style={styles.createButtonTopText}>+ 미션 만들기</Text>
-        </TouchableOpacity>
-
-        {/* 기간 탭 (일간/주간/월간) */}
-        <View style={styles.periodHeader}>
-          <Text style={styles.periodDateText}>{getDateDisplay()}</Text>
-        </View>
-        <View style={styles.periodTabContainer}>
-          <TouchableOpacity
-            style={[styles.periodTab, selectedPeriod === 'DAILY' && styles.periodTabActive]}
-            onPress={() => setSelectedPeriod('DAILY')}
-            activeOpacity={0.7}
-          >
-            <Text style={[styles.periodTabText, selectedPeriod === 'DAILY' && styles.periodTabTextActive]}>
-              일간
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.periodTab, selectedPeriod === 'WEEKLY' && styles.periodTabActive]}
-            onPress={() => setSelectedPeriod('WEEKLY')}
-            activeOpacity={0.7}
-          >
-            <Text style={[styles.periodTabText, selectedPeriod === 'WEEKLY' && styles.periodTabTextActive]}>
-              주간
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.periodTab, selectedPeriod === 'MONTHLY' && styles.periodTabActive]}
-            onPress={() => setSelectedPeriod('MONTHLY')}
-            activeOpacity={0.7}
-          >
-            <Text style={[styles.periodTabText, selectedPeriod === 'MONTHLY' && styles.periodTabTextActive]}>
-              월간
-            </Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* 일반/커스텀 미션 탭 */}
-        <TabBar
+        {/* 필터 탭 (진행중/완료) - SimpleTabBar 컴포넌트 사용 */}
+        <SimpleTabBar
           tabs={[
-            { key: 'REGULAR', label: '일반 미션' },
-            { key: 'CUSTOM', label: '커스텀 미션' },
-          ]}
-          activeTab={selectedSource}
-          onTabChange={(key) => setSelectedSource(key as MissionSourceFilter)}
-          variant="underline"
-          containerStyle={{
-            marginBottom: spacing[4],
-          }}
-        />
-
-        {/* 필터 탭 (진행중/인증대기/완료) */}
-        <FilterBar
-          filters={[
             { key: 'inProgress', label: '진행중' },
-            { key: 'pendingVerification', label: '인증대기' },
             { key: 'completed', label: '완료' },
           ]}
-          selectedFilter={selectedFilter}
-          onFilterChange={setSelectedFilter}
-          variant="pill"
+          activeTab={selectedFilter}
+          onTabChange={(key) => setSelectedFilter(key as MissionFilter)}
+          style={{ marginBottom: spacing[4] }}
         />
 
         {/* 미션 목록 */}
         <View style={styles.missionSection}>
-          <View style={styles.sectionHeader}>
-            <SectionTitle
-              title={
-                `${selectedSource === 'CUSTOM' ? '커스텀 ' : ''}${
-                  selectedFilter === 'inProgress' ? '진행중' :
-                  selectedFilter === 'pendingVerification' ? '인증대기' : '완료한'
-                } 미션 (${totalGrowthMissions}개)`
-              }
-              marginBottom={spacing[3]}
-            />
-          </View>
-
           {displayedMissions.length === 0 ? (
             <EmptyState
               iconImage={require('../assets/images/clover.png')}
               title={
-                selectedSource === 'CUSTOM'
-                  ? '커스텀 미션이 없어요'
-                  : selectedFilter === 'inProgress'
-                    ? '모든 미션을 완료했어요!'
-                    : selectedFilter === 'pendingVerification'
-                      ? '인증 대기 중인 미션이 없어요'
-                      : '완료한 미션이 없어요'
+                selectedFilter === 'inProgress'
+                  ? '모든 미션을 완료했어요!'
+                  : '완료한 미션이 없어요'
               }
               description={
-                selectedSource === 'CUSTOM'
-                  ? '아래 버튼을 눌러 나만의 미션을 만들어보세요!'
-                  : selectedFilter === 'inProgress'
-                    ? '새로운 미션에 도전해보세요!'
-                    : selectedFilter === 'pendingVerification'
-                      ? '미션을 완료하고 인증하면 여기에 표시됩니다.'
-                      : '미션을 완료하면 여기에 표시됩니다.'
+                selectedFilter === 'inProgress'
+                  ? '새로운 미션에 도전해보세요!'
+                  : '미션을 완료하면 여기에 표시됩니다.'
               }
             />
           ) : (
@@ -756,6 +635,15 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
             </View>
           )}
         </View>
+
+        {/* 미션 만들기 버튼 */}
+        <TouchableOpacity
+          style={styles.createButtonTop}
+          onPress={() => navigation.navigate('CustomMissionCreate' as any)}
+          activeOpacity={0.7}
+        >
+          <Text style={styles.createButtonTopText}>+ 미션 만들기</Text>
+        </TouchableOpacity>
       </ScrollView>
     </View>
   );
@@ -767,7 +655,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background.secondary,
   },
   title: {
-    fontSize: typography.fontSize['2xl'],
+    fontSize: typography.fontSize.xl,
     fontWeight: typography.fontWeight.bold,
     color: colors.text.primary,
   },
@@ -779,61 +667,134 @@ const styles = StyleSheet.create({
     paddingBottom: spacing[20], // 하단 탭바 높이 + 여유 공간
   },
   progressCard: {
-    backgroundColor: colors.background.primary,
-    borderRadius: borderRadius.xl,
+    backgroundColor: '#F8F9FA', // 연한 베이지색 배경
+    borderRadius: borderRadius.base,
     padding: spacing[5],
     marginBottom: spacing[5],
-    ...shadows.lg,
   },
-  progressHeader: {
+  progressCardHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: spacing[3],
+    marginBottom: spacing[4],
   },
   progressTitle: {
     fontSize: typography.fontSize.xl,
     fontWeight: typography.fontWeight.bold,
     color: colors.text.primary,
   },
-  progressPercentage: {
-    fontSize: typography.fontSize['2xl'],
-    fontWeight: typography.fontWeight.bold,
-    color: colors.primary[600],
+  homeIcon: {
+    fontSize: typography.fontSize.xl,
   },
-  progressInfo: {
-    marginBottom: spacing[3],
-  },
-  progressText: {
-    fontSize: typography.fontSize.base,
-    color: colors.text.secondary,
-    fontWeight: typography.fontWeight.medium,
-  },
-  progressBar: {
-    height: 12,
-    backgroundColor: colors.gray[100],
-    borderRadius: borderRadius.full,
-    overflow: 'hidden',
-  },
-  progressFill: {
-    height: '100%',
-    backgroundColor: colors.primary[500],
-    borderRadius: borderRadius.full,
-  },
-  createButtonTop: {
-    backgroundColor: colors.green[600],
-    borderRadius: borderRadius.lg,
-    paddingVertical: spacing[3],
-    paddingHorizontal: spacing[5],
+  circularProgressContainer: {
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: spacing[4],
-    ...shadows.base,
+    position: 'relative',
+    width: 140,
+    height: 140,
+    alignSelf: 'center',
+  },
+  circularProgressOuter: {
+    width: 140,
+    height: 140,
+    borderRadius: 70,
+    borderWidth: 12,
+    borderColor: colors.gray[200],
+    position: 'absolute',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  circularProgressInner: {
+    width: 140,
+    height: 140,
+    borderRadius: 70,
+    borderWidth: 12,
+    borderColor: colors.primary[500],
+    borderRightColor: 'transparent',
+    borderBottomColor: 'transparent',
+    position: 'absolute',
+  },
+  circularProgressContent: {
+    width: 116,
+    height: 116,
+    borderRadius: 58,
+    backgroundColor: colors.background.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'absolute',
+    zIndex: 1,
+  },
+  circularProgressText: {
+    fontSize: typography.fontSize.sm,
+    color: colors.text.secondary,
+    textAlign: 'center',
+    marginBottom: spacing[1],
+  },
+  circularProgressPercentage: {
+    fontSize: typography.fontSize['2xl'],
+    fontWeight: typography.fontWeight.bold,
+    color: colors.primary[500],
+  },
+  rewardInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: spacing[2],
+  },
+  rewardIcon: {
+    fontSize: typography.fontSize.base,
+    marginRight: spacing[2],
+  },
+  rewardText: {
+    fontSize: typography.fontSize.sm,
+    color: colors.text.secondary,
+  },
+  rewardDescription: {
+    fontSize: typography.fontSize.sm,
+    color: colors.text.secondary,
+    textAlign: 'left',
+  },
+  simpleTabContainer: {
+    flexDirection: 'row',
+    backgroundColor: colors.background.primary,
+    borderRadius: borderRadius.base,
+    padding: spacing[1],
+    marginBottom: spacing[4],
+  },
+  simpleTab: {
+    flex: 1,
+    paddingVertical: spacing[3],
+    alignItems: 'center',
+    borderRadius: borderRadius.base,
+  },
+  simpleTabActive: {
+    backgroundColor: colors.primary[500],
+  },
+  simpleTabText: {
+    fontSize: typography.fontSize.base,
+    fontWeight: typography.fontWeight.medium,
+    color: colors.text.secondary,
+  },
+  simpleTabTextActive: {
+    color: colors.white,
+    fontWeight: typography.fontWeight.semibold,
+  },
+  createButtonTop: {
+    backgroundColor: colors.white,
+    borderRadius: borderRadius.base,
+    borderWidth: 1,
+    borderColor: colors.primary[500],
+    paddingVertical: spacing[2],
+    paddingHorizontal: spacing[4],
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: spacing[4],
+    marginBottom: spacing[4],
   },
   createButtonTopText: {
-    fontSize: typography.fontSize.base,
-    fontWeight: typography.fontWeight.semibold,
-    color: colors.white,
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.normal,
+    color: colors.primary[500],
   },
   periodHeader: {
     marginBottom: spacing[2],
@@ -913,12 +874,15 @@ const styles = StyleSheet.create({
     marginBottom: spacing[6],
   },
   sectionHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: spacing[1],
+    marginBottom: spacing[3],
+  },
+  sectionTitle: {
+    fontSize: typography.fontSize['2xl'],
+    fontWeight: typography.fontWeight.normal,
+    color: colors.text.primary,
   },
   createButton: {
-    backgroundColor: colors.green[700],
+    backgroundColor: colors.green[500],
     borderRadius: borderRadius.full,
     paddingVertical: spacing[3],
     paddingHorizontal: spacing[24],
@@ -950,26 +914,25 @@ const styles = StyleSheet.create({
   // 뱃지 섹션 스타일
   badgeSection: {
     backgroundColor: colors.background.primary,
-    borderRadius: borderRadius.xl,
-    padding: spacing[4],
+    borderRadius: borderRadius.base,
+    padding: spacing[5],
     marginBottom: spacing[4],
-    ...shadows.base,
   },
   badgeSectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: spacing[3],
+    marginBottom: spacing[4],
   },
   badgeSectionTitle: {
-    fontSize: typography.fontSize.lg,
-    fontWeight: typography.fontWeight.bold,
+    fontSize: typography.fontSize.base,
+    fontWeight: typography.fontWeight.normal,
     color: colors.text.primary,
   },
   badgeToggleText: {
     fontSize: typography.fontSize.sm,
-    color: colors.primary[600],
-    fontWeight: typography.fontWeight.medium,
+    color: colors.primary[500],
+    fontWeight: typography.fontWeight.normal,
   },
   badgeLoadingText: {
     fontSize: typography.fontSize.sm,
@@ -980,23 +943,28 @@ const styles = StyleSheet.create({
   badgeList: {
     paddingVertical: spacing[2],
     gap: spacing[3],
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   noBadgeContainer: {
     flex: 1,
     paddingVertical: spacing[4],
     alignItems: 'center',
+    justifyContent: 'center',
     minWidth: 200,
+    width: '100%',
   },
   noBadgeText: {
     fontSize: typography.fontSize.sm,
     color: colors.text.tertiary,
+    textAlign: 'center',
   },
   badgeItem: {
     alignItems: 'center',
     width: 80,
     padding: spacing[2],
     backgroundColor: colors.gray[50],
-    borderRadius: borderRadius.lg,
+    borderRadius: borderRadius.base,
     marginRight: spacing[2],
   },
   badgeItemExpired: {
@@ -1031,7 +999,7 @@ const styles = StyleSheet.create({
   badgeRemaining: {
     fontSize: typography.fontSize.xs,
     fontWeight: typography.fontWeight.semibold,
-    color: colors.primary[600],
+    color: colors.primary[500],
   },
   badgeExpiredText: {
     fontSize: typography.fontSize.xs,
