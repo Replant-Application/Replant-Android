@@ -18,17 +18,17 @@ import {
   Image,
 } from 'react-native';
 import { NavigationProp } from '@react-navigation/native';
-import { RootStackParamList } from '../types/navigation';
-import { Header, Loading, ErrorBoundary, EmptyState } from '../components/ui';
-import { colors, spacing, typography, borderRadius, shadows } from '../utils/designTokens';
+import { RootStackParamList } from '../../types/navigation';
+import { Header, Loading, ErrorBoundary, EmptyState } from '../../components/ui';
+import { colors, spacing, typography, borderRadius, shadows } from '../../utils/designTokens';
 import {
   getSystemMissions,
   getMissionReviews,
   createMissionReview,
   SystemMission,
   MissionReview,
-} from '../api/missionApi';
-import { useUser } from '../contexts/UserContext';
+} from '../../api/missionApi';
+import { useUser } from '../../contexts/UserContext';
 
 interface MissionGroupScreenProps {
   navigation: NavigationProp<RootStackParamList>;
@@ -199,7 +199,7 @@ const MissionGroupScreen: React.FC<MissionGroupScreenProps> = ({ navigation }) =
         leftButton={
           <TouchableOpacity onPress={() => navigation.goBack()}>
             <Image
-              source={require('../assets/images/left.png')}
+              source={require('../../assets/images/left.png')}
               style={styles.backButtonIcon}
               resizeMode="contain"
             />

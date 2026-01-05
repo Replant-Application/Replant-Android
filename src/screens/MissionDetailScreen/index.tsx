@@ -17,12 +17,12 @@ import {
   Platform,
   RefreshControl,
 } from 'react-native';
-import { Loading, Header, EmptyState } from '../components/ui';
-import { formatDateKorean } from '../utils/dateUtils';
-import { colors, spacing, typography, borderRadius } from '../utils/designTokens';
+import { Loading, Header, EmptyState } from '../../components/ui';
+import { formatDateKorean } from '../../utils/dateUtils';
+import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
 import { NavigationProp, RouteProp } from '@react-navigation/native';
-import { RootStackParamList } from '../types/navigation';
-import { useUser } from '../contexts/UserContext';
+import { RootStackParamList } from '../../types/navigation';
+import { useUser } from '../../contexts/UserContext';
 import {
   getSystemMission,
   getMissionReviews,
@@ -30,8 +30,8 @@ import {
   SystemMission,
   MissionReview,
   MissionReviewListResponse,
-} from '../api/missionApi';
-import { getMyBadges, Badge } from '../api/badgeApi';
+} from '../../api/missionApi';
+import { getMyBadges, Badge } from '../../api/badgeApi';
 
 interface MissionDetailScreenProps {
   navigation: NavigationProp<RootStackParamList>;
@@ -276,7 +276,7 @@ const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
           leftButton={
             <TouchableOpacity onPress={() => navigation.goBack()}>
               <Image
-                source={require('../assets/images/left.png')}
+                source={require('../../assets/images/left.png')}
                 style={styles.backButtonIcon}
                 resizeMode="contain"
               />
@@ -305,7 +305,7 @@ const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
         leftButton={
           <TouchableOpacity onPress={() => navigation.goBack()}>
             <Image
-              source={require('../assets/images/left.png')}
+              source={require('../../assets/images/left.png')}
               style={styles.backButtonIcon}
               resizeMode="contain"
             />

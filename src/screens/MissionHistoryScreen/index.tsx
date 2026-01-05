@@ -5,11 +5,11 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, RefreshControl } from 'react-native';
-import { getMissionHistory, UserMission, UserMissionStatus } from '../api/missionApi';
-import { Loading, Header, EmptyState, FilterBar } from '../components/ui';
-import { colors, spacing, typography, borderRadius } from '../utils/designTokens';
+import { getMissionHistory, UserMission, UserMissionStatus } from '../../api/missionApi';
+import { Loading, Header, EmptyState, FilterBar } from '../../components/ui';
+import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
 import { NavigationProp } from '@react-navigation/native';
-import { RootStackParamList } from '../types/navigation';
+import { RootStackParamList } from '../../types/navigation';
 
 interface MissionHistoryScreenProps {
   navigation: NavigationProp<RootStackParamList>;

@@ -208,8 +208,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
     <Animated.View style={[styles.container, { opacity: fadeAnim }]}>
       <ImageBackground
         source={backgroundType === 'day' 
-          ? require('../assets/images/day.png')
-          : require('../assets/images/night.png')
+          ? require('../../assets/images/day.png')
+          : require('../../assets/images/night.png')
         }
         style={styles.fullBackground}
         resizeMode="cover"
