@@ -465,16 +465,6 @@ const styles = StyleSheet.create({
     borderTopRightRadius: borderRadius.xl + 8,
     overflow: 'hidden',
   },
-  gradientBorder: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    height: 3,
-    backgroundColor: colors.primary[400],
-    borderTopLeftRadius: borderRadius.xl + 8,
-    borderTopRightRadius: borderRadius.xl + 8,
-  },
   dragHandleArea: {
     paddingVertical: spacing[2],
     alignItems: 'center',
