@@ -14,8 +14,9 @@
  */
 
 import React from 'react';
-import { TouchableOpacity, Text, StyleSheet, ActivityIndicator, ViewStyle, TextStyle, TouchableOpacityProps } from 'react-native';
+import { TouchableOpacity, Text, StyleSheet, ActivityIndicator, ViewStyle, TextStyle, TouchableOpacityProps, Platform } from 'react-native';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
+import { getOptimizedLineHeight } from '../../utils/textStyles';
 
 interface ButtonProps extends Omit<TouchableOpacityProps, 'onPress' | 'style'> {
   title: string;
@@ -122,6 +123,11 @@ const styles = StyleSheet.create({
   // Text styles
   text: {
     fontWeight: typography.fontWeight.medium,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
   },
   primaryText: {
     color: colors.text.inverse,
@@ -139,12 +145,15 @@ const styles = StyleSheet.create({
   // Text sizes
   smText: {
     fontSize: typography.fontSize.sm,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
   },
   baseText: {
     fontSize: typography.fontSize.base,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
   },
   lgText: {
     fontSize: typography.fontSize.lg,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.lg),
   },
 
   disabledText: {

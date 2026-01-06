@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Platform } from 'react-native';
 import { colors, spacing, typography, borderRadius, shadows } from '../../utils/designTokens';
+import { getOptimizedLineHeight } from '../../utils/textStyles';
 
 export interface SimpleTabItem {
   key: string;
@@ -96,22 +97,24 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.sm,
     fontWeight: typography.fontWeight.medium,
     color: '#8B6F47', // 비활성 탭 텍스트 색상
-    lineHeight: 20,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
     letterSpacing: 0.3,
     fontFamily: Platform.select({
-      ios: 'Neo-Regular',
-      android: 'Neo-Regular',
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
     }),
+    includeFontPadding: false,
   },
   tabTextActive: {
     color: '#FFF8E7', // 활성 탭 텍스트 색상 (크림색)
     fontWeight: typography.fontWeight.semibold,
-    lineHeight: 20,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
     letterSpacing: 0.3,
     fontFamily: Platform.select({
-      ios: 'Neo-Regular',
-      android: 'Neo-Regular',
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
     }),
+    includeFontPadding: false,
   },
   underline: {
     display: 'none', // 언더라인 제거 (배경색으로 구분)

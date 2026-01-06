@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Alert, Image, Platform } from 'react-native';
-import { spacing } from '../../utils/designTokens';
+import { spacing, typography } from '../../utils/designTokens';
+import { getOptimizedLineHeight } from '../../utils/textStyles';
 import { SCREEN_NAMES } from '../../utils/constants';
 
 interface StartScreenProps {
@@ -113,9 +114,10 @@ const styles = StyleSheet.create({
     marginBottom: spacing[2],
     letterSpacing: 2,
     fontFamily: Platform.select({
-      ios: 'Neo-Regular',
-      android: 'Neo-Regular',
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
     }),
+    includeFontPadding: false,
   },
   subtitleContainer: {
     alignItems: 'center',
@@ -127,11 +129,12 @@ const styles = StyleSheet.create({
     fontWeight: '400',
     color: '#666666',
     letterSpacing: 0.5,
-    lineHeight: 22,
+    lineHeight: getOptimizedLineHeight(16),
     fontFamily: Platform.select({
-      ios: 'Neo-Regular',
-      android: 'Neo-Regular',
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
     }),
+    includeFontPadding: false,
   },
   clover: {
     fontSize: 18,
@@ -164,11 +167,12 @@ const styles = StyleSheet.create({
     fontWeight: '400',
     color: '#000000',
     letterSpacing: 0.1,
-    lineHeight: 22,
+    lineHeight: getOptimizedLineHeight(16),
     fontFamily: Platform.select({
-      ios: 'Neo-Regular',
-      android: 'Neo-Regular',
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
     }),
+    includeFontPadding: false,
   },
   googleButton: {
     flexDirection: 'row',
@@ -190,11 +194,12 @@ const styles = StyleSheet.create({
     fontWeight: '400',
     color: '#ffffff',
     letterSpacing: 0.1,
-    lineHeight: 22,
+    lineHeight: getOptimizedLineHeight(15),
     fontFamily: Platform.select({
-      ios: 'Neo-Regular',
-      android: 'Neo-Regular',
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
     }),
+    includeFontPadding: false,
   },
   textButtonContainer: {
     flexDirection: 'row',
@@ -211,15 +216,21 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '400',
     color: '#666666',
-    lineHeight: 22,
+    lineHeight: getOptimizedLineHeight(15),
     fontFamily: Platform.select({
-      ios: 'Neo-Regular',
-      android: 'Neo-Regular',
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
     }),
+    includeFontPadding: false,
   },
   dividerText: {
     fontSize: 14,
     color: '#CCCCCC',
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
   },
 });
 

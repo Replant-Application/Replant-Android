@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, ViewStyle, TextStyle, TouchableOpacity, Image, Platform } from 'react-native';
 import { spacing, colors, typography, borderRadius } from '../../utils/designTokens';
+import { getOptimizedLineHeight } from '../../utils/textStyles';
 
 interface HeaderProps {
   title?: string;
@@ -98,11 +99,12 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.lg,
     fontWeight: typography.fontWeight.normal,
     color: colors.text.primary,
-    lineHeight: 22,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.lg),
     fontFamily: Platform.select({
-      ios: 'Neo-Regular',
-      android: 'Neo-Regular',
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
     }),
+    includeFontPadding: false,
   },
   backButton: {
     width: 40,
@@ -116,6 +118,12 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.xl,
     color: colors.text.primary,
     fontWeight: typography.fontWeight.medium,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.xl),
   },
 });
 

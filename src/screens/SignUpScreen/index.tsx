@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, Alert, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform, Image } from 'react-native';
 import { Button, Input, Header } from '../../components/ui';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
+import { getOptimizedLineHeight } from '../../utils/textStyles';
 import { SCREEN_NAMES } from '../../utils/constants';
 import { join } from '../../api/authApi';
 import { saveTokens, saveUserInfo } from '../../utils/tokenStorage';
@@ -338,11 +339,12 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.sm,
     color: colors.primary[700],
     letterSpacing: -1,
-    lineHeight: 22,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
     fontFamily: Platform.select({
-      ios: 'Neo-Regular',
-      android: 'Neo-Regular',
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
     }),
+    includeFontPadding: false,
   },
   inputContainer: {
     marginBottom: spacing[3],
@@ -352,11 +354,12 @@ const styles = StyleSheet.create({
     fontWeight: typography.fontWeight.medium,
     color: colors.text.primary,
     marginBottom: spacing[3],
-    lineHeight: 22,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
     fontFamily: Platform.select({
-      ios: 'Neo-Regular',
-      android: 'Neo-Regular',
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
     }),
+    includeFontPadding: false,
   },
   inputText: {
     fontSize: typography.fontSize.sm,
@@ -365,11 +368,12 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.xs,
     color: colors.red[500],
     marginTop: -5,
-    lineHeight: 22,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
     fontFamily: Platform.select({
-      ios: 'Neo-Regular',
-      android: 'Neo-Regular',
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
     }),
+    includeFontPadding: false,
   },
   buttonContainer: {
     padding: spacing[5],
@@ -384,11 +388,12 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     fontSize: typography.fontSize.sm,
-    lineHeight: 22,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
     fontFamily: Platform.select({
-      ios: 'Neo-Regular',
-      android: 'Neo-Regular',
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
     }),
+    includeFontPadding: false,
   },
   linkButton: {
     paddingVertical: spacing[2],
@@ -398,11 +403,12 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.sm,
     color: colors.text.secondary,
     textDecorationLine: 'underline',
-    lineHeight: 22,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
     fontFamily: Platform.select({
-      ios: 'Neo-Regular',
-      android: 'Neo-Regular',
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
     }),
+    includeFontPadding: false,
   },
   backButton: {
     padding: spacing[2],

@@ -19,6 +19,7 @@ import {
 } from 'react-native';
 import { Header, AlertModal } from '../../components/ui';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
+import { getOptimizedLineHeight } from '../../utils/textStyles';
 import { createVerification, updateVerification, getVerification } from '../../api/missionApi';
 import { uploadMissionVerifyPhoto } from '../../api/fileApi';
 import { NavigationProp, RouteProp } from '@react-navigation/native';
@@ -481,7 +482,8 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: typography.fontSize.xs,
     color: colors.primary[700],
-    lineHeight: 18,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
+    includeFontPadding: false,
   },
   inputSection: {
     marginBottom: spacing[4],
@@ -525,7 +527,8 @@ const styles = StyleSheet.create({
     color: colors.text.primary,
     minHeight: 200,
     textAlignVertical: 'top',
-    lineHeight: 24,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
+    includeFontPadding: false,
   },
   photoSection: {
     marginBottom: spacing[4],

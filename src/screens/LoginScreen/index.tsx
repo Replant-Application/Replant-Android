@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, KeyboardAvoidingView, Platform, Image, TextInput, Modal, Animated } from 'react-native';
 import FastImage from 'react-native-fast-image';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
+import { getOptimizedLineHeight } from '../../utils/textStyles';
 import { SCREEN_NAMES } from '../../utils/constants';
 import { login as loginApi } from '../../api/authApi';
 import { saveTokens, saveUserInfo, saveKeepLoggedIn } from '../../utils/tokenStorage';
@@ -449,12 +450,14 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.sm,
     height: 48,
     color: colors.text.primary,
-    lineHeight: 22,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
     letterSpacing: 1,
     fontFamily: Platform.select({
-      ios: 'Neo-Regular',
-      android: 'Neo-Regular',
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
     }),
+    includeFontPadding: false,
+    textAlignVertical: 'center',
   },
   optionsRow: {
     flexDirection: 'row',
@@ -487,11 +490,12 @@ const styles = StyleSheet.create({
   checkboxLabel: {
     fontSize: typography.fontSize.sm,
     color: colors.text.primary,
-    lineHeight: 22,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
     fontFamily: Platform.select({
-      ios: 'Neo-Regular',
-      android: 'Neo-Regular',
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
     }),
+    includeFontPadding: false,
   },
   findPasswordText: {
     fontSize: typography.fontSize.sm,
@@ -514,11 +518,12 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.sm,
     fontWeight: typography.fontWeight.medium,
     color: colors.text.inverse,
-    lineHeight: 22,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
     fontFamily: Platform.select({
-      ios: 'Neo-Regular',
-      android: 'Neo-Regular',
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
     }),
+    includeFontPadding: false,
   },
   signUpButton: {
     alignItems: 'center',
@@ -530,11 +535,12 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.sm,
     color: colors.text.secondary,
     textDecorationLine: 'underline',
-    lineHeight: 22,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
     fontFamily: Platform.select({
-      ios: 'Neo-Regular',
-      android: 'Neo-Regular',
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
     }),
+    includeFontPadding: false,
   },
   socialSection: {
     alignItems: 'center',
@@ -555,11 +561,12 @@ const styles = StyleSheet.create({
     fontWeight: typography.fontWeight.normal,
     color: colors.text.primary,
     marginHorizontal: spacing[3],
-    lineHeight: 22,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
     fontFamily: Platform.select({
-      ios: 'Neo-Regular',
-      android: 'Neo-Regular',
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
     }),
+    includeFontPadding: false,
   },
   socialIcons: {
     flexDirection: 'row',
@@ -623,11 +630,12 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.lg,
     color: colors.text.primary,
     textAlign: 'center',
-    lineHeight: 22,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.lg),
     fontFamily: Platform.select({
-      ios: 'Neo-Regular',
-      android: 'Neo-Regular',
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
     }),
+    includeFontPadding: false,
   },
   modalButton: {
     width: '100%',
@@ -639,13 +647,14 @@ const styles = StyleSheet.create({
   },
   modalButtonText: {
     fontSize: typography.fontSize.base,
-    lineHeight: 22,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
     fontWeight: typography.fontWeight.medium,
     color: colors.text.inverse,
     fontFamily: Platform.select({
-      ios: 'Neo-Regular',
-      android: 'Neo-Regular',
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
     }),
+    includeFontPadding: false,
   },
 });
 

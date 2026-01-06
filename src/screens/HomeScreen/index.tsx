@@ -5,6 +5,7 @@ import { useCharacter } from '../../hooks/useCharacter';
 import { useMission } from '../../hooks/useMission';
 import { Loading, ErrorBoundary, EmptyState, AppHeader, SimpleTabBar } from '../../components/ui';
 import { colors, spacing, typography, borderRadius, shadows } from '../../utils/designTokens';
+import { getOptimizedLineHeight } from '../../utils/textStyles';
 import { getCharacterImage } from '../../utils/characterUtils';
 import { HomeScreenProps } from './HomeScreen.types';
 import { getBackgroundImage } from './HomeScreen.utils';
@@ -425,13 +426,14 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.base,
     fontWeight: typography.fontWeight.medium,
     color: colors.text.primary,
-    lineHeight: 20,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
     letterSpacing: 0,
     textAlign: 'center',
     fontFamily: Platform.select({
-      ios: 'Neo-Regular',
-      android: 'Neo-Regular',
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
     }),
+    includeFontPadding: false,
   },
   characterImageContainer: {
     width: SCREEN_WIDTH * 1,
@@ -519,12 +521,13 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize['2xl'],
     fontWeight: typography.fontWeight.medium,
     color: '#000000', // 책 제목 같은 어두운 갈색
-    lineHeight: 32,
+    lineHeight: getOptimizedLineHeight(typography.fontSize['2xl']),
     letterSpacing: 0.5,
     fontFamily: Platform.select({
-      ios: 'Neo-Regular',
-      android: 'Neo-Regular',
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
     }),
+    includeFontPadding: false,
     textShadowColor: 'rgba(139, 111, 71, 0.1)',
     textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 2,
@@ -541,22 +544,24 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.sm,
     color: '#8B6F47',
     fontWeight: typography.fontWeight.medium,
-    lineHeight: 20,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
     letterSpacing: 0.3,
     fontFamily: Platform.select({
-      ios: 'Neo-Regular',
-      android: 'Neo-Regular',
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
     }),
+    includeFontPadding: false,
   },
   simpleStatsNumber: {
     fontWeight: typography.fontWeight.bold,
     color: '#5A4A3A',
-    lineHeight: 20,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
     letterSpacing: 0.3,
     fontFamily: Platform.select({
-      ios: 'Neo-Regular',
-      android: 'Neo-Regular',
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
     }),
+    includeFontPadding: false,
   },
   tabBar: {
     marginBottom: spacing[3],
@@ -613,21 +618,23 @@ const styles = StyleSheet.create({
     fontWeight: typography.fontWeight.normal,
     color: colors.text.primary,
     flex: 1,
-    lineHeight: 16,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
     letterSpacing: 0,
     fontFamily: Platform.select({
-      ios: 'Neo-Regular',
-      android: 'Neo-Regular',
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
     }),
+    includeFontPadding: false,
   },
   missionListItemArrow: {
     fontSize: typography.fontSize.lg,
     color: colors.gray[400],
     fontWeight: typography.fontWeight.normal,
     fontFamily: Platform.select({
-      ios: 'Neo-Regular',
-      android: 'Neo-Regular',
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
     }),
+    includeFontPadding: false,
   },
 });
 

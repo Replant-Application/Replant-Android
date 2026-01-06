@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, StyleSheet, Image, Platform, BackHandler,
 import { useUser } from '../contexts/UserContext';
 import { SCREEN_NAMES } from '../utils/constants';
 import { colors, spacing, typography } from '../utils/designTokens';
+import { getOptimizedLineHeight } from '../utils/textStyles';
 import { RootStackParamList } from '../types/navigation';
 import { apiClient } from '../api/client';
 import { logout } from '../services/authService';
@@ -489,21 +490,21 @@ const styles = StyleSheet.create({
     color: colors.text.secondary,
     fontWeight: typography.fontWeight.medium,
     fontFamily: Platform.select({
-      ios: 'Neo-Regular',
-      android: 'Neo-Regular',
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
     }),
-    lineHeight: typography.fontSize.xs * 1.2,
-    ...(Platform.OS === 'android' && { includeFontPadding: false }),
+    lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
+    includeFontPadding: false,
   },
   tabLabelActive: {
     color: colors.green[600],
     fontWeight: typography.fontWeight.bold,
     fontFamily: Platform.select({
-      ios: 'Neo-Regular',
-      android: 'Neo-Regular',
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
     }),
-    lineHeight: typography.fontSize.xs * 1.2,
-    ...(Platform.OS === 'android' && { includeFontPadding: false }),
+    lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
+    includeFontPadding: false,
   },
 });
 
