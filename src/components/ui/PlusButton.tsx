@@ -13,11 +13,11 @@ interface PlusButtonProps {
 const PlusButton: React.FC<PlusButtonProps> = ({
   onPress,
   size = 36,
-  backgroundColor = colors.purple[800],
-  plusColor = colors.gray[400],
+  backgroundColor = colors.primary[500],
+  plusColor = colors.white,
   style,
 }) => {
-  const plusThickness = Math.max(2, size * 0.15);
+  const plusThickness = Math.max(1, size * 0.1);
   const plusLength = size * 0.4;
 
   return (
@@ -32,7 +32,7 @@ const PlusButton: React.FC<PlusButtonProps> = ({
           {
             width: size,
             height: size,
-            borderRadius: borderRadius.xl,
+            borderRadius: borderRadius.base,
             backgroundColor,
           },
         ]}
@@ -62,12 +62,12 @@ const PlusButton: React.FC<PlusButtonProps> = ({
           <View
             style={[
               styles.plusBar,
+              styles.plusBarVertical,
               {
                 width: plusThickness,
                 height: plusLength,
                 backgroundColor: plusColor,
                 borderRadius: plusThickness / 2,
-                position: 'absolute',
               },
             ]}
           />
@@ -92,6 +92,9 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   plusBar: {
+    position: 'absolute',
+  },
+  plusBarVertical: {
     position: 'absolute',
   },
 });
