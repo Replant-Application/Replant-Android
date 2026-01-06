@@ -284,8 +284,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
 
       {/* 하단: 바텀 시트 스타일 */}
       <View style={styles.bottomSheet}>
-        {/* 그라데이션 보더 효과 */}
-        <View style={styles.gradientBorder} />
         {/* 드래그 핸들 - 터치하면 토글 */}
         <TouchableOpacity
           style={styles.dragHandleArea}
