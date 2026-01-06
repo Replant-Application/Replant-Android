@@ -402,7 +402,7 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.base,
     paddingHorizontal: spacing[4],
     paddingVertical: spacing[3],
-    fontSize: typography.fontSize.base,
+    fontSize: typography.fontSize.sm,
     height: 48,
     color: colors.text.primary,
   },
