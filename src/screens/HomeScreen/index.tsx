@@ -316,10 +316,12 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
           {/* 메인 제목과 추가 버튼 */}
           <View style={styles.mainHeader}>
             <Text style={styles.mainTitle}>나의 목표</Text>
-            <PlusButton
-              onPress={() => navigation.navigate('Mission' as any)}
-              size={36}
-            />
+            <View style={styles.plusButtonWrapper}>
+              <PlusButton
+                onPress={() => navigation.navigate('Mission' as any)}
+                size={28}
+              />
+            </View>
           </View>
 
           {/* 간단한 통계 */}
@@ -476,14 +478,17 @@ const styles = StyleSheet.create({
   mainHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: spacing[3],
-    paddingTop: spacing[1],
+    alignItems: 'flex-start',
+    marginBottom: spacing[1],
+    paddingTop: spacing[2],
   },
   mainTitle: {
     fontSize: typography.fontSize.xl,
     fontWeight: typography.fontWeight.normal,
     color: colors.text.primary,
+  },
+  plusButtonWrapper: {
+    marginTop: spacing[4],
   },
   simpleStats: {
     marginBottom: spacing[3],

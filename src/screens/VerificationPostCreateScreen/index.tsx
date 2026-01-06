@@ -59,13 +59,14 @@ const VerificationPostCreateScreen: React.FC<VerificationPostCreateScreenProps> 
 
   // 필수 파라미터 체크
   useEffect(() => {
-    if (!isEditMode && !userMissionId) {
+    if (!isEditMode && (!userMissionId || userMissionId === 0)) {
       logError('VerificationPostCreate: userMissionId 누락', new Error('Missing userMissionId'), { params });
       Alert.alert('오류', '미션 정보가 올바르지 않습니다.', [
         { text: '확인', onPress: () => navigation.goBack() }
       ]);
+      return;
     }
-  }, [userMissionId, isEditMode, navigation]);
+  }, [userMissionId, isEditMode, navigation, params]);
 
   // 수정 모드일 때 기존 데이터 로드
   useEffect(() => {
@@ -210,7 +211,7 @@ const VerificationPostCreateScreen: React.FC<VerificationPostCreateScreenProps> 
       return;
     }
 
-    if (!isEditMode && !userMissionId) {
+    if (!isEditMode && (!userMissionId || userMissionId === 0)) {
       Alert.alert('오류', '미션 정보가 올바르지 않습니다.');
       return;
     }

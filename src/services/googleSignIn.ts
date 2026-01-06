@@ -57,7 +57,7 @@ export const signInWithGoogle = async (): Promise<string | null> => {
         hint: 'Check if GOOGLE_WEB_CLIENT_ID is correctly configured and SHA-1 certificate is registered in Google Cloud Console'
       });
     } else {
-      console.error('Google Sign-In Error:', error);
+    console.error('Google Sign-In Error:', error);
     }
     return null;
   }

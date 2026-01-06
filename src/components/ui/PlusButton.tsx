@@ -12,7 +12,7 @@ interface PlusButtonProps {
 
 const PlusButton: React.FC<PlusButtonProps> = ({
   onPress,
-  size = 36,
+  size = 16,
   backgroundColor = colors.primary[500],
   plusColor = colors.white,
   style,

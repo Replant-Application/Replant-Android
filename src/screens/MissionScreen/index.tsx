@@ -447,7 +447,7 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
 
   return (
     <View style={styles.container}>
-      <Header showBackButton={false} navigation={navigation} />
+      <Header title="오늘의 미션" showBackButton={false} navigation={navigation} />
 
       {/* 미션 완료 모달 */}
       <ConfirmModal
@@ -500,9 +500,6 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
           />
         }
       >
-        {/* 오늘의 미션 제목 */}
-        <Text style={styles.title}>오늘의 미션</Text>
-
         {/* 진행률 카드 */}
         {totalMissions > 0 && (
           <MissionProgressCard
@@ -609,7 +606,7 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
                     if (!mission.completed) {
                       handleVerify(mission, verificationType as 'COMMUNITY' | 'GPS' | 'TIME');
                     } else {
-                      navigation.navigate('MissionDetail', { missionId: String(mission.mission_id || mission.id || '') });
+                      navigation.navigate('MissionDetail', { missionId: mission.mission_id || mission.id || '' });
                     }
                   }}
                 >
@@ -621,7 +618,7 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
                     onDeletePhoto={handleDeletePhoto}
                     onShareToCommunity={handleShareToCommunity}
                     onVerify={handleVerify}
-                    onViewDetails={() => navigation.navigate('MissionDetail', { missionId: String(mission.mission_id || mission.id || '') })}
+                    onViewDetails={() => navigation.navigate('MissionDetail', { missionId: mission.mission_id || mission.id || '' })}
                   />
                 </TouchableOpacity>
               );
@@ -706,7 +703,8 @@ const styles = StyleSheet.create({
     fontWeight: typography.fontWeight.normal,
   },
   badgeLoadingText: {
-    fontSize: typography.fontSize.sm,
+    fontSize: typography.fontSize.sm
+    ,
     color: colors.text.tertiary,
     textAlign: 'center',
     paddingVertical: spacing[4],

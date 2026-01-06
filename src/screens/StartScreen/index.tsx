@@ -28,7 +28,7 @@ const StartScreen: React.FC<StartScreenProps> = ({ onNavigate }) => {
     <View style={styles.container}>
       <View style={styles.content}>
         <Image
-          source={require('../../assets/images/Replant_Loading.png')}
+          source={require('../../assets/images/RePlant_Logo.png')}
           style={styles.logoImage}
           resizeMode="contain"
         />

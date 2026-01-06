@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, Alert, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform, Image } from 'react-native';
 import { Button, Input, Header } from '../../components/ui';
-import { colors, spacing, typography } from '../../utils/designTokens';
+import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
 import { SCREEN_NAMES } from '../../utils/constants';
 import { join } from '../../api/authApi';
 import { saveTokens, saveUserInfo } from '../../utils/tokenStorage';
@@ -20,6 +20,13 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onNavigate }) => {
   const [nickname, setNickname] = useState('');
   const [phone, setPhone] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [errors, setErrors] = useState({
+    email: '',
+    password: '',
+    confirmPassword: '',
+    nickname: '',
+    phone: '',
+  });
 
   const validateEmail = (email: string): boolean => {
     const emailRegex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,6}$/;
@@ -32,34 +39,67 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onNavigate }) => {
   };
 
   const handleSignUp = async () => {
+    // 에러 초기화
+    setErrors({
+      email: '',
+      password: '',
+      confirmPassword: '',
+      nickname: '',
+      phone: '',
+    });
+
+    let hasError = false;
+    const newErrors = {
+      email: '',
+      password: '',
+      confirmPassword: '',
+      nickname: '',
+      phone: '',
+    };
+
     // 유효성 검사
-    if (!email.trim() || !password.trim() || !nickname.trim() || !phone.trim()) {
-      Alert.alert('오류', '모든 필수 항목을 입력해주세요.');
-      return;
+    if (!email.trim()) {
+      newErrors.email = '이메일을 입력해주세요.';
+      hasError = true;
+    } else if (!validateEmail(email)) {
+      newErrors.email = '올바른 이메일 형식으로 입력해주세요.';
+      hasError = true;
     }
 
-    if (!validateEmail(email)) {
-      Alert.alert('오류', '올바른 이메일 형식을 입력해주세요.');
-      return;
+    if (!password.trim()) {
+      newErrors.password = '비밀번호를 입력해주세요.';
+      hasError = true;
+    } else if (password.length < 8) {
+      newErrors.password = '비밀번호는 8자 이상 입력해주세요.';
+      hasError = true;
     }
 
-    if (password.length < 8) {
-      Alert.alert('오류', '비밀번호는 8자 이상이어야 합니다.');
-      return;
+    if (!confirmPassword.trim()) {
+      newErrors.confirmPassword = '비밀번호 확인을 입력해주세요.';
+      hasError = true;
+    } else if (password !== confirmPassword) {
+      newErrors.confirmPassword = '비밀번호가 일치하지 않습니다.';
+      hasError = true;
     }
 
-    if (password !== confirmPassword) {
-      Alert.alert('오류', '비밀번호가 일치하지 않습니다.');
-      return;
+    if (!nickname.trim()) {
+      newErrors.nickname = '닉네임을 입력해주세요.';
+      hasError = true;
+    } else if (nickname.length < 2 || nickname.length > 20) {
+      newErrors.nickname = '닉네임은 2~20자 사이로 입력해주세요.';
+      hasError = true;
     }
 
-    if (nickname.length < 2 || nickname.length > 20) {
-      Alert.alert('오류', '닉네임은 2~20자 사이로 입력해주세요.');
-      return;
+    if (!phone.trim()) {
+      newErrors.phone = '전화번호를 입력해주세요.';
+      hasError = true;
+    } else if (!validatePhone(phone)) {
+      newErrors.phone = '올바른 전화번호 형식으로 입력해주세요. (예: 01012345678)';
+      hasError = true;
     }
 
-    if (!validatePhone(phone)) {
-      Alert.alert('오류', '올바른 전화번호 형식을 입력해주세요.');
+    if (hasError) {
+      setErrors(newErrors);
       return;
     }
 
@@ -97,18 +137,18 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onNavigate }) => {
         // 로컬 로그인 처리
         await login(name);
 
-        Alert.alert('회원가입 완료', '환영합니다! 홈 화면으로 이동합니다.', [
+        Alert.alert('회원가입 완료', '환영합니다!\n홈 화면으로 이동합니다.', [
           {
             text: '확인',
             onPress: () => onNavigate(SCREEN_NAMES.HOME as string),
           },
         ]);
       } else {
-        Alert.alert('회원가입 실패', result.error || '회원가입에 실패했습니다.');
+        Alert.alert('회원가입 실패', result.error || '회원가입에 실패했습니다.\n잠시 후 다시 시도해주세요.');
       }
     } catch (error) {
       console.error('SignUp error:', error);
-      Alert.alert('오류', '회원가입 중 오류가 발생했습니다.');
+      Alert.alert('오류', '회원가입 중 오류가 발생했습니다.\n잠시 후 다시 시도해주세요.');
     } finally {
       setIsLoading(false);
     }
@@ -120,6 +160,7 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onNavigate }) => {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <Header
+        title="회원가입"
         leftButton={
           <TouchableOpacity
             onPress={() => onNavigate(SCREEN_NAMES.START as string)}
@@ -135,66 +176,107 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onNavigate }) => {
       />
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
         <View style={styles.content}>
-          <Text style={styles.title}>회원가입</Text>
-          <Text style={styles.subtitle}>
-            새로운 계정을 만들어주세요
-          </Text>
+          <View style={styles.infoBox}>
+            <Image
+              source={require('../../assets/images/RePlant_Logo.png')}
+              style={styles.logoIcon}
+              resizeMode="contain"
+            />
+            <Text style={styles.infoText}>
+              생명을 더하는 첫걸음, 회원가입부터 시작하세요 !
+            </Text>
+          </View>
 
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>이메일 *</Text>
+            <Text style={styles.label}>이메일</Text>
             <Input
-              placeholder="이메일을 입력하세요"
+              placeholder="이메일 주소를 입력해주세요"
               value={email}
-              onChangeText={setEmail}
+              onChangeText={(text) => {
+                setEmail(text);
+                if (errors.email) {
+                  setErrors({ ...errors, email: '' });
+                }
+              }}
               keyboardType="email-address"
               autoCapitalize="none"
               autoCorrect={false}
+              inputStyle={styles.inputText}
             />
+            {errors.email ? <Text style={styles.errorText}>{errors.email}</Text> : null}
           </View>
 
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>비밀번호 * (8자 이상)</Text>
+            <Text style={styles.label}>비밀번호</Text>
             <Input
-              placeholder="비밀번호를 입력하세요"
+              placeholder="8자 이상의 비밀번호를 입력해주세요"
               value={password}
-              onChangeText={setPassword}
+              onChangeText={(text) => {
+                setPassword(text);
+                if (errors.password) {
+                  setErrors({ ...errors, password: '' });
+                }
+              }}
               secureTextEntry
               autoCapitalize="none"
               autoCorrect={false}
+              inputStyle={styles.inputText}
             />
+            {errors.password ? <Text style={styles.errorText}>{errors.password}</Text> : null}
           </View>
 
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>비밀번호 확인 *</Text>
+            <Text style={styles.label}>비밀번호 확인</Text>
             <Input
-              placeholder="비밀번호를 다시 입력하세요"
+              placeholder="비밀번호를 한 번 더 입력해주세요"
               value={confirmPassword}
-              onChangeText={setConfirmPassword}
+              onChangeText={(text) => {
+                setConfirmPassword(text);
+                if (errors.confirmPassword) {
+                  setErrors({ ...errors, confirmPassword: '' });
+                }
+              }}
               secureTextEntry
               autoCapitalize="none"
               autoCorrect={false}
+              inputStyle={styles.inputText}
             />
+            {errors.confirmPassword ? <Text style={styles.errorText}>{errors.confirmPassword}</Text> : null}
           </View>
 
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>닉네임 * (2~20자)</Text>
+            <Text style={styles.label}>닉네임</Text>
             <Input
-              placeholder="닉네임을 입력하세요"
+              placeholder="2~20자 사이의 닉네임을 입력해주세요"
               value={nickname}
-              onChangeText={setNickname}
+              onChangeText={(text) => {
+                setNickname(text);
+                if (errors.nickname) {
+                  setErrors({ ...errors, nickname: '' });
+                }
+              }}
               maxLength={20}
+              inputStyle={styles.inputText}
             />
+            {errors.nickname ? <Text style={styles.errorText}>{errors.nickname}</Text> : null}
           </View>
 
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>전화번호 *</Text>
+            <Text style={styles.label}>전화번호</Text>
             <Input
-              placeholder="전화번호를 입력하세요 (숫자만)"
+              placeholder="숫자만 입력해주세요 (예: 01012345678)"
               value={phone}
-              onChangeText={setPhone}
+              onChangeText={(text) => {
+                setPhone(text);
+                if (errors.phone) {
+                  setErrors({ ...errors, phone: '' });
+                }
+              }}
               keyboardType="phone-pad"
               maxLength={11}
+              inputStyle={styles.inputText}
             />
+            {errors.phone ? <Text style={styles.errorText}>{errors.phone}</Text> : null}
           </View>
         </View>
       </ScrollView>
@@ -230,32 +312,49 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: spacing[5],
+    paddingTop: spacing[2],
     paddingBottom: spacing[24],
   },
   content: {
     flex: 1,
   },
-  title: {
-    fontSize: typography.fontSize['2xl'],
-    fontWeight: typography.fontWeight.bold,
-    color: colors.text.primary,
-    marginBottom: spacing[2],
-    textAlign: 'center' as const,
+  infoBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.primary[50],
+    borderRadius: borderRadius.sm,
+    padding: spacing[3],
+    marginBottom: spacing[6],
+    borderWidth: 1,
+    borderColor: colors.primary[200],
+    gap: spacing[4],
   },
-  subtitle: {
-    fontSize: typography.fontSize.base,
-    color: colors.text.secondary,
-    textAlign: 'center',
-    marginBottom: spacing[8],
+  logoIcon: {
+    width: 24,
+    height: 24,
+  },
+  infoText: {
+    flex: 1,
+    fontSize: typography.fontSize.sm,
+    color: colors.primary[700],
+    lineHeight: 20,
   },
   inputContainer: {
-    marginBottom: spacing[4],
+    marginBottom: spacing[3],
   },
   label: {
     fontSize: typography.fontSize.sm,
     fontWeight: typography.fontWeight.medium,
     color: colors.text.primary,
-    marginBottom: spacing[2],
+    marginBottom: spacing[3],
+  },
+  inputText: {
+    fontSize: typography.fontSize.xs,
+  },
+  errorText: {
+    fontSize: typography.fontSize.xs,
+    color: colors.red[500],
+    marginTop: -5,
   },
   buttonContainer: {
     padding: spacing[5],
@@ -263,10 +362,10 @@ const styles = StyleSheet.create({
     gap: spacing[3],
   },
   button: {
-    height: 42,
+    height: 44,
     width: '100%',
-    borderRadius: 28,
-    backgroundColor: '#166534',
+    borderRadius: borderRadius.base,
+    backgroundColor: colors.primary[500],
   },
   buttonText: {
     fontSize: typography.fontSize.sm,

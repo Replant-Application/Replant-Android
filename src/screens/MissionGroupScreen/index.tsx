@@ -145,13 +145,25 @@ const MissionGroupScreen: React.FC<MissionGroupScreenProps> = ({ navigation }) =
   const getVerificationTypeLabel = (type?: string) => {
     switch (type) {
       case 'GPS':
-        return '📍 GPS 인증';
+        return 'GPS 인증';
       case 'TIME':
         return '⏱️ 시간 인증';
       case 'COMMUNITY':
-        return '👥 커뮤니티 인증';
+        return '커뮤니티 인증';
       default:
         return '✅ 일반 인증';
+    }
+  };
+
+  // 인증 타입 아이콘
+  const getVerificationTypeIcon = (type?: string) => {
+    switch (type) {
+      case 'GPS':
+        return require('../../assets/images/location.png');
+      case 'COMMUNITY':
+        return require('../../assets/images/high-five.png');
+      default:
+        return null;
     }
   };
 
@@ -169,19 +181,16 @@ const MissionGroupScreen: React.FC<MissionGroupScreenProps> = ({ navigation }) =
     }
   };
 
-  // 미션 이모지
-  const getMissionEmoji = (title: string): string => {
-    if (title.includes('운동') || title.includes('헬스') || title.includes('걷기')) return '🏃';
-    if (title.includes('독서') || title.includes('책')) return '📚';
-    if (title.includes('물') || title.includes('마시')) return '💧';
-    if (title.includes('명상') || title.includes('휴식')) return '🧘';
-    if (title.includes('아침') || title.includes('기상')) return '🌅';
-    if (title.includes('영어') || title.includes('단어') || title.includes('외국어')) return '📝';
-    if (title.includes('잠') || title.includes('수면')) return '😴';
-    if (title.includes('식사') || title.includes('밥')) return '🍽️';
-    if (title.includes('저축') || title.includes('돈')) return '💰';
-    if (title.includes('공부')) return '📖';
-    return '🎯';
+  // 미션 아이콘
+  const getMissionIcon = (title: string) => {
+    if (title.includes('운동') || title.includes('헬스') || title.includes('걷기')) {
+      return require('../../assets/images/training.png');
+    }
+    if (title.includes('독서') || title.includes('책')) {
+      return require('../../assets/images/book.png');
+    }
+    // 기본 아이콘 (과녁)
+    return require('../../assets/images/calendar.png');
   };
 
   if (loading) {
@@ -223,10 +232,16 @@ const MissionGroupScreen: React.FC<MissionGroupScreenProps> = ({ navigation }) =
           <>
             {/* 미션 목록 */}
             <View style={styles.missionListContainer}>
-              <Text style={styles.sectionTitle}>미션 도감</Text>
-              <Text style={styles.sectionSubtitle}>
-                미션을 선택하면 상세 정보와 후기를 볼 수 있어요
-              </Text>
+              <View style={styles.infoBox}>
+                <Image
+                  source={require('../../assets/images/RePlant_Logo.png')}
+                  style={styles.logoIcon}
+                  resizeMode="contain"
+                />
+                <Text style={styles.infoText}>
+                  미션을 선택하면 상세 정보와 후기를 볼 수 있어요
+                </Text>
+              </View>
 
               {missions.map((mission) => (
                 <TouchableOpacity
@@ -243,9 +258,13 @@ const MissionGroupScreen: React.FC<MissionGroupScreenProps> = ({ navigation }) =
                   activeOpacity={0.7}
                 >
                   <View style={styles.missionHeader}>
-                    <Text style={styles.missionEmoji}>{getMissionEmoji(mission.title)}</Text>
                     <View style={styles.missionInfo}>
                       <View style={styles.missionTitleRow}>
+                        <Image
+                          source={getMissionIcon(mission.title)}
+                          style={styles.missionIcon}
+                          resizeMode="contain"
+                        />
                         <Text style={styles.missionTitle}>{mission.title}</Text>
                         <View style={styles.missionTypeBadge}>
                           <Text style={styles.missionTypeText}>
@@ -256,16 +275,41 @@ const MissionGroupScreen: React.FC<MissionGroupScreenProps> = ({ navigation }) =
                       <Text style={styles.missionDescription} numberOfLines={2}>
                         {mission.description}
                       </Text>
-                      <View style={styles.missionMeta}>
-                        <Text style={styles.missionMetaText}>
-                          {getVerificationTypeLabel(mission.verificationType)}
-                        </Text>
-                        <Text style={styles.missionMetaText}>
-                          💎 {mission.expReward} EXP
-                        </Text>
-                        <Text style={styles.missionMetaText}>
-                          📝 후기 {mission.reviewCount || 0}개
-                        </Text>
+                    </View>
+                  </View>
+
+                  <View style={styles.missionContent}>
+                    <View style={styles.missionVerificationInfo}>
+                      {getVerificationTypeIcon(mission.verificationType) && (
+                        <Image
+                          source={getVerificationTypeIcon(mission.verificationType)!}
+                          style={styles.verificationIcon}
+                          resizeMode="contain"
+                        />
+                      )}
+                      <Text style={styles.missionVerificationText}>
+                        {getVerificationTypeLabel(mission.verificationType)}
+                      </Text>
+                    </View>
+                  </View>
+
+                  <View style={styles.missionFooter}>
+                    <View style={styles.missionStats}>
+                      <View style={styles.statItem}>
+                        <Image
+                          source={require('../../assets/images/sun.png')}
+                          style={styles.statIcon}
+                          resizeMode="contain"
+                        />
+                        <Text style={styles.statText}>{mission.expReward} EXP</Text>
+                      </View>
+                      <View style={styles.statItem}>
+                        <Image
+                          source={require('../../assets/images/pencil.png')}
+                          style={styles.statIcon}
+                          resizeMode="contain"
+                        />
+                        <Text style={styles.statText}>후기 {mission.reviewCount || 0}개</Text>
                       </View>
                     </View>
                   </View>
@@ -465,14 +509,34 @@ const styles = StyleSheet.create({
   missionListContainer: {
     marginBottom: spacing[4],
   },
-  missionCard: {
-    backgroundColor: colors.background.primary,
-    borderRadius: borderRadius.lg,
-    padding: spacing[4],
+  infoBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.primary[50],
+    borderRadius: borderRadius.base,
+    padding: spacing[3],
     marginBottom: spacing[3],
     borderWidth: 1,
+    borderColor: colors.primary[200],
+    gap: spacing[4],
+  },
+  logoIcon: {
+    width: 24,
+    height: 24,
+  },
+  infoText: {
+    flex: 1,
+    fontSize: typography.fontSize.sm,
+    color: colors.primary[700],
+    lineHeight: 20,
+  },
+  missionCard: {
+    backgroundColor: colors.background.primary,
+    borderRadius: borderRadius.base,
+    padding: spacing[3],
+    marginBottom: spacing[1],
+    borderWidth: 1,
     borderColor: colors.border.light,
-    ...shadows.sm,
   },
   missionCardSelected: {
     borderColor: colors.primary[500],
@@ -480,12 +544,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.primary[50],
   },
   missionHeader: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-  },
-  missionEmoji: {
-    fontSize: 32,
-    marginRight: spacing[3],
+    marginBottom: spacing[2],
   },
   missionInfo: {
     flex: 1,
@@ -493,11 +552,16 @@ const styles = StyleSheet.create({
   missionTitleRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: spacing[1],
+    marginBottom: spacing[2],
+    gap: spacing[1.5],
+  },
+  missionIcon: {
+    width: 20,
+    height: 20,
   },
   missionTitle: {
-    fontSize: typography.fontSize.lg,
-    fontWeight: typography.fontWeight.semibold,
+    fontSize: typography.fontSize.base,
+    fontWeight: typography.fontWeight.normal,
     color: colors.text.primary,
     flex: 1,
   },
@@ -505,27 +569,66 @@ const styles = StyleSheet.create({
     backgroundColor: colors.primary[100],
     paddingHorizontal: spacing[2],
     paddingVertical: spacing[1],
-    borderRadius: borderRadius.sm,
+    borderRadius: borderRadius.base,
   },
   missionTypeText: {
     fontSize: typography.fontSize.xs,
-    color: colors.primary[700],
-    fontWeight: typography.fontWeight.medium,
+    color: colors.primary[600],
+    fontWeight: typography.fontWeight.normal,
   },
   missionDescription: {
     fontSize: typography.fontSize.sm,
     color: colors.text.secondary,
-    lineHeight: typography.lineHeight.relaxed * typography.fontSize.sm,
+    lineHeight: 20,
+    marginBottom: spacing[2],
+    fontWeight: typography.fontWeight.normal,
+  },
+  missionContent: {
     marginBottom: spacing[2],
   },
-  missionMeta: {
+  missionVerificationInfo: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
+    alignItems: 'center',
+    paddingHorizontal: spacing[2],
+    paddingVertical: spacing[1],
+    backgroundColor: colors.primary[100],
+    borderRadius: borderRadius.base,
+    borderWidth: 1.5,
+    borderColor: colors.primary[500],
+    alignSelf: 'flex-start',
+    gap: spacing[1],
+  },
+  verificationIcon: {
+    width: 14,
+    height: 14,
+  },
+  missionVerificationText: {
+    fontSize: typography.fontSize.xs,
+    color: colors.primary[800],
+    fontWeight: typography.fontWeight.normal,
+  },
+  missionFooter: {
+    borderTopWidth: 1,
+    borderTopColor: colors.border.light,
+    paddingTop: spacing[2],
+  },
+  missionStats: {
+    flexDirection: 'row',
+    gap: spacing[4],
+  },
+  statItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: spacing[2],
   },
-  missionMetaText: {
-    fontSize: typography.fontSize.xs,
-    color: colors.text.tertiary,
+  statIcon: {
+    width: 16,
+    height: 16,
+  },
+  statText: {
+    fontSize: typography.fontSize.sm,
+    color: colors.text.secondary,
+    fontWeight: typography.fontWeight.medium,
   },
   detailContainer: {
     marginTop: spacing[4],

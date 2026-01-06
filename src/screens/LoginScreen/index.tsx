@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, KeyboardAvoidingView, Platform, Image, TextInput, Modal } from 'react-native';
-import { spacing, typography, borderRadius } from '../../utils/designTokens';
+import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
 import { SCREEN_NAMES } from '../../utils/constants';
 import { login as loginApi } from '../../api/authApi';
 import { saveTokens, saveUserInfo, saveKeepLoggedIn } from '../../utils/tokenStorage';
@@ -218,7 +218,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onNavigate }) => {
           <View style={styles.inputContainer}>
             <TextInput
               placeholder="이메일을 입력하세요"
-              placeholderTextColor="#999999"
+              placeholderTextColor={colors.text.tertiary}
               value={email}
               onChangeText={setEmail}
               keyboardType="email-address"
@@ -231,7 +231,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onNavigate }) => {
           <View style={styles.inputContainer}>
             <TextInput
               placeholder="비밀번호를 입력하세요"
-              placeholderTextColor="#999999"
+              placeholderTextColor={colors.text.tertiary}
               value={password}
               onChangeText={setPassword}
               secureTextEntry
@@ -299,7 +299,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onNavigate }) => {
                 disabled={isLoading}
                 activeOpacity={0.8}
               >
-                <View style={[styles.socialIconCircle, { backgroundColor: '#ffffff', borderWidth: 1, borderColor: '#E0E0E0' }]}>
+                <View style={[styles.socialIconCircle, { backgroundColor: colors.background.primary, borderWidth: 1, borderColor: colors.border.light }]}>
                   <Image
                     source={require('../../assets/images/google_logo.png')}
                     style={styles.socialIconImage}
@@ -359,14 +359,14 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onNavigate }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F5F5F5',
+    backgroundColor: colors.background.secondary,
   },
   scrollContent: {
     flexGrow: 1,
   },
   content: {
     flex: 1,
-    backgroundColor: '#ffffff',
+    backgroundColor: colors.background.primary,
     paddingHorizontal: spacing[6],
     justifyContent: 'center',
   },
@@ -386,34 +386,25 @@ const styles = StyleSheet.create({
     height: 140,
     marginBottom: spacing[1],
   },
-  brandText: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: '#166534',
-    fontFamily: Platform.select({
-      ios: 'Maplestory Bold',
-      android: 'MaplestoryBold',
-    }),
-  },
   title: {
-    fontSize: 28,
-    fontWeight: '700',
-    color: '#000000',
+    fontSize: typography.fontSize['2xl'],
+    fontWeight: typography.fontWeight.normal,
+    color: colors.text.primary,
     textAlign: 'center',
   },
   inputContainer: {
     marginBottom: spacing[4],
   },
   input: {
-    backgroundColor: '#ffffff',
+    backgroundColor: colors.background.primary,
     borderWidth: 1,
-    borderColor: '#E0E0E0',
-    borderRadius: borderRadius.md,
+    borderColor: colors.border.light,
+    borderRadius: borderRadius.base,
     paddingHorizontal: spacing[4],
     paddingVertical: spacing[3],
     fontSize: typography.fontSize.base,
     height: 48,
-    color: '#000000',
+    color: colors.text.primary,
   },
   optionsRow: {
     flexDirection: 'row',
@@ -429,23 +420,23 @@ const styles = StyleSheet.create({
   checkbox: {
     width: 20,
     height: 20,
-    borderRadius: 10,
+    borderRadius: borderRadius.full,
     borderWidth: 2,
-    borderColor: '#000000',
+    borderColor: colors.primary[500],
     alignItems: 'center',
     justifyContent: 'center',
   },
   checkboxChecked: {
-    backgroundColor: '#000000',
+    backgroundColor: colors.primary[500],
   },
   checkmark: {
-    color: '#ffffff',
+    color: colors.text.inverse,
     fontSize: 12,
-    fontWeight: 'bold',
+    fontWeight: typography.fontWeight.bold,
   },
   checkboxLabel: {
     fontSize: typography.fontSize.sm,
-    color: '#000000',
+    color: colors.text.primary,
   },
   findPasswordText: {
     fontSize: typography.fontSize.sm,
@@ -453,20 +444,21 @@ const styles = StyleSheet.create({
   },
   loginButton: {
     width: '100%',
-    height: 48,
-    backgroundColor: '#166534',
-    borderRadius: 28,
+    height: 44,
+    backgroundColor: colors.primary[500],
+    borderRadius: borderRadius.base,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: spacing[4],
   },
   loginButtonDisabled: {
     opacity: 0.6,
+    backgroundColor: colors.gray[300],
   },
   loginButtonText: {
-    fontSize: typography.fontSize.base,
-    fontWeight: '600',
-    color: '#ffffff',
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.medium,
+    color: colors.text.inverse,
   },
   signUpButton: {
     alignItems: 'center',
@@ -476,7 +468,7 @@ const styles = StyleSheet.create({
   },
   linkText: {
     fontSize: typography.fontSize.sm,
-    color: '#666666',
+    color: colors.text.secondary,
     textDecorationLine: 'underline',
   },
   socialSection: {
@@ -491,12 +483,12 @@ const styles = StyleSheet.create({
   socialTitleLine: {
     flex: 1,
     height: 1,
-    backgroundColor: '#E0E0E0',
+    backgroundColor: colors.border.light,
   },
   socialTitle: {
     fontSize: typography.fontSize.base,
-    fontWeight: '600',
-    color: '#000000',
+    fontWeight: typography.fontWeight.normal,
+    color: colors.text.primary,
     marginHorizontal: spacing[3],
   },
   socialIcons: {
@@ -531,12 +523,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modalContent: {
-    backgroundColor: '#ffffff',
-    borderRadius: 20,
+    backgroundColor: colors.background.primary,
+    borderRadius: borderRadius.xl,
     padding: spacing[6],
     width: '80%',
     alignItems: 'center',
-    shadowColor: '#000',
+    shadowColor: colors.black,
     shadowOffset: {
       width: 0,
       height: 2,
@@ -552,28 +544,28 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     fontSize: typography.fontSize.xl,
-    fontWeight: '700',
-    color: '#000000',
+    fontWeight: typography.fontWeight.bold,
+    color: colors.text.primary,
     marginBottom: spacing[2],
   },
   modalMessage: {
     fontSize: typography.fontSize.base,
-    color: '#666666',
+    color: colors.text.secondary,
     marginBottom: spacing[6],
     textAlign: 'center',
   },
   modalButton: {
     width: '100%',
     height: 43,
-    backgroundColor: '#166534',
-    borderRadius: 24,
+    backgroundColor: colors.primary[500],
+    borderRadius: borderRadius.base,
     justifyContent: 'center',
     alignItems: 'center',
   },
   modalButtonText: {
     fontSize: typography.fontSize.base,
-    fontWeight: '600',
-    color: '#ffffff',
+    fontWeight: typography.fontWeight.medium,
+    color: colors.text.inverse,
   },
 });
 
