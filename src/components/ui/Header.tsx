@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, ViewStyle, TextStyle, TouchableOpacity, Image } from 'react-native';
+import { View, Text, StyleSheet, ViewStyle, TextStyle, TouchableOpacity, Image, Platform } from 'react-native';
 import { spacing, colors, typography, borderRadius } from '../../utils/designTokens';
 
 interface HeaderProps {
@@ -98,6 +98,11 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.lg,
     fontWeight: typography.fontWeight.normal,
     color: colors.text.primary,
+    lineHeight: 22,
+    fontFamily: Platform.select({
+      ios: 'Neo-Regular',
+      android: 'Neo-Regular',
+    }),
   },
   backButton: {
     width: 40,

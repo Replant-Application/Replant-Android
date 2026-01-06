@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { TextInput, View, Text, StyleSheet, ViewStyle, TextStyle } from 'react-native';
+import { TextInput, View, Text, StyleSheet, ViewStyle, TextStyle, Platform } from 'react-native';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
 
 interface InputProps {
@@ -57,11 +57,12 @@ const Input: React.FC<InputProps> = ({
         onBlur={() => setIsFocused(false)}
         multiline={multiline}
         numberOfLines={numberOfLines}
-        placeholderTextColor={colors.text.tertiary}
+        placeholderTextColor={colors.gray[500]}
         autoCorrect={false}
         autoCapitalize="none"
         keyboardType="default"
         returnKeyType="done"
+        {...(Platform.OS === 'android' && { includeFontPadding: false })}
         {...props}
       />
       {error && <Text style={styles.errorText}>{error}</Text>}
@@ -90,6 +91,12 @@ const styles = StyleSheet.create({
     color: colors.text.primary,
     fontSize: typography.fontSize.base,
     textAlign: 'left', // 한글 입력을 위해 명시적으로 설정
+    lineHeight: 22,
+    letterSpacing: 0,
+    fontFamily: Platform.select({
+      ios: 'Neo-Regular',
+      android: 'Neo-Regular',
+    }),
   },
 
   // Sizes

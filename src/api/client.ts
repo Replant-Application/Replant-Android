@@ -229,8 +229,30 @@ export class ApiClient {
         };
       }
 
-      // 401 Unauthorized - 토큰 갱신 후 재시도
+      // 401 Unauthorized - 토큰 만료 확인
       if (response.status === 401 && !url.includes('/auth/refresh')) {
+        // COMMON-002 에러 코드 확인 (토큰 만료)
+        const isTokenExpired = data?.error?.code === 'COMMON-002' || 
+                               data?.error?.message?.includes('토큰값이 만료') ||
+                               data?.message?.includes('토큰값이 만료');
+        
+        if (isTokenExpired) {
+          // 토큰 만료 시 바로 콜백 호출 (갱신 시도하지 않음)
+          if (this.onTokenExpiredCallback) {
+            this.onTokenExpiredCallback();
+          }
+          // 토큰 데이터 정리
+          const { clearAuthData } = await import('../utils/tokenStorage');
+          await clearAuthData();
+          this.setAccessToken(null);
+          
+          return {
+            success: false,
+            error: '토큰이 만료되었습니다. 다시 로그인해주세요.',
+          };
+        }
+        
+        // 일반 401 에러는 토큰 갱신 시도
         const newToken = await this.handleTokenRefresh();
         if (newToken) {
           // 새 토큰으로 재시도
@@ -390,8 +412,30 @@ export class ApiClient {
         };
       }
 
-      // 401 Unauthorized - 토큰 갱신 후 재시도
+      // 401 Unauthorized - 토큰 만료 확인
       if (response.status === 401) {
+        // COMMON-002 에러 코드 확인 (토큰 만료)
+        const isTokenExpired = data?.error?.code === 'COMMON-002' || 
+                               data?.error?.message?.includes('토큰값이 만료') ||
+                               data?.message?.includes('토큰값이 만료');
+        
+        if (isTokenExpired) {
+          // 토큰 만료 시 바로 콜백 호출 (갱신 시도하지 않음)
+          if (this.onTokenExpiredCallback) {
+            this.onTokenExpiredCallback();
+          }
+          // 토큰 데이터 정리
+          const { clearAuthData } = await import('../utils/tokenStorage');
+          await clearAuthData();
+          this.setAccessToken(null);
+          
+          return {
+            success: false,
+            error: '토큰이 만료되었습니다. 다시 로그인해주세요.',
+          };
+        }
+        
+        // 일반 401 에러는 토큰 갱신 시도
         const newToken = await this.handleTokenRefresh();
         if (newToken) {
           return this.upload<T>(endpoint, formData);

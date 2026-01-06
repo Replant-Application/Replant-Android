@@ -1,6 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { colors, spacing, typography } from '../../utils/designTokens';
+import { View, Text, StyleSheet, TouchableOpacity, Platform } from 'react-native';
+import { colors, spacing, typography, borderRadius, shadows } from '../../utils/designTokens';
 
 export interface SimpleTabItem {
   key: string;
@@ -54,36 +54,67 @@ export const SimpleTabBar: React.FC<SimpleTabBarProps> = ({
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
-    backgroundColor: colors.background.primary,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border.light,
+    backgroundColor: '#FFF8E7', // 책 페이지와 같은 크림색 배경
+    borderRadius: borderRadius.lg,
+    padding: spacing[1],
+    marginVertical: spacing[2],
+    borderWidth: 2,
+    borderColor: '#D4A574', // 책 테두리 색상
+    ...shadows.sm,
+    shadowColor: '#8B6F47',
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.15,
+    shadowRadius: 3,
+    elevation: 2,
   },
   tab: {
     flex: 1,
     paddingVertical: spacing[2],
+    paddingHorizontal: spacing[2],
     alignItems: 'center',
     justifyContent: 'center',
     position: 'relative',
+    borderRadius: borderRadius.md,
+    marginHorizontal: spacing[0.5],
   },
   tabActive: {
-    // 활성 상태는 언더라인으로 표시
+    backgroundColor: '#8B6F47', // 활성 탭 배경색 (책 등 색상)
+    ...shadows.sm,
+    shadowColor: '#8B6F47',
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+    elevation: 2,
   },
   tabText: {
     fontSize: typography.fontSize.sm,
-    fontWeight: typography.fontWeight.normal,
-    color: colors.text.tertiary,
+    fontWeight: typography.fontWeight.medium,
+    color: '#8B6F47', // 비활성 탭 텍스트 색상
+    lineHeight: 20,
+    letterSpacing: 0.3,
+    fontFamily: Platform.select({
+      ios: 'Neo-Regular',
+      android: 'Neo-Regular',
+    }),
   },
   tabTextActive: {
-    color: colors.primary[500],
-    fontWeight: typography.fontWeight.normal,
+    color: '#FFF8E7', // 활성 탭 텍스트 색상 (크림색)
+    fontWeight: typography.fontWeight.semibold,
+    lineHeight: 20,
+    letterSpacing: 0.3,
+    fontFamily: Platform.select({
+      ios: 'Neo-Regular',
+      android: 'Neo-Regular',
+    }),
   },
   underline: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: 2,
-    backgroundColor: colors.primary[500],
+    display: 'none', // 언더라인 제거 (배경색으로 구분)
   },
 });
 

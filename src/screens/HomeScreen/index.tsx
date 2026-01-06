@@ -1,9 +1,9 @@
 import React, { useMemo, useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions, ImageBackground, Animated, Image, PanResponder } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions, ImageBackground, Animated, Image, PanResponder, Platform } from 'react-native';
 import FastImage from 'react-native-fast-image';
 import { useCharacter } from '../../hooks/useCharacter';
 import { useMission } from '../../hooks/useMission';
-import { Loading, ErrorBoundary, EmptyState, AppHeader, PlusButton, SimpleTabBar } from '../../components/ui';
+import { Loading, ErrorBoundary, EmptyState, AppHeader, SimpleTabBar } from '../../components/ui';
 import { colors, spacing, typography, borderRadius, shadows } from '../../utils/designTokens';
 import { getCharacterImage } from '../../utils/characterUtils';
 import { HomeScreenProps } from './HomeScreen.types';
@@ -30,7 +30,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const [characterEmotion, setCharacterEmotion] = useState<'default' | 'happy'>('default');
 
   // 히어로 섹션 접힘 상태
-  const [isHeroCollapsed, setIsHeroCollapsed] = useState(false);
+  const [_isHeroCollapsed, setIsHeroCollapsed] = useState(false);
 
   // 캐릭터 영역 슬라이딩 상태
   const MIN_HERO_HEIGHT = SCREEN_HEIGHT * 0.2;  // 최소 높이
@@ -282,6 +282,23 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
 
       {/* 하단: 바텀 시트 스타일 */}
       <View style={styles.bottomSheet}>
+        {/* 도트 패턴 배경 */}
+        <View style={styles.dotPattern} pointerEvents="none">
+          {Array.from({ length: Math.ceil(SCREEN_HEIGHT / 20) }).map((_item, row) =>
+            Array.from({ length: Math.ceil(SCREEN_WIDTH / 20) }).map((_item2, col) => (
+              <View
+                key={`${row}-${col}`}
+                style={[
+                  styles.dot,
+                  {
+                    left: col * 20,
+                    top: row * 20,
+                  },
+                ]}
+              />
+            ))
+          )}
+        </View>
         {/* 드래그 핸들 - 터치하면 토글 */}
         <TouchableOpacity
           style={styles.dragHandleArea}
@@ -299,11 +316,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
           }}
           activeOpacity={0.7}
         >
-          <Image
-            source={require('../../assets/images/top.png')}
-            style={styles.dragHandleIcon}
-            resizeMode="contain"
-          />
         </TouchableOpacity>
         
         <ScrollView
@@ -313,23 +325,15 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
           nestedScrollEnabled={true}
           bounces={true}
         >
-          {/* 메인 제목과 추가 버튼 */}
+          {/* 메인 제목 */}
           <View style={styles.mainHeader}>
             <Text style={styles.mainTitle}>나의 목표</Text>
-            <View style={styles.plusButtonWrapper}>
-              <PlusButton
-                onPress={() => navigation.navigate('Mission' as any)}
-                size={28}
-              />
+            <View style={styles.simpleStats}>
+              <Text style={styles.simpleStatsText}>
+                진행 중 <Text style={styles.simpleStatsNumber}>{stats.inProgressMissions}</Text> · 
+                완료 <Text style={styles.simpleStatsNumber}>{stats.completedMissions}</Text>
+              </Text>
             </View>
-          </View>
-
-          {/* 간단한 통계 */}
-          <View style={styles.simpleStats}>
-            <Text style={styles.simpleStatsText}>
-              진행 중 <Text style={styles.simpleStatsNumber}>{stats.inProgressMissions}</Text> · 
-              완료 <Text style={styles.simpleStatsNumber}>{stats.completedMissions}</Text>
-            </Text>
           </View>
 
           {/* 필터 탭 */}
@@ -421,8 +425,13 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.base,
     fontWeight: typography.fontWeight.medium,
     color: colors.text.primary,
-    lineHeight: 22,
+    lineHeight: 20,
+    letterSpacing: 0,
     textAlign: 'center',
+    fontFamily: Platform.select({
+      ios: 'Neo-Regular',
+      android: 'Neo-Regular',
+    }),
   },
   characterImageContainer: {
     width: SCREEN_WIDTH * 1,
@@ -447,10 +456,33 @@ const styles = StyleSheet.create({
   },
   bottomSheet: {
     flex: 1,
-    backgroundColor: colors.background.primary,
+    backgroundColor: '#FFFFFF', // 흰색 배경
     borderTopLeftRadius: borderRadius.xl + 8,
     borderTopRightRadius: borderRadius.xl + 8,
+    borderColor: '#0E0F37', // 남색 테두리
+    borderTopWidth: 12,
+    borderLeftWidth: 12,
+    borderRightWidth: 12,
+    borderBottomWidth: 0, // 바닥 테두리 제거
     overflow: 'hidden',
+    position: 'relative',
+  },
+  dotPattern: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    width: '100%',
+    height: '100%',
+  },
+  dot: {
+    position: 'absolute',
+    width: 2,
+    height: 2,
+    borderRadius: 1,
+    backgroundColor: colors.gray[300],
+    opacity: 0.3,
   },
   dragHandleArea: {
     paddingVertical: spacing[2],
@@ -478,60 +510,98 @@ const styles = StyleSheet.create({
   mainHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: spacing[1],
-    paddingTop: spacing[2],
+    alignItems: 'center',
+    marginBottom: spacing[2],
+    paddingTop: spacing[3],
+    paddingBottom: spacing[2],
   },
   mainTitle: {
-    fontSize: typography.fontSize.xl,
-    fontWeight: typography.fontWeight.normal,
-    color: colors.text.primary,
-  },
-  plusButtonWrapper: {
-    marginTop: spacing[4],
+    fontSize: typography.fontSize['2xl'],
+    fontWeight: typography.fontWeight.medium,
+    color: '#000000', // 책 제목 같은 어두운 갈색
+    lineHeight: 32,
+    letterSpacing: 0.5,
+    fontFamily: Platform.select({
+      ios: 'Neo-Regular',
+      android: 'Neo-Regular',
+    }),
+    textShadowColor: 'rgba(139, 111, 71, 0.1)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 2,
   },
   simpleStats: {
-    marginBottom: spacing[3],
+    paddingVertical: spacing[1],
+    paddingHorizontal: spacing[2],
+    backgroundColor: '#F5F0E8', // 연한 베이지 배경
+    borderRadius: borderRadius.md,
+    borderWidth: 1,
+    borderColor: '#E8DCC8',
   },
   simpleStatsText: {
     fontSize: typography.fontSize.sm,
-    color: colors.text.tertiary,
-    fontWeight: typography.fontWeight.normal,
+    color: '#8B6F47',
+    fontWeight: typography.fontWeight.medium,
+    lineHeight: 20,
+    letterSpacing: 0.3,
+    fontFamily: Platform.select({
+      ios: 'Neo-Regular',
+      android: 'Neo-Regular',
+    }),
   },
   simpleStatsNumber: {
-    fontWeight: typography.fontWeight.normal,
-    color: colors.text.primary,
+    fontWeight: typography.fontWeight.bold,
+    color: '#5A4A3A',
+    lineHeight: 20,
+    letterSpacing: 0.3,
+    fontFamily: Platform.select({
+      ios: 'Neo-Regular',
+      android: 'Neo-Regular',
+    }),
   },
   tabBar: {
     marginBottom: spacing[3],
   },
   missionSection: {
-    marginTop: spacing[2],
+    marginTop: spacing[1],
   },
   missionListItem: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: colors.white,
+    backgroundColor: '#FFF8E7', // 책 페이지 같은 크림색
     borderRadius: borderRadius.base,
-    padding: spacing[3],
-    marginBottom: spacing[1],
-    borderWidth: 1,
-    borderColor: colors.border.light,
+    paddingVertical: 8,
+    paddingHorizontal: spacing[3],
+    paddingLeft: spacing[4], // 왼쪽 여백을 더 크게 (책 등 부분 공간)
+    marginBottom: spacing[3],
+    borderWidth: 2,
+    borderColor: '#D4A574', // 책 표지 같은 갈색 테두리
+    borderLeftWidth: 6, // 왼쪽 테두리를 더 두껍게 (책 등 부분)
+    borderLeftColor: '#8B6F47', // 어두운 갈색 (책 등)
+    height: 48,
+    shadowColor: '#8B6F47',
+    shadowOffset: {
+      width: 2,
+      height: 2,
+    },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
   },
   missionListItemLeft: {
     flexDirection: 'row',
     alignItems: 'center',
     flex: 1,
+    marginLeft: -4, // 왼쪽 테두리 공간 보정
   },
   missionCompletedIcon: {
-    width: 20,
-    height: 20,
+    width: 18,
+    height: 18,
     marginRight: spacing[2],
   },
   missionInProgressIcon: {
-    width: 20,
-    height: 20,
+    width: 18,
+    height: 18,
     backgroundColor: colors.gray[200],
     borderRadius: borderRadius.base,
     marginRight: spacing[2],
@@ -543,11 +613,21 @@ const styles = StyleSheet.create({
     fontWeight: typography.fontWeight.normal,
     color: colors.text.primary,
     flex: 1,
+    lineHeight: 16,
+    letterSpacing: 0,
+    fontFamily: Platform.select({
+      ios: 'Neo-Regular',
+      android: 'Neo-Regular',
+    }),
   },
   missionListItemArrow: {
     fontSize: typography.fontSize.lg,
     color: colors.gray[400],
     fontWeight: typography.fontWeight.normal,
+    fontFamily: Platform.select({
+      ios: 'Neo-Regular',
+      android: 'Neo-Regular',
+    }),
   },
 });
 

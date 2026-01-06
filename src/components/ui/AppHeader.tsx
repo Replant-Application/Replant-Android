@@ -68,15 +68,15 @@ const styles = StyleSheet.create({
   rightSection: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing[3],
+    gap: spacing[1],
     marginLeft: 'auto',
   },
   iconButton: {
     position: 'relative',
   },
   iconWrapper: {
-    width: 44,
-    height: 44,
+    width: 52,
+    height: 52,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -84,8 +84,8 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.base,
   },
   iconImage: {
-    width: 28,
-    height: 28,
+    width: 36,
+    height: 36,
   },
   notificationBadge: {
     position: 'absolute',
@@ -120,8 +120,8 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.lg,
   },
   profileIconImage: {
-    width: 28,
-    height: 28,
+    width: 50,
+    height: 50,
   },
 });
 

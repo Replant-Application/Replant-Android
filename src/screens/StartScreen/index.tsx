@@ -28,14 +28,14 @@ const StartScreen: React.FC<StartScreenProps> = ({ onNavigate }) => {
     <View style={styles.container}>
       <View style={styles.content}>
         <Image
-          source={require('../../assets/images/RePlant_Logo.png')}
+          source={require('../../assets/images/Replant_Loading.png')}
           style={styles.logoImage}
           resizeMode="contain"
         />
-        <Text style={styles.title}>RePlant</Text>
         <View style={styles.subtitleContainer}>
-          <Text style={styles.subtitle}>다시 살아갈 당신에게 희망을</Text>
-          <Text style={styles.clover}>🍀</Text>
+          <Text style={styles.subtitle}>
+            다시 살아갈 당신에게 희망을<Text style={styles.clover}>🍀</Text>
+          </Text>
         </View>
       </View>
 
@@ -102,9 +102,9 @@ const styles = StyleSheet.create({
     paddingTop: spacing[24] + spacing[12],
   },
   logoImage: {
-    width: 160,
-    height: 160,
-    marginBottom: spacing[1],
+    width: 310,
+    height: 310,
+    marginBottom: -50,
   },
   title: {
     fontSize: 66,
@@ -113,27 +113,29 @@ const styles = StyleSheet.create({
     marginBottom: spacing[2],
     letterSpacing: 2,
     fontFamily: Platform.select({
-      ios: 'Maplestory Bold',
-      android: 'MaplestoryBold',
+      ios: 'Neo-Regular',
+      android: 'Neo-Regular',
     }),
   },
   subtitleContainer: {
-    flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing[1],
+    justifyContent: 'center',
+    marginTop: -30,
   },
   subtitle: {
-    fontSize: 15,
-    fontWeight: '300',
+    fontSize: 16,
+    fontWeight: '400',
     color: '#666666',
-    letterSpacing: 0.2,
+    letterSpacing: 0.5,
+    lineHeight: 22,
     fontFamily: Platform.select({
-      ios: 'Maplestory Light',
-      android: 'MaplestoryLight',
+      ios: 'Neo-Regular',
+      android: 'Neo-Regular',
     }),
   },
   clover: {
-    fontSize: 15,
+    fontSize: 18,
+    marginLeft: 8,
   },
   buttonContainer: {
     width: '100%',
@@ -146,11 +148,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    width: '90%',
-    height: 45,
+    width: '85%',
+    height: 44,
     backgroundColor: '#FEE500',
-    borderRadius: 28,
-    gap: spacing[5],
+    borderRadius: 8,
+    gap: spacing[2],
+    paddingHorizontal: spacing[3],
   },
   kakaoLogo: {
     width: 24,
@@ -160,28 +163,38 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '400',
     color: '#000000',
-    letterSpacing: 0.3,
+    letterSpacing: 0.1,
+    lineHeight: 22,
+    fontFamily: Platform.select({
+      ios: 'Neo-Regular',
+      android: 'Neo-Regular',
+    }),
   },
   googleButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    width: '90%',
-    height: 45,
+    width: '85%',
+    height: 44,
     backgroundColor: '#000000',
-    borderWidth: 0,
-    borderRadius: 28,
-    gap: spacing[5],
+    borderRadius: 8,
+    gap: spacing[2],
+    paddingHorizontal: spacing[3],
   },
   googleLogo: {
-    width: 19,
-    height: 19,
+    width: 17,
+    height: 17,
   },
   googleButtonText: {
     fontSize: 15,
     fontWeight: '400',
     color: '#ffffff',
-    letterSpacing: 0.3,
+    letterSpacing: 0.1,
+    lineHeight: 22,
+    fontFamily: Platform.select({
+      ios: 'Neo-Regular',
+      android: 'Neo-Regular',
+    }),
   },
   textButtonContainer: {
     flexDirection: 'row',
@@ -195,9 +208,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing[4],
   },
   textButtonText: {
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: '400',
     color: '#666666',
+    lineHeight: 22,
+    fontFamily: Platform.select({
+      ios: 'Neo-Regular',
+      android: 'Neo-Regular',
+    }),
   },
   dividerText: {
     fontSize: 14,

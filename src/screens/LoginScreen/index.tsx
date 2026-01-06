@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, KeyboardAvoidingView, Platform, Image, TextInput, Modal } from 'react-native';
+import React, { useState, useRef } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, KeyboardAvoidingView, Platform, Image, TextInput, Modal, Animated } from 'react-native';
+import FastImage from 'react-native-fast-image';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
 import { SCREEN_NAMES } from '../../utils/constants';
 import { login as loginApi } from '../../api/authApi';
@@ -26,6 +27,8 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onNavigate }) => {
   const [showAlert, setShowAlert] = useState(false);
   const [alertTitle, setAlertTitle] = useState('');
   const [alertMessage, setAlertMessage] = useState('');
+  const modalScaleAnim = useRef(new Animated.Value(0)).current;
+  const modalFadeAnim = useRef(new Animated.Value(0)).current;
 
   const showAlertModal = (title: string, message: string) => {
     setAlertTitle(title);
@@ -74,6 +77,20 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onNavigate }) => {
         // 성공 모달 표시 (로그인 처리는 모달이 닫힐 때)
         setUserName(name || email);
         setShowSuccessModal(true);
+        // 모달 애니메이션
+        Animated.parallel([
+          Animated.spring(modalScaleAnim, {
+            toValue: 1,
+            useNativeDriver: true,
+            tension: 50,
+            friction: 7,
+          }),
+          Animated.timing(modalFadeAnim, {
+            toValue: 1,
+            duration: 300,
+            useNativeDriver: true,
+          }),
+        ]).start();
       } else {
         // 에러 메시지를 문자열로 변환
         let errorMessage = '로그인에 실패했습니다.';
@@ -205,33 +222,32 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onNavigate }) => {
         <View style={styles.topSection}>
           <View style={styles.logoContainer}>
             <Image
-              source={require('../../assets/images/RePlant_Logo.png')}
+              source={require('../../assets/images/Replant_Loading.png')}
               style={styles.logo}
               resizeMode="contain"
             />
           </View>
-
-          <Text style={styles.title}>로그인</Text>
         </View>
 
         <View style={styles.bottomSection}>
           <View style={styles.inputContainer}>
             <TextInput
               placeholder="이메일을 입력하세요"
-              placeholderTextColor={colors.text.tertiary}
+              placeholderTextColor={colors.gray[500]}
               value={email}
               onChangeText={setEmail}
               keyboardType="email-address"
               autoCapitalize="none"
               autoCorrect={false}
               style={styles.input}
+              {...(Platform.OS === 'android' && { includeFontPadding: false })}
             />
           </View>
 
           <View style={styles.inputContainer}>
             <TextInput
               placeholder="비밀번호를 입력하세요"
-              placeholderTextColor={colors.text.tertiary}
+              placeholderTextColor={colors.gray[500]}
               value={password}
               onChangeText={setPassword}
               secureTextEntry
@@ -239,6 +255,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onNavigate }) => {
               autoCorrect={false}
               onSubmitEditing={handleLogin}
               style={styles.input}
+              {...(Platform.OS === 'android' && { includeFontPadding: false })}
             />
           </View>
 
@@ -321,29 +338,57 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onNavigate }) => {
           onNavigate((SCREEN_NAMES.HOME || 'Home') as string);
         }}
       >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <Image
-              source={require('../../assets/images/check.png')}
-              style={styles.modalIcon}
-              resizeMode="contain"
-            />
-            <Text style={styles.modalTitle}>로그인 성공</Text>
-            <Text style={styles.modalMessage}>{userName}님, 환영합니다!</Text>
+        <Animated.View style={[styles.modalOverlay, { opacity: modalFadeAnim }]}>
+          <Animated.View
+            style={[
+              styles.modalContent,
+              {
+                transform: [{ scale: modalScaleAnim }],
+              },
+            ]}
+          >
+            <View style={styles.modalCharacterContainer}>
+              <FastImage
+                source={require('../../assets/images/smile_replant.gif')}
+                style={styles.modalCharacter}
+                resizeMode={FastImage.resizeMode.contain}
+              />
+            </View>
+            <View style={styles.modalTextContainer}>
+              <Text style={styles.modalMessage}>
+                환영합니다! <Text style={styles.modalUserName}>{userName}</Text>님,{'\n'}
+                함께 성장해요 🌱
+              </Text>
+            </View>
             <TouchableOpacity
               style={styles.modalButton}
               onPress={async () => {
-                setShowSuccessModal(false);
+                Animated.parallel([
+                  Animated.timing(modalScaleAnim, {
+                    toValue: 0,
+                    duration: 200,
+                    useNativeDriver: true,
+                  }),
+                  Animated.timing(modalFadeAnim, {
+                    toValue: 0,
+                    duration: 200,
+                    useNativeDriver: true,
+                  }),
+                ]).start(() => {
+                  setShowSuccessModal(false);
+                  modalScaleAnim.setValue(0);
+                  modalFadeAnim.setValue(0);
+                });
                 // 모달이 닫힌 후 로그인 처리 및 화면 전환
                 await login(userName);
                 onNavigate((SCREEN_NAMES.HOME || 'Home') as string);
               }}
               activeOpacity={0.8}
             >
-              <Text style={styles.modalButtonText}>확인</Text>
+              <Text style={styles.modalButtonText}>시작하기</Text>
             </TouchableOpacity>
-          </View>
-        </View>
+          </Animated.View>
+        </Animated.View>
       </Modal>
 
       <AlertModal
@@ -372,19 +417,18 @@ const styles = StyleSheet.create({
   },
   topSection: {
     alignItems: 'center',
-    marginBottom: spacing[8],
+    marginBottom: spacing[2],
   },
   bottomSection: {
     width: '100%',
   },
   logoContainer: {
     alignItems: 'center',
-    marginBottom: spacing[4],
+    marginBottom: spacing[1],
   },
   logo: {
-    width: 140,
-    height: 140,
-    marginBottom: spacing[1],
+    width: 280,
+    height: 280,
   },
   title: {
     fontSize: typography.fontSize['2xl'],
@@ -405,6 +449,12 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.sm,
     height: 48,
     color: colors.text.primary,
+    lineHeight: 22,
+    letterSpacing: 1,
+    fontFamily: Platform.select({
+      ios: 'Neo-Regular',
+      android: 'Neo-Regular',
+    }),
   },
   optionsRow: {
     flexDirection: 'row',
@@ -437,6 +487,11 @@ const styles = StyleSheet.create({
   checkboxLabel: {
     fontSize: typography.fontSize.sm,
     color: colors.text.primary,
+    lineHeight: 22,
+    fontFamily: Platform.select({
+      ios: 'Neo-Regular',
+      android: 'Neo-Regular',
+    }),
   },
   findPasswordText: {
     fontSize: typography.fontSize.sm,
@@ -459,6 +514,11 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.sm,
     fontWeight: typography.fontWeight.medium,
     color: colors.text.inverse,
+    lineHeight: 22,
+    fontFamily: Platform.select({
+      ios: 'Neo-Regular',
+      android: 'Neo-Regular',
+    }),
   },
   signUpButton: {
     alignItems: 'center',
@@ -470,6 +530,11 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.sm,
     color: colors.text.secondary,
     textDecorationLine: 'underline',
+    lineHeight: 22,
+    fontFamily: Platform.select({
+      ios: 'Neo-Regular',
+      android: 'Neo-Regular',
+    }),
   },
   socialSection: {
     alignItems: 'center',
@@ -490,6 +555,11 @@ const styles = StyleSheet.create({
     fontWeight: typography.fontWeight.normal,
     color: colors.text.primary,
     marginHorizontal: spacing[3],
+    lineHeight: 22,
+    fontFamily: Platform.select({
+      ios: 'Neo-Regular',
+      android: 'Neo-Regular',
+    }),
   },
   socialIcons: {
     flexDirection: 'row',
@@ -518,45 +588,50 @@ const styles = StyleSheet.create({
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
     justifyContent: 'center',
     alignItems: 'center',
   },
   modalContent: {
     backgroundColor: colors.background.primary,
     borderRadius: borderRadius.xl,
-    padding: spacing[6],
+    padding: spacing[5],
     width: '80%',
+    maxWidth: 300,
     alignItems: 'center',
-    shadowColor: colors.black,
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
   },
-  modalIcon: {
-    width: 48,
-    height: 48,
-    marginBottom: spacing[6],
+  modalCharacterContainer: {
+    width: 70,
+    height: 70,
+    marginBottom: spacing[3],
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  modalTitle: {
-    fontSize: typography.fontSize.xl,
-    fontWeight: typography.fontWeight.bold,
-    color: colors.text.primary,
-    marginBottom: spacing[2],
+  modalCharacter: {
+    width: '100%',
+    height: '100%',
+  },
+  modalTextContainer: {
+    alignItems: 'center',
+    marginBottom: spacing[5],
+  },
+  modalUserName: {
+    fontWeight: typography.fontWeight.medium,
+    color: colors.primary[600],
   },
   modalMessage: {
-    fontSize: typography.fontSize.base,
-    color: colors.text.secondary,
-    marginBottom: spacing[6],
+    fontSize: typography.fontSize.lg,
+    color: colors.text.primary,
     textAlign: 'center',
+    lineHeight: 22,
+    fontFamily: Platform.select({
+      ios: 'Neo-Regular',
+      android: 'Neo-Regular',
+    }),
   },
   modalButton: {
     width: '100%',
-    height: 43,
+    height: 44,
     backgroundColor: colors.primary[500],
     borderRadius: borderRadius.base,
     justifyContent: 'center',
@@ -564,8 +639,13 @@ const styles = StyleSheet.create({
   },
   modalButtonText: {
     fontSize: typography.fontSize.base,
+    lineHeight: 22,
     fontWeight: typography.fontWeight.medium,
     color: colors.text.inverse,
+    fontFamily: Platform.select({
+      ios: 'Neo-Regular',
+      android: 'Neo-Regular',
+    }),
   },
 });
 

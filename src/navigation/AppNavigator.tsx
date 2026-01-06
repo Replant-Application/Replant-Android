@@ -76,8 +76,15 @@ const AppNavigator = () => {
     setCurrentScreen(SCREEN_NAMES.START);
   }, [userLogout]);
 
-  // 화면 전환 애니메이션 (모든 hooks는 조건부 렌더링 이전에 위치해야 함)
+  // 화면 전환 애니메이션 (메인 탭 화면 간 전환은 제외)
   useEffect(() => {
+    // 메인 탭 화면 간 전환은 애니메이션 없이 즉시 전환
+    if (isMainTabScreen(currentScreen)) {
+      fadeAnim.setValue(1);
+      slideAnim.setValue(0);
+      return;
+    }
+    
     // 초기값 설정 (새 화면이 약간 아래에서 시작)
     fadeAnim.setValue(0.5);
     slideAnim.setValue(10);
@@ -97,7 +104,7 @@ const AppNavigator = () => {
         useNativeDriver: true,
       }),
     ]).start();
-  }, [currentScreen, fadeAnim, slideAnim]);
+  }, [currentScreen, fadeAnim, slideAnim, isMainTabScreen]);
 
   // 뒤로가기 버튼 처리
   useEffect(() => {
@@ -446,7 +453,7 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     paddingBottom: Platform.OS === 'android' ? spacing[12] : spacing[5], // Android 네비게이션 바 대응 (48px)
-    paddingTop: spacing[3],
+    paddingTop: spacing[2],
     paddingHorizontal: spacing[2],
     shadowColor: '#000',
     shadowOffset: {
@@ -461,16 +468,16 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: spacing[2],
+    paddingVertical: spacing[1],
     borderRadius: 12,
   },
   activeTab: {
     backgroundColor: colors.green[50],
   },
   tabIconImage: {
-    width: 24,
-    height: 24,
-    marginBottom: spacing[1],
+    width: 40,
+    height: 40,
+    marginBottom: 2,
     opacity: 0.6,
   },
   tabIconImageActive: {
@@ -481,10 +488,22 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.xs,
     color: colors.text.secondary,
     fontWeight: typography.fontWeight.medium,
+    fontFamily: Platform.select({
+      ios: 'Neo-Regular',
+      android: 'Neo-Regular',
+    }),
+    lineHeight: typography.fontSize.xs * 1.2,
+    ...(Platform.OS === 'android' && { includeFontPadding: false }),
   },
   tabLabelActive: {
     color: colors.green[600],
     fontWeight: typography.fontWeight.bold,
+    fontFamily: Platform.select({
+      ios: 'Neo-Regular',
+      android: 'Neo-Regular',
+    }),
+    lineHeight: typography.fontSize.xs * 1.2,
+    ...(Platform.OS === 'android' && { includeFontPadding: false }),
   },
 });
 
