@@ -44,16 +44,23 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
   const [badgesLoading, setBadgesLoading] = useState(false);
 
 
-  // 필터링된 미션 목록 (진행중/완료만)
+  // 필터링된 미션 목록 (진행중/인증대기/완료)
   const filteredMissions = useMemo(() => {
     switch (selectedFilter) {
       case 'completed':
-        // 완료된 미션
-        return missions.filter(mission => mission.completed);
+        // 완료된 미션 (status === 'COMPLETED')
+        return missions.filter(mission => mission.status === 'COMPLETED' || mission.completed);
+      case 'pendingVerification':
+        // 인증 대기 미션 (status === 'PENDING')
+        return missions.filter(mission => mission.status === 'PENDING');
       case 'inProgress':
       default:
-        // 아직 완료하지 않은 미션
-        return missions.filter(mission => !mission.completed);
+        // 진행중 미션 (status가 없거나 'ASSIGNED')
+        return missions.filter(mission =>
+          !mission.completed &&
+          mission.status !== 'COMPLETED' &&
+          mission.status !== 'PENDING'
+        );
     }
   }, [missions, selectedFilter]);
 
@@ -303,18 +310,18 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
     });
   };
 
-  // 커뮤니티에 공유
-  const handleShareToCommunity = (missionId: string) => {
-    const mission = missions.find(m => m.mission_id === missionId);
-    if (!mission) return;
-
-    navigation.navigate('CommunityPostCreate', {
-      missionId: mission.mission_id,
-      missionTitle: mission.title,
-      missionEmoji: mission.emoji,
-      photoUrl: mission.photo_url || undefined,
-    });
-  };
+  // 커뮤니티에 공유 (나중에 되살릴 수 있도록 주석 처리)
+  // const handleShareToCommunity = (missionId: string) => {
+  //   const mission = missions.find(m => m.mission_id === missionId);
+  //   if (!mission) return;
+  //
+  //   navigation.navigate('CommunityPostCreate', {
+  //     missionId: mission.mission_id,
+  //     missionTitle: mission.title,
+  //     missionEmoji: mission.emoji,
+  //     photoUrl: mission.photo_url || undefined,
+  //   });
+  // };
 
   // 미션 사진 삭제
   const handleDeletePhoto = async (missionId: string) => {
@@ -534,7 +541,18 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
                   <Text style={styles.noBadgeText}>유효한 뱃지가 없습니다</Text>
                 </View>
               ) : (
-                (showAllBadges ? allBadges : validBadges).map((badge) => {
+                // 전체 보기일 때 유효한 뱃지를 먼저 정렬
+                (showAllBadges
+                  ? [...allBadges].sort((a, b) => {
+                      const aExpired = a.isExpired || new Date(a.expiresAt) < new Date();
+                      const bExpired = b.isExpired || new Date(b.expiresAt) < new Date();
+                      // 유효한 뱃지를 먼저, 그 다음 만료된 뱃지
+                      if (aExpired !== bExpired) return aExpired ? 1 : -1;
+                      // 같은 상태면 남은 일수 기준 정렬 (적은 것 먼저)
+                      return (a.remainingDays || 0) - (b.remainingDays || 0);
+                    })
+                  : validBadges
+                ).map((badge) => {
                   const missionTitle = badge.mission?.title || badge.customMission?.title || '미션';
                   const isExpired = badge.isExpired || new Date(badge.expiresAt) < new Date();
 
@@ -571,10 +589,11 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
           )}
         </View>
 
-        {/* 진행중/완료 탭 */}
+        {/* 진행중/인증대기/완료 탭 */}
         <SimpleTabBar
           tabs={[
             { key: 'inProgress', label: '진행중' },
+            { key: 'pendingVerification', label: '인증 대기' },
             { key: 'completed', label: '완료' },
           ]}
           activeTab={selectedFilter}
@@ -586,11 +605,19 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
         {displayedMissions.length === 0 ? (
           <EmptyState
             iconImage={require('../../assets/images/clover.png')}
-            title={selectedFilter === 'inProgress' ? '완료할 미션이 없어' : '완료한 미션이 없어요'}
+            title={
+              selectedFilter === 'inProgress'
+                ? '완료할 미션이 없어'
+                : selectedFilter === 'pendingVerification'
+                  ? '인증 대기 중인 미션이 없어요'
+                  : '완료한 미션이 없어요'
+            }
             description={
               selectedFilter === 'inProgress'
                 ? '새로운 미션에 도전해보세요!'
-                : '미션을 완료하면 여기에 표시됩니다.'
+                : selectedFilter === 'pendingVerification'
+                  ? '미션을 인증하면 여기에 표시됩니다.'
+                  : '미션을 완료하면 여기에 표시됩니다.'
             }
           />
         ) : (
@@ -605,7 +632,7 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
                     if (!mission.completed) {
                       handleVerify(mission, verificationType as 'COMMUNITY' | 'GPS' | 'TIME');
                     } else {
-                      navigation.navigate('MissionDetail', { missionId: mission.mission_id || mission.id || '' });
+                      navigation.navigate('MissionDetail', { missionId: mission.mission_id || String(mission.id) || '' });
                     }
                   }}
                 >
@@ -615,9 +642,10 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
                     onUncomplete={handleMissionUncomplete}
                     onUploadPhoto={handlePhotoUpload}
                     onDeletePhoto={handleDeletePhoto}
-                    onShareToCommunity={handleShareToCommunity}
+                    // onShareToCommunity={handleShareToCommunity} // 공유 기능 주석 처리
+                    onWriteReview={(missionId) => navigation.navigate('MissionDetail', { missionId })}
                     onVerify={handleVerify}
-                    onViewDetails={() => navigation.navigate('MissionDetail', { missionId: mission.mission_id || mission.id || '' })}
+                    onViewDetails={() => navigation.navigate('MissionDetail', { missionId: mission.mission_id || String(mission.id) || '' })}
                   />
                 </TouchableOpacity>
               );

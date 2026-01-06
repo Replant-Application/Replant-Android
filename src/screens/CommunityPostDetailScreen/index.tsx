@@ -176,11 +176,11 @@ const CommunityPostDetailScreen: React.FC<CommunityPostDetailScreenProps> = ({
             <View style={styles.authorInfo}>
               <View style={styles.authorAvatar}>
                 <Text style={styles.authorAvatarText}>
-                  {post.author_nickname.charAt(0).toUpperCase()}
+                  {post.author_nickname?.charAt(0)?.toUpperCase() || '?'}
                 </Text>
               </View>
               <View>
-                <Text style={styles.authorName}>{post.author_nickname}</Text>
+                <Text style={styles.authorName}>{post.author_nickname || '알 수 없음'}</Text>
                 {post.category && (
                   <View style={styles.categoryBadge}>
                     <Text style={styles.categoryText}>{post.category}</Text>
@@ -189,13 +189,13 @@ const CommunityPostDetailScreen: React.FC<CommunityPostDetailScreenProps> = ({
               </View>
             </View>
             <Text style={styles.date}>
-              {new Date(post.created_at).toLocaleDateString('ko-KR')}
+              {post.created_at ? new Date(post.created_at).toLocaleDateString('ko-KR') : ''}
             </Text>
           </View>
 
           <View style={styles.missionInfo}>
-            <Text style={styles.missionEmoji}>{post.mission_emoji}</Text>
-            <Text style={styles.missionTitle}>{post.mission_title}</Text>
+            <Text style={styles.missionEmoji}>{post.mission_emoji || '🎯'}</Text>
+            <Text style={styles.missionTitle}>{post.mission_title || '미션'}</Text>
             {/* 인증 상태 뱃지 */}
             {post.verified === true ? (
               <View style={styles.verifiedBadge}>

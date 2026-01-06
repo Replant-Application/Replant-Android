@@ -69,19 +69,19 @@ export const API_CONFIG = {
 
     // 커스텀 미션 (CustomMission)
     customMission: {
-      list: '/custom-missions',
-      detail: '/custom-missions/:customMissionId',
-      create: '/custom-missions',
-      update: '/custom-missions/:customMissionId',
-      delete: '/custom-missions/:customMissionId',
+      list: '/missions/custom',
+      detail: '/missions/custom/:customMissionId',
+      create: '/missions/custom',
+      update: '/missions/custom/:customMissionId',
+      delete: '/missions/custom/:customMissionId',
     },
 
     // 내 미션 (UserMission)
     userMission: {
-      list: '/user-missions',
-      detail: '/user-missions/:userMissionId',
-      add: '/user-missions',
-      verify: '/user-missions/:userMissionId/verify',
+      list: '/missions/my',
+      detail: '/missions/my/:userMissionId',
+      add: '/missions/my',
+      verify: '/missions/my/:userMissionId/verify',
     },
 
     // 인증 게시판 (Verification)
@@ -96,17 +96,17 @@ export const API_CONFIG = {
       time: '/verifications/time',
     },
 
-    // 자유 게시판 (Post)
+    // 자유 게시판 (Post) - /api/community/posts
     post: {
-      list: '/posts',
-      detail: '/posts/:postId',
-      create: '/posts',
-      update: '/posts/:postId',
-      delete: '/posts/:postId',
-      comments: '/posts/:postId/comments',
-      createComment: '/posts/:postId/comments',
-      updateComment: '/posts/:postId/comments/:commentId',
-      deleteComment: '/posts/:postId/comments/:commentId',
+      list: '/community/posts',
+      detail: '/community/posts/:postId',
+      create: '/community/posts',
+      update: '/community/posts/:postId',
+      delete: '/community/posts/:postId',
+      comments: '/community/posts/:postId/comments',
+      createComment: '/community/posts/:postId/comments',
+      updateComment: '/community/posts/:postId/comments/:commentId',
+      deleteComment: '/community/posts/:postId/comments/:commentId',
     },
 
     // 뱃지 (Badge)

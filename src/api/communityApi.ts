@@ -74,7 +74,7 @@ export interface CommentListResponse {
 
 /**
  * 게시글 목록 조회
- * GET /api/posts
+ * GET /api/community/posts
  */
 export const getPosts = async (params?: {
   missionId?: number;
@@ -88,7 +88,7 @@ export const getPosts = async (params?: {
 
 /**
  * 게시글 상세 조회
- * GET /api/posts/{postId}
+ * GET /api/community/posts/{postId}
  */
 export const getPost = async (postId: number): Promise<ServiceResult<Post>> => {
   const endpoint = API_CONFIG.endpoints.post.detail.replace(':postId', String(postId));
@@ -97,7 +97,7 @@ export const getPost = async (postId: number): Promise<ServiceResult<Post>> => {
 
 /**
  * 게시글 작성
- * POST /api/posts
+ * POST /api/community/posts
  * 인증 필요
  */
 export const createPost = async (data: CreatePostRequest): Promise<ServiceResult<Post>> => {
@@ -106,7 +106,7 @@ export const createPost = async (data: CreatePostRequest): Promise<ServiceResult
 
 /**
  * 게시글 수정
- * PUT /api/posts/{postId}
+ * PUT /api/community/posts/{postId}
  * 작성자만 가능
  */
 export const updatePost = async (
@@ -119,7 +119,7 @@ export const updatePost = async (
 
 /**
  * 게시글 삭제
- * DELETE /api/posts/{postId}
+ * DELETE /api/community/posts/{postId}
  * 작성자만 가능
  */
 export const deletePost = async (postId: number): Promise<ServiceResult<{ message: string }>> => {
@@ -133,7 +133,7 @@ export const deletePost = async (postId: number): Promise<ServiceResult<{ messag
 
 /**
  * 댓글 목록 조회
- * GET /api/posts/{postId}/comments
+ * GET /api/community/posts/{postId}/comments
  */
 export const getComments = async (
   postId: number,
@@ -145,7 +145,7 @@ export const getComments = async (
 
 /**
  * 댓글 작성
- * POST /api/posts/{postId}/comments
+ * POST /api/community/posts/{postId}/comments
  * 인증 필요
  */
 export const createComment = async (
@@ -158,7 +158,7 @@ export const createComment = async (
 
 /**
  * 댓글 수정
- * PUT /api/posts/{postId}/comments/{commentId}
+ * PUT /api/community/posts/{postId}/comments/{commentId}
  * 작성자만 가능
  */
 export const updateComment = async (
@@ -174,7 +174,7 @@ export const updateComment = async (
 
 /**
  * 댓글 삭제
- * DELETE /api/posts/{postId}/comments/{commentId}
+ * DELETE /api/community/posts/{postId}/comments/{commentId}
  * 작성자만 가능
  */
 export const deleteComment = async (

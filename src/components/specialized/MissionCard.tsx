@@ -12,6 +12,7 @@ interface MissionCardProps {
   onUploadPhoto?: (missionId: string) => void;
   onDeletePhoto?: (missionId: string) => void;
   onShareToCommunity?: (missionId: string) => void;
+  onWriteReview?: (missionId: string) => void;
   onViewDetails?: (missionId: string) => void;
   onVerify?: (mission: Mission, type: 'COMMUNITY' | 'GPS' | 'TIME') => void;
   loading?: boolean;
@@ -27,6 +28,7 @@ const MissionCard: React.FC<MissionCardProps> = ({
   onUploadPhoto,
   onDeletePhoto,
   onShareToCommunity,
+  onWriteReview,
   onViewDetails,
   onVerify,
   loading = false,
@@ -183,20 +185,20 @@ const MissionCard: React.FC<MissionCardProps> = ({
           </TouchableOpacity>
         ) : (
           <View style={styles.actionButtonsContainer}>
-            {/* 공유 버튼: 완료 후 COMMUNITY 인증일 때 */}
-            {mission.completed && verificationType === 'COMMUNITY' && onShareToCommunity && (
+            {/* 후기 쓰기 버튼: 완료 후 표시 */}
+            {mission.completed && onWriteReview && (
               <TouchableOpacity
-                style={[styles.shareButton]}
-                onPress={() => onShareToCommunity(mission.mission_id)}
+                style={[styles.reviewButton]}
+                onPress={() => onWriteReview(mission.mission_id)}
                 disabled={disabled}
                 activeOpacity={disabled ? 1 : 0.7}
               >
                 <Image
-                  source={require('../../assets/images/chat.png')}
-                  style={styles.shareIcon}
+                  source={require('../../assets/images/edit.png')}
+                  style={styles.reviewIcon}
                   resizeMode="contain"
                 />
-                <Text style={styles.shareButtonText}>공유</Text>
+                <Text style={styles.reviewButtonText}>후기 쓰기</Text>
               </TouchableOpacity>
             )}
             {/* 인증 버튼: 미완료 상태일 때 */}
@@ -502,6 +504,29 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.sm,
     fontWeight: typography.fontWeight.medium,
     color: colors.primary[500],
+  },
+  reviewButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: spacing[3],
+    paddingVertical: spacing[1.5],
+    borderRadius: borderRadius.base,
+    backgroundColor: colors.green[100],
+    borderWidth: 1,
+    borderColor: colors.green[300],
+    minHeight: 32,
+    justifyContent: 'center',
+    gap: spacing[1],
+  },
+  reviewIcon: {
+    width: 16,
+    height: 16,
+    tintColor: colors.green[600],
+  },
+  reviewButtonText: {
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.medium,
+    color: colors.green[600],
   },
   disabledButton: {
     backgroundColor: colors.gray[200],

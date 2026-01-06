@@ -115,6 +115,7 @@ const transformUserMission = (userMission: UserMission): Mission => {
     experience: mission.expReward || 10,
     category_id: 'growth',
     type: missionType as MissionType,
+    status: userMission.status, // 백엔드 상태 그대로 저장 (ASSIGNED, PENDING, COMPLETED, EXPIRED)
     difficulty: 'medium' as const,
     completed: userMission.status === 'COMPLETED',
     completed_at: userMission.status === 'COMPLETED' ? userMission.verification?.verifiedAt : undefined,
@@ -179,6 +180,7 @@ export const useMission = (
           const userMission = userMissionMap.get(m.mission_id);
           if (userMission) {
             m.user_mission_id = userMission.id;
+            m.status = userMission.status; // 백엔드 상태 저장 (ASSIGNED, PENDING, COMPLETED, EXPIRED)
             m.completed = userMission.status === 'COMPLETED';
             m.verified = userMission.status === 'COMPLETED';
             m.due_date = userMission.dueDate;

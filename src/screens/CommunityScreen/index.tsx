@@ -116,8 +116,8 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation }) => {
   }, [loadPosts, loadVerificationPosts]);
 
   const filterOptions = [
-    { value: 'all', label: '전체' },
-    { value: 'popular', label: '인기' },
+    { value: 'all', label: '최신순' },
+    { value: 'popular', label: '인기순' },
   ];
 
   const selectedFilterLabel = filterOptions.find(opt => opt.value === filter)?.label || '전체';
@@ -170,9 +170,9 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation }) => {
       const lowerQuery = debouncedSearchQuery.toLowerCase();
       allPosts = allPosts.filter(
         post =>
-          post.title.toLowerCase().includes(lowerQuery) ||
-          post.content.toLowerCase().includes(lowerQuery) ||
-          (post.mission_title?.toLowerCase().includes(lowerQuery) ?? false)
+          (post.title?.toLowerCase() || '').includes(lowerQuery) ||
+          (post.content?.toLowerCase() || '').includes(lowerQuery) ||
+          (post.mission_title?.toLowerCase()?.includes(lowerQuery) ?? false)
       );
     }
 
@@ -180,15 +180,17 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation }) => {
     if (filter === 'popular') {
       // 인기 게시글: 좋아요 + 댓글 수가 높은 순으로 정렬
       allPosts = [...allPosts].sort((a, b) => {
-        const aScore = a.like_count + a.comment_count;
-        const bScore = b.like_count + b.comment_count;
+        const aScore = (a.like_count || 0) + (a.comment_count || 0);
+        const bScore = (b.like_count || 0) + (b.comment_count || 0);
         return bScore - aScore;
       });
     } else {
       // 전체: 최신순으로 정렬
-      allPosts = [...allPosts].sort(
-        (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-      );
+      allPosts = [...allPosts].sort((a, b) => {
+        const dateA = a.created_at ? new Date(a.created_at).getTime() : 0;
+        const dateB = b.created_at ? new Date(b.created_at).getTime() : 0;
+        return dateB - dateA;
+      });
     }
 
     return allPosts;

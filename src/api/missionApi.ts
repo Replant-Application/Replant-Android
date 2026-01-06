@@ -415,7 +415,7 @@ export interface VerifyMissionResponse {
 
 /**
  * 내 미션 목록 조회
- * GET /api/user-missions
+ * GET /api/missions/my
  * 인증 필요
  */
 export const getUserMissions = async (params?: {
@@ -429,7 +429,7 @@ export const getUserMissions = async (params?: {
 
 /**
  * 내 미션 상세 조회
- * GET /api/user-missions/{userMissionId}
+ * GET /api/missions/my/{userMissionId}
  * 인증 필요
  */
 export const getUserMission = async (
@@ -441,18 +441,18 @@ export const getUserMission = async (
 
 /**
  * 커스텀 미션 추가 (내 미션에)
- * POST /api/user-missions/custom
+ * POST /api/missions/my/custom
  * 인증 필요
  */
 export const addCustomMissionToMyMissions = async (data: {
   customMissionId: number;
 }): Promise<ServiceResult<UserMission>> => {
-  return apiClient.post<UserMission>('/user-missions/custom', data);
+  return apiClient.post<UserMission>('/missions/my/custom', data);
 };
 
 /**
  * 시스템 미션 추가 (내 미션에 할당)
- * POST /api/user-missions
+ * POST /api/missions/my
  * 인증 필요
  */
 export const addSystemMissionToMyMissions = async (data: {
@@ -463,7 +463,7 @@ export const addSystemMissionToMyMissions = async (data: {
 
 /**
  * 미션 인증 (GPS/TIME)
- * POST /api/user-missions/{userMissionId}/verify
+ * POST /api/missions/my/{userMissionId}/verify
  * 인증 필요
  */
 export const verifyUserMission = async (

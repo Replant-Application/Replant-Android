@@ -4,7 +4,7 @@
  */
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
-// getData는 사용하지 않음
+import { Alert } from 'react-native';
 import {
   createPost as createPostService,
   updatePost as updatePostService,
@@ -139,6 +139,15 @@ export const useCommunity = (): UseCommunityReturn => {
         return { success: false, error: '사용자 정보가 없습니다.' };
       }
 
+      // 해당 게시글 찾기
+      const targetPost = posts.find(p => p.post_id === postId);
+
+      // 내 게시글에는 좋아요를 누를 수 없음
+      if (targetPost && targetPost.author_nickname === currentNickname) {
+        Alert.alert('알림', '내 게시글에는 좋아요를 누를 수 없습니다.');
+        return { success: false, error: '내 게시글에는 좋아요를 누를 수 없습니다.' };
+      }
+
       try {
         const result = await toggleLikeService(postId, currentNickname);
 
@@ -161,10 +170,11 @@ export const useCommunity = (): UseCommunityReturn => {
         return result;
       } catch (toggleError) {
         logError('좋아요 토글 실패', toggleError as Error, { postId, currentNickname });
+        Alert.alert('오류', '좋아요 처리 중 문제가 발생했습니다.');
         return { success: false, error: (toggleError as Error).message };
       }
     },
-    [currentNickname]
+    [currentNickname, posts]
   );
 
   // 게시글 검색

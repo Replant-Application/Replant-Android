@@ -296,19 +296,19 @@ const VerificationPostDetailScreen: React.FC<VerificationPostDetailScreenProps> 
                   <Image source={{ uri: post.userProfileImg }} style={styles.authorAvatarImage} />
                 ) : (
                   <Text style={styles.authorAvatarText}>
-                    {post.userNickname.charAt(0).toUpperCase()}
+                    {post.userNickname?.charAt(0)?.toUpperCase() || '?'}
                   </Text>
                 )}
               </View>
               <View>
-                <Text style={styles.authorName}>{post.userNickname}</Text>
+                <Text style={styles.authorName}>{post.userNickname || '알 수 없음'}</Text>
                 <Text style={styles.missionTypeBadge}>
                   {post.missionType === 'SYSTEM' ? '시스템 미션' : '커스텀 미션'}
                 </Text>
               </View>
             </View>
             <Text style={styles.date}>
-              {new Date(post.createdAt).toLocaleDateString('ko-KR')}
+              {post.createdAt ? new Date(post.createdAt).toLocaleDateString('ko-KR') : ''}
             </Text>
           </View>
 

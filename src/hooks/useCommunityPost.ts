@@ -76,6 +76,12 @@ export const useCommunityPost = (postId: string): UseCommunityPostReturn => {
         return { success: false, error: '사용자 정보가 없습니다.' };
       }
 
+      // 내 게시글에는 좋아요를 누를 수 없음 (닉네임 비교)
+      if (post.author_nickname === currentNickname) {
+        Alert.alert('알림', '내 게시글에는 좋아요를 누를 수 없습니다.');
+        return { success: false, error: '내 게시글에는 좋아요를 누를 수 없습니다.' };
+      }
+
       try {
         const result = await toggleLikeService(postId, currentNickname);
 
@@ -95,36 +101,41 @@ export const useCommunityPost = (postId: string): UseCommunityPostReturn => {
           });
 
           // 좋아요 추가 시 인증 확인 (게시글 작성자의 미션 인증)
-          if (isAddingLike && post.mission_id && post.author !== currentNickname) {
-            const verificationResult = await checkLikeVerification(
-              postId,
-              newLikeCount,
-              post.mission_id,
-              post.author // 게시글 작성자의 미션 인증
-            );
+          if (isAddingLike && post.mission_id && post.author_nickname !== currentNickname) {
+            try {
+              const verificationResult = await checkLikeVerification(
+                postId,
+                newLikeCount,
+                post.mission_id,
+                post.author_nickname // 게시글 작성자 닉네임으로 변경
+              );
 
-            if (verificationResult.success && verificationResult.data?.verified && verificationResult.data.experience > 0) {
-              // XP 지급 처리: 작성자의 캐릭터에 경험치 추가
-              const authorNickname = post.author;
-              const storageKeys = getStorageKeys(authorNickname);
+              if (verificationResult.success && verificationResult.data?.verified && verificationResult.data.experience > 0) {
+                // XP 지급 처리: 작성자의 캐릭터에 경험치 추가
+                const authorNickname = post.author_nickname;
+                const storageKeys = getStorageKeys(authorNickname);
 
-              // 작성자의 캐릭터 찾기 (첫 번째 캐릭터에 경험치 추가)
-              const characters: Character[] = await getData(storageKeys.CHARACTERS) || [];
-              const character = characters[0]; // 기본 캐릭터
-              if (character && character.id) {
-                const levelUpResult = await autoLevelupCharacter(
-                  character.id,
-                  verificationResult.data.experience,
-                  authorNickname
-                );
+                // 작성자의 캐릭터 찾기 (첫 번째 캐릭터에 경험치 추가)
+                const characters: Character[] = await getData(storageKeys.CHARACTERS) || [];
+                const character = characters[0]; // 기본 캐릭터
+                if (character && character.id) {
+                  const levelUpResult = await autoLevelupCharacter(
+                    character.id,
+                    verificationResult.data.experience,
+                    authorNickname
+                  );
 
-                // 알림: 게시글 작성자에게 알림 (현재는 로컬 알림만)
-                const message = levelUpResult.levelUp
-                  ? `게시글이 인증되었습니다!\n+${verificationResult.data.experience} EXP 획득!\n🎉 레벨 ${levelUpResult.newLevel}로 레벨업!`
-                  : `게시글이 좋아요 인증되었습니다!\n+${verificationResult.data.experience} EXP가 작성자에게 지급되었습니다.`;
+                  // 알림: 게시글 작성자에게 알림 (현재는 로컬 알림만)
+                  const message = levelUpResult.levelUp
+                    ? `게시글이 인증되었습니다!\n+${verificationResult.data.experience} EXP 획득!\n🎉 레벨 ${levelUpResult.newLevel}로 레벨업!`
+                    : `게시글이 좋아요 인증되었습니다!\n+${verificationResult.data.experience} EXP가 작성자에게 지급되었습니다.`;
 
-                Alert.alert('🎉 인증 완료!', message);
+                  Alert.alert('🎉 인증 완료!', message);
+                }
               }
+            } catch (verifyError) {
+              // 인증 확인 실패해도 좋아요 자체는 성공으로 처리
+              logError('좋아요 인증 확인 실패', verifyError as Error, { postId });
             }
           }
         }
@@ -132,6 +143,7 @@ export const useCommunityPost = (postId: string): UseCommunityPostReturn => {
         return result;
       } catch (toggleError) {
         logError('좋아요 토글 실패', toggleError as Error, { postId, currentNickname });
+        Alert.alert('오류', '좋아요 처리 중 문제가 발생했습니다.');
         return { success: false, error: (toggleError as Error).message };
       }
     },

@@ -30,6 +30,9 @@ export type MissionCategory = 'growth';
 // 감정 타입
 export type Emotion = 'happy' | 'excited' | 'calm' | 'grateful' | 'sad' | 'angry' | 'anxious' | 'tired';
 
+// 미션 상태 타입
+export type MissionStatus = 'ASSIGNED' | 'PENDING' | 'COMPLETED' | 'EXPIRED';
+
 // Mission 관련 타입
 export interface Mission {
   id: number;
@@ -42,6 +45,7 @@ export interface Mission {
   experience: number;
   category_id: MissionCategory;
   type?: 'DAILY' | 'WEEKLY' | 'MONTHLY'; // 미션 타입
+  status?: MissionStatus; // 백엔드 UserMission 상태 (ASSIGNED, PENDING, COMPLETED, EXPIRED)
   is_custom?: boolean;
   created_by?: string;
   created_at?: string;
@@ -50,12 +54,9 @@ export interface Mission {
   completed: boolean;
   completed_at?: string | undefined;
   photo_url?: string | undefined;
-  // 미션 기간 타입 (DAILY, WEEKLY, MONTHLY)
-  type?: 'DAILY' | 'WEEKLY' | 'MONTHLY';
   // 인증 타입 (COMMUNITY, GPS, TIME)
   verification_type?: 'COMMUNITY' | 'GPS' | 'TIME';
   // 인증 관련 필드
-  verification_type?: 'COMMUNITY' | 'GPS' | 'TIME'; // 백엔드 인증 타입
   verification_method?: 'like' | 'gps' | 'manual';
   verified?: boolean;
   verified_at?: string;
