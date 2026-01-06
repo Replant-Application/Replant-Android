@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Alert, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, Alert, TouchableOpacity, Platform } from 'react-native';
 import { useUser } from '../../contexts/UserContext';
 import { Button, Input, Header } from '../../components/ui';
 import { colors, spacing, typography } from '../../utils/designTokens';
+import { getOptimizedLineHeight } from '../../utils/textStyles';
 import { SCREEN_NAMES } from '../../utils/constants';
 
 interface NicknameScreenProps {
@@ -116,6 +117,12 @@ const styles = StyleSheet.create({
     color: colors.text.primary,
     marginBottom: spacing[4],
     textAlign: 'center' as const,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize['2xl']),
   },
   subtitle: {
     fontSize: typography.fontSize.base,
@@ -123,6 +130,12 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: typography.lineHeight.relaxed * typography.fontSize.base,
     marginBottom: spacing[10],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
   },
   input: {
     // textAlign은 Input 컴포넌트에서 처리
@@ -142,6 +155,12 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.sm,
     color: colors.text.secondary,
     textDecorationLine: 'underline',
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
   },
 });
 
