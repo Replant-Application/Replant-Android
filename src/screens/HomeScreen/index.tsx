@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions, Image
 import FastImage from 'react-native-fast-image';
 import { useCharacter } from '../../hooks/useCharacter';
 import { useMission } from '../../hooks/useMission';
-import { Loading, ErrorBoundary, EmptyState, AppHeader } from '../../components/ui';
+import { Loading, ErrorBoundary, EmptyState, AppHeader, PlusButton } from '../../components/ui';
 import { colors, spacing, typography, borderRadius, shadows } from '../../utils/designTokens';
 import { ScreenNames } from '../../types';
 import { getCharacterImage } from '../../utils/characterUtils';
@@ -316,14 +316,10 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
           {/* 메인 제목과 추가 버튼 */}
           <View style={styles.mainHeader}>
             <Text style={styles.mainTitle}>나의 목표</Text>
-            <TouchableOpacity 
+            <PlusButton
               onPress={() => navigation.navigate('Mission' as any)}
-              style={styles.addButtonWrapper}
-            >
-              <View style={styles.largeAddButton}>
-                <Text style={styles.largeAddButtonText}>+</Text>
-              </View>
-            </TouchableOpacity>
+              size={36}
+            />
           </View>
 
           {/* 간단한 통계 */}
@@ -500,21 +496,6 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.lg,
     fontWeight: typography.fontWeight.normal,
     color: colors.text.primary,
-  },
-  addButtonWrapper: {
-  },
-  largeAddButton: {
-    width: 36,
-    height: 36,
-    borderRadius: borderRadius.base,
-    backgroundColor: colors.primary[500],
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  largeAddButtonText: {
-    fontSize: typography.fontSize.base,
-    fontWeight: typography.fontWeight.normal,
-    color: colors.white,
   },
   simpleStats: {
     marginBottom: spacing[2],
