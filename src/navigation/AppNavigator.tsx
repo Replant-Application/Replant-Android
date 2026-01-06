@@ -151,7 +151,11 @@ const AppNavigator = () => {
   if (isLoading) {
     return (
       <View style={styles.loadingContainer}>
-        <Text>로딩 중...</Text>
+        <Image
+          source={require('../assets/images/Replant_Loading.png')}
+          style={styles.loadingImage}
+          resizeMode="contain"
+        />
       </View>
     );
   }
@@ -427,6 +431,11 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: colors.background.primary,
+  },
+  loadingImage: {
+    width: 200,
+    height: 200,
   },
   screenContainer: {
     flex: 1,
