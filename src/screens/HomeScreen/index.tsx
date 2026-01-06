@@ -469,9 +469,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   dragHandleIcon: {
-    fontSize: typography.fontSize.base,
-    color: colors.gray[500],
-    fontWeight: typography.fontWeight.normal,
+    width: 24,
+    height: 24,
   },
   dragHandle: {
     width: 50,
