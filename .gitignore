@@ -1,7 +1,8 @@
 # OSX
 #
-android/**/*
-!android/main/
+android/*
+!android/app/
+!android/app/src/
 !android/app/src/main/
 !android/app/src/main/**
 
