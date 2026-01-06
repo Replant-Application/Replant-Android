@@ -431,7 +431,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: colors.background.primary,
+    backgroundColor: '#ffffff',
   },
   loadingImage: {
     width: 200,
