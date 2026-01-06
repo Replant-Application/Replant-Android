@@ -315,17 +315,19 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
         >
           {/* 메인 제목과 추가 버튼 */}
           <View style={styles.mainHeader}>
-            <View style={styles.titleContainer}>
-              <Text style={styles.mainTitle}>나의 목표</Text>
-              <Text style={styles.simpleStatsText}>
-                진행 중 <Text style={styles.simpleStatsNumber}>{stats.inProgressMissions}</Text> · 
-                완료 <Text style={styles.simpleStatsNumber}>{stats.completedMissions}</Text>
-              </Text>
-            </View>
+            <Text style={styles.mainTitle}>나의 목표</Text>
             <PlusButton
               onPress={() => navigation.navigate('Mission' as any)}
               size={36}
             />
+          </View>
+
+          {/* 간단한 통계 */}
+          <View style={styles.simpleStats}>
+            <Text style={styles.simpleStatsText}>
+              진행 중 <Text style={styles.simpleStatsNumber}>{stats.inProgressMissions}</Text> · 
+              완료 <Text style={styles.simpleStatsNumber}>{stats.completedMissions}</Text>
+            </Text>
           </View>
 
           {/* 필터 탭 */}
@@ -474,29 +476,26 @@ const styles = StyleSheet.create({
   mainHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: spacing[4],
-    paddingTop: spacing[4],
-  },
-  titleContainer: {
-    flex: 1,
-    marginRight: spacing[3],
+    alignItems: 'center',
+    marginBottom: spacing[3],
+    paddingTop: spacing[1],
   },
   mainTitle: {
-    fontSize: typography.fontSize['2xl'],
+    fontSize: typography.fontSize.xl,
     fontWeight: typography.fontWeight.normal,
     color: colors.text.primary,
-    marginBottom: spacing[1],
+  },
+  simpleStats: {
+    marginBottom: spacing[3],
   },
   simpleStatsText: {
-    fontSize: typography.fontSize.xs,
+    fontSize: typography.fontSize.sm,
     color: colors.text.tertiary,
     fontWeight: typography.fontWeight.normal,
-    lineHeight: 18,
   },
   simpleStatsNumber: {
     fontWeight: typography.fontWeight.normal,
-    color: colors.text.secondary,
+    color: colors.text.primary,
   },
   tabBar: {
     marginBottom: spacing[3],
