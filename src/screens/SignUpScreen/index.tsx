@@ -363,6 +363,12 @@ const styles = StyleSheet.create({
   },
   inputText: {
     fontSize: typography.fontSize.sm,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
   },
   errorText: {
     fontSize: typography.fontSize.xs,

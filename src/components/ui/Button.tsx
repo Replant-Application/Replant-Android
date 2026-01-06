@@ -146,14 +146,29 @@ const styles = StyleSheet.create({
   smText: {
     fontSize: typography.fontSize.sm,
     lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
   },
   baseText: {
     fontSize: typography.fontSize.base,
     lineHeight: getOptimizedLineHeight(typography.fontSize.base),
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
   },
   lgText: {
     fontSize: typography.fontSize.lg,
     lineHeight: getOptimizedLineHeight(typography.fontSize.lg),
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
   },
 
   disabledText: {

@@ -266,6 +266,11 @@ const styles = StyleSheet.create({
   categoryEmoji: {
     fontSize: typography.fontSize.sm,
     flexShrink: 0,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
   },
   categoryImage: {
     width: 16,
