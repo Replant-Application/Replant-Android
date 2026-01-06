@@ -2,12 +2,15 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ViewStyle } from 'react-native';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
 import { CommunityComment } from '../../types';
+import { formatTimeAgo } from '../../utils/dateUtils';
 
 interface CommentCardProps {
   comment: CommunityComment;
   onEdit?: (comment: CommunityComment) => void;
   onDelete?: (commentId: string) => void;
+  onReply?: (comment: CommunityComment) => void;
   isAuthor?: boolean;
+  isReply?: boolean;
   style?: ViewStyle;
 }
 
@@ -15,32 +18,17 @@ const CommentCard: React.FC<CommentCardProps> = ({
   comment,
   onEdit,
   onDelete,
+  onReply,
   isAuthor = false,
+  isReply = false,
   style
 }) => {
   if (!comment) return null;
 
-  const formatDate = (dateString: string): string => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diff = now.getTime() - date.getTime();
-    const minutes = Math.floor(diff / 60000);
-    const hours = Math.floor(diff / 3600000);
-    const days = Math.floor(diff / 86400000);
-
-    if (minutes < 1) return '방금 전';
-    if (minutes < 60) return `${minutes}분 전`;
-    if (hours < 24) return `${hours}시간 전`;
-    if (days < 7) return `${days}일 전`;
-    return date.toLocaleDateString('ko-KR', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
-  };
+  // formatDate는 formatTimeAgo의 longFormat 버전 사용
 
   return (
-    <View style={[styles.container, style]}>
+    <View style={[styles.container, isReply && styles.replyContainer, style]}>
       <View style={styles.header}>
         <View style={styles.authorInfo}>
           <Text style={styles.authorName}>{comment.author_nickname}</Text>
@@ -50,7 +38,7 @@ const CommentCard: React.FC<CommentCardProps> = ({
             </View>
           )}
         </View>
-        <Text style={styles.date}>{formatDate(comment.created_at)}</Text>
+        <Text style={styles.date}>{formatTimeAgo(comment.created_at, { longFormat: true })}</Text>
       </View>
 
       <View style={styles.content}>
@@ -60,82 +48,101 @@ const CommentCard: React.FC<CommentCardProps> = ({
         )}
       </View>
 
-      {isAuthor && (onEdit || onDelete) && (
-        <View style={styles.footer}>
-          <View style={styles.actions}>
-            {onEdit && (
-              <TouchableOpacity
-                style={styles.actionButton}
-                onPress={() => onEdit(comment)}
-                activeOpacity={0.7}
-              >
-                <Text style={styles.editText}>✏️ 수정</Text>
-              </TouchableOpacity>
-            )}
+      <View style={styles.footer}>
+        <View style={styles.actions}>
+          {/* 답글 버튼 - 대댓글이 아닌 경우에만 표시 */}
+          {onReply && !isReply && (
+            <TouchableOpacity
+              style={styles.actionButton}
+              onPress={() => onReply(comment)}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.replyText}>💬 답글</Text>
+            </TouchableOpacity>
+          )}
 
-            {onDelete && (
-              <TouchableOpacity
-                style={styles.actionButton}
-                onPress={() => onDelete(comment.comment_id)}
-                activeOpacity={0.7}
-              >
-                <Text style={styles.deleteText}>🗑️ 삭제</Text>
-              </TouchableOpacity>
-            )}
-          </View>
+          {/* 수정/삭제 버튼 - 본인 댓글인 경우에만 표시 */}
+          {isAuthor && onEdit && (
+            <TouchableOpacity
+              style={styles.actionButton}
+              onPress={() => onEdit(comment)}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.editText}>✏️ 수정</Text>
+            </TouchableOpacity>
+          )}
+
+          {isAuthor && onDelete && (
+            <TouchableOpacity
+              style={styles.actionButton}
+              onPress={() => onDelete(comment.comment_id)}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.deleteText}>🗑️ 삭제</Text>
+            </TouchableOpacity>
+          )}
         </View>
-      )}
+      </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: colors.background.secondary,
-    borderRadius: borderRadius.md,
-    padding: spacing[3],
-    marginVertical: spacing[2],
+    backgroundColor: colors.background.primary,
+    borderRadius: borderRadius.base,
+    padding: spacing[2],
+    marginVertical: spacing[1],
     borderWidth: 1,
     borderColor: colors.border.light,
+  },
+  replyContainer: {
+    marginLeft: spacing[3],
+    backgroundColor: colors.gray[50],
+    borderLeftWidth: 2,
+    borderLeftColor: colors.primary[500],
+    borderWidth: 1,
+    borderColor: colors.border.light,
+    borderRadius: borderRadius.base,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: spacing[2],
+    marginBottom: spacing[1],
   },
   authorInfo: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing[2],
+    gap: spacing[1.5],
   },
   authorName: {
     fontSize: typography.fontSize.sm,
-    fontWeight: typography.fontWeight.semibold,
+    fontWeight: typography.fontWeight.normal,
     color: colors.text.primary,
   },
   authorBadge: {
     backgroundColor: colors.primary[100],
     paddingHorizontal: spacing[1],
     paddingVertical: 2,
-    borderRadius: borderRadius.sm,
+    borderRadius: borderRadius.base,
   },
   authorBadgeText: {
     fontSize: typography.fontSize.xs,
     color: colors.primary[700],
-    fontWeight: typography.fontWeight.medium,
+    fontWeight: typography.fontWeight.normal,
   },
   date: {
     fontSize: typography.fontSize.xs,
     color: colors.text.tertiary,
   },
   content: {
-    marginBottom: spacing[2],
+    marginBottom: spacing[1],
   },
   text: {
-    fontSize: typography.fontSize.base,
-    color: colors.text.primary,
-    lineHeight: typography.lineHeight.normal * typography.fontSize.base,
+    fontSize: typography.fontSize.sm,
+    color: colors.text.secondary,
+    lineHeight: 18,
   },
   editedText: {
     fontSize: typography.fontSize.xs,
@@ -146,27 +153,31 @@ const styles = StyleSheet.create({
   footer: {
     borderTopWidth: 1,
     borderTopColor: colors.border.light,
-    paddingTop: spacing[2],
+    paddingTop: spacing[1],
   },
   actions: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
-    gap: spacing[3],
+    gap: spacing[2],
   },
   actionButton: {
-    paddingHorizontal: spacing[2],
-    paddingVertical: spacing[1],
-    borderRadius: borderRadius.sm,
+    paddingHorizontal: spacing[1],
+    paddingVertical: 2,
   },
   editText: {
-    fontSize: typography.fontSize.sm,
+    fontSize: typography.fontSize.xs,
     color: colors.primary[500],
-    fontWeight: typography.fontWeight.medium,
+    fontWeight: typography.fontWeight.normal,
   },
   deleteText: {
-    fontSize: typography.fontSize.sm,
+    fontSize: typography.fontSize.xs,
     color: colors.error,
-    fontWeight: typography.fontWeight.medium,
+    fontWeight: typography.fontWeight.normal,
+  },
+  replyText: {
+    fontSize: typography.fontSize.xs,
+    color: colors.text.secondary,
+    fontWeight: typography.fontWeight.normal,
   },
 });
 

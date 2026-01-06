@@ -17,10 +17,9 @@ export type RootStackParamList = {
     analysisResult?: { verified: boolean } | null;
   };
   CustomMissionCreate: {
-    generatedMission?: any; // AIGeneratedMission 타입
+    generatedMission?: any;
   };
   CounselingSelect: undefined;
-  ChatBot: undefined;
   PlacesSearch: undefined;
   CharacterDetail: {
     character: Character;
@@ -60,13 +59,34 @@ export type RootStackParamList = {
     userId: number;
   };
   MissionGroup: undefined;
-  AIMissionGenerate: {
-    generatedMission?: any;
-  };
   Notification: undefined;
   MissionDetail: {
     missionId: string;
   };
+  BadgeDetail: {
+    badge: {
+      id: number;
+      missionType: 'SYSTEM' | 'CUSTOM';
+      mission?: { id: number; title: string };
+      customMission?: { id: number; title: string };
+      issuedAt: string;
+      expiresAt: string;
+      remainingDays?: number;
+      isExpired?: boolean;
+    };
+  };
+  VerificationPostCreate: {
+    userMissionId: number;
+    missionId: string;
+    missionTitle: string;
+    missionEmoji?: string;
+    photoUrl?: string;
+    mode?: 'create' | 'edit';
+    verificationId?: number;
+    initialContent?: string;
+  };
+  Login: undefined;
+  SignUp: undefined;
 };
 
 // 네비게이션 파라미터 타입
@@ -80,7 +100,6 @@ export interface NavigationParams {
     generatedMission?: any;
   };
   [ScreenNames.COUNSELING_SELECT]: undefined;
-  [ScreenNames.CHATBOT]: undefined;
   [ScreenNames.PLACES_SEARCH]: undefined;
   [ScreenNames.CHARACTER_DETAIL]: {
     character: Character;
@@ -120,9 +139,6 @@ export interface NavigationParams {
     userId: number;
   };
   [ScreenNames.MISSION_GROUP]: undefined;
-  [ScreenNames.AI_MISSION_GENERATE]: {
-    generatedMission?: any;
-  };
   [ScreenNames.NOTIFICATION]: undefined;
 }
 

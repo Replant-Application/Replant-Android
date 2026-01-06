@@ -37,8 +37,28 @@ export const signInWithGoogle = async (): Promise<string | null> => {
     // Get access token
     const tokens = await GoogleSignin.getTokens();
     return tokens.accessToken;
-  } catch (error) {
+  } catch (error: any) {
+    // 사용자가 로그인을 취소한 경우는 에러가 아님
+    const errorCode = error?.code || '';
+    const errorMessage = error?.message || error?.toString() || '';
+    
+    // 구글 로그인 취소 에러 코드: SIGN_IN_CANCELLED (12501)
+    if (errorCode === '12501' || errorCode === 'SIGN_IN_CANCELLED' || 
+        errorMessage.includes('cancelled') || errorMessage.includes('canceled')) {
+      console.log('Google login cancelled by user');
+      return null; // 에러 메시지 없이 null 반환
+    }
+    
+    // "non-recoverable sign in failure" 에러는 설정 문제일 가능성이 높음
+    if (errorMessage.includes('non-recoverable') || errorMessage.includes('SIGN_IN_FAILED')) {
+      console.error('Google Sign-In Configuration Error:', {
+        code: errorCode,
+        message: errorMessage,
+        hint: 'Check if GOOGLE_WEB_CLIENT_ID is correctly configured and SHA-1 certificate is registered in Google Cloud Console'
+      });
+    } else {
     console.error('Google Sign-In Error:', error);
+    }
     return null;
   }
 };

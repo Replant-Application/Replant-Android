@@ -1,43 +1,60 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, ViewStyle } from 'react-native';
-import { colors, spacing, typography, borderRadius, shadows } from '../../utils/designTokens';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Image, ViewStyle, Modal, Alert } from 'react-native';
+import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
 import { CommunityPost } from '../../types';
+import { formatTimeAgo } from '../../utils/dateUtils';
 
 interface PostCardProps {
   post: CommunityPost;
+  currentUserId?: string;
   onPress?: (postId: string) => void;
   onLike?: (postId: string) => void;
   onScrap?: (postId: string) => void;
+  onEdit?: (postId: string) => void;
+  onDelete?: (postId: string) => void;
   style?: ViewStyle;
 }
 
 const PostCard: React.FC<PostCardProps> = ({
   post,
+  currentUserId,
   onPress,
   onLike,
   onScrap,
+  onEdit,
+  onDelete,
   style
 }) => {
+  const [showMenu, setShowMenu] = useState(false);
+
+  // 본인 게시글인지 확인
+  const isOwnPost = currentUserId && post.author_id === currentUserId;
+  // 인증되지 않은 게시글인지 확인 (verified가 false이거나 undefined인 경우)
+  const canEditDelete = isOwnPost && !post.verified;
+
+  const handleEdit = () => {
+    setShowMenu(false);
+    onEdit?.(post.post_id);
+  };
+
+  const handleDelete = () => {
+    setShowMenu(false);
+    Alert.alert(
+      '게시글 삭제',
+      '정말 이 게시글을 삭제하시겠습니까?',
+      [
+        { text: '취소', style: 'cancel' },
+        {
+          text: '삭제',
+          style: 'destructive',
+          onPress: () => onDelete?.(post.post_id)
+        }
+      ]
+    );
+  };
   if (!post) return null;
 
-  const formatDate = (dateString: string): string => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diff = now.getTime() - date.getTime();
-    const minutes = Math.floor(diff / 60000);
-    const hours = Math.floor(diff / 3600000);
-    const days = Math.floor(diff / 86400000);
-
-    if (minutes < 1) return '방금 전';
-    if (minutes < 60) return `${minutes}분 전`;
-    if (hours < 24) return `${hours}시간 전`;
-    if (days < 7) return `${days}일 전`;
-    return date.toLocaleDateString('ko-KR', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
-  };
+  // formatDate는 formatTimeAgo의 longFormat 버전 사용
 
   return (
     <TouchableOpacity
@@ -61,8 +78,48 @@ const PostCard: React.FC<PostCardProps> = ({
             )}
           </View>
         </View>
-        <Text style={styles.date}>{formatDate(post.created_at)}</Text>
+        <View style={styles.headerRight}>
+          <Text style={styles.date}>{formatTimeAgo(post.created_at, { longFormat: true })}</Text>
+          {canEditDelete && (
+            <TouchableOpacity
+              style={styles.menuButton}
+              onPress={(e) => {
+                e.stopPropagation();
+                setShowMenu(true);
+              }}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.menuIcon}>⋮</Text>
+            </TouchableOpacity>
+          )}
+        </View>
       </View>
+
+      {/* 수정/삭제 메뉴 모달 */}
+      <Modal
+        visible={showMenu}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowMenu(false)}
+      >
+        <TouchableOpacity
+          style={styles.modalOverlay}
+          activeOpacity={1}
+          onPress={() => setShowMenu(false)}
+        >
+          <View style={styles.menuContainer}>
+            <TouchableOpacity style={styles.menuItem} onPress={handleEdit}>
+              <Text style={styles.menuItemIcon}>✏️</Text>
+              <Text style={styles.menuItemText}>수정</Text>
+            </TouchableOpacity>
+            <View style={styles.menuDivider} />
+            <TouchableOpacity style={styles.menuItem} onPress={handleDelete}>
+              <Text style={styles.menuItemIcon}>🗑️</Text>
+              <Text style={[styles.menuItemText, styles.deleteText]}>삭제</Text>
+            </TouchableOpacity>
+          </View>
+        </TouchableOpacity>
+      </Modal>
 
       <View style={styles.content}>
         {post.mission_title && (
@@ -71,6 +128,18 @@ const PostCard: React.FC<PostCardProps> = ({
             <Text style={styles.missionTitle} numberOfLines={1}>
               {post.mission_title}
             </Text>
+            {/* 인증 상태 뱃지 */}
+            {post.verified === true ? (
+              <View style={styles.verifiedBadge}>
+                <Text style={styles.verifiedIcon}>✓</Text>
+                <Text style={styles.verifiedText}>인증완료</Text>
+              </View>
+            ) : post.verified === false ? (
+              <View style={styles.pendingBadge}>
+                <Text style={styles.pendingIcon}>⏳</Text>
+                <Text style={styles.pendingText}>인증대기</Text>
+              </View>
+            ) : null}
           </View>
         )}
         <Text style={styles.title} numberOfLines={2}>
@@ -150,134 +219,222 @@ const PostCard: React.FC<PostCardProps> = ({
 const styles = StyleSheet.create({
   container: {
     backgroundColor: colors.background.primary,
-    borderRadius: borderRadius.xl,
-    padding: spacing[5],
-    marginBottom: spacing[3],
-    borderWidth: 0,
-    ...shadows.lg,
+    borderRadius: borderRadius.base,
+    padding: spacing[3],
+    marginBottom: spacing[1],
+    borderWidth: 1,
+    borderColor: colors.border.light,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    marginBottom: spacing[4],
+    marginBottom: spacing[2],
   },
   authorInfo: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing[3],
+    gap: spacing[2],
     flex: 1,
   },
   authorAvatar: {
-    width: 40,
-    height: 40,
+    width: 32,
+    height: 32,
     borderRadius: borderRadius.full,
-    backgroundColor: colors.green[500],
+    backgroundColor: colors.primary[500],
     justifyContent: 'center',
     alignItems: 'center',
   },
   authorAvatarText: {
-    fontSize: typography.fontSize.base,
-    fontWeight: typography.fontWeight.bold,
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.normal,
     color: colors.white,
   },
   authorName: {
-    fontSize: typography.fontSize.base,
-    fontWeight: typography.fontWeight.semibold,
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.normal,
     color: colors.text.primary,
-    marginBottom: spacing[1],
+    marginBottom: 2,
   },
   categoryBadge: {
-    backgroundColor: colors.green[100],
+    backgroundColor: colors.primary[100],
     paddingHorizontal: spacing[2],
-    paddingVertical: spacing[1],
-    borderRadius: borderRadius.sm,
+    paddingVertical: 2,
+    borderRadius: borderRadius.base,
     alignSelf: 'flex-start',
   },
   categoryText: {
     fontSize: typography.fontSize.xs,
-    color: colors.green[700],
-    fontWeight: typography.fontWeight.medium,
+    color: colors.primary[700],
+    fontWeight: typography.fontWeight.normal,
   },
   date: {
     fontSize: typography.fontSize.xs,
     color: colors.text.tertiary,
     marginTop: spacing[1],
   },
+  headerRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing[2],
+  },
+  menuButton: {
+    padding: spacing[2],
+    marginRight: -spacing[2],
+  },
+  menuIcon: {
+    fontSize: typography.fontSize.xl,
+    color: colors.text.secondary,
+    fontWeight: typography.fontWeight.normal,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  menuContainer: {
+    backgroundColor: colors.background.primary,
+    borderRadius: borderRadius.base,
+    minWidth: 150,
+    borderWidth: 1,
+    borderColor: colors.border.light,
+  },
+  menuItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: spacing[4],
+    paddingHorizontal: spacing[5],
+    gap: spacing[3],
+  },
+  menuItemIcon: {
+    fontSize: typography.fontSize.lg,
+  },
+  menuItemText: {
+    fontSize: typography.fontSize.base,
+    color: colors.text.primary,
+    fontWeight: typography.fontWeight.medium,
+  },
+  menuDivider: {
+    height: 1,
+    backgroundColor: colors.border.light,
+  },
+  deleteText: {
+    color: colors.red[500],
+  },
   content: {
-    marginBottom: spacing[4],
+    marginBottom: spacing[2],
   },
   missionInfo: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing[2],
-    marginBottom: spacing[3],
-    paddingHorizontal: spacing[3],
-    paddingVertical: spacing[2],
-    backgroundColor: colors.green[50],
-    borderRadius: borderRadius.md,
-    borderLeftWidth: 3,
-    borderLeftColor: colors.green[500],
+    gap: spacing[1.5],
+    marginBottom: spacing[2],
+    paddingHorizontal: spacing[2],
+    paddingVertical: spacing[1],
+    backgroundColor: colors.primary[100],
+    borderRadius: borderRadius.base,
+    borderWidth: 1.5,
+    borderColor: colors.primary[500],
   },
   missionEmoji: {
-    fontSize: typography.fontSize.xl,
+    fontSize: typography.fontSize.base,
   },
   missionTitle: {
     flex: 1,
     fontSize: typography.fontSize.sm,
-    fontWeight: typography.fontWeight.semibold,
-    color: colors.green[700],
+    fontWeight: typography.fontWeight.normal,
+    color: colors.primary[800],
+  },
+  verifiedBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.primary[100],
+    paddingHorizontal: spacing[2],
+    paddingVertical: spacing[1],
+    borderRadius: borderRadius.base,
+    gap: 2,
+    marginLeft: spacing[2],
+  },
+  verifiedIcon: {
+    fontSize: typography.fontSize.xs,
+    color: colors.primary[600],
+    fontWeight: typography.fontWeight.normal,
+  },
+  verifiedText: {
+    fontSize: typography.fontSize.xs,
+    color: colors.primary[700],
+    fontWeight: typography.fontWeight.normal,
+  },
+  pendingBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.orange[100],
+    paddingHorizontal: spacing[2],
+    paddingVertical: spacing[1],
+    borderRadius: borderRadius.base,
+    gap: 2,
+    marginLeft: spacing[2],
+  },
+  pendingIcon: {
+    fontSize: typography.fontSize.xs,
+  },
+  pendingText: {
+    fontSize: typography.fontSize.xs,
+    color: colors.orange[700],
+    fontWeight: typography.fontWeight.medium,
   },
   title: {
-    fontSize: typography.fontSize.xl,
-    fontWeight: typography.fontWeight.bold,
+    fontSize: typography.fontSize.base,
+    fontWeight: typography.fontWeight.normal,
     color: colors.text.primary,
-    marginBottom: spacing[2],
-    lineHeight: typography.lineHeight.tight * typography.fontSize.xl,
+    marginBottom: spacing[1],
+    lineHeight: 20,
   },
   text: {
-    fontSize: typography.fontSize.base,
+    fontSize: typography.fontSize.sm,
     color: colors.text.secondary,
-    lineHeight: typography.lineHeight.relaxed * typography.fontSize.base,
+    lineHeight: 18,
   },
   imageContainer: {
-    marginBottom: spacing[4],
-    borderRadius: borderRadius.lg,
+    marginBottom: spacing[2],
+    borderRadius: borderRadius.base,
     overflow: 'hidden',
-    ...shadows.sm,
+    borderWidth: 1,
+    borderColor: colors.border.light,
   },
   thumbnail: {
     width: '100%',
-    height: 200,
+    height: 160,
     backgroundColor: colors.background.secondary,
   },
   tagsContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: spacing[2],
-    marginBottom: spacing[4],
+    gap: spacing[1.5],
+    marginBottom: spacing[2],
   },
   tag: {
-    backgroundColor: colors.green[50],
-    paddingHorizontal: spacing[3],
-    paddingVertical: spacing[1],
-    borderRadius: borderRadius.md,
+    backgroundColor: colors.gray[100],
+    paddingHorizontal: spacing[2],
+    paddingVertical: 2,
+    borderRadius: borderRadius.base,
     borderWidth: 1,
-    borderColor: colors.green[200],
+    borderColor: colors.gray[300],
   },
   tagText: {
     fontSize: typography.fontSize.xs,
-    color: colors.green[700],
-    fontWeight: typography.fontWeight.medium,
+    color: colors.gray[700],
+    fontWeight: typography.fontWeight.normal,
   },
   footer: {
     borderTopWidth: 1,
     borderTopColor: colors.border.light,
-    paddingTop: spacing[3],
+    paddingTop: spacing[2],
   },
   stats: {
     flexDirection: 'row',
-    gap: spacing[6],
+    gap: spacing[4],
   },
   statButton: {
     flexDirection: 'row',
@@ -288,7 +445,7 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.md,
   },
   statIcon: {
-    fontSize: typography.fontSize.lg,
+    fontSize: typography.fontSize.base,
   },
   likedIcon: {
     // 이미 이모지로 표시됨
@@ -302,8 +459,8 @@ const styles = StyleSheet.create({
     fontWeight: typography.fontWeight.medium,
   },
   statTextActive: {
-    color: colors.green[600],
-    fontWeight: typography.fontWeight.semibold,
+    color: colors.primary[600],
+    fontWeight: typography.fontWeight.normal,
   },
 });
 

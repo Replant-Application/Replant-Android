@@ -24,6 +24,7 @@ export interface Colors {
   purple: ColorPalette;
   green: ColorPalette;
   orange: ColorPalette;
+  red: ColorPalette;
   success: string;
   warning: string;
   error: string;
@@ -63,6 +64,7 @@ export interface Colors {
 export interface Spacing {
   0: number;
   1: number;
+  1.5: number;
   2: number;
   3: number;
   4: number;
@@ -126,6 +128,7 @@ export interface Shadows {
   sm: Shadow;
   base: Shadow;
   lg: Shadow;
+  xl: Shadow;
 }
 
 // 컴포넌트 스타일 타입

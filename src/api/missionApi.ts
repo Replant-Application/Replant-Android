@@ -441,11 +441,22 @@ export const getUserMission = async (
 
 /**
  * 커스텀 미션 추가 (내 미션에)
- * POST /api/user-missions
+ * POST /api/user-missions/custom
  * 인증 필요
  */
 export const addCustomMissionToMyMissions = async (data: {
   customMissionId: number;
+}): Promise<ServiceResult<UserMission>> => {
+  return apiClient.post<UserMission>('/user-missions/custom', data);
+};
+
+/**
+ * 시스템 미션 추가 (내 미션에 할당)
+ * POST /api/user-missions
+ * 인증 필요
+ */
+export const addSystemMissionToMyMissions = async (data: {
+  missionId: number;
 }): Promise<ServiceResult<UserMission>> => {
   return apiClient.post<UserMission>(API_CONFIG.endpoints.userMission.add, data);
 };
@@ -663,6 +674,50 @@ export const verifyMissionByTime = async (
 };
 
 // ============================================
+// 새로운 인증 API (/verifications/gps, /verifications/time)
+// ============================================
+
+export interface GpsVerifyResponse {
+  success: boolean;
+  message: string;
+  expReward: number;
+}
+
+export interface TimeVerifyResponse {
+  success: boolean;
+  message: string;
+  expReward: number;
+}
+
+/**
+ * GPS 인증 (백엔드 /api/verifications/gps)
+ * POST /api/verifications/gps
+ */
+export const verifyByGps = async (
+  userMissionId: number,
+  latitude: number,
+  longitude: number
+): Promise<ServiceResult<GpsVerifyResponse>> => {
+  return apiClient.post<GpsVerifyResponse>(API_CONFIG.endpoints.verification.gps, {
+    userMissionId,
+    latitude,
+    longitude,
+  });
+};
+
+/**
+ * 시간 인증 (백엔드 /api/verifications/time)
+ * POST /api/verifications/time
+ */
+export const verifyByTime = async (
+  userMissionId: number
+): Promise<ServiceResult<TimeVerifyResponse>> => {
+  return apiClient.post<TimeVerifyResponse>(API_CONFIG.endpoints.verification.time, {
+    userMissionId,
+  });
+};
+
+// ============================================
 // 미션 그룹 (같은 미션 수행자 게시판)
 // ============================================
 
@@ -776,103 +831,39 @@ function getMissionEmoji(title: string): string {
   return '🎯';
 }
 
-// ============================================
-// 직접 인증 API (GPS/시간)
-// ============================================
-
-export interface DirectVerificationResponse {
-  success: boolean;
-  message: string;
-  expReward: number;
-}
-
 /**
- * GPS 직접 인증
- * POST /api/verifications/gps
- */
-export const verifyByGps = async (
-  userMissionId: number,
-  latitude: number,
-  longitude: number
-): Promise<ServiceResult<DirectVerificationResponse>> => {
-  return apiClient.post<DirectVerificationResponse>(API_CONFIG.endpoints.verification.gps, {
-    userMissionId,
-    latitude,
-    longitude,
-  });
-};
-
-/**
- * 시간 직접 인증
- * POST /api/verifications/time
- */
-export const verifyByTime = async (
-  userMissionId: number
-): Promise<ServiceResult<DirectVerificationResponse>> => {
-  return apiClient.post<DirectVerificationResponse>(API_CONFIG.endpoints.verification.time, {
-    userMissionId,
-  });
-};
-
-// ============================================
-// 파일 업로드 (S3)
-// ============================================
-
-export interface UploadedFileInfo {
-  fileName: string;
-  fileUrl: string;
-  fileSize: number;
-  contentType: string;
-}
-
-/**
- * 파일 업로드 (S3)
- * POST /api/files/upload
- * 인증 필요
- */
-export const uploadFile = async (
-  file: { uri: string; name: string; type: string }
-): Promise<ServiceResult<UploadedFileInfo>> => {
-  const formData = new FormData();
-  formData.append('file', {
-    uri: file.uri,
-    name: file.name,
-    type: file.type,
-  } as any);
-
-  return apiClient.upload<UploadedFileInfo>(API_CONFIG.endpoints.file.upload, formData);
-};
-
-/**
- * 파일 삭제 (S3)
- * DELETE /api/files/{fileName}
- * 인증 필요
- */
-export const deleteFile = async (
-  fileName: string
-): Promise<ServiceResult<{ message: string }>> => {
-  const endpoint = API_CONFIG.endpoints.file.delete.replace(':fileName', fileName);
-  return apiClient.delete(endpoint);
-};
-
-// ============================================
-// 인증 상태 확인
-// ============================================
-
-/**
- * 미션 인증 상태 확인
- * 미션이 인증되었는지 확인
+ * 인증 상태 확인
+ * 미션 ID로 해당 미션의 인증글 상태 확인
  */
 export const checkVerificationStatus = async (
   missionId: string
-): Promise<ServiceResult<{ verified: boolean; verificationMethod?: string }>> => {
-  // 로컬 미션의 경우 인증 상태 확인 - 현재는 항상 미인증 상태 반환
-  // 백엔드 연동 시 실제 API 호출로 대체
-  return {
-    success: true,
-    data: {
-      verified: false,
-      verificationMethod: undefined,
-    },
-  };
+): Promise<ServiceResult<{ verified: boolean; status?: VerificationStatus }>> => {
+  try {
+    const result = await getVerifications({ missionId: Number(missionId) });
+
+    if (!result.success || !result.data) {
+      return { success: false, error: result.error || '인증 상태를 확인할 수 없습니다.' };
+    }
+
+    const verifications = result.data.content;
+    if (!verifications || verifications.length === 0) {
+      return { success: true, data: { verified: false } };
+    }
+
+    // 가장 최근 인증글의 상태 확인
+    const latestVerification = verifications[0];
+    if (!latestVerification) {
+      return { success: true, data: { verified: false } };
+    }
+
+    return {
+      success: true,
+      data: {
+        verified: latestVerification.status === 'APPROVED',
+        status: latestVerification.status,
+      },
+    };
+  } catch (error) {
+    return { success: false, error: '인증 상태 확인 중 오류가 발생했습니다.' };
+  }
 };

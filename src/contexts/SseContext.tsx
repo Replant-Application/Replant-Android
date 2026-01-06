@@ -48,7 +48,10 @@ export const SseProvider: React.FC<SseProviderProps> = ({ children }) => {
 
   // 알림 수신 핸들러
   const handleNotification = useCallback((notification: any) => {
-    console.log('[SseContext] 알림 수신:', notification);
+    console.log('[SseContext] 알림 수신:', JSON.stringify(notification, null, 2));
+    console.log('[SseContext] 알림 타입:', typeof notification);
+    console.log('[SseContext] 알림 키:', notification ? Object.keys(notification) : 'null');
+    
     setLastNotification(notification);
 
     // 읽지 않은 알림 카운트 증가
@@ -71,12 +74,18 @@ export const SseProvider: React.FC<SseProviderProps> = ({ children }) => {
         setIsConnected(false);
       },
       onError: (error) => {
-        console.error('[SseContext] SSE 에러:', error);
+        // 에러를 경고로만 표시 (앱은 계속 작동)
+        console.warn('[SseContext] SSE 에러 (앱은 정상 작동):', error);
         setIsConnected(false);
       },
     });
 
-    await sseService.connect();
+    // SSE 연결 실패해도 앱이 계속 작동하도록
+    try {
+      await sseService.connect();
+    } catch (error) {
+      console.warn('[SseContext] SSE 연결 실패 (앱은 정상 작동):', error);
+    }
   }, [handleNotification]);
 
   // SSE 연결 해제

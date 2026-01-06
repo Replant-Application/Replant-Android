@@ -14,31 +14,47 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { getData, setData, updateData, getStorageKeys } from '../services';
-import { createCustomMission as createCustomMissionService, updateCustomMission as updateCustomMissionService, deleteCustomMission as deleteCustomMissionService, deleteMissionPhoto as deleteMissionPhotoService } from '../services/missionService';
+import { deleteMissionPhoto as deleteMissionPhotoService } from '../services/missionService';
 import { useUser } from '../contexts/UserContext';
 import { logError } from '../utils/logger';
 import { sortMissionsByTitle, removeDuplicateMissions } from '../utils/missionUtils';
 import { Mission, MissionData, UseMissionReturn, MissionCompletionResult, ServiceResult, ExperienceResult, MissionCategory } from '../types';
-import { getSystemMissions, SystemMission, MissionType } from '../api/missionApi';
+import {
+  getSystemMissions,
+  getUserMissions,
+  getCustomMissions,
+  createCustomMission as createCustomMissionApi,
+  updateCustomMission as updateCustomMissionApi,
+  deleteCustomMission as deleteCustomMissionApi,
+  SystemMission,
+  CustomMission,
+  UserMission,
+  MissionType,
+  CreateCustomMissionRequest,
+} from '../api/missionApi';
+import { uploadMissionVerifyPhoto } from '../api/fileApi';
+
+/**
+ * 미션 제목으로 이모지 반환
+ */
+const getMissionEmoji = (title: string): string => {
+  if (title.includes('운동') || title.includes('헬스') || title.includes('걷기')) return '🏃';
+  if (title.includes('독서') || title.includes('책')) return '📚';
+  if (title.includes('물') || title.includes('마시')) return '💧';
+  if (title.includes('명상') || title.includes('휴식')) return '🧘';
+  if (title.includes('아침') || title.includes('기상')) return '🌅';
+  if (title.includes('영어') || title.includes('단어') || title.includes('외국어')) return '📝';
+  if (title.includes('잠') || title.includes('수면')) return '😴';
+  if (title.includes('식사') || title.includes('밥')) return '🍽️';
+  if (title.includes('저축') || title.includes('돈')) return '💰';
+  if (title.includes('공부')) return '📖';
+  return '🎯';
+};
 
 /**
  * 백엔드 시스템 미션을 로컬 미션 형식으로 변환
  */
 const transformSystemMission = (systemMission: SystemMission, missionType: MissionType): Mission => {
-  const getMissionEmoji = (title: string): string => {
-    if (title.includes('운동') || title.includes('헬스') || title.includes('걷기')) return '🏃';
-    if (title.includes('독서') || title.includes('책')) return '📚';
-    if (title.includes('물') || title.includes('마시')) return '💧';
-    if (title.includes('명상') || title.includes('휴식')) return '🧘';
-    if (title.includes('아침') || title.includes('기상')) return '🌅';
-    if (title.includes('영어') || title.includes('단어') || title.includes('외국어')) return '📝';
-    if (title.includes('잠') || title.includes('수면')) return '😴';
-    if (title.includes('식사') || title.includes('밥')) return '🍽️';
-    if (title.includes('저축') || title.includes('돈')) return '💰';
-    if (title.includes('공부')) return '📖';
-    return '🎯';
-  };
-
   return {
     id: systemMission.id,
     mission_id: systemMission.id.toString(),
@@ -56,6 +72,60 @@ const transformSystemMission = (systemMission: SystemMission, missionType: Missi
   };
 };
 
+/**
+ * 백엔드 커스텀 미션을 로컬 미션 형식으로 변환
+ */
+const transformCustomMission = (customMission: CustomMission): Mission => {
+  return {
+    id: customMission.id,
+    mission_id: `custom_${customMission.id}`,
+    title: customMission.title,
+    description: customMission.description,
+    emoji: getMissionEmoji(customMission.title),
+    experience: customMission.expReward || 10,
+    category_id: 'growth',
+    type: 'DAILY' as MissionType, // 커스텀 미션은 기본 DAILY
+    difficulty: 'medium' as const,
+    completed: false,
+    created_at: customMission.createdAt,
+    is_custom: true,
+    verification_type: customMission.verificationType || 'COMMUNITY',
+  };
+};
+
+/**
+ * 백엔드 UserMission을 로컬 미션 형식으로 변환
+ */
+const transformUserMission = (userMission: UserMission): Mission => {
+  const mission = userMission.mission || userMission.customMission;
+  if (!mission) {
+    throw new Error('UserMission has no mission data');
+  }
+
+  const isCustom = userMission.missionType === 'CUSTOM';
+  const missionType = userMission.mission?.type || 'DAILY';
+
+  return {
+    id: userMission.id,
+    mission_id: isCustom ? `custom_${mission.id}` : mission.id.toString(),
+    user_mission_id: userMission.id, // 백엔드 UserMission ID 저장
+    title: mission.title,
+    description: mission.description,
+    emoji: getMissionEmoji(mission.title),
+    experience: mission.expReward || 10,
+    category_id: 'growth',
+    type: missionType as MissionType,
+    difficulty: 'medium' as const,
+    completed: userMission.status === 'COMPLETED',
+    completed_at: userMission.status === 'COMPLETED' ? userMission.verification?.verifiedAt : undefined,
+    created_at: userMission.assignedAt,
+    due_date: userMission.dueDate,
+    is_custom: isCustom,
+    verification_type: mission.verificationType || 'COMMUNITY',
+    verified: userMission.status === 'COMPLETED',
+  };
+};
+
 export const useMission = (
   addExperienceByCategory?: (categoryId: MissionCategory, experience: number) => Promise<ExperienceResult>
 ): UseMissionReturn => {
@@ -64,7 +134,7 @@ export const useMission = (
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  // 미션 데이터 로드 - 백엔드 API에서 불러옴
+  // 미션 데이터 로드 (백엔드 API 사용)
   const loadMissions = useCallback(async (): Promise<void> => {
     if (!currentNickname) return;
 
@@ -72,70 +142,61 @@ export const useMission = (
       setLoading(true);
       setError(null);
 
-      const storageKeys = getStorageKeys(currentNickname);
-
-      // 로컬 스토리지에서 기존 미션 상태 가져오기 (완료 상태 보존용)
-      const localMissions: Mission[] = await getData(storageKeys.MISSIONS) || [];
-      const localMissionMap = new Map<string, Mission>();
-      localMissions.forEach(m => localMissionMap.set(m.mission_id, m));
-
-      // 백엔드 API에서 DAILY, WEEKLY, MONTHLY 미션 불러오기
-      const missionTypes: MissionType[] = ['DAILY', 'WEEKLY', 'MONTHLY'];
       const allMissions: Mission[] = [];
 
-      for (const missionType of missionTypes) {
-        try {
-          const result = await getSystemMissions({ type: missionType, size: 50 });
+      // 1. 시스템 미션 불러오기 (DAILY, WEEKLY, MONTHLY)
+      const [dailyResult, weeklyResult, monthlyResult] = await Promise.all([
+        getSystemMissions({ type: 'DAILY', size: 50 }),
+        getSystemMissions({ type: 'WEEKLY', size: 50 }),
+        getSystemMissions({ type: 'MONTHLY', size: 50 }),
+      ]);
 
-          if (result.success && result.data && result.data.content) {
-            const transformedMissions = result.data.content.map(systemMission => {
-              const transformed = transformSystemMission(systemMission, missionType);
+      if (dailyResult.success && dailyResult.data) {
+        allMissions.push(...dailyResult.data.content.map(m => transformSystemMission(m, 'DAILY')));
+      }
+      if (weeklyResult.success && weeklyResult.data) {
+        allMissions.push(...weeklyResult.data.content.map(m => transformSystemMission(m, 'WEEKLY')));
+      }
+      if (monthlyResult.success && monthlyResult.data) {
+        allMissions.push(...monthlyResult.data.content.map(m => transformSystemMission(m, 'MONTHLY')));
+      }
 
-              // 로컬에 저장된 완료 상태 병합
-              const localMission = localMissionMap.get(transformed.mission_id);
-              if (localMission) {
-                return {
-                  ...transformed,
-                  completed: localMission.completed,
-                  completed_at: localMission.completed_at,
-                  photo_url: localMission.photo_url,
-                  verified: localMission.verified,
-                  verification_method: localMission.verification_method,
-                };
-              }
-              return transformed;
-            });
-
-            allMissions.push(...transformedMissions);
+      // 2. 사용자 미션 목록 불러오기 (할당된 미션, 완료된 미션 포함)
+      const userMissionsResult = await getUserMissions({ size: 100 });
+      if (userMissionsResult.success && userMissionsResult.data) {
+        // 사용자 미션 상태를 시스템 미션에 반영
+        const userMissionMap = new Map<string, UserMission>();
+        userMissionsResult.data.content.forEach(um => {
+          const mission = um.mission || um.customMission;
+          if (mission) {
+            const key = um.missionType === 'CUSTOM' ? `custom_${mission.id}` : mission.id.toString();
+            userMissionMap.set(key, um);
           }
-        } catch (apiError) {
-          logError(`${missionType} 미션 API 호출 실패`, apiError as Error, { missionType });
-        }
+        });
+
+        // 시스템 미션에 사용자 상태 반영
+        allMissions.forEach(m => {
+          const userMission = userMissionMap.get(m.mission_id);
+          if (userMission) {
+            m.user_mission_id = userMission.id;
+            m.completed = userMission.status === 'COMPLETED';
+            m.verified = userMission.status === 'COMPLETED';
+            m.due_date = userMission.dueDate;
+            if (userMission.verification?.verifiedAt) {
+              m.completed_at = userMission.verification.verifiedAt;
+            }
+          }
+        });
       }
 
-      // API에서 미션을 불러오지 못한 경우 로컬 데이터 사용
-      let finalMissions: Mission[];
-      if (allMissions.length > 0) {
-        // 커스텀 미션 유지 (is_custom이 true인 것들)
-        const customMissions = localMissions.filter(m => m.is_custom === true);
-        finalMissions = [...allMissions, ...customMissions];
-
-        // 새로운 미션 목록을 로컬 스토리지에 저장
-        await setData(storageKeys.MISSIONS, finalMissions);
-      } else {
-        // API 실패 시 빈 배열 반환 (더미 데이터 사용 안함)
-        // 커스텀 미션만 유지
-        finalMissions = localMissions.filter(m => m.is_custom === true);
+      // 3. 커스텀 미션 불러오기
+      const customMissionsResult = await getCustomMissions({ size: 50 });
+      if (customMissionsResult.success && customMissionsResult.data) {
+        allMissions.push(...customMissionsResult.data.content.map(transformCustomMission));
       }
-
-      // 단일 카테고리로 normalize
-      const normalizedMissions: Mission[] = finalMissions.map(m => ({
-        ...m,
-        category_id: 'growth',
-      }));
 
       // 중복 제거 및 정렬
-      const uniqueMissions = removeDuplicateMissions(normalizedMissions);
+      const uniqueMissions = removeDuplicateMissions(allMissions);
       const sortedMissions = sortMissionsByTitle(uniqueMissions);
 
       setMissions(sortedMissions);
@@ -152,16 +213,32 @@ export const useMission = (
     loadMissions();
   }, [loadMissions]);
 
-  // 미션에 사진만 저장 (완료하지 않음)
+  // 미션에 사진 저장 (S3 업로드 후 URL 저장)
   const saveMissionPhoto = useCallback(async (
     missionId: string,
-    photoUrl: string
+    photoUri: string
   ): Promise<ServiceResult<void>> => {
     if (!currentNickname) {
       return { success: false, error: '사용자 정보가 없습니다.' };
     }
 
     try {
+      // 1. S3에 사진 업로드
+      const fileName = `mission_${missionId}_${Date.now()}.jpg`;
+      const uploadResult = await uploadMissionVerifyPhoto({
+        uri: photoUri,
+        type: 'image/jpeg',
+        name: fileName,
+      });
+
+      if (!uploadResult.success || !uploadResult.data) {
+        logError('S3 업로드 실패', new Error(uploadResult.error || 'Unknown error'), { missionId, photoUri });
+        return { success: false, error: uploadResult.error || 'S3 업로드에 실패했습니다.' };
+      }
+
+      const s3PhotoUrl = uploadResult.data.fileUrl;
+
+      // 2. 로컬 스토리지에 S3 URL 저장
       const storageKeys = getStorageKeys(currentNickname);
       const missionsData: Mission[] = await getData(storageKeys.MISSIONS) || [];
       const mission: Mission | undefined = missionsData.find(m => m.mission_id === missionId);
@@ -177,7 +254,7 @@ export const useMission = (
 
       const updatedMission: Mission = {
         ...mission,
-        photo_url: photoUrl,
+        photo_url: s3PhotoUrl,
         updated_at: new Date().toISOString()
       };
 
@@ -196,7 +273,7 @@ export const useMission = (
 
       return { success: true };
     } catch (err) {
-      logError('사진 저장 실패', err as Error, { missionId, photoUrl });
+      logError('사진 저장 실패', err as Error, { missionId, photoUri });
       return { success: false, error: (err as Error).message };
     }
   }, [currentNickname]);
@@ -331,66 +408,98 @@ export const useMission = (
     }
   }, [missions, currentNickname]);
 
-  // 커스텀 미션 생성
+  // 커스텀 미션 생성 (백엔드 API 사용)
   const createCustomMission = useCallback(async (missionData: MissionData): Promise<ServiceResult> => {
     if (!currentNickname) {
       return { success: false, error: '사용자 정보가 없습니다.' };
     }
 
     try {
-      const result = await createCustomMissionService(missionData, currentNickname);
+      // 백엔드 API 형식으로 변환
+      const createRequest: CreateCustomMissionRequest = {
+        title: missionData.title,
+        description: missionData.description || '',
+        durationDays: missionData.durationDays || 7,
+        isPublic: missionData.isPublic ?? true,
+        verificationType: (missionData.verificationType as 'COMMUNITY' | 'GPS' | 'TIME') || 'COMMUNITY',
+        expReward: missionData.experience || 10,
+        badgeDurationDays: missionData.badgeDurationDays || 7,
+      };
+
+      const result = await createCustomMissionApi(createRequest);
 
       if (result.success && result.data) {
-        setMissions(prev => [...prev, result.data!]);
+        // 새 미션을 로컬 형식으로 변환하여 추가
+        const newMission = transformCustomMission(result.data);
+        setMissions(prev => [...prev, newMission]);
+        return { success: true, data: newMission };
       }
 
-      return result;
+      return { success: false, error: result.error || '커스텀 미션 생성에 실패했습니다.' };
     } catch (createError) {
       logError('커스텀 미션 생성 실패', createError as Error, { missionData, currentNickname });
       return { success: false, error: (createError as Error).message };
     }
   }, [currentNickname]);
 
-  // 커스텀 미션 업데이트
+  // 커스텀 미션 업데이트 (백엔드 API 사용)
   const updateCustomMission = useCallback(async (missionId: string, missionData: MissionData): Promise<ServiceResult> => {
     if (!currentNickname) {
       return { success: false, error: '사용자 정보가 없습니다.' };
     }
 
     try {
-      const result = await updateCustomMissionService(missionId, missionData, currentNickname);
+      // missionId에서 숫자 ID 추출 (custom_123 형식)
+      const numericId = missionId.startsWith('custom_')
+        ? parseInt(missionId.replace('custom_', ''), 10)
+        : parseInt(missionId, 10);
+
+      const updateData: Partial<CreateCustomMissionRequest> = {
+        title: missionData.title,
+        description: missionData.description,
+        isPublic: missionData.isPublic,
+        expReward: missionData.experience,
+      };
+
+      const result = await updateCustomMissionApi(numericId, updateData);
 
       if (result.success && result.data) {
+        const updatedMission = transformCustomMission(result.data);
         setMissions(prev =>
           prev.map(m =>
-            m.mission_id === missionId
-              ? result.data!
-              : m
+            m.mission_id === missionId ? updatedMission : m
           )
         );
+        return { success: true, data: updatedMission };
       }
 
-      return result;
+      return { success: false, error: result.error || '커스텀 미션 수정에 실패했습니다.' };
     } catch (updateError) {
       logError('커스텀 미션 업데이트 실패', updateError as Error, { missionId, missionData, currentNickname });
       return { success: false, error: (updateError as Error).message };
     }
   }, [currentNickname]);
 
-  // 커스텀 미션 삭제
+  // 커스텀 미션 삭제 (백엔드 API 사용)
   const deleteCustomMission = useCallback(async (missionId: string): Promise<ServiceResult> => {
     if (!currentNickname) {
       return { success: false, error: '사용자 정보가 없습니다.' };
     }
 
     try {
-      const result = await deleteCustomMissionService(missionId, currentNickname);
+      // missionId에서 숫자 ID 추출
+      const numericId = missionId.startsWith('custom_')
+        ? parseInt(missionId.replace('custom_', ''), 10)
+        : parseInt(missionId, 10);
+
+      const result = await deleteCustomMissionApi(numericId);
 
       if (result.success) {
         setMissions(prev => prev.filter(m => m.mission_id !== missionId));
+        return { success: true };
       }
 
-      return result;
+      return { success: false, error: result.error || '커스텀 미션 삭제에 실패했습니다.' };
     } catch (deleteError) {
       logError('커스텀 미션 삭제 실패', deleteError as Error, { missionId, currentNickname });
       return { success: false, error: (deleteError as Error).message };

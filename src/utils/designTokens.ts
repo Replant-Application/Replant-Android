@@ -6,18 +6,18 @@
 import { Colors, Spacing, Typography, BorderRadius, Shadows, ComponentStyles } from '../types/design';
 
 export const colors: Colors = {
-  // Primary brand colors
+  // Primary brand colors - 자연스러운 줄기 녹색 팔레트
   primary: {
-    50: '#f0fdf4',
-    100: '#dcfce7',
-    200: '#bbf7d0',
-    300: '#86efac',
-    400: '#4ade80',
-    500: '#22c55e', // 메인 색상
-    600: '#16a34a',
-    700: '#15803d',
-    800: '#166534',
-    900: '#14532d',
+    50: '#f0f7f0',
+    100: '#e8f4e8',
+    200: '#d4ead4',
+    300: '#C6E07B', // 가장 밝은 노란 초록색
+    400: '#A8D47A', // 줄기 끝 연두색
+    500: '#89C17E', // 줄기 바깥쪽 연한 녹색 (메인 색상)
+    600: '#65B269', // 아주 연한 줄기 녹색
+    700: '#4a9a4e',
+    800: '#3a7a3d',
+    900: '#2a5a2d',
   },
 
   // Neutral grays
@@ -62,18 +62,18 @@ export const colors: Colors = {
     900: '#581c87',
   },
 
-  // Green colors
+  // Green colors - 자연스러운 줄기 녹색 팔레트
   green: {
-    50: '#f0fdf4',
-    100: '#dcfce7',
-    200: '#bbf7d0',
-    300: '#86efac',
-    400: '#4ade80',
-    500: '#22c55e',
-    600: '#16a34a',
-    700: '#15803d',
-    800: '#166534',
-    900: '#14532d',
+    50: '#f0f7f0',
+    100: '#e8f4e8',
+    200: '#d4ead4',
+    300: '#C6E07B', // 가장 밝은 노란 초록색
+    400: '#A8D47A', // 줄기 끝 연두색
+    500: '#89C17E', // 줄기 바깥쪽 연한 녹색 (메인 색상)
+    600: '#65B269', // 아주 연한 줄기 녹색
+    700: '#4a9a4e',
+    800: '#3a7a3d',
+    900: '#2a5a2d',
   },
 
   // Orange colors
@@ -90,12 +90,26 @@ export const colors: Colors = {
     900: '#7c2d12',
   },
 
+  // Red colors
+  red: {
+    50: '#fef2f2',
+    100: '#fee2e2',
+    200: '#fecaca',
+    300: '#fca5a5',
+    400: '#f87171',
+    500: '#ef4444',
+    600: '#dc2626',
+    700: '#b91c1c',
+    800: '#991b1b',
+    900: '#7f1d1d',
+  },
+
   // Black and white colors
   black: '#000000',
   white: '#ffffff',
 
   // Semantic colors
-  success: '#22c55e',
+  success: '#89C17E', // 자연스러운 녹색으로 변경
   warning: '#f59e0b',
   error: '#ef4444',
   info: '#3b82f6',
@@ -120,7 +134,7 @@ export const colors: Colors = {
     light: '#e5e7eb',
     medium: '#d1d5db',
     dark: '#9ca3af',
-    primary: '#22c55e',
+    primary: '#89C17E', // 자연스러운 녹색으로 변경
   },
 
   // Emotion colors
@@ -139,6 +153,7 @@ export const colors: Colors = {
 export const spacing: Spacing = {
   0: 0,
   1: 4,
+  1.5: 6,
   2: 8,
   3: 12,
   4: 16,
@@ -208,6 +223,13 @@ export const shadows: Shadows = {
     shadowOpacity: 0.15,
     shadowRadius: 8,
     elevation: 4,
+  },
+  xl: {
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.2,
+    shadowRadius: 16,
+    elevation: 8,
   },
 };
 

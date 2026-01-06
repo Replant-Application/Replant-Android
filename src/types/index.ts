@@ -34,16 +34,19 @@ export type Emotion = 'happy' | 'excited' | 'calm' | 'grateful' | 'sad' | 'angry
 export interface Mission {
   id: number;
   mission_id: string;
+  user_mission_id?: number; // 백엔드 UserMission ID
   title: string;
   description: string;
   emoji: string;
   difficulty: Difficulty;
   experience: number;
   category_id: MissionCategory;
+  type?: 'DAILY' | 'WEEKLY' | 'MONTHLY'; // 미션 타입
   is_custom?: boolean;
   created_by?: string;
   created_at?: string;
   updated_at?: string;
+  due_date?: string; // 마감일
   completed: boolean;
   completed_at?: string | undefined;
   photo_url?: string | undefined;
@@ -52,6 +55,7 @@ export interface Mission {
   // 인증 타입 (COMMUNITY, GPS, TIME)
   verification_type?: 'COMMUNITY' | 'GPS' | 'TIME';
   // 인증 관련 필드
+  verification_type?: 'COMMUNITY' | 'GPS' | 'TIME'; // 백엔드 인증 타입
   verification_method?: 'like' | 'gps' | 'manual';
   verified?: boolean;
   verified_at?: string;
@@ -71,13 +75,18 @@ export interface MissionTemplate {
 
 export interface MissionData {
   title: string;
-  description: string;
-  emoji: string;
-  difficulty: Difficulty;
-  experience: number;
-  category_id: MissionCategory;
+  description?: string;
+  emoji?: string;
+  difficulty?: Difficulty;
+  experience?: number;
+  category_id?: MissionCategory;
   is_custom?: boolean;
   created_by?: string;
+  // 백엔드 API 필드
+  durationDays?: number;
+  isPublic?: boolean;
+  verificationType?: 'COMMUNITY' | 'GPS' | 'TIME';
+  badgeDurationDays?: number;
 }
 
 export interface MissionCompletionResult {
@@ -190,6 +199,7 @@ export interface CommunityPost {
   title: string; // 게시글 제목 (미션 제목을 기본값으로 사용 가능)
   content: string; // 사용자가 작성한 내용
   author: string;
+  author_id: string; // 작성자 ID
   author_nickname: string;
   created_at: string;
   updated_at?: string;
@@ -201,6 +211,7 @@ export interface CommunityPost {
   category?: string;
   is_liked?: boolean; // 현재 사용자가 좋아요 했는지
   is_scrapped?: boolean; // 현재 사용자가 스크랩 했는지
+  verified?: boolean; // 인증 완료 여부 (false일 때만 수정/삭제 가능)
 }
 
 export interface CommunityComment {
@@ -378,31 +389,6 @@ export interface MissionGroup {
   member_count: number; // 해당 미션 완료자 수
 }
 
-// AI 미션 생성 관련 타입
-export interface WeeklyMissionStats {
-  total_completed: number;
-  category_stats: { [category: string]: number };
-  difficulty_stats: { [difficulty: string]: number };
-  completed_dates: string[];
-}
-
-export interface MissionAnalysis {
-  patterns: string[];
-  recommendations: string[];
-  strengths: string[];
-  areas_for_improvement: string[];
-}
-
-export interface AIGeneratedMission {
-  title: string;
-  description: string;
-  emoji: string;
-  difficulty: Difficulty;
-  experience: number;
-  category_id: MissionCategory;
-  reasoning: string; // AI가 이 미션을 추천한 이유
-}
-
 // Screen Names 타입
 export enum ScreenNames {
   START = 'Start',
@@ -413,7 +399,6 @@ export enum ScreenNames {
   CHARACTER_DETAIL = 'CharacterDetail',
   SETTINGS = 'Settings',
   CUSTOM_MISSION_CREATE = 'CustomMissionCreate',
-  CHATBOT = 'ChatBot',
   COUNSELING_SELECT = 'CounselingSelect',
   PLACES_SEARCH = 'PlacesSearch',
   INFO = 'Info',
@@ -426,7 +411,6 @@ export enum ScreenNames {
   CALENDAR = 'Calendar',
   STATISTICS = 'Statistics',
   MISSION_GROUP = 'MissionGroup',
-  AI_MISSION_GENERATE = 'AIMissionGenerate',
   ADMIN_DASHBOARD = 'AdminDashboard',
   ADMIN_USER_LIST = 'AdminUserList',
   ADMIN_USER_DETAIL = 'AdminUserDetail',

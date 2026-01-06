@@ -23,6 +23,7 @@ import {
 import { useOverlay } from '../../contexts/OverlayContext';
 import { getNotifications, markNotificationAsRead } from '../../api/notificationApi';
 import { colors, spacing, typography, borderRadius, shadows } from '../../utils/designTokens';
+import { formatTimeAgo } from '../../utils/dateUtils';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const DROPDOWN_WIDTH = Math.min(SCREEN_WIDTH - 32, 340);
@@ -117,21 +118,7 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
     }
   };
 
-  // 상대 시간 표시
-  const formatTimeAgo = (dateString: string) => {
-    const now = new Date();
-    const date = new Date(dateString);
-    const diff = now.getTime() - date.getTime();
-    const minutes = Math.floor(diff / 60000);
-    const hours = Math.floor(diff / 3600000);
-    const days = Math.floor(diff / 86400000);
-
-    if (minutes < 1) return '방금';
-    if (minutes < 60) return `${minutes}분 전`;
-    if (hours < 24) return `${hours}시간 전`;
-    if (days < 7) return `${days}일 전`;
-    return `${date.getMonth() + 1}/${date.getDate()}`;
-  };
+  // 상대 시간 표시 (shortFormat: true로 "방금" 사용)
 
   // 알림 클릭 핸들러
   const handleNotificationPress = async (notification: Notification) => {
@@ -247,7 +234,7 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
                         {notification.content}
                       </Text>
                       <Text style={styles.notificationTime}>
-                        {formatTimeAgo(notification.createdAt)}
+                        {formatTimeAgo(notification.createdAt, { shortFormat: true })}
                       </Text>
                     </View>
                   </TouchableOpacity>

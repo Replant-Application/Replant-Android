@@ -13,6 +13,7 @@ interface MissionCardProps {
   onDeletePhoto?: (missionId: string) => void;
   onShareToCommunity?: (missionId: string) => void;
   onViewDetails?: (missionId: string) => void;
+  onVerify?: (mission: Mission, type: 'COMMUNITY' | 'GPS' | 'TIME') => void;
   loading?: boolean;
   disabled?: boolean;
   readonly?: boolean;
@@ -27,12 +28,38 @@ const MissionCard: React.FC<MissionCardProps> = ({
   onDeletePhoto,
   onShareToCommunity,
   onViewDetails,
+  onVerify,
   loading = false,
   disabled = false,
   readonly = false,
   style
 }) => {
   if (!mission) return null;
+
+  // 인증 유형 결정 (verification_type 또는 기본값 COMMUNITY)
+  const verificationType = mission.verification_type || 'COMMUNITY';
+
+  // 인증하기 버튼 라벨
+  const getVerifyButtonLabel = (): string => {
+    switch (verificationType) {
+      case 'GPS':
+        return '인증';
+      case 'TIME':
+        return '인증';
+      case 'COMMUNITY':
+      default:
+        return '인증';
+    }
+  };
+
+  // 인증하기 버튼 핸들러
+  const handleVerifyPress = () => {
+    if (onVerify) {
+      onVerify(mission, verificationType);
+    } else if (onComplete) {
+      onComplete(mission.mission_id);
+    }
+  };
 
   const getCategoryImage = (categoryId: string): any => {
     const imageMap: Record<string, any> = {
@@ -50,49 +77,60 @@ const MissionCard: React.FC<MissionCardProps> = ({
     return nameMap[categoryId] || '성장';
   };
 
+  // 미션 카드 클릭 핸들러
+  const handleCardPress = () => {
+    if (!readonly && !disabled && !mission.completed && onVerify) {
+      onVerify(mission, verificationType);
+    } else if (onViewDetails) {
+      onViewDetails(mission.mission_id);
+    }
+  };
+
   return (
-    <View style={[styles.container, style]}>
+    <TouchableOpacity 
+      style={[styles.container, style]}
+      onPress={handleCardPress}
+      activeOpacity={0.7}
+      disabled={readonly && !onViewDetails}
+    >
       <View style={styles.header}>
         <View style={styles.categoryInfo}>
-          {typeof getCategoryImage(mission.category_id || '') === 'string' ? (
-            <Text style={styles.categoryEmoji}>
-              {getCategoryImage(mission.category_id || '')}
+          <View style={styles.categoryNameContainer}>
+            {typeof getCategoryImage(mission.category_id || '') === 'string' ? (
+              <Text style={styles.categoryEmoji}>
+                {getCategoryImage(mission.category_id || '')}
+              </Text>
+            ) : (
+              <Image
+                source={getCategoryImage(mission.category_id || '')}
+                style={styles.categoryImage}
+                resizeMode="contain"
+              />
+            )}
+            <Text style={styles.categoryName} numberOfLines={1}>
+              {getCategoryName(mission.category_id || '')}
             </Text>
-          ) : (
-            <Image
-              source={getCategoryImage(mission.category_id || '')}
-              style={styles.categoryImage}
-              resizeMode="contain"
-            />
-          )}
-          <Text style={styles.categoryName}>
-            {getCategoryName(mission.category_id || '')}
-          </Text>
+          </View>
         </View>
         <View style={styles.statusContainer}>
           {mission.completed ? (
             <>
-              {/* 인증 완료된 경우에만 인증 뱃지(badge_verified.png) 표시 */}
+              {/* 인증 완료된 경우 */}
               {mission.verified === true ? (
-                <Badge tier="bronze" size="sm" />
+                <View style={styles.verifiedBadge}>
+                  <Text style={styles.verifiedIcon}>✓</Text>
+                  <Text style={styles.verifiedText}>인증완료</Text>
+                </View>
               ) : (
-                <View style={styles.statusWrapper}>
-                  <Image
-                    source={require('../../assets/images/alarm.png')}
-                    style={styles.statusIcon}
-                    resizeMode="contain"
-                  />
-                  <Text style={styles.pendingVerificationText}>인증 대기</Text>
+                <View style={styles.pendingBadge}>
+                  <Text style={styles.pendingIcon}>⏳</Text>
+                  <Text style={styles.pendingVerificationText}>인증대기중</Text>
                 </View>
               )}
             </>
           ) : (
-            <View style={styles.statusWrapper}>
-              <Image
-                source={require('../../assets/images/alarm.png')}
-                style={styles.statusIcon}
-                resizeMode="contain"
-              />
+            <View style={styles.inProgressBadge}>
+              <Text style={styles.inProgressIcon}>▶</Text>
               <Text style={styles.pendingText}>진행중</Text>
             </View>
           )}
@@ -100,9 +138,9 @@ const MissionCard: React.FC<MissionCardProps> = ({
       </View>
 
       <View style={styles.content}>
-        <Text style={styles.title}>{mission.title}</Text>
+        <Text style={styles.title} numberOfLines={2}>{mission.title}</Text>
         {mission.description && (
-          <Text style={styles.description}>{mission.description}</Text>
+          <Text style={styles.description} numberOfLines={2}>{mission.description}</Text>
         )}
 
         {mission.photo_url && (
@@ -145,21 +183,8 @@ const MissionCard: React.FC<MissionCardProps> = ({
           </TouchableOpacity>
         ) : (
           <View style={styles.actionButtonsContainer}>
-            {!mission.completed && onUploadPhoto && (
-              <TouchableOpacity
-                style={[styles.photoIconButton]}
-                onPress={() => onUploadPhoto(mission.mission_id)}
-                disabled={disabled}
-                activeOpacity={disabled ? 1 : 0.7}
-              >
-                <Image
-                  source={require('../../assets/images/plus.png')}
-                  style={styles.photoIcon}
-                  resizeMode="contain"
-                />
-              </TouchableOpacity>
-            )}
-            {mission.completed && onShareToCommunity && (
+            {/* 공유 버튼: 완료 후 COMMUNITY 인증일 때 */}
+            {mission.completed && verificationType === 'COMMUNITY' && onShareToCommunity && (
               <TouchableOpacity
                 style={[styles.shareButton]}
                 onPress={() => onShareToCommunity(mission.mission_id)}
@@ -174,41 +199,44 @@ const MissionCard: React.FC<MissionCardProps> = ({
                 <Text style={styles.shareButtonText}>공유</Text>
               </TouchableOpacity>
             )}
-          {!mission.completed && (
-            <TouchableOpacity
-              style={[
-                styles.actionButton,
-                styles.completeButton,
-                disabled && styles.disabledButton
-              ]}
-              onPress={disabled ? undefined : () => onComplete?.(mission.mission_id)}
-              disabled={loading || disabled}
-              activeOpacity={disabled ? 1 : 0.7}
-            >
-              <Text style={[
-                styles.actionText,
-                styles.completeText,
-                disabled && styles.disabledText
-              ]}>
-                {disabled ? '비활성화' : loading ? '처리중...' : '인증하기'}
-              </Text>
-            </TouchableOpacity>
-          )}
+            {/* 인증 버튼: 미완료 상태일 때 */}
+            {!mission.completed && (
+              <TouchableOpacity
+                style={[
+                  styles.actionButton,
+                  verificationType === 'GPS' ? styles.gpsButton :
+                  verificationType === 'TIME' ? styles.timeButton :
+                  styles.completeButton,
+                  disabled && styles.disabledButton
+                ]}
+                onPress={disabled ? undefined : handleVerifyPress}
+                disabled={loading || disabled}
+                activeOpacity={disabled ? 1 : 0.7}
+              >
+                <Text style={[
+                  styles.actionText,
+                  styles.completeText,
+                  disabled && styles.disabledText
+                ]}>
+                  {disabled ? '비활성화' : loading ? '처리중...' : getVerifyButtonLabel()}
+                </Text>
+              </TouchableOpacity>
+            )}
           </View>
         )}
       </View>
-    </View>
+    </TouchableOpacity>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     backgroundColor: colors.background.primary,
-    borderRadius: borderRadius.xl,
-    padding: spacing[5],
-    marginVertical: spacing[2],
-    borderWidth: 0,
-    ...shadows.lg,
+    borderRadius: borderRadius.base,
+    padding: spacing[4],
+    marginVertical: spacing[1],
+    borderWidth: 1,
+    borderColor: colors.border.light,
   },
 
   header: {
@@ -223,14 +251,31 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
 
+  categoryNameContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.gray[100],
+    borderRadius: borderRadius.base,
+    paddingHorizontal: spacing[2],
+    paddingVertical: 2,
+    gap: spacing[1],
+    flexShrink: 0,
+    flexWrap: 'nowrap',
+  },
   categoryEmoji: {
-    fontSize: typography.fontSize.xl,
-    marginRight: spacing[2],
+    fontSize: typography.fontSize.sm,
+    flexShrink: 0,
   },
   categoryImage: {
-    width: 24,
-    height: 24,
-    marginRight: spacing[2],
+    width: 16,
+    height: 16,
+    flexShrink: 0,
+  },
+  categoryName: {
+    fontSize: typography.fontSize.xs,
+    fontWeight: typography.fontWeight.normal,
+    color: colors.text.secondary,
+    flexShrink: 0,
   },
   statusWrapper: {
     flexDirection: 'row',
@@ -242,17 +287,11 @@ const styles = StyleSheet.create({
     height: 16,
   },
 
-  categoryName: {
-    fontSize: typography.fontSize.sm,
-    fontWeight: typography.fontWeight.medium,
-    color: colors.text.secondary,
-  },
-
   statusContainer: {
     alignItems: 'center',
     justifyContent: 'center',
-    minHeight: 36,
-    minWidth: 36,
+    minHeight: 28,
+    minWidth: 28,
   },
 
   pendingText: {
@@ -266,21 +305,67 @@ const styles = StyleSheet.create({
     fontWeight: typography.fontWeight.medium,
   },
 
+  verifiedBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.green[100],
+    paddingHorizontal: spacing[2],
+    paddingVertical: spacing[1],
+    borderRadius: borderRadius.full,
+    gap: spacing[1],
+  },
+  verifiedIcon: {
+    fontSize: typography.fontSize.xs,
+    color: colors.green[500],
+    fontWeight: typography.fontWeight.bold,
+  },
+  verifiedText: {
+    fontSize: typography.fontSize.xs,
+    color: colors.green[500],
+    fontWeight: typography.fontWeight.medium,
+  },
+  pendingBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.orange[100],
+    paddingHorizontal: spacing[2],
+    paddingVertical: spacing[1],
+    borderRadius: borderRadius.full,
+    gap: spacing[1],
+  },
+  pendingIcon: {
+    fontSize: typography.fontSize.xs,
+  },
+  inProgressBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.gray[100],
+    paddingHorizontal: spacing[2],
+    paddingVertical: spacing[1],
+    borderRadius: borderRadius.full,
+    gap: spacing[1],
+  },
+  inProgressIcon: {
+    fontSize: typography.fontSize.xs,
+    color: colors.gray[500],
+  },
+
   content: {
     marginBottom: spacing[3],
   },
 
   title: {
-    fontSize: typography.fontSize.lg,
-    fontWeight: typography.fontWeight.semibold,
+    fontSize: typography.fontSize.base,
+    fontWeight: typography.fontWeight.normal,
     color: colors.text.primary,
-    marginBottom: spacing[1],
+    marginBottom: spacing[2],
+    lineHeight: typography.fontSize.base * 1.4,
   },
 
   description: {
-    fontSize: typography.fontSize.base,
+    fontSize: typography.fontSize.sm,
     color: colors.text.secondary,
-    lineHeight: typography.lineHeight.normal * typography.fontSize.base,
+    lineHeight: typography.fontSize.sm * 1.5,
   },
 
   photoContainer: {
@@ -290,7 +375,7 @@ const styles = StyleSheet.create({
   },
   photo: {
     width: '100%',
-    height: 120,
+    height: 80,
     borderRadius: borderRadius.base,
   },
   deletePhotoButton: {
@@ -314,7 +399,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: spacing[1],
+    marginTop: spacing[2],
   },
   actionButtonsContainer: {
     flexDirection: 'row',
@@ -334,15 +419,26 @@ const styles = StyleSheet.create({
 
   actionButton: {
     paddingHorizontal: spacing[4],
-    paddingVertical: spacing[2],
+    paddingVertical: spacing[1],
     borderRadius: borderRadius.xl,
-    minHeight: 40,
+    minHeight: 32,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: colors.white,
+    borderWidth: 1,
+    borderColor: colors.primary[500],
   },
 
   completeButton: {
-    backgroundColor: colors.primary[500],
+    // 기본 actionButton 스타일 사용
+  },
+
+  gpsButton: {
+    // 기본 actionButton 스타일 사용
+  },
+
+  timeButton: {
+    // 기본 actionButton 스타일 사용
   },
 
   uncompleteButton: {
@@ -361,7 +457,7 @@ const styles = StyleSheet.create({
   },
 
   completeText: {
-    color: colors.text.inverse,
+    color: colors.primary[500],
   },
 
   uncompleteText: {
@@ -369,7 +465,7 @@ const styles = StyleSheet.create({
   },
 
   viewText: {
-    color: colors.primary[600],
+    color: colors.primary[500],
   },
   photoIconButton: {
     width: 40,
@@ -388,13 +484,13 @@ const styles = StyleSheet.create({
   shareButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: spacing[3],
-    paddingVertical: spacing[2],
-    borderRadius: borderRadius.xl,
+    paddingHorizontal: spacing[2],
+    paddingVertical: spacing[1.5],
+    borderRadius: borderRadius.base,
     backgroundColor: colors.primary[100],
     borderWidth: 1,
     borderColor: colors.primary[300],
-    minHeight: 40,
+    minHeight: 32,
     justifyContent: 'center',
     gap: spacing[1],
   },
@@ -405,7 +501,7 @@ const styles = StyleSheet.create({
   shareButtonText: {
     fontSize: typography.fontSize.sm,
     fontWeight: typography.fontWeight.medium,
-    color: colors.primary[700],
+    color: colors.primary[500],
   },
   disabledButton: {
     backgroundColor: colors.gray[200],

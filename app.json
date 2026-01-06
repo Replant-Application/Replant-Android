@@ -1,10 +1,8 @@
 {
   "name": "ReplantMobileApp",
-  "displayName": "ReplantMobileApp",
+  "displayName": "Replant",
+  "main": "index.js",
   "android": {
     "package": "com.anonymous.replantmobileapp"
-  },
-  "ios": {
-    "bundleIdentifier": "com.anonymous.replantmobileapp"
   }
 }

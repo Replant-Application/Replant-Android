@@ -24,6 +24,7 @@ import {
 import { useOverlay } from '../../contexts/OverlayContext';
 import { getChatRooms } from '../../api/chatApi';
 import { colors, spacing, typography, borderRadius, shadows } from '../../utils/designTokens';
+import { formatTimeAgo } from '../../utils/dateUtils';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const DROPDOWN_WIDTH = Math.min(SCREEN_WIDTH - 32, 340);
@@ -119,21 +120,7 @@ const ChatDropdown: React.FC<ChatDropdownProps> = ({
     }
   }, [isVisible, fadeAnim, scaleAnim, loadChatRooms]);
 
-  // 상대 시간 표시
-  const formatTimeAgo = (dateString: string) => {
-    const now = new Date();
-    const date = new Date(dateString);
-    const diff = now.getTime() - date.getTime();
-    const minutes = Math.floor(diff / 60000);
-    const hours = Math.floor(diff / 3600000);
-    const days = Math.floor(diff / 86400000);
-
-    if (minutes < 1) return '방금';
-    if (minutes < 60) return `${minutes}분`;
-    if (hours < 24) return `${hours}시간`;
-    if (days < 7) return `${days}일`;
-    return `${date.getMonth() + 1}/${date.getDate()}`;
-  };
+  // 상대 시간 표시 (shortFormat: true, omitAgo: true로 "방금", "X분" 형식 사용)
 
   // 채팅방 클릭 핸들러
   const handleChatRoomPress = (room: ChatRoom) => {
@@ -244,7 +231,7 @@ const ChatDropdown: React.FC<ChatDropdownProps> = ({
                         </Text>
                         {room.lastMessage && (
                           <Text style={styles.time}>
-                            {formatTimeAgo(room.lastMessage.createdAt)}
+                            {formatTimeAgo(room.lastMessage.createdAt, { shortFormat: true, omitAgo: true })}
                           </Text>
                         )}
                       </View>

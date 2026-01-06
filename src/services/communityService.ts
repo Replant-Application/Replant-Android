@@ -241,30 +241,16 @@ export const getPost = async (
   }
 };
 
-// 백엔드 댓글 응답 타입
-interface BackendCommentResponse {
+// 댓글 생성 백엔드 응답 타입
+interface CreateCommentResponse {
   id: number;
   userId: number;
   userNickname: string;
   userProfileImg?: string;
   content: string;
+  parentId?: number;
   createdAt: string;
-  updatedAt?: string;
 }
-
-/**
- * 백엔드 댓글 응답을 프론트엔드 형식으로 변환
- */
-const transformBackendComment = (comment: BackendCommentResponse | any, postId?: string): CommunityComment => ({
-  id: (comment.id || comment.comment_id || '').toString(),
-  comment_id: (comment.id || comment.comment_id || '').toString(),
-  post_id: postId || '',
-  content: comment.content || '',
-  author: (comment.userId || comment.author || '').toString(),
-  author_nickname: comment.userNickname || comment.author_nickname || '알 수 없음',
-  created_at: comment.createdAt || comment.created_at || new Date().toISOString(),
-  updated_at: comment.updatedAt || comment.updated_at,
-});
 
 /**
  * 댓글 생성 - 백엔드 API 사용
@@ -277,21 +263,26 @@ export const createComment = async (
 ): Promise<ServiceResult<CommunityComment>> => {
   try {
     const endpoint = API_CONFIG.endpoints.post.createComment.replace(':postId', postId);
-    const result = await apiClient.post<BackendCommentResponse>(endpoint, {
+    const result = await apiClient.post<CreateCommentResponse>(endpoint, {
       content: content.trim(),
-      parentCommentId,
+      parentId: parentCommentId ? parseInt(parentCommentId, 10) : undefined,
     });
 
     if (result.success && result.data) {
       // 백엔드 응답을 프론트엔드 형식으로 변환
-      const transformedComment = transformBackendComment(result.data, postId);
-      // 백엔드에서 사용자 닉네임이 없으면 현재 사용자 닉네임 사용
-      if (!transformedComment.author_nickname || transformedComment.author_nickname === '알 수 없음') {
-        transformedComment.author_nickname = nickname;
-      }
+      const comment: CommunityComment = {
+        id: result.data.id.toString(),
+        comment_id: result.data.id.toString(),
+        post_id: postId,
+        content: result.data.content,
+        author: result.data.userId.toString(),
+        author_nickname: result.data.userNickname,
+        created_at: result.data.createdAt,
+        parent_comment_id: result.data.parentId?.toString(),
+      };
       return {
         success: true,
-        data: transformedComment
+        data: comment
       };
     }
 
@@ -323,19 +314,25 @@ export const updateComment = async (
       .replace(':postId', postId || '0')
       .replace(':commentId', commentId);
 
-    const result = await apiClient.put<BackendCommentResponse>(endpoint, {
+    const result = await apiClient.put<CreateCommentResponse>(endpoint, {
       content: content.trim(),
     });
 
     if (result.success && result.data) {
       // 백엔드 응답을 프론트엔드 형식으로 변환
-      const transformedComment = transformBackendComment(result.data, postId);
-      if (!transformedComment.author_nickname || transformedComment.author_nickname === '알 수 없음') {
-        transformedComment.author_nickname = nickname;
-      }
+      const comment: CommunityComment = {
+        id: result.data.id.toString(),
+        comment_id: result.data.id.toString(),
+        post_id: postId || '',
+        content: result.data.content,
+        author: result.data.userId.toString(),
+        author_nickname: result.data.userNickname,
+        created_at: result.data.createdAt,
+        parent_comment_id: result.data.parentId?.toString(),
+      };
       return {
         success: true,
-        data: transformedComment
+        data: comment
       };
     }
 
@@ -384,6 +381,42 @@ export const deleteComment = async (
   }
 };
 
+// 백엔드 댓글 응답 타입
+interface BackendComment {
+  id: number;
+  userId: number;
+  userNickname: string;
+  userProfileImg?: string;
+  content: string;
+  parentId?: number;
+  replies?: BackendComment[];
+  replyCount?: number;
+  createdAt: string;
+  updatedAt?: string;
+}
+
+interface BackendCommentPageResponse {
+  content: BackendComment[];
+  totalElements: number;
+  totalPages: number;
+  number: number;
+}
+
+/**
+ * 백엔드 댓글을 프론트엔드 형식으로 변환
+ */
+const transformBackendComment = (comment: BackendComment, postId: string): CommunityComment => ({
+  id: comment.id.toString(),
+  comment_id: comment.id.toString(),
+  post_id: postId,
+  content: comment.content,
+  author: comment.userId.toString(),
+  author_nickname: comment.userNickname,
+  created_at: comment.createdAt,
+  updated_at: comment.updatedAt,
+  parent_comment_id: comment.parentId?.toString(),
+});
+
 /**
  * 댓글 목록 조회 - 백엔드 API 사용
  */
@@ -393,22 +426,33 @@ export const getComments = async (
 ): Promise<CommunityComment[]> => {
   try {
     const endpoint = API_CONFIG.endpoints.post.comments.replace(':postId', postId);
-    const result = await apiClient.get<BackendCommentResponse[] | any>(endpoint);
+    const result = await apiClient.get<BackendCommentPageResponse | BackendComment[]>(endpoint);
 
     if (result.success && result.data) {
-      let rawComments = result.data;
-      // Page 객체인 경우 content 추출
+      let backendComments: BackendComment[] = [];
+
+      // Page 객체인지 배열인지 확인
       if (result.data && typeof result.data === 'object' && 'content' in result.data) {
-        rawComments = result.data.content || [];
+        backendComments = (result.data as BackendCommentPageResponse).content || [];
+      } else if (Array.isArray(result.data)) {
+        backendComments = result.data;
       }
-      const comments = Array.isArray(rawComments) ? rawComments : [];
 
-      // 백엔드 응답을 프론트엔드 형식으로 변환
-      const transformedComments = comments.map(comment => transformBackendComment(comment, postId));
+      // 댓글과 대댓글 변환
+      const allComments: CommunityComment[] = [];
+      backendComments.forEach(comment => {
+        allComments.push(transformBackendComment(comment, postId));
+        // 대댓글도 변환
+        if (comment.replies && comment.replies.length > 0) {
+          comment.replies.forEach(reply => {
+            allComments.push(transformBackendComment(reply, postId));
+          });
+        }
+      });
 
-      return transformedComments.sort((a, b) =>
-        new Date(a.created_at || 0).getTime() -
-        new Date(b.created_at || 0).getTime()
+      // 생성일 기준 정렬
+      return allComments.sort((a, b) =>
+        new Date(a.created_at || 0).getTime() - new Date(b.created_at || 0).getTime()
       );
     }
 

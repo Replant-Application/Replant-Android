@@ -27,11 +27,31 @@ export class ApiClient {
   private accessToken: string | null = null;
   private isRefreshing: boolean = false;
   private refreshSubscribers: Array<(token: string) => void> = [];
+  private onTokenExpiredCallback: (() => void) | null = null;
+
+  private tokenLoaded: boolean = false;
 
   constructor(baseURL: string = API_CONFIG.baseURL) {
     this.baseURL = baseURL;
     // 초기화 시 저장된 토큰 로드
     this.loadAccessToken();
+  }
+
+  /**
+   * 토큰 만료 콜백 설정
+   */
+  setOnTokenExpiredCallback(callback: () => void): void {
+    this.onTokenExpiredCallback = callback;
+  }
+
+  /**
+   * 토큰이 로드될 때까지 대기
+   */
+  private async ensureTokenLoaded(): Promise<void> {
+    if (this.tokenLoaded) return;
+
+    // 토큰 로드가 아직 완료되지 않았으면 다시 시도
+    await this.loadAccessToken();
   }
 
   /**
@@ -43,8 +63,10 @@ export class ApiClient {
       if (token) {
         this.accessToken = token;
       }
+      this.tokenLoaded = true;
     } catch (error) {
       console.error('Failed to load access token:', error);
+      this.tokenLoaded = true; // 실패해도 로드 시도 완료로 표시
     }
   }
 
@@ -109,6 +131,10 @@ export class ApiClient {
       // 토큰 갱신 실패 시 로그아웃 처리
       const { clearAuthData } = await import('../utils/tokenStorage');
       await clearAuthData();
+      // 토큰 만료 콜백 호출
+      if (this.onTokenExpiredCallback) {
+        this.onTokenExpiredCallback();
+      }
       return null;
     } finally {
       this.isRefreshing = false;
@@ -122,24 +148,41 @@ export class ApiClient {
     endpoint: string,
     options: ApiRequestOptions = {}
   ): Promise<ServiceResult<T>> {
+    // URL 구성 (params가 있으면 query string 추가)
+    let url = `${this.baseURL}${endpoint}`;
+
     try {
-      // URL 구성 (params가 있으면 query string 추가)
-      let url = `${this.baseURL}${endpoint}`;
+      // 토큰이 로드될 때까지 대기
+      await this.ensureTokenLoaded();
+
       if (options.params) {
-        const queryString = new URLSearchParams(
-          Object.entries(options.params).reduce((acc, [key, value]) => {
-            acc[key] = String(value);
-            return acc;
-          }, {} as Record<string, string>)
-        ).toString();
-        url = `${url}?${queryString}`;
+        // undefined 값은 쿼리 파라미터에서 제외
+        const filteredParams = Object.entries(options.params).filter(
+          ([_, value]) => value !== undefined && value !== null
+        );
+        if (filteredParams.length > 0) {
+          const queryString = new URLSearchParams(
+            filteredParams.reduce((acc, [key, value]) => {
+              acc[key] = String(value);
+              return acc;
+            }, {} as Record<string, string>)
+          ).toString();
+          url = `${url}?${queryString}`;
+        }
       }
 
       // 헤더 구성
       const headers: Record<string, string> = {
         'Content-Type': 'application/json',
+        'Accept': 'application/json',
         ...options.headers,
       };
+
+      // CORS를 위한 Origin 헤더 추가 (필요시)
+      // Android 에뮬레이터에서 localhost로 요청할 때 서버가 인식할 수 있도록
+      if (url.includes('10.0.2.2')) {
+        headers['Origin'] = 'http://localhost:8081';
+      }
 
       // 토큰이 있으면 Authorization 헤더 추가
       if (this.accessToken) {
@@ -196,16 +239,62 @@ export class ApiClient {
       }
 
       // 에러 응답
+      // 403, 404 등 다양한 HTTP 에러에 대한 상세 메시지 제공
+      let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+      
+      // HTML 응답인 경우 파싱 시도
+      if (typeof data === 'string' && data.includes('<html>')) {
+        // HTML에서 에러 메시지 추출 시도
+        const titleMatch = data.match(/<title>(.*?)<\/title>/i);
+        const h2Match = data.match(/<h2>(.*?)<\/h2>/i);
+        if (titleMatch && titleMatch[1]) {
+          errorMessage = titleMatch[1];
+        } else if (h2Match && h2Match[1]) {
+          errorMessage = h2Match[1];
+        } else {
+          errorMessage = '서버에서 HTML 에러 페이지를 반환했습니다. API 엔드포인트가 올바른지 확인하세요.';
+        }
+      } else if (data) {
+        if (typeof data === 'string') {
+          errorMessage = data;
+        } else if (typeof data === 'object') {
+          errorMessage = data?.message || data?.error || data?.msg || data?.detail || errorMessage;
+        }
+      }
+      
+      console.error('[API Client] Error response:', {
+        status: response.status,
+        statusText: response.statusText,
+        url,
+        contentType: response.headers.get('content-type'),
+        dataPreview: typeof data === 'string' ? data.substring(0, 200) : data,
+      });
+      
       return {
         success: false,
-        error: data?.message || data?.error || `HTTP ${response.status}: ${response.statusText}`,
+        error: errorMessage,
         data: data as T,
       };
     } catch (error) {
       // 네트워크 에러 등
+      console.error('[API Client] Request failed:', {
+        url,
+        method: options.method || 'GET',
+        error: error instanceof Error ? error.message : String(error),
+        errorType: error instanceof TypeError ? 'NetworkError' : 'UnknownError',
+      });
+      
+      // 네트워크 에러인 경우 더 자세한 메시지 제공
+      let errorMessage = '알 수 없는 오류가 발생했습니다.';
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        errorMessage = '네트워크 연결에 실패했습니다. 인터넷 연결을 확인하거나 서버가 실행 중인지 확인해주세요.';
+      } else if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+      
       return {
         success: false,
-        error: error instanceof Error ? error.message : '알 수 없는 오류가 발생했습니다.',
+        error: errorMessage,
       };
     }
   }
@@ -246,13 +335,16 @@ export class ApiClient {
   }
 
   /**
-   * 파일 업로드 요청 (FormData)
+   * 파일 업로드 (FormData)
    */
   async upload<T>(endpoint: string, formData: FormData): Promise<ServiceResult<T>> {
     try {
+      // 토큰이 로드될 때까지 대기
+      await this.ensureTokenLoaded();
+
       const url = `${this.baseURL}${endpoint}`;
 
-      // 헤더 구성 (Content-Type은 자동 설정되므로 명시하지 않음)
+      // 헤더 구성 (Content-Type은 FormData에서 자동 설정됨)
       const headers: Record<string, string> = {};
 
       // 토큰이 있으면 Authorization 헤더 추가
@@ -299,7 +391,7 @@ export class ApiClient {
       }
 
       // 401 Unauthorized - 토큰 갱신 후 재시도
-      if (response.status === 401 && !url.includes('/auth/refresh')) {
+      if (response.status === 401) {
         const newToken = await this.handleTokenRefresh();
         if (newToken) {
           return this.upload<T>(endpoint, formData);
@@ -310,12 +402,11 @@ export class ApiClient {
       return {
         success: false,
         error: data?.message || data?.error || `HTTP ${response.status}: ${response.statusText}`,
-        data: data as T,
       };
     } catch (error) {
       return {
         success: false,
-        error: error instanceof Error ? error.message : '알 수 없는 오류가 발생했습니다.',
+        error: error instanceof Error ? error.message : '파일 업로드 중 오류가 발생했습니다.',
       };
     }
   }

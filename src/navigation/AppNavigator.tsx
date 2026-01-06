@@ -1,9 +1,12 @@
-import React, { useState, useCallback, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Image, Platform, BackHandler, ToastAndroid } from 'react-native';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, Image, Platform, BackHandler, ToastAndroid, Animated, Easing } from 'react-native';
 import { useUser } from '../contexts/UserContext';
 import { SCREEN_NAMES } from '../utils/constants';
 import { colors, spacing, typography } from '../utils/designTokens';
 import { RootStackParamList } from '../types/navigation';
+import { apiClient } from '../api/client';
+import { logout } from '../services/authService';
+import AlertModal from '../components/ui/AlertModal';
 
 // 화면 컴포넌트들
 import StartScreen from '../screens/StartScreen';
@@ -15,7 +18,6 @@ import DiaryScreen from '../screens/DiaryScreen';
 import MissionScreen from '../screens/MissionScreen';
 import CustomMissionCreateScreen from '../screens/CustomMissionCreateScreen';
 import CounselingSelectScreen from '../screens/CounselingSelectScreen';
-import ChatBotScreen from '../screens/ChatBotScreen';
 import PlacesSearchScreen from '../screens/PlacesSearchScreen';
 import CharacterDetailScreen from '../screens/CharacterDetailScreen';
 import SettingsScreen from '../screens/SettingsScreen';
@@ -34,13 +36,19 @@ import AdminUserDetailScreen from '../screens/AdminUserDetailScreen';
 import AdminUserEditScreen from '../screens/AdminUserEditScreen';
 import MissionGroupScreen from '../screens/MissionGroupScreen';
 import MissionDetailScreen from '../screens/MissionDetailScreen';
+import BadgeDetailScreen from '../screens/BadgeDetailScreen';
+import VerificationPostCreateScreen from '../screens/VerificationPostCreateScreen';
+import NotificationScreen from '../screens/NotificationScreen';
 
 // 간단한 상태 기반 네비게이션 (React Navigation 없이)
 const AppNavigator = () => {
-  const { isLoggedIn, isLoading } = useUser();
+  const { isLoggedIn, isLoading, logout: userLogout } = useUser();
   const [currentScreen, setCurrentScreen] = useState(SCREEN_NAMES.START);
   const [navigationParams, setNavigationParams] = useState({});
   const [backPressedOnce, setBackPressedOnce] = useState(false);
+  const [showTokenExpiredModal, setShowTokenExpiredModal] = useState(false);
+  const fadeAnim = useRef(new Animated.Value(1)).current;
+  const slideAnim = useRef(new Animated.Value(0)).current;
 
   // 메인 탭 화면인지 확인
   const isMainTabScreen = useCallback((screen: string) => {
@@ -53,13 +61,51 @@ const AppNavigator = () => {
     ].includes(screen);
   }, []);
 
+  // 토큰 만료 콜백 설정
+  useEffect(() => {
+    apiClient.setOnTokenExpiredCallback(() => {
+      setShowTokenExpiredModal(true);
+    });
+  }, []);
+
+  // 토큰 만료 모달 닫기 및 로그아웃 처리
+  const handleTokenExpiredClose = useCallback(async () => {
+    setShowTokenExpiredModal(false);
+    await logout();
+    await userLogout();
+    setCurrentScreen(SCREEN_NAMES.START);
+  }, [userLogout]);
+
+  // 화면 전환 애니메이션 (모든 hooks는 조건부 렌더링 이전에 위치해야 함)
+  useEffect(() => {
+    // 초기값 설정 (새 화면이 약간 아래에서 시작)
+    fadeAnim.setValue(0.5);
+    slideAnim.setValue(10);
+    
+    // 부드러운 페이드와 슬라이드 인 (더 자연스러운 전환)
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 280,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: true,
+      }),
+      Animated.timing(slideAnim, {
+        toValue: 0,
+        duration: 280,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, [currentScreen, fadeAnim, slideAnim]);
+
   // 뒤로가기 버튼 처리
   useEffect(() => {
     if (Platform.OS !== 'android' || !isLoggedIn) return;
 
     const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
       // 메인 탭 화면이면 두 번 눌러서 종료
-      if (isMainTabScreen(currentScreen)) {
+      if (currentScreen && isMainTabScreen(currentScreen)) {
         if (backPressedOnce) {
           BackHandler.exitApp();
           return true;
@@ -72,11 +118,11 @@ const AppNavigator = () => {
 
       // 상세 화면이면 goBack 호출
       // 화면별 뒤로가기 목적지 정의
-      if (currentScreen === SCREEN_NAMES.CHATBOT || currentScreen === SCREEN_NAMES.PLACES_SEARCH) {
+      if (currentScreen === SCREEN_NAMES.PLACES_SEARCH) {
         setCurrentScreen(SCREEN_NAMES.COUNSELING_SELECT);
       } else if (currentScreen === SCREEN_NAMES.COUNSELING_SELECT || currentScreen === SCREEN_NAMES.INFO) {
         setCurrentScreen(SCREEN_NAMES.SETTINGS);
-      } else if (currentScreen === SCREEN_NAMES.PHOTO_SELECT || currentScreen === SCREEN_NAMES.MISSION_DETAIL) {
+      } else if (currentScreen === SCREEN_NAMES.PHOTO_SELECT || currentScreen === SCREEN_NAMES.MISSION_DETAIL || currentScreen === SCREEN_NAMES.BADGE_DETAIL || currentScreen === SCREEN_NAMES.VERIFICATION_POST_CREATE) {
         setCurrentScreen(SCREEN_NAMES.MISSION);
       } else if (
         currentScreen === SCREEN_NAMES.COMMUNITY_POST_CREATE ||
@@ -90,6 +136,8 @@ const AppNavigator = () => {
         currentScreen === SCREEN_NAMES.CALENDAR
       ) {
         setCurrentScreen(SCREEN_NAMES.SETTINGS);
+      } else if (currentScreen === SCREEN_NAMES.NOTIFICATION) {
+        setCurrentScreen(SCREEN_NAMES.HOME);
       } else {
         setCurrentScreen(SCREEN_NAMES.HOME);
       }
@@ -103,7 +151,11 @@ const AppNavigator = () => {
   if (isLoading) {
     return (
       <View style={styles.loadingContainer}>
-        <Text>로딩 중...</Text>
+        <Image
+          source={require('../assets/images/Replant_Loading.png')}
+          style={styles.loadingImage}
+          resizeMode="contain"
+        />
       </View>
     );
   }
@@ -127,9 +179,17 @@ const AppNavigator = () => {
 
     return (
       <View style={styles.container}>
-        <View style={styles.screenContainer}>
+        <Animated.View 
+          style={[
+            styles.screenContainer,
+            {
+              opacity: fadeAnim,
+              transform: [{ translateY: slideAnim }],
+            }
+          ]}
+        >
           {renderAuthScreen()}
-        </View>
+        </Animated.View>
       </View>
     );
   }
@@ -142,11 +202,11 @@ const AppNavigator = () => {
 
   const goBack = () => {
     // 화면별 뒤로가기 목적지 정의
-    if (currentScreen === SCREEN_NAMES.CHATBOT || currentScreen === SCREEN_NAMES.PLACES_SEARCH) {
+    if (currentScreen === SCREEN_NAMES.PLACES_SEARCH) {
       setCurrentScreen(SCREEN_NAMES.COUNSELING_SELECT);
     } else if (currentScreen === SCREEN_NAMES.COUNSELING_SELECT || currentScreen === SCREEN_NAMES.INFO) {
       setCurrentScreen(SCREEN_NAMES.SETTINGS);
-    } else if (currentScreen === SCREEN_NAMES.PHOTO_SELECT || currentScreen === SCREEN_NAMES.MISSION_DETAIL) {
+    } else if (currentScreen === SCREEN_NAMES.PHOTO_SELECT || currentScreen === SCREEN_NAMES.MISSION_DETAIL || currentScreen === SCREEN_NAMES.BADGE_DETAIL || currentScreen === SCREEN_NAMES.VERIFICATION_POST_CREATE) {
       setCurrentScreen(SCREEN_NAMES.MISSION);
     } else if (
       currentScreen === SCREEN_NAMES.COMMUNITY_POST_CREATE ||
@@ -160,6 +220,8 @@ const AppNavigator = () => {
       currentScreen === SCREEN_NAMES.CALENDAR
     ) {
       setCurrentScreen(SCREEN_NAMES.SETTINGS);
+    } else if (currentScreen === SCREEN_NAMES.NOTIFICATION) {
+      setCurrentScreen(SCREEN_NAMES.HOME);
     } else {
       setCurrentScreen(SCREEN_NAMES.HOME);
     }
@@ -196,8 +258,6 @@ const AppNavigator = () => {
         return <CustomMissionCreateScreen navigation={navigation} route={route} />;
       case SCREEN_NAMES.COUNSELING_SELECT:
         return <CounselingSelectScreen navigation={navigation} />;
-      case SCREEN_NAMES.CHATBOT:
-        return <ChatBotScreen navigation={navigation} />;
       case SCREEN_NAMES.PLACES_SEARCH:
         return <PlacesSearchScreen navigation={navigation} />;
       case SCREEN_NAMES.CHARACTER_DETAIL:
@@ -234,6 +294,12 @@ const AppNavigator = () => {
         return <MissionGroupScreen navigation={navigation} />;
       case SCREEN_NAMES.MISSION_DETAIL:
         return <MissionDetailScreen navigation={navigation} route={route} />;
+      case SCREEN_NAMES.BADGE_DETAIL:
+        return <BadgeDetailScreen navigation={navigation} route={route} />;
+      case SCREEN_NAMES.VERIFICATION_POST_CREATE:
+        return <VerificationPostCreateScreen navigation={navigation} route={route} />;
+      case SCREEN_NAMES.NOTIFICATION:
+        return <NotificationScreen navigation={navigation} />;
       default:
         return <HomeScreen navigation={navigation} />;
     }
@@ -245,6 +311,15 @@ const AppNavigator = () => {
       <View style={styles.screenContainer}>
         {renderScreen()}
       </View>
+
+      {/* 토큰 만료 모달 */}
+      <AlertModal
+        visible={showTokenExpiredModal}
+        title="세션이 만료되었습니다"
+        message="로그인 세션이 만료되었습니다. 다시 로그인해주세요."
+        buttonText="확인"
+        onClose={handleTokenExpiredClose}
+      />
 
       {/* 하단 탭 네비게이션 */}
       <View style={styles.tabBar}>
@@ -356,6 +431,11 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: '#ffffff',
+  },
+  loadingImage: {
+    width: 200,
+    height: 200,
   },
   screenContainer: {
     flex: 1,
@@ -365,8 +445,8 @@ const styles = StyleSheet.create({
     backgroundColor: colors.white,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
-    paddingBottom: spacing[3],
-    paddingTop: spacing[2],
+    paddingBottom: Platform.OS === 'android' ? spacing[12] : spacing[5], // Android 네비게이션 바 대응 (48px)
+    paddingTop: spacing[3],
     paddingHorizontal: spacing[2],
     shadowColor: '#000',
     shadowOffset: {
