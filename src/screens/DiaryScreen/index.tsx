@@ -10,7 +10,8 @@ import {
   Image,
   Animated,
   Dimensions,
-  PanResponder
+  PanResponder,
+  Platform
 } from 'react-native';
 import { useDiary } from '../../hooks/useDiary';
 import { useCharacter } from '../../hooks/useCharacter';
@@ -22,6 +23,7 @@ import { EMOTION_TAGS } from './DiaryScreen.constants';
 import { DiaryStep } from './DiaryScreen.types';
 import { getEmotionColor, addOpacity } from './DiaryScreen.utils';
 import { getCharacterImage } from '../../utils/characterUtils';
+import { getOptimizedLineHeight } from '../../utils/textStyles';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -644,7 +646,12 @@ const styles = StyleSheet.create({
     color: colors.white,
     textAlign: 'left',
     marginBottom: spacing[1],
-    lineHeight: 28,
+    lineHeight: getOptimizedLineHeight(typography.fontSize['2xl']),
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
   },
   modalContent: {
     marginBottom: spacing[4],
@@ -697,11 +704,21 @@ const styles = StyleSheet.create({
   sliderLabel: {
     fontSize: typography.fontSize.sm,
     color: colors.gray[300],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
   },
   sliderValue: {
     fontSize: typography.fontSize.lg,
     fontWeight: typography.fontWeight.bold,
     color: colors.blue[400],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
   },
   emotionsContainer: {
     maxHeight: 450,
@@ -724,6 +741,11 @@ const styles = StyleSheet.create({
   emotionTagText: {
     fontSize: typography.fontSize.sm,
     color: colors.white,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
   },
   emotionTagTextSelected: {
     color: colors.gray[900],
@@ -741,6 +763,12 @@ const styles = StyleSheet.create({
     color: colors.white,
     borderWidth: 1,
     borderColor: colors.gray[700],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    textAlignVertical: 'top',
   },
   cancelButton: {
     paddingHorizontal: spacing[6],
@@ -753,6 +781,11 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.sm,
     color: colors.gray[900],
     fontWeight: typography.fontWeight.medium,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
   },
   skipButton: {
     paddingHorizontal: spacing[6],
@@ -765,6 +798,11 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.sm,
     color: colors.gray[900],
     fontWeight: typography.fontWeight.medium,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
   },
   confirmButton: {
     paddingHorizontal: spacing[6],
@@ -781,6 +819,11 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.sm,
     color: colors.gray[800],
     fontWeight: typography.fontWeight.bold,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
   },
   characterContainer: {
     position: 'absolute',
@@ -821,6 +864,11 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.base,
     color: colors.gray[900],
     fontWeight: typography.fontWeight.bold,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
   },
   viewButton: {
     flex: 1,
@@ -833,6 +881,11 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.base,
     color: colors.white,
     fontWeight: typography.fontWeight.bold,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
   },
   nextButton: {
     flex: 1,
@@ -845,6 +898,11 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.base,
     color: colors.gray[900],
     fontWeight: typography.fontWeight.bold,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
   },
   viewContainer: {
     flex: 1,
@@ -877,10 +935,20 @@ const styles = StyleSheet.create({
     fontWeight: typography.fontWeight.bold,
     color: colors.white,
     marginBottom: spacing[2],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
   },
   bookDate: {
     fontSize: typography.fontSize.sm,
     color: colors.gray[300],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
   },
   bookNavigation: {
     flexDirection: 'row',
@@ -901,6 +969,11 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.xl,
     color: colors.white,
     fontWeight: typography.fontWeight.bold,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
   },
   viewDetailButton: {
     marginTop: -spacing[20],
@@ -916,6 +989,11 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.sm,
     color: colors.white,
     fontWeight: typography.fontWeight.bold,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
   },
   emptyView: {
     flex: 1,
@@ -925,6 +1003,11 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: typography.fontSize.lg,
     color: colors.white,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
   },
   detailContainer: {
     flex: 1,
@@ -953,12 +1036,22 @@ const styles = StyleSheet.create({
     color: colors.text.primary,
     marginTop: spacing[3],
     marginBottom: spacing[2],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
   },
   signboardContent: {
     fontSize: typography.fontSize.sm,
     color: colors.text.secondary,
-    lineHeight: 20,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
     marginBottom: spacing[4],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
   },
   detailButtons: {
     flexDirection: 'row',
@@ -976,6 +1069,11 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.base,
     color: colors.white,
     fontWeight: typography.fontWeight.bold,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
   },
   deleteButton: {
     flex: 1,
@@ -988,6 +1086,11 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.base,
     color: colors.white,
     fontWeight: typography.fontWeight.bold,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
   },
 });
 
