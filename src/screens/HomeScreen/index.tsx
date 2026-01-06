@@ -254,20 +254,19 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                 activeOpacity={0.9}
               >
                 <Animated.View
-                  style={{
-                    width: '100%',
-                    height: '100%',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    // 높이에 따라 캐릭터 크기도 조절
-                    transform: [{
-                      scale: heroHeightAnim.interpolate({
-                        inputRange: [MIN_HERO_HEIGHT, MAX_HERO_HEIGHT],
-                        outputRange: [0.6, 1],
-                        extrapolate: 'clamp',
-                      }),
-                    }],
-                  }}
+                  style={[
+                    styles.characterAnimatedContainer,
+                    {
+                      // 높이에 따라 캐릭터 크기도 조절
+                      transform: [{
+                        scale: heroHeightAnim.interpolate({
+                          inputRange: [MIN_HERO_HEIGHT, MAX_HERO_HEIGHT],
+                          outputRange: [0.6, 1],
+                          extrapolate: 'clamp',
+                        }),
+                      }],
+                    },
+                  ]}
                 >
                   <FastImage
                     key={`character-${currentCharacter.level || 1}-${characterEmotion}`}
