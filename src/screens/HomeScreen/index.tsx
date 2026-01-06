@@ -5,7 +5,6 @@ import { useCharacter } from '../../hooks/useCharacter';
 import { useMission } from '../../hooks/useMission';
 import { Loading, ErrorBoundary, EmptyState, AppHeader, PlusButton } from '../../components/ui';
 import { colors, spacing, typography, borderRadius, shadows } from '../../utils/designTokens';
-import { ScreenNames } from '../../types';
 import { getCharacterImage } from '../../utils/characterUtils';
 import { HomeScreenProps } from './HomeScreen.types';
 import { getBackgroundImage } from './HomeScreen.utils';
