@@ -14,11 +14,13 @@ import {
   RefreshControl,
   Image,
   Alert,
+  Platform,
 } from 'react-native';
 import { getRecommendations, acceptRecommendation, rejectRecommendation } from '../../api/recommendationApi';
 import { getChatRooms } from '../../api/chatApi';
 import { Loading, Header, EmptyState, TabBar } from '../../components/ui';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
+import { getOptimizedLineHeight } from '../../utils/textStyles';
 import { NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types/navigation';
 import { SCREEN_NAMES } from '../../utils/constants';
@@ -359,6 +361,12 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.sm,
     color: colors.primary[700],
     textAlign: 'center',
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
   },
   listContent: {
     padding: spacing[4],
@@ -393,6 +401,12 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.xl,
     color: colors.primary[700],
     fontWeight: typography.fontWeight.bold as any,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.xl),
   },
   userDetails: {
     marginLeft: spacing[3],
@@ -402,11 +416,23 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.lg,
     fontWeight: typography.fontWeight.semibold as any,
     color: colors.text.primary,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.lg),
   },
   userLevel: {
     fontSize: typography.fontSize.sm,
     color: colors.text.secondary,
     marginTop: spacing[1],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
   },
   matchBadge: {
     backgroundColor: colors.primary[50],
@@ -419,6 +445,12 @@ const styles = StyleSheet.create({
   matchText: {
     fontSize: typography.fontSize.xs,
     color: colors.primary[700],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
   },
   actionButtons: {
     flexDirection: 'row',
@@ -439,6 +471,12 @@ const styles = StyleSheet.create({
     color: colors.text.secondary,
     fontSize: typography.fontSize.base,
     fontWeight: typography.fontWeight.medium as any,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
   },
   acceptButton: {
     backgroundColor: colors.primary[500],
@@ -447,6 +485,12 @@ const styles = StyleSheet.create({
     color: colors.text.inverse,
     fontSize: typography.fontSize.base,
     fontWeight: typography.fontWeight.semibold as any,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
   },
   chatRoomCard: {
     flexDirection: 'row',
@@ -473,6 +517,12 @@ const styles = StyleSheet.create({
     fontSize: 10,
     color: colors.text.inverse,
     fontWeight: typography.fontWeight.bold as any,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(10),
   },
   chatInfo: {
     flex: 1,
@@ -487,20 +537,44 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.base,
     fontWeight: typography.fontWeight.semibold as any,
     color: colors.text.primary,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
   },
   chatTime: {
     fontSize: typography.fontSize.xs,
     color: colors.text.tertiary,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
   },
   lastMessage: {
     fontSize: typography.fontSize.sm,
     color: colors.text.secondary,
     marginTop: spacing[1],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
   },
   matchedMission: {
     fontSize: typography.fontSize.xs,
     color: colors.primary[600],
     marginTop: spacing[1],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
   },
 });
 
