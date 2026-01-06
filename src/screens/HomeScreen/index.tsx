@@ -454,6 +454,12 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
   },
+  characterAnimatedContainer: {
+    width: '100%',
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   bottomSheet: {
     flex: 1,
     backgroundColor: colors.background.primary,
