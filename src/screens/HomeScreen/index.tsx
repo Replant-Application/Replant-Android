@@ -301,9 +301,11 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
           }}
           activeOpacity={0.7}
         >
-          <Text style={styles.dragHandleIcon}>
-            {isHeroCollapsed ? '∨' : '∧'}
-          </Text>
+          <Image
+            source={require('../../assets/images/top.png')}
+            style={styles.dragHandleIcon}
+            resizeMode="contain"
+          />
         </TouchableOpacity>
         
         <ScrollView
