@@ -280,8 +280,15 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
           )}
         </Animated.View>
 
-      {/* 하단: 바텀 시트 스타일 */}
+      {/* 하단: 노트북 스타일 */}
       <View style={styles.bottomSheet}>
+        {/* 스프링 바인딩 */}
+        <View style={styles.spiralBinding}>
+          {Array.from({ length: 14 }).map((_, index) => (
+            <View key={index} style={styles.spiralLoop} />
+          ))}
+        </View>
+        
         {/* 드래그 핸들 - 터치하면 토글 */}
         <TouchableOpacity
           style={styles.dragHandleArea}
@@ -305,6 +312,13 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
             resizeMode="contain"
           />
         </TouchableOpacity>
+        
+        {/* 노트북 줄 */}
+        <View style={styles.notebookLines}>
+          {Array.from({ length: 20 }).map((_, index) => (
+            <View key={index} style={styles.notebookLine} />
+          ))}
+        </View>
         
         <ScrollView
           style={styles.contentScroll}
@@ -455,17 +469,55 @@ const styles = StyleSheet.create({
     height: '100%',
   },
   characterAnimatedContainer: {
-    width: '100%',
-    height: '100%',
+    width: '70%',
+    height: '70%',
     justifyContent: 'center',
     alignItems: 'center',
   },
   bottomSheet: {
     flex: 1,
-    backgroundColor: colors.background.primary,
+    backgroundColor: '#fefcf8', // 크림색 노트북 배경
     borderTopLeftRadius: borderRadius.xl + 8,
     borderTopRightRadius: borderRadius.xl + 8,
     overflow: 'hidden',
+    position: 'relative',
+  },
+  spiralBinding: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 40,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 2,
+    paddingHorizontal: spacing[2],
+    zIndex: 10,
+  },
+  spiralLoop: {
+    width: 8,
+    height: 32,
+    backgroundColor: colors.gray[900],
+    borderRadius: 4,
+    marginHorizontal: 1,
+  },
+  notebookLines: {
+    position: 'absolute',
+    top: 50,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    paddingLeft: spacing[6],
+    paddingRight: spacing[3],
+    paddingTop: spacing[2],
+    zIndex: 1,
+  },
+  notebookLine: {
+    height: 28,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.gray[200],
+    marginBottom: 0,
   },
   dragHandleArea: {
     paddingVertical: spacing[2],
@@ -487,8 +539,11 @@ const styles = StyleSheet.create({
   },
   contentScrollContent: {
     paddingHorizontal: spacing[3],
+    paddingLeft: spacing[6], // 노트북 줄을 위한 왼쪽 패딩
     paddingBottom: 150, // 하단 탭바 높이 + 네비게이션바 + 여유 공간
     flexGrow: 1,
+    zIndex: 2,
+    position: 'relative',
   },
   mainHeader: {
     flexDirection: 'row',
@@ -498,7 +553,8 @@ const styles = StyleSheet.create({
     paddingTop: spacing[2],
   },
   mainTitle: {
-    fontSize: typography.fontSize.lg,
+    lineHeight: 24,
+    fontSize: typography.fontSize.xl,
     fontWeight: typography.fontWeight.normal,
     color: colors.text.primary,
   },
