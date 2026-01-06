@@ -48,6 +48,23 @@ export const uploadMissionVerifyPhoto = async (file: { uri: string; type: string
 };
 
 /**
+ * 커뮤니티/인증글 사진 업로드
+ * POST /files/upload/REPLANT/COMMUNITY
+ * S3의 REPLANT/COMMUNITY 폴더에 업로드됩니다
+ */
+export const uploadCommunityPhoto = async (file: { uri: string; type: string; name: string }): Promise<ServiceResult<UploadResponse>> => {
+  const formData = new FormData();
+  formData.append('file', {
+    uri: Platform.OS === 'android' ? file.uri : file.uri.replace('file://', ''),
+    type: file.type,
+    name: file.name,
+  } as any);
+
+  const endpoint = API_CONFIG.endpoints.file.uploadToFolder.replace(':folder', 'REPLANT/COMMUNITY');
+  return apiClient.upload<UploadResponse>(endpoint, formData);
+};
+
+/**
  * 특정 폴더에 사진 업로드
  * POST /files/upload/:folder
  */

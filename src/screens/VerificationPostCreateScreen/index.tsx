@@ -20,7 +20,7 @@ import {
 import { Header, AlertModal } from '../../components/ui';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
 import { createVerification, updateVerification, getVerification } from '../../api/missionApi';
-import { uploadMissionVerifyPhoto } from '../../api/fileApi';
+import { uploadCommunityPhoto } from '../../api/fileApi';
 import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types/navigation';
 import { launchImageLibrary, launchCamera } from 'react-native-image-picker';
@@ -175,7 +175,7 @@ const VerificationPostCreateScreen: React.FC<VerificationPostCreateScreenProps> 
         name: asset.fileName || `verification_${Date.now()}.jpg`,
       };
 
-      const result = await uploadMissionVerifyPhoto(file);
+      const result = await uploadCommunityPhoto(file);
 
       if (result.success && result.data) {
         setPhotoUrl(result.data.fileUrl);
