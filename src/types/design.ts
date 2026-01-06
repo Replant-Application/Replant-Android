@@ -80,6 +80,11 @@ export interface Spacing {
 
 // 타이포그래피 타입
 export interface Typography {
+  fontFamily: {
+    regular: string;
+    bold?: string;
+    light?: string;
+  };
   fontSize: {
     xs: number;
     sm: number;
