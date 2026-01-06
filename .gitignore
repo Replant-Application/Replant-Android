@@ -1,7 +1,10 @@
 # OSX
 #
-android
-.android
+android/**/*
+!android/main/
+!android/app/src/main/
+!android/app/src/main/**
+
 # Xcode
 #
 build/
