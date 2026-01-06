@@ -1,6 +1,7 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, Platform } from 'react-native';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
+import { getOptimizedLineHeight } from '../../utils/textStyles';
 
 interface ProgressBarProps {
   current: number;
@@ -73,6 +74,12 @@ const styles = StyleSheet.create({
     color: colors.text.secondary,
     marginBottom: spacing[2],
     fontWeight: typography.fontWeight.medium,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
   },
   progressContainer: {
     flexDirection: 'row',
@@ -97,17 +104,35 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.sm,
     color: colors.text.primary,
     fontWeight: typography.fontWeight.medium,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
   },
   percentageText: {
     fontSize: typography.fontSize.sm,
     color: colors.primary[600],
     fontWeight: typography.fontWeight.bold,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
   },
   remainingText: {
     fontSize: typography.fontSize.xs,
     color: colors.text.secondary,
     textAlign: 'center',
     marginTop: spacing[2],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
   },
 });
 

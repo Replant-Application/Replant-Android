@@ -1,6 +1,7 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ViewStyle } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ViewStyle, Platform } from 'react-native';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
+import { getOptimizedLineHeight } from '../../utils/textStyles';
 
 interface ErrorBoundaryProps {
   error?: string | Error;
@@ -43,6 +44,11 @@ const styles = StyleSheet.create({
   icon: {
     fontSize: typography.fontSize['4xl'],
     marginBottom: spacing[4],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
   },
 
   title: {
@@ -51,6 +57,12 @@ const styles = StyleSheet.create({
     color: colors.text.primary,
     marginBottom: spacing[2],
     textAlign: 'center',
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.xl),
   },
 
   message: {
@@ -58,7 +70,12 @@ const styles = StyleSheet.create({
     color: colors.text.secondary,
     textAlign: 'center',
     marginBottom: spacing[6],
-    lineHeight: typography.lineHeight.relaxed * typography.fontSize.base,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
   },
 
   retryButton: {
@@ -72,6 +89,12 @@ const styles = StyleSheet.create({
     color: colors.text.inverse,
     fontSize: typography.fontSize.base,
     fontWeight: typography.fontWeight.medium,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
   },
 });
 

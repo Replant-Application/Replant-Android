@@ -1,6 +1,7 @@
 import React from 'react';
-import { Text, StyleSheet, TextStyle } from 'react-native';
+import { Text, StyleSheet, TextStyle, Platform } from 'react-native';
 import { colors, spacing, typography } from '../../utils/designTokens';
+import { getOptimizedLineHeight } from '../../utils/textStyles';
 
 interface SectionTitleProps {
   title: string;
@@ -46,15 +47,39 @@ const styles = StyleSheet.create({
   },
   sm: {
     fontSize: typography.fontSize.sm,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
   },
   base: {
     fontSize: typography.fontSize.base,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
   },
   lg: {
     fontSize: typography.fontSize.lg,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.lg),
   },
   xl: {
     fontSize: typography.fontSize.xl,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.xl),
   },
 });
 

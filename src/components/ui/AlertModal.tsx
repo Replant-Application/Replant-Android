@@ -10,8 +10,10 @@ import {
   StyleSheet,
   Modal,
   TouchableOpacity,
+  Platform,
 } from 'react-native';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
+import { getOptimizedLineHeight } from '../../utils/textStyles';
 
 interface AlertModalProps {
   visible: boolean;
@@ -75,13 +77,24 @@ const styles = StyleSheet.create({
     color: colors.white,
     marginBottom: spacing[3],
     textAlign: 'center',
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.xl),
   },
   message: {
     fontSize: typography.fontSize.base,
     color: colors.gray[300],
     marginBottom: spacing[6],
     textAlign: 'center',
-    lineHeight: 22,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
   },
   button: {
     paddingVertical: spacing[2],
@@ -93,6 +106,12 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.base,
     color: colors.white,
     fontWeight: typography.fontWeight.bold,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
   },
 });
 

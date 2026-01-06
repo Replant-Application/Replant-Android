@@ -4,8 +4,9 @@
  */
 
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ViewStyle } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ViewStyle, Platform } from 'react-native';
 import { colors, spacing, typography, borderRadius, shadows } from '../../utils/designTokens';
+import { getOptimizedLineHeight } from '../../utils/textStyles';
 
 export interface TabItem {
   key: string;
@@ -157,6 +158,12 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.base,
     fontWeight: typography.fontWeight.medium,
     color: colors.text.secondary,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
   },
   pillTabTextActive: {
     color: colors.white,
@@ -188,6 +195,12 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.base,
     color: colors.text.secondary,
     fontWeight: typography.fontWeight.medium,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
   },
   simpleTabTextActive: {
     color: colors.text.inverse,
@@ -203,6 +216,12 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.xs,
     color: colors.text.inverse,
     fontWeight: typography.fontWeight.bold,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
   },
 
   // Underline variant (향후 확장용)
@@ -228,6 +247,12 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.base,
     fontWeight: typography.fontWeight.medium,
     color: colors.text.tertiary,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
   },
   underlineTabTextActive: {
     color: colors.primary[600],

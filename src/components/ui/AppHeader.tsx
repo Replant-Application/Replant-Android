@@ -1,8 +1,9 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, Platform } from 'react-native';
 import { NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types/navigation';
 import { colors, spacing, typography, borderRadius, shadows } from '../../utils/designTokens';
+import { getOptimizedLineHeight } from '../../utils/textStyles';
 import { useOverlay } from '../../contexts/OverlayContext';
 
 interface AppHeaderProps {
@@ -82,6 +83,12 @@ const styles = StyleSheet.create({
   },
   iconText: {
     fontSize: typography.fontSize.base,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
   },
   iconImage: {
     width: 36,
@@ -106,6 +113,12 @@ const styles = StyleSheet.create({
     color: colors.white,
     fontSize: typography.fontSize.xs,
     fontWeight: typography.fontWeight.bold,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
   },
   profileButton: {
     position: 'relative',
@@ -118,6 +131,12 @@ const styles = StyleSheet.create({
   },
   profileIcon: {
     fontSize: typography.fontSize.lg,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.lg),
   },
   profileIconImage: {
     width: 50,

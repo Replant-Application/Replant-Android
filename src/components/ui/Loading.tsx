@@ -1,6 +1,7 @@
 import React from 'react';
-import { View, Text, ActivityIndicator, StyleSheet, ViewStyle, TextStyle } from 'react-native';
+import { View, Text, ActivityIndicator, StyleSheet, ViewStyle, TextStyle, Platform } from 'react-native';
 import { colors, spacing, typography } from '../../utils/designTokens';
+import { getOptimizedLineHeight } from '../../utils/textStyles';
 
 interface LoadingProps {
   text?: string;
@@ -38,6 +39,12 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.base,
     color: colors.text.secondary,
     textAlign: 'center',
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
   },
 });
 

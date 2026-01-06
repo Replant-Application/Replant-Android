@@ -1,6 +1,7 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, Platform } from 'react-native';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
+import { getOptimizedLineHeight } from '../../utils/textStyles';
 
 interface CircularProgressBarProps {
   current: number;
@@ -121,17 +122,34 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.lg,
     fontWeight: typography.fontWeight.normal,
     color: colors.text.primary,
-    lineHeight: typography.fontSize.lg * 1.2,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.lg),
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
   },
   totalText: {
     fontSize: typography.fontSize.base,
     fontWeight: typography.fontWeight.normal,
     color: colors.text.secondary,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
   },
   labelText: {
     fontSize: typography.fontSize.xs,
     color: colors.text.secondary,
     marginTop: spacing[1],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
   },
   percentageContainer: {
     marginTop: spacing[1],
@@ -148,6 +166,12 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.xs,
     fontWeight: typography.fontWeight.normal,
     color: colors.primary[500],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
   },
 });
 
