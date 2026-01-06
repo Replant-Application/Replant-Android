@@ -629,11 +629,8 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
                   key={`${mission.mission_id}-${mission.id || index}`}
                   activeOpacity={0.7}
                   onPress={() => {
-                    if (!mission.completed) {
-                      handleVerify(mission, verificationType as 'COMMUNITY' | 'GPS' | 'TIME');
-                    } else {
-                      navigation.navigate('MissionDetail', { missionId: mission.mission_id || String(mission.id) || '' });
-                    }
+                    // 미션 카드 클릭 시 항상 미션 상세로 이동
+                    navigation.navigate('MissionDetail', { missionId: mission.mission_id || String(mission.id) || '' });
                   }}
                 >
                   <MissionCard

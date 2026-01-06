@@ -22,7 +22,18 @@ const BadgeDetailScreen: React.FC<BadgeDetailScreenProps> = ({ navigation, route
 
   return (
     <View style={styles.container}>
-      <Header />
+      <Header
+        title="뱃지 상세"
+        leftButton={
+          <TouchableOpacity onPress={() => navigation.goBack()}>
+            <Image
+              source={require('../../assets/images/left.png')}
+              style={styles.backButtonIcon}
+              resizeMode="contain"
+            />
+          </TouchableOpacity>
+        }
+      />
 
       <ScrollView
         style={styles.content}
@@ -107,6 +118,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background.secondary,
+  },
+  backButtonIcon: {
+    width: 24,
+    height: 24,
+    tintColor: colors.text.primary,
   },
   content: {
     flex: 1,

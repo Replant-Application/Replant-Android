@@ -2,6 +2,9 @@ import { getData, setData, getStorageKeys } from './storage';
 import { logError } from '../utils/logger';
 import { ServiceResult, Character, UserProfile, UserInfoUpdateData, CalendarEvent, CalendarEventData, User, Mission, Diary, CommunityPost } from '../types';
 import { generateUserCharacterName } from '../utils/characterNameGenerator';
+import { getMyInfo } from '../api/userApi';
+import { getUserMissions } from '../api/missionApi';
+import { getMyBadges } from '../api/badgeApi';
 
 // 카테고리별 캐릭터 설명
 const getCategoryDescription = (categoryId: string): string => {
@@ -88,47 +91,69 @@ export const initializeUserData = async (
 };
 
 /**
- * 사용자 프로필 조회 (통계 포함)
+ * 사용자 프로필 조회 (통계 포함) - 백엔드 API 연동
  */
 export const getUserProfile = async (nickname: string): Promise<ServiceResult<UserProfile>> => {
   try {
     const storageKeys = getStorageKeys(nickname);
 
-    // User 정보 로드
-    const userData: User | null = await getData(storageKeys.USER);
-    if (!userData) {
-      return { success: false, error: '사용자 정보를 찾을 수 없습니다.' };
-    }
+    // 1. 백엔드 API에서 사용자 기본 정보 가져오기
+    const userInfoResult = await getMyInfo();
 
-    // 캐릭터 정보 로드
+    // 2. 백엔드 API에서 내 미션 목록 가져오기
+    const missionsResult = await getUserMissions();
+
+    // 3. 백엔드 API에서 뱃지 정보 가져오기
+    const badgesResult = await getMyBadges();
+
+    // 로컬 캐릭터 정보 로드
     const characters: Character[] = await getData(storageKeys.CHARACTERS) || [];
     const character = characters.length > 0 ? characters[0] : null;
 
-    // 미션 통계
-    const missions: Mission[] = await getData(storageKeys.MISSIONS) || [];
-    const completedMissions = missions.filter(m => m.completed).length;
-
-    // 경험치 통계 (캐릭터의 total_experience 사용)
-    const totalExperience = (character && 'total_experience' in character) ? character.total_experience || 0 : 0;
-
-    // 다이어리 통계
+    // 로컬 다이어리 통계
     const diaries: Diary[] = await getData(storageKeys.DIARIES) || [];
     const diaryCount = diaries.length;
 
-    // 커뮤니티 게시글 통계
+    // 미션 통계 계산
+    let completedMissions = 0;
+    let totalExperience = 0;
+
+    if (missionsResult.success && missionsResult.data) {
+      const missionsList = missionsResult.data.content || [];
+      completedMissions = missionsList.filter(m => m.status === 'COMPLETED').length;
+    }
+
+    // 경험치 계산 (캐릭터 총 경험치 사용)
+    if (character && 'total_experience' in character) {
+      totalExperience = character.total_experience || 0;
+    }
+
+    // 커뮤니티 게시글 통계 (로컬에서)
     const posts: CommunityPost[] = await getData(storageKeys.COMMUNITY_POSTS) || [];
     const userPosts = posts.filter(p => p.author === nickname);
     const postCount = userPosts.length;
 
+    // 뱃지 수 계산
+    const badgeCount = badgesResult.success && badgesResult.data ? badgesResult.data.badges?.length || 0 : 0;
+
+    // 프로필 생성
+    const profileNickname = userInfoResult.success && userInfoResult.data
+      ? userInfoResult.data.nickname
+      : nickname;
+    const profileCreatedAt = userInfoResult.success && userInfoResult.data
+      ? userInfoResult.data.createdAt
+      : new Date().toISOString();
+
     const profile: UserProfile = {
-      nickname: userData.nickname,
-      createdAt: userData.createdAt || new Date().toISOString(),
+      nickname: profileNickname,
+      createdAt: profileCreatedAt,
       character: character || null,
       stats: {
         completedMissions,
         totalExperience,
         diaryCount,
         postCount,
+        badgeCount,
       },
     };
 

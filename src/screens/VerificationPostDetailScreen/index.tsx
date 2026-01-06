@@ -102,6 +102,12 @@ const VerificationPostDetailScreen: React.FC<VerificationPostDetailScreenProps> 
   const handleVote = async (voteType: VoteType) => {
     if (!post) return;
 
+    // 내 게시글에는 투표할 수 없음 - 크래시 방지
+    if (isAuthor) {
+      Alert.alert('알림', '자신의 인증글에는 투표할 수 없습니다.');
+      return;
+    }
+
     try {
       const result = await voteVerification(verificationId, { vote: voteType });
       if (result.success && result.data) {
@@ -330,23 +336,23 @@ const VerificationPostDetailScreen: React.FC<VerificationPostDetailScreenProps> 
 
           <View style={styles.actions}>
             <TouchableOpacity
-              style={[styles.voteButton, post.myVote === 'APPROVE' && styles.voteButtonActive]}
+              style={[styles.voteButton, post.myVote === 'APPROVE' && styles.voteButtonActive, isAuthor && styles.voteButtonDisabled]}
               onPress={() => handleVote('APPROVE')}
               disabled={isAuthor}
             >
-              <Text style={styles.voteIcon}>👍</Text>
-              <Text style={[styles.voteText, post.myVote === 'APPROVE' && styles.voteTextActive]}>
+              <Text style={[styles.voteIcon, isAuthor && styles.voteIconDisabled]}>👍</Text>
+              <Text style={[styles.voteText, post.myVote === 'APPROVE' && styles.voteTextActive, isAuthor && styles.voteTextDisabled]}>
                 {post.approveCount}
               </Text>
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={[styles.voteButton, post.myVote === 'REJECT' && styles.voteButtonRejectActive]}
+              style={[styles.voteButton, post.myVote === 'REJECT' && styles.voteButtonRejectActive, isAuthor && styles.voteButtonDisabled]}
               onPress={() => handleVote('REJECT')}
               disabled={isAuthor}
             >
-              <Text style={styles.voteIcon}>👎</Text>
-              <Text style={[styles.voteText, post.myVote === 'REJECT' && styles.voteTextRejectActive]}>
+              <Text style={[styles.voteIcon, isAuthor && styles.voteIconDisabled]}>👎</Text>
+              <Text style={[styles.voteText, post.myVote === 'REJECT' && styles.voteTextRejectActive, isAuthor && styles.voteTextDisabled]}>
                 {post.rejectCount}
               </Text>
             </TouchableOpacity>
@@ -712,6 +718,15 @@ const styles = StyleSheet.create({
   voteTextRejectActive: {
     color: colors.red[700],
     fontWeight: typography.fontWeight.medium,
+  },
+  voteButtonDisabled: {
+    opacity: 0.5,
+  },
+  voteIconDisabled: {
+    opacity: 0.5,
+  },
+  voteTextDisabled: {
+    color: colors.text.tertiary,
   },
   actionButton: {
     flexDirection: 'row',

@@ -9,6 +9,7 @@ import {
   Alert,
   KeyboardAvoidingView,
   Platform,
+  Image,
 } from 'react-native';
 import { Button, Header, SectionTitle, FormCard } from '../../components/ui';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
@@ -17,6 +18,7 @@ import { useUser } from '../../contexts/UserContext';
 import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types/navigation';
 import { ScreenNames } from '../../types';
+import { WorryType } from '../../api/userApi';
 
 interface CustomMissionCreateScreenProps {
   navigation: NavigationProp<RootStackParamList>;
@@ -27,6 +29,22 @@ const DIFFICULTY_OPTIONS = [
   { id: 'easy', name: '쉬움', emoji: '😊', exp: 30 },
   { id: 'medium', name: '보통', emoji: '😐', exp: 50 },
   { id: 'hard', name: '어려움', emoji: '😤', exp: 80 },
+];
+
+const WORRY_TYPE_OPTIONS: { id: WorryType; name: string; emoji: string }[] = [
+  { id: 'RE_EMPLOYMENT', name: '재취업', emoji: '💼' },
+  { id: 'JOB_PREPARATION', name: '취업준비', emoji: '📝' },
+  { id: 'ENTRANCE_EXAM', name: '입시', emoji: '📚' },
+  { id: 'ADVANCEMENT', name: '진학', emoji: '🎓' },
+  { id: 'RETURN_TO_SCHOOL', name: '복학', emoji: '🏫' },
+  { id: 'RELATIONSHIP', name: '연애', emoji: '💕' },
+  { id: 'SELF_MANAGEMENT', name: '자기관리', emoji: '🧘' },
+];
+
+const MISSION_TYPE_OPTIONS = [
+  { id: 'DAILY', name: '일간', emoji: '📅', days: 1 },
+  { id: 'WEEKLY', name: '주간', emoji: '📆', days: 7 },
+  { id: 'MONTHLY', name: '월간', emoji: '🗓️', days: 30 },
 ];
 
 
@@ -40,6 +58,8 @@ const CustomMissionCreateScreen: React.FC<CustomMissionCreateScreenProps> = ({ n
   const [difficulty, setDifficulty] = useState('medium');
   const [customExp, setCustomExp] = useState(50);
   const [loading, setLoading] = useState(false);
+  const [worryType, setWorryType] = useState<WorryType | null>(null);
+  const [missionType, setMissionType] = useState<'DAILY' | 'WEEKLY' | 'MONTHLY'>('DAILY');
 
   // AI 생성 미션이 있으면 초기값 설정
   useEffect(() => {
@@ -73,6 +93,8 @@ const CustomMissionCreateScreen: React.FC<CustomMissionCreateScreenProps> = ({ n
         difficulty: difficulty as 'easy' | 'medium' | 'hard',
         experience: customExp,
         category_id: 'growth' as const, // 기존 구조에 맞춰 growth로 설정
+        worryType: worryType,
+        missionType: missionType,
       };
 
       const result = await createCustomMission(missionData as any, currentNickname || 'default');
@@ -112,7 +134,18 @@ const CustomMissionCreateScreen: React.FC<CustomMissionCreateScreenProps> = ({ n
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       {/* 헤더 */}
-      <Header />
+      <Header
+        title="미션 만들기"
+        leftButton={
+          <TouchableOpacity onPress={() => navigation.goBack()}>
+            <Image
+              source={require('../../assets/images/left.png')}
+              style={styles.backButtonIcon}
+              resizeMode="contain"
+            />
+          </TouchableOpacity>
+        }
+      />
 
       <ScrollView style={styles.content}>
         <FormCard>
@@ -139,6 +172,54 @@ const CustomMissionCreateScreen: React.FC<CustomMissionCreateScreenProps> = ({ n
           />
         </FormCard>
 
+        <FormCard>
+          <SectionTitle title="고민 종류" size="lg" marginBottom={spacing[3]} />
+          <View style={styles.worryTypeContainer}>
+            {WORRY_TYPE_OPTIONS.map((option) => (
+              <TouchableOpacity
+                key={option.id}
+                style={[
+                  styles.worryTypeButton,
+                  worryType === option.id && styles.selectedWorryType
+                ]}
+                onPress={() => setWorryType(worryType === option.id ? null : option.id)}
+              >
+                <Text style={styles.worryTypeEmoji}>{option.emoji}</Text>
+                <Text style={[
+                  styles.worryTypeText,
+                  worryType === option.id && styles.selectedWorryTypeText
+                ]}>
+                  {option.name}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+          <Text style={styles.optionalHint}>선택 사항</Text>
+        </FormCard>
+
+        <FormCard>
+          <SectionTitle title="기간 선택" size="lg" marginBottom={spacing[3]} />
+          <View style={styles.missionTypeContainer}>
+            {MISSION_TYPE_OPTIONS.map((option) => (
+              <TouchableOpacity
+                key={option.id}
+                style={[
+                  styles.missionTypeButton,
+                  missionType === option.id && styles.selectedMissionType
+                ]}
+                onPress={() => setMissionType(option.id as 'DAILY' | 'WEEKLY' | 'MONTHLY')}
+              >
+                <Text style={styles.missionTypeEmoji}>{option.emoji}</Text>
+                <Text style={[
+                  styles.missionTypeText,
+                  missionType === option.id && styles.selectedMissionTypeText
+                ]}>
+                  {option.name}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </FormCard>
 
         <FormCard>
           <SectionTitle title="난이도 선택" size="lg" marginBottom={spacing[3]} />
@@ -209,6 +290,11 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.background.secondary,
   },
+  backButtonIcon: {
+    width: 24,
+    height: 24,
+    tintColor: colors.text.primary,
+  },
   content: {
     flex: 1,
     padding: spacing[5],
@@ -225,6 +311,73 @@ const styles = StyleSheet.create({
   textArea: {
     height: 100,
     textAlignVertical: 'top',
+  },
+  worryTypeContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing[2],
+  },
+  worryTypeButton: {
+    paddingHorizontal: spacing[3],
+    paddingVertical: spacing[2],
+    borderRadius: borderRadius.full,
+    backgroundColor: colors.background.primary,
+    borderWidth: 1,
+    borderColor: colors.border.light,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing[1],
+  },
+  selectedWorryType: {
+    backgroundColor: colors.primary[100],
+    borderColor: colors.primary[500],
+  },
+  worryTypeEmoji: {
+    fontSize: typography.fontSize.base,
+  },
+  worryTypeText: {
+    fontSize: typography.fontSize.sm,
+    color: colors.text.secondary,
+  },
+  selectedWorryTypeText: {
+    color: colors.primary[600],
+    fontWeight: typography.fontWeight.medium,
+  },
+  optionalHint: {
+    fontSize: typography.fontSize.xs,
+    color: colors.text.tertiary,
+    marginTop: spacing[2],
+  },
+  missionTypeContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  missionTypeButton: {
+    flex: 1,
+    alignItems: 'center',
+    padding: spacing[3],
+    marginHorizontal: spacing[1],
+    borderRadius: borderRadius.md,
+    backgroundColor: colors.background.primary,
+    borderWidth: 1,
+    borderColor: colors.border.light,
+  },
+  selectedMissionType: {
+    backgroundColor: colors.primary[100],
+    borderColor: colors.primary[500],
+  },
+  missionTypeEmoji: {
+    fontSize: typography.fontSize.xl,
+    marginBottom: spacing[1],
+  },
+  missionTypeText: {
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.medium,
+    color: colors.text.secondary,
+  },
+  selectedMissionTypeText: {
+    color: colors.primary[600],
+    fontWeight: typography.fontWeight.semibold,
   },
   emojiGrid: {
     flexDirection: 'row',

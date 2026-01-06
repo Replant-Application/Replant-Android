@@ -77,6 +77,7 @@ export interface OAuthLoginResponse {
     gender?: 'MALE' | 'FEMALE' | 'OTHER';
     profileImg?: string;
     createdAt?: string;
+    role?: 'USER' | 'GRADUATE' | 'CONTRIBUTOR' | 'ADMIN';
   };
   newUser: boolean; // 신규 회원 여부 (백엔드 응답과 일치)
 }

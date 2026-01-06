@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image } from 'react-native';
 import { NavigationProp } from '@react-navigation/native';
 import { useUserProfile } from '../../hooks/useUserProfile';
 import { useCharacter } from '../../hooks/useCharacter';
@@ -41,7 +41,18 @@ const MyPageScreen: React.FC<MyPageScreenProps> = ({ navigation }) => {
 
   return (
     <ScrollView style={styles.container}>
-      <Header />
+      <Header
+        title="마이페이지"
+        leftButton={
+          <TouchableOpacity onPress={() => navigation.goBack()}>
+            <Image
+              source={require('../../assets/images/left.png')}
+              style={styles.backButtonIcon}
+              resizeMode="contain"
+            />
+          </TouchableOpacity>
+        }
+      />
       <View style={styles.content}>
         <Card style={styles.profileCard}>
           <SectionTitle title="👤 프로필" size="lg" marginBottom={spacing[4]} />
@@ -85,6 +96,12 @@ const MyPageScreen: React.FC<MyPageScreenProps> = ({ navigation }) => {
               <Text style={styles.statValue}>{profile.stats.postCount}</Text>
               <Text style={styles.statLabel}>커뮤니티 게시글</Text>
             </View>
+            {profile.stats.badgeCount !== undefined && (
+              <View style={styles.statItem}>
+                <Text style={styles.statValue}>{profile.stats.badgeCount}</Text>
+                <Text style={styles.statLabel}>보유 뱃지</Text>
+              </View>
+            )}
           </View>
         </Card>
       </View>
@@ -96,6 +113,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background.secondary,
+  },
+  backButtonIcon: {
+    width: 24,
+    height: 24,
+    tintColor: colors.text.primary,
   },
   content: {
     padding: spacing[5],

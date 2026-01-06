@@ -56,17 +56,26 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         const nickname = storedUserInfo.nickname;
         const storageKeys = getStorageKeys(nickname);
 
+        // 백엔드에서 받은 role 사용 (ADMIN -> admin 변환)
+        const backendRole = storedUserInfo.role?.toLowerCase() || 'user';
+        const role = backendRole === 'admin' ? 'admin' : 'user';
+
         // User 객체 생성 또는 로드
         let userData: User | null = null;
         const existingData = await AsyncStorage.getItem(storageKeys.USER);
         if (existingData) {
           userData = JSON.parse(existingData);
+          // 역할 업데이트
+          if (userData && userData.role !== role) {
+            userData.role = role;
+            await AsyncStorage.setItem(storageKeys.USER, JSON.stringify(userData));
+          }
         } else {
           userData = {
             nickname,
             id: `user_${storedUserInfo.id}`,
             createdAt: new Date().toISOString(),
-            role: 'user'
+            role
           };
           await AsyncStorage.setItem(storageKeys.USER, JSON.stringify(userData));
         }

@@ -21,6 +21,7 @@ export interface StoredUserInfo {
   email: string;
   nickname: string;
   profileImg?: string;
+  role?: string;
 }
 
 /**

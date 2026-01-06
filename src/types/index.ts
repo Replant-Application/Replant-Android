@@ -311,6 +311,7 @@ export interface UserProfile {
     totalExperience: number;
     diaryCount: number;
     postCount: number;
+    badgeCount?: number;
   };
 }
 

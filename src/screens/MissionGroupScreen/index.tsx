@@ -244,173 +244,175 @@ const MissionGroupScreen: React.FC<MissionGroupScreenProps> = ({ navigation }) =
               </View>
 
               {missions.map((mission) => (
-                <TouchableOpacity
-                  key={mission.id}
-                  style={[
-                    styles.missionCard,
-                    selectedMission?.id === mission.id && styles.missionCardSelected,
-                  ]}
-                  onPress={() => {
-                    setSelectedMission(
-                      selectedMission?.id === mission.id ? null : mission
-                    );
-                  }}
-                  activeOpacity={0.7}
-                >
-                  <View style={styles.missionHeader}>
-                    <View style={styles.missionInfo}>
-                      <View style={styles.missionTitleRow}>
-                        <Image
-                          source={getMissionIcon(mission.title)}
-                          style={styles.missionIcon}
-                          resizeMode="contain"
-                        />
-                        <Text style={styles.missionTitle}>{mission.title}</Text>
-                        <View style={styles.missionTypeBadge}>
-                          <Text style={styles.missionTypeText}>
-                            {getMissionTypeLabel(mission.type)}
-                          </Text>
+                <View key={mission.id}>
+                  <TouchableOpacity
+                    style={[
+                      styles.missionCard,
+                      selectedMission?.id === mission.id && styles.missionCardSelected,
+                    ]}
+                    onPress={() => {
+                      setSelectedMission(
+                        selectedMission?.id === mission.id ? null : mission
+                      );
+                    }}
+                    activeOpacity={0.7}
+                  >
+                    <View style={styles.missionHeader}>
+                      <View style={styles.missionInfo}>
+                        <View style={styles.missionTitleRow}>
+                          <Image
+                            source={getMissionIcon(mission.title)}
+                            style={styles.missionIcon}
+                            resizeMode="contain"
+                          />
+                          <Text style={styles.missionTitle}>{mission.title}</Text>
+                          <View style={styles.missionTypeBadge}>
+                            <Text style={styles.missionTypeText}>
+                              {getMissionTypeLabel(mission.type)}
+                            </Text>
+                          </View>
+                        </View>
+                        <Text style={styles.missionDescription} numberOfLines={2}>
+                          {mission.description}
+                        </Text>
+                      </View>
+                    </View>
+
+                    <View style={styles.missionContent}>
+                      <View style={styles.missionVerificationInfo}>
+                        {getVerificationTypeIcon(mission.verificationType) && (
+                          <Image
+                            source={getVerificationTypeIcon(mission.verificationType)!}
+                            style={styles.verificationIcon}
+                            resizeMode="contain"
+                          />
+                        )}
+                        <Text style={styles.missionVerificationText}>
+                          {getVerificationTypeLabel(mission.verificationType)}
+                        </Text>
+                      </View>
+                    </View>
+
+                    <View style={styles.missionFooter}>
+                      <View style={styles.missionStats}>
+                        <View style={styles.statItem}>
+                          <Image
+                            source={require('../../assets/images/sun.png')}
+                            style={styles.statIcon}
+                            resizeMode="contain"
+                          />
+                          <Text style={styles.statText}>{mission.expReward} EXP</Text>
+                        </View>
+                        <View style={styles.statItem}>
+                          <Image
+                            source={require('../../assets/images/pencil.png')}
+                            style={styles.statIcon}
+                            resizeMode="contain"
+                          />
+                          <Text style={styles.statText}>후기 {mission.reviewCount || 0}개</Text>
                         </View>
                       </View>
-                      <Text style={styles.missionDescription} numberOfLines={2}>
-                        {mission.description}
-                      </Text>
                     </View>
-                  </View>
+                  </TouchableOpacity>
 
-                  <View style={styles.missionContent}>
-                    <View style={styles.missionVerificationInfo}>
-                      {getVerificationTypeIcon(mission.verificationType) && (
-                        <Image
-                          source={getVerificationTypeIcon(mission.verificationType)!}
-                          style={styles.verificationIcon}
-                          resizeMode="contain"
-                        />
-                      )}
-                      <Text style={styles.missionVerificationText}>
-                        {getVerificationTypeLabel(mission.verificationType)}
-                      </Text>
-                    </View>
-                  </View>
+                  {/* 선택된 미션의 상세 정보를 해당 카드 바로 아래에 표시 */}
+                  {selectedMission?.id === mission.id && (
+                    <View style={styles.inlineDetailContainer}>
+                      {/* 미션 상세 정보 */}
+                      <View style={styles.inlineDetailCard}>
+                        <Text style={styles.detailTitle}>미션 정보</Text>
+                        <View style={styles.detailRow}>
+                          <Text style={styles.detailLabel}>미션명</Text>
+                          <Text style={styles.detailValue}>{selectedMission.title}</Text>
+                        </View>
+                        <View style={styles.detailRow}>
+                          <Text style={styles.detailLabel}>설명</Text>
+                          <Text style={styles.detailValue}>{selectedMission.description}</Text>
+                        </View>
+                        <View style={styles.detailRow}>
+                          <Text style={styles.detailLabel}>인증 방식</Text>
+                          <Text style={styles.detailValue}>
+                            {getVerificationTypeLabel(selectedMission.verificationType)}
+                          </Text>
+                        </View>
+                        <View style={styles.detailRow}>
+                          <Text style={styles.detailLabel}>보상</Text>
+                          <Text style={styles.detailValue}>
+                            {selectedMission.expReward} EXP + 뱃지 ({selectedMission.badgeDurationDays}일)
+                          </Text>
+                        </View>
+                        {selectedMission.requiredMinutes && (
+                          <View style={styles.detailRow}>
+                            <Text style={styles.detailLabel}>필요 시간</Text>
+                            <Text style={styles.detailValue}>{selectedMission.requiredMinutes}분</Text>
+                          </View>
+                        )}
 
-                  <View style={styles.missionFooter}>
-                    <View style={styles.missionStats}>
-                      <View style={styles.statItem}>
-                        <Image
-                          source={require('../../assets/images/sun.png')}
-                          style={styles.statIcon}
-                          resizeMode="contain"
-                        />
-                        <Text style={styles.statText}>{mission.expReward} EXP</Text>
+                        {/* 미션 상세 페이지로 이동 버튼 */}
+                        <TouchableOpacity
+                          style={styles.detailButton}
+                          onPress={() => navigation.navigate('MissionDetail', { missionId: String(selectedMission.id) })}
+                          activeOpacity={0.7}
+                        >
+                          <Text style={styles.detailButtonText}>미션 상세 보기</Text>
+                        </TouchableOpacity>
                       </View>
-                      <View style={styles.statItem}>
-                        <Image
-                          source={require('../../assets/images/pencil.png')}
-                          style={styles.statIcon}
-                          resizeMode="contain"
-                        />
-                        <Text style={styles.statText}>후기 {mission.reviewCount || 0}개</Text>
+
+                      {/* 후기 섹션 */}
+                      <View style={styles.inlineReviewSection}>
+                        <View style={styles.reviewSectionHeader}>
+                          <Text style={styles.sectionTitle}>미션 후기</Text>
+                          <TouchableOpacity
+                            style={styles.writeReviewButton}
+                            onPress={() => setShowReviewModal(true)}
+                            activeOpacity={0.7}
+                          >
+                            <Text style={styles.writeReviewButtonText}>후기 작성</Text>
+                          </TouchableOpacity>
+                        </View>
+                        <Text style={styles.reviewHint}>
+                          ※ 미션을 완료하고 뱃지를 획득해야 후기를 작성할 수 있습니다
+                        </Text>
+
+                        {reviewsLoading ? (
+                          <View style={styles.loadingContainer}>
+                            <ActivityIndicator size="large" color={colors.primary[500]} />
+                          </View>
+                        ) : reviews.length === 0 ? (
+                          <EmptyState
+                            icon="📝"
+                            title="아직 후기가 없어요"
+                            description="첫 번째 후기를 남겨보세요!"
+                          />
+                        ) : (
+                          <View style={styles.reviewList}>
+                            {reviews.map((review) => (
+                              <View key={review.id} style={styles.reviewCard}>
+                                <View style={styles.reviewHeader}>
+                                  <View style={styles.reviewAvatar}>
+                                    <Text style={styles.reviewAvatarText}>
+                                      {review.userNickname.charAt(0).toUpperCase()}
+                                    </Text>
+                                  </View>
+                                  <View style={styles.reviewAuthorInfo}>
+                                    <Text style={styles.reviewAuthor}>{review.userNickname}</Text>
+                                    <Text style={styles.reviewDate}>
+                                      {new Date(review.createdAt).toLocaleDateString('ko-KR')}
+                                    </Text>
+                                  </View>
+                                </View>
+                                <Text style={styles.reviewContent}>{review.content}</Text>
+                              </View>
+                            ))}
+                          </View>
+                        )}
                       </View>
                     </View>
-                  </View>
-                </TouchableOpacity>
+                  )}
+                </View>
               ))}
             </View>
 
-            {/* 선택된 미션 상세 정보 + 후기 */}
-            {selectedMission && (
-              <View style={styles.detailContainer}>
-                {/* 미션 상세 정보 */}
-                <View style={styles.detailCard}>
-                  <Text style={styles.detailTitle}>미션 정보</Text>
-                  <View style={styles.detailRow}>
-                    <Text style={styles.detailLabel}>미션명</Text>
-                    <Text style={styles.detailValue}>{selectedMission.title}</Text>
-                  </View>
-                  <View style={styles.detailRow}>
-                    <Text style={styles.detailLabel}>설명</Text>
-                    <Text style={styles.detailValue}>{selectedMission.description}</Text>
-                  </View>
-                  <View style={styles.detailRow}>
-                    <Text style={styles.detailLabel}>인증 방식</Text>
-                    <Text style={styles.detailValue}>
-                      {getVerificationTypeLabel(selectedMission.verificationType)}
-                    </Text>
-                  </View>
-                  <View style={styles.detailRow}>
-                    <Text style={styles.detailLabel}>보상</Text>
-                    <Text style={styles.detailValue}>
-                      {selectedMission.expReward} EXP + 뱃지 ({selectedMission.badgeDurationDays}일)
-                    </Text>
-                  </View>
-                  {selectedMission.requiredMinutes && (
-                    <View style={styles.detailRow}>
-                      <Text style={styles.detailLabel}>필요 시간</Text>
-                      <Text style={styles.detailValue}>{selectedMission.requiredMinutes}분</Text>
-                    </View>
-                  )}
-
-                  {/* 미션 상세 페이지로 이동 버튼 */}
-                  <TouchableOpacity
-                    style={styles.detailButton}
-                    onPress={() => navigation.navigate('MissionDetail', { missionId: String(selectedMission.id) })}
-                    activeOpacity={0.7}
-                  >
-                    <Text style={styles.detailButtonText}>미션 상세 보기</Text>
-                  </TouchableOpacity>
-                </View>
-
-                {/* 후기 섹션 */}
-                <View style={styles.reviewSection}>
-                  <View style={styles.reviewSectionHeader}>
-                    <Text style={styles.sectionTitle}>미션 후기</Text>
-                    <TouchableOpacity
-                      style={styles.writeReviewButton}
-                      onPress={() => setShowReviewModal(true)}
-                      activeOpacity={0.7}
-                    >
-                      <Text style={styles.writeReviewButtonText}>후기 작성</Text>
-                    </TouchableOpacity>
-                  </View>
-                  <Text style={styles.reviewHint}>
-                    ※ 미션을 완료하고 뱃지를 획득해야 후기를 작성할 수 있습니다
-                  </Text>
-
-                  {reviewsLoading ? (
-                    <View style={styles.loadingContainer}>
-                      <ActivityIndicator size="large" color={colors.primary[500]} />
-                    </View>
-                  ) : reviews.length === 0 ? (
-                    <EmptyState
-                      icon="📝"
-                      title="아직 후기가 없어요"
-                      description="첫 번째 후기를 남겨보세요!"
-                    />
-                  ) : (
-                    <View style={styles.reviewList}>
-                      {reviews.map((review) => (
-                        <View key={review.id} style={styles.reviewCard}>
-                          <View style={styles.reviewHeader}>
-                            <View style={styles.reviewAvatar}>
-                              <Text style={styles.reviewAvatarText}>
-                                {review.userNickname.charAt(0).toUpperCase()}
-                              </Text>
-                            </View>
-                            <View style={styles.reviewAuthorInfo}>
-                              <Text style={styles.reviewAuthor}>{review.userNickname}</Text>
-                              <Text style={styles.reviewDate}>
-                                {new Date(review.createdAt).toLocaleDateString('ko-KR')}
-                              </Text>
-                            </View>
-                          </View>
-                          <Text style={styles.reviewContent}>{review.content}</Text>
-                        </View>
-                      ))}
-                    </View>
-                  )}
-                </View>
-              </View>
-            )}
           </>
         )}
       </ScrollView>
@@ -632,6 +634,25 @@ const styles = StyleSheet.create({
   },
   detailContainer: {
     marginTop: spacing[4],
+  },
+  inlineDetailContainer: {
+    marginTop: spacing[2],
+    marginBottom: spacing[3],
+    borderLeftWidth: 3,
+    borderLeftColor: colors.primary[400],
+    marginLeft: spacing[2],
+    paddingLeft: spacing[3],
+  },
+  inlineDetailCard: {
+    backgroundColor: colors.background.primary,
+    borderRadius: borderRadius.lg,
+    padding: spacing[4],
+    marginBottom: spacing[3],
+    borderWidth: 1,
+    borderColor: colors.primary[200],
+  },
+  inlineReviewSection: {
+    marginBottom: spacing[2],
   },
   detailCard: {
     backgroundColor: colors.background.primary,
