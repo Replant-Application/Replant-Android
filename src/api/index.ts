@@ -9,9 +9,6 @@ export * from './authApi';
 // 사용자 API
 export * from './userApi';
 
-// 펫 (Reant) API
-export * from './petApi';
-
 // 미션 API (시스템 미션, 커스텀 미션, 내 미션, 인증 게시판)
 export * from './missionApi';
 

@@ -45,12 +45,6 @@ export const API_CONFIG = {
       getUser: '/users/:userId',
     },
 
-    // 펫 (Reant)
-    reant: {
-      get: '/reant',
-      update: '/reant',
-    },
-
     // 시스템 미션 (Mission)
     mission: {
       list: '/missions',
@@ -160,6 +154,25 @@ export const API_CONFIG = {
       byDate: '/diaries/by-date',
       range: '/diaries/range',
       stats: '/diaries/stats',
+    },
+
+    // 관리자 (Admin/Manage) - manageApi.ts에서 사용
+    manage: {
+      getAllUsers: '/admin/members',
+      getUserDetail: '/admin/members/:id',
+      updateUser: '/admin/members/:id',
+      deactivateUser: '/admin/members/:id/deactivate',
+      activateUser: '/admin/members/:id/activate',
+    },
+
+    // 관리자 (Admin) - adminApi.ts에서 사용
+    admin: {
+      members: '/admin/members',
+      memberDetail: '/admin/members/:memberId',
+      cards: '/admin/card',
+      sendCustomNotification: '/admin/send/custom',
+      sendDiaryNotification: '/admin/send/diary',
+      sendReportNotification: '/admin/send/report',
     },
   },
 
