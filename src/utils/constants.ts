@@ -34,4 +34,5 @@ export const SCREEN_NAMES: Record<string, string> = {
   MISSION_DETAIL: 'MissionDetail',
   BADGE_DETAIL: 'BadgeDetail',
   VERIFICATION_POST_CREATE: 'VerificationPostCreate',
+  VERIFICATION_POST_DETAIL: 'VerificationPostDetail',
 } as const;

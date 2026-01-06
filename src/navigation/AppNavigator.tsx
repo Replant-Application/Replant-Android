@@ -38,6 +38,7 @@ import MissionGroupScreen from '../screens/MissionGroupScreen';
 import MissionDetailScreen from '../screens/MissionDetailScreen';
 import BadgeDetailScreen from '../screens/BadgeDetailScreen';
 import VerificationPostCreateScreen from '../screens/VerificationPostCreateScreen';
+import VerificationPostDetailScreen from '../screens/VerificationPostDetailScreen';
 import NotificationScreen from '../screens/NotificationScreen';
 
 // 간단한 상태 기반 네비게이션 (React Navigation 없이)
@@ -128,7 +129,8 @@ const AppNavigator = () => {
         currentScreen === SCREEN_NAMES.COMMUNITY_POST_CREATE ||
         currentScreen === SCREEN_NAMES.COMMUNITY_POST_DETAIL ||
         currentScreen === SCREEN_NAMES.COMMUNITY_POST_EDIT ||
-        currentScreen === SCREEN_NAMES.MISSION_GROUP
+        currentScreen === SCREEN_NAMES.MISSION_GROUP ||
+        currentScreen === SCREEN_NAMES.VERIFICATION_POST_DETAIL
       ) {
         setCurrentScreen(SCREEN_NAMES.COMMUNITY);
       } else if (
@@ -212,7 +214,8 @@ const AppNavigator = () => {
       currentScreen === SCREEN_NAMES.COMMUNITY_POST_CREATE ||
       currentScreen === SCREEN_NAMES.COMMUNITY_POST_DETAIL ||
       currentScreen === SCREEN_NAMES.COMMUNITY_POST_EDIT ||
-      currentScreen === SCREEN_NAMES.MISSION_GROUP
+      currentScreen === SCREEN_NAMES.MISSION_GROUP ||
+      currentScreen === SCREEN_NAMES.VERIFICATION_POST_DETAIL
     ) {
       setCurrentScreen(SCREEN_NAMES.COMMUNITY);
     } else if (
@@ -298,6 +301,8 @@ const AppNavigator = () => {
         return <BadgeDetailScreen navigation={navigation} route={route} />;
       case SCREEN_NAMES.VERIFICATION_POST_CREATE:
         return <VerificationPostCreateScreen navigation={navigation} route={route} />;
+      case SCREEN_NAMES.VERIFICATION_POST_DETAIL:
+        return <VerificationPostDetailScreen navigation={navigation} route={route} />;
       case SCREEN_NAMES.NOTIFICATION:
         return <NotificationScreen navigation={navigation} />;
       default:

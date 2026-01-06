@@ -195,11 +195,10 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation }) => {
   }, [posts, convertedVerificationPosts, debouncedSearchQuery, filter, verificationFilter]);
 
   const handlePostPress = (postId: string) => {
-    // 인증글인 경우 인증글 상세 화면으로 이동 (추후 구현)
+    // 인증글인 경우 인증글 상세 화면으로 이동
     if (postId.startsWith('verification_')) {
       const verificationId = parseInt(postId.replace('verification_', ''), 10);
-      // 임시: Alert로 알림
-      Alert.alert('인증글', `인증글 ID: ${verificationId}`);
+      navigation.navigate('VerificationPostDetail' as any, { verificationId });
       return;
     }
     navigation.navigate('CommunityPostDetail', { postId });

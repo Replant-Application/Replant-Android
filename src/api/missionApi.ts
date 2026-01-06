@@ -490,12 +490,17 @@ export interface VerificationPost {
     title: string;
     type?: MissionType;
   };
+  customMission?: {
+    id: number;
+    title: string;
+  };
   missionTitle: string;
   content: string;
   imageUrls: string[];
   status: VerificationStatus;
   approveCount: number;
   rejectCount: number;
+  commentCount: number;
   createdAt: string;
   myVote?: VoteType;
 }
@@ -715,6 +720,89 @@ export const verifyByTime = async (
   return apiClient.post<TimeVerifyResponse>(API_CONFIG.endpoints.verification.time, {
     userMissionId,
   });
+};
+
+// ============================================
+// 인증글 댓글 API
+// ============================================
+
+export interface VerificationComment {
+  comment_id: string;
+  author: string;
+  author_nickname: string;
+  content: string;
+  created_at: string;
+  parent_comment_id?: string;
+  replies?: VerificationComment[];
+}
+
+export interface VerificationCommentListResponse {
+  content: VerificationComment[];
+  totalElements: number;
+  totalPages: number;
+  number: number;
+}
+
+/**
+ * 인증글 댓글 목록 조회
+ * GET /api/verifications/{verificationId}/comments
+ */
+export const getVerificationComments = async (
+  verificationId: number,
+  page: number = 0,
+  size: number = 20
+): Promise<ServiceResult<VerificationCommentListResponse>> => {
+  const endpoint = `/verifications/${verificationId}/comments?page=${page}&size=${size}`;
+  return apiClient.get<VerificationCommentListResponse>(endpoint);
+};
+
+/**
+ * 인증글 댓글 작성
+ * POST /api/verifications/{verificationId}/comments
+ */
+export const createVerificationComment = async (
+  verificationId: number,
+  content: string,
+  parentId?: string
+): Promise<ServiceResult<VerificationComment>> => {
+  const endpoint = `/verifications/${verificationId}/comments`;
+  return apiClient.post<VerificationComment>(endpoint, { content, parentId: parentId ? Number(parentId) : undefined });
+};
+
+/**
+ * 인증글 댓글 수정
+ * PUT /api/verifications/{verificationId}/comments/{commentId}
+ */
+export const updateVerificationComment = async (
+  verificationId: number,
+  commentId: string,
+  content: string
+): Promise<ServiceResult<VerificationComment>> => {
+  const endpoint = `/verifications/${verificationId}/comments/${commentId}`;
+  return apiClient.put<VerificationComment>(endpoint, { content });
+};
+
+/**
+ * 인증글 댓글 삭제
+ * DELETE /api/verifications/{verificationId}/comments/{commentId}
+ */
+export const deleteVerificationComment = async (
+  verificationId: number,
+  commentId: string
+): Promise<ServiceResult<{ message: string }>> => {
+  const endpoint = `/verifications/${verificationId}/comments/${commentId}`;
+  return apiClient.delete(endpoint);
+};
+
+/**
+ * 인증글 댓글 수 조회
+ * GET /api/verifications/{verificationId}/comments/count
+ */
+export const getVerificationCommentCount = async (
+  verificationId: number
+): Promise<ServiceResult<{ count: number }>> => {
+  const endpoint = `/verifications/${verificationId}/comments/count`;
+  return apiClient.get<{ count: number }>(endpoint);
 };
 
 // ============================================
