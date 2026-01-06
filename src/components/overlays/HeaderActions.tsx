@@ -19,6 +19,7 @@ import {
 } from 'react-native';
 import { useOverlay } from '../../contexts/OverlayContext';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
+import { getOptimizedLineHeight } from '../../utils/textStyles';
 
 interface HeaderActionsProps {
   showNotification?: boolean;
@@ -131,6 +132,12 @@ const styles = StyleSheet.create({
   },
   icon: {
     fontSize: 22,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(22),
   },
   badge: {
     position: 'absolute',
@@ -161,6 +168,12 @@ const styles = StyleSheet.create({
     fontSize: 9,
     fontWeight: typography.fontWeight.bold as any,
     color: colors.white,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(9),
   },
 });
 

@@ -139,6 +139,12 @@ const styles = StyleSheet.create({
   clover: {
     fontSize: 18,
     marginLeft: 8,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(18),
   },
   buttonContainer: {
     width: '100%',
