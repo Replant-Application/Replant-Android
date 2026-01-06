@@ -1,6 +1,6 @@
 import React from 'react';
 import { TouchableOpacity, View, StyleSheet, ViewStyle } from 'react-native';
-import { colors, spacing, borderRadius } from '../../utils/designTokens';
+import { colors, borderRadius } from '../../utils/designTokens';
 
 interface PlusButtonProps {
   onPress: () => void;
