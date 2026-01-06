@@ -85,6 +85,7 @@ export interface OAuthLoginResponse {
  * 토큰 갱신 요청
  */
 export interface RefreshTokenRequest {
+  accessToken: string;
   refreshToken: string;
 }
 

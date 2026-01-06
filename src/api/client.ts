@@ -115,7 +115,7 @@ export class ApiClient {
         throw new Error('No refresh token available');
       }
 
-      const result = await refreshTokenApi({ refreshToken });
+      const result = await refreshTokenApi({ accessToken: this.accessToken || '', refreshToken });
 
       if (result.success && result.data) {
         const { accessToken, refreshToken: newRefreshToken } = result.data;

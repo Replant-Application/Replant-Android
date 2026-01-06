@@ -8,7 +8,6 @@ import { colors, spacing, typography, borderRadius } from '../../utils/designTok
 import { useUser } from '../../contexts/UserContext';
 import { Mission } from '../../types';
 import { checkVerificationStatus, MissionType, verifyByGps, verifyByTime, createVerification, addSystemMissionToMyMissions } from '../../api/missionApi';
-import { uploadMissionVerifyPhoto } from '../../api/fileApi';
 import * as Location from 'expo-location';
 import { formatDateYYYYMMDD } from '../../utils/dateUtils';
 import { getMyBadges, getBadgeHistory, Badge } from '../../api/badgeApi';
