@@ -43,7 +43,12 @@ const SectionTitle: React.FC<SectionTitleProps> = ({
 
 const styles = StyleSheet.create({
   title: {
-    fontWeight: typography.fontWeight.bold,
+    fontWeight: typography.fontWeight.medium as any,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
   },
   sm: {
     fontSize: typography.fontSize.sm,

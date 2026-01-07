@@ -167,7 +167,7 @@ const styles = StyleSheet.create({
   },
   pillTabTextActive: {
     color: colors.white,
-    fontWeight: typography.fontWeight.semibold,
+    fontWeight: typography.fontWeight.medium,
   },
 
   // Simple variant (ConnectionsScreen 스타일)

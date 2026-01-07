@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, Platform } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Platform, ImageBackground, Image } from 'react-native';
 import { NavigationProp } from '@react-navigation/native';
 import { useUserProfile } from '../../hooks/useUserProfile';
 import { useCharacter } from '../../hooks/useCharacter';
@@ -26,91 +26,185 @@ const MyPageScreen: React.FC<MyPageScreenProps> = ({ navigation }) => {
 
   if (loading || !profile) {
     return (
-      <ScrollView style={styles.container}>
-        <Header />
-        <View style={styles.content}>
-          <Loading text="프로필을 불러오는 중..." />
-        </View>
-      </ScrollView>
+      <ImageBackground
+        source={require('../../assets/images/background.png')}
+        style={styles.container}
+        resizeMode="cover"
+      >
+        <ScrollView style={styles.scrollView}>
+          <Header />
+          <View style={styles.content}>
+            <Loading text="프로필을 불러오는 중..." />
+          </View>
+        </ScrollView>
+      </ImageBackground>
     );
   }
-
 
   const handleCharacterPress = (character: Character): void => {
     navigation.navigate('CharacterDetail', { character });
   };
 
+  // 통계 데이터 정규화 (그래프 표시용)
+  const maxValue = Math.max(
+    profile.stats.completedMissions,
+    profile.stats.totalExperience / 100, // 경험치는 100으로 나눠서 스케일 조정
+    profile.stats.diaryCount,
+    profile.stats.postCount,
+    1 // 0으로 나누기 방지
+  );
+
+  const statsData = [
+    { label: '완료한 미션', value: profile.stats.completedMissions, color: colors.primary[500] },
+    { label: '총 경험치', value: profile.stats.totalExperience / 100, displayValue: profile.stats.totalExperience.toLocaleString(), color: colors.green[500] },
+    { label: '작성한 다이어리', value: profile.stats.diaryCount, color: colors.orange[500] },
+    { label: '커뮤니티 게시글', value: profile.stats.postCount, color: colors.blue[500] },
+  ];
+
   return (
-    <ScrollView style={styles.container}>
-      <Header />
-      <View style={styles.content}>
-        <Card style={styles.profileCard}>
-          <SectionTitle title="👤 프로필" size="lg" marginBottom={spacing[4]} />
-          <View style={styles.profileInfo}>
-            <Text style={styles.profileLabel}>닉네임</Text>
-            <Text style={styles.profileValue}>{profile.nickname}</Text>
+    <ImageBackground
+      source={require('../../assets/images/background.png')}
+      style={styles.container}
+      resizeMode="cover"
+    >
+      <ScrollView style={styles.scrollView}>
+        <Header />
+        <View style={styles.content}>
+          {/* 프로필 섹션 */}
+          <View style={styles.profileCard}>
+            <View style={styles.sectionHeader}>
+              <Image
+                source={require('../../assets/images/boy.png')}
+                style={styles.sectionIcon}
+                resizeMode="contain"
+              />
+              <Text style={styles.sectionTitle}>프로필</Text>
+            </View>
+            <View style={styles.profileInfo}>
+              <View style={styles.profileRow}>
+                <Text style={styles.profileLabel}>닉네임</Text>
+                <Text style={styles.profileValue}>{profile.nickname}</Text>
+              </View>
+              <View style={styles.profileRow}>
+                <Text style={styles.profileLabel}>가입일</Text>
+                <Text style={styles.profileValue}>{formatDateKorean(profile.createdAt)}</Text>
+              </View>
+            </View>
           </View>
-          <View style={styles.profileInfo}>
-            <Text style={styles.profileLabel}>가입일</Text>
-            <Text style={styles.profileValue}>{formatDateKorean(profile.createdAt)}</Text>
-          </View>
-        </Card>
 
-        {currentCharacter && (
-          <View style={styles.characterSection}>
-            <SectionTitle title="🌱 나의 캐릭터" size="lg" marginBottom={spacing[4]} />
-            <CharacterCard
-              character={currentCharacter}
-              onPress={handleCharacterPress}
-              style={styles.characterCard}
-            />
-          </View>
-        )}
+          {/* 캐릭터 섹션 */}
+          {currentCharacter && (
+            <View style={styles.characterCard}>
+              <View style={styles.sectionHeader}>
+                <Image
+                  source={require('../../assets/images/clover.png')}
+                  style={styles.sectionIcon}
+                  resizeMode="contain"
+                />
+                <Text style={styles.sectionTitle}>나의 캐릭터</Text>
+              </View>
+              <CharacterCard
+                character={currentCharacter}
+                onPress={handleCharacterPress}
+                style={styles.characterCardInner}
+              />
+            </View>
+          )}
 
-        <Card style={styles.statsCard}>
-          <SectionTitle title="📊 통계" size="lg" marginBottom={spacing[4]} />
-          <View style={styles.statsGrid}>
-            <View style={styles.statItem}>
-              <Text style={styles.statValue}>{profile.stats.completedMissions}</Text>
-              <Text style={styles.statLabel}>완료한 미션</Text>
+          {/* 통계 섹션 */}
+          <View style={styles.statsCard}>
+            <View style={styles.sectionHeader}>
+              <Image
+                source={require('../../assets/images/search.png')}
+                style={styles.sectionIcon}
+                resizeMode="contain"
+              />
+              <Text style={styles.sectionTitle}>통계</Text>
             </View>
-            <View style={styles.statItem}>
-              <Text style={styles.statValue}>{profile.stats.totalExperience.toLocaleString()}</Text>
-              <Text style={styles.statLabel}>총 경험치</Text>
-            </View>
-            <View style={styles.statItem}>
-              <Text style={styles.statValue}>{profile.stats.diaryCount}</Text>
-              <Text style={styles.statLabel}>작성한 다이어리</Text>
-            </View>
-            <View style={styles.statItem}>
-              <Text style={styles.statValue}>{profile.stats.postCount}</Text>
-              <Text style={styles.statLabel}>커뮤니티 게시글</Text>
+            <View style={styles.statsContainer}>
+              {statsData.map((stat, index) => {
+                const percentage = maxValue > 0 ? (stat.value / maxValue) * 100 : 0;
+                return (
+                  <View key={index} style={styles.statItem}>
+                    <View style={styles.statHeader}>
+                      <Text style={styles.statLabel}>{stat.label}</Text>
+                      <Text style={styles.statValue}>
+                        {stat.displayValue || stat.value.toLocaleString()}
+                      </Text>
+                    </View>
+                    <View style={styles.barChartContainer}>
+                      <View style={styles.barChartBackground}>
+                        <View
+                          style={[
+                            styles.barChartFill,
+                            {
+                              width: `${percentage}%`,
+                              backgroundColor: stat.color,
+                            },
+                          ]}
+                        />
+                      </View>
+                    </View>
+                  </View>
+                );
+              })}
             </View>
           </View>
-        </Card>
-      </View>
-    </ScrollView>
+        </View>
+      </ScrollView>
+    </ImageBackground>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background.secondary,
+  },
+  scrollView: {
+    flex: 1,
   },
   content: {
     padding: spacing[5],
+    paddingBottom: spacing[20],
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: spacing[4],
+    gap: spacing[2],
+  },
+  sectionIcon: {
+    width: 25,
+    height: 25,
+  },
+  sectionTitle: {
+    fontSize: typography.fontSize.lg,
+    fontWeight: typography.fontWeight.medium,
+    color: colors.text.primary,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.lg),
   },
   profileCard: {
+    backgroundColor: colors.background.primary,
+    borderRadius: borderRadius.xl,
+    padding: spacing[5],
     marginBottom: spacing[6],
+    borderWidth: 1,
+    borderColor: '#D4A574',
+    ...shadows.lg,
   },
   profileInfo: {
+    gap: spacing[3],
+  },
+  profileRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: spacing[3],
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border.light,
+    paddingVertical: spacing[2],
   },
   profileLabel: {
     fontSize: typography.fontSize.base,
@@ -126,7 +220,7 @@ const styles = StyleSheet.create({
   profileValue: {
     fontSize: typography.fontSize.base,
     color: colors.text.primary,
-    fontWeight: typography.fontWeight.semibold,
+    fontWeight: typography.fontWeight.medium,
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,
       android: typography.fontFamily.regular,
@@ -134,51 +228,72 @@ const styles = StyleSheet.create({
     includeFontPadding: false,
     lineHeight: getOptimizedLineHeight(typography.fontSize.base),
   },
-  characterSection: {
-    marginBottom: spacing[6],
-  },
   characterCard: {
+    backgroundColor: colors.background.primary,
+    borderRadius: borderRadius.xl,
+    padding: spacing[5],
+    marginBottom: spacing[6],
+    borderWidth: 1,
+    borderColor: '#D4A574',
+    ...shadows.lg,
+  },
+  characterCardInner: {
     marginBottom: 0,
   },
   statsCard: {
+    backgroundColor: colors.background.primary,
+    borderRadius: borderRadius.xl,
+    padding: spacing[5],
     marginBottom: spacing[6],
+    borderWidth: 1,
+    borderColor: '#D4A574',
+    ...shadows.lg,
   },
-  statsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+  statsContainer: {
     gap: spacing[4],
   },
   statItem: {
-    flex: 1,
-    minWidth: '45%',
-    alignItems: 'center',
-    padding: spacing[4],
-    backgroundColor: colors.background.secondary,
-    borderRadius: borderRadius.lg,
-    ...shadows.base,
+    gap: spacing[2],
   },
-  statValue: {
-    fontSize: typography.fontSize['2xl'],
-    fontWeight: typography.fontWeight.bold,
-    color: colors.primary[600],
-    marginBottom: spacing[2],
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize['2xl']),
+  statHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   statLabel: {
-    fontSize: typography.fontSize.sm,
-    color: colors.text.secondary,
+    fontSize: typography.fontSize.base,
+    color: colors.text.primary,
     fontWeight: typography.fontWeight.medium,
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,
       android: typography.fontFamily.regular,
     }),
     includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
+    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
+  },
+  statValue: {
+    fontSize: typography.fontSize.lg,
+    color: colors.text.primary,
+    fontWeight: typography.fontWeight.medium,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.lg),
+  },
+  barChartContainer: {
+    marginTop: spacing[1],
+  },
+  barChartBackground: {
+    height: 12,
+    backgroundColor: colors.gray[200],
+    borderRadius: borderRadius.full,
+    overflow: 'hidden',
+  },
+  barChartFill: {
+    height: '100%',
+    borderRadius: borderRadius.full,
   },
 });
 

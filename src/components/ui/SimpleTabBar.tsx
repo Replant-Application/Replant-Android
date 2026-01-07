@@ -107,7 +107,7 @@ const styles = StyleSheet.create({
   },
   tabTextActive: {
     color: '#FFF8E7', // 활성 탭 텍스트 색상 (크림색)
-    fontWeight: typography.fontWeight.semibold,
+    fontWeight: typography.fontWeight.medium,
     lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
     letterSpacing: 0.3,
     fontFamily: Platform.select({

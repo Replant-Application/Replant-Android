@@ -388,7 +388,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: typography.fontSize['2xl'],
-    fontWeight: typography.fontWeight.bold,
+    fontWeight: typography.fontWeight.medium,
     color: colors.text.primary,
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,
@@ -444,7 +444,7 @@ const styles = StyleSheet.create({
   },
   filterTextActive: {
     color: colors.text.primary,
-    fontWeight: typography.fontWeight.semibold as any,
+    fontWeight: typography.fontWeight.medium as any,
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,
       android: typography.fontFamily.regular,

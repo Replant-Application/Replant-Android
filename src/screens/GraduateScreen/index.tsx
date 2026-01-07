@@ -371,7 +371,7 @@ const styles = StyleSheet.create({
   },
   statValue: {
     fontSize: typography.fontSize['2xl'],
-    fontWeight: typography.fontWeight.bold,
+    fontWeight: typography.fontWeight.medium,
     color: colors.primary[600],
     marginBottom: spacing[1],
     fontFamily: Platform.select({
@@ -420,7 +420,7 @@ const styles = StyleSheet.create({
   },
   roleTitle: {
     fontSize: typography.fontSize.base,
-    fontWeight: typography.fontWeight.semibold,
+    fontWeight: typography.fontWeight.medium,
     color: colors.text.primary,
     marginBottom: spacing[1],
     fontFamily: Platform.select({
@@ -533,7 +533,7 @@ const styles = StyleSheet.create({
   },
   actionTitle: {
     fontSize: typography.fontSize.base,
-    fontWeight: typography.fontWeight.semibold,
+    fontWeight: typography.fontWeight.medium,
     color: colors.text.primary,
     marginBottom: spacing[1],
     fontFamily: Platform.select({
@@ -581,7 +581,7 @@ const styles = StyleSheet.create({
   },
   badgeTitle: {
     fontSize: typography.fontSize.xl,
-    fontWeight: typography.fontWeight.bold,
+    fontWeight: typography.fontWeight.medium,
     color: colors.text.inverse,
     marginBottom: spacing[2],
     fontFamily: Platform.select({

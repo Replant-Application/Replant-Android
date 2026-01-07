@@ -289,7 +289,7 @@ const styles = StyleSheet.create({
   },
   optionTitle: {
     fontSize: typography.fontSize.xl,
-    fontWeight: typography.fontWeight.semibold,
+    fontWeight: typography.fontWeight.medium,
     color: colors.text.primary,
     marginBottom: spacing[2],
     fontFamily: Platform.select({
@@ -351,7 +351,7 @@ const styles = StyleSheet.create({
   },
   analyzeButtonText: {
     color: colors.blue[700],
-    fontWeight: typography.fontWeight.semibold,
+    fontWeight: typography.fontWeight.medium,
   },
   confirmButton: {
     flex: 1,

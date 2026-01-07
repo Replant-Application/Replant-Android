@@ -635,7 +635,7 @@ const styles = StyleSheet.create({
   addButtonText: {
     color: colors.text.inverse,
     fontSize: typography.fontSize.sm,
-    fontWeight: typography.fontWeight.semibold,
+    fontWeight: typography.fontWeight.medium,
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,
       android: typography.fontFamily.regular,
@@ -674,7 +674,7 @@ const styles = StyleSheet.create({
   },
   missionTitle: {
     fontSize: typography.fontSize.lg,
-    fontWeight: typography.fontWeight.bold,
+    fontWeight: typography.fontWeight.medium,
     color: colors.text.primary,
     flex: 1,
     fontFamily: Platform.select({
@@ -925,7 +925,7 @@ const styles = StyleSheet.create({
   checkmark: {
     color: colors.text.inverse,
     fontSize: 14,
-    fontWeight: typography.fontWeight.bold,
+    fontWeight: typography.fontWeight.medium,
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,
       android: typography.fontFamily.regular,
@@ -979,7 +979,7 @@ const styles = StyleSheet.create({
   saveButtonText: {
     fontSize: typography.fontSize.base,
     color: colors.text.inverse,
-    fontWeight: typography.fontWeight.semibold,
+    fontWeight: typography.fontWeight.medium,
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,
       android: typography.fontFamily.regular,

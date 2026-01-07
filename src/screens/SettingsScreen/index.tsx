@@ -204,7 +204,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
             />
             <View style={styles.divider} />
             <SettingItem
-              icon={require('../../assets/images/home.png')}
+              icon={require('../../assets/images/boy.png')}
               title="마이페이지"
               onPress={() => navigation?.navigate('MyPage')}
             />

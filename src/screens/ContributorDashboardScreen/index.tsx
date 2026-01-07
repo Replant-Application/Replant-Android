@@ -14,7 +14,6 @@ import {
   TouchableOpacity,
   Alert,
   Modal,
-  TextInput,
   Platform,
   Image,
 } from 'react-native';
@@ -379,7 +378,11 @@ const ContributorDashboardScreen: React.FC<ContributorDashboardScreenProps> = ({
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.actionItem}
-              onPress={() => navigation.navigate('CommunityPostCreate')}
+              onPress={() => navigation.navigate('CommunityPostCreate' as any, {
+                missionId: '',
+                missionTitle: '정보 공유',
+                missionEmoji: '📝',
+              })}
             >
               <Text style={styles.actionIcon}>📝</Text>
               <Text style={styles.actionLabel}>정보 공유</Text>
@@ -500,7 +503,7 @@ const styles = StyleSheet.create({
   },
   welcomeTitle: {
     fontSize: typography.fontSize.lg,
-    fontWeight: typography.fontWeight.bold,
+    fontWeight: typography.fontWeight.medium,
     color: colors.primary[700],
     marginBottom: spacing[1],
     fontFamily: Platform.select({
@@ -538,7 +541,7 @@ const styles = StyleSheet.create({
   },
   statValue: {
     fontSize: typography.fontSize['2xl'],
-    fontWeight: typography.fontWeight.bold,
+    fontWeight: typography.fontWeight.medium,
     color: colors.primary[600],
     marginBottom: spacing[1],
     fontFamily: Platform.select({
@@ -612,7 +615,7 @@ const styles = StyleSheet.create({
   },
   requestUserName: {
     fontSize: typography.fontSize.sm,
-    fontWeight: typography.fontWeight.semibold,
+    fontWeight: typography.fontWeight.medium,
     color: colors.text.primary,
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,
@@ -666,7 +669,7 @@ const styles = StyleSheet.create({
   acceptButtonText: {
     color: colors.text.inverse,
     fontSize: typography.fontSize.sm,
-    fontWeight: typography.fontWeight.semibold,
+    fontWeight: typography.fontWeight.medium,
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,
       android: typography.fontFamily.regular,
@@ -696,7 +699,7 @@ const styles = StyleSheet.create({
   },
   sessionAvatarText: {
     fontSize: typography.fontSize.lg,
-    fontWeight: typography.fontWeight.bold,
+    fontWeight: typography.fontWeight.medium,
     color: colors.primary[600],
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,
@@ -715,7 +718,7 @@ const styles = StyleSheet.create({
   },
   sessionUserName: {
     fontSize: typography.fontSize.sm,
-    fontWeight: typography.fontWeight.semibold,
+    fontWeight: typography.fontWeight.medium,
     color: colors.text.primary,
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,
@@ -755,7 +758,7 @@ const styles = StyleSheet.create({
   unreadCount: {
     fontSize: typography.fontSize.xs,
     color: colors.text.inverse,
-    fontWeight: typography.fontWeight.bold,
+    fontWeight: typography.fontWeight.medium,
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,
       android: typography.fontFamily.regular,
@@ -794,7 +797,7 @@ const styles = StyleSheet.create({
   },
   guideTitle: {
     fontSize: typography.fontSize.sm,
-    fontWeight: typography.fontWeight.semibold,
+    fontWeight: typography.fontWeight.medium,
     color: colors.text.primary,
     marginBottom: spacing[1],
     fontFamily: Platform.select({
@@ -884,7 +887,7 @@ const styles = StyleSheet.create({
   },
   emergencyTitle: {
     fontSize: typography.fontSize.sm,
-    fontWeight: typography.fontWeight.bold,
+    fontWeight: typography.fontWeight.medium,
     color: colors.error[700],
     marginBottom: spacing[2],
     fontFamily: Platform.select({
@@ -897,7 +900,6 @@ const styles = StyleSheet.create({
   emergencyText: {
     fontSize: typography.fontSize.sm,
     color: colors.error[600],
-    lineHeight: 22,
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,
       android: typography.fontFamily.regular,
@@ -940,15 +942,12 @@ const styles = StyleSheet.create({
     width: 24,
     height: 24,
   },
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(24),
-  },
   resourceContent: {
     flex: 1,
   },
   resourceTitle: {
     fontSize: typography.fontSize.base,
-    fontWeight: typography.fontWeight.semibold,
+    fontWeight: typography.fontWeight.medium,
     color: colors.text.primary,
     marginBottom: spacing[1],
     fontFamily: Platform.select({

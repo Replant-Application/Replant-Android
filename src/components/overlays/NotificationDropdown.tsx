@@ -293,7 +293,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: typography.fontSize.lg,
-    fontWeight: typography.fontWeight.semibold as any,
+    fontWeight: typography.fontWeight.medium as any,
     color: colors.text.primary,
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,
@@ -312,7 +312,7 @@ const styles = StyleSheet.create({
   },
   unreadBadgeText: {
     fontSize: typography.fontSize.xs,
-    fontWeight: typography.fontWeight.bold as any,
+    fontWeight: typography.fontWeight.medium as any,
     color: colors.white,
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,
@@ -405,7 +405,7 @@ const styles = StyleSheet.create({
     lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
   },
   unreadTitle: {
-    fontWeight: typography.fontWeight.semibold as any,
+    fontWeight: typography.fontWeight.medium as any,
   },
   unreadDot: {
     width: 6,

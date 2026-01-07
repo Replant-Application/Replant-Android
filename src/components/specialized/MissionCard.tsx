@@ -341,7 +341,7 @@ const styles = StyleSheet.create({
   verifiedIcon: {
     fontSize: typography.fontSize.xs,
     color: colors.green[500],
-    fontWeight: typography.fontWeight.bold,
+    fontWeight: typography.fontWeight.medium,
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,
       android: typography.fontFamily.regular,
@@ -450,7 +450,7 @@ const styles = StyleSheet.create({
   deletePhotoIcon: {
     color: colors.text.inverse,
     fontSize: typography.fontSize.base,
-    fontWeight: typography.fontWeight.bold,
+    fontWeight: typography.fontWeight.medium,
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,
       android: typography.fontFamily.regular,

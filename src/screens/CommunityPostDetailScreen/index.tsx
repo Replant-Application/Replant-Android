@@ -393,7 +393,7 @@ const CommunityPostDetailScreen: React.FC<CommunityPostDetailScreenProps> = ({
             style={styles.commentInput}
             value={commentContent}
             onChangeText={setCommentContent}
-            placeholder={replyingToComment ? `@${replyingToComment.nickname}님에게 답글...` : "댓글을 입력하세요..."}
+            placeholder={replyingToComment ? `@${replyingToComment.nickname}님에게 답글...` : "댓글을 입력하세요"}
             placeholderTextColor={colors.text.tertiary}
             multiline
           />

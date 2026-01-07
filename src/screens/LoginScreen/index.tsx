@@ -491,7 +491,7 @@ const styles = StyleSheet.create({
   checkmark: {
     color: colors.text.inverse,
     fontSize: 12,
-    fontWeight: typography.fontWeight.bold,
+    fontWeight: typography.fontWeight.medium,
   },
   checkboxLabel: {
     fontSize: typography.fontSize.sm,

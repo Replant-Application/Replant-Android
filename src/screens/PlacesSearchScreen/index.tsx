@@ -237,7 +237,7 @@ const styles = StyleSheet.create({
   },
   filterChipTextActive: {
     color: colors.text.inverse,
-    fontWeight: typography.fontWeight.bold,
+    fontWeight: typography.fontWeight.medium,
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,
       android: typography.fontFamily.regular,
@@ -274,7 +274,7 @@ const styles = StyleSheet.create({
   },
   regionChipTextActive: {
     color: colors.primary[700],
-    fontWeight: typography.fontWeight.semibold,
+    fontWeight: typography.fontWeight.medium,
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,
       android: typography.fontFamily.regular,

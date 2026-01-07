@@ -147,7 +147,7 @@ const styles = StyleSheet.create({
   },
   expiredBadgeText: {
     fontSize: typography.fontSize.xs,
-    fontWeight: typography.fontWeight.semibold,
+    fontWeight: typography.fontWeight.medium,
     color: colors.white,
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,
@@ -295,7 +295,7 @@ const styles = StyleSheet.create({
   },
   viewMissionButtonText: {
     fontSize: typography.fontSize.base,
-    fontWeight: typography.fontWeight.semibold,
+    fontWeight: typography.fontWeight.medium,
     color: colors.white,
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,

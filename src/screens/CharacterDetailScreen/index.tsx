@@ -352,7 +352,7 @@ const styles = StyleSheet.create({
   emotionLabel: {
     fontSize: typography.fontSize.sm,
     color: colors.text.secondary,
-    fontWeight: typography.fontWeight.semibold,
+    fontWeight: typography.fontWeight.medium,
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,
       android: typography.fontFamily.regular,

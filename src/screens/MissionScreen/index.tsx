@@ -812,7 +812,7 @@ const styles = StyleSheet.create({
   },
   badgeRemaining: {
     fontSize: typography.fontSize.xs,
-    fontWeight: typography.fontWeight.semibold,
+    fontWeight: typography.fontWeight.medium,
     color: colors.primary[600],
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,

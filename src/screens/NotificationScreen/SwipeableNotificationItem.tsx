@@ -143,7 +143,7 @@ const styles = StyleSheet.create({
   deleteButtonText: {
     color: colors.white,
     fontSize: typography.fontSize.sm,
-    fontWeight: typography.fontWeight.semibold as any,
+    fontWeight: typography.fontWeight.medium as any,
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,
       android: typography.fontFamily.regular,
@@ -191,7 +191,7 @@ const styles = StyleSheet.create({
     lineHeight: getOptimizedLineHeight(typography.fontSize.base),
   },
   unreadTitle: {
-    fontWeight: typography.fontWeight.semibold as any,
+    fontWeight: typography.fontWeight.medium as any,
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,
       android: typography.fontFamily.regular,

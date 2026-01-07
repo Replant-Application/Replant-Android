@@ -94,7 +94,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: typography.fontSize.xl,
-    fontWeight: typography.fontWeight.bold,
+    fontWeight: typography.fontWeight.medium,
     color: colors.white,
     marginBottom: spacing[3],
     textAlign: 'center',
@@ -126,7 +126,7 @@ const styles = StyleSheet.create({
   buttonText: {
     fontSize: typography.fontSize.base,
     color: colors.white,
-    fontWeight: typography.fontWeight.bold,
+    fontWeight: typography.fontWeight.medium,
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,
       android: typography.fontFamily.regular,

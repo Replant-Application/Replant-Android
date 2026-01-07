@@ -492,7 +492,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: typography.fontSize.xl,
-    fontWeight: typography.fontWeight.bold,
+    fontWeight: typography.fontWeight.medium,
     color: colors.text.primary,
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,
@@ -684,7 +684,7 @@ const styles = StyleSheet.create({
   },
   detailTitle: {
     fontSize: typography.fontSize.lg,
-    fontWeight: typography.fontWeight.bold,
+    fontWeight: typography.fontWeight.medium,
     color: colors.text.primary,
     marginBottom: spacing[4],
     fontFamily: Platform.select({
@@ -729,7 +729,7 @@ const styles = StyleSheet.create({
   detailButtonText: {
     color: colors.white,
     fontSize: typography.fontSize.base,
-    fontWeight: typography.fontWeight.semibold,
+    fontWeight: typography.fontWeight.medium,
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,
       android: typography.fontFamily.regular,
@@ -755,7 +755,7 @@ const styles = StyleSheet.create({
   writeReviewButtonText: {
     color: colors.text.inverse,
     fontSize: typography.fontSize.sm,
-    fontWeight: typography.fontWeight.semibold,
+    fontWeight: typography.fontWeight.medium,
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,
       android: typography.fontFamily.regular,
@@ -804,7 +804,7 @@ const styles = StyleSheet.create({
   },
   reviewAvatarText: {
     fontSize: typography.fontSize.base,
-    fontWeight: typography.fontWeight.bold,
+    fontWeight: typography.fontWeight.medium,
     color: colors.primary[600],
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,
@@ -818,7 +818,7 @@ const styles = StyleSheet.create({
   },
   reviewAuthor: {
     fontSize: typography.fontSize.sm,
-    fontWeight: typography.fontWeight.semibold,
+    fontWeight: typography.fontWeight.medium,
     color: colors.text.primary,
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,
@@ -869,7 +869,7 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     fontSize: typography.fontSize.xl,
-    fontWeight: typography.fontWeight.bold,
+    fontWeight: typography.fontWeight.medium,
     color: colors.text.primary,
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,
@@ -933,7 +933,7 @@ const styles = StyleSheet.create({
   },
   cancelButtonText: {
     fontSize: typography.fontSize.base,
-    fontWeight: typography.fontWeight.semibold,
+    fontWeight: typography.fontWeight.medium,
     color: colors.text.secondary,
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,
@@ -954,7 +954,7 @@ const styles = StyleSheet.create({
   },
   submitButtonText: {
     fontSize: typography.fontSize.base,
-    fontWeight: typography.fontWeight.semibold,
+    fontWeight: typography.fontWeight.medium,
     color: colors.text.inverse,
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,

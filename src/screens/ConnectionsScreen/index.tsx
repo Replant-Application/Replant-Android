@@ -414,7 +414,7 @@ const styles = StyleSheet.create({
   },
   userName: {
     fontSize: typography.fontSize.lg,
-    fontWeight: typography.fontWeight.semibold as any,
+    fontWeight: typography.fontWeight.medium as any,
     color: colors.text.primary,
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,
@@ -484,7 +484,7 @@ const styles = StyleSheet.create({
   acceptButtonText: {
     color: colors.text.inverse,
     fontSize: typography.fontSize.base,
-    fontWeight: typography.fontWeight.semibold as any,
+    fontWeight: typography.fontWeight.medium as any,
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,
       android: typography.fontFamily.regular,
@@ -535,7 +535,7 @@ const styles = StyleSheet.create({
   },
   chatUserName: {
     fontSize: typography.fontSize.base,
-    fontWeight: typography.fontWeight.semibold as any,
+    fontWeight: typography.fontWeight.medium as any,
     color: colors.text.primary,
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,

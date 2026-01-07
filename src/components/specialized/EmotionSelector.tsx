@@ -93,7 +93,7 @@ const styles = StyleSheet.create({
 
   title: {
     fontSize: typography.fontSize.lg,
-    fontWeight: typography.fontWeight.semibold,
+    fontWeight: typography.fontWeight.medium,
     color: colors.text.primary,
     marginBottom: spacing[3],
     textAlign: 'center',
@@ -150,7 +150,7 @@ const styles = StyleSheet.create({
 
   selectedLabel: {
     color: colors.primary[500],
-    fontWeight: typography.fontWeight.semibold,
+    fontWeight: typography.fontWeight.medium,
   },
 });
 

@@ -642,7 +642,7 @@ const styles = StyleSheet.create({
   modalQuestion: {
     paddingVertical: spacing[3],
     fontSize: typography.fontSize['2xl'],
-    fontWeight: typography.fontWeight.semibold,
+    fontWeight: typography.fontWeight.medium,
     color: colors.white,
     textAlign: 'left',
     marginBottom: spacing[1],
@@ -897,7 +897,7 @@ const styles = StyleSheet.create({
   nextButtonText: {
     fontSize: typography.fontSize.base,
     color: colors.gray[900],
-    fontWeight: typography.fontWeight.bold,
+    fontWeight: typography.fontWeight.medium,
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,
       android: typography.fontFamily.regular,
@@ -932,7 +932,7 @@ const styles = StyleSheet.create({
   },
   bookTitle: {
     fontSize: typography.fontSize.xl,
-    fontWeight: typography.fontWeight.bold,
+    fontWeight: typography.fontWeight.medium,
     color: colors.white,
     marginBottom: spacing[2],
     fontFamily: Platform.select({
@@ -968,7 +968,7 @@ const styles = StyleSheet.create({
   navButtonText: {
     fontSize: typography.fontSize.xl,
     color: colors.white,
-    fontWeight: typography.fontWeight.bold,
+    fontWeight: typography.fontWeight.medium,
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,
       android: typography.fontFamily.regular,
@@ -988,7 +988,7 @@ const styles = StyleSheet.create({
   viewDetailButtonText: {
     fontSize: typography.fontSize.sm,
     color: colors.white,
-    fontWeight: typography.fontWeight.bold,
+    fontWeight: typography.fontWeight.medium,
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,
       android: typography.fontFamily.regular,
@@ -1068,7 +1068,7 @@ const styles = StyleSheet.create({
   backToListButtonText: {
     fontSize: typography.fontSize.base,
     color: colors.white,
-    fontWeight: typography.fontWeight.bold,
+    fontWeight: typography.fontWeight.medium,
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,
       android: typography.fontFamily.regular,
@@ -1085,7 +1085,7 @@ const styles = StyleSheet.create({
   deleteButtonText: {
     fontSize: typography.fontSize.base,
     color: colors.white,
-    fontWeight: typography.fontWeight.bold,
+    fontWeight: typography.fontWeight.medium,
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,
       android: typography.fontFamily.regular,

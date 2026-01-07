@@ -228,7 +228,7 @@ const styles = StyleSheet.create({
   },
   userNickname: {
     fontSize: typography.fontSize.base,
-    fontWeight: typography.fontWeight.semibold,
+    fontWeight: typography.fontWeight.medium,
     color: colors.text.primary,
     marginBottom: spacing[1],
     fontFamily: Platform.select({
@@ -273,7 +273,7 @@ const styles = StyleSheet.create({
   },
   actionButtonText: {
     fontSize: typography.fontSize.base,
-    fontWeight: typography.fontWeight.semibold,
+    fontWeight: typography.fontWeight.medium,
     color: colors.text.inverse,
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,
@@ -291,7 +291,7 @@ const styles = StyleSheet.create({
   },
   dangerButtonText: {
     fontSize: typography.fontSize.base,
-    fontWeight: typography.fontWeight.semibold,
+    fontWeight: typography.fontWeight.medium,
     color: colors.text.inverse,
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,

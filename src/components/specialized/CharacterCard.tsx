@@ -135,7 +135,7 @@ const styles = StyleSheet.create({
 
   name: {
     fontSize: typography.fontSize.lg,
-    fontWeight: typography.fontWeight.bold,
+    fontWeight: typography.fontWeight.medium,
     color: colors.text.primary,
     marginBottom: spacing[1],
     fontFamily: Platform.select({
@@ -169,7 +169,7 @@ const styles = StyleSheet.create({
 
   levelText: {
     fontSize: typography.fontSize.sm,
-    fontWeight: typography.fontWeight.semibold,
+    fontWeight: typography.fontWeight.medium,
     color: colors.primary[500],
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,

@@ -239,7 +239,7 @@ const styles = StyleSheet.create({
   },
   statValue: {
     fontSize: typography.fontSize['2xl'],
-    fontWeight: typography.fontWeight.bold as any,
+    fontWeight: typography.fontWeight.medium as any,
     color: colors.primary[600],
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,
@@ -309,7 +309,7 @@ const styles = StyleSheet.create({
   },
   missionTitle: {
     fontSize: typography.fontSize.lg,
-    fontWeight: typography.fontWeight.semibold as any,
+    fontWeight: typography.fontWeight.medium as any,
     color: colors.text.primary,
     marginBottom: spacing[1],
     fontFamily: Platform.select({

@@ -16,6 +16,7 @@ import {
   Image,
   TouchableOpacity,
   ActivityIndicator,
+  ImageBackground,
 } from 'react-native';
 import { Header, AlertModal } from '../../components/ui';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
@@ -273,12 +274,17 @@ const VerificationPostCreateScreen: React.FC<VerificationPostCreateScreenProps> 
   };
 
   return (
-    <KeyboardAvoidingView
+    <ImageBackground
+      source={require('../../assets/images/background.png')}
       style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+      resizeMode="cover"
     >
-      <Header
+      <KeyboardAvoidingView
+        style={styles.keyboardView}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+      >
+        <Header
         title={isEditMode ? "인증글 수정" : "인증글 작성"}
         leftButton={
           <TouchableOpacity onPress={() => navigation.goBack()}>
@@ -386,22 +392,28 @@ const VerificationPostCreateScreen: React.FC<VerificationPostCreateScreenProps> 
 
       {/* 작성/수정 버튼 - 하단 고정 */}
       <View style={styles.buttonContainer}>
-        <TouchableOpacity
-          style={[
-            styles.submitButton,
-            (loading || loadingData || !content.trim()) && styles.submitButtonDisabled
-          ]}
-          onPress={handleSubmitVerification}
-          disabled={loading || loadingData || !content.trim()}
+        <ImageBackground
+          source={require('../../assets/images/background.png')}
+          style={styles.buttonBackground}
+          resizeMode="cover"
         >
-          {loading ? (
-            <ActivityIndicator color={colors.white} />
-          ) : (
-            <Text style={styles.submitButtonText}>
-              {isEditMode ? '인증글 수정' : '인증글 작성'}
-            </Text>
-          )}
-        </TouchableOpacity>
+          <TouchableOpacity
+            style={[
+              styles.submitButton,
+              (loading || loadingData || !content.trim()) && styles.submitButtonDisabled
+            ]}
+            onPress={handleSubmitVerification}
+            disabled={loading || loadingData || !content.trim()}
+          >
+            {loading ? (
+              <ActivityIndicator color={colors.white} />
+            ) : (
+              <Text style={styles.submitButtonText}>
+                {isEditMode ? '인증글 수정' : '인증글 작성'}
+              </Text>
+            )}
+          </TouchableOpacity>
+        </ImageBackground>
       </View>
 
       {/* 성공 모달 */}
@@ -417,14 +429,17 @@ const VerificationPostCreateScreen: React.FC<VerificationPostCreateScreenProps> 
           navigation.goBack();
         }}
       />
-    </KeyboardAvoidingView>
+      </KeyboardAvoidingView>
+    </ImageBackground>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background.primary,
+  },
+  keyboardView: {
+    flex: 1,
   },
   content: {
     flex: 1,
@@ -636,9 +651,12 @@ const styles = StyleSheet.create({
   buttonContainer: {
     padding: spacing[4],
     paddingBottom: spacing[6],
-    backgroundColor: colors.background.primary,
     borderTopWidth: 1,
-    borderTopColor: colors.border.light,
+    borderTopColor: '#D4A574',
+  },
+  buttonBackground: {
+    borderRadius: borderRadius.base,
+    overflow: 'hidden',
   },
   submitButton: {
     backgroundColor: colors.primary[500],

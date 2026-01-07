@@ -279,7 +279,7 @@ const AppNavigator = () => {
       case SCREEN_NAMES.MY_PAGE:
         return <MyPageScreen navigation={navigation} />;
       case SCREEN_NAMES.CALENDAR:
-        return <CalendarScreen />;
+        return <CalendarScreen navigation={navigation} />;
       case SCREEN_NAMES.STATISTICS:
         return <StatisticsScreen navigation={navigation} />;
       case SCREEN_NAMES.ADMIN_DASHBOARD:

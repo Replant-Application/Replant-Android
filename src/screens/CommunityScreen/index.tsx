@@ -121,8 +121,6 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation }) => {
     { value: 'popular', label: '인기' },
   ];
 
-  const selectedFilterLabel = filterOptions.find(opt => opt.value === filter)?.label || '전체';
-
   // VerificationPost를 CommunityPost 형태로 변환
   const convertedVerificationPosts = useMemo((): (CommunityPost & { isVerificationPost: boolean; verificationId: number })[] => {
     return verificationPosts.map(vPost => ({
@@ -283,7 +281,11 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation }) => {
               onPress={() => setShowFilterModal(true)}
               activeOpacity={0.7}
             >
-              <Text style={styles.filterButtonText}>필터</Text>
+              <Image
+                source={require('../../assets/images/filter.png')}
+                style={styles.filterIcon}
+                resizeMode="contain"
+              />
               {(verificationFilter !== 'all' || filter !== 'all') && (
                 <View style={styles.filterBadge} />
               )}
@@ -469,24 +471,20 @@ const styles = StyleSheet.create({
   filterButton: {
     backgroundColor: '#8B6F47',
     borderRadius: borderRadius.lg,
-    paddingHorizontal: spacing[4],
+    paddingHorizontal: spacing[3],
     paddingVertical: spacing[3],
-    minWidth: 70,
+    width: 48,
+    height: 48,
     alignItems: 'center',
     justifyContent: 'center',
     position: 'relative',
     borderWidth: 1,
     borderColor: '#D4A574',
   },
-  filterButtonText: {
-    fontSize: typography.fontSize.sm,
-    color: colors.white,
-    fontWeight: typography.fontWeight.semibold,
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
+  filterIcon: {
+    width: 26,
+    height: 26,
+    tintColor: colors.white,
   },
   filterBadge: {
     position: 'absolute',
@@ -527,7 +525,7 @@ const styles = StyleSheet.create({
   chipClose: {
     fontSize: typography.fontSize.base,
     color: colors.primary[700],
-    fontWeight: typography.fontWeight.bold,
+    fontWeight: typography.fontWeight.medium,
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,
       android: typography.fontFamily.regular,

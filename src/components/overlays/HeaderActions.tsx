@@ -175,7 +175,7 @@ const styles = StyleSheet.create({
   },
   badgeText: {
     fontSize: 9,
-    fontWeight: typography.fontWeight.bold as any,
+    fontWeight: typography.fontWeight.medium as any,
     color: colors.white,
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,

@@ -39,11 +39,14 @@ const Header: React.FC<HeaderProps> = ({
 
     return (
       <TouchableOpacity
-        style={styles.backButton}
         onPress={() => navigation?.goBack?.()}
         activeOpacity={0.7}
       >
-        <Text style={styles.backButtonText}>←</Text>
+        <Image
+          source={require('../../assets/images/left.png')}
+          style={styles.backButtonIcon}
+          resizeMode="contain"
+        />
       </TouchableOpacity>
     );
   };
@@ -106,24 +109,9 @@ const styles = StyleSheet.create({
     }),
     includeFontPadding: false,
   },
-  backButton: {
-    width: 40,
-    height: 40,
-    borderRadius: borderRadius.full,
-    backgroundColor: colors.gray[100],
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  backButtonText: {
-    fontSize: typography.fontSize.xl,
-    color: colors.text.primary,
-    fontWeight: typography.fontWeight.medium,
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.xl),
+  backButtonIcon: {
+    width: 24,
+    height: 24,
   },
 });
 

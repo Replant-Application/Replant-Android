@@ -129,7 +129,7 @@ const styles = StyleSheet.create({
   },
   pillFilterTextActive: {
     color: colors.white,
-    fontWeight: typography.fontWeight.semibold,
+    fontWeight: typography.fontWeight.medium,
   },
 
   // Button variant (MissionHistoryScreen, CommunityScreen verificationFilter 스타일)
@@ -164,7 +164,7 @@ const styles = StyleSheet.create({
   },
   buttonFilterTextActive: {
     color: colors.white,
-    fontWeight: typography.fontWeight.semibold,
+    fontWeight: typography.fontWeight.medium,
   },
 });
 

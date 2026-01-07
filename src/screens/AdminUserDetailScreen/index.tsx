@@ -215,7 +215,7 @@ const styles = StyleSheet.create({
   infoValue: {
     fontSize: typography.fontSize.base,
     color: colors.text.primary,
-    fontWeight: typography.fontWeight.semibold,
+    fontWeight: typography.fontWeight.medium,
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,
       android: typography.fontFamily.regular,
