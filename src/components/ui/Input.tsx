@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { TextInput, View, Text, StyleSheet, ViewStyle, TextStyle } from 'react-native';
+import { TextInput, View, Text, StyleSheet, ViewStyle, TextStyle, Platform } from 'react-native';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
+import { getOptimizedLineHeight } from '../../utils/textStyles';
 
 interface InputProps {
   label?: string;
@@ -57,11 +58,12 @@ const Input: React.FC<InputProps> = ({
         onBlur={() => setIsFocused(false)}
         multiline={multiline}
         numberOfLines={numberOfLines}
-        placeholderTextColor={colors.text.tertiary}
+        placeholderTextColor={colors.gray[500]}
         autoCorrect={false}
         autoCapitalize="none"
         keyboardType="default"
         returnKeyType="done"
+        {...(Platform.OS === 'android' && { includeFontPadding: false })}
         {...props}
       />
       {error && <Text style={styles.errorText}>{error}</Text>}
@@ -79,6 +81,12 @@ const styles = StyleSheet.create({
     fontWeight: typography.fontWeight.medium,
     color: colors.text.primary,
     marginBottom: spacing[1],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: 22,
   },
 
   input: {
@@ -90,6 +98,14 @@ const styles = StyleSheet.create({
     color: colors.text.primary,
     fontSize: typography.fontSize.base,
     textAlign: 'left', // 한글 입력을 위해 명시적으로 설정
+    lineHeight: 22,
+    letterSpacing: 0,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false, // Android 여백 문제 해결
+    textAlignVertical: 'center', // Android 수직 정렬
   },
 
   // Sizes
@@ -125,6 +141,12 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.sm,
     color: colors.error,
     marginTop: spacing[1],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: 22,
   },
 });
 

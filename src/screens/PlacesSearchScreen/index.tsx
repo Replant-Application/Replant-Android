@@ -7,9 +7,9 @@ import {
   ScrollView,
   TextInput,
   ActivityIndicator,
-  PermissionsAndroid,
   Platform,
   Image,
+  ImageBackground,
 } from 'react-native';
 import { NavigationProp } from '@react-navigation/native';
 import { Header, EmptyState } from '../../components/ui';
@@ -17,6 +17,7 @@ import { PlaceCard } from '../../components/specialized/PlaceCard';
 import { useLocation } from '../../hooks/useLocation';
 import { usePlacesSearch } from '../../hooks/usePlacesSearch';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
+import { getOptimizedLineHeight } from '../../utils/textStyles';
 import { RootStackParamList } from '../../types/navigation';
 
 interface PlacesSearchScreenProps {
@@ -69,21 +70,26 @@ const PlacesSearchScreen: React.FC<PlacesSearchScreenProps> = ({ navigation }) =
   }, [userLocation, selectedFilter, searchPlaces]);
 
   return (
-    <View style={styles.container}>
-      <Header
-        title="근처 상담센터"
-        leftButton={
-          <TouchableOpacity onPress={handleGoBack} style={styles.backButton}>
-            <Image
-              source={require('../../assets/images/left.png')}
-              style={styles.backButtonIcon}
-              resizeMode="contain"
-            />
-          </TouchableOpacity>
-        }
-      />
+    <ImageBackground
+      source={require('../../assets/images/background.png')}
+      style={styles.backgroundImage}
+      resizeMode="cover"
+    >
+      <View style={styles.container}>
+        <Header
+          title="근처 상담센터"
+          leftButton={
+            <TouchableOpacity onPress={handleGoBack}>
+              <Image
+                source={require('../../assets/images/left.png')}
+                style={styles.backButtonIcon}
+                resizeMode="contain"
+              />
+            </TouchableOpacity>
+          }
+        />
 
-      <ScrollView style={styles.content}>
+        <ScrollView style={styles.content}>
         {/* 검색 바 */}
         <View style={styles.searchContainer}>
           <TextInput
@@ -154,7 +160,7 @@ const PlacesSearchScreen: React.FC<PlacesSearchScreenProps> = ({ navigation }) =
           </View>
         ) : places.length === 0 ? (
           <EmptyState
-            icon="🔍"
+            iconImage={require('../../assets/images/search.png')}
             title="검색 결과가 없습니다"
             description="다른 필터나 지역을 선택해보세요"
           />
@@ -166,21 +172,20 @@ const PlacesSearchScreen: React.FC<PlacesSearchScreenProps> = ({ navigation }) =
             ))}
           </ScrollView>
         )}
-      </ScrollView>
-    </View>
+        </ScrollView>
+      </View>
+    </ImageBackground>
   );
 };
 
 const styles = StyleSheet.create({
+  backgroundImage: {
+    flex: 1,
+    width: '100%',
+    height: '100%',
+  },
   container: {
     flex: 1,
-    backgroundColor: colors.background.secondary,
-  },
-  backButton: {
-    paddingVertical: spacing[2],
-    paddingHorizontal: spacing[3],
-    borderRadius: borderRadius.md,
-    backgroundColor: colors.primary[100],
   },
   backButtonIcon: {
     width: 24,
@@ -201,6 +206,13 @@ const styles = StyleSheet.create({
     color: colors.text.primary,
     borderWidth: 1,
     borderColor: colors.border.light,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    textAlignVertical: 'center',
+    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
   },
   filterContainer: {
     marginBottom: spacing[3],
@@ -220,10 +232,22 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.sm,
     color: colors.text.secondary,
     fontWeight: typography.fontWeight.medium,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
   },
   filterChipTextActive: {
     color: colors.text.inverse,
-    fontWeight: typography.fontWeight.bold,
+    fontWeight: typography.fontWeight.medium,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
   },
   regionContainer: {
     marginBottom: spacing[4],
@@ -245,10 +269,22 @@ const styles = StyleSheet.create({
   regionChipText: {
     fontSize: typography.fontSize.sm,
     color: colors.text.secondary,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
   },
   regionChipTextActive: {
     color: colors.primary[700],
-    fontWeight: typography.fontWeight.semibold,
+    fontWeight: typography.fontWeight.medium,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
   },
   loadingContainer: {
     flex: 1,
@@ -259,6 +295,12 @@ const styles = StyleSheet.create({
     marginTop: spacing[3],
     fontSize: typography.fontSize.base,
     color: colors.text.secondary,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
   },
   placesList: {
     flex: 1,
@@ -267,6 +309,12 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.sm,
     color: colors.text.secondary,
     marginBottom: spacing[3],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
     fontWeight: typography.fontWeight.medium,
   },
 });

@@ -1,7 +1,8 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Linking } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Linking, Platform, Image } from 'react-native';
 import { Place } from '../../services/placesService';
 import { colors, spacing, typography, borderRadius, shadows } from '../../utils/designTokens';
+import { getOptimizedLineHeight } from '../../utils/textStyles';
 
 interface PlaceCardProps {
   place: Place;
@@ -26,7 +27,12 @@ export const PlaceCard: React.FC<PlaceCardProps> = ({ place }) => {
         <Text style={styles.name}>{place.name}</Text>
         {place.rating && (
           <View style={styles.ratingContainer}>
-            <Text style={styles.rating}>⭐ {place.rating.toFixed(1)}</Text>
+            <Image
+              source={require('../../assets/images/star.png')}
+              style={styles.ratingIcon}
+              resizeMode="contain"
+            />
+            <Text style={styles.rating}>{place.rating.toFixed(1)}</Text>
             {place.user_ratings_total && (
               <Text style={styles.ratingCount}>({place.user_ratings_total})</Text>
             )}
@@ -34,10 +40,24 @@ export const PlaceCard: React.FC<PlaceCardProps> = ({ place }) => {
         )}
       </View>
 
-      <Text style={styles.address}>📍 {place.formatted_address}</Text>
+      <View style={styles.addressContainer}>
+        <Image
+          source={require('../../assets/images/gps.png')}
+          style={styles.addressIcon}
+          resizeMode="contain"
+        />
+        <Text style={styles.address}>{place.formatted_address}</Text>
+      </View>
 
       {place.formatted_phone_number && (
-        <Text style={styles.phone}>📞 {place.formatted_phone_number}</Text>
+        <View style={styles.phoneContainer}>
+          <Image
+            source={require('../../assets/images/call.png')}
+            style={styles.phoneIcon}
+            resizeMode="contain"
+          />
+          <Text style={styles.phone}>{place.formatted_phone_number}</Text>
+        </View>
       )}
 
       {place.opening_hours && (
@@ -84,39 +104,99 @@ const styles = StyleSheet.create({
   name: {
     flex: 1,
     fontSize: typography.fontSize.lg,
-    fontWeight: typography.fontWeight.bold,
+    fontWeight: typography.fontWeight.medium,
     color: colors.text.primary,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.lg),
   },
   ratingContainer: {
     flexDirection: 'row',
     alignItems: 'center',
   },
+  ratingIcon: {
+    width: 16,
+    height: 16,
+    marginRight: spacing[1],
+  },
   rating: {
     fontSize: typography.fontSize.sm,
     color: colors.warning[600],
-    fontWeight: typography.fontWeight.semibold,
+    fontWeight: typography.fontWeight.medium,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
   },
   ratingCount: {
     fontSize: typography.fontSize.sm,
     color: colors.text.secondary,
     marginLeft: spacing[1],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
+  },
+  addressContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: spacing[1],
+  },
+  addressIcon: {
+    width: 16,
+    height: 16,
+    marginRight: spacing[1],
   },
   address: {
+    flex: 1,
     fontSize: typography.fontSize.sm,
     color: colors.text.secondary,
-    marginBottom: spacing[1],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
+  },
+  phoneContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: spacing[2],
+  },
+  phoneIcon: {
+    width: 16,
+    height: 16,
+    marginRight: spacing[1],
   },
   phone: {
     fontSize: typography.fontSize.sm,
     color: colors.text.secondary,
-    marginBottom: spacing[2],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
   },
   hoursContainer: {
     marginBottom: spacing[3],
   },
   openStatus: {
     fontSize: typography.fontSize.sm,
-    fontWeight: typography.fontWeight.semibold,
+    fontWeight: typography.fontWeight.medium,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
   },
   open: {
     color: colors.success[600],
@@ -138,6 +218,12 @@ const styles = StyleSheet.create({
   buttonText: {
     color: colors.text.inverse,
     fontSize: typography.fontSize.sm,
-    fontWeight: typography.fontWeight.semibold,
+    fontWeight: typography.fontWeight.medium,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
   },
 });

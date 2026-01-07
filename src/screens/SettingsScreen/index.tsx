@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, Image, TextInput } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, Image, TextInput, Platform, ImageBackground } from 'react-native';
 import { useUser } from '../../contexts/UserContext';
 import { useAdmin } from '../../hooks/useAdmin';
+import { useCharacter } from '../../hooks/useCharacter';
 import { Header, ConfirmModal } from '../../components/ui';
 import { colors, spacing, typography, borderRadius, shadows } from '../../utils/designTokens';
+import { getOptimizedLineHeight } from '../../utils/textStyles';
+import { getCharacterImage } from '../../utils/characterUtils';
 import { clearAllCommunityPosts } from '../../services/storage';
 import { SettingsScreenProps } from './SettingsScreen.types';
 import { TERMS_OF_SERVICE, PRIVACY_POLICY, OPEN_SOURCE_LICENSE } from './SettingsScreen.constants';
@@ -12,6 +15,8 @@ import SettingItem from './SettingItem';
 const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
   const { user, logout, updateNickname } = useUser();
   const { deleteAllUsers } = useAdmin();
+  const { characters } = useCharacter();
+  const currentCharacter = characters.length > 0 ? characters[0] : null;
   const [showNicknameForm, setShowNicknameForm] = useState(false);
   const [newNickname, setNewNickname] = useState('');
   const [showLogoutModal, setShowLogoutModal] = useState(false);
@@ -113,7 +118,11 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
 
 
   return (
-    <View style={styles.container}>
+    <ImageBackground
+      source={require('../../assets/images/background.png')}
+      style={styles.container}
+      resizeMode="cover"
+    >
       <Header />
       <ScrollView 
         style={styles.scrollView}
@@ -124,11 +133,19 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
         <View style={styles.section}>
           <View style={styles.userCard}>
             <View style={styles.userInfo}>
-              <Image
-                source={require('../../assets/images/home.png')}
-                style={styles.userIcon}
-                resizeMode="contain"
-              />
+              {currentCharacter ? (
+                <Image
+                  source={getCharacterImage(currentCharacter.level || 1, 'default')}
+                  style={styles.userIcon}
+                  resizeMode="contain"
+                />
+              ) : (
+                <Image
+                  source={require('../../assets/images/home.png')}
+                  style={styles.userIcon}
+                  resizeMode="contain"
+                />
+              )}
               <View style={styles.userDetails}>
                 <Text style={styles.userName}>{user?.nickname || '사용자'}</Text>
                 <Text style={styles.userSubtext}>
@@ -199,7 +216,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
             />
             <View style={styles.divider} />
             <SettingItem
-              icon={require('../../assets/images/home.png')}
+              icon={require('../../assets/images/boy.png')}
               title="마이페이지"
               onPress={() => navigation?.navigate('MyPage')}
             />
@@ -287,15 +304,15 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
         onConfirm={handleLogout}
         onCancel={() => setShowLogoutModal(false)}
         confirmButtonColor={colors.error}
+        image={require('../../assets/images/logout.png')}
       />
-    </View>
+    </ImageBackground>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background.secondary,
   },
   scrollView: {
     flex: 1,
@@ -309,10 +326,16 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: typography.fontSize.lg,
-    fontWeight: typography.fontWeight.bold,
+    fontWeight: typography.fontWeight.medium,
     color: colors.text.primary,
     marginBottom: spacing[3],
     paddingHorizontal: spacing[2],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.lg),
   },
   userCard: {
     backgroundColor: colors.background.primary,
@@ -335,13 +358,25 @@ const styles = StyleSheet.create({
   },
   userName: {
     fontSize: typography.fontSize.xl,
-    fontWeight: typography.fontWeight.bold,
+    fontWeight: typography.fontWeight.medium,
     color: colors.text.primary,
     marginBottom: spacing[1],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.xl),
   },
   userSubtext: {
     fontSize: typography.fontSize.sm,
     color: colors.text.secondary,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
   },
   nicknameForm: {
     marginTop: spacing[2],
@@ -354,6 +389,12 @@ const styles = StyleSheet.create({
     fontWeight: typography.fontWeight.medium,
     color: colors.text.secondary,
     marginBottom: spacing[2],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
   },
   textInputWrapper: {
     backgroundColor: colors.background.secondary,
@@ -365,6 +406,12 @@ const styles = StyleSheet.create({
     padding: spacing[3],
     fontSize: typography.fontSize.base,
     color: colors.text.primary,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    textAlignVertical: 'center',
   },
   nicknameActions: {
     flexDirection: 'row',
@@ -383,6 +430,12 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.base,
     color: colors.text.secondary,
     fontWeight: typography.fontWeight.medium,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
   },
   saveButton: {
     flex: 1,
@@ -394,7 +447,13 @@ const styles = StyleSheet.create({
   saveButtonText: {
     fontSize: typography.fontSize.base,
     color: colors.white,
-    fontWeight: typography.fontWeight.semibold,
+    fontWeight: typography.fontWeight.medium,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
   },
   changeNicknameButton: {
     flexDirection: 'row',
@@ -415,6 +474,12 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.base,
     color: colors.primary[600],
     fontWeight: typography.fontWeight.medium,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
   },
   settingsCard: {
     backgroundColor: colors.background.primary,
@@ -446,6 +511,12 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.base,
     color: colors.text.primary,
     fontWeight: typography.fontWeight.medium,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
   },
   settingItemTextDanger: {
     color: colors.error,

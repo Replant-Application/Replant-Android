@@ -20,10 +20,12 @@ import {
   Animated,
   Dimensions,
   Image,
+  Platform,
 } from 'react-native';
 import { useOverlay } from '../../contexts/OverlayContext';
 import { getChatRooms } from '../../api/chatApi';
 import { colors, spacing, typography, borderRadius, shadows } from '../../utils/designTokens';
+import { getOptimizedLineHeight } from '../../utils/textStyles';
 import { formatTimeAgo } from '../../utils/dateUtils';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -177,7 +179,11 @@ const ChatDropdown: React.FC<ChatDropdownProps> = ({
                 </View>
               ) : chatRooms.length === 0 ? (
                 <View style={styles.emptyContainer}>
-                  <Text style={styles.emptyIcon}>💬</Text>
+                  <Image
+                    source={require('../../assets/images/say.png')}
+                    style={styles.emptyIconImage}
+                    resizeMode="contain"
+                  />
                   <Text style={styles.emptyText}>아직 대화가 없습니다</Text>
                   <Text style={styles.emptySubText}>
                     인연을 맺고 대화를 시작해보세요
@@ -251,9 +257,16 @@ const ChatDropdown: React.FC<ChatDropdownProps> = ({
                       )}
 
                       {room.matchedMission && (
-                        <Text style={styles.missionTag} numberOfLines={1}>
-                          🎯 {room.matchedMission.title}
-                        </Text>
+                        <View style={styles.missionTagContainer}>
+                          <Image
+                            source={require('../../assets/images/goal.png')}
+                            style={styles.missionTagIcon}
+                            resizeMode="contain"
+                          />
+                          <Text style={styles.missionTag} numberOfLines={1}>
+                            {room.matchedMission.title}
+                          </Text>
+                        </View>
                       )}
                     </View>
                   </TouchableOpacity>
@@ -301,8 +314,14 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: typography.fontSize.lg,
-    fontWeight: typography.fontWeight.semibold as any,
+    fontWeight: typography.fontWeight.medium as any,
     color: colors.text.primary,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.lg),
   },
   unreadBadge: {
     backgroundColor: colors.primary[500],
@@ -314,8 +333,14 @@ const styles = StyleSheet.create({
   },
   unreadBadgeText: {
     fontSize: typography.fontSize.xs,
-    fontWeight: typography.fontWeight.bold as any,
+    fontWeight: typography.fontWeight.medium as any,
     color: colors.white,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
   },
   scrollView: {
     maxHeight: 300,
@@ -327,6 +352,12 @@ const styles = StyleSheet.create({
   loadingText: {
     fontSize: typography.fontSize.sm,
     color: colors.text.secondary,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
   },
   emptyContainer: {
     padding: spacing[8],
@@ -335,15 +366,37 @@ const styles = StyleSheet.create({
   emptyIcon: {
     fontSize: 32,
     marginBottom: spacing[2],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+  },
+  emptyIconImage: {
+    width: 32,
+    height: 32,
+    marginBottom: spacing[2],
   },
   emptyText: {
     fontSize: typography.fontSize.sm,
     color: colors.text.secondary,
     marginBottom: spacing[1],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
   },
   emptySubText: {
     fontSize: typography.fontSize.xs,
     color: colors.text.tertiary,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
   },
   chatItem: {
     flexDirection: 'row',
@@ -371,8 +424,14 @@ const styles = StyleSheet.create({
   },
   avatarText: {
     fontSize: typography.fontSize.lg,
-    fontWeight: typography.fontWeight.semibold as any,
+    fontWeight: typography.fontWeight.medium as any,
     color: colors.primary[700],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.lg),
   },
   unreadCountBadge: {
     position: 'absolute',
@@ -390,8 +449,14 @@ const styles = StyleSheet.create({
   },
   unreadCountText: {
     fontSize: 10,
-    fontWeight: typography.fontWeight.bold as any,
+    fontWeight: typography.fontWeight.medium as any,
     color: colors.white,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(10),
   },
   chatContent: {
     flex: 1,
@@ -407,18 +472,36 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.sm,
     color: colors.text.primary,
     marginRight: spacing[2],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
   },
   unreadNickname: {
-    fontWeight: typography.fontWeight.semibold as any,
+    fontWeight: typography.fontWeight.medium as any,
   },
   time: {
     fontSize: 10,
     color: colors.text.tertiary,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(10),
   },
   lastMessage: {
     fontSize: typography.fontSize.xs,
     color: colors.text.secondary,
     marginTop: 2,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
   },
   unreadMessage: {
     color: colors.text.primary,
@@ -429,11 +512,32 @@ const styles = StyleSheet.create({
     color: colors.text.tertiary,
     fontStyle: 'italic',
     marginTop: 2,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
+  },
+  missionTagContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing[1],
+  },
+  missionTagIcon: {
+    width: 14,
+    height: 14,
   },
   missionTag: {
     fontSize: 10,
     color: colors.primary[600],
     marginTop: spacing[1],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(10),
   },
   footer: {
     paddingVertical: spacing[3],
@@ -446,6 +550,12 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.sm,
     fontWeight: typography.fontWeight.medium as any,
     color: colors.primary[600],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
   },
 });
 

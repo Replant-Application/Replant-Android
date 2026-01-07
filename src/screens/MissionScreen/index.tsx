@@ -1,10 +1,11 @@
 import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Image, RefreshControl } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Image, RefreshControl, Platform, ImageBackground } from 'react-native';
 import { useMission } from '../../hooks/useMission';
 import { useCharacter } from '../../hooks/useCharacter';
 import { MissionCard, MissionVerificationModal, MissionProgressCard } from '../../components/specialized';
 import { Loading, ErrorBoundary, Header, EmptyState, ConfirmModal, SimpleTabBar } from '../../components/ui';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
+import { getOptimizedLineHeight } from '../../utils/textStyles';
 import { useUser } from '../../contexts/UserContext';
 import { Mission } from '../../types';
 import { checkVerificationStatus, MissionType, verifyByGps, verifyByTime, createVerification, addSystemMissionToMyMissions } from '../../api/missionApi';
@@ -452,7 +453,11 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
 
 
   return (
-    <View style={styles.container}>
+    <ImageBackground
+      source={require('../../assets/images/background.png')}
+      style={styles.container}
+      resizeMode="cover"
+    >
       <Header title="오늘의 미션" showBackButton={false} navigation={navigation} />
 
       {/* 미션 완료 모달 */}
@@ -659,20 +664,25 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
           <Text style={styles.createButtonTopText}>미션 만들기</Text>
         </TouchableOpacity>
       </ScrollView>
-    </View>
+    </ImageBackground>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background.secondary,
   },
   title: {
     fontSize: typography.fontSize['2xl'],
     fontWeight: typography.fontWeight.normal,
     color: colors.text.primary,
     marginBottom: spacing[4],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize['2xl']),
   },
   tabBar: {
     marginBottom: spacing[4],
@@ -699,6 +709,12 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.sm,
     fontWeight: typography.fontWeight.normal,
     color: colors.primary[500],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
   },
   missionList: {
     gap: spacing[1],
@@ -709,6 +725,8 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.base,
     padding: spacing[4],
     marginBottom: spacing[4],
+    borderWidth: 4,
+    borderColor: '#0E0F37',
   },
   badgeSectionHeader: {
     flexDirection: 'row',
@@ -720,18 +738,35 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.base,
     fontWeight: typography.fontWeight.normal,
     color: colors.text.primary,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
   },
   badgeToggleText: {
     fontSize: typography.fontSize.sm,
     color: colors.primary[600],
     fontWeight: typography.fontWeight.normal,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
   },
   badgeLoadingText: {
-    fontSize: typography.fontSize.sm
-    ,
+    fontSize: typography.fontSize.sm,
     color: colors.text.tertiary,
     textAlign: 'center',
     paddingVertical: spacing[4],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
   },
   badgeList: {
     paddingVertical: spacing[2],
@@ -751,6 +786,12 @@ const styles = StyleSheet.create({
   noBadgeText: {
     fontSize: typography.fontSize.sm,
     color: colors.text.tertiary,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
   },
   badgeItem: {
     alignItems: 'center',
@@ -785,18 +826,36 @@ const styles = StyleSheet.create({
     color: colors.text.primary,
     textAlign: 'center',
     marginBottom: spacing[1],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
   },
   badgeTitleExpired: {
     color: colors.text.tertiary,
   },
   badgeRemaining: {
     fontSize: typography.fontSize.xs,
-    fontWeight: typography.fontWeight.semibold,
+    fontWeight: typography.fontWeight.medium,
     color: colors.primary[600],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
   },
   badgeExpiredText: {
     fontSize: typography.fontSize.xs,
     color: colors.text.tertiary,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
   },
 });
 

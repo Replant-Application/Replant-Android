@@ -16,8 +16,10 @@ import {
   Alert,
   ActivityIndicator,
   Image,
+  Platform,
 } from 'react-native';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
+import { getOptimizedLineHeight } from '../../utils/textStyles';
 import { Mission } from '../../types';
 import { useLocation } from '../../hooks/useLocation';
 
@@ -350,11 +352,22 @@ const styles = StyleSheet.create({
     fontWeight: typography.fontWeight.normal,
     color: colors.text.primary,
     marginBottom: spacing[2],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
   },
   subtitle: {
     fontSize: typography.fontSize.sm,
     color: colors.text.secondary,
-    lineHeight: typography.lineHeight.normal * typography.fontSize.sm,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
   },
   optionsContainer: {
     gap: spacing[4],
@@ -371,16 +384,34 @@ const styles = StyleSheet.create({
     fontWeight: typography.fontWeight.normal,
     color: colors.text.primary,
     marginBottom: spacing[1],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
   },
   requirementValue: {
     fontSize: typography.fontSize.xs,
     color: colors.text.secondary,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
   },
   currentTime: {
     fontSize: typography.fontSize.xs,
     color: colors.primary[500],
     fontWeight: typography.fontWeight.normal,
     marginTop: spacing[1],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
   },
   resultBox: {
     padding: spacing[2],
@@ -401,6 +432,12 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.xs,
     color: colors.text.primary,
     textAlign: 'center',
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
   },
   optionButton: {
     flexDirection: 'row',
@@ -425,6 +462,12 @@ const styles = StyleSheet.create({
   },
   optionIcon: {
     fontSize: typography.fontSize.xl,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.xl),
   },
   optionIconImage: {
     width: 24,
@@ -438,11 +481,22 @@ const styles = StyleSheet.create({
     fontWeight: typography.fontWeight.normal,
     color: colors.text.primary,
     marginBottom: spacing[1],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
   },
   optionDescription: {
     fontSize: typography.fontSize.sm,
     color: colors.text.secondary,
-    lineHeight: typography.lineHeight.normal * typography.fontSize.sm,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
   },
   cancelButton: {
     paddingVertical: spacing[2],
@@ -452,6 +506,12 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.sm,
     color: colors.text.secondary,
     fontWeight: typography.fontWeight.normal,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
   },
 });
 

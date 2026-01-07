@@ -13,6 +13,7 @@ import {
 } from 'react-native';
 import { Button, Header, SectionTitle, FormCard } from '../../components/ui';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
+import { getOptimizedLineHeight } from '../../utils/textStyles';
 import { createCustomMission } from '../../services/missionService';
 import { useUser } from '../../contexts/UserContext';
 import { NavigationProp, RouteProp } from '@react-navigation/native';
@@ -307,6 +308,13 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.base,
     color: colors.text.primary,
     backgroundColor: colors.background.primary,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    textAlignVertical: 'top',
+    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
   },
   textArea: {
     height: 100,
@@ -401,6 +409,12 @@ const styles = StyleSheet.create({
   },
   emojiText: {
     fontSize: typography.fontSize.xl,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.xl),
   },
   difficultyContainer: {
     flexDirection: 'row',
@@ -423,20 +437,44 @@ const styles = StyleSheet.create({
   difficultyEmoji: {
     fontSize: typography.fontSize.xl,
     marginBottom: spacing[1],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.xl),
   },
   difficultyText: {
     fontSize: typography.fontSize.sm,
     fontWeight: typography.fontWeight.medium,
     color: colors.text.secondary,
     marginBottom: spacing[1],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
   },
   selectedDifficultyText: {
     color: colors.primary[500],
-    fontWeight: typography.fontWeight.semibold,
+    fontWeight: typography.fontWeight.medium,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
   },
   difficultyExp: {
     fontSize: typography.fontSize.xs,
     color: colors.text.tertiary,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
   },
   expContainer: {
     flexDirection: 'row',
@@ -455,15 +493,34 @@ const styles = StyleSheet.create({
     width: 80,
     textAlign: 'center',
     marginRight: spacing[2],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    textAlignVertical: 'center',
+    lineHeight: getOptimizedLineHeight(typography.fontSize.lg),
   },
   expLabel: {
     fontSize: typography.fontSize.lg,
     fontWeight: typography.fontWeight.bold,
     color: colors.text.primary,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.lg),
   },
   expHint: {
     fontSize: typography.fontSize.sm,
     color: colors.text.tertiary,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
   },
   buttonContainer: {
     flexDirection: 'row',

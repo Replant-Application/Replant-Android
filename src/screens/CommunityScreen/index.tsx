@@ -4,11 +4,12 @@
  */
 
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Image, Modal, RefreshControl, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Image, Modal, RefreshControl, Alert, Platform, ImageBackground } from 'react-native';
 import { useCommunity } from '../../hooks/useCommunity';
 import { PostCard } from '../../components/specialized';
-import { Loading, ErrorBoundary, EmptyState, SimpleTabBar } from '../../components/ui';
+import { Loading, ErrorBoundary, EmptyState, SimpleTabBar, Header } from '../../components/ui';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
+import { getOptimizedLineHeight } from '../../utils/textStyles';
 import { NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types/navigation';
 import { getVerifications, voteVerification, VerificationPost, VerificationStatus } from '../../api/missionApi';
@@ -120,8 +121,6 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation }) => {
     { value: 'popular', label: '인기순' },
   ];
 
-  const selectedFilterLabel = filterOptions.find(opt => opt.value === filter)?.label || '전체';
-
   // VerificationPost를 CommunityPost 형태로 변환
   const convertedVerificationPosts = useMemo((): (CommunityPost & { isVerificationPost: boolean; verificationId: number })[] => {
     return verificationPosts.map(vPost => ({
@@ -232,67 +231,83 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation }) => {
   };
 
   return (
-    <View style={styles.container}>
+    <ImageBackground
+      source={require('../../assets/images/background.png')}
+      style={styles.container}
+      resizeMode="cover"
+    >
       {/* 헤더 */}
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>커뮤니티</Text>
-      </View>
+      <Header title="커뮤니티" showBackButton={false} navigation={navigation} />
 
       {/* 탭 */}
-      <SimpleTabBar
-        tabs={[
-          { key: 'all', label: '전체 게시판' },
-          { key: 'mission-group', label: '미션 도감' },
-        ]}
-        activeTab={activeTab}
-        onTabChange={(key) => {
-          if (key === 'mission-group') {
-            handleMissionGroupPress();
-          } else {
-            setActiveTab(key as CommunityTab);
-          }
-        }}
-        style={styles.tabBar}
-      />
+      <View style={styles.tabBarContainer}>
+        <SimpleTabBar
+          tabs={[
+            { key: 'all', label: '전체 게시판' },
+            { key: 'mission-group', label: '미션 도감' },
+          ]}
+          activeTab={activeTab}
+          onTabChange={(key) => {
+            if (key === 'mission-group') {
+              handleMissionGroupPress();
+            } else {
+              setActiveTab(key as CommunityTab);
+            }
+          }}
+          style={styles.tabBar}
+        />
+      </View>
 
       {/* 검색 및 정렬 */}
       {activeTab === 'all' && (
         <View style={styles.filterContainer}>
-          <View style={styles.searchContainer}>
-            <Image
-              source={require('../../assets/images/search.png')}
-              style={styles.searchIcon}
-              resizeMode="contain"
-            />
-            <TextInput
-              style={styles.searchInput}
-              value={searchQuery}
-              onChangeText={setSearchQuery}
-              placeholder="게시글 검색..."
-              placeholderTextColor={colors.text.tertiary}
-            />
+          {/* 검색창과 필터 버튼 */}
+          <View style={styles.searchRow}>
+            <View style={styles.searchContainer}>
+              <Image
+                source={require('../../assets/images/search.png')}
+                style={styles.searchIcon}
+                resizeMode="contain"
+              />
+              <TextInput
+                style={styles.searchInput}
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+                placeholder="게시글 검색..."
+                placeholderTextColor={colors.text.tertiary}
+              />
+            </View>
+            <TouchableOpacity
+              style={styles.filterButton}
+              onPress={() => setShowFilterModal(true)}
+              activeOpacity={0.7}
+            >
+              <Image
+                source={require('../../assets/images/filter.png')}
+                style={styles.filterIcon}
+                resizeMode="contain"
+              />
+              {(verificationFilter !== 'all' || filter !== 'all') && (
+                <View style={styles.filterBadge} />
+              )}
+            </TouchableOpacity>
           </View>
 
-          {/* 인증 필터 탭 */}
-          <SimpleTabBar
-            tabs={[
-              { key: 'all', label: '전체' },
-              { key: 'pending', label: '인증대기' },
-              { key: 'approved', label: '인증완료' },
-            ]}
-            activeTab={verificationFilter}
-            onTabChange={(key) => setVerificationFilter(key as VerificationFilter)}
-            style={styles.filterTabBar}
-          />
-
-          <TouchableOpacity
-            style={styles.filterSelector}
-            onPress={() => setShowFilterModal(true)}
-            activeOpacity={0.7}
-          >
-            <Text style={styles.filterSelectorText}>{selectedFilterLabel}</Text>
-            <Text style={styles.filterSelectorIcon}>▼</Text>
-          </TouchableOpacity>
+          {/* 인증 필터 칩 (선택된 경우에만 표시) */}
+          {verificationFilter !== 'all' && (
+            <View style={styles.chipContainer}>
+              <TouchableOpacity
+                style={styles.chip}
+                onPress={() => setVerificationFilter('all')}
+                activeOpacity={0.7}
+              >
+                <Text style={styles.chipText}>
+                  {verificationFilter === 'pending' ? '인증대기' : '인증완료'}
+                </Text>
+                <Text style={styles.chipClose}>×</Text>
+              </TouchableOpacity>
+            </View>
+          )}
         </View>
       )}
 
@@ -336,13 +351,17 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation }) => {
         animationType="fade"
         onRequestClose={() => setShowFilterModal(false)}
       >
-        <TouchableOpacity
-          style={styles.modalOverlay}
-          activeOpacity={1}
-          onPress={() => setShowFilterModal(false)}
-        >
+        <View style={styles.modalOverlay}>
+          <TouchableOpacity
+            style={styles.modalOverlayTouchable}
+            activeOpacity={1}
+            onPress={() => setShowFilterModal(false)}
+          />
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>필터 선택</Text>
+            
+            {/* 정렬 옵션 */}
+            <Text style={styles.modalSectionTitle}>정렬</Text>
             {filterOptions.map((option) => (
               <TouchableOpacity
                 key={option.value}
@@ -352,7 +371,6 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation }) => {
                 ]}
                 onPress={() => {
                   setFilter(option.value as 'all' | 'popular');
-                  setShowFilterModal(false);
                 }}
                 activeOpacity={0.7}
               >
@@ -369,55 +387,152 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation }) => {
                 )}
               </TouchableOpacity>
             ))}
+
+            {/* 인증 상태 필터 */}
+            <Text style={styles.modalSectionTitle}>인증 상태</Text>
+            {[
+              { key: 'all', label: '전체' },
+              { key: 'pending', label: '인증대기' },
+              { key: 'approved', label: '인증완료' },
+            ].map((option) => (
+              <TouchableOpacity
+                key={option.key}
+                style={[
+                  styles.filterOption,
+                  verificationFilter === option.key && styles.filterOptionActive,
+                ]}
+                onPress={() => {
+                  setVerificationFilter(option.key as VerificationFilter);
+                }}
+                activeOpacity={0.7}
+              >
+                <Text
+                  style={[
+                    styles.filterOptionText,
+                    verificationFilter === option.key && styles.filterOptionTextActive,
+                  ]}
+                >
+                  {option.label}
+                </Text>
+                {verificationFilter === option.key && (
+                  <Text style={styles.filterOptionCheck}>✓</Text>
+                )}
+              </TouchableOpacity>
+            ))}
+
+            {/* 적용 버튼 */}
+            <TouchableOpacity
+              style={styles.modalApplyButton}
+              onPress={() => setShowFilterModal(false)}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.modalApplyButtonText}>적용</Text>
+            </TouchableOpacity>
           </View>
-        </TouchableOpacity>
+        </View>
       </Modal>
-    </View>
+    </ImageBackground>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background.secondary,
   },
-  header: {
-    backgroundColor: colors.background.primary,
-    paddingTop: spacing[16],
+  tabBarContainer: {
+    paddingHorizontal: spacing[3],
+    paddingTop: spacing[2],
     paddingBottom: spacing[3],
-    paddingHorizontal: spacing[4],
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border.light,
-  },
-  headerTitle: {
-    fontSize: typography.fontSize['2xl'],
-    fontWeight: typography.fontWeight.normal,
-    color: colors.text.primary,
   },
   tabBar: {
     marginBottom: 0,
   },
-  filterTabBar: {
-    marginBottom: spacing[2],
-  },
   filterContainer: {
     paddingHorizontal: spacing[4],
-    paddingTop: spacing[3],
-    paddingBottom: spacing[2],
-    backgroundColor: colors.background.primary,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border.light,
+    paddingTop: spacing[1],
+    paddingBottom: spacing[3],
+
   },
-  searchContainer: {
+  searchRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.white,
-    borderRadius: borderRadius.base,
+    gap: spacing[2],
+  },
+  searchContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.background.secondary,
+    borderRadius: borderRadius.lg,
     paddingHorizontal: spacing[3],
-    paddingVertical: spacing[2],
-    marginBottom: spacing[2],
+    paddingVertical: spacing[3],
     borderWidth: 1,
-    borderColor: colors.border.light,
+    borderColor: '#D4A574',
+  },
+  filterButton: {
+    backgroundColor: '#8B6F47',
+    borderRadius: borderRadius.lg,
+    paddingHorizontal: spacing[3],
+    paddingVertical: spacing[3],
+    width: 48,
+    height: 48,
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative',
+    borderWidth: 1,
+    borderColor: '#D4A574',
+  },
+  filterIcon: {
+    width: 26,
+    height: 26,
+    tintColor: colors.white,
+  },
+  filterBadge: {
+    position: 'absolute',
+    top: 4,
+    right: 4,
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: colors.error,
+    borderWidth: 2,
+    borderColor: colors.white,
+  },
+  chipContainer: {
+    flexDirection: 'row',
+    marginTop: spacing[2],
+  },
+  chip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.primary[100],
+    borderRadius: borderRadius.full,
+    paddingHorizontal: spacing[3],
+    paddingVertical: spacing[1.5],
+    borderWidth: 1,
+    borderColor: colors.primary[500],
+    gap: spacing[1],
+  },
+  chipText: {
+    fontSize: typography.fontSize.xs,
+    color: colors.primary[700],
+    fontWeight: typography.fontWeight.medium,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+  },
+  chipClose: {
+    fontSize: typography.fontSize.base,
+    color: colors.primary[700],
+    fontWeight: typography.fontWeight.medium,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: 16,
   },
   searchIcon: {
     width: 16,
@@ -429,28 +544,46 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.sm,
     color: colors.text.primary,
     padding: 0,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    textAlignVertical: 'center',
   },
   filterSelector: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: colors.white,
-    borderRadius: borderRadius.base,
+    backgroundColor: colors.background.secondary,
+    borderRadius: borderRadius.lg,
     paddingHorizontal: spacing[3],
-    paddingVertical: spacing[2],
+    paddingVertical: spacing[3],
     borderWidth: 1,
     borderColor: colors.border.light,
-    minHeight: 36,
+    alignSelf: 'flex-start',
   },
   filterSelectorText: {
     fontSize: typography.fontSize.sm,
     color: colors.text.primary,
     fontWeight: typography.fontWeight.normal,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
   },
   filterSelectorIcon: {
     fontSize: typography.fontSize.xs,
     color: colors.text.secondary,
     marginLeft: spacing[2],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
   },
   modalOverlay: {
     flex: 1,
@@ -458,20 +591,49 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  modalOverlayTouchable: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
   modalContent: {
     backgroundColor: colors.background.primary,
-    borderRadius: borderRadius.base,
-    padding: spacing[4],
-    width: '80%',
-    maxWidth: 300,
+    borderRadius: borderRadius.xl,
+    padding: spacing[5],
+    width: '85%',
+    maxWidth: 350,
     borderWidth: 1,
     borderColor: colors.border.light,
+    maxHeight: '80%',
+    zIndex: 1,
+    elevation: 5,
   },
   modalTitle: {
-    fontSize: typography.fontSize.lg,
-    fontWeight: typography.fontWeight.normal,
+    fontSize: typography.fontSize.xl,
+    fontWeight: typography.fontWeight.medium,
     color: colors.text.primary,
     marginBottom: spacing[4],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.xl),
+  },
+  modalSectionTitle: {
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.medium,
+    color: colors.text.secondary,
+    marginTop: spacing[4],
+    marginBottom: spacing[2],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
   },
   filterOption: {
     flexDirection: 'row',
@@ -493,15 +655,51 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.base,
     color: colors.text.primary,
     fontWeight: typography.fontWeight.normal,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
   },
   filterOptionTextActive: {
     color: colors.primary[600],
     fontWeight: typography.fontWeight.normal,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
   },
   filterOptionCheck: {
     fontSize: typography.fontSize.base,
     color: colors.primary[600],
     fontWeight: typography.fontWeight.normal,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
+  },
+  modalApplyButton: {
+    marginTop: spacing[6],
+    paddingVertical: spacing[3],
+    backgroundColor: colors.primary[500],
+    borderRadius: borderRadius.base,
+    alignItems: 'center',
+  },
+  modalApplyButtonText: {
+    fontSize: typography.fontSize.base,
+    color: colors.white,
+    fontWeight: typography.fontWeight.medium,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
   },
   content: {
     flex: 1,

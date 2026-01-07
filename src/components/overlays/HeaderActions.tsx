@@ -16,9 +16,11 @@ import {
   StyleSheet,
   TouchableOpacity,
   Platform,
+  Image,
 } from 'react-native';
 import { useOverlay } from '../../contexts/OverlayContext';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
+import { getOptimizedLineHeight } from '../../utils/textStyles';
 
 interface HeaderActionsProps {
   showNotification?: boolean;
@@ -74,7 +76,11 @@ const HeaderActions: React.FC<HeaderActionsProps> = ({
           activeOpacity={0.7}
           hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
         >
-          <Text style={styles.icon}>💬</Text>
+          <Image
+            source={require('../../assets/images/say.png')}
+            style={styles.iconImage}
+            resizeMode="contain"
+          />
           {unreadChatCount > 0 && (
             <View style={styles.badge}>
               <Text style={styles.badgeText}>
@@ -131,6 +137,16 @@ const styles = StyleSheet.create({
   },
   icon: {
     fontSize: 22,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(22),
+  },
+  iconImage: {
+    width: 22,
+    height: 22,
   },
   badge: {
     position: 'absolute',
@@ -159,8 +175,14 @@ const styles = StyleSheet.create({
   },
   badgeText: {
     fontSize: 9,
-    fontWeight: typography.fontWeight.bold as any,
+    fontWeight: typography.fontWeight.medium as any,
     color: colors.white,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(9),
   },
 });
 

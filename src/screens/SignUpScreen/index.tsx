@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, Alert, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform, Image } from 'react-native';
 import { Button, Input, Header } from '../../components/ui';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
+import { getOptimizedLineHeight } from '../../utils/textStyles';
 import { SCREEN_NAMES } from '../../utils/constants';
 import { join } from '../../api/authApi';
 import { saveTokens, saveUserInfo } from '../../utils/tokenStorage';
@@ -182,8 +183,8 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onNavigate }) => {
               style={styles.logoIcon}
               resizeMode="contain"
             />
-            <Text style={styles.infoText}>
-              생명을 더하는 첫걸음, 회원가입부터 시작하세요 !
+            <Text style={styles.infoText} numberOfLines={1}>
+            지금의 나에서, 한 단계 더 성장해보세요.
             </Text>
           </View>
 
@@ -337,7 +338,13 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: typography.fontSize.sm,
     color: colors.primary[700],
-    lineHeight: 20,
+    letterSpacing: -1,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
   },
   inputContainer: {
     marginBottom: spacing[3],
@@ -347,14 +354,32 @@ const styles = StyleSheet.create({
     fontWeight: typography.fontWeight.medium,
     color: colors.text.primary,
     marginBottom: spacing[3],
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
   },
   inputText: {
-    fontSize: typography.fontSize.xs,
+    fontSize: typography.fontSize.sm,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
   },
   errorText: {
     fontSize: typography.fontSize.xs,
     color: colors.red[500],
     marginTop: -5,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
   },
   buttonContainer: {
     padding: spacing[5],
@@ -369,6 +394,12 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     fontSize: typography.fontSize.sm,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
   },
   linkButton: {
     paddingVertical: spacing[2],
@@ -376,8 +407,14 @@ const styles = StyleSheet.create({
   },
   linkText: {
     fontSize: typography.fontSize.sm,
-    color: colors.primary[600],
+    color: colors.text.secondary,
     textDecorationLine: 'underline',
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
   },
   backButton: {
     padding: spacing[2],

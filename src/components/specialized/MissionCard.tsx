@@ -1,6 +1,7 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, ViewStyle } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, ViewStyle, Platform } from 'react-native';
 import { colors, spacing, typography, borderRadius, shadows } from '../../utils/designTokens';
+import { getOptimizedLineHeight } from '../../utils/textStyles';
 
 import { Mission } from '../../types';
 import Badge from './Badge';
@@ -237,8 +238,8 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.base,
     padding: spacing[4],
     marginVertical: spacing[1],
-    borderWidth: 1,
-    borderColor: colors.border.light,
+    borderWidth: 4,
+    borderColor: '#0E0F37',
   },
 
   header: {
@@ -267,6 +268,11 @@ const styles = StyleSheet.create({
   categoryEmoji: {
     fontSize: typography.fontSize.sm,
     flexShrink: 0,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
   },
   categoryImage: {
     width: 16,
@@ -278,6 +284,12 @@ const styles = StyleSheet.create({
     fontWeight: typography.fontWeight.normal,
     color: colors.text.secondary,
     flexShrink: 0,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
   },
   statusWrapper: {
     flexDirection: 'row',
@@ -300,11 +312,23 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.xs,
     color: colors.warning,
     fontWeight: typography.fontWeight.medium,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
   },
   pendingVerificationText: {
     fontSize: typography.fontSize.xs,
     color: colors.warning,
     fontWeight: typography.fontWeight.medium,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
   },
 
   verifiedBadge: {
@@ -319,12 +343,24 @@ const styles = StyleSheet.create({
   verifiedIcon: {
     fontSize: typography.fontSize.xs,
     color: colors.green[500],
-    fontWeight: typography.fontWeight.bold,
+    fontWeight: typography.fontWeight.medium,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
   },
   verifiedText: {
     fontSize: typography.fontSize.xs,
     color: colors.green[500],
     fontWeight: typography.fontWeight.medium,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
   },
   pendingBadge: {
     flexDirection: 'row',
@@ -337,6 +373,12 @@ const styles = StyleSheet.create({
   },
   pendingIcon: {
     fontSize: typography.fontSize.xs,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
   },
   inProgressBadge: {
     flexDirection: 'row',
@@ -350,6 +392,12 @@ const styles = StyleSheet.create({
   inProgressIcon: {
     fontSize: typography.fontSize.xs,
     color: colors.gray[500],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
   },
 
   content: {
@@ -361,13 +409,23 @@ const styles = StyleSheet.create({
     fontWeight: typography.fontWeight.normal,
     color: colors.text.primary,
     marginBottom: spacing[2],
-    lineHeight: typography.fontSize.base * 1.4,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
   },
 
   description: {
     fontSize: typography.fontSize.sm,
     color: colors.text.secondary,
-    lineHeight: typography.fontSize.sm * 1.5,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
   },
 
   photoContainer: {
@@ -394,7 +452,13 @@ const styles = StyleSheet.create({
   deletePhotoIcon: {
     color: colors.text.inverse,
     fontSize: typography.fontSize.base,
-    fontWeight: typography.fontWeight.bold,
+    fontWeight: typography.fontWeight.medium,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
   },
 
   footer: {
@@ -417,6 +481,12 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.sm,
     color: colors.primary[500],
     fontWeight: typography.fontWeight.medium,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
   },
 
   actionButton: {
@@ -456,6 +526,12 @@ const styles = StyleSheet.create({
   actionText: {
     fontSize: typography.fontSize.sm,
     fontWeight: typography.fontWeight.medium,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
   },
 
   completeText: {
@@ -504,6 +580,12 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.sm,
     fontWeight: typography.fontWeight.medium,
     color: colors.primary[500],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
   },
   reviewButton: {
     flexDirection: 'row',
@@ -535,6 +617,11 @@ const styles = StyleSheet.create({
 
   disabledText: {
     color: colors.text.tertiary,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
   },
 });
 

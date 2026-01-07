@@ -1,20 +1,3 @@
-<img width="1119" height="418" alt="532294881-1a1e4863-862b-4376-b859-26e4bb1cea2a (1)" src="https://github.com/user-attachments/assets/c42ed7ff-245c-41e6-8036-30f2a1b63dba" />
-
-
-
-<p align="center">
-  <a href="https://play.google.com/store">
-    <img src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png"
-         height="70"
-         alt="Get it on Google Play">
-  </a>
-</p>
-
-<p align="center">
-<em>Grow quietly, one day at a time.</em>
-</p>
-
-
 # 🌱 Replant App
 
 ![React Native](https://img.shields.io/badge/React%20Native-0.81.4-61DAFB?logo=react&logoColor=white)
@@ -25,7 +8,65 @@
 
 > **"쉬었음 청년을 위한 성장 앱"** - 나만의 미션으로 성장하는 캐릭터와 함께하는 심리상담 플랫폼
 
-<img width="908" height="400" alt="image" src="https://github.com/user-attachments/assets/e6b6ddaa-43bf-4b6d-b6bf-2d8c1396d434" />
+---
+
+## 📱 주요 기능
+
+**1. 미션을 만들어요!**  
+카테고리별 미션을 선택하거나 나만의 맞춤형 미션을 생성해보세요.
+
+**2. 캐릭터와 함께 성장해요!**  
+미션을 완료하면 경험치를 얻고, 레벨업하며 변화하는 캐릭터를 만나보세요.
+
+**3. AI 상담사와 대화해요!**  
+24시간 언제든지 마음을 나눌 수 있는 심리상담 챗봇과 함께하세요.
+
+**4. 커뮤니티에서 소통해요!**  
+다른 사용자들과 미션 인증을 공유하고 서로 응원해요.
+
+---
+
+## Architecture
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                    App Navigator                         │
+│              (Custom State-based Navigation)             │
+└─────────────────────────────────────────────────────────┘
+                            │
+        ┌───────────────────┼───────────────────┐
+        │                   │                   │
+┌───────▼────────┐  ┌───────▼────────┐  ┌───────▼────────┐
+│   Screens      │  │   Components   │  │   Services     │
+│                │  │                │  │                │
+│ - Home         │  │ - UI           │  │ - Auth         │
+│ - Mission      │  │ - Specialized  │  │ - API Client   │
+│ - Diary        │  │ - Overlays     │  │ - Storage      │
+│ - Community    │  │                │  │                │
+│ - Chat         │  │                │  │                │
+└───────┬────────┘  └───────┬────────┘  └───────┬────────┘
+        │                   │                   │
+        └───────────────────┼───────────────────┘
+                            │
+        ┌───────────────────▼───────────────────┐
+        │          Context & Hooks               │
+        │                                        │
+        │ - UserContext                          │
+        │ - OverlayContext                       │
+        │ - SseContext                           │
+        │ - Custom Hooks                         │
+        └───────────────────┬───────────────────┘
+                            │
+        ┌───────────────────▼───────────────────┐
+        │            API Client                  │
+        │                                        │
+        │ - RESTful API                          │
+        │ - JWT Authentication                   │
+        │ - Auto Token Refresh                  │
+        └───────────────────────────────────────┘
+```
+
+---
 
 ## Stack & Libraries
 
@@ -45,12 +86,112 @@
 - Design Tokens System
 - FastImage
 - Custom UI Components
-  
 
-## Contributor
+### Authentication
+- Kakao Login (`@react-native-seoul/kakao-login`)
+- Google Sign-In (`@react-native-google-signin/google-signin`)
+- JWT Token Management
 
-| 김미르 | 임성혁 | 최홍석 |
-|:---:|:---:|:---:|
-| <img alt="미르 프로필" src="https://github.com/user-attachments/assets/661e0a9b-32aa-47b2-a901-cdc3a6aacac2" width="100" height="100"> | <img alt="성혁 프로필" src="https://github.com/user-attachments/assets/07a2ccb4-436d-440c-b8ab-849404d4ddb8" width="100" height="100"> | <img alt="홍석 프로필" src="https://avatars.githubusercontent.com/u/129854575?v=4" width="100" height="100"> |
-| [🔗 GitHub](https://github.com/kimmireu0220) | [🔗 GitHub](https://github.com/highcastle01) | [🔗 GitHub](https://github.com/ChatHongPT) |
-| <img alt="Frontend" src="https://img.shields.io/badge/Frontend-brightgreen">| <img alt="Frontend" src="https://img.shields.io/badge/Frontend-brightgreen"><br/><img alt="Backend" src="https://img.shields.io/badge/Backend-blue"><br/><img alt="Cloud Engineer" src="https://img.shields.io/badge/Cloud%20Engineer-brightorange"> | <img alt="Frontend" src="https://img.shields.io/badge/Frontend-brightgreen"><br/><img alt="Backend" src="https://img.shields.io/badge/Backend-blue"> |
+### Storage & Data
+- AsyncStorage (`@react-native-async-storage/async-storage`)
+- DataStore Pattern
+
+### Media & Files
+- Image Picker (`react-native-image-picker`)
+- Camera Roll (`@react-native-camera-roll/camera-roll`)
+- View Shot (`react-native-view-shot`)
+
+### Network
+- Custom API Client (Retrofit2-like)
+- OkHttp3 Pattern
+- SSE (`react-native-sse`)
+
+### Location & Services
+- Expo Location (`expo-location`)
+- Places Search Service
+
+### Development Tools
+- ESLint
+- Prettier
+- Jest
+- TypeScript Config
+
+---
+
+## Contributors
+
+<!-- Contributors 섹션은 프로젝트에 기여한 개발자 정보를 추가하세요 -->
+
+---
+
+## 🚀 시작하기
+
+### 설치
+
+```bash
+# 의존성 설치
+npm install
+
+# iOS 설정 (macOS만)
+cd ios && pod install && cd ..
+```
+
+### 환경 설정
+
+`.env` 파일을 생성하고 다음 내용을 추가하세요:
+
+```env
+API_BASE_URL=http://your-api-url/api
+API_TIMEOUT=10000
+KAKAO_APP_KEY=your-kakao-app-key
+GOOGLE_CLIENT_ID=your-google-client-id
+GOOGLE_WEB_CLIENT_ID=your-google-web-client-id
+```
+
+### 실행
+
+```bash
+# Metro 서버 시작
+npm start
+
+# Android 에뮬레이터
+npm run android
+
+# iOS 시뮬레이터 (macOS만)
+npm run ios
+```
+
+---
+
+## 📁 프로젝트 구조
+
+```
+src/
+├── api/                # 백엔드 API 연동
+│   ├── client.ts       # API 클라이언트 (자동 토큰 갱신)
+│   ├── authApi.ts      # 인증 API
+│   ├── userApi.ts       # 사용자 API
+│   ├── petApi.ts        # 펫 API
+│   ├── missionApi.ts    # 미션 API
+│   └── ...
+├── components/         # 재사용 가능한 컴포넌트
+│   ├── ui/             # 기본 UI 컴포넌트
+│   └── specialized/    # 특화된 컴포넌트
+├── screens/            # 화면 컴포넌트
+├── navigation/         # 네비게이션 로직
+├── services/           # 비즈니스 로직
+├── hooks/              # 커스텀 훅
+├── contexts/           # React Context
+├── utils/              # 유틸리티 함수
+└── types/              # TypeScript 타입 정의
+```
+
+---
+
+## 📄 라이선스
+
+이 프로젝트는 MIT 라이선스 하에 있습니다.
+
+---
+
+**🌱 함께 성장해요!** - Replant Team

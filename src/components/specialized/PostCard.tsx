@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, ViewStyle, Modal, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, ViewStyle, Modal, Alert, Platform } from 'react-native';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
+import { getOptimizedLineHeight } from '../../utils/textStyles';
 import { CommunityPost } from '../../types';
 import { formatTimeAgo } from '../../utils/dateUtils';
 
@@ -124,7 +125,11 @@ const PostCard: React.FC<PostCardProps> = ({
       <View style={styles.content}>
         {post.mission_title && (
           <View style={styles.missionInfo}>
-            <Text style={styles.missionEmoji}>{post.mission_emoji || '🎯'}</Text>
+            <Image
+              source={require('../../assets/images/goal.png')}
+              style={styles.missionEmojiImage}
+              resizeMode="contain"
+            />
             <Text style={styles.missionTitle} numberOfLines={1}>
               {post.mission_title}
             </Text>
@@ -180,16 +185,26 @@ const PostCard: React.FC<PostCardProps> = ({
             }}
             activeOpacity={0.7}
           >
-            <Text style={[styles.statIcon, post.is_liked && styles.likedIcon]}>
-              {post.is_liked ? '❤️' : '🤍'}
-            </Text>
+            {post.is_liked ? (
+              <Text style={[styles.statIcon, styles.likedIcon]}>❤️</Text>
+            ) : (
+              <Image
+                source={require('../../assets/images/heart.png')}
+                style={styles.statIconImage}
+                resizeMode="contain"
+              />
+            )}
             <Text style={[styles.statText, post.is_liked && styles.statTextActive]}>
               {post.like_count}
             </Text>
           </TouchableOpacity>
 
           <View style={styles.statButton}>
-            <Text style={styles.statIcon}>💬</Text>
+            <Image
+              source={require('../../assets/images/say.png')}
+              style={styles.statIconImage}
+              resizeMode="contain"
+            />
             <Text style={styles.statText}>{post.comment_count}</Text>
           </View>
 
@@ -201,9 +216,15 @@ const PostCard: React.FC<PostCardProps> = ({
             }}
             activeOpacity={0.7}
           >
-            <Text style={[styles.statIcon, post.is_scrapped && styles.scrappedIcon]}>
-              {post.is_scrapped ? '🔖' : '📌'}
-            </Text>
+            {post.is_scrapped ? (
+              <Text style={[styles.statIcon, styles.scrappedIcon]}>🔖</Text>
+            ) : (
+              <Image
+                source={require('../../assets/images/clip.png')}
+                style={styles.statIconImage}
+                resizeMode="contain"
+              />
+            )}
             {post.scrap_count > 0 && (
               <Text style={[styles.statText, post.is_scrapped && styles.statTextActive]}>
                 {post.scrap_count}
@@ -222,8 +243,8 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.base,
     padding: spacing[3],
     marginBottom: spacing[1],
-    borderWidth: 1,
-    borderColor: colors.border.light,
+    borderWidth: 4,
+    borderColor: '#0E0F37',
   },
   header: {
     flexDirection: 'row',
@@ -249,12 +270,24 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.sm,
     fontWeight: typography.fontWeight.normal,
     color: colors.white,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
   },
   authorName: {
     fontSize: typography.fontSize.sm,
     fontWeight: typography.fontWeight.normal,
     color: colors.text.primary,
     marginBottom: 2,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
   },
   categoryBadge: {
     backgroundColor: colors.primary[100],
@@ -267,11 +300,23 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.xs,
     color: colors.primary[700],
     fontWeight: typography.fontWeight.normal,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
   },
   date: {
     fontSize: typography.fontSize.xs,
     color: colors.text.tertiary,
     marginTop: spacing[1],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
   },
   headerRight: {
     flexDirection: 'row',
@@ -286,6 +331,12 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.xl,
     color: colors.text.secondary,
     fontWeight: typography.fontWeight.normal,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.xl),
   },
   modalOverlay: {
     flex: 1,
@@ -309,11 +360,23 @@ const styles = StyleSheet.create({
   },
   menuItemIcon: {
     fontSize: typography.fontSize.lg,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.lg),
   },
   menuItemText: {
     fontSize: typography.fontSize.base,
     color: colors.text.primary,
     fontWeight: typography.fontWeight.medium,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
   },
   menuDivider: {
     height: 1,
@@ -339,12 +402,27 @@ const styles = StyleSheet.create({
   },
   missionEmoji: {
     fontSize: typography.fontSize.base,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+  },
+  missionEmojiImage: {
+    width: 16,
+    height: 16,
   },
   missionTitle: {
     flex: 1,
     fontSize: typography.fontSize.sm,
     fontWeight: typography.fontWeight.normal,
     color: colors.primary[800],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
   },
   verifiedBadge: {
     flexDirection: 'row',
@@ -360,11 +438,23 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.xs,
     color: colors.primary[600],
     fontWeight: typography.fontWeight.normal,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
   },
   verifiedText: {
     fontSize: typography.fontSize.xs,
     color: colors.primary[700],
     fontWeight: typography.fontWeight.normal,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
   },
   pendingBadge: {
     flexDirection: 'row',
@@ -378,23 +468,44 @@ const styles = StyleSheet.create({
   },
   pendingIcon: {
     fontSize: typography.fontSize.xs,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
   },
   pendingText: {
     fontSize: typography.fontSize.xs,
     color: colors.orange[700],
     fontWeight: typography.fontWeight.medium,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
   },
   title: {
     fontSize: typography.fontSize.base,
     fontWeight: typography.fontWeight.normal,
     color: colors.text.primary,
     marginBottom: spacing[1],
-    lineHeight: 20,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
   },
   text: {
     fontSize: typography.fontSize.sm,
     color: colors.text.secondary,
-    lineHeight: 18,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
   },
   imageContainer: {
     marginBottom: spacing[2],
@@ -426,6 +537,12 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.xs,
     color: colors.gray[700],
     fontWeight: typography.fontWeight.normal,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
   },
   footer: {
     borderTopWidth: 1,
@@ -446,6 +563,15 @@ const styles = StyleSheet.create({
   },
   statIcon: {
     fontSize: typography.fontSize.base,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+  },
+  statIconImage: {
+    width: 20,
+    height: 20,
   },
   likedIcon: {
     // 이미 이모지로 표시됨
@@ -457,6 +583,12 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.sm,
     color: colors.text.secondary,
     fontWeight: typography.fontWeight.medium,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
   },
   statTextActive: {
     color: colors.primary[600],

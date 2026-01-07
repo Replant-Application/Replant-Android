@@ -1,6 +1,7 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ViewStyle } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ViewStyle, Platform, Image } from 'react-native';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
+import { getOptimizedLineHeight } from '../../utils/textStyles';
 import { CommunityComment } from '../../types';
 import { formatTimeAgo } from '../../utils/dateUtils';
 
@@ -57,7 +58,12 @@ const CommentCard: React.FC<CommentCardProps> = ({
               onPress={() => onReply(comment)}
               activeOpacity={0.7}
             >
-              <Text style={styles.replyText}>💬 답글</Text>
+              <Image
+                source={require('../../assets/images/say.png')}
+                style={styles.replyIcon}
+                resizeMode="contain"
+              />
+              <Text style={styles.replyText}>답글</Text>
             </TouchableOpacity>
           )}
 
@@ -120,6 +126,12 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.sm,
     fontWeight: typography.fontWeight.normal,
     color: colors.text.primary,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
   },
   authorBadge: {
     backgroundColor: colors.primary[100],
@@ -131,10 +143,22 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.xs,
     color: colors.primary[700],
     fontWeight: typography.fontWeight.normal,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
   },
   date: {
     fontSize: typography.fontSize.xs,
     color: colors.text.tertiary,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
   },
   content: {
     marginBottom: spacing[1],
@@ -142,13 +166,24 @@ const styles = StyleSheet.create({
   text: {
     fontSize: typography.fontSize.sm,
     color: colors.text.secondary,
-    lineHeight: 18,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
   },
   editedText: {
     fontSize: typography.fontSize.xs,
     color: colors.text.tertiary,
     marginTop: spacing[1],
     fontStyle: 'italic',
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
   },
   footer: {
     borderTopWidth: 1,
@@ -168,16 +203,39 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.xs,
     color: colors.primary[500],
     fontWeight: typography.fontWeight.normal,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
   },
   deleteText: {
     fontSize: typography.fontSize.xs,
     color: colors.error,
     fontWeight: typography.fontWeight.normal,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
+  },
+  replyIcon: {
+    width: 12,
+    height: 12,
+    marginRight: spacing[1],
   },
   replyText: {
     fontSize: typography.fontSize.xs,
     color: colors.text.secondary,
     fontWeight: typography.fontWeight.normal,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
   },
 });
 

@@ -16,11 +16,14 @@ import {
   Alert,
   RefreshControl,
   Image,
+  Platform,
+  ImageBackground,
 } from 'react-native';
 import { NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types/navigation';
 import { Header, Loading, ErrorBoundary, EmptyState } from '../../components/ui';
 import { colors, spacing, typography, borderRadius, shadows } from '../../utils/designTokens';
+import { getOptimizedLineHeight } from '../../utils/textStyles';
 import {
   getSystemMissions,
   getMissionReviews,
@@ -183,14 +186,7 @@ const MissionGroupScreen: React.FC<MissionGroupScreenProps> = ({ navigation }) =
 
   // 미션 아이콘
   const getMissionIcon = (title: string) => {
-    if (title.includes('운동') || title.includes('헬스') || title.includes('걷기')) {
-      return require('../../assets/images/training.png');
-    }
-    if (title.includes('독서') || title.includes('책')) {
-      return require('../../assets/images/book.png');
-    }
-    // 기본 아이콘 (과녁)
-    return require('../../assets/images/calendar.png');
+    return require('../../assets/images/goal.png');
   };
 
   if (loading) {
@@ -202,19 +198,24 @@ const MissionGroupScreen: React.FC<MissionGroupScreenProps> = ({ navigation }) =
   }
 
   return (
-    <View style={styles.container}>
-      <Header
-        title="미션 도감"
-        leftButton={
-          <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Image
-              source={require('../../assets/images/left.png')}
-              style={styles.backButtonIcon}
-              resizeMode="contain"
-            />
-          </TouchableOpacity>
-        }
-      />
+    <ImageBackground
+      source={require('../../assets/images/background.png')}
+      style={styles.backgroundImage}
+      resizeMode="cover"
+    >
+      <View style={styles.container}>
+        <Header
+          title="미션 도감"
+          leftButton={
+            <TouchableOpacity onPress={() => navigation.goBack()}>
+              <Image
+                source={require('../../assets/images/left.png')}
+                style={styles.backButtonIcon}
+                resizeMode="contain"
+              />
+            </TouchableOpacity>
+          }
+        />
 
       <ScrollView
         style={styles.content}
@@ -224,7 +225,7 @@ const MissionGroupScreen: React.FC<MissionGroupScreenProps> = ({ navigation }) =
       >
         {missions.length === 0 ? (
           <EmptyState
-            icon="🎯"
+            iconImage={require('../../assets/images/goal.png')}
             title="미션이 없어요"
             description="현재 등록된 미션이 없습니다."
           />
@@ -478,14 +479,19 @@ const MissionGroupScreen: React.FC<MissionGroupScreenProps> = ({ navigation }) =
           </View>
         </View>
       </Modal>
-    </View>
+      </View>
+    </ImageBackground>
   );
 };
 
 const styles = StyleSheet.create({
+  backgroundImage: {
+    flex: 1,
+    width: '100%',
+    height: '100%',
+  },
   container: {
     flex: 1,
-    backgroundColor: colors.background.secondary,
   },
   backButtonIcon: {
     width: 24,
@@ -499,14 +505,26 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: typography.fontSize.xl,
-    fontWeight: typography.fontWeight.bold,
+    fontWeight: typography.fontWeight.medium,
     color: colors.text.primary,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.xl),
   },
   sectionSubtitle: {
     fontSize: typography.fontSize.sm,
     color: colors.text.secondary,
     marginTop: spacing[1],
     marginBottom: spacing[4],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
   },
   missionListContainer: {
     marginBottom: spacing[4],
@@ -530,7 +548,12 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: typography.fontSize.sm,
     color: colors.primary[700],
-    lineHeight: 20,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
   },
   missionCard: {
     backgroundColor: colors.background.primary,
@@ -566,6 +589,12 @@ const styles = StyleSheet.create({
     fontWeight: typography.fontWeight.normal,
     color: colors.text.primary,
     flex: 1,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
   },
   missionTypeBadge: {
     backgroundColor: colors.primary[100],
@@ -577,13 +606,24 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.xs,
     color: colors.primary[600],
     fontWeight: typography.fontWeight.normal,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
   },
   missionDescription: {
     fontSize: typography.fontSize.sm,
     color: colors.text.secondary,
-    lineHeight: 20,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
     marginBottom: spacing[2],
     fontWeight: typography.fontWeight.normal,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
   },
   missionContent: {
     marginBottom: spacing[2],
@@ -608,6 +648,12 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.xs,
     color: colors.primary[800],
     fontWeight: typography.fontWeight.normal,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
   },
   missionFooter: {
     borderTopWidth: 1,
@@ -631,6 +677,12 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.sm,
     color: colors.text.secondary,
     fontWeight: typography.fontWeight.medium,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
   },
   detailContainer: {
     marginTop: spacing[4],
@@ -664,9 +716,15 @@ const styles = StyleSheet.create({
   },
   detailTitle: {
     fontSize: typography.fontSize.lg,
-    fontWeight: typography.fontWeight.bold,
+    fontWeight: typography.fontWeight.medium,
     color: colors.text.primary,
     marginBottom: spacing[4],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.lg),
   },
   detailRow: {
     marginBottom: spacing[3],
@@ -675,10 +733,22 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.sm,
     color: colors.text.tertiary,
     marginBottom: spacing[1],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
   },
   detailValue: {
     fontSize: typography.fontSize.base,
     color: colors.text.primary,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
   },
   detailButton: {
     backgroundColor: colors.green[500],
@@ -691,7 +761,13 @@ const styles = StyleSheet.create({
   detailButtonText: {
     color: colors.white,
     fontSize: typography.fontSize.base,
-    fontWeight: typography.fontWeight.semibold,
+    fontWeight: typography.fontWeight.medium,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
   },
   reviewSection: {
     marginBottom: spacing[6],
@@ -711,12 +787,24 @@ const styles = StyleSheet.create({
   writeReviewButtonText: {
     color: colors.text.inverse,
     fontSize: typography.fontSize.sm,
-    fontWeight: typography.fontWeight.semibold,
+    fontWeight: typography.fontWeight.medium,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
   },
   reviewHint: {
     fontSize: typography.fontSize.xs,
     color: colors.text.tertiary,
     marginBottom: spacing[4],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
   },
   loadingContainer: {
     padding: spacing[8],
@@ -748,26 +836,49 @@ const styles = StyleSheet.create({
   },
   reviewAvatarText: {
     fontSize: typography.fontSize.base,
-    fontWeight: typography.fontWeight.bold,
+    fontWeight: typography.fontWeight.medium,
     color: colors.primary[600],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
   },
   reviewAuthorInfo: {
     flex: 1,
   },
   reviewAuthor: {
     fontSize: typography.fontSize.sm,
-    fontWeight: typography.fontWeight.semibold,
+    fontWeight: typography.fontWeight.medium,
     color: colors.text.primary,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
   },
   reviewDate: {
     fontSize: typography.fontSize.xs,
     color: colors.text.tertiary,
     marginTop: spacing[1],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
   },
   reviewContent: {
     fontSize: typography.fontSize.sm,
     color: colors.text.secondary,
-    lineHeight: typography.lineHeight.relaxed * typography.fontSize.sm,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
   },
   // Modal styles
   modalOverlay: {
@@ -790,8 +901,14 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     fontSize: typography.fontSize.xl,
-    fontWeight: typography.fontWeight.bold,
+    fontWeight: typography.fontWeight.medium,
     color: colors.text.primary,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.xl),
   },
   modalCloseButton: {
     padding: spacing[2],
@@ -799,12 +916,24 @@ const styles = StyleSheet.create({
   modalCloseText: {
     fontSize: typography.fontSize.xl,
     color: colors.text.tertiary,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.xl),
   },
   modalMissionTitle: {
     fontSize: typography.fontSize.base,
     color: colors.primary[600],
     fontWeight: typography.fontWeight.medium,
     marginBottom: spacing[4],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
   },
   reviewInput: {
     backgroundColor: colors.gray[50],
@@ -816,6 +945,12 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border.light,
     marginBottom: spacing[4],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    textAlignVertical: 'top',
   },
   modalButtons: {
     flexDirection: 'row',
@@ -830,8 +965,14 @@ const styles = StyleSheet.create({
   },
   cancelButtonText: {
     fontSize: typography.fontSize.base,
-    fontWeight: typography.fontWeight.semibold,
+    fontWeight: typography.fontWeight.medium,
     color: colors.text.secondary,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
   },
   submitButton: {
     flex: 1,
@@ -845,8 +986,14 @@ const styles = StyleSheet.create({
   },
   submitButtonText: {
     fontSize: typography.fontSize.base,
-    fontWeight: typography.fontWeight.semibold,
+    fontWeight: typography.fontWeight.medium,
     color: colors.text.inverse,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
   },
 });
 

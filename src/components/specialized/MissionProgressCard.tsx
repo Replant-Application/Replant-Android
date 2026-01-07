@@ -1,8 +1,9 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, Platform } from 'react-native';
 import Card from '../ui/Card';
 import CircularProgressBar from '../ui/CircularProgressBar';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
+import { getOptimizedLineHeight } from '../../utils/textStyles';
 
 interface MissionProgressCardProps {
   completedMissions: number;
@@ -38,6 +39,8 @@ const styles = StyleSheet.create({
     marginBottom: spacing[4],
     padding: spacing[5],
     borderRadius: borderRadius.base,
+    borderWidth: 4,
+    borderColor: '#0E0F37',
   },
   header: {
     marginBottom: spacing[5],
@@ -46,6 +49,12 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.base,
     fontWeight: typography.fontWeight.normal,
     color: colors.text.primary,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
   },
   progressContainer: {
     alignItems: 'center',

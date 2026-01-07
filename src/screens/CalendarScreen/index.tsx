@@ -1,33 +1,111 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Modal, TextInput, Image } from 'react-native';
+import React, { useState, useMemo } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Modal, TextInput, Platform, Image, ImageBackground } from 'react-native';
 import { useCalendar } from '../../hooks/useCalendar';
-import { Card, Loading, ErrorBoundary, Header, SectionTitle, Button, FAB } from '../../components/ui';
+import { useMission } from '../../hooks/useMission';
+import { Card, ErrorBoundary, Header, Button } from '../../components/ui';
 import { colors, spacing, typography, borderRadius, shadows } from '../../utils/designTokens';
-import { CalendarEventData } from '../../types';
-import { formatDateKorean } from '../../utils/dateUtils';
-import { NavigationProp } from '@react-navigation/native';
-import { RootStackParamList } from '../../types/navigation';
+import { getOptimizedLineHeight } from '../../utils/textStyles';
+import { CalendarEventData, Mission } from '../../types';
+import { formatDateKorean, formatDateYYYYMMDD } from '../../utils/dateUtils';
 
 interface CalendarScreenProps {
-  navigation: NavigationProp<RootStackParamList>;
+  navigation?: {
+    goBack?: () => void;
+  };
 }
 
 const CalendarScreen: React.FC<CalendarScreenProps> = ({ navigation }) => {
-  const { loading, error, addEvent, updateEvent, deleteEvent, getEventsByDate } = useCalendar();
-  const todayDateString = new Date().toISOString().split('T')[0] || '';
-  const [selectedDate, setSelectedDate] = useState<string>(todayDateString);
+  const { error, addEvent, updateEvent, deleteEvent, getEventsByDate } = useCalendar();
+  const { missions } = useMission();
+  const today = new Date();
+  const [currentMonth, setCurrentMonth] = useState(today.getMonth());
+  const [currentYear, setCurrentYear] = useState(today.getFullYear());
+  const [selectedDate, setSelectedDate] = useState<string>(formatDateYYYYMMDD(today));
   const [showEventModal, setShowEventModal] = useState(false);
+  const [showMissionModal, setShowMissionModal] = useState(false);
   const [editingEvent, setEditingEvent] = useState<{ id: string; data: CalendarEventData } | null>(null);
   const [eventTitle, setEventTitle] = useState('');
   const [eventDescription, setEventDescription] = useState('');
   const [eventTime, setEventTime] = useState('');
 
-  // 에러 처리
-  if (error) {
-    return <ErrorBoundary error={error} />;
-  }
+  // 완료된 미션을 날짜별로 그룹화
+  const missionsByDate = useMemo(() => {
+    const grouped: Record<string, Mission[]> = {};
+    missions.forEach(mission => {
+      if (mission.completed && mission.completed_at) {
+        const date = mission.completed_at.split('T')[0];
+        if (date) {
+          if (!grouped[date]) {
+            grouped[date] = [];
+          }
+          grouped[date].push(mission);
+        }
+      }
+    });
+    return grouped;
+  }, [missions]);
 
-  // 날짜 포맷팅 (formatDateKorean의 includeWeekday 옵션 사용)
+  // 현재 월의 날짜 배열 생성
+  const calendarDays = useMemo(() => {
+    const firstDay = new Date(currentYear, currentMonth, 1);
+    const lastDay = new Date(currentYear, currentMonth + 1, 0);
+    const daysInMonth = lastDay.getDate();
+    const startingDayOfWeek = firstDay.getDay();
+
+    const days: Array<{ date: number; dateString: string | undefined; isCurrentMonth: boolean }> = [];
+
+    // 이전 달의 마지막 날들
+    const prevMonthLastDay = new Date(currentYear, currentMonth, 0).getDate();
+    for (let i = startingDayOfWeek - 1; i >= 0; i--) {
+      const date = prevMonthLastDay - i;
+      const dateString = formatDateYYYYMMDD(new Date(currentYear, currentMonth - 1, date));
+      days.push({ date, dateString, isCurrentMonth: false });
+    }
+
+    // 현재 달의 날들
+    for (let i = 1; i <= daysInMonth; i++) {
+      const dateString = formatDateYYYYMMDD(new Date(currentYear, currentMonth, i));
+      days.push({ date: i, dateString, isCurrentMonth: true });
+    }
+
+    // 다음 달의 첫 날들 (캘린더를 채우기 위해)
+    const remainingDays = 42 - days.length; // 6주 * 7일
+    for (let i = 1; i <= remainingDays; i++) {
+      const dateString = formatDateYYYYMMDD(new Date(currentYear, currentMonth + 1, i));
+      days.push({ date: i, dateString, isCurrentMonth: false });
+    }
+
+    return days;
+  }, [currentYear, currentMonth]);
+
+  // 월 이동
+  const changeMonth = (direction: 'prev' | 'next') => {
+    if (direction === 'prev') {
+      if (currentMonth === 0) {
+        setCurrentMonth(11);
+        setCurrentYear(currentYear - 1);
+      } else {
+        setCurrentMonth(currentMonth - 1);
+      }
+    } else {
+      if (currentMonth === 11) {
+        setCurrentMonth(0);
+        setCurrentYear(currentYear + 1);
+      } else {
+        setCurrentMonth(currentMonth + 1);
+      }
+    }
+  };
+
+  // 날짜 클릭 처리
+  const handleDatePress = (dateString: string | undefined) => {
+    if (!dateString) return;
+    setSelectedDate(dateString);
+    const dayMissions = missionsByDate[dateString] || [];
+    if (dayMissions.length >= 3) {
+      setShowMissionModal(true);
+    }
+  };
 
   // 시간 포맷팅
   const formatTime = (timeString?: string): string => {
@@ -37,7 +115,7 @@ const CalendarScreen: React.FC<CalendarScreenProps> = ({ navigation }) => {
 
   // 이벤트 모달 열기
   const openEventModal = (date?: string, event?: { id: string; data: CalendarEventData }) => {
-    const dateToSet = date || todayDateString || '';
+    const dateToSet = date || selectedDate || '';
     setSelectedDate(dateToSet);
     if (event) {
       setEditingEvent(event);
@@ -124,176 +202,335 @@ const CalendarScreen: React.FC<CalendarScreenProps> = ({ navigation }) => {
 
   // 선택된 날짜의 이벤트
   const dayEvents = selectedDate ? getEventsByDate(selectedDate) : [];
+  const selectedDayMissions = selectedDate ? missionsByDate[selectedDate] || [] : [];
 
-  // 날짜 선택 UI (간단한 버전)
-  const today = new Date();
-  const todayString = today.toISOString().split('T')[0];
-  const yesterday = new Date(today);
-  yesterday.setDate(yesterday.getDate() - 1);
-  const yesterdayString = yesterday.toISOString().split('T')[0];
-  const tomorrow = new Date(today);
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  const tomorrowString = tomorrow.toISOString().split('T')[0];
+  // 에러 처리
+  if (error) {
+    return <ErrorBoundary error={error} />;
+  }
+
+  const monthNames = ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'];
+  const weekDays = ['일', '월', '화', '수', '목', '금', '토'];
 
   return (
-    <View style={styles.container}>
-      <ScrollView style={styles.scrollView}>
-        <Header
-          title="캘린더"
-          leftButton={
-            <TouchableOpacity onPress={() => navigation.goBack()}>
-              <Image
-                source={require('../../assets/images/left.png')}
-                style={styles.backButtonIcon}
-                resizeMode="contain"
-              />
-            </TouchableOpacity>
-          }
-        />
-        <View style={styles.content}>
-          {/* 날짜 선택 */}
-          <Card style={styles.dateCard}>
-            <SectionTitle title="📅 날짜 선택" size="lg" marginBottom={spacing[4]} />
-            <View style={styles.dateButtons}>
-              <TouchableOpacity
-                style={[styles.dateButton, selectedDate === yesterdayString && styles.dateButtonActive]}
-                onPress={() => setSelectedDate(yesterdayString || '')}
-              >
-                <Text style={[styles.dateButtonText, selectedDate === yesterdayString && styles.dateButtonTextActive]}>
-                  어제
+    <ImageBackground
+      source={require('../../assets/images/background.png')}
+      style={styles.backgroundImage}
+      resizeMode="cover"
+    >
+      <View style={styles.container}>
+        <ScrollView style={styles.scrollView}>
+          <Header
+            title="캘린더"
+            navigation={navigation}
+            leftButton={
+              navigation?.goBack ? (
+                <TouchableOpacity onPress={() => navigation.goBack?.()} activeOpacity={0.7}>
+                  <Image
+                    source={require('../../assets/images/left.png')}
+                    style={styles.backButtonIcon}
+                    resizeMode="contain"
+                  />
+                </TouchableOpacity>
+              ) : undefined
+            }
+          />
+          <View style={styles.content}>
+            {/* 캘린더 */}
+            <Card style={styles.calendarCard}>
+              <View style={styles.calendarHeader}>
+                <TouchableOpacity onPress={() => changeMonth('prev')} style={styles.monthButton}>
+                  <Text style={styles.monthButtonText}>‹</Text>
+                </TouchableOpacity>
+                <Text style={styles.monthYearText}>
+                  {currentYear}년 {monthNames[currentMonth]}
                 </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.dateButton, selectedDate === todayString && styles.dateButtonActive]}
-                onPress={() => setSelectedDate(todayString || '')}
-              >
-                <Text style={[styles.dateButtonText, selectedDate === todayString && styles.dateButtonTextActive]}>
-                  오늘
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.dateButton, selectedDate === tomorrowString && styles.dateButtonActive]}
-                onPress={() => setSelectedDate(tomorrowString || '')}
-              >
-                <Text style={[styles.dateButtonText, selectedDate === tomorrowString && styles.dateButtonTextActive]}>
-                  내일
-                </Text>
-              </TouchableOpacity>
-            </View>
-            <Text style={styles.selectedDateText}>{formatDateKorean(selectedDate, true)}</Text>
-          </Card>
+                <TouchableOpacity onPress={() => changeMonth('next')} style={styles.monthButton}>
+                  <Text style={styles.monthButtonText}>›</Text>
+                </TouchableOpacity>
+              </View>
 
-          {/* 선택된 날짜의 이벤트 */}
-          <Card style={styles.eventsCard}>
-            <SectionTitle title="📌 이벤트" size="lg" marginBottom={spacing[4]} />
-            {loading ? (
-              <Loading text="이벤트를 불러오는 중..." />
-            ) : dayEvents.length > 0 ? (
-              dayEvents.map((event) => (
-                <View key={event.id} style={styles.eventItem}>
-                  <View style={styles.eventContent}>
-                    <Text style={styles.eventTitle}>{event.title}</Text>
-                    {event.description && (
-                      <Text style={styles.eventDescription}>{event.description}</Text>
-                    )}
-                    {event.time && (
-                      <Text style={styles.eventTime}>⏰ {formatTime(event.time)}</Text>
-                    )}
+              {/* 요일 헤더 */}
+              <View style={styles.weekDaysHeader}>
+                {weekDays.map((day, index) => (
+                  <View key={index} style={styles.weekDayHeader}>
+                    <Text style={styles.weekDayText}>{day}</Text>
                   </View>
-                  <View style={styles.eventActions}>
+                ))}
+              </View>
+
+              {/* 캘린더 그리드 */}
+              <View style={styles.calendarGrid}>
+                {calendarDays.map((day, index) => {
+                  if (!day.dateString) return null;
+                  const dateString = day.dateString;
+                  const dayMissionsForDate = missionsByDate[dateString] || [];
+                  const todayString = formatDateYYYYMMDD(today);
+                  const isToday = dateString === todayString;
+                  const isSelected = dateString === selectedDate;
+                  const missionCount = dayMissionsForDate.length;
+                  const showMoreIndicator = missionCount > 2;
+
+                  return (
                     <TouchableOpacity
-                      style={styles.eventActionButton}
-                      onPress={() => openEventModal(selectedDate, { id: event.id, data: { title: event.title, description: event.description, date: event.date, time: event.time } })}
+                      key={index}
+                      style={[
+                        styles.calendarDay,
+                        !day.isCurrentMonth && styles.calendarDayOtherMonth,
+                        isToday && styles.calendarDayToday,
+                        isSelected && styles.calendarDaySelected,
+                      ]}
+                      onPress={() => handleDatePress(dateString)}
                     >
-                      <Text style={styles.eventActionText}>✏️</Text>
+                      <Text
+                        style={[
+                          styles.calendarDayText,
+                          !day.isCurrentMonth && styles.calendarDayTextOtherMonth,
+                          isToday && styles.calendarDayTextToday,
+                        ]}
+                      >
+                        {day.date}
+                      </Text>
+                      {missionCount > 0 && (
+                        <View style={styles.missionIndicators}>
+                          {dayMissionsForDate.slice(0, 2).map((mission, idx) => (
+                            <View
+                              key={mission.id}
+                              style={[
+                                styles.missionIndicator,
+                                { backgroundColor: getMissionColor(mission, idx) },
+                              ]}
+                            />
+                          ))}
+                          {showMoreIndicator && (
+                            <Text style={styles.moreIndicatorText}>+{missionCount - 2}</Text>
+                          )}
+                        </View>
+                      )}
                     </TouchableOpacity>
+                  );
+                })}
+              </View>
+
+              {/* 선택된 날짜의 미션 목록 (캘린더 바로 아래) */}
+              {selectedDate && (
+                <View style={styles.missionsListContainer}>
+                  <View style={styles.missionsListHeader}>
+                    <Image
+                      source={require('../../assets/images/clip.png')}
+                      style={styles.missionsListIcon}
+                      resizeMode="contain"
+                    />
+                    <Text style={styles.missionsListTitle}>
+                      {formatDateKorean(selectedDate, true)} 완료한 미션
+                    </Text>
                     <TouchableOpacity
-                      style={styles.eventActionButton}
-                      onPress={() => handleDeleteEvent(event.id)}
+                      style={styles.addButtonSmall}
+                      onPress={() => openEventModal(selectedDate)}
+                      activeOpacity={0.7}
                     >
-                      <Text style={styles.eventActionText}>🗑️</Text>
+                      <View style={styles.addButtonDot} />
                     </TouchableOpacity>
                   </View>
+                  {selectedDayMissions.length > 0 && (
+                    <>
+                      {selectedDayMissions.map((mission) => (
+                        <View key={mission.id} style={styles.missionItem}>
+                          <Image
+                            source={require('../../assets/images/goal.png')}
+                            style={styles.missionIcon}
+                            resizeMode="contain"
+                          />
+                          <View style={styles.missionContent}>
+                            <Text style={styles.missionTitle}>{mission.title}</Text>
+                            {mission.description && (
+                              <Text style={styles.missionDescription}>{mission.description}</Text>
+                            )}
+                          </View>
+                        </View>
+                      ))}
+                    </>
+                  )}
                 </View>
-              ))
-            ) : (
-              <Text style={styles.emptyText}>이 날짜에는 이벤트가 없습니다.</Text>
-            )}
-          </Card>
-        </View>
-      </ScrollView>
+              )}
 
-      {/* 이벤트 추가 버튼 */}
-      <FAB
-        icon="➕"
-        onPress={() => openEventModal(selectedDate)}
-        style={styles.fab}
-      />
+              {/* 선택된 날짜의 이벤트 목록 */}
+              {selectedDate && dayEvents.length > 0 && (
+                <View style={styles.eventsListContainer}>
+                  <View style={styles.missionsListHeader}>
+                    <Image
+                      source={require('../../assets/images/clip.png')}
+                      style={styles.missionsListIcon}
+                      resizeMode="contain"
+                    />
+                    <Text style={styles.missionsListTitle}>이벤트</Text>
+                  </View>
+                  {dayEvents.map((event) => (
+                    <View key={event.id} style={styles.eventItem}>
+                      <View style={styles.eventContent}>
+                        <Text style={styles.eventTitle}>{event.title}</Text>
+                        {event.description && (
+                          <Text style={styles.eventDescription}>{event.description}</Text>
+                        )}
+                        {event.time && (
+                          <Text style={styles.eventTime}>⏰ {formatTime(event.time)}</Text>
+                        )}
+                      </View>
+                      <View style={styles.eventActions}>
+                        <TouchableOpacity
+                          style={styles.eventActionButton}
+                          onPress={() =>
+                            openEventModal(selectedDate, {
+                              id: event.id,
+                              data: {
+                                title: event.title,
+                                description: event.description,
+                                date: event.date,
+                                time: event.time,
+                              },
+                            })
+                          }
+                        >
+                          <Text style={styles.eventActionText}>✏️</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                          style={styles.eventActionButton}
+                          onPress={() => handleDeleteEvent(event.id)}
+                        >
+                          <Text style={styles.eventActionText}>🗑️</Text>
+                        </TouchableOpacity>
+                      </View>
+                    </View>
+                  ))}
+                </View>
+              )}
 
-      {/* 이벤트 추가/수정 모달 */}
-      <Modal
-        visible={showEventModal}
-        animationType="slide"
-        transparent={true}
-        onRequestClose={closeEventModal}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>
-              {editingEvent ? '이벤트 수정' : '이벤트 추가'}
-            </Text>
-            <Text style={styles.modalDate}>{formatDateKorean(selectedDate, true)}</Text>
+              {/* 빈 상태 메시지 */}
+              {selectedDate && selectedDayMissions.length === 0 && dayEvents.length === 0 && (
+                <View style={styles.emptyStateContainer}>
+                  <Text style={styles.emptyText}>이 날짜에는 미션과 이벤트가 없습니다.</Text>
+                </View>
+              )}
+            </Card>
+          </View>
+        </ScrollView>
 
-            <TextInput
-              style={styles.input}
-              placeholder="제목 *"
-              value={eventTitle}
-              onChangeText={setEventTitle}
-              placeholderTextColor={colors.text.secondary}
-            />
+        {/* 이벤트 추가/수정 모달 */}
+        <Modal
+          visible={showEventModal}
+          animationType="slide"
+          transparent={true}
+          onRequestClose={closeEventModal}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContent}>
+              <Text style={styles.modalTitle}>
+                {editingEvent ? '이벤트 수정' : '이벤트 추가'}
+              </Text>
+              <Text style={styles.modalDate}>{formatDateKorean(selectedDate, true)}</Text>
 
-            <TextInput
-              style={[styles.input, styles.textArea]}
-              placeholder="설명 (선택사항)"
-              value={eventDescription}
-              onChangeText={setEventDescription}
-              multiline
-              numberOfLines={4}
-              placeholderTextColor={colors.text.secondary}
-            />
-
-            <TextInput
-              style={styles.input}
-              placeholder="시간 (예: 14:30)"
-              value={eventTime}
-              onChangeText={setEventTime}
-              placeholderTextColor={colors.text.secondary}
-            />
-
-            <View style={styles.modalActions}>
-              <Button
-                title="취소"
-                onPress={closeEventModal}
-                variant="outline"
-                style={styles.modalButton}
+              <TextInput
+                style={styles.input}
+                placeholder="제목 *"
+                value={eventTitle}
+                onChangeText={setEventTitle}
+                placeholderTextColor={colors.text.secondary}
               />
+
+              <TextInput
+                style={[styles.input, styles.textArea]}
+                placeholder="설명 (선택사항)"
+                value={eventDescription}
+                onChangeText={setEventDescription}
+                multiline
+                numberOfLines={4}
+                placeholderTextColor={colors.text.secondary}
+              />
+
+              <TextInput
+                style={styles.input}
+                placeholder="시간 (예: 14:30)"
+                value={eventTime}
+                onChangeText={setEventTime}
+                placeholderTextColor={colors.text.secondary}
+              />
+
+              <View style={styles.modalActions}>
+                <Button
+                  title="취소"
+                  onPress={closeEventModal}
+                  variant="outline"
+                  style={styles.modalButton}
+                />
+                <Button
+                  title={editingEvent ? '수정' : '추가'}
+                  onPress={handleSaveEvent}
+                  style={styles.modalButton}
+                />
+              </View>
+            </View>
+          </View>
+        </Modal>
+
+        {/* 미션 목록 모달 (3개 이상일 때) */}
+        <Modal
+          visible={showMissionModal}
+          animationType="slide"
+          transparent={true}
+          onRequestClose={() => setShowMissionModal(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContent}>
+              <Text style={styles.modalTitle}>
+                {formatDateKorean(selectedDate, true)} 완료한 미션
+              </Text>
+              <ScrollView style={styles.missionModalList}>
+                {selectedDayMissions.map((mission) => (
+                  <View key={mission.id} style={styles.missionModalItem}>
+                    <Image
+                      source={require('../../assets/images/goal.png')}
+                      style={styles.missionModalIcon}
+                      resizeMode="contain"
+                    />
+                    <View style={styles.missionModalContent}>
+                      <Text style={styles.missionModalTitle}>{mission.title}</Text>
+                      {mission.description && (
+                        <Text style={styles.missionModalDescription}>{mission.description}</Text>
+                      )}
+                    </View>
+                  </View>
+                ))}
+              </ScrollView>
               <Button
-                title={editingEvent ? '수정' : '추가'}
-                onPress={handleSaveEvent}
+                title="닫기"
+                onPress={() => setShowMissionModal(false)}
                 style={styles.modalButton}
               />
             </View>
           </View>
-        </View>
-      </Modal>
-    </View>
+        </Modal>
+      </View>
+    </ImageBackground>
   );
 };
 
+// 미션 색상 생성 함수
+const getMissionColor = (mission: Mission, index: number): string => {
+  const missionColors: string[] = ['#FFE066', '#FF6B6B', '#4ECDC4', '#95E1D3', '#F38181', '#A8E6CF', '#FFD3A5'];
+  const hash = mission.id.toString().split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  const colorIndex = (hash + index) % missionColors.length;
+  const selectedColor = missionColors[colorIndex];
+  return selectedColor ?? missionColors[0] ?? '#FFE066';
+};
+
 const styles = StyleSheet.create({
+  backgroundImage: {
+    flex: 1,
+    width: '100%',
+    height: '100%',
+  },
   container: {
     flex: 1,
-    backgroundColor: colors.background.secondary,
   },
   backButtonIcon: {
     width: 24,
@@ -306,44 +543,236 @@ const styles = StyleSheet.create({
   content: {
     padding: spacing[5],
   },
-  dateCard: {
+  calendarCard: {
     marginBottom: spacing[6],
   },
-  dateButtons: {
-    flexDirection: 'row',
-    gap: spacing[2],
-    marginBottom: spacing[4],
+  missionsListContainer: {
+    marginTop: spacing[1],
+    paddingTop: spacing[4],
+    borderTopWidth: 1,
+    borderTopColor: colors.border.light,
   },
-  dateButton: {
+  missionsListHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing[2],
+    marginBottom: spacing[1],
+  },
+  missionsListIcon: {
+    width: 20,
+    height: 20,
+  },
+  missionsListTitle: {
+    fontSize: typography.fontSize.base,
+    letterSpacing: -0.5,
+    fontWeight: typography.fontWeight.medium as any,
+    color: colors.text.primary,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
     flex: 1,
-    padding: spacing[3],
-    borderRadius: borderRadius.base,
-    backgroundColor: colors.background.secondary,
-    borderWidth: 1,
-    borderColor: colors.border.light,
+  },
+  backButtonIcon: {
+    width: 24,
+    height: 24,
+  },
+  addButtonSmall: {
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
     alignItems: 'center',
   },
-  dateButtonActive: {
+  addButtonDot: {
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    backgroundColor: colors.primary[500],
+  },
+  eventsListContainer: {
+    marginTop: spacing[4],
+    paddingTop: spacing[4],
+  },
+  emptyStateContainer: {
+    marginTop: spacing[4],
+    paddingTop: spacing[4],
+    borderTopWidth: 1,
+    borderTopColor: colors.border.light,
+    alignItems: 'center',
+  },
+  calendarHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: spacing[4],
+  },
+  monthButton: {
+    padding: spacing[2],
+    minWidth: 40,
+    alignItems: 'center',
+  },
+  monthButtonText: {
+    fontSize: typography.fontSize['2xl'],
+    color: colors.primary[700],
+    fontWeight: typography.fontWeight.medium,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+  },
+  monthYearText: {
+    fontSize: typography.fontSize.xl,
+    fontWeight: typography.fontWeight.medium,
+    color: colors.text.primary,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.xl),
+  },
+  weekDaysHeader: {
+    flexDirection: 'row',
+    marginBottom: spacing[2],
+  },
+  weekDayHeader: {
+    flex: 1,
+    alignItems: 'center',
+    paddingVertical: spacing[2],
+  },
+  weekDayText: {
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.medium,
+    color: colors.text.secondary,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
+  },
+  calendarGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+  },
+  calendarDay: {
+    width: '14.28%',
+    aspectRatio: 1,
+    padding: spacing[1],
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: colors.border.light,
+    backgroundColor: colors.background.primary,
+  },
+  calendarDayOtherMonth: {
+    backgroundColor: colors.background.secondary,
+    opacity: 0.5,
+  },
+  calendarDayToday: {
     backgroundColor: colors.primary[50],
     borderColor: colors.primary[400],
   },
-  dateButtonText: {
-    fontSize: typography.fontSize.base,
+  calendarDaySelected: {
+    backgroundColor: colors.primary[100],
+    borderColor: colors.primary[600],
+  },
+  calendarDayText: {
+    fontSize: typography.fontSize.sm,
+    color: colors.text.primary,
+    fontWeight: typography.fontWeight.medium,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
+  },
+  calendarDayTextOtherMonth: {
     color: colors.text.secondary,
+  },
+  calendarDayTextToday: {
+    color: colors.primary[700],
     fontWeight: typography.fontWeight.medium,
   },
-  dateButtonTextActive: {
-    color: colors.primary[700],
-    fontWeight: typography.fontWeight.bold,
+  missionIndicators: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 2,
+    gap: 2,
   },
-  selectedDateText: {
-    fontSize: typography.fontSize.lg,
+  missionIndicator: {
+    width: 4,
+    height: 4,
+    borderRadius: 2,
+  },
+  moreIndicatorText: {
+    fontSize: typography.fontSize.xs,
+    color: colors.text.secondary,
+    fontWeight: typography.fontWeight.medium,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
+  },
+  sectionSubtitle: {
+    fontSize: typography.fontSize.base,
+    fontWeight: typography.fontWeight.medium as any,
     color: colors.text.primary,
-    fontWeight: typography.fontWeight.semibold,
-    textAlign: 'center',
+    marginBottom: spacing[3],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
   },
-  eventsCard: {
-    marginBottom: spacing[6],
+  missionItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: spacing[3],
+    marginBottom: spacing[2],
+    backgroundColor: colors.background.secondary,
+    borderRadius: borderRadius.lg,
+    ...shadows.base,
+  },
+  missionIcon: {
+    width: 24,
+    height: 24,
+    marginRight: spacing[3],
+  },
+  missionContent: {
+    flex: 1,
+  },
+  missionTitle: {
+    fontSize: typography.fontSize.base,
+    fontWeight: typography.fontWeight.medium as any,
+    color: colors.text.primary,
+    marginBottom: spacing[1],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
+  },
+  missionDescription: {
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.medium as any,
+    color: colors.text.secondary,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
   },
   eventItem: {
     flexDirection: 'row',
@@ -360,19 +789,37 @@ const styles = StyleSheet.create({
   },
   eventTitle: {
     fontSize: typography.fontSize.base,
-    fontWeight: typography.fontWeight.semibold,
+    fontWeight: typography.fontWeight.medium,
     color: colors.text.primary,
     marginBottom: spacing[1],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
   },
   eventDescription: {
     fontSize: typography.fontSize.sm,
     color: colors.text.secondary,
     marginBottom: spacing[1],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
   },
   eventTime: {
     fontSize: typography.fontSize.sm,
     color: colors.primary[600],
     fontWeight: typography.fontWeight.medium,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
   },
   eventActions: {
     flexDirection: 'row',
@@ -383,17 +830,24 @@ const styles = StyleSheet.create({
   },
   eventActionText: {
     fontSize: typography.fontSize.lg,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.lg),
   },
   emptyText: {
     fontSize: typography.fontSize.base,
     color: colors.text.secondary,
     textAlign: 'center',
     padding: spacing[6],
-  },
-  fab: {
-    position: 'absolute',
-    bottom: spacing[6],
-    right: spacing[5],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
   },
   modalOverlay: {
     flex: 1,
@@ -404,6 +858,7 @@ const styles = StyleSheet.create({
   modalContent: {
     width: '90%',
     maxWidth: 400,
+    maxHeight: '80%',
     backgroundColor: colors.background.primary,
     borderRadius: borderRadius.xl,
     padding: spacing[6],
@@ -411,14 +866,26 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     fontSize: typography.fontSize.xl,
-    fontWeight: typography.fontWeight.bold,
+    fontWeight: typography.fontWeight.medium,
     color: colors.text.primary,
     marginBottom: spacing[2],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.xl),
   },
   modalDate: {
     fontSize: typography.fontSize.base,
     color: colors.text.secondary,
     marginBottom: spacing[4],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
   },
   input: {
     borderWidth: 1,
@@ -429,6 +896,13 @@ const styles = StyleSheet.create({
     color: colors.text.primary,
     backgroundColor: colors.background.secondary,
     marginBottom: spacing[3],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    textAlignVertical: 'top',
+    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
   },
   textArea: {
     height: 100,
@@ -441,6 +915,49 @@ const styles = StyleSheet.create({
   },
   modalButton: {
     flex: 1,
+  },
+  missionModalList: {
+    maxHeight: 400,
+    marginBottom: spacing[4],
+  },
+  missionModalItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: spacing[3],
+    marginBottom: spacing[2],
+    backgroundColor: colors.background.secondary,
+    borderRadius: borderRadius.lg,
+  },
+  missionModalIcon: {
+    width: 24,
+    height: 24,
+    marginRight: spacing[3],
+  },
+  missionModalContent: {
+    flex: 1,
+  },
+  missionModalTitle: {
+    fontSize: typography.fontSize.base,
+    fontWeight: typography.fontWeight.medium as any,
+    color: colors.text.primary,
+    marginBottom: spacing[1],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
+  },
+  missionModalDescription: {
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.medium as any,
+    color: colors.text.secondary,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
   },
 });
 

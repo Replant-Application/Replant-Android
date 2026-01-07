@@ -168,6 +168,11 @@ export const spacing: Spacing = {
 };
 
 export const typography: Typography = {
+  fontFamily: {
+    regular: 'Neo-Regular',
+    bold: 'Maplestory Bold',
+    light: 'Maplestory Light',
+  },
   fontSize: {
     xs: 12,
     sm: 14,

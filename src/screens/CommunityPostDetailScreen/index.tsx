@@ -14,12 +14,14 @@ import {
   Image,
   KeyboardAvoidingView,
   Platform,
+  ImageBackground,
 } from 'react-native';
 import { useCommunityPost } from '../../hooks/useCommunityPost';
 import { useCommunity } from '../../hooks/useCommunity';
 import { CommentCard } from '../../components/specialized';
-import { Loading, ErrorBoundary, EmptyState } from '../../components/ui';
-import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
+import { getOptimizedLineHeight } from '../../utils/textStyles';
+import { Loading, ErrorBoundary, EmptyState, Header, Card } from '../../components/ui';
+import { colors, spacing, typography, borderRadius, shadows } from '../../utils/designTokens';
 import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types/navigation';
 import { useUser } from '../../contexts/UserContext';
@@ -147,31 +149,31 @@ const CommunityPostDetailScreen: React.FC<CommunityPostDetailScreenProps> = ({
   }
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+    <ImageBackground
+      source={require('../../assets/images/background.png')}
+      style={styles.backgroundImage}
+      resizeMode="cover"
     >
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-          <Image
-            source={require('../../assets/images/left.png')}
-            style={styles.backButtonIcon}
-            resizeMode="contain"
-          />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>게시글</Text>
-        <View style={styles.headerRight} />
-      </View>
-
-      <ScrollView
-        style={styles.content}
-        contentContainerStyle={styles.scrollContent}
-        keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={true}
+      <KeyboardAvoidingView
+        style={styles.container}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
       >
-        {/* 게시글 내용 */}
-        <View style={styles.postContainer}>
+        <Header
+          title="게시글"
+          navigation={navigation}
+          showBorder={false}
+          titleStyle={styles.headerTitle}
+        />
+
+        <ScrollView
+          style={styles.content}
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
+          {/* 게시글 내용 */}
+          <Card style={styles.postContainer}>
           <View style={styles.postHeader}>
             <View style={styles.authorInfo}>
               <View style={styles.authorAvatar}>
@@ -223,12 +225,24 @@ const CommunityPostDetailScreen: React.FC<CommunityPostDetailScreenProps> = ({
 
           <View style={styles.actions}>
             <TouchableOpacity style={styles.actionButton} onPress={handleLike}>
-              <Text style={styles.actionIcon}>{post.is_liked ? '❤️' : '🤍'}</Text>
+              {post.is_liked ? (
+                <Text style={styles.actionIcon}>❤️</Text>
+              ) : (
+                <Image
+                  source={require('../../assets/images/heart.png')}
+                  style={styles.actionIconImage}
+                  resizeMode="contain"
+                />
+              )}
               <Text style={styles.actionText}>{post.like_count}</Text>
             </TouchableOpacity>
 
             <View style={styles.actionButton}>
-              <Text style={styles.actionIcon}>💬</Text>
+              <Image
+                source={require('../../assets/images/say.png')}
+                style={styles.actionIconImage}
+                resizeMode="contain"
+              />
               <Text style={styles.actionText}>{post.comment_count}</Text>
             </View>
 
@@ -247,14 +261,14 @@ const CommunityPostDetailScreen: React.FC<CommunityPostDetailScreenProps> = ({
               </TouchableOpacity>
             )}
           </View>
-        </View>
+          </Card>
 
-        {/* 댓글 섹션 */}
-        <View style={styles.commentsSection}>
+          {/* 댓글 섹션 */}
+          <Card style={styles.commentsSection}>
           <Text style={styles.commentsTitle}>댓글 ({comments.length})</Text>
 
           {comments.length === 0 ? (
-            <EmptyState icon="💬" title="아직 댓글이 없어요" description="첫 댓글을 남겨보세요!" />
+            <EmptyState iconImage={require('../../assets/images/say.png')} title="아직 댓글이 없어요" description="첫 댓글을 남겨보세요!" />
           ) : (
             <View style={styles.commentsList}>
               {/* 부모 댓글만 먼저 렌더링하고, 대댓글은 부모 댓글 아래에 표시 */}
@@ -359,91 +373,72 @@ const CommunityPostDetailScreen: React.FC<CommunityPostDetailScreenProps> = ({
                 ))}
             </View>
           )}
-        </View>
-      </ScrollView>
+          </Card>
+        </ScrollView>
 
-      {/* 댓글 입력 */}
-      <View style={styles.commentInputWrapper}>
-        {/* 답글 모드 표시 */}
-        {replyingToComment && (
-          <View style={styles.replyingToContainer}>
-            <Text style={styles.replyingToText}>
-              @{replyingToComment.nickname}님에게 답글 작성 중
-            </Text>
-            <TouchableOpacity onPress={handleCancelReply} style={styles.cancelReplyButton}>
-              <Text style={styles.cancelReplyText}>X</Text>
+        {/* 댓글 입력 */}
+        <View style={styles.commentInputWrapper}>
+          {/* 답글 모드 표시 */}
+          {replyingToComment && (
+            <View style={styles.replyingToContainer}>
+              <Text style={styles.replyingToText}>
+                @{replyingToComment.nickname}님에게 답글 작성 중
+              </Text>
+              <TouchableOpacity onPress={handleCancelReply} style={styles.cancelReplyButton}>
+                <Text style={styles.cancelReplyText}>X</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+          <View style={styles.commentInputContainer}>
+            <TextInput
+              style={styles.commentInput}
+              value={commentContent}
+              onChangeText={setCommentContent}
+              placeholder={replyingToComment ? `@${replyingToComment.nickname}님에게 답글...` : "댓글을 입력하세요"}
+              placeholderTextColor={colors.text.tertiary}
+              multiline
+            />
+            <TouchableOpacity
+              style={[styles.submitButton, !commentContent.trim() && styles.submitButtonDisabled]}
+              onPress={handleSubmitComment}
+              disabled={!commentContent.trim()}
+            >
+              <Text style={styles.submitButtonText}>{replyingToComment ? '답글' : '등록'}</Text>
             </TouchableOpacity>
           </View>
-        )}
-        <View style={styles.commentInputContainer}>
-          <TextInput
-            style={styles.commentInput}
-            value={commentContent}
-            onChangeText={setCommentContent}
-            placeholder={replyingToComment ? `@${replyingToComment.nickname}님에게 답글...` : "댓글을 입력하세요..."}
-            placeholderTextColor={colors.text.tertiary}
-            multiline
-          />
-          <TouchableOpacity
-            style={[styles.submitButton, !commentContent.trim() && styles.submitButtonDisabled]}
-            onPress={handleSubmitComment}
-            disabled={!commentContent.trim()}
-          >
-            <Text style={styles.submitButtonText}>{replyingToComment ? '답글' : '등록'}</Text>
-          </TouchableOpacity>
         </View>
-      </View>
-    </KeyboardAvoidingView>
+      </KeyboardAvoidingView>
+    </ImageBackground>
   );
 };
 
 const styles = StyleSheet.create({
+  backgroundImage: {
+    flex: 1,
+    width: '100%',
+    height: '100%',
+  },
   container: {
     flex: 1,
-    backgroundColor: colors.background.secondary,
   },
   content: {
     flex: 1,
   },
   scrollContent: {
-    padding: spacing[4],
+    padding: spacing[5],
     paddingBottom: spacing[24],
   },
-  header: {
-    backgroundColor: colors.background.primary,
-    paddingTop: spacing[16],
-    paddingBottom: spacing[3],
-    paddingHorizontal: spacing[4],
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border.light,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  backButton: {
-    padding: spacing[1],
-  },
-  backButtonIcon: {
-    width: 20,
-    height: 20,
-  },
   headerTitle: {
-    fontSize: typography.fontSize['2xl'],
-    fontWeight: typography.fontWeight.normal,
-    color: colors.text.primary,
-    flex: 1,
-    textAlign: 'center',
-  },
-  headerRight: {
-    width: 28,
+    fontWeight: typography.fontWeight.medium as any,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
   },
   postContainer: {
-    backgroundColor: colors.background.primary,
-    borderRadius: borderRadius.base,
-    padding: spacing[3],
-    marginBottom: spacing[2],
-    borderWidth: 1,
-    borderColor: colors.border.light,
+    marginBottom: spacing[5],
+    ...shadows.sm,
   },
   postHeader: {
     flexDirection: 'row',
@@ -469,12 +464,24 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.sm,
     fontWeight: typography.fontWeight.normal,
     color: colors.white,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
   },
   authorName: {
     fontSize: typography.fontSize.sm,
     fontWeight: typography.fontWeight.normal,
     color: colors.text.primary,
     marginBottom: 2,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
   },
   categoryBadge: {
     backgroundColor: colors.primary[100],
@@ -487,10 +494,22 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.xs,
     color: colors.primary[700],
     fontWeight: typography.fontWeight.normal,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
   },
   date: {
     fontSize: typography.fontSize.xs,
     color: colors.text.tertiary,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
   },
   missionInfo: {
     flexDirection: 'row',
@@ -506,12 +525,23 @@ const styles = StyleSheet.create({
   },
   missionEmoji: {
     fontSize: typography.fontSize.base,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
   },
   missionTitle: {
     flex: 1,
     fontSize: typography.fontSize.sm,
     fontWeight: typography.fontWeight.normal,
     color: colors.primary[800],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
   },
   verifiedBadge: {
     flexDirection: 'row',
@@ -527,11 +557,23 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.xs,
     color: colors.primary[600],
     fontWeight: typography.fontWeight.normal,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
   },
   verifiedText: {
     fontSize: typography.fontSize.xs,
     color: colors.primary[700],
     fontWeight: typography.fontWeight.normal,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
   },
   pendingBadge: {
     flexDirection: 'row',
@@ -545,24 +587,45 @@ const styles = StyleSheet.create({
   },
   pendingIcon: {
     fontSize: typography.fontSize.xs,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
   },
   pendingText: {
     fontSize: typography.fontSize.xs,
     color: colors.orange[700],
     fontWeight: typography.fontWeight.normal,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
   },
   title: {
     fontSize: typography.fontSize.base,
     fontWeight: typography.fontWeight.normal,
     color: colors.text.primary,
     marginBottom: spacing[1],
-    lineHeight: 20,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
   },
   contentText: {
     fontSize: typography.fontSize.sm,
     color: colors.text.secondary,
-    lineHeight: 18,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
     marginBottom: spacing[2],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
   },
   imageContainer: {
     marginBottom: spacing[2],
@@ -590,23 +653,45 @@ const styles = StyleSheet.create({
   },
   actionIcon: {
     fontSize: typography.fontSize.base,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+  },
+  actionIconImage: {
+    width: 20,
+    height: 20,
   },
   actionText: {
     fontSize: typography.fontSize.sm,
     color: colors.text.secondary,
     fontWeight: typography.fontWeight.normal,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
   },
   deleteText: {
     color: colors.error,
   },
   commentsSection: {
     marginTop: spacing[2],
+    ...shadows.sm,
   },
   commentsTitle: {
     fontSize: typography.fontSize.base,
     fontWeight: typography.fontWeight.normal,
     color: colors.text.primary,
     marginBottom: spacing[2],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
   },
   commentsList: {
     gap: spacing[1],
@@ -627,6 +712,12 @@ const styles = StyleSheet.create({
     color: colors.text.primary,
     minHeight: 60,
     marginBottom: spacing[1],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    textAlignVertical: 'top',
   },
   editCommentActions: {
     flexDirection: 'row',
@@ -649,6 +740,12 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.xs,
     color: colors.text.secondary,
     fontWeight: typography.fontWeight.normal,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
   },
   editCommentButtonTextSave: {
     color: colors.white,
@@ -661,6 +758,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background.primary,
     borderTopWidth: 1,
     borderTopColor: colors.border.light,
+    ...shadows.sm,
   },
   replyingToContainer: {
     flexDirection: 'row',
@@ -676,6 +774,12 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.xs,
     color: colors.primary[700],
     fontWeight: typography.fontWeight.normal,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
   },
   cancelReplyButton: {
     padding: spacing[1],
@@ -684,6 +788,12 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.sm,
     color: colors.text.secondary,
     fontWeight: typography.fontWeight.normal,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
   },
   commentInputContainer: {
     flexDirection: 'row',
@@ -701,6 +811,12 @@ const styles = StyleSheet.create({
     maxHeight: 80,
     borderWidth: 1,
     borderColor: colors.border.light,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    textAlignVertical: 'top',
   },
   submitButton: {
     paddingHorizontal: spacing[3],
@@ -717,6 +833,12 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.sm,
     color: colors.white,
     fontWeight: typography.fontWeight.normal,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
   },
 });
 

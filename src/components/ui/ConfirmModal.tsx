@@ -12,8 +12,10 @@ import {
   TouchableOpacity,
   Image,
   ImageSourcePropType,
+  Platform,
 } from 'react-native';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
+import { getOptimizedLineHeight } from '../../utils/textStyles';
 
 interface ConfirmModalProps {
   visible: boolean;
@@ -98,17 +100,28 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: typography.fontSize.xl,
-    fontWeight: typography.fontWeight.bold,
+    fontWeight: typography.fontWeight.medium,
     color: colors.white,
     marginBottom: spacing[3],
     textAlign: 'center',
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.xl),
   },
   message: {
     fontSize: typography.fontSize.base,
     color: colors.gray[300],
     marginBottom: spacing[6],
     textAlign: 'center',
-    lineHeight: 22,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
   },
   buttonContainer: {
     flexDirection: 'row',
@@ -127,11 +140,23 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.base,
     color: colors.white,
     fontWeight: typography.fontWeight.medium,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
   },
   confirmButtonText: {
     fontSize: typography.fontSize.base,
     color: colors.white,
-    fontWeight: typography.fontWeight.bold,
+    fontWeight: typography.fontWeight.medium,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
   },
 });
 

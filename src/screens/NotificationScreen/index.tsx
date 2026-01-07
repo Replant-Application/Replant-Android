@@ -11,7 +11,8 @@ import {
   FlatList,
   TouchableOpacity,
   RefreshControl,
-  Image,
+  Platform,
+  ImageBackground,
 } from 'react-native';
 import { 
   getNotifications, 
@@ -20,8 +21,9 @@ import {
   deleteNotification,
   type Notification as NotificationType
 } from '../../api/notificationApi';
-import { Loading, EmptyState } from '../../components/ui';
-import { colors, spacing, typography } from '../../utils/designTokens';
+import { Loading, EmptyState, Header } from '../../components/ui';
+import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
+import { getOptimizedLineHeight } from '../../utils/textStyles';
 import { SCREEN_NAMES } from '../../utils/constants';
 import { useSse } from '../../contexts/SseContext';
 import { NotificationScreenProps } from './NotificationScreen.types';
@@ -302,113 +304,98 @@ const NotificationScreen: React.FC<NotificationScreenProps> = ({ navigation }) =
   }
 
   return (
-    <View style={styles.container}>
-      {/* 헤더 섹션 */}
-      <View style={styles.headerSection}>
-        <View style={styles.headerContent}>
-          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-            <Image
-              source={require('../../assets/images/left.png')}
-              style={styles.backButtonIcon}
-              resizeMode="contain"
-            />
+    <ImageBackground
+      source={require('../../assets/images/background.png')}
+      style={styles.backgroundImage}
+      resizeMode="cover"
+    >
+      <View style={styles.container}>
+        {/* 헤더 섹션 */}
+        <Header
+          title="알림"
+          navigation={navigation}
+          titleStyle={styles.headerTitle}
+          rightButton={
+            unreadCount > 0 ? (
+              <TouchableOpacity 
+                style={styles.markAllButton}
+                onPress={handleMarkAllAsRead}
+              >
+                <Text style={styles.markAllReadText}>모두 읽음</Text>
+              </TouchableOpacity>
+            ) : undefined
+          }
+        />
+
+        {/* 필터 탭 */}
+        <View style={styles.filterContainer}>
+          <TouchableOpacity
+            style={[styles.filterTab, filter === 'all' && styles.filterTabActive]}
+            onPress={() => setFilter('all')}
+          >
+            <Text style={[styles.filterText, filter === 'all' && styles.filterTextActive]}>
+              전체
+            </Text>
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>알림</Text>
-          {unreadCount > 0 ? (
-            <TouchableOpacity
-              style={styles.markAllButton}
-              onPress={handleMarkAllAsRead}
-            >
-              <Text style={styles.markAllReadText}>모두 읽음</Text>
-            </TouchableOpacity>
-          ) : (
-            <View style={styles.placeholderButton} />
-          )}
+          <TouchableOpacity
+            style={[styles.filterTab, filter === 'unread' && styles.filterTabActive]}
+            onPress={() => setFilter('unread')}
+          >
+            <Text style={[styles.filterText, filter === 'unread' && styles.filterTextActive]}>
+              읽지 않음 {unreadCount > 0 && `(${unreadCount})`}
+            </Text>
+          </TouchableOpacity>
         </View>
-      </View>
 
-      {/* 필터 탭 */}
-      <View style={styles.filterContainer}>
-        <TouchableOpacity
-          style={[styles.filterTab, filter === 'all' && styles.filterTabActive]}
-          onPress={() => setFilter('all')}
-        >
-          <Text style={[styles.filterText, filter === 'all' && styles.filterTextActive]}>
-            전체
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.filterTab, filter === 'unread' && styles.filterTabActive]}
-          onPress={() => setFilter('unread')}
-        >
-          <Text style={[styles.filterText, filter === 'unread' && styles.filterTextActive]}>
-            읽지 않음 {unreadCount > 0 && `(${unreadCount})`}
-          </Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* 알림 목록 */}
-      <FlatList
-        data={filter === 'unread' ? notifications.filter(n => !n.isRead) : notifications}
-        renderItem={renderNotification}
-        keyExtractor={(item) => String(item.id)}
-        contentContainerStyle={styles.listContent}
-        refreshControl={
-          <RefreshControl 
-            refreshing={refreshing} 
-            onRefresh={handleRefresh}
-            tintColor={colors.primary[500]}
-            colors={[colors.primary[500]]}
-          />
-        }
-        ListEmptyComponent={
-          <EmptyState
-            icon="bell"
-            title="알림이 없습니다"
-            description={filter === 'unread'
-              ? "읽지 않은 알림이 없습니다."
-              : "아직 받은 알림이 없어요.\n미션을 수행하면 알림을 받을 수 있어요!"
+        {/* 알림 목록 */}
+        <View style={styles.listWrapper}>
+          <FlatList
+            data={filter === 'unread' ? notifications.filter(n => !n.isRead) : notifications}
+            renderItem={renderNotification}
+            keyExtractor={(item) => String(item.id)}
+            contentContainerStyle={styles.listContent}
+            refreshControl={
+              <RefreshControl 
+                refreshing={refreshing} 
+                onRefresh={handleRefresh}
+                tintColor={colors.primary[500]}
+                colors={[colors.primary[500]]}
+              />
+            }
+            ListEmptyComponent={
+              <EmptyState
+                iconImage={require('../../assets/images/notification.png')}
+                title="알림이 없습니다"
+                description={filter === 'unread'
+                  ? "읽지 않은 알림이 없습니다."
+                  : "아직 받은 알림이 없어요.\n미션을 수행하면 알림을 받을 수 있어요!"
+                }
+              />
             }
           />
-        }
-      />
-    </View>
+        </View>
+      </View>
+    </ImageBackground>
   );
 };
 
 const styles = StyleSheet.create({
+  backgroundImage: {
+    flex: 1,
+  },
   container: {
     flex: 1,
-    backgroundColor: colors.background.secondary,
-  },
-  backButton: {
-    padding: spacing[2],
-  },
-  backButtonIcon: {
-    width: 24,
-    height: 24,
-    tintColor: colors.text.primary,
-  },
-  placeholderButton: {
-    width: 60,
-  },
-  headerSection: {
-    backgroundColor: colors.white,
-    paddingHorizontal: spacing[5],
-    paddingTop: spacing[6],
-    paddingBottom: spacing[4],
-    borderBottomWidth: 1,
-    borderBottomColor: colors.gray[100],
-  },
-  headerContent: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
   },
   headerTitle: {
-    fontSize: typography.fontSize['2xl'],
-    fontWeight: typography.fontWeight.bold,
+    fontSize: typography.fontSize.lg,
+    fontWeight: typography.fontWeight.medium,
     color: colors.text.primary,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.lg),
   },
   markAllButton: {
     paddingHorizontal: spacing[3],
@@ -418,34 +405,65 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.sm,
     color: colors.text.secondary,
     fontWeight: typography.fontWeight.medium as any,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
   },
   filterContainer: {
     flexDirection: 'row',
-    paddingHorizontal: spacing[5],
-    paddingVertical: spacing[4],
-    backgroundColor: colors.white,
-    gap: spacing[2],
-    borderBottomWidth: 1,
-    borderBottomColor: colors.gray[100],
+    marginHorizontal: spacing[5],
+    paddingVertical: spacing[2],
+    backgroundColor: '#FFF8E7',
+    borderRadius: borderRadius.lg,
+    borderWidth: 1,
+    borderColor: '#D4A574',
+    padding: 1,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 2,
   },
   filterTab: {
     flex: 1,
     paddingVertical: spacing[2],
     alignItems: 'center',
-    borderBottomWidth: 2,
-    borderBottomColor: 'transparent',
+    borderRadius: borderRadius.md,
+    backgroundColor: 'transparent',
   },
   filterTabActive: {
-    borderBottomColor: colors.text.primary,
+    backgroundColor: '#8B6F47',
   },
   filterText: {
     fontSize: typography.fontSize.sm,
-    color: colors.text.secondary,
+    color: '#8B6F47',
     fontWeight: typography.fontWeight.medium as any,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
   },
   filterTextActive: {
-    color: colors.text.primary,
-    fontWeight: typography.fontWeight.semibold as any,
+    color: colors.white,
+    fontWeight: typography.fontWeight.medium as any,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
+  },
+  listWrapper: {
+    flex: 1,
+    position: 'relative',
   },
   listContent: {
     padding: spacing[4],

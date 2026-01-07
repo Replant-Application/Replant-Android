@@ -27,7 +27,7 @@ export const MissionList: React.FC<MissionListProps> = ({
   if (missions.length === 0) {
     return (
       <EmptyState
-        icon="🎯"
+        iconImage={require('../../assets/images/goal.png')}
         title="미션이 없습니다"
         description="새로운 미션을 만들어보세요!"
       />

@@ -1,6 +1,7 @@
 import React from 'react';
-import { View, Text, StyleSheet, ViewStyle, TextStyle, Image, ImageSourcePropType } from 'react-native';
+import { View, Text, StyleSheet, ViewStyle, TextStyle, Image, ImageSourcePropType, Platform } from 'react-native';
 import { colors, spacing, typography } from '../../utils/designTokens';
+import { getOptimizedLineHeight } from '../../utils/textStyles';
 
 interface EmptyStateProps {
   icon?: string;
@@ -55,6 +56,11 @@ const styles = StyleSheet.create({
   icon: {
     fontSize: typography.fontSize['4xl'],
     marginBottom: spacing[4],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
   },
   iconImage: {
     width: 40,
@@ -67,13 +73,24 @@ const styles = StyleSheet.create({
     color: colors.text.primary,
     marginBottom: spacing[2],
     textAlign: 'center',
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
   },
   description: {
     fontSize: typography.fontSize.sm,
     color: colors.text.secondary,
     textAlign: 'center',
-    lineHeight: typography.lineHeight.relaxed * typography.fontSize.base,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
     marginBottom: spacing[4],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
   },
   actionContainer: {
     marginTop: spacing[2],

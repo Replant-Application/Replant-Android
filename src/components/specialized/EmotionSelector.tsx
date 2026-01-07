@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, ViewStyle } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, ViewStyle, Platform } from 'react-native';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
+import { getOptimizedLineHeight } from '../../utils/textStyles';
 
 interface Emotion {
   id: string;
@@ -92,10 +93,16 @@ const styles = StyleSheet.create({
 
   title: {
     fontSize: typography.fontSize.lg,
-    fontWeight: typography.fontWeight.semibold,
+    fontWeight: typography.fontWeight.medium,
     color: colors.text.primary,
     marginBottom: spacing[3],
     textAlign: 'center',
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.lg),
   },
 
   scrollContent: {
@@ -121,6 +128,11 @@ const styles = StyleSheet.create({
   emoji: {
     fontSize: typography.fontSize['2xl'],
     marginBottom: spacing[1],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
   },
 
   label: {
@@ -128,11 +140,17 @@ const styles = StyleSheet.create({
     fontWeight: typography.fontWeight.medium,
     color: colors.text.secondary,
     textAlign: 'center',
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
   },
 
   selectedLabel: {
     color: colors.primary[500],
-    fontWeight: typography.fontWeight.semibold,
+    fontWeight: typography.fontWeight.medium,
   },
 });
 

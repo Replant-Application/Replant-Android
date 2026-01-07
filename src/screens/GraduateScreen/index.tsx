@@ -16,6 +16,8 @@ import {
 import { NavigationProp } from '@react-navigation/native';
 import { Card, Header, Loading, SectionTitle } from '../../components/ui';
 import { colors, spacing, typography, borderRadius, shadows } from '../../utils/designTokens';
+import { getOptimizedLineHeight } from '../../utils/textStyles';
+import { Platform } from 'react-native';
 import { RootStackParamList } from '../../types/navigation';
 import { useUser } from '../../contexts/UserContext';
 
@@ -99,7 +101,7 @@ const GraduateScreen: React.FC<GraduateScreenProps> = ({ navigation }) => {
   const getActivityIcon = (type: string) => {
     switch (type) {
       case 'answer':
-        return '💬';
+        return require('../../assets/images/say.png');
       case 'post':
         return '📝';
       case 'comment':
@@ -177,7 +179,11 @@ const GraduateScreen: React.FC<GraduateScreenProps> = ({ navigation }) => {
               </View>
             </View>
             <View style={styles.roleItem}>
-              <Text style={styles.roleIcon}>💡</Text>
+              <Image
+                source={require('../../assets/images/light.png')}
+                style={styles.roleIconImage}
+                resizeMode="contain"
+              />
               <View style={styles.roleContent}>
                 <Text style={styles.roleTitle}>경험 공유</Text>
                 <Text style={styles.roleDescription}>
@@ -207,9 +213,17 @@ const GraduateScreen: React.FC<GraduateScreenProps> = ({ navigation }) => {
           ) : (
             recentActivities.map(activity => (
               <View key={activity.id} style={styles.activityItem}>
-                <Text style={styles.activityIcon}>
-                  {getActivityIcon(activity.type)}
-                </Text>
+                {typeof getActivityIcon(activity.type) === 'string' ? (
+                  <Text style={styles.activityIcon}>
+                    {getActivityIcon(activity.type) as string}
+                  </Text>
+                ) : (
+                  <Image
+                    source={getActivityIcon(activity.type) as any}
+                    style={styles.activityIconImage}
+                    resizeMode="contain"
+                  />
+                )}
                 <View style={styles.activityContent}>
                   <Text style={styles.activityTitle}>{activity.title}</Text>
                   <Text style={styles.activityDate}>
@@ -229,7 +243,11 @@ const GraduateScreen: React.FC<GraduateScreenProps> = ({ navigation }) => {
             style={styles.actionButton}
             onPress={() => navigation.navigate('Community')}
           >
-            <Text style={styles.actionIcon}>💬</Text>
+            <Image
+              source={require('../../assets/images/say.png')}
+              style={styles.actionIconImage}
+              resizeMode="contain"
+            />
             <View style={styles.actionContent}>
               <Text style={styles.actionTitle}>Q&A 답변하기</Text>
               <Text style={styles.actionDescription}>
@@ -293,6 +311,11 @@ const styles = StyleSheet.create({
   },
   graduateBadge: {
     fontSize: 48,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
   },
   bannerText: {
     flex: 1,
@@ -302,15 +325,33 @@ const styles = StyleSheet.create({
     fontWeight: typography.fontWeight.bold,
     color: colors.primary[700],
     marginBottom: spacing[1],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.xl),
   },
   bannerSubtitle: {
     fontSize: typography.fontSize.sm,
     color: colors.primary[600],
     marginBottom: spacing[2],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
   },
   graduationDate: {
     fontSize: typography.fontSize.xs,
     color: colors.primary[500],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
   },
   statsCard: {
     marginBottom: spacing[6],
@@ -330,13 +371,25 @@ const styles = StyleSheet.create({
   },
   statValue: {
     fontSize: typography.fontSize['2xl'],
-    fontWeight: typography.fontWeight.bold,
+    fontWeight: typography.fontWeight.medium,
     color: colors.primary[600],
     marginBottom: spacing[1],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize['2xl']),
   },
   statLabel: {
     fontSize: typography.fontSize.sm,
     color: colors.text.secondary,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
   },
   roleCard: {
     marginBottom: spacing[6],
@@ -352,20 +405,41 @@ const styles = StyleSheet.create({
     fontSize: 28,
     width: 40,
     textAlign: 'center',
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+  },
+  roleIconImage: {
+    width: 28,
+    height: 28,
   },
   roleContent: {
     flex: 1,
   },
   roleTitle: {
     fontSize: typography.fontSize.base,
-    fontWeight: typography.fontWeight.semibold,
+    fontWeight: typography.fontWeight.medium,
     color: colors.text.primary,
     marginBottom: spacing[1],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
   },
   roleDescription: {
     fontSize: typography.fontSize.sm,
     color: colors.text.secondary,
     lineHeight: 20,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
   },
   activityCard: {
     marginBottom: spacing[6],
@@ -375,6 +449,16 @@ const styles = StyleSheet.create({
     color: colors.text.tertiary,
     textAlign: 'center',
     padding: spacing[4],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
+  },
+  activityIconImage: {
+    width: 20,
+    height: 20,
   },
   activityItem: {
     flexDirection: 'row',
@@ -387,6 +471,11 @@ const styles = StyleSheet.create({
     fontSize: 20,
     width: 30,
     textAlign: 'center',
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
   },
   activityContent: {
     flex: 1,
@@ -395,10 +484,22 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.sm,
     color: colors.text.primary,
     marginBottom: spacing[1],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
   },
   activityDate: {
     fontSize: typography.fontSize.xs,
     color: colors.text.tertiary,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
   },
   actionsCard: {
     marginBottom: spacing[6],
@@ -417,19 +518,40 @@ const styles = StyleSheet.create({
     fontSize: 24,
     width: 40,
     textAlign: 'center',
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+  },
+  actionIconImage: {
+    width: 24,
+    height: 24,
   },
   actionContent: {
     flex: 1,
   },
   actionTitle: {
     fontSize: typography.fontSize.base,
-    fontWeight: typography.fontWeight.semibold,
+    fontWeight: typography.fontWeight.medium,
     color: colors.text.primary,
     marginBottom: spacing[1],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
   },
   actionDescription: {
     fontSize: typography.fontSize.sm,
     color: colors.text.secondary,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
   },
   badgeCard: {
     marginBottom: spacing[6],
@@ -451,12 +573,23 @@ const styles = StyleSheet.create({
   },
   badgeEmoji: {
     fontSize: 40,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
   },
   badgeTitle: {
     fontSize: typography.fontSize.xl,
-    fontWeight: typography.fontWeight.bold,
+    fontWeight: typography.fontWeight.medium,
     color: colors.text.inverse,
     marginBottom: spacing[2],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.xl),
   },
   badgeDescription: {
     fontSize: typography.fontSize.sm,
@@ -464,6 +597,12 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 20,
     marginBottom: spacing[4],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
   },
   badgeStats: {
     backgroundColor: colors.primary[700],
@@ -475,6 +614,12 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.xs,
     color: colors.primary[200],
     fontWeight: typography.fontWeight.medium,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
   },
 });
 

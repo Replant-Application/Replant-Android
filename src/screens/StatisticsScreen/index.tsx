@@ -6,19 +6,21 @@ import {
   ScrollView,
   TouchableOpacity,
   Image,
+  Platform,
+  ImageBackground,
 } from 'react-native';
 import { NavigationProp } from '@react-navigation/native';
-import { Header } from '../../components/ui';
+import { Header, Card } from '../../components/ui';
 import { colors, spacing, typography, borderRadius, shadows } from '../../utils/designTokens';
+import { getOptimizedLineHeight } from '../../utils/textStyles';
 import { RootStackParamList } from '../../types/navigation';
 import { useMission } from '../../hooks/useMission';
-import { Mission } from '../../types';
 
 interface StatisticsScreenProps {
   navigation: NavigationProp<RootStackParamList>;
 }
 
-type TabType = 'monthly' | 'weekly' | 'greenlight';
+type TabType = 'monthly' | 'weekly';
 type CategoryFilter = 'all' | 'health' | 'selfcare' | 'daily' | 'regular';
 
 const StatisticsScreen: React.FC<StatisticsScreenProps> = ({ navigation }) => {
@@ -106,7 +108,7 @@ const StatisticsScreen: React.FC<StatisticsScreenProps> = ({ navigation }) => {
 
   // 캘린더 그리드 렌더링
   const renderCalendarGrid = (completedDays: number[], daysInMonth: number) => {
-    const colors = ['#FFE066', '#FF6B6B', '#4ECDC4', '#95E1D3', '#F38181'];
+    const dayColors = ['#FFE066', '#FF6B6B', '#4ECDC4', '#95E1D3', '#F38181'];
     const rows = [];
     const daysPerRow = 7;
     const totalRows = Math.ceil(daysInMonth / daysPerRow);
@@ -117,14 +119,14 @@ const StatisticsScreen: React.FC<StatisticsScreenProps> = ({ navigation }) => {
         const day = row * daysPerRow + col + 1;
         if (day <= daysInMonth) {
           const isCompleted = completedDays.includes(day);
-          const colorIndex = completedDays.indexOf(day) % colors.length;
+          const colorIndex = completedDays.indexOf(day) % dayColors.length;
           rowDays.push(
             <View
               key={day}
               style={[
                 styles.calendarDay,
                 isCompleted && {
-                  backgroundColor: colors[colorIndex],
+                  backgroundColor: dayColors[colorIndex],
                 },
               ]}
             />
@@ -144,180 +146,187 @@ const StatisticsScreen: React.FC<StatisticsScreenProps> = ({ navigation }) => {
 
   const categoryFilters = [
     { id: 'all' as CategoryFilter, label: '전체', icon: require('../../assets/images/search.png') },
-    { id: 'health' as CategoryFilter, label: '건강 챙기기', icon: require('../../assets/images/home.png') },
-    { id: 'selfcare' as CategoryFilter, label: '나 돌보기', icon: require('../../assets/images/like.png') },
-    { id: 'daily' as CategoryFilter, label: '정돈된 일상', icon: require('../../assets/images/home.png') },
-    { id: 'regular' as CategoryFilter, label: '규칙적인', icon: require('../../assets/images/day.png') },
+    { id: 'health' as CategoryFilter, label: '건강 챙기기', icon: require('../../assets/images/health.png') },
+    { id: 'selfcare' as CategoryFilter, label: '나 돌보기', icon: require('../../assets/images/coffee.png') },
+    { id: 'daily' as CategoryFilter, label: '정돈된 일상', icon: require('../../assets/images/clean.png') },
+    { id: 'regular' as CategoryFilter, label: '규칙적인', icon: require('../../assets/images/traning.png') },
   ];
 
   return (
-    <View style={styles.container}>
-      <Header
-        title="통계"
-        leftButton={
-          <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Image
-              source={require('../../assets/images/left.png')}
-              style={styles.backButtonIcon}
-              resizeMode="contain"
-            />
-          </TouchableOpacity>
-        }
-      />
-      <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
-        {/* 탭 */}
-        <View style={styles.tabContainer}>
-          <TouchableOpacity
-            style={[styles.tab, activeTab === 'monthly' && styles.tabActive]}
-            onPress={() => setActiveTab('monthly')}
-            activeOpacity={0.7}
-          >
-            <Text style={[styles.tabText, activeTab === 'monthly' && styles.tabTextActive]}>
-              월간
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.tab, activeTab === 'weekly' && styles.tabActive]}
-            onPress={() => setActiveTab('weekly')}
-            activeOpacity={0.7}
-          >
-            <Text style={[styles.tabText, activeTab === 'weekly' && styles.tabTextActive]}>
-              주간
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.tab, activeTab === 'greenlight' && styles.tabActive]}
-            onPress={() => setActiveTab('greenlight')}
-            activeOpacity={0.7}
-          >
-            <Text style={[styles.tabText, activeTab === 'greenlight' && styles.tabTextActive]}>
-              초록불
-            </Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* 날짜 선택기 */}
-        <View style={styles.dateSelector}>
-          <TouchableOpacity
-            style={styles.dateArrow}
-            onPress={() => changeMonth('prev')}
-            activeOpacity={0.7}
-          >
-            <Image
-              source={require('../../assets/images/left.png')}
-              style={styles.arrowIcon}
-              resizeMode="contain"
-            />
-          </TouchableOpacity>
-          <Text style={styles.dateText}>
-            {selectedYear}년 {selectedMonth}월
-          </Text>
-          <TouchableOpacity
-            style={styles.dateArrow}
-            onPress={() => changeMonth('next')}
-            activeOpacity={0.7}
-          >
-            <Image
-              source={require('../../assets/images/left.png')}
-              style={[styles.arrowIcon, { transform: [{ rotate: '180deg' }] }]}
-              resizeMode="contain"
-            />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.infoButton} activeOpacity={0.7}>
-            <Text style={styles.infoText}>i</Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* 카테고리 필터 */}
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          style={styles.categoryScroll}
-          contentContainerStyle={styles.categoryContainer}
-        >
-          {categoryFilters.map((filter) => (
-            <TouchableOpacity
-              key={filter.id}
-              style={[
-                styles.categoryFilter,
-                selectedCategory === filter.id && styles.categoryFilterActive,
-              ]}
-              onPress={() => setSelectedCategory(filter.id)}
-              activeOpacity={0.7}
-            >
-              <Image
-                source={filter.icon}
-                style={styles.categoryIcon}
-                resizeMode="contain"
-              />
-              <Text
-                style={[
-                  styles.categoryFilterText,
-                  selectedCategory === filter.id && styles.categoryFilterTextActive,
-                ]}
-              >
-                {filter.label}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
-
-        {/* 목표 달성률 */}
-        <View style={styles.achievementCard}>
-          <View style={styles.achievementHeader}>
-            <Image
-              source={require('../../assets/images/search.png')}
-              style={styles.achievementIcon}
-              resizeMode="contain"
-            />
-            <Text style={styles.achievementTitle}>목표 달성률</Text>
-          </View>
-          <View style={styles.achievementContent}>
-            <Text style={styles.achievementPercentage}>
-              {monthlyStats.totalCompletionRate}%
-            </Text>
-            <View style={styles.progressBar}>
-              <View
-                style={[
-                  styles.progressFill,
-                  { width: `${monthlyStats.totalCompletionRate}%` },
-                ]}
-              />
-            </View>
-          </View>
-        </View>
-
-        {/* 미션별 통계 카드 */}
-        <View style={styles.missionStatsGrid}>
-          {monthlyStats.missionStats.map((stat, index) => (
-            <View key={stat.mission.mission_id} style={styles.missionStatCard}>
-              <Text style={styles.missionStatTitle} numberOfLines={2}>
-                {stat.mission.title}
-              </Text>
-              {renderCalendarGrid(stat.completedDays, stat.totalDays)}
-              <View style={styles.missionStatFooter}>
-                <Text style={styles.missionStatPercentage}>{stat.completionRate}%</Text>
-                <View style={styles.missionStatCheck}>
+    <ImageBackground
+      source={require('../../assets/images/background.png')}
+      style={styles.backgroundImage}
+      resizeMode="cover"
+    >
+      <View style={styles.container}>
+        <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
+          <Header
+            title="통계"
+            navigation={navigation}
+            leftButton={
+              navigation?.goBack ? (
+                <TouchableOpacity onPress={() => navigation.goBack()} activeOpacity={0.7}>
                   <Image
-                    source={require('../../assets/images/check2.png')}
-                    style={styles.checkIcon}
+                    source={require('../../assets/images/left.png')}
+                    style={styles.backButtonIcon}
                     resizeMode="contain"
                   />
-                  <Text style={styles.missionStatDays}>{stat.completedDays.length}</Text>
+                </TouchableOpacity>
+              ) : undefined
+            }
+          />
+          <View style={styles.content}>
+            {/* 통합 통계 카드 */}
+            <Card style={styles.mainCard}>
+              {/* 날짜 선택기 */}
+              <View style={styles.dateSection}>
+                <View style={styles.dateSelector}>
+                  <TouchableOpacity
+                    style={styles.dateArrow}
+                    onPress={() => changeMonth('prev')}
+                    activeOpacity={0.7}
+                  >
+                    <Text style={styles.arrowText}>‹</Text>
+                  </TouchableOpacity>
+                  <Text style={styles.dateText}>
+                    {selectedYear}년 {selectedMonth}월
+                  </Text>
+                  <TouchableOpacity
+                    style={styles.dateArrow}
+                    onPress={() => changeMonth('next')}
+                    activeOpacity={0.7}
+                  >
+                    <Text style={styles.arrowText}>›</Text>
+                  </TouchableOpacity>
                 </View>
               </View>
-            </View>
-          ))}
-        </View>
-      </ScrollView>
-    </View>
+
+              {/* 탭 */}
+              <View style={styles.tabContainer}>
+                <TouchableOpacity
+                  style={[styles.tab, activeTab === 'monthly' && styles.tabActive]}
+                  onPress={() => setActiveTab('monthly')}
+                  activeOpacity={0.7}
+                >
+                  <Text style={[styles.tabText, activeTab === 'monthly' && styles.tabTextActive]}>
+                    월간
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.tab, activeTab === 'weekly' && styles.tabActive]}
+                  onPress={() => setActiveTab('weekly')}
+                  activeOpacity={0.7}
+                >
+                  <Text style={[styles.tabText, activeTab === 'weekly' && styles.tabTextActive]}>
+                    주간
+                  </Text>
+                </TouchableOpacity>
+              </View>
+
+              {/* 카테고리 필터 */}
+              <View style={styles.filterSection}>
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  style={styles.categoryScroll}
+                  contentContainerStyle={styles.categoryContainer}
+                >
+                  {categoryFilters.map((filter) => (
+                    <TouchableOpacity
+                      key={filter.id}
+                      style={[
+                        styles.categoryFilter,
+                        selectedCategory === filter.id && styles.categoryFilterActive,
+                      ]}
+                      onPress={() => setSelectedCategory(filter.id)}
+                      activeOpacity={0.7}
+                    >
+                      <Image
+                        source={filter.icon}
+                        style={styles.categoryIcon}
+                        resizeMode="contain"
+                      />
+                      <Text
+                        style={[
+                          styles.categoryFilterText,
+                          selectedCategory === filter.id && styles.categoryFilterTextActive,
+                        ]}
+                      >
+                        {filter.label}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+              </View>
+
+              {/* 목표 달성률 */}
+              <View style={styles.achievementSection}>
+                <View style={styles.achievementHeader}>
+                  <Image
+                    source={require('../../assets/images/goal.png')}
+                    style={styles.achievementIcon}
+                    resizeMode="contain"
+                  />
+                  <Text style={styles.achievementTitle}>목표 달성률</Text>
+                </View>
+                <View style={styles.achievementContent}>
+                  <Text style={styles.achievementPercentage}>
+                    {monthlyStats.totalCompletionRate}%
+                  </Text>
+                  <View style={styles.progressBarContainer}>
+                    <View style={styles.progressBar}>
+                      <View
+                        style={[
+                          styles.progressFill,
+                          { width: `${monthlyStats.totalCompletionRate}%` },
+                        ]}
+                      />
+                    </View>
+                    <View style={styles.progressGlow} />
+                  </View>
+                </View>
+              </View>
+
+              {/* 미션별 통계 */}
+              <View style={styles.missionStatsSection}>
+                <View style={styles.missionStatsGrid}>
+                  {monthlyStats.missionStats.map((stat) => (
+                    <View key={stat.mission.mission_id} style={styles.missionStatCard}>
+                      <Text style={styles.missionStatTitle} numberOfLines={2}>
+                        {stat.mission.title}
+                      </Text>
+                      {renderCalendarGrid(stat.completedDays, stat.totalDays)}
+                      <View style={styles.missionStatFooter}>
+                        <Text style={styles.missionStatPercentage}>{stat.completionRate}%</Text>
+                        <View style={styles.missionStatCheck}>
+                          <Image
+                            source={require('../../assets/images/check2.png')}
+                            style={styles.checkIcon}
+                            resizeMode="contain"
+                          />
+                          <Text style={styles.missionStatDays}>{stat.completedDays.length}</Text>
+                        </View>
+                      </View>
+                    </View>
+                  ))}
+                </View>
+              </View>
+            </Card>
+          </View>
+        </ScrollView>
+      </View>
+    </ImageBackground>
   );
 };
 
 const styles = StyleSheet.create({
+  backgroundImage: {
+    flex: 1,
+    width: '100%',
+    height: '100%',
+  },
   container: {
     flex: 1,
-    backgroundColor: colors.background.secondary,
   },
   backButtonIcon: {
     width: 24,
@@ -328,72 +337,125 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    padding: spacing[4],
     paddingBottom: spacing[6],
+  },
+  content: {
+    padding: spacing[5],
+  },
+  mainCard: {
+    marginBottom: spacing[6],
   },
   tabContainer: {
     flexDirection: 'row',
-    marginBottom: spacing[4],
-    backgroundColor: colors.background.primary,
-    borderRadius: borderRadius.xl,
+    backgroundColor: '#FFF8E7',
+    borderRadius: borderRadius.lg,
     padding: spacing[1],
+    marginBottom: spacing[5],
+    marginTop: spacing[3],
+    borderWidth: 2,
+    borderColor: '#D4A574',
     ...shadows.sm,
+    shadowColor: '#8B6F47',
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.15,
+    shadowRadius: 3,
+    elevation: 2,
   },
   tab: {
     flex: 1,
-    paddingVertical: spacing[2],
+    paddingVertical: 6,
+    paddingHorizontal: spacing[2],
     alignItems: 'center',
-    borderRadius: borderRadius.lg,
+    justifyContent: 'center',
+    borderRadius: borderRadius.md,
+    marginHorizontal: 2,
+    minHeight: 28,
   },
   tabActive: {
-    backgroundColor: colors.primary[500],
+    backgroundColor: '#8B6F47',
+    ...shadows.sm,
+    shadowColor: '#8B6F47',
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+    elevation: 2,
   },
   tabText: {
-    fontSize: typography.fontSize.base,
-    fontWeight: typography.fontWeight.medium,
-    color: colors.text.secondary,
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.medium as any,
+    color: '#8B6F47',
+    letterSpacing: 0.3,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
   },
   tabTextActive: {
-    color: colors.white,
-    fontWeight: typography.fontWeight.bold,
+    color: '#FFF8E7',
+    fontWeight: typography.fontWeight.medium as any,
+    letterSpacing: 0.3,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
+  },
+  dateSection: {
+    marginBottom: spacing[3],
+    paddingBottom: 0,
   },
   dateSelector: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: spacing[4],
-    paddingHorizontal: spacing[4],
+    justifyContent: 'space-between',
   },
   dateArrow: {
     padding: spacing[2],
+    minWidth: 40,
+    alignItems: 'center',
   },
-  arrowIcon: {
-    width: 20,
-    height: 20,
-    tintColor: colors.text.primary,
+  arrowText: {
+    fontSize: typography.fontSize['2xl'],
+    color: colors.primary[700],
+    fontWeight: typography.fontWeight.medium as any,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
   },
   dateText: {
-    fontSize: typography.fontSize.lg,
-    fontWeight: typography.fontWeight.bold,
+    fontSize: typography.fontSize.xl,
+    fontWeight: typography.fontWeight.medium as any,
     color: colors.text.primary,
-    marginHorizontal: spacing[4],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.xl),
   },
-  infoButton: {
+  backButtonIcon: {
     width: 24,
     height: 24,
-    borderRadius: borderRadius.full,
-    backgroundColor: colors.gray[200],
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginLeft: spacing[2],
   },
-  infoText: {
-    fontSize: typography.fontSize.sm,
-    fontWeight: typography.fontWeight.bold,
-    color: colors.text.secondary,
+  filterSection: {
+    marginBottom: spacing[5],
+    paddingBottom: spacing[4],
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border.light,
   },
   categoryScroll: {
-    marginBottom: spacing[4],
+    marginBottom: 0,
   },
   categoryContainer: {
     paddingHorizontal: spacing[2],
@@ -412,23 +474,34 @@ const styles = StyleSheet.create({
     backgroundColor: colors.primary[100],
   },
   categoryIcon: {
-    width: 20,
-    height: 20,
+    width: 25,
+    height: 25,
   },
   categoryFilterText: {
     fontSize: typography.fontSize.sm,
     fontWeight: typography.fontWeight.medium,
     color: colors.text.secondary,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
   },
   categoryFilterTextActive: {
     color: colors.primary[600],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
   },
-  achievementCard: {
-    backgroundColor: colors.background.primary,
-    borderRadius: borderRadius.xl,
-    padding: spacing[4],
-    marginBottom: spacing[4],
-    ...shadows.lg,
+  achievementSection: {
+    marginBottom: spacing[5],
+    paddingBottom: spacing[4],
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border.light,
   },
   achievementHeader: {
     flexDirection: 'row',
@@ -442,31 +515,74 @@ const styles = StyleSheet.create({
   },
   achievementTitle: {
     fontSize: typography.fontSize.base,
-    fontWeight: typography.fontWeight.semibold,
+    fontWeight: typography.fontWeight.medium,
     color: colors.text.primary,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
   },
   achievementContent: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing[3],
+    gap: spacing[0],
   },
   achievementPercentage: {
     fontSize: typography.fontSize['2xl'],
-    fontWeight: typography.fontWeight.bold,
-    color: colors.primary[600],
-    minWidth: 60,
+    fontWeight: typography.fontWeight.medium as any,
+    color: '#8B6F47',
+    minWidth: 45,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize['2xl']),
+  },
+  progressBarContainer: {
+    flex: 1,
+    position: 'relative',
+    minWidth: 0,
   },
   progressBar: {
-    flex: 1,
-    height: 12,
-    backgroundColor: colors.gray[100],
+    height: 16,
+    backgroundColor: '#F5E6D3',
     borderRadius: borderRadius.full,
     overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: '#D4A574',
+    ...shadows.sm,
   },
   progressFill: {
     height: '100%',
-    backgroundColor: colors.primary[500],
+    backgroundColor: '#8B6F47',
     borderRadius: borderRadius.full,
+    ...shadows.sm,
+    shadowColor: '#8B6F47',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  progressGlow: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 16,
+    borderRadius: borderRadius.full,
+    backgroundColor: 'transparent',
+    borderWidth: 1,
+    borderColor: 'rgba(139, 111, 71, 0.2)',
+    pointerEvents: 'none',
+  },
+  missionStatsSection: {
+    marginTop: spacing[2],
   },
   missionStatsGrid: {
     flexDirection: 'row',
@@ -475,17 +591,22 @@ const styles = StyleSheet.create({
   },
   missionStatCard: {
     width: '48%',
-    backgroundColor: colors.background.primary,
-    borderRadius: borderRadius.xl,
     padding: spacing[3],
-    ...shadows.lg,
+    backgroundColor: colors.background.secondary,
+    borderRadius: borderRadius.lg,
   },
   missionStatTitle: {
     fontSize: typography.fontSize.sm,
-    fontWeight: typography.fontWeight.semibold,
+    fontWeight: typography.fontWeight.medium,
     color: colors.text.primary,
     marginBottom: spacing[2],
     minHeight: 36,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
   },
   calendarGrid: {
     marginBottom: spacing[2],
@@ -508,8 +629,14 @@ const styles = StyleSheet.create({
   },
   missionStatPercentage: {
     fontSize: typography.fontSize.base,
-    fontWeight: typography.fontWeight.bold,
+    fontWeight: typography.fontWeight.medium,
     color: colors.text.primary,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
   },
   missionStatCheck: {
     flexDirection: 'row',
@@ -524,6 +651,12 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.sm,
     fontWeight: typography.fontWeight.medium,
     color: colors.text.secondary,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
   },
 });
 

@@ -14,11 +14,13 @@ import {
   TouchableOpacity,
   Alert,
   Modal,
-  TextInput,
+  Platform,
+  Image,
 } from 'react-native';
 import { NavigationProp } from '@react-navigation/native';
 import { Card, Header, Loading, SectionTitle } from '../../components/ui';
 import { colors, spacing, typography, borderRadius, shadows } from '../../utils/designTokens';
+import { getOptimizedLineHeight } from '../../utils/textStyles';
 import { RootStackParamList } from '../../types/navigation';
 import { useUser } from '../../contexts/UserContext';
 
@@ -329,7 +331,11 @@ const ContributorDashboardScreen: React.FC<ContributorDashboardScreenProps> = ({
               </View>
             </View>
             <View style={styles.guideItem}>
-              <Text style={styles.guideIcon}>⚠️</Text>
+              <Image
+                source={require('../../assets/images/warning.png')}
+                style={styles.guideIconImage}
+                resizeMode="contain"
+              />
               <View style={styles.guideContent}>
                 <Text style={styles.guideTitle}>위기 상황</Text>
                 <Text style={styles.guideDescription}>
@@ -363,12 +369,20 @@ const ContributorDashboardScreen: React.FC<ContributorDashboardScreenProps> = ({
               style={styles.actionItem}
               onPress={() => navigation.navigate('Community')}
             >
-              <Text style={styles.actionIcon}>💬</Text>
+              <Image
+                source={require('../../assets/images/say.png')}
+                style={styles.actionIconImage}
+                resizeMode="contain"
+              />
               <Text style={styles.actionLabel}>Q&A 답변</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.actionItem}
-              onPress={() => navigation.navigate('CommunityPostCreate')}
+              onPress={() => navigation.navigate('CommunityPostCreate' as any, {
+                missionId: '',
+                missionTitle: '정보 공유',
+                missionEmoji: '📝',
+              })}
             >
               <Text style={styles.actionIcon}>📝</Text>
               <Text style={styles.actionLabel}>정보 공유</Text>
@@ -427,7 +441,11 @@ const ContributorDashboardScreen: React.FC<ContributorDashboardScreenProps> = ({
                 </View>
               </TouchableOpacity>
               <TouchableOpacity style={styles.resourceItem}>
-                <Text style={styles.resourceIcon}>⚠️</Text>
+                <Image
+                  source={require('../../assets/images/warning.png')}
+                  style={styles.resourceIconImage}
+                  resizeMode="contain"
+                />
                 <View style={styles.resourceContent}>
                   <Text style={styles.resourceTitle}>위기 상황 대응 매뉴얼</Text>
                   <Text style={styles.resourceDesc}>긴급 상황 판단 및 대응 방법</Text>
@@ -474,19 +492,36 @@ const styles = StyleSheet.create({
   },
   welcomeEmoji: {
     fontSize: 40,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
   },
   bannerText: {
     flex: 1,
   },
   welcomeTitle: {
     fontSize: typography.fontSize.lg,
-    fontWeight: typography.fontWeight.bold,
+    fontWeight: typography.fontWeight.medium,
     color: colors.primary[700],
     marginBottom: spacing[1],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.lg),
   },
   welcomeSubtitle: {
     fontSize: typography.fontSize.sm,
     color: colors.primary[600],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
   },
   statsCard: {
     marginBottom: spacing[6],
@@ -506,13 +541,25 @@ const styles = StyleSheet.create({
   },
   statValue: {
     fontSize: typography.fontSize['2xl'],
-    fontWeight: typography.fontWeight.bold,
+    fontWeight: typography.fontWeight.medium,
     color: colors.primary[600],
     marginBottom: spacing[1],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize['2xl']),
   },
   statLabel: {
     fontSize: typography.fontSize.xs,
     color: colors.text.secondary,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
   },
   totalHours: {
     marginTop: spacing[4],
@@ -525,6 +572,12 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.sm,
     color: colors.primary[700],
     fontWeight: typography.fontWeight.medium,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
   },
   requestsCard: {
     marginBottom: spacing[6],
@@ -534,6 +587,12 @@ const styles = StyleSheet.create({
     color: colors.text.tertiary,
     textAlign: 'center',
     padding: spacing[4],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
   },
   requestItem: {
     padding: spacing[4],
@@ -556,8 +615,14 @@ const styles = StyleSheet.create({
   },
   requestUserName: {
     fontSize: typography.fontSize.sm,
-    fontWeight: typography.fontWeight.semibold,
+    fontWeight: typography.fontWeight.medium,
     color: colors.text.primary,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
   },
   urgencyBadge: {
     paddingHorizontal: spacing[2],
@@ -567,15 +632,33 @@ const styles = StyleSheet.create({
   urgencyText: {
     fontSize: typography.fontSize.xs,
     fontWeight: typography.fontWeight.medium,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
   },
   requestTime: {
     fontSize: typography.fontSize.xs,
     color: colors.text.tertiary,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
   },
   requestTopic: {
     fontSize: typography.fontSize.base,
     color: colors.text.primary,
     marginBottom: spacing[3],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
   },
   acceptButton: {
     backgroundColor: colors.primary[500],
@@ -586,7 +669,13 @@ const styles = StyleSheet.create({
   acceptButtonText: {
     color: colors.text.inverse,
     fontSize: typography.fontSize.sm,
-    fontWeight: typography.fontWeight.semibold,
+    fontWeight: typography.fontWeight.medium,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
   },
   sessionsCard: {
     marginBottom: spacing[6],
@@ -610,8 +699,14 @@ const styles = StyleSheet.create({
   },
   sessionAvatarText: {
     fontSize: typography.fontSize.lg,
-    fontWeight: typography.fontWeight.bold,
+    fontWeight: typography.fontWeight.medium,
     color: colors.primary[600],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.lg),
   },
   sessionContent: {
     flex: 1,
@@ -623,16 +718,34 @@ const styles = StyleSheet.create({
   },
   sessionUserName: {
     fontSize: typography.fontSize.sm,
-    fontWeight: typography.fontWeight.semibold,
+    fontWeight: typography.fontWeight.medium,
     color: colors.text.primary,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
   },
   sessionTime: {
     fontSize: typography.fontSize.xs,
     color: colors.text.tertiary,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
   },
   sessionLastMessage: {
     fontSize: typography.fontSize.sm,
     color: colors.text.secondary,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
   },
   unreadBadge: {
     width: 20,
@@ -645,7 +758,13 @@ const styles = StyleSheet.create({
   unreadCount: {
     fontSize: typography.fontSize.xs,
     color: colors.text.inverse,
-    fontWeight: typography.fontWeight.bold,
+    fontWeight: typography.fontWeight.medium,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
   },
   guideCard: {
     marginBottom: spacing[6],
@@ -662,19 +781,41 @@ const styles = StyleSheet.create({
     fontSize: 24,
     width: 32,
     textAlign: 'center',
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(24),
+  },
+  guideIconImage: {
+    width: 24,
+    height: 24,
   },
   guideContent: {
     flex: 1,
   },
   guideTitle: {
     fontSize: typography.fontSize.sm,
-    fontWeight: typography.fontWeight.semibold,
+    fontWeight: typography.fontWeight.medium,
     color: colors.text.primary,
     marginBottom: spacing[1],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
   },
   guideDescription: {
     fontSize: typography.fontSize.xs,
     color: colors.text.secondary,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
   },
   resourceButton: {
     backgroundColor: colors.primary[50],
@@ -688,6 +829,12 @@ const styles = StyleSheet.create({
     color: colors.primary[600],
     fontSize: typography.fontSize.sm,
     fontWeight: typography.fontWeight.medium,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
   },
   actionsCard: {
     marginBottom: spacing[6],
@@ -709,11 +856,28 @@ const styles = StyleSheet.create({
   actionIcon: {
     fontSize: 24,
     marginBottom: spacing[2],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(24),
+  },
+  actionIconImage: {
+    width: 24,
+    height: 24,
+    marginBottom: spacing[2],
   },
   actionLabel: {
     fontSize: typography.fontSize.sm,
     color: colors.text.primary,
     fontWeight: typography.fontWeight.medium,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
   },
   emergencyCard: {
     marginBottom: spacing[6],
@@ -723,14 +887,25 @@ const styles = StyleSheet.create({
   },
   emergencyTitle: {
     fontSize: typography.fontSize.sm,
-    fontWeight: typography.fontWeight.bold,
+    fontWeight: typography.fontWeight.medium,
     color: colors.error[700],
     marginBottom: spacing[2],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
   },
   emergencyText: {
     fontSize: typography.fontSize.sm,
     color: colors.error[600],
-    lineHeight: 22,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
   },
   // Modal styles
   modalOverlay: {
@@ -758,19 +933,39 @@ const styles = StyleSheet.create({
   },
   resourceIcon: {
     fontSize: 24,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+  },
+  resourceIconImage: {
+    width: 24,
+    height: 24,
   },
   resourceContent: {
     flex: 1,
   },
   resourceTitle: {
     fontSize: typography.fontSize.base,
-    fontWeight: typography.fontWeight.semibold,
+    fontWeight: typography.fontWeight.medium,
     color: colors.text.primary,
     marginBottom: spacing[1],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
   },
   resourceDesc: {
     fontSize: typography.fontSize.sm,
     color: colors.text.secondary,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
   },
   closeButton: {
     backgroundColor: colors.background.secondary,
@@ -784,6 +979,12 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.base,
     color: colors.text.secondary,
     fontWeight: typography.fontWeight.medium,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
   },
 });
 

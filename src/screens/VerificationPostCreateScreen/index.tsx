@@ -16,9 +16,11 @@ import {
   Image,
   TouchableOpacity,
   ActivityIndicator,
+  ImageBackground,
 } from 'react-native';
 import { Header, AlertModal } from '../../components/ui';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
+import { getOptimizedLineHeight } from '../../utils/textStyles';
 import { createVerification, updateVerification, getVerification } from '../../api/missionApi';
 import { uploadCommunityPhoto } from '../../api/fileApi';
 import { NavigationProp, RouteProp } from '@react-navigation/native';
@@ -41,7 +43,7 @@ const VerificationPostCreateScreen: React.FC<VerificationPostCreateScreenProps> 
     userMissionId,
     missionId,
     missionTitle = '미션',
-    missionEmoji = '🎯',
+    missionEmoji = '',
     photoUrl: initialPhotoUrl,
     // 수정 모드용 params
     mode = 'create',
@@ -272,8 +274,13 @@ const VerificationPostCreateScreen: React.FC<VerificationPostCreateScreenProps> 
   };
 
   return (
-    <KeyboardAvoidingView
+    <ImageBackground
+      source={require('../../assets/images/background.png')}
       style={styles.container}
+      resizeMode="cover"
+    >
+      <KeyboardAvoidingView
+        style={styles.keyboardView}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
     >
@@ -298,7 +305,11 @@ const VerificationPostCreateScreen: React.FC<VerificationPostCreateScreenProps> 
         {/* 미션 정보 표시 */}
         <View style={styles.missionInfo}>
           <View style={styles.missionEmojiContainer}>
-            <Text style={styles.missionEmoji}>{missionEmoji || '🎯'}</Text>
+            <Image
+              source={require('../../assets/images/goal.png')}
+              style={styles.missionEmojiImage}
+              resizeMode="contain"
+            />
           </View>
           <View style={styles.missionTextContainer}>
             <Text style={styles.missionLabel}>미션</Text>
@@ -308,7 +319,11 @@ const VerificationPostCreateScreen: React.FC<VerificationPostCreateScreenProps> 
 
         {/* 안내 메시지 */}
         <View style={styles.infoBox}>
-          <Text style={styles.infoIcon}>💡</Text>
+          <Image
+            source={require('../../assets/images/light.png')}
+            style={styles.infoIconImage}
+            resizeMode="contain"
+          />
           <Text style={styles.infoText}>
             인증글을 작성하면 커뮤니티에 공개됩니다.{'\n'}
             다른 사용자들의 좋아요를 받으면 미션이 완료됩니다.
@@ -377,6 +392,11 @@ const VerificationPostCreateScreen: React.FC<VerificationPostCreateScreenProps> 
 
       {/* 작성/수정 버튼 - 하단 고정 */}
       <View style={styles.buttonContainer}>
+        <ImageBackground
+          source={require('../../assets/images/background.png')}
+          style={styles.buttonBackground}
+          resizeMode="cover"
+        >
         <TouchableOpacity
           style={[
             styles.submitButton,
@@ -393,6 +413,7 @@ const VerificationPostCreateScreen: React.FC<VerificationPostCreateScreenProps> 
             </Text>
           )}
         </TouchableOpacity>
+        </ImageBackground>
       </View>
 
       {/* 성공 모달 */}
@@ -409,13 +430,16 @@ const VerificationPostCreateScreen: React.FC<VerificationPostCreateScreenProps> 
         }}
       />
     </KeyboardAvoidingView>
+    </ImageBackground>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background.primary,
+  },
+  keyboardView: {
+    flex: 1,
   },
   content: {
     flex: 1,
@@ -451,6 +475,10 @@ const styles = StyleSheet.create({
   missionEmoji: {
     fontSize: 24,
   },
+  missionEmojiImage: {
+    width: 24,
+    height: 24,
+  },
   missionTextContainer: {
     flex: 1,
   },
@@ -458,11 +486,23 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.xs,
     color: colors.text.tertiary,
     marginBottom: spacing[1],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
   },
   missionTitle: {
     fontSize: typography.fontSize.base,
     fontWeight: typography.fontWeight.normal,
     color: colors.text.primary,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
   },
   infoBox: {
     flexDirection: 'row',
@@ -477,11 +517,22 @@ const styles = StyleSheet.create({
     marginRight: spacing[2],
     marginTop: 1,
   },
+  infoIconImage: {
+    width: 18,
+    height: 18,
+    marginRight: spacing[2],
+    marginTop: 1,
+  },
   infoText: {
     flex: 1,
     fontSize: typography.fontSize.xs,
     color: colors.primary[700],
-    lineHeight: 18,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
+    includeFontPadding: false,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
   },
   inputSection: {
     marginBottom: spacing[4],
@@ -491,6 +542,12 @@ const styles = StyleSheet.create({
     fontWeight: typography.fontWeight.normal,
     color: colors.text.primary,
     marginBottom: spacing[2],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
   },
   notebookContainer: {
     backgroundColor: colors.white,
@@ -525,7 +582,12 @@ const styles = StyleSheet.create({
     color: colors.text.primary,
     minHeight: 200,
     textAlignVertical: 'top',
-    lineHeight: 24,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
+    includeFontPadding: false,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
   },
   photoSection: {
     marginBottom: spacing[4],
@@ -552,6 +614,12 @@ const styles = StyleSheet.create({
   changePhotoText: {
     color: colors.text.primary,
     fontSize: typography.fontSize.xs,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
   },
   addPhotoButton: {
     backgroundColor: colors.white,
@@ -573,13 +641,22 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.sm,
     color: colors.primary[600],
     fontWeight: typography.fontWeight.medium,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
   },
   buttonContainer: {
     padding: spacing[4],
     paddingBottom: spacing[6],
-    backgroundColor: colors.background.primary,
     borderTopWidth: 1,
-    borderTopColor: colors.border.light,
+    borderTopColor: '#D4A574',
+  },
+  buttonBackground: {
+    borderRadius: borderRadius.base,
+    overflow: 'hidden',
   },
   submitButton: {
     backgroundColor: colors.primary[500],
@@ -604,6 +681,12 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.base,
     fontWeight: typography.fontWeight.medium,
     color: colors.white,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
   },
 });
 

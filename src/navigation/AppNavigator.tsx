@@ -3,10 +3,10 @@ import { View, Text, TouchableOpacity, StyleSheet, Image, Platform, BackHandler,
 import { useUser } from '../contexts/UserContext';
 import { SCREEN_NAMES } from '../utils/constants';
 import { colors, spacing, typography } from '../utils/designTokens';
+import { getOptimizedLineHeight } from '../utils/textStyles';
 import { RootStackParamList } from '../types/navigation';
 import { apiClient } from '../api/client';
 import { logout } from '../services/authService';
-import AlertModal from '../components/ui/AlertModal';
 
 // 화면 컴포넌트들
 import StartScreen from '../screens/StartScreen';
@@ -47,7 +47,6 @@ const AppNavigator = () => {
   const [currentScreen, setCurrentScreen] = useState(SCREEN_NAMES.START);
   const [navigationParams, setNavigationParams] = useState({});
   const [backPressedOnce, setBackPressedOnce] = useState(false);
-  const [showTokenExpiredModal, setShowTokenExpiredModal] = useState(false);
   const fadeAnim = useRef(new Animated.Value(1)).current;
   const slideAnim = useRef(new Animated.Value(0)).current;
 
@@ -62,23 +61,24 @@ const AppNavigator = () => {
     ].includes(screen);
   }, []);
 
-  // 토큰 만료 콜백 설정
+  // 토큰 만료 콜백 설정 - 바로 로그아웃 처리
   useEffect(() => {
-    apiClient.setOnTokenExpiredCallback(() => {
-      setShowTokenExpiredModal(true);
-    });
-  }, []);
-
-  // 토큰 만료 모달 닫기 및 로그아웃 처리
-  const handleTokenExpiredClose = useCallback(async () => {
-    setShowTokenExpiredModal(false);
+    apiClient.setOnTokenExpiredCallback(async () => {
     await logout();
     await userLogout();
     setCurrentScreen(SCREEN_NAMES.START);
+    });
   }, [userLogout]);
 
-  // 화면 전환 애니메이션 (모든 hooks는 조건부 렌더링 이전에 위치해야 함)
+  // 화면 전환 애니메이션 (메인 탭 화면 간 전환은 제외)
   useEffect(() => {
+    // 메인 탭 화면 간 전환은 애니메이션 없이 즉시 전환
+    if (currentScreen && isMainTabScreen(currentScreen)) {
+      fadeAnim.setValue(1);
+      slideAnim.setValue(0);
+      return;
+    }
+    
     // 초기값 설정 (새 화면이 약간 아래에서 시작)
     fadeAnim.setValue(0.5);
     slideAnim.setValue(10);
@@ -98,7 +98,7 @@ const AppNavigator = () => {
         useNativeDriver: true,
       }),
     ]).start();
-  }, [currentScreen, fadeAnim, slideAnim]);
+  }, [currentScreen, fadeAnim, slideAnim, isMainTabScreen]);
 
   // 뒤로가기 버튼 처리
   useEffect(() => {
@@ -282,7 +282,7 @@ const AppNavigator = () => {
       case SCREEN_NAMES.MY_PAGE:
         return <MyPageScreen navigation={navigation} />;
       case SCREEN_NAMES.CALENDAR:
-        return <CalendarScreen />;
+        return <CalendarScreen navigation={navigation} />;
       case SCREEN_NAMES.STATISTICS:
         return <StatisticsScreen navigation={navigation} />;
       case SCREEN_NAMES.ADMIN_DASHBOARD:
@@ -316,15 +316,6 @@ const AppNavigator = () => {
       <View style={styles.screenContainer}>
         {renderScreen()}
       </View>
-
-      {/* 토큰 만료 모달 */}
-      <AlertModal
-        visible={showTokenExpiredModal}
-        title="세션이 만료되었습니다"
-        message="로그인 세션이 만료되었습니다. 다시 로그인해주세요."
-        buttonText="확인"
-        onClose={handleTokenExpiredClose}
-      />
 
       {/* 하단 탭 네비게이션 */}
       <View style={styles.tabBar}>
@@ -401,7 +392,7 @@ const AppNavigator = () => {
           <Text style={[
             styles.tabLabel,
             currentScreen === SCREEN_NAMES.DIARY && styles.tabLabelActive
-          ]}>다이어리</Text>
+          ]}>감성일기</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -451,7 +442,7 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     paddingBottom: Platform.OS === 'android' ? spacing[12] : spacing[5], // Android 네비게이션 바 대응 (48px)
-    paddingTop: spacing[3],
+    paddingTop: spacing[2],
     paddingHorizontal: spacing[2],
     shadowColor: '#000',
     shadowOffset: {
@@ -466,7 +457,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: spacing[2],
+    paddingVertical: spacing[1],
     borderRadius: 12,
   },
   activeTab: {
@@ -475,7 +466,7 @@ const styles = StyleSheet.create({
   tabIconImage: {
     width: 24,
     height: 24,
-    marginBottom: spacing[1],
+    marginBottom: 2,
     opacity: 0.6,
   },
   tabIconImageActive: {
@@ -486,10 +477,22 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.xs,
     color: colors.text.secondary,
     fontWeight: typography.fontWeight.medium,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
+    includeFontPadding: false,
   },
   tabLabelActive: {
     color: colors.green[600],
-    fontWeight: typography.fontWeight.bold,
+    fontWeight: typography.fontWeight.medium,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
+    includeFontPadding: false,
   },
 });
 

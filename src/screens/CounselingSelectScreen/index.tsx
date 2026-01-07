@@ -5,10 +5,13 @@ import {
   StyleSheet,
   TouchableOpacity,
   ScrollView,
+  Platform,
+  ImageBackground,
   Image,
 } from 'react-native';
-import { Header } from '../../components/ui';
-import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
+import { Header, Card } from '../../components/ui';
+import { colors, spacing, typography, borderRadius, shadows } from '../../utils/designTokens';
+import { getOptimizedLineHeight } from '../../utils/textStyles';
 import { NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types/navigation';
 
@@ -24,68 +27,96 @@ const CounselingSelectScreen: React.FC<CounselingSelectScreenProps> = ({ navigat
 
 
   return (
-    <ScrollView style={styles.container}>
-      <Header
-        title="상담 서비스"
-        leftButton={
-          <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Image
-              source={require('../../assets/images/left.png')}
-              style={styles.backButtonIcon}
-              resizeMode="contain"
-            />
-          </TouchableOpacity>
-        }
-      />
+    <ImageBackground
+      source={require('../../assets/images/background.png')}
+      style={styles.backgroundImage}
+      resizeMode="cover"
+    >
+      <View style={styles.container}>
+        <Header />
+        <ScrollView
+          style={styles.scrollView}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={styles.content}>
+            <Text style={styles.title}>상담 서비스</Text>
+            <Text style={styles.subtitle}>어떤 도움이 필요하신가요?</Text>
 
-      <View style={styles.content}>
-        <Text style={styles.title}>상담 서비스</Text>
-        <Text style={styles.subtitle}>어떤 도움이 필요하신가요?</Text>
+            {/* 근처 상담센터 찾기 카드 */}
+            <Card style={styles.counselingCard}>
+              <TouchableOpacity
+                style={styles.counselingCardContent}
+                onPress={handleFindCenter}
+                activeOpacity={0.7}
+              >
+                <View style={styles.cardIcon}>
+                  <Image
+                    source={require('../../assets/images/hospital.png')}
+                    style={styles.cardIconImage}
+                    resizeMode="contain"
+                  />
+                </View>
+                <View style={styles.cardContent}>
+                  <Text style={styles.cardTitle}>근처 상담센터 찾기</Text>
+                  <Text style={styles.cardDescription}>주변 상담센터를 찾아보세요.</Text>
+                </View>
+                <View style={styles.cardArrow}>
+                  <Image
+                    source={require('../../assets/images/chevron.png')}
+                    style={styles.arrowIcon}
+                    resizeMode="contain"
+                  />
+                </View>
+              </TouchableOpacity>
+            </Card>
 
-        {/* 근처 상담센터 찾기 카드 */}
-        <TouchableOpacity style={styles.counselingCard} onPress={handleFindCenter}>
-          <View style={styles.cardIcon}>
-            <Text style={styles.iconText}>🏥</Text>
+            {/* 추가 정보 */}
+            <Card style={styles.infoCard}>
+              <Text style={styles.infoTitle}>상담 서비스 안내</Text>
+              <View style={styles.infoItem}>
+                <Text style={styles.infoBullet}>•</Text>
+                <Text style={styles.infoText}>모든 상담은 익명으로 진행됩니다</Text>
+              </View>
+              <View style={styles.infoItem}>
+                <Text style={styles.infoBullet}>•</Text>
+                <Text style={styles.infoText}>개인정보는 안전하게 보호됩니다</Text>
+              </View>
+              <View style={styles.infoItem}>
+                <Text style={styles.infoBullet}>•</Text>
+                <Text style={styles.infoText}>언제든 상담을 중단할 수 있습니다</Text>
+              </View>
+              <View style={styles.infoItem}>
+                <Text style={styles.infoBullet}>•</Text>
+                <Text style={styles.infoText}>전문 상담사가 도움을 드립니다</Text>
+              </View>
+            </Card>
           </View>
-          <View style={styles.cardContent}>
-            <Text style={styles.cardTitle}>근처 상담센터 찾기</Text>
-            <Text style={styles.cardDescription}>주변 상담센터를 찾아보세요.</Text>
-          </View>
-          <View style={styles.cardArrow}>
-            <Text style={styles.arrowText}>→</Text>
-          </View>
-        </TouchableOpacity>
-
-
-        {/* 추가 정보 */}
-        <View style={styles.infoSection}>
-          <Text style={styles.infoTitle}>상담 서비스 안내</Text>
-          <View style={styles.infoItem}>
-            <Text style={styles.infoBullet}>•</Text>
-            <Text style={styles.infoText}>모든 상담은 익명으로 진행됩니다</Text>
-          </View>
-          <View style={styles.infoItem}>
-            <Text style={styles.infoBullet}>•</Text>
-            <Text style={styles.infoText}>개인정보는 안전하게 보호됩니다</Text>
-          </View>
-          <View style={styles.infoItem}>
-            <Text style={styles.infoBullet}>•</Text>
-            <Text style={styles.infoText}>언제든 상담을 중단할 수 있습니다</Text>
-          </View>
-          <View style={styles.infoItem}>
-            <Text style={styles.infoBullet}>•</Text>
-            <Text style={styles.infoText}>전문 상담사가 도움을 드립니다</Text>
-          </View>
-        </View>
+        </ScrollView>
       </View>
-    </ScrollView>
+    </ImageBackground>
   );
 };
 
 const styles = StyleSheet.create({
+  backgroundImage: {
+    flex: 1,
+    width: '100%',
+    height: '100%',
+  },
   container: {
     flex: 1,
-    backgroundColor: colors.background.secondary,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingBottom: spacing[6],
+  },
+  backButtonIcon: {
+    width: 24,
+    height: 24,
+    tintColor: colors.text.primary,
   },
   backButtonIcon: {
     width: 24,
@@ -93,80 +124,103 @@ const styles = StyleSheet.create({
     tintColor: colors.text.primary,
   },
   content: {
-    padding: spacing[4],
+    padding: spacing[5],
   },
   title: {
     fontSize: typography.fontSize.xxl,
-    fontWeight: typography.fontWeight.bold,
+    fontWeight: typography.fontWeight.medium as any,
     color: colors.text.primary,
     marginBottom: spacing[2],
     textAlign: 'center',
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.xxl),
   },
   subtitle: {
     fontSize: typography.fontSize.base,
     color: colors.text.secondary,
     marginBottom: spacing[6],
     textAlign: 'center',
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
   },
   counselingCard: {
+    marginBottom: spacing[5],
+  },
+  counselingCardContent: {
     flexDirection: 'row',
-    backgroundColor: colors.background.primary,
-    borderRadius: borderRadius.lg,
-    padding: spacing[4],
-    marginBottom: spacing[4],
     alignItems: 'center',
-    shadowColor: colors.black,
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    padding: spacing[1],
   },
   cardIcon: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: colors.primary[100],
+    width: 56,
+    height: 56,
+    borderRadius: borderRadius.full,
+    backgroundColor: '#FFF8E7',
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: spacing[3],
+    borderWidth: 2,
+    borderColor: '#D4A574',
+    ...shadows.sm,
   },
-  iconText: {
-    fontSize: 24,
+  cardIconImage: {
+    width: 32,
+    height: 32,
   },
   cardContent: {
     flex: 1,
   },
   cardTitle: {
     fontSize: typography.fontSize.lg,
-    fontWeight: typography.fontWeight.semibold,
+    fontWeight: typography.fontWeight.medium as any,
     color: colors.text.primary,
     marginBottom: spacing[1],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.lg),
   },
   cardDescription: {
     fontSize: typography.fontSize.sm,
     color: colors.text.secondary,
-    lineHeight: typography.lineHeight.normal * typography.fontSize.sm,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
   },
   cardArrow: {
     marginLeft: spacing[2],
   },
-  arrowText: {
-    fontSize: typography.fontSize.lg,
-    color: colors.text.tertiary,
+  arrowIcon: {
+    width: 20,
+    height: 20,
   },
-  infoSection: {
-    backgroundColor: colors.background.primary,
-    borderRadius: borderRadius.lg,
-    padding: spacing[4],
+  infoCard: {
+    marginTop: spacing[2],
   },
   infoTitle: {
     fontSize: typography.fontSize.base,
-    fontWeight: typography.fontWeight.semibold,
+    fontWeight: typography.fontWeight.medium as any,
     color: colors.text.primary,
     marginBottom: spacing[3],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
   },
   infoItem: {
     flexDirection: 'row',
@@ -175,15 +229,27 @@ const styles = StyleSheet.create({
   },
   infoBullet: {
     fontSize: typography.fontSize.sm,
-    color: colors.primary[500],
+    color: '#8B6F47',
     marginRight: spacing[2],
     marginTop: 2,
+    fontWeight: typography.fontWeight.medium as any,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
   },
   infoText: {
     flex: 1,
     fontSize: typography.fontSize.sm,
     color: colors.text.secondary,
-    lineHeight: typography.lineHeight.normal * typography.fontSize.sm,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
   },
 });
 
