@@ -16,6 +16,7 @@ import {
   Modal,
   TextInput,
   Platform,
+  Image,
 } from 'react-native';
 import { NavigationProp } from '@react-navigation/native';
 import { Card, Header, Loading, SectionTitle } from '../../components/ui';
@@ -331,7 +332,11 @@ const ContributorDashboardScreen: React.FC<ContributorDashboardScreenProps> = ({
               </View>
             </View>
             <View style={styles.guideItem}>
-              <Text style={styles.guideIcon}>⚠️</Text>
+              <Image
+                source={require('../../assets/images/warning.png')}
+                style={styles.guideIconImage}
+                resizeMode="contain"
+              />
               <View style={styles.guideContent}>
                 <Text style={styles.guideTitle}>위기 상황</Text>
                 <Text style={styles.guideDescription}>
@@ -365,7 +370,11 @@ const ContributorDashboardScreen: React.FC<ContributorDashboardScreenProps> = ({
               style={styles.actionItem}
               onPress={() => navigation.navigate('Community')}
             >
-              <Text style={styles.actionIcon}>💬</Text>
+              <Image
+                source={require('../../assets/images/say.png')}
+                style={styles.actionIconImage}
+                resizeMode="contain"
+              />
               <Text style={styles.actionLabel}>Q&A 답변</Text>
             </TouchableOpacity>
             <TouchableOpacity
@@ -429,7 +438,11 @@ const ContributorDashboardScreen: React.FC<ContributorDashboardScreenProps> = ({
                 </View>
               </TouchableOpacity>
               <TouchableOpacity style={styles.resourceItem}>
-                <Text style={styles.resourceIcon}>⚠️</Text>
+                <Image
+                  source={require('../../assets/images/warning.png')}
+                  style={styles.resourceIconImage}
+                  resizeMode="contain"
+                />
                 <View style={styles.resourceContent}>
                   <Text style={styles.resourceTitle}>위기 상황 대응 매뉴얼</Text>
                   <Text style={styles.resourceDesc}>긴급 상황 판단 및 대응 방법</Text>
@@ -772,6 +785,10 @@ const styles = StyleSheet.create({
     includeFontPadding: false,
     lineHeight: getOptimizedLineHeight(24),
   },
+  guideIconImage: {
+    width: 24,
+    height: 24,
+  },
   guideContent: {
     flex: 1,
   },
@@ -843,6 +860,11 @@ const styles = StyleSheet.create({
     includeFontPadding: false,
     lineHeight: getOptimizedLineHeight(24),
   },
+  actionIconImage: {
+    width: 24,
+    height: 24,
+    marginBottom: spacing[2],
+  },
   actionLabel: {
     fontSize: typography.fontSize.sm,
     color: colors.text.primary,
@@ -913,6 +935,11 @@ const styles = StyleSheet.create({
       ios: typography.fontFamily.regular,
       android: typography.fontFamily.regular,
     }),
+  },
+  resourceIconImage: {
+    width: 24,
+    height: 24,
+  },
     includeFontPadding: false,
     lineHeight: getOptimizedLineHeight(24),
   },

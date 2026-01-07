@@ -125,7 +125,11 @@ const PostCard: React.FC<PostCardProps> = ({
       <View style={styles.content}>
         {post.mission_title && (
           <View style={styles.missionInfo}>
-            <Text style={styles.missionEmoji}>{post.mission_emoji || '🎯'}</Text>
+            <Image
+              source={require('../../assets/images/goal.png')}
+              style={styles.missionEmojiImage}
+              resizeMode="contain"
+            />
             <Text style={styles.missionTitle} numberOfLines={1}>
               {post.mission_title}
             </Text>
@@ -181,16 +185,26 @@ const PostCard: React.FC<PostCardProps> = ({
             }}
             activeOpacity={0.7}
           >
-            <Text style={[styles.statIcon, post.is_liked && styles.likedIcon]}>
-              {post.is_liked ? '❤️' : '🤍'}
-            </Text>
+            {post.is_liked ? (
+              <Text style={[styles.statIcon, styles.likedIcon]}>❤️</Text>
+            ) : (
+              <Image
+                source={require('../../assets/images/heart.png')}
+                style={styles.statIconImage}
+                resizeMode="contain"
+              />
+            )}
             <Text style={[styles.statText, post.is_liked && styles.statTextActive]}>
               {post.like_count}
             </Text>
           </TouchableOpacity>
 
           <View style={styles.statButton}>
-            <Text style={styles.statIcon}>💬</Text>
+            <Image
+              source={require('../../assets/images/say.png')}
+              style={styles.statIconImage}
+              resizeMode="contain"
+            />
             <Text style={styles.statText}>{post.comment_count}</Text>
           </View>
 
@@ -202,9 +216,15 @@ const PostCard: React.FC<PostCardProps> = ({
             }}
             activeOpacity={0.7}
           >
-            <Text style={[styles.statIcon, post.is_scrapped && styles.scrappedIcon]}>
-              {post.is_scrapped ? '🔖' : '📌'}
-            </Text>
+            {post.is_scrapped ? (
+              <Text style={[styles.statIcon, styles.scrappedIcon]}>🔖</Text>
+            ) : (
+              <Image
+                source={require('../../assets/images/clip.png')}
+                style={styles.statIconImage}
+                resizeMode="contain"
+              />
+            )}
             {post.scrap_count > 0 && (
               <Text style={[styles.statText, post.is_scrapped && styles.statTextActive]}>
                 {post.scrap_count}
@@ -388,6 +408,10 @@ const styles = StyleSheet.create({
     }),
     includeFontPadding: false,
   },
+  missionEmojiImage: {
+    width: 16,
+    height: 16,
+  },
   missionTitle: {
     flex: 1,
     fontSize: typography.fontSize.sm,
@@ -544,6 +568,10 @@ const styles = StyleSheet.create({
       android: typography.fontFamily.regular,
     }),
     includeFontPadding: false,
+  },
+  statIconImage: {
+    width: 20,
+    height: 20,
   },
   likedIcon: {
     // 이미 이모지로 표시됨

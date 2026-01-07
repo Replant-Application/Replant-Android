@@ -101,7 +101,7 @@ const GraduateScreen: React.FC<GraduateScreenProps> = ({ navigation }) => {
   const getActivityIcon = (type: string) => {
     switch (type) {
       case 'answer':
-        return '💬';
+        return require('../../assets/images/say.png');
       case 'post':
         return '📝';
       case 'comment':
@@ -179,7 +179,11 @@ const GraduateScreen: React.FC<GraduateScreenProps> = ({ navigation }) => {
               </View>
             </View>
             <View style={styles.roleItem}>
-              <Text style={styles.roleIcon}>💡</Text>
+              <Image
+                source={require('../../assets/images/light.png')}
+                style={styles.roleIconImage}
+                resizeMode="contain"
+              />
               <View style={styles.roleContent}>
                 <Text style={styles.roleTitle}>경험 공유</Text>
                 <Text style={styles.roleDescription}>
@@ -209,9 +213,17 @@ const GraduateScreen: React.FC<GraduateScreenProps> = ({ navigation }) => {
           ) : (
             recentActivities.map(activity => (
               <View key={activity.id} style={styles.activityItem}>
-                <Text style={styles.activityIcon}>
-                  {getActivityIcon(activity.type)}
-                </Text>
+                {typeof getActivityIcon(activity.type) === 'string' ? (
+                  <Text style={styles.activityIcon}>
+                    {getActivityIcon(activity.type) as string}
+                  </Text>
+                ) : (
+                  <Image
+                    source={getActivityIcon(activity.type) as any}
+                    style={styles.activityIconImage}
+                    resizeMode="contain"
+                  />
+                )}
                 <View style={styles.activityContent}>
                   <Text style={styles.activityTitle}>{activity.title}</Text>
                   <Text style={styles.activityDate}>
@@ -231,7 +243,11 @@ const GraduateScreen: React.FC<GraduateScreenProps> = ({ navigation }) => {
             style={styles.actionButton}
             onPress={() => navigation.navigate('Community')}
           >
-            <Text style={styles.actionIcon}>💬</Text>
+            <Image
+              source={require('../../assets/images/say.png')}
+              style={styles.actionIconImage}
+              resizeMode="contain"
+            />
             <View style={styles.actionContent}>
               <Text style={styles.actionTitle}>Q&A 답변하기</Text>
               <Text style={styles.actionDescription}>
@@ -395,6 +411,10 @@ const styles = StyleSheet.create({
     }),
     includeFontPadding: false,
   },
+  roleIconImage: {
+    width: 28,
+    height: 28,
+  },
   roleContent: {
     flex: 1,
   },
@@ -435,6 +455,10 @@ const styles = StyleSheet.create({
     }),
     includeFontPadding: false,
     lineHeight: getOptimizedLineHeight(typography.fontSize.base),
+  },
+  activityIconImage: {
+    width: 20,
+    height: 20,
   },
   activityItem: {
     flexDirection: 'row',
@@ -499,6 +523,10 @@ const styles = StyleSheet.create({
       android: typography.fontFamily.regular,
     }),
     includeFontPadding: false,
+  },
+  actionIconImage: {
+    width: 24,
+    height: 24,
   },
   actionContent: {
     flex: 1,

@@ -224,12 +224,24 @@ const CommunityPostDetailScreen: React.FC<CommunityPostDetailScreenProps> = ({
 
           <View style={styles.actions}>
             <TouchableOpacity style={styles.actionButton} onPress={handleLike}>
-              <Text style={styles.actionIcon}>{post.is_liked ? '❤️' : '🤍'}</Text>
+              {post.is_liked ? (
+                <Text style={styles.actionIcon}>❤️</Text>
+              ) : (
+                <Image
+                  source={require('../../assets/images/heart.png')}
+                  style={styles.actionIconImage}
+                  resizeMode="contain"
+                />
+              )}
               <Text style={styles.actionText}>{post.like_count}</Text>
             </TouchableOpacity>
 
             <View style={styles.actionButton}>
-              <Text style={styles.actionIcon}>💬</Text>
+              <Image
+                source={require('../../assets/images/say.png')}
+                style={styles.actionIconImage}
+                resizeMode="contain"
+              />
               <Text style={styles.actionText}>{post.comment_count}</Text>
             </View>
 
@@ -255,7 +267,7 @@ const CommunityPostDetailScreen: React.FC<CommunityPostDetailScreenProps> = ({
           <Text style={styles.commentsTitle}>댓글 ({comments.length})</Text>
 
           {comments.length === 0 ? (
-            <EmptyState icon="💬" title="아직 댓글이 없어요" description="첫 댓글을 남겨보세요!" />
+            <EmptyState iconImage={require('../../assets/images/say.png')} title="아직 댓글이 없어요" description="첫 댓글을 남겨보세요!" />
           ) : (
             <View style={styles.commentsList}>
               {/* 부모 댓글만 먼저 렌더링하고, 대댓글은 부모 댓글 아래에 표시 */}
@@ -670,6 +682,10 @@ const styles = StyleSheet.create({
       android: typography.fontFamily.regular,
     }),
     includeFontPadding: false,
+  },
+  actionIconImage: {
+    width: 20,
+    height: 20,
   },
   actionText: {
     fontSize: typography.fontSize.sm,

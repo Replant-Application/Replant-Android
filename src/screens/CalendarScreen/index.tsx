@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Modal, TextInput, Platform } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Modal, TextInput, Platform, Image } from 'react-native';
 import { useCalendar } from '../../hooks/useCalendar';
 import { Card, Loading, ErrorBoundary, Header, SectionTitle, Button, FAB } from '../../components/ui';
 import { colors, spacing, typography, borderRadius, shadows } from '../../utils/designTokens';
@@ -169,7 +169,14 @@ const CalendarScreen: React.FC = () => {
 
           {/* 선택된 날짜의 이벤트 */}
           <Card style={styles.eventsCard}>
-            <SectionTitle title="📌 이벤트" size="lg" marginBottom={spacing[4]} />
+            <View style={styles.sectionTitleContainer}>
+              <Image
+                source={require('../../assets/images/clip.png')}
+                style={styles.sectionTitleIcon}
+                resizeMode="contain"
+              />
+              <SectionTitle title="이벤트" size="lg" marginBottom={spacing[4]} style={styles.sectionTitle} />
+            </View>
             {loading ? (
               <Loading text="이벤트를 불러오는 중..." />
             ) : dayEvents.length > 0 ? (
@@ -341,6 +348,18 @@ const styles = StyleSheet.create({
   },
   eventsCard: {
     marginBottom: spacing[6],
+  },
+  sectionTitleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing[2],
+  },
+  sectionTitleIcon: {
+    width: 20,
+    height: 20,
+  },
+  sectionTitle: {
+    marginBottom: 0,
   },
   eventItem: {
     flexDirection: 'row',

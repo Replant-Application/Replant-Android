@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, Image, TextInput, Platform } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, Image, TextInput, Platform, ImageBackground } from 'react-native';
 import { useUser } from '../../contexts/UserContext';
 import { useAdmin } from '../../hooks/useAdmin';
 import { Header, ConfirmModal } from '../../components/ui';
@@ -114,7 +114,11 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
 
 
   return (
-    <View style={styles.container}>
+    <ImageBackground
+      source={require('../../assets/images/background.png')}
+      style={styles.container}
+      resizeMode="cover"
+    >
       <Header />
       <ScrollView 
         style={styles.scrollView}
@@ -288,15 +292,15 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
         onConfirm={handleLogout}
         onCancel={() => setShowLogoutModal(false)}
         confirmButtonColor={colors.error}
+        image={require('../../assets/images/logout.png')}
       />
-    </View>
+    </ImageBackground>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background.secondary,
   },
   scrollView: {
     flex: 1,
@@ -310,7 +314,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: typography.fontSize.lg,
-    fontWeight: typography.fontWeight.bold,
+    fontWeight: typography.fontWeight.medium,
     color: colors.text.primary,
     marginBottom: spacing[3],
     paddingHorizontal: spacing[2],
@@ -342,7 +346,7 @@ const styles = StyleSheet.create({
   },
   userName: {
     fontSize: typography.fontSize.xl,
-    fontWeight: typography.fontWeight.bold,
+    fontWeight: typography.fontWeight.medium,
     color: colors.text.primary,
     marginBottom: spacing[1],
     fontFamily: Platform.select({
@@ -431,7 +435,7 @@ const styles = StyleSheet.create({
   saveButtonText: {
     fontSize: typography.fontSize.base,
     color: colors.white,
-    fontWeight: typography.fontWeight.semibold,
+    fontWeight: typography.fontWeight.medium,
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,
       android: typography.fontFamily.regular,

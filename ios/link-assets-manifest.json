@@ -1,0 +1,17 @@
+{
+  "migIndex": 1,
+  "data": [
+    {
+      "path": "src/assets/fonts/Maplestory Light.ttf",
+      "sha1": "578ab49cd5dd25e3a13a2ca34f55019123d09f4d"
+    },
+    {
+      "path": "src/assets/fonts/Neo-Regular.ttf",
+      "sha1": "d2c46e86184297e96ab1064828df7455ab51ce1d"
+    },
+    {
+      "path": "src/assets/fonts/Maplestory Bold.ttf",
+      "sha1": "6120fd63046695888c25cfc124342c5cca0da4bc"
+    }
+  ]
+}

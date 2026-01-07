@@ -42,7 +42,7 @@ const VerificationPostCreateScreen: React.FC<VerificationPostCreateScreenProps> 
     userMissionId,
     missionId,
     missionTitle = '미션',
-    missionEmoji = '🎯',
+    missionEmoji = '',
     photoUrl: initialPhotoUrl,
     // 수정 모드용 params
     mode = 'create',
@@ -299,7 +299,11 @@ const VerificationPostCreateScreen: React.FC<VerificationPostCreateScreenProps> 
         {/* 미션 정보 표시 */}
         <View style={styles.missionInfo}>
           <View style={styles.missionEmojiContainer}>
-            <Text style={styles.missionEmoji}>{missionEmoji || '🎯'}</Text>
+            <Image
+              source={require('../../assets/images/goal.png')}
+              style={styles.missionEmojiImage}
+              resizeMode="contain"
+            />
           </View>
           <View style={styles.missionTextContainer}>
             <Text style={styles.missionLabel}>미션</Text>
@@ -309,7 +313,11 @@ const VerificationPostCreateScreen: React.FC<VerificationPostCreateScreenProps> 
 
         {/* 안내 메시지 */}
         <View style={styles.infoBox}>
-          <Text style={styles.infoIcon}>💡</Text>
+          <Image
+            source={require('../../assets/images/light.png')}
+            style={styles.infoIconImage}
+            resizeMode="contain"
+          />
           <Text style={styles.infoText}>
             인증글을 작성하면 커뮤니티에 공개됩니다.{'\n'}
             다른 사용자들의 좋아요를 받으면 미션이 완료됩니다.
@@ -452,6 +460,10 @@ const styles = StyleSheet.create({
   missionEmoji: {
     fontSize: 24,
   },
+  missionEmojiImage: {
+    width: 24,
+    height: 24,
+  },
   missionTextContainer: {
     flex: 1,
   },
@@ -487,6 +499,12 @@ const styles = StyleSheet.create({
   },
   infoIcon: {
     fontSize: 18,
+    marginRight: spacing[2],
+    marginTop: 1,
+  },
+  infoIconImage: {
+    width: 18,
+    height: 18,
     marginRight: spacing[2],
     marginTop: 1,
   },

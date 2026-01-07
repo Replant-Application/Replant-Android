@@ -1,20 +1,15 @@
-const { getDefaultConfig, mergeConfig } = require('@react-native/metro-config');
+const { getDefaultConfig } = require('expo/metro-config');
 
 /**
  * Metro configuration
  * https://reactnative.dev/docs/metro
  *
- * @type {import('@react-native/metro-config').MetroConfig}
+ * @type {import('expo/metro-config').MetroConfig}
  */
-const config = {
-  resolver: {
-    unstable_enablePackageExports: false,
-    unstable_conditionNames: ['react-native', 'browser', 'require'],
-  },
-  transformer: {
-    // Metro bundler 안정성 향상
-    unstable_allowRequireContext: false,
-  },
-};
+const config = getDefaultConfig(__dirname);
 
-module.exports = mergeConfig(getDefaultConfig(__dirname), config);
+config.resolver.unstable_enablePackageExports = false;
+config.resolver.unstable_conditionNames = ['react-native', 'browser', 'require'];
+config.transformer.unstable_allowRequireContext = false;
+
+module.exports = config;

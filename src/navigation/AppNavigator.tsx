@@ -7,7 +7,6 @@ import { getOptimizedLineHeight } from '../utils/textStyles';
 import { RootStackParamList } from '../types/navigation';
 import { apiClient } from '../api/client';
 import { logout } from '../services/authService';
-import AlertModal from '../components/ui/AlertModal';
 
 // 화면 컴포넌트들
 import StartScreen from '../screens/StartScreen';
@@ -47,7 +46,6 @@ const AppNavigator = () => {
   const [currentScreen, setCurrentScreen] = useState(SCREEN_NAMES.START);
   const [navigationParams, setNavigationParams] = useState({});
   const [backPressedOnce, setBackPressedOnce] = useState(false);
-  const [showTokenExpiredModal, setShowTokenExpiredModal] = useState(false);
   const fadeAnim = useRef(new Animated.Value(1)).current;
   const slideAnim = useRef(new Animated.Value(0)).current;
 
@@ -62,25 +60,19 @@ const AppNavigator = () => {
     ].includes(screen);
   }, []);
 
-  // 토큰 만료 콜백 설정
+  // 토큰 만료 콜백 설정 - 바로 로그아웃 처리
   useEffect(() => {
-    apiClient.setOnTokenExpiredCallback(() => {
-      setShowTokenExpiredModal(true);
+    apiClient.setOnTokenExpiredCallback(async () => {
+      await logout();
+      await userLogout();
+      setCurrentScreen(SCREEN_NAMES.START);
     });
-  }, []);
-
-  // 토큰 만료 모달 닫기 및 로그아웃 처리
-  const handleTokenExpiredClose = useCallback(async () => {
-    setShowTokenExpiredModal(false);
-    await logout();
-    await userLogout();
-    setCurrentScreen(SCREEN_NAMES.START);
   }, [userLogout]);
 
   // 화면 전환 애니메이션 (메인 탭 화면 간 전환은 제외)
   useEffect(() => {
     // 메인 탭 화면 간 전환은 애니메이션 없이 즉시 전환
-    if (isMainTabScreen(currentScreen)) {
+    if (currentScreen && isMainTabScreen(currentScreen)) {
       fadeAnim.setValue(1);
       slideAnim.setValue(0);
       return;
@@ -320,15 +312,6 @@ const AppNavigator = () => {
         {renderScreen()}
       </View>
 
-      {/* 토큰 만료 모달 */}
-      <AlertModal
-        visible={showTokenExpiredModal}
-        title="세션이 만료되었습니다"
-        message="로그인 세션이 만료되었습니다. 다시 로그인해주세요."
-        buttonText="확인"
-        onClose={handleTokenExpiredClose}
-      />
-
       {/* 하단 탭 네비게이션 */}
       <View style={styles.tabBar}>
         <TouchableOpacity
@@ -404,7 +387,7 @@ const AppNavigator = () => {
           <Text style={[
             styles.tabLabel,
             currentScreen === SCREEN_NAMES.DIARY && styles.tabLabelActive
-          ]}>다이어리</Text>
+          ]}>감성일기</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -476,8 +459,8 @@ const styles = StyleSheet.create({
     backgroundColor: colors.green[50],
   },
   tabIconImage: {
-    width: 40,
-    height: 40,
+    width: 24,
+    height: 24,
     marginBottom: 2,
     opacity: 0.6,
   },
@@ -498,7 +481,7 @@ const styles = StyleSheet.create({
   },
   tabLabelActive: {
     color: colors.green[600],
-    fontWeight: typography.fontWeight.bold,
+    fontWeight: typography.fontWeight.medium,
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,
       android: typography.fontFamily.regular,

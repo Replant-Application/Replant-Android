@@ -185,14 +185,7 @@ const MissionGroupScreen: React.FC<MissionGroupScreenProps> = ({ navigation }) =
 
   // 미션 아이콘
   const getMissionIcon = (title: string) => {
-    if (title.includes('운동') || title.includes('헬스') || title.includes('걷기')) {
-      return require('../../assets/images/training.png');
-    }
-    if (title.includes('독서') || title.includes('책')) {
-      return require('../../assets/images/book.png');
-    }
-    // 기본 아이콘 (과녁)
-    return require('../../assets/images/calendar.png');
+    return require('../../assets/images/goal.png');
   };
 
   if (loading) {
@@ -226,7 +219,7 @@ const MissionGroupScreen: React.FC<MissionGroupScreenProps> = ({ navigation }) =
       >
         {missions.length === 0 ? (
           <EmptyState
-            icon="🎯"
+            iconImage={require('../../assets/images/goal.png')}
             title="미션이 없어요"
             description="현재 등록된 미션이 없습니다."
           />

@@ -11,6 +11,8 @@ import {
   Modal,
   TouchableOpacity,
   Platform,
+  Image,
+  ImageSourcePropType,
 } from 'react-native';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
 import { getOptimizedLineHeight } from '../../utils/textStyles';
@@ -21,6 +23,7 @@ interface AlertModalProps {
   message: string;
   buttonText?: string;
   onClose: () => void;
+  icon?: ImageSourcePropType;
 }
 
 const AlertModal: React.FC<AlertModalProps> = ({
@@ -29,6 +32,7 @@ const AlertModal: React.FC<AlertModalProps> = ({
   message,
   buttonText = '확인',
   onClose,
+  icon,
 }) => {
   // message가 문자열이 아닌 경우 문자열로 변환
   const messageText = typeof message === 'string' ? message : String(message || '');
@@ -43,6 +47,15 @@ const AlertModal: React.FC<AlertModalProps> = ({
     >
       <View style={styles.overlay}>
         <View style={styles.modalContainer}>
+          {icon && (
+            <View style={styles.iconContainer}>
+              <Image
+                source={icon}
+                style={styles.icon}
+                resizeMode="contain"
+              />
+            </View>
+          )}
           <Text style={styles.title}>{titleText}</Text>
           <Text style={styles.message}>{messageText}</Text>
           <TouchableOpacity
@@ -70,6 +83,14 @@ const styles = StyleSheet.create({
     padding: spacing[6],
     width: '80%',
     maxWidth: 400,
+  },
+  iconContainer: {
+    alignItems: 'center',
+    marginBottom: spacing[4],
+  },
+  icon: {
+    width: 70,
+    height: 70,
   },
   title: {
     fontSize: typography.fontSize.xl,

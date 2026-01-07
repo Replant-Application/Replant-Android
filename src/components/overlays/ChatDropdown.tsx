@@ -179,7 +179,11 @@ const ChatDropdown: React.FC<ChatDropdownProps> = ({
                 </View>
               ) : chatRooms.length === 0 ? (
                 <View style={styles.emptyContainer}>
-                  <Text style={styles.emptyIcon}>💬</Text>
+                  <Image
+                    source={require('../../assets/images/say.png')}
+                    style={styles.emptyIconImage}
+                    resizeMode="contain"
+                  />
                   <Text style={styles.emptyText}>아직 대화가 없습니다</Text>
                   <Text style={styles.emptySubText}>
                     인연을 맺고 대화를 시작해보세요
@@ -253,9 +257,16 @@ const ChatDropdown: React.FC<ChatDropdownProps> = ({
                       )}
 
                       {room.matchedMission && (
-                        <Text style={styles.missionTag} numberOfLines={1}>
-                          🎯 {room.matchedMission.title}
-                        </Text>
+                        <View style={styles.missionTagContainer}>
+                          <Image
+                            source={require('../../assets/images/goal.png')}
+                            style={styles.missionTagIcon}
+                            resizeMode="contain"
+                          />
+                          <Text style={styles.missionTag} numberOfLines={1}>
+                            {room.matchedMission.title}
+                          </Text>
+                        </View>
                       )}
                     </View>
                   </TouchableOpacity>
@@ -360,6 +371,11 @@ const styles = StyleSheet.create({
       android: typography.fontFamily.regular,
     }),
     includeFontPadding: false,
+  },
+  emptyIconImage: {
+    width: 32,
+    height: 32,
+    marginBottom: spacing[2],
   },
   emptyText: {
     fontSize: typography.fontSize.sm,
@@ -502,6 +518,15 @@ const styles = StyleSheet.create({
     }),
     includeFontPadding: false,
     lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
+  },
+  missionTagContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing[1],
+  },
+  missionTagIcon: {
+    width: 14,
+    height: 14,
   },
   missionTag: {
     fontSize: 10,

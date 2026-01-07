@@ -20,6 +20,7 @@ import {
   Animated,
   Dimensions,
   Platform,
+  Image,
 } from 'react-native';
 import { useOverlay } from '../../contexts/OverlayContext';
 import { getNotifications, markNotificationAsRead } from '../../api/notificationApi';
@@ -110,11 +111,11 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
   // 알림 아이콘 반환
   const getNotificationIcon = (type: string) => {
     switch (type) {
-      case 'MISSION': case 'MISSION_ASSIGNED': return '🎯';
+      case 'MISSION': case 'MISSION_ASSIGNED': return require('../../assets/images/goal.png');
       case 'VERIFICATION_APPROVED': return '✅';
       case 'VERIFICATION_REJECTED': return '❌';
       case 'USER_RECOMMENDED': return '👋';
-      case 'CHAT_MESSAGE': return '💬';
+      case 'CHAT_MESSAGE': return require('../../assets/images/say.png');
       case 'BADGE_EXPIRING': return '🏅';
       default: return '📢';
     }
@@ -216,9 +217,17 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
                     onPress={() => handleNotificationPress(notification)}
                     activeOpacity={0.7}
                   >
-                    <Text style={styles.notificationIcon}>
-                      {getNotificationIcon(notification.type)}
-                    </Text>
+                    {typeof getNotificationIcon(notification.type) === 'string' ? (
+                      <Text style={styles.notificationIcon}>
+                        {getNotificationIcon(notification.type) as string}
+                      </Text>
+                    ) : (
+                      <Image
+                        source={getNotificationIcon(notification.type) as any}
+                        style={styles.notificationIconImage}
+                        resizeMode="contain"
+                      />
+                    )}
                     <View style={styles.notificationContent}>
                       <View style={styles.notificationHeader}>
                         <Text
@@ -371,6 +380,11 @@ const styles = StyleSheet.create({
     }),
     includeFontPadding: false,
     lineHeight: getOptimizedLineHeight(20),
+  },
+  notificationIconImage: {
+    width: 20,
+    height: 20,
+    marginRight: spacing[3],
   },
   notificationContent: {
     flex: 1,

@@ -109,7 +109,6 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 66,
-    fontWeight: '600',
     color: '#166534',
     marginBottom: spacing[2],
     letterSpacing: 2,
@@ -126,7 +125,6 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: 16,
-    fontWeight: '400',
     color: '#666666',
     letterSpacing: 0.5,
     lineHeight: getOptimizedLineHeight(16),
@@ -170,7 +168,6 @@ const styles = StyleSheet.create({
   },
   kakaoButtonText: {
     fontSize: 16,
-    fontWeight: '400',
     color: '#000000',
     letterSpacing: 0.1,
     lineHeight: getOptimizedLineHeight(16),
@@ -197,7 +194,6 @@ const styles = StyleSheet.create({
   },
   googleButtonText: {
     fontSize: 15,
-    fontWeight: '400',
     color: '#ffffff',
     letterSpacing: 0.1,
     lineHeight: getOptimizedLineHeight(15),
@@ -220,7 +216,6 @@ const styles = StyleSheet.create({
   },
   textButtonText: {
     fontSize: 15,
-    fontWeight: '400',
     color: '#666666',
     lineHeight: getOptimizedLineHeight(15),
     fontFamily: Platform.select({
@@ -237,6 +232,7 @@ const styles = StyleSheet.create({
       android: typography.fontFamily.regular,
     }),
     includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(14),
   },
 });
 

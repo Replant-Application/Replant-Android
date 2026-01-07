@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Image, RefreshControl, Platform } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Image, RefreshControl, Platform, ImageBackground } from 'react-native';
 import { useMission } from '../../hooks/useMission';
 import { useCharacter } from '../../hooks/useCharacter';
 import { MissionCard, MissionVerificationModal, MissionProgressCard } from '../../components/specialized';
@@ -447,7 +447,11 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
 
 
   return (
-    <View style={styles.container}>
+    <ImageBackground
+      source={require('../../assets/images/background.png')}
+      style={styles.container}
+      resizeMode="cover"
+    >
       <Header title="오늘의 미션" showBackButton={false} navigation={navigation} />
 
       {/* 미션 완료 모달 */}
@@ -636,14 +640,13 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
           <Text style={styles.createButtonTopText}>미션 만들기</Text>
         </TouchableOpacity>
       </ScrollView>
-    </View>
+    </ImageBackground>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background.secondary,
   },
   title: {
     fontSize: typography.fontSize['2xl'],

@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ViewStyle, Platform } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ViewStyle, Platform, Image } from 'react-native';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
 import { getOptimizedLineHeight } from '../../utils/textStyles';
 import { CommunityComment } from '../../types';
@@ -58,7 +58,12 @@ const CommentCard: React.FC<CommentCardProps> = ({
               onPress={() => onReply(comment)}
               activeOpacity={0.7}
             >
-              <Text style={styles.replyText}>💬 답글</Text>
+              <Image
+                source={require('../../assets/images/say.png')}
+                style={styles.replyIcon}
+                resizeMode="contain"
+              />
+              <Text style={styles.replyText}>답글</Text>
             </TouchableOpacity>
           )}
 
@@ -215,6 +220,11 @@ const styles = StyleSheet.create({
     }),
     includeFontPadding: false,
     lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
+  },
+  replyIcon: {
+    width: 12,
+    height: 12,
+    marginRight: spacing[1],
   },
   replyText: {
     fontSize: typography.fontSize.xs,

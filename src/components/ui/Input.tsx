@@ -86,7 +86,7 @@ const styles = StyleSheet.create({
       android: typography.fontFamily.regular,
     }),
     includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
+    lineHeight: 22,
   },
 
   input: {
@@ -98,7 +98,7 @@ const styles = StyleSheet.create({
     color: colors.text.primary,
     fontSize: typography.fontSize.base,
     textAlign: 'left', // 한글 입력을 위해 명시적으로 설정
-    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
+    lineHeight: 22,
     letterSpacing: 0,
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,
@@ -146,7 +146,7 @@ const styles = StyleSheet.create({
       android: typography.fontFamily.regular,
     }),
     includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
+    lineHeight: 22,
   },
 });
 

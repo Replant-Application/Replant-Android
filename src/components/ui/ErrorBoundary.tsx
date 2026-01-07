@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ViewStyle, Platform } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ViewStyle, Platform, Image } from 'react-native';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
 import { getOptimizedLineHeight } from '../../utils/textStyles';
 
@@ -20,7 +20,11 @@ const ErrorBoundary: React.FC<ErrorBoundaryProps> = ({
 
   return (
     <View style={[styles.container, style]}>
-      <Text style={styles.icon}>⚠️</Text>
+      <Image
+        source={require('../../assets/images/warning.png')}
+        style={styles.iconImage}
+        resizeMode="contain"
+      />
       <Text style={styles.title}>오류가 발생했습니다</Text>
       <Text style={styles.message}>{errorMessage}</Text>
       {onRetry && (
@@ -50,10 +54,15 @@ const styles = StyleSheet.create({
     }),
     includeFontPadding: false,
   },
+  iconImage: {
+    width: 64,
+    height: 64,
+    marginBottom: spacing[4],
+  },
 
   title: {
     fontSize: typography.fontSize.xl,
-    fontWeight: typography.fontWeight.bold,
+    fontWeight: typography.fontWeight.medium,
     color: colors.text.primary,
     marginBottom: spacing[2],
     textAlign: 'center',

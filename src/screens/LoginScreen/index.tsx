@@ -456,7 +456,7 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.sm,
     height: 48,
     color: colors.text.primary,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
+    lineHeight: 22,
     letterSpacing: 1,
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,
@@ -496,7 +496,7 @@ const styles = StyleSheet.create({
   checkboxLabel: {
     fontSize: typography.fontSize.sm,
     color: colors.text.primary,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
+    lineHeight: 22,
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,
       android: typography.fontFamily.regular,
@@ -530,7 +530,7 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.sm,
     fontWeight: typography.fontWeight.medium,
     color: colors.text.inverse,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
+    lineHeight: 22,
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,
       android: typography.fontFamily.regular,
@@ -547,7 +547,7 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.sm,
     color: colors.text.secondary,
     textDecorationLine: 'underline',
-    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
+    lineHeight: 22,
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,
       android: typography.fontFamily.regular,
@@ -573,7 +573,7 @@ const styles = StyleSheet.create({
     fontWeight: typography.fontWeight.normal,
     color: colors.text.primary,
     marginHorizontal: spacing[3],
-    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
+    lineHeight: 22,
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,
       android: typography.fontFamily.regular,
@@ -642,7 +642,7 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.lg,
     color: colors.text.primary,
     textAlign: 'center',
-    lineHeight: getOptimizedLineHeight(typography.fontSize.lg),
+    lineHeight: 22,
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,
       android: typography.fontFamily.regular,
@@ -659,7 +659,7 @@ const styles = StyleSheet.create({
   },
   modalButtonText: {
     fontSize: typography.fontSize.base,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
+    lineHeight: 22,
     fontWeight: typography.fontWeight.medium,
     color: colors.text.inverse,
     fontFamily: Platform.select({
