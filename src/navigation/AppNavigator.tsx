@@ -63,9 +63,9 @@ const AppNavigator = () => {
   // 토큰 만료 콜백 설정 - 바로 로그아웃 처리
   useEffect(() => {
     apiClient.setOnTokenExpiredCallback(async () => {
-      await logout();
-      await userLogout();
-      setCurrentScreen(SCREEN_NAMES.START);
+    await logout();
+    await userLogout();
+    setCurrentScreen(SCREEN_NAMES.START);
     });
   }, [userLogout]);
 

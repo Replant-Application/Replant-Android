@@ -2,9 +2,11 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, Image, TextInput, Platform, ImageBackground } from 'react-native';
 import { useUser } from '../../contexts/UserContext';
 import { useAdmin } from '../../hooks/useAdmin';
+import { useCharacter } from '../../hooks/useCharacter';
 import { Header, ConfirmModal } from '../../components/ui';
 import { colors, spacing, typography, borderRadius, shadows } from '../../utils/designTokens';
 import { getOptimizedLineHeight } from '../../utils/textStyles';
+import { getCharacterImage } from '../../utils/characterUtils';
 import { clearAllCommunityPosts } from '../../services/storage';
 import { SettingsScreenProps } from './SettingsScreen.types';
 import { TERMS_OF_SERVICE, PRIVACY_POLICY, OPEN_SOURCE_LICENSE } from './SettingsScreen.constants';
@@ -13,6 +15,8 @@ import SettingItem from './SettingItem';
 const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
   const { user, logout, updateNickname } = useUser();
   const { deleteAllUsers } = useAdmin();
+  const { characters } = useCharacter();
+  const currentCharacter = characters.length > 0 ? characters[0] : null;
   const [showNicknameForm, setShowNicknameForm] = useState(false);
   const [newNickname, setNewNickname] = useState('');
   const [showLogoutModal, setShowLogoutModal] = useState(false);
@@ -129,11 +133,19 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
         <View style={styles.section}>
           <View style={styles.userCard}>
             <View style={styles.userInfo}>
-              <Image
-                source={require('../../assets/images/home.png')}
-                style={styles.userIcon}
-                resizeMode="contain"
-              />
+              {currentCharacter ? (
+                <Image
+                  source={getCharacterImage(currentCharacter.level || 1, 'default')}
+                  style={styles.userIcon}
+                  resizeMode="contain"
+                />
+              ) : (
+                <Image
+                  source={require('../../assets/images/home.png')}
+                  style={styles.userIcon}
+                  resizeMode="contain"
+                />
+              )}
               <View style={styles.userDetails}>
                 <Text style={styles.userName}>{user?.nickname || '사용자'}</Text>
                 <Text style={styles.userSubtext}>

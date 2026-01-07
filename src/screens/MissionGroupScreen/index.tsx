@@ -17,6 +17,7 @@ import {
   RefreshControl,
   Image,
   Platform,
+  ImageBackground,
 } from 'react-native';
 import { NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types/navigation';
@@ -197,19 +198,24 @@ const MissionGroupScreen: React.FC<MissionGroupScreenProps> = ({ navigation }) =
   }
 
   return (
-    <View style={styles.container}>
-      <Header
-        title="미션 도감"
-        leftButton={
-          <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Image
-              source={require('../../assets/images/left.png')}
-              style={styles.backButtonIcon}
-              resizeMode="contain"
-            />
-          </TouchableOpacity>
-        }
-      />
+    <ImageBackground
+      source={require('../../assets/images/background.png')}
+      style={styles.backgroundImage}
+      resizeMode="cover"
+    >
+      <View style={styles.container}>
+        <Header
+          title="미션 도감"
+          leftButton={
+            <TouchableOpacity onPress={() => navigation.goBack()}>
+              <Image
+                source={require('../../assets/images/left.png')}
+                style={styles.backButtonIcon}
+                resizeMode="contain"
+              />
+            </TouchableOpacity>
+          }
+        />
 
       <ScrollView
         style={styles.content}
@@ -471,14 +477,19 @@ const MissionGroupScreen: React.FC<MissionGroupScreenProps> = ({ navigation }) =
           </View>
         </View>
       </Modal>
-    </View>
+      </View>
+    </ImageBackground>
   );
 };
 
 const styles = StyleSheet.create({
+  backgroundImage: {
+    flex: 1,
+    width: '100%',
+    height: '100%',
+  },
   container: {
     flex: 1,
-    backgroundColor: colors.background.secondary,
   },
   backButtonIcon: {
     width: 24,

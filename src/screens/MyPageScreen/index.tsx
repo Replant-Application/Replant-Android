@@ -4,18 +4,17 @@ import { NavigationProp } from '@react-navigation/native';
 import { useUserProfile } from '../../hooks/useUserProfile';
 import { useCharacter } from '../../hooks/useCharacter';
 import { CharacterCard } from '../../components/specialized';
-import { Card, Loading, ErrorBoundary, Header, SectionTitle } from '../../components/ui';
+import { Loading, ErrorBoundary, Header } from '../../components/ui';
 import { colors, spacing, typography, borderRadius, shadows } from '../../utils/designTokens';
 import { getOptimizedLineHeight } from '../../utils/textStyles';
 import { RootStackParamList } from '../../types/navigation';
-import { Character } from '../../types';
 import { formatDateKorean } from '../../utils/dateUtils';
 
 interface MyPageScreenProps {
   navigation: NavigationProp<RootStackParamList>;
 }
 
-const MyPageScreen: React.FC<MyPageScreenProps> = ({ navigation }) => {
+const MyPageScreen: React.FC<MyPageScreenProps> = ({ navigation: _navigation }) => {
   const { profile, loading, error } = useUserProfile();
   const { characters } = useCharacter();
   const currentCharacter = characters.length > 0 ? characters[0] : null;
@@ -41,9 +40,6 @@ const MyPageScreen: React.FC<MyPageScreenProps> = ({ navigation }) => {
     );
   }
 
-  const handleCharacterPress = (character: Character): void => {
-    navigation.navigate('CharacterDetail', { character });
-  };
 
   // 통계 데이터 정규화 (그래프 표시용)
   const maxValue = Math.max(
@@ -105,7 +101,7 @@ const MyPageScreen: React.FC<MyPageScreenProps> = ({ navigation }) => {
               </View>
               <CharacterCard
                 character={currentCharacter}
-                onPress={handleCharacterPress}
+                onPress={() => {}}
                 style={styles.characterCardInner}
               />
             </View>

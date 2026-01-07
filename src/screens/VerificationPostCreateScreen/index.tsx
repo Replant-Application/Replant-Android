@@ -281,10 +281,10 @@ const VerificationPostCreateScreen: React.FC<VerificationPostCreateScreenProps> 
     >
       <KeyboardAvoidingView
         style={styles.keyboardView}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
-      >
-        <Header
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+    >
+      <Header
         title={isEditMode ? "인증글 수정" : "인증글 작성"}
         leftButton={
           <TouchableOpacity onPress={() => navigation.goBack()}>
@@ -397,22 +397,22 @@ const VerificationPostCreateScreen: React.FC<VerificationPostCreateScreenProps> 
           style={styles.buttonBackground}
           resizeMode="cover"
         >
-          <TouchableOpacity
-            style={[
-              styles.submitButton,
-              (loading || loadingData || !content.trim()) && styles.submitButtonDisabled
-            ]}
-            onPress={handleSubmitVerification}
-            disabled={loading || loadingData || !content.trim()}
-          >
-            {loading ? (
-              <ActivityIndicator color={colors.white} />
-            ) : (
-              <Text style={styles.submitButtonText}>
-                {isEditMode ? '인증글 수정' : '인증글 작성'}
-              </Text>
-            )}
-          </TouchableOpacity>
+        <TouchableOpacity
+          style={[
+            styles.submitButton,
+            (loading || loadingData || !content.trim()) && styles.submitButtonDisabled
+          ]}
+          onPress={handleSubmitVerification}
+          disabled={loading || loadingData || !content.trim()}
+        >
+          {loading ? (
+            <ActivityIndicator color={colors.white} />
+          ) : (
+            <Text style={styles.submitButtonText}>
+              {isEditMode ? '인증글 수정' : '인증글 작성'}
+            </Text>
+          )}
+        </TouchableOpacity>
         </ImageBackground>
       </View>
 
@@ -429,7 +429,7 @@ const VerificationPostCreateScreen: React.FC<VerificationPostCreateScreenProps> 
           navigation.goBack();
         }}
       />
-      </KeyboardAvoidingView>
+    </KeyboardAvoidingView>
     </ImageBackground>
   );
 };

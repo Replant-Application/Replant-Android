@@ -4,7 +4,7 @@ import FastImage from 'react-native-fast-image';
 import { useCharacter } from '../../hooks/useCharacter';
 import { useMission } from '../../hooks/useMission';
 import { Loading, ErrorBoundary, EmptyState, AppHeader, SimpleTabBar } from '../../components/ui';
-import { colors, spacing, typography, borderRadius, shadows } from '../../utils/designTokens';
+import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
 import { getOptimizedLineHeight } from '../../utils/textStyles';
 import { getCharacterImage } from '../../utils/characterUtils';
 import { HomeScreenProps } from './HomeScreen.types';
@@ -241,9 +241,17 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                     },
                   ]}
                 >
-                  <Text style={styles.speechText}>
-                    {currentCharacter.description || '안녕하세요! 오늘도 화이팅!'}
-                  </Text>
+                  <ImageBackground
+                    source={require('../../assets/images/conversation.png')}
+                    style={styles.speechBubbleImage}
+                    resizeMode="stretch"
+                  >
+                    <View style={styles.speechTextContainer}>
+                      <Text style={styles.speechText}>
+                        {currentCharacter.description || '안녕하세요! 오늘도 화이팅!'}
+                      </Text>
+                    </View>
+                  </ImageBackground>
                 </Animated.View>
               )}
 
@@ -409,31 +417,39 @@ const styles = StyleSheet.create({
   },
   speechBubble: {
     position: 'absolute',
-    top: '30%',
-    left: '8%',
-    transform: [{ translateX: -(SCREEN_WIDTH * 0.85) / 2 }],
-    backgroundColor: colors.background.primary,
-    borderRadius: borderRadius.xl,
-    paddingHorizontal: spacing[5],
-    paddingVertical: spacing[4],
-    ...shadows.lg,
-    width: SCREEN_WIDTH * 0.85,
-    borderWidth: 1,
-    borderColor: colors.gray[200],
+    top: '25%',
+    left: '12%',
+    transform: [{ translateX: -(SCREEN_WIDTH * 0.9) / 2 }],
+    width: SCREEN_WIDTH * 0.9,
     alignSelf: 'center',
   },
+  speechBubbleImage: {
+    width: '100%',
+    minHeight: 120,
+    paddingHorizontal: spacing[6],
+    paddingVertical: spacing[5],
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  speechTextContainer: {
+    width: '100%',
+    alignItems: 'flex-start',
+    justifyContent: 'center',
+    paddingLeft: spacing[12],
+  },
   speechText: {
-    fontSize: typography.fontSize.base,
+    fontSize: typography.fontSize.lg,
     fontWeight: typography.fontWeight.medium,
     color: colors.text.primary,
     lineHeight: getOptimizedLineHeight(typography.fontSize.base),
     letterSpacing: 0,
-    textAlign: 'center',
+    textAlign: 'left',
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,
       android: typography.fontFamily.regular,
     }),
     includeFontPadding: false,
+    width: '100%',
   },
   characterImageContainer: {
     width: SCREEN_WIDTH * 1,
@@ -553,7 +569,7 @@ const styles = StyleSheet.create({
     includeFontPadding: false,
   },
   simpleStatsNumber: {
-    fontWeight: typography.fontWeight.bold,
+    fontWeight: typography.fontWeight.medium,
     color: '#5A4A3A',
     lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
     letterSpacing: 0.3,

@@ -7,9 +7,9 @@ import {
   ScrollView,
   TextInput,
   ActivityIndicator,
-  PermissionsAndroid,
   Platform,
   Image,
+  ImageBackground,
 } from 'react-native';
 import { NavigationProp } from '@react-navigation/native';
 import { Header, EmptyState } from '../../components/ui';
@@ -70,21 +70,26 @@ const PlacesSearchScreen: React.FC<PlacesSearchScreenProps> = ({ navigation }) =
   }, [userLocation, selectedFilter, searchPlaces]);
 
   return (
-    <View style={styles.container}>
-      <Header
-        title="근처 상담센터"
-        leftButton={
-          <TouchableOpacity onPress={handleGoBack} style={styles.backButton}>
-            <Image
-              source={require('../../assets/images/left.png')}
-              style={styles.backButtonIcon}
-              resizeMode="contain"
-            />
-          </TouchableOpacity>
-        }
-      />
+    <ImageBackground
+      source={require('../../assets/images/background.png')}
+      style={styles.backgroundImage}
+      resizeMode="cover"
+    >
+      <View style={styles.container}>
+        <Header
+          title="근처 상담센터"
+          leftButton={
+            <TouchableOpacity onPress={handleGoBack}>
+              <Image
+                source={require('../../assets/images/left.png')}
+                style={styles.backButtonIcon}
+                resizeMode="contain"
+              />
+            </TouchableOpacity>
+          }
+        />
 
-      <ScrollView style={styles.content}>
+        <ScrollView style={styles.content}>
         {/* 검색 바 */}
         <View style={styles.searchContainer}>
           <TextInput
@@ -155,7 +160,7 @@ const PlacesSearchScreen: React.FC<PlacesSearchScreenProps> = ({ navigation }) =
           </View>
         ) : places.length === 0 ? (
           <EmptyState
-            icon="🔍"
+            iconImage={require('../../assets/images/search.png')}
             title="검색 결과가 없습니다"
             description="다른 필터나 지역을 선택해보세요"
           />
@@ -167,21 +172,20 @@ const PlacesSearchScreen: React.FC<PlacesSearchScreenProps> = ({ navigation }) =
             ))}
           </ScrollView>
         )}
-      </ScrollView>
-    </View>
+        </ScrollView>
+      </View>
+    </ImageBackground>
   );
 };
 
 const styles = StyleSheet.create({
+  backgroundImage: {
+    flex: 1,
+    width: '100%',
+    height: '100%',
+  },
   container: {
     flex: 1,
-    backgroundColor: colors.background.secondary,
-  },
-  backButton: {
-    paddingVertical: spacing[2],
-    paddingHorizontal: spacing[3],
-    borderRadius: borderRadius.md,
-    backgroundColor: colors.primary[100],
   },
   backButtonIcon: {
     width: 24,

@@ -39,6 +39,8 @@ const styles = StyleSheet.create({
     marginBottom: spacing[4],
     padding: spacing[5],
     borderRadius: borderRadius.base,
+    borderWidth: 4,
+    borderColor: '#0E0F37',
   },
   header: {
     marginBottom: spacing[5],

@@ -8,14 +8,17 @@ import {
   PanResponder,
   Dimensions,
   Platform,
+  Image,
 } from 'react-native';
 import { SwipeableNotificationItemProps } from './NotificationScreen.types';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
 import { getOptimizedLineHeight } from '../../utils/textStyles';
 import { formatTimeAgo } from '../../utils/dateUtils';
+import ConfirmModal from '../../components/ui/ConfirmModal';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
-const SWIPE_THRESHOLD = -80; // 삭제 버튼이 나타나는 슬라이드 거리
+const SWIPE_THRESHOLD = -70; // 삭제 버튼이 나타나는 슬라이드 거리
+const MAX_SWIPE_DISTANCE = -80; // 최대 슬라이드 거리 제한
 
 const SwipeableNotificationItem: React.FC<SwipeableNotificationItemProps> = ({ 
   item, 
@@ -24,6 +27,7 @@ const SwipeableNotificationItem: React.FC<SwipeableNotificationItemProps> = ({
 }) => {
   const translateX = useRef(new Animated.Value(0)).current;
   const [isDeleting, setIsDeleting] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const panResponder = useRef(
     PanResponder.create({
@@ -34,7 +38,9 @@ const SwipeableNotificationItem: React.FC<SwipeableNotificationItemProps> = ({
       onPanResponderMove: (_, gestureState) => {
         // 오른쪽으로 스와이프만 허용 (음수 = 왼쪽)
         if (gestureState.dx < 0) {
-          translateX.setValue(gestureState.dx);
+          // 최대 슬라이드 거리 제한
+          const limitedDx = Math.max(gestureState.dx, MAX_SWIPE_DISTANCE);
+          translateX.setValue(limitedDx);
         }
       },
       onPanResponderRelease: (_, gestureState) => {
@@ -43,12 +49,16 @@ const SwipeableNotificationItem: React.FC<SwipeableNotificationItemProps> = ({
           Animated.spring(translateX, {
             toValue: SWIPE_THRESHOLD,
             useNativeDriver: true,
+            tension: 50,
+            friction: 7,
           }).start();
         } else {
           // 원래 위치로 복귀
           Animated.spring(translateX, {
             toValue: 0,
             useNativeDriver: true,
+            tension: 50,
+            friction: 7,
           }).start();
         }
       },
@@ -56,6 +66,11 @@ const SwipeableNotificationItem: React.FC<SwipeableNotificationItemProps> = ({
   ).current;
 
   const handleDelete = () => {
+    setShowDeleteModal(true);
+  };
+
+  const handleConfirmDelete = () => {
+    setShowDeleteModal(false);
     setIsDeleting(true);
     Animated.timing(translateX, {
       toValue: -SCREEN_WIDTH,
@@ -64,6 +79,17 @@ const SwipeableNotificationItem: React.FC<SwipeableNotificationItemProps> = ({
     }).start(() => {
       onDelete(item.id);
     });
+  };
+
+  const handleCancelDelete = () => {
+    setShowDeleteModal(false);
+    // 원래 위치로 복귀
+    Animated.spring(translateX, {
+      toValue: 0,
+      useNativeDriver: true,
+      tension: 50,
+      friction: 7,
+    }).start();
   };
 
   if (isDeleting) {
@@ -79,7 +105,11 @@ const SwipeableNotificationItem: React.FC<SwipeableNotificationItemProps> = ({
           onPress={handleDelete}
           activeOpacity={0.8}
         >
-          <Text style={styles.deleteButtonText}>삭제</Text>
+          <Image
+            source={require('../../assets/images/trash.png')}
+            style={styles.deleteButtonIcon}
+            resizeMode="contain"
+          />
         </TouchableOpacity>
       </View>
 
@@ -100,19 +130,38 @@ const SwipeableNotificationItem: React.FC<SwipeableNotificationItemProps> = ({
           style={styles.cardTouchable}
         >
           <View style={styles.contentContainer}>
-            <View style={styles.headerRow}>
-              {!item.isRead && <View style={styles.unreadDot} />}
-              <Text style={[styles.title, !item.isRead && styles.unreadTitle]}>
-                {item.title}
+            <Image
+              source={require('../../assets/images/funny.png')}
+              style={styles.characterImage}
+              resizeMode="contain"
+            />
+            <View style={styles.textContainer}>
+              <View style={styles.headerRow}>
+                {!item.isRead && <View style={styles.unreadDot} />}
+                <Text style={[styles.title, !item.isRead && styles.unreadTitle]}>
+                  {item.title}
+                </Text>
+                <Text style={styles.time}>{formatTimeAgo(item.createdAt)}</Text>
+              </View>
+              <Text style={styles.content} numberOfLines={2}>
+                {item.content}
               </Text>
-              <Text style={styles.time}>{formatTimeAgo(item.createdAt)}</Text>
             </View>
-            <Text style={styles.content} numberOfLines={2}>
-              {item.content}
-            </Text>
           </View>
         </TouchableOpacity>
       </Animated.View>
+
+      {/* 삭제 확인 모달 */}
+      <ConfirmModal
+        visible={showDeleteModal}
+        title="알림 삭제"
+        message="이 알림을 삭제하시겠습니까?"
+        confirmText="삭제"
+        cancelText="취소"
+        onConfirm={handleConfirmDelete}
+        onCancel={handleCancelDelete}
+        confirmButtonColor={colors.error[500]}
+      />
     </View>
   );
 };
@@ -120,8 +169,8 @@ const SwipeableNotificationItem: React.FC<SwipeableNotificationItemProps> = ({
 const styles = StyleSheet.create({
   swipeContainer: {
     position: 'relative',
-    marginBottom: spacing[2],
-    overflow: 'hidden',
+    marginBottom: spacing[3],
+    overflow: 'visible',
   },
   deleteButtonContainer: {
     position: 'absolute',
@@ -130,8 +179,13 @@ const styles = StyleSheet.create({
     bottom: 0,
     justifyContent: 'center',
     alignItems: 'center',
-    width: 80,
-    backgroundColor: colors.error[500],
+    width: 100,
+    height: 95,
+    backgroundColor: '#FF0003',
+    borderWidth: 2,
+    borderColor: '#0E0F37',
+    borderTopRightRadius: borderRadius.base,
+    borderBottomRightRadius: borderRadius.base,
   },
   deleteButton: {
     width: '100%',
@@ -140,22 +194,20 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: spacing[3],
   },
-  deleteButtonText: {
-    color: colors.white,
-    fontSize: typography.fontSize.sm,
-    fontWeight: typography.fontWeight.medium as any,
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
+  deleteButtonIcon: {
+    width: 30,
+    height: 30,
   },
   notificationCard: {
     backgroundColor: colors.white,
     padding: spacing[4],
-    borderBottomWidth: 1,
-    borderBottomColor: colors.gray[100],
+    borderRadius: borderRadius.base,
+    borderWidth: 2,
+    borderColor: '#0E0F37',
+    borderTopWidth: 2,
+    borderBottomWidth: 2,
+    borderLeftWidth: 2,
+    borderRightWidth: 2,
   },
   cardTouchable: {
     flex: 1,
@@ -164,6 +216,16 @@ const styles = StyleSheet.create({
     backgroundColor: colors.gray[50],
   },
   contentContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+  },
+  characterImage: {
+    width: 60,
+    height: 60,
+    marginRight: spacing[3],
+  },
+  textContainer: {
     flex: 1,
   },
   headerRow: {
@@ -179,7 +241,7 @@ const styles = StyleSheet.create({
     marginRight: spacing[2],
   },
   title: {
-    fontSize: typography.fontSize.base,
+    fontSize: typography.fontSize.sm,
     color: colors.text.primary,
     flex: 1,
     fontWeight: typography.fontWeight.medium as any,
@@ -188,7 +250,7 @@ const styles = StyleSheet.create({
       android: typography.fontFamily.regular,
     }),
     includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
   },
   unreadTitle: {
     fontWeight: typography.fontWeight.medium as any,
@@ -197,18 +259,17 @@ const styles = StyleSheet.create({
       android: typography.fontFamily.regular,
     }),
     includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
   },
   content: {
-    fontSize: typography.fontSize.sm,
+    fontSize: typography.fontSize.xs,
     color: colors.text.secondary,
-    lineHeight: 20,
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,
       android: typography.fontFamily.regular,
     }),
     includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
+    lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
   },
   time: {
     fontSize: typography.fontSize.xs,

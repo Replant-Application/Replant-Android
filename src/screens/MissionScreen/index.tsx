@@ -701,6 +701,8 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.base,
     padding: spacing[4],
     marginBottom: spacing[4],
+    borderWidth: 4,
+    borderColor: '#0E0F37',
   },
   badgeSectionHeader: {
     flexDirection: 'row',

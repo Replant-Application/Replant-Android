@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "ReplantMobileApp",
+  "name": "ReplantMobileApp",
     "slug": "replant-mobile-app",
     "version": "0.0.19",
     "orientation": "portrait",
@@ -10,7 +10,7 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "android": {
+  "android": {
       "package": "com.anonymous.replantmobileapp",
       "adaptiveIcon": {
         "foregroundImage": "./logo/play_store_512.png",

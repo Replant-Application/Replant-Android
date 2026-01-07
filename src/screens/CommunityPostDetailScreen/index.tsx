@@ -14,13 +14,14 @@ import {
   Image,
   KeyboardAvoidingView,
   Platform,
+  ImageBackground,
 } from 'react-native';
 import { useCommunityPost } from '../../hooks/useCommunityPost';
 import { useCommunity } from '../../hooks/useCommunity';
 import { CommentCard } from '../../components/specialized';
 import { getOptimizedLineHeight } from '../../utils/textStyles';
-import { Loading, ErrorBoundary, EmptyState } from '../../components/ui';
-import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
+import { Loading, ErrorBoundary, EmptyState, Header, Card } from '../../components/ui';
+import { colors, spacing, typography, borderRadius, shadows } from '../../utils/designTokens';
 import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types/navigation';
 import { useUser } from '../../contexts/UserContext';
@@ -148,31 +149,31 @@ const CommunityPostDetailScreen: React.FC<CommunityPostDetailScreenProps> = ({
   }
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+    <ImageBackground
+      source={require('../../assets/images/background.png')}
+      style={styles.backgroundImage}
+      resizeMode="cover"
     >
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-          <Image
-            source={require('../../assets/images/left.png')}
-            style={styles.backButtonIcon}
-            resizeMode="contain"
-          />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>게시글</Text>
-        <View style={styles.headerRight} />
-      </View>
-
-      <ScrollView
-        style={styles.content}
-        contentContainerStyle={styles.scrollContent}
-        keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={true}
+      <KeyboardAvoidingView
+        style={styles.container}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
       >
-        {/* 게시글 내용 */}
-        <View style={styles.postContainer}>
+        <Header
+          title="게시글"
+          navigation={navigation}
+          showBorder={false}
+          titleStyle={styles.headerTitle}
+        />
+
+        <ScrollView
+          style={styles.content}
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
+          {/* 게시글 내용 */}
+          <Card style={styles.postContainer}>
           <View style={styles.postHeader}>
             <View style={styles.authorInfo}>
               <View style={styles.authorAvatar}>
@@ -260,10 +261,10 @@ const CommunityPostDetailScreen: React.FC<CommunityPostDetailScreenProps> = ({
               </TouchableOpacity>
             )}
           </View>
-        </View>
+          </Card>
 
-        {/* 댓글 섹션 */}
-        <View style={styles.commentsSection}>
+          {/* 댓글 섹션 */}
+          <Card style={styles.commentsSection}>
           <Text style={styles.commentsTitle}>댓글 ({comments.length})</Text>
 
           {comments.length === 0 ? (
@@ -372,97 +373,72 @@ const CommunityPostDetailScreen: React.FC<CommunityPostDetailScreenProps> = ({
                 ))}
             </View>
           )}
-        </View>
-      </ScrollView>
+          </Card>
+        </ScrollView>
 
-      {/* 댓글 입력 */}
-      <View style={styles.commentInputWrapper}>
-        {/* 답글 모드 표시 */}
-        {replyingToComment && (
-          <View style={styles.replyingToContainer}>
-            <Text style={styles.replyingToText}>
-              @{replyingToComment.nickname}님에게 답글 작성 중
-            </Text>
-            <TouchableOpacity onPress={handleCancelReply} style={styles.cancelReplyButton}>
-              <Text style={styles.cancelReplyText}>X</Text>
+        {/* 댓글 입력 */}
+        <View style={styles.commentInputWrapper}>
+          {/* 답글 모드 표시 */}
+          {replyingToComment && (
+            <View style={styles.replyingToContainer}>
+              <Text style={styles.replyingToText}>
+                @{replyingToComment.nickname}님에게 답글 작성 중
+              </Text>
+              <TouchableOpacity onPress={handleCancelReply} style={styles.cancelReplyButton}>
+                <Text style={styles.cancelReplyText}>X</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+          <View style={styles.commentInputContainer}>
+            <TextInput
+              style={styles.commentInput}
+              value={commentContent}
+              onChangeText={setCommentContent}
+              placeholder={replyingToComment ? `@${replyingToComment.nickname}님에게 답글...` : "댓글을 입력하세요"}
+              placeholderTextColor={colors.text.tertiary}
+              multiline
+            />
+            <TouchableOpacity
+              style={[styles.submitButton, !commentContent.trim() && styles.submitButtonDisabled]}
+              onPress={handleSubmitComment}
+              disabled={!commentContent.trim()}
+            >
+              <Text style={styles.submitButtonText}>{replyingToComment ? '답글' : '등록'}</Text>
             </TouchableOpacity>
           </View>
-        )}
-        <View style={styles.commentInputContainer}>
-          <TextInput
-            style={styles.commentInput}
-            value={commentContent}
-            onChangeText={setCommentContent}
-            placeholder={replyingToComment ? `@${replyingToComment.nickname}님에게 답글...` : "댓글을 입력하세요"}
-            placeholderTextColor={colors.text.tertiary}
-            multiline
-          />
-          <TouchableOpacity
-            style={[styles.submitButton, !commentContent.trim() && styles.submitButtonDisabled]}
-            onPress={handleSubmitComment}
-            disabled={!commentContent.trim()}
-          >
-            <Text style={styles.submitButtonText}>{replyingToComment ? '답글' : '등록'}</Text>
-          </TouchableOpacity>
         </View>
-      </View>
-    </KeyboardAvoidingView>
+      </KeyboardAvoidingView>
+    </ImageBackground>
   );
 };
 
 const styles = StyleSheet.create({
+  backgroundImage: {
+    flex: 1,
+    width: '100%',
+    height: '100%',
+  },
   container: {
     flex: 1,
-    backgroundColor: colors.background.secondary,
   },
   content: {
     flex: 1,
   },
   scrollContent: {
-    padding: spacing[4],
+    padding: spacing[5],
     paddingBottom: spacing[24],
   },
-  header: {
-    backgroundColor: colors.background.primary,
-    paddingTop: spacing[16],
-    paddingBottom: spacing[3],
-    paddingHorizontal: spacing[4],
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border.light,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  backButton: {
-    padding: spacing[1],
-  },
-  backButtonIcon: {
-    width: 20,
-    height: 20,
-  },
   headerTitle: {
-    fontSize: typography.fontSize['2xl'],
-    fontWeight: typography.fontWeight.normal,
-    color: colors.text.primary,
-    flex: 1,
-    textAlign: 'center',
+    fontWeight: typography.fontWeight.medium as any,
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,
       android: typography.fontFamily.regular,
     }),
     includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize['2xl']),
-  },
-  headerRight: {
-    width: 28,
   },
   postContainer: {
-    backgroundColor: colors.background.primary,
-    borderRadius: borderRadius.base,
-    padding: spacing[3],
-    marginBottom: spacing[2],
-    borderWidth: 1,
-    borderColor: colors.border.light,
+    marginBottom: spacing[5],
+    ...shadows.sm,
   },
   postHeader: {
     flexDirection: 'row',
@@ -703,6 +679,7 @@ const styles = StyleSheet.create({
   },
   commentsSection: {
     marginTop: spacing[2],
+    ...shadows.sm,
   },
   commentsTitle: {
     fontSize: typography.fontSize.base,
@@ -781,6 +758,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background.primary,
     borderTopWidth: 1,
     borderTopColor: colors.border.light,
+    ...shadows.sm,
   },
   replyingToContainer: {
     flexDirection: 'row',
