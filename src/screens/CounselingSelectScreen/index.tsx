@@ -33,7 +33,7 @@ const CounselingSelectScreen: React.FC<CounselingSelectScreenProps> = ({ navigat
       resizeMode="cover"
     >
       <View style={styles.container}>
-        <Header />
+        <Header title="상담 서비스" navigation={navigation} />
         <ScrollView
           style={styles.scrollView}
           contentContainerStyle={styles.scrollContent}

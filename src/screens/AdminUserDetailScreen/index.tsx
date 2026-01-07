@@ -75,7 +75,7 @@ const AdminUserDetailScreen: React.FC<AdminUserDetailScreenProps> = ({ navigatio
   if (loading || !user) {
     return (
       <View style={styles.container}>
-        <Header title="유저 상세" />
+        <Header title="유저 상세" navigation={navigation} />
         <View style={styles.loadingContainer}>
           <Loading text="유저 정보를 불러오는 중..." />
         </View>
@@ -85,7 +85,7 @@ const AdminUserDetailScreen: React.FC<AdminUserDetailScreenProps> = ({ navigatio
 
   return (
     <ScrollView style={styles.container}>
-      <Header title="유저 상세" />
+      <Header title="유저 상세" navigation={navigation} />
 
       <View style={styles.content}>
         {/* 기본 정보 */}

@@ -325,6 +325,11 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
           }}
           activeOpacity={0.7}
         >
+          <View style={styles.dragHandleContainer}>
+            <View style={styles.dragHandleDot} />
+            <View style={styles.dragHandleDot} />
+            <View style={styles.dragHandleDot} />
+          </View>
         </TouchableOpacity>
         
         <ScrollView
@@ -503,19 +508,25 @@ const styles = StyleSheet.create({
     opacity: 0.3,
   },
   dragHandleArea: {
-    paddingVertical: spacing[2],
+    paddingVertical: spacing[3],
     alignItems: 'center',
     justifyContent: 'center',
   },
-  dragHandleIcon: {
-    width: 24,
-    height: 24,
-  },
-  dragHandle: {
-    width: 50,
-    height: 5,
-    backgroundColor: colors.gray[400],
+  dragHandleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing[1.5],
+    paddingHorizontal: spacing[4],
+    paddingVertical: spacing[1],
+    backgroundColor: colors.gray[100],
     borderRadius: borderRadius.full,
+  },
+  dragHandleDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: colors.gray[400],
   },
   contentScroll: {
     flex: 1,

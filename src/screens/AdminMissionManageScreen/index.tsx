@@ -270,7 +270,7 @@ const AdminMissionManageScreen: React.FC<AdminMissionManageScreenProps> = ({ nav
   if (loading) {
     return (
       <View style={styles.container}>
-        <Header title="미션 관리" />
+        <Header title="미션 관리" navigation={navigation} />
         <Loading text="미션 목록을 불러오는 중..." />
       </View>
     );
@@ -278,7 +278,7 @@ const AdminMissionManageScreen: React.FC<AdminMissionManageScreenProps> = ({ nav
 
   return (
     <View style={styles.container}>
-      <Header title="미션 관리" />
+      <Header title="미션 관리" navigation={navigation} />
 
       <View style={styles.content}>
         {/* 필터 및 추가 버튼 */}

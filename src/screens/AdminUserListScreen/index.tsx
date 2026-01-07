@@ -70,7 +70,7 @@ const AdminUserListScreen: React.FC<AdminUserListScreenProps> = ({ navigation })
 
   return (
     <View style={styles.container}>
-      <Header title="전체 유저 목록" />
+      <Header title="전체 유저 목록" navigation={navigation} />
 
       <View style={styles.content}>
         {/* 검색 및 필터 */}

@@ -61,7 +61,7 @@ const MissionGroupScreen: React.FC<MissionGroupScreenProps> = ({ navigation }) =
       if (result.success && result.data) {
         setMissions(result.data.content || []);
       } else {
-        setError(result.error || '미션 목록을 불러올 수 없습니다.');
+        throw new Error(result.error || '미션 목록을 불러올 수 없습니다.');
       }
     } catch (err) {
       setError((err as Error).message);
@@ -306,11 +306,13 @@ const MissionGroupScreen: React.FC<MissionGroupScreenProps> = ({ navigation }) =
                         </View>
                         <View style={styles.statItem}>
                           <Image
-                            source={require('../../assets/images/pencil.png')}
+                            source={require('../../assets/images/high-five.png')}
                             style={styles.statIcon}
                             resizeMode="contain"
                           />
-                          <Text style={styles.statText}>후기 {mission.reviewCount || 0}개</Text>
+                          <Text style={styles.statText}>
+                            참여 {mission.participantCount || 0}명
+                          </Text>
                         </View>
                       </View>
                     </View>
@@ -349,7 +351,6 @@ const MissionGroupScreen: React.FC<MissionGroupScreenProps> = ({ navigation }) =
                           </View>
                         )}
 
-                        {/* 미션 상세 페이지로 이동 버튼 */}
                         <TouchableOpacity
                           style={styles.detailButton}
                           onPress={() => navigation.navigate('MissionDetail', { missionId: String(selectedMission.id) })}
@@ -361,54 +362,54 @@ const MissionGroupScreen: React.FC<MissionGroupScreenProps> = ({ navigation }) =
 
                       {/* 후기 섹션 */}
                       <View style={styles.inlineReviewSection}>
-                        <View style={styles.reviewSectionHeader}>
-                          <Text style={styles.sectionTitle}>미션 후기</Text>
-                          <TouchableOpacity
-                            style={styles.writeReviewButton}
-                            onPress={() => setShowReviewModal(true)}
-                            activeOpacity={0.7}
-                          >
-                            <Text style={styles.writeReviewButtonText}>후기 작성</Text>
-                          </TouchableOpacity>
-                        </View>
-                        <Text style={styles.reviewHint}>
-                          ※ 미션을 완료하고 뱃지를 획득해야 후기를 작성할 수 있습니다
-                        </Text>
+                          <View style={styles.reviewSectionHeader}>
+                            <Text style={styles.sectionTitle}>미션 후기</Text>
+                            <TouchableOpacity
+                              style={styles.writeReviewButton}
+                              onPress={() => setShowReviewModal(true)}
+                              activeOpacity={0.7}
+                            >
+                              <Text style={styles.writeReviewButtonText}>후기 작성</Text>
+                            </TouchableOpacity>
+                          </View>
+                          <Text style={styles.reviewHint}>
+                            ※ 미션을 완료하고 뱃지를 획득해야 후기를 작성할 수 있습니다
+                          </Text>
 
-                        {reviewsLoading ? (
-                          <View style={styles.loadingContainer}>
-                            <ActivityIndicator size="large" color={colors.primary[500]} />
-                          </View>
-                        ) : reviews.length === 0 ? (
-                          <EmptyState
-                            icon="📝"
-                            title="아직 후기가 없어요"
-                            description="첫 번째 후기를 남겨보세요!"
-                          />
-                        ) : (
-                          <View style={styles.reviewList}>
-                            {reviews.map((review) => (
-                              <View key={review.id} style={styles.reviewCard}>
-                                <View style={styles.reviewHeader}>
-                                  <View style={styles.reviewAvatar}>
-                                    <Text style={styles.reviewAvatarText}>
-                                      {review.userNickname.charAt(0).toUpperCase()}
-                                    </Text>
+                          {reviewsLoading ? (
+                            <View style={styles.loadingContainer}>
+                              <ActivityIndicator size="large" color={colors.primary[500]} />
+                            </View>
+                          ) : reviews.length === 0 ? (
+                            <EmptyState
+                              icon="📝"
+                              title="아직 후기가 없어요"
+                              description="첫 번째 후기를 남겨보세요!"
+                            />
+                          ) : (
+                            <View style={styles.reviewList}>
+                              {reviews.map((review) => (
+                                <View key={review.id} style={styles.reviewCard}>
+                                  <View style={styles.reviewHeader}>
+                                    <View style={styles.reviewAvatar}>
+                                      <Text style={styles.reviewAvatarText}>
+                                        {review.userNickname.charAt(0).toUpperCase()}
+                                      </Text>
+                                    </View>
+                                    <View style={styles.reviewAuthorInfo}>
+                                      <Text style={styles.reviewAuthor}>{review.userNickname}</Text>
+                                      <Text style={styles.reviewDate}>
+                                        {new Date(review.createdAt).toLocaleDateString('ko-KR')}
+                                      </Text>
+                                    </View>
                                   </View>
-                                  <View style={styles.reviewAuthorInfo}>
-                                    <Text style={styles.reviewAuthor}>{review.userNickname}</Text>
-                                    <Text style={styles.reviewDate}>
-                                      {new Date(review.createdAt).toLocaleDateString('ko-KR')}
-                                    </Text>
-                                  </View>
+                                  <Text style={styles.reviewContent}>{review.content}</Text>
                                 </View>
-                                <Text style={styles.reviewContent}>{review.content}</Text>
-                              </View>
-                            ))}
-                          </View>
-                        )}
+                              ))}
+                            </View>
+                          )}
+                        </View>
                       </View>
-                    </View>
                   )}
                 </View>
               ))}

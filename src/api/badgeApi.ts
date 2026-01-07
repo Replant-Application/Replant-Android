@@ -28,6 +28,7 @@ export interface Badge {
   isExpired?: boolean;
 }
 
+// 백엔드는 Badge 배열을 직접 반환
 export interface BadgeListResponse {
   badges: Badge[];
   totalCount: number;
@@ -48,9 +49,28 @@ export interface BadgeHistoryResponse {
  * 내 유효 뱃지 목록 조회
  * GET /api/badges
  * 인증 필요
+ * 백엔드: List<BadgeResponse> 반환 (배열 직접 반환)
  */
 export const getMyBadges = async (): Promise<ServiceResult<BadgeListResponse>> => {
-  return apiClient.get<BadgeListResponse>(API_CONFIG.endpoints.badge.list);
+  // 백엔드가 배열을 직접 반환하므로 변환 필요
+  const result = await apiClient.get<Badge[]>(API_CONFIG.endpoints.badge.list);
+
+  if (result.success && result.data) {
+    // 배열을 BadgeListResponse 형식으로 변환
+    return {
+      success: true,
+      data: {
+        badges: result.data,
+        totalCount: result.data.length,
+      },
+    };
+  }
+
+  return {
+    success: result.success,
+    error: result.error,
+    data: undefined,
+  };
 };
 
 /**

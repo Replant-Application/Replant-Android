@@ -139,10 +139,15 @@ export const getMissionReviews = async (
  */
 export const createMissionReview = async (
   missionId: number,
-  data: { content: string }
+  data: { content: string; rating?: number }
 ): Promise<ServiceResult<MissionReview>> => {
   const endpoint = API_CONFIG.endpoints.mission.createReview.replace(':missionId', String(missionId));
-  return apiClient.post<MissionReview>(endpoint, data);
+  // rating이 없으면 기본값 5 설정
+  const requestData = {
+    content: data.content,
+    rating: data.rating ?? 5,
+  };
+  return apiClient.post<MissionReview>(endpoint, requestData);
 };
 
 // ============================================
@@ -261,6 +266,7 @@ export interface CustomMission {
   description: string;
   creatorId: number;
   creatorNickname: string;
+  missionType?: MissionType;
   durationDays: number;
   isPublic: boolean;
   verificationType: VerificationType;
@@ -447,7 +453,7 @@ export const getUserMission = async (
 export const addCustomMissionToMyMissions = async (data: {
   customMissionId: number;
 }): Promise<ServiceResult<UserMission>> => {
-  return apiClient.post<UserMission>('/missions/my/custom', data);
+  return apiClient.post<UserMission>(API_CONFIG.endpoints.userMission.addCustom, data);
 };
 
 /**
@@ -732,6 +738,7 @@ export interface VerificationComment {
   author_nickname: string;
   content: string;
   created_at: string;
+  updated_at?: string;
   parent_comment_id?: string;
   replies?: VerificationComment[];
 }
@@ -743,6 +750,32 @@ export interface VerificationCommentListResponse {
   number: number;
 }
 
+// 백엔드 CommentResponse 타입
+interface BackendCommentResponse {
+  id: number;
+  userId: number;
+  userNickname: string;
+  userProfileImg?: string;
+  content: string;
+  parentId?: number;
+  replies?: BackendCommentResponse[];
+  replyCount: number;
+  createdAt: string;
+  updatedAt?: string;
+}
+
+// 백엔드 응답을 프론트엔드 형식으로 변환
+const transformComment = (comment: BackendCommentResponse): VerificationComment => ({
+  comment_id: String(comment.id),
+  author: String(comment.userId),
+  author_nickname: comment.userNickname,
+  content: comment.content,
+  created_at: comment.createdAt,
+  updated_at: comment.updatedAt,
+  parent_comment_id: comment.parentId ? String(comment.parentId) : undefined,
+  replies: comment.replies?.map(transformComment),
+});
+
 /**
  * 인증글 댓글 목록 조회
  * GET /api/verifications/{verificationId}/comments
@@ -753,7 +786,25 @@ export const getVerificationComments = async (
   size: number = 20
 ): Promise<ServiceResult<VerificationCommentListResponse>> => {
   const endpoint = `/verifications/${verificationId}/comments?page=${page}&size=${size}`;
-  return apiClient.get<VerificationCommentListResponse>(endpoint);
+  const result = await apiClient.get<{
+    content: BackendCommentResponse[];
+    totalElements: number;
+    totalPages: number;
+    number: number;
+  }>(endpoint);
+
+  if (result.success && result.data) {
+    return {
+      success: true,
+      data: {
+        content: result.data.content.map(transformComment),
+        totalElements: result.data.totalElements,
+        totalPages: result.data.totalPages,
+        number: result.data.number,
+      },
+    };
+  }
+  return { success: false, error: result.error };
 };
 
 /**
@@ -766,7 +817,15 @@ export const createVerificationComment = async (
   parentId?: string
 ): Promise<ServiceResult<VerificationComment>> => {
   const endpoint = `/verifications/${verificationId}/comments`;
-  return apiClient.post<VerificationComment>(endpoint, { content, parentId: parentId ? Number(parentId) : undefined });
+  const result = await apiClient.post<BackendCommentResponse>(endpoint, {
+    content,
+    parentId: parentId ? Number(parentId) : undefined,
+  });
+
+  if (result.success && result.data) {
+    return { success: true, data: transformComment(result.data) };
+  }
+  return { success: false, error: result.error };
 };
 
 /**
@@ -779,7 +838,12 @@ export const updateVerificationComment = async (
   content: string
 ): Promise<ServiceResult<VerificationComment>> => {
   const endpoint = `/verifications/${verificationId}/comments/${commentId}`;
-  return apiClient.put<VerificationComment>(endpoint, { content });
+  const result = await apiClient.put<BackendCommentResponse>(endpoint, { content });
+
+  if (result.success && result.data) {
+    return { success: true, data: transformComment(result.data) };
+  }
+  return { success: false, error: result.error };
 };
 
 /**
@@ -954,4 +1018,113 @@ export const checkVerificationStatus = async (
   } catch (error) {
     return { success: false, error: '인증 상태 확인 중 오류가 발생했습니다.' };
   }
+};
+
+// ============================================
+// 기상 미션 API (Wakeup Mission)
+// ============================================
+
+export type WakeupTimeSlot = 'SLOT_6_8' | 'SLOT_8_10' | 'SLOT_10_12';
+
+export interface WakeupMissionSetting {
+  id: number;
+  userId: number;
+  timeSlot: WakeupTimeSlot;
+  weekNumber: number;
+  year: number;
+  createdAt: string;
+}
+
+export interface WakeupMissionSettingRequest {
+  timeSlot: WakeupTimeSlot;
+}
+
+export interface NextWeekSetupInfo {
+  weekNumber: number;
+  year: number;
+  isAlreadySet: boolean;
+  currentSetting?: WakeupMissionSetting;
+  availableTimeSlots: WakeupTimeSlot[];
+}
+
+export interface WakeupVerificationResult {
+  canVerify: boolean;
+  currentTimeSlot?: WakeupTimeSlot;
+  settingTimeSlot?: WakeupTimeSlot;
+  message: string;
+}
+
+/**
+ * 기상 미션 시간대 설정
+ * POST /api/missions/my/wakeup/settings
+ * 인증 필요
+ */
+export const setWakeupTime = async (
+  data: WakeupMissionSettingRequest
+): Promise<ServiceResult<WakeupMissionSetting>> => {
+  return apiClient.post<WakeupMissionSetting>(API_CONFIG.endpoints.userMission.wakeupSettings, data);
+};
+
+/**
+ * 기상 미션 시간대 수정
+ * PUT /api/missions/my/wakeup/settings/{settingId}
+ * 인증 필요
+ */
+export const updateWakeupTime = async (
+  settingId: number,
+  timeSlot: WakeupTimeSlot
+): Promise<ServiceResult<WakeupMissionSetting>> => {
+  const endpoint = API_CONFIG.endpoints.userMission.wakeupSettingDetail.replace(':settingId', String(settingId));
+  return apiClient.put<WakeupMissionSetting>(endpoint, null, { timeSlot });
+};
+
+/**
+ * 현재 주차 기상 미션 설정 조회
+ * GET /api/missions/my/wakeup/settings/current
+ * 인증 필요
+ */
+export const getCurrentWeekWakeupSetting = async (): Promise<ServiceResult<WakeupMissionSetting>> => {
+  return apiClient.get<WakeupMissionSetting>(API_CONFIG.endpoints.userMission.wakeupCurrentWeek);
+};
+
+/**
+ * 특정 주차 기상 미션 설정 조회
+ * GET /api/missions/my/wakeup/settings?weekNumber=&year=
+ * 인증 필요
+ */
+export const getWeekWakeupSetting = async (
+  weekNumber: number,
+  year: number
+): Promise<ServiceResult<WakeupMissionSetting>> => {
+  return apiClient.get<WakeupMissionSetting>(API_CONFIG.endpoints.userMission.wakeupSettings, { weekNumber, year });
+};
+
+/**
+ * 다음 주차 기상 미션 설정 정보
+ * GET /api/missions/my/wakeup/settings/next-week-info
+ * 인증 필요
+ */
+export const getNextWeekSetupInfo = async (): Promise<ServiceResult<NextWeekSetupInfo>> => {
+  return apiClient.get<NextWeekSetupInfo>(API_CONFIG.endpoints.userMission.wakeupNextWeekInfo);
+};
+
+/**
+ * 기상 미션 인증 시간 확인
+ * GET /api/missions/my/wakeup/verify-time
+ * 인증 필요
+ */
+export const verifyWakeupTime = async (): Promise<ServiceResult<WakeupVerificationResult>> => {
+  return apiClient.get<WakeupVerificationResult>(API_CONFIG.endpoints.userMission.wakeupVerifyTime);
+};
+
+/**
+ * 미션 수행 이력 조회
+ * GET /api/missions/my/history
+ * 인증 필요
+ */
+export const getMissionHistory = async (params?: {
+  page?: number;
+  size?: number;
+}): Promise<ServiceResult<UserMissionListResponse>> => {
+  return apiClient.get<UserMissionListResponse>(API_CONFIG.endpoints.userMission.history, params);
 };

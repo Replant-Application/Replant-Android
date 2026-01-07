@@ -14,7 +14,7 @@ interface MyPageScreenProps {
   navigation: NavigationProp<RootStackParamList>;
 }
 
-const MyPageScreen: React.FC<MyPageScreenProps> = ({ navigation: _navigation }) => {
+const MyPageScreen: React.FC<MyPageScreenProps> = ({ navigation }) => {
   const { profile, loading, error } = useUserProfile();
   const { characters } = useCharacter();
   const currentCharacter = characters.length > 0 ? characters[0] : null;
@@ -31,7 +31,7 @@ const MyPageScreen: React.FC<MyPageScreenProps> = ({ navigation: _navigation }) 
         resizeMode="cover"
       >
         <ScrollView style={styles.scrollView}>
-          <Header />
+          <Header title="마이페이지" navigation={navigation} />
           <View style={styles.content}>
             <Loading text="프로필을 불러오는 중..." />
           </View>
@@ -64,7 +64,7 @@ const MyPageScreen: React.FC<MyPageScreenProps> = ({ navigation: _navigation }) 
       resizeMode="cover"
     >
       <ScrollView style={styles.scrollView}>
-        <Header />
+        <Header title="마이페이지" navigation={navigation} />
         <View style={styles.content}>
           {/* 프로필 섹션 */}
           <View style={styles.profileCard}>

@@ -10,7 +10,6 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  TextInput,
   Alert,
   Image,
   KeyboardAvoidingView,
@@ -23,16 +22,12 @@ import { colors, spacing, typography, borderRadius } from '../../utils/designTok
 import { getOptimizedLineHeight } from '../../utils/textStyles';
 import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types/navigation';
-import { useUser } from '../../contexts/UserContext';
 import {
   getSystemMission,
   getMissionReviews,
-  createMissionReview,
   SystemMission,
   MissionReview,
-  MissionReviewListResponse,
 } from '../../api/missionApi';
-import { getMyBadges, Badge } from '../../api/badgeApi';
 
 interface MissionDetailScreenProps {
   navigation: NavigationProp<RootStackParamList>;
@@ -102,16 +97,11 @@ const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
   route,
 }) => {
   const { missionId } = route.params;
-  const { isLoggedIn } = useUser();
 
   const [mission, setMission] = useState<SystemMission | null>(null);
   const [reviews, setReviews] = useState<MissionReview[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [newReviewContent, setNewReviewContent] = useState('');
-  const [submitting, setSubmitting] = useState(false);
-  const [hasBadge, setHasBadge] = useState(false);
-  const [loadingBadge, setLoadingBadge] = useState(true);
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [totalReviews, setTotalReviews] = useState(0);
@@ -162,51 +152,19 @@ const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
     }
   }, [missionId]);
 
-  // 뱃지 확인
-  const checkBadge = useCallback(async () => {
-    if (!missionId || !isLoggedIn) {
-      setLoadingBadge(false);
-      return;
-    }
-
-    try {
-      const numericMissionId = parseInt(missionId, 10);
-      if (isNaN(numericMissionId)) {
-        setLoadingBadge(false);
-        return;
-      }
-
-      const result = await getMyBadges();
-      if (result.success && result.data) {
-        // 해당 미션에 대한 유효한 뱃지가 있는지 확인
-        const missionBadge = result.data.badges.find(
-          (badge: Badge) =>
-            badge.missionType === 'SYSTEM' &&
-            badge.mission?.id === numericMissionId &&
-            !badge.isExpired
-        );
-        setHasBadge(!!missionBadge);
-      }
-    } catch (error) {
-      console.error('뱃지 확인 실패:', error);
-    } finally {
-      setLoadingBadge(false);
-    }
-  }, [missionId, isLoggedIn]);
-
   // 초기 데이터 로드
   const loadData = useCallback(async () => {
     setLoading(true);
-    await Promise.all([loadMission(), loadReviews(0), checkBadge()]);
+    await Promise.all([loadMission(), loadReviews(0)]);
     setLoading(false);
-  }, [loadMission, loadReviews, checkBadge]);
+  }, [loadMission, loadReviews]);
 
   // 새로고침
   const handleRefresh = useCallback(async () => {
     setRefreshing(true);
-    await Promise.all([loadMission(), loadReviews(0), checkBadge()]);
+    await Promise.all([loadMission(), loadReviews(0)]);
     setRefreshing(false);
-  }, [loadMission, loadReviews, checkBadge]);
+  }, [loadMission, loadReviews]);
 
   // 더 많은 리뷰 로드
   const loadMoreReviews = useCallback(() => {
@@ -218,52 +176,6 @@ const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
   useEffect(() => {
     loadData();
   }, [loadData]);
-
-  // 리뷰 작성
-  const handleSubmitReview = async () => {
-    if (!newReviewContent.trim()) {
-      Alert.alert('오류', '리뷰 내용을 입력해주세요.');
-      return;
-    }
-
-    if (!isLoggedIn) {
-      Alert.alert('오류', '로그인이 필요합니다.');
-      return;
-    }
-
-    if (!hasBadge) {
-      Alert.alert(
-        '권한 없음',
-        '이 미션을 완료하고 뱃지를 획득한 후에 후기를 작성할 수 있습니다.'
-      );
-      return;
-    }
-
-    if (!missionId) return;
-
-    try {
-      setSubmitting(true);
-      const numericMissionId = parseInt(missionId, 10);
-
-      const result = await createMissionReview(numericMissionId, {
-        content: newReviewContent.trim(),
-      });
-
-      if (result.success && result.data) {
-        // 새 리뷰를 목록 맨 앞에 추가
-        setReviews(prev => [result.data!, ...prev]);
-        setTotalReviews(prev => prev + 1);
-        setNewReviewContent('');
-        Alert.alert('완료', '후기가 등록되었습니다.');
-      } else {
-        Alert.alert('오류', result.error || '후기 등록에 실패했습니다.');
-      }
-    } catch (error) {
-      Alert.alert('오류', '후기 등록에 실패했습니다.');
-    } finally {
-      setSubmitting(false);
-    }
-  };
 
   if (loading) {
     return <Loading text="미션 정보를 불러오는 중..." />;
@@ -370,55 +282,6 @@ const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
                 : '커뮤니티 인증'}
             </Text>
           </View>
-        </View>
-
-        {/* 리뷰 작성 */}
-        <View style={styles.reviewFormContainer}>
-          <Text style={styles.sectionTitle}>후기 작성</Text>
-
-          {!isLoggedIn ? (
-            <View style={styles.loginPrompt}>
-              <Text style={styles.loginPromptText}>
-                후기를 작성하려면 로그인이 필요합니다.
-              </Text>
-            </View>
-          ) : loadingBadge ? (
-            <View style={styles.loginPrompt}>
-              <Text style={styles.loginPromptText}>뱃지 확인 중...</Text>
-            </View>
-          ) : !hasBadge ? (
-            <View style={styles.noBadgePrompt}>
-              <Text style={styles.noBadgeIcon}>🔒</Text>
-              <Text style={styles.noBadgeText}>
-                이 미션을 완료하고 뱃지를 획득하면{'\n'}후기를 작성할 수 있습니다.
-              </Text>
-            </View>
-          ) : (
-            <>
-              <TextInput
-                style={styles.reviewInput}
-                value={newReviewContent}
-                onChangeText={setNewReviewContent}
-                placeholder="미션을 완료한 경험을 공유해주세요..."
-                placeholderTextColor={colors.text.tertiary}
-                multiline
-                numberOfLines={3}
-                editable={!submitting}
-              />
-              <TouchableOpacity
-                style={[
-                  styles.submitButton,
-                  (!newReviewContent.trim() || submitting) && styles.submitButtonDisabled,
-                ]}
-                onPress={handleSubmitReview}
-                disabled={!newReviewContent.trim() || submitting}
-              >
-                <Text style={styles.submitButtonText}>
-                  {submitting ? '등록 중...' : '후기 등록'}
-                </Text>
-              </TouchableOpacity>
-            </>
-          )}
         </View>
 
         {/* 리뷰 목록 */}
@@ -618,13 +481,7 @@ const styles = StyleSheet.create({
     includeFontPadding: false,
     lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
   },
-  // 리뷰 작성
-  reviewFormContainer: {
-    backgroundColor: colors.background.primary,
-    borderRadius: borderRadius.lg,
-    padding: spacing[4],
-    marginBottom: spacing[4],
-  },
+  // 리뷰 목록
   sectionTitle: {
     fontSize: typography.fontSize.lg,
     fontWeight: typography.fontWeight.medium,
@@ -637,82 +494,6 @@ const styles = StyleSheet.create({
     includeFontPadding: false,
     lineHeight: getOptimizedLineHeight(typography.fontSize.lg),
   },
-  loginPrompt: {
-    padding: spacing[4],
-    alignItems: 'center',
-  },
-  loginPromptText: {
-    fontSize: typography.fontSize.sm,
-    color: colors.text.tertiary,
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
-  },
-  noBadgePrompt: {
-    padding: spacing[4],
-    alignItems: 'center',
-    backgroundColor: colors.background.secondary,
-    borderRadius: borderRadius.md,
-  },
-  noBadgeIcon: {
-    fontSize: 32,
-    marginBottom: spacing[2],
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-  },
-  noBadgeText: {
-    fontSize: typography.fontSize.sm,
-    color: colors.text.secondary,
-    textAlign: 'center',
-    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-  },
-  reviewInput: {
-    backgroundColor: colors.background.secondary,
-    borderRadius: borderRadius.md,
-    padding: spacing[3],
-    fontSize: typography.fontSize.base,
-    color: colors.text.primary,
-    minHeight: 80,
-    textAlignVertical: 'top',
-    marginBottom: spacing[3],
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-  },
-  submitButton: {
-    backgroundColor: colors.primary[600],
-    paddingVertical: spacing[3],
-    borderRadius: borderRadius.md,
-    alignItems: 'center',
-  },
-  submitButtonDisabled: {
-    backgroundColor: colors.background.tertiary,
-  },
-  submitButtonText: {
-    fontSize: typography.fontSize.base,
-    color: colors.white,
-    fontWeight: typography.fontWeight.medium,
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
-  },
-  // 리뷰 목록
   reviewsSection: {
     marginBottom: spacing[6],
   },
@@ -757,7 +538,7 @@ const styles = StyleSheet.create({
       android: typography.fontFamily.regular,
     }),
     includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
+    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
   },
   reviewAuthor: {
     fontSize: typography.fontSize.sm,

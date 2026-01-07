@@ -90,7 +90,7 @@ const AdminDashboardScreen: React.FC<AdminDashboardScreenProps> = ({ navigation 
 
   return (
     <ScrollView style={styles.container}>
-      <Header title="관리자 대시보드" />
+      <Header title="관리자 대시보드" navigation={navigation} />
 
       <View style={styles.content}>
         {loading ? (

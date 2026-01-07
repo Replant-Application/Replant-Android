@@ -123,7 +123,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
       style={styles.container}
       resizeMode="cover"
     >
-      <Header />
+      <Header title="설정" showBackButton={false} />
       <ScrollView 
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}

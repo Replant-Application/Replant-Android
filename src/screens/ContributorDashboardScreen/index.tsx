@@ -183,7 +183,7 @@ const ContributorDashboardScreen: React.FC<ContributorDashboardScreenProps> = ({
   if (loading) {
     return (
       <View style={styles.container}>
-        <Header title="기여자 대시보드" />
+        <Header title="기여자 대시보드" navigation={navigation} />
         <Loading text="정보를 불러오는 중..." />
       </View>
     );
@@ -191,7 +191,7 @@ const ContributorDashboardScreen: React.FC<ContributorDashboardScreenProps> = ({
 
   return (
     <ScrollView style={styles.container}>
-      <Header title="기여자 대시보드" />
+      <Header title="기여자 대시보드" navigation={navigation} />
 
       <View style={styles.content}>
         {/* 환영 배너 */}

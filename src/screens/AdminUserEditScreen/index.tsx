@@ -68,7 +68,7 @@ const AdminUserEditScreen: React.FC<AdminUserEditScreenProps> = ({ navigation, r
   if (loading || !user) {
     return (
       <View style={styles.container}>
-        <Header title="유저 수정" />
+        <Header title="유저 수정" navigation={navigation} />
         <View style={styles.loadingContainer}>
           <Loading text="유저 정보를 불러오는 중..." />
         </View>
@@ -82,18 +82,7 @@ const AdminUserEditScreen: React.FC<AdminUserEditScreenProps> = ({ navigation, r
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
     >
-      <Header
-        title="유저 수정"
-        leftButton={
-          <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Image
-              source={require('../../assets/images/left.png')}
-              style={styles.backButtonIcon}
-              resizeMode="contain"
-            />
-          </TouchableOpacity>
-        }
-      />
+      <Header title="유저 수정" navigation={navigation} />
 
       <ScrollView style={styles.content} keyboardShouldPersistTaps="handled">
         <View style={styles.formContainer}>

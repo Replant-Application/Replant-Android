@@ -114,7 +114,7 @@ const GraduateScreen: React.FC<GraduateScreenProps> = ({ navigation }) => {
   if (loading) {
     return (
       <View style={styles.container}>
-        <Header title="졸업자 공간" />
+        <Header title="졸업자 공간" navigation={navigation} />
         <Loading text="정보를 불러오는 중..." />
       </View>
     );
@@ -122,7 +122,7 @@ const GraduateScreen: React.FC<GraduateScreenProps> = ({ navigation }) => {
 
   return (
     <ScrollView style={styles.container}>
-      <Header title="졸업자 공간" />
+      <Header title="졸업자 공간" navigation={navigation} />
 
       <View style={styles.content}>
         {/* 졸업 축하 배너 */}

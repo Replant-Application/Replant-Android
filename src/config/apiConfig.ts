@@ -81,7 +81,15 @@ export const API_CONFIG = {
       list: '/missions/my',
       detail: '/missions/my/:userMissionId',
       add: '/missions/my',
+      addCustom: '/missions/my/custom',
       verify: '/missions/my/:userMissionId/verify',
+      history: '/missions/my/history',
+      // 기상 미션 설정
+      wakeupSettings: '/missions/my/wakeup/settings',
+      wakeupSettingDetail: '/missions/my/wakeup/settings/:settingId',
+      wakeupCurrentWeek: '/missions/my/wakeup/settings/current',
+      wakeupNextWeekInfo: '/missions/my/wakeup/settings/next-week-info',
+      wakeupVerifyTime: '/missions/my/wakeup/verify-time',
     },
 
     // 인증 게시판 (Verification)
