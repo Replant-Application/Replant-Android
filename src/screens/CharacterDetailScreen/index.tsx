@@ -13,7 +13,7 @@ interface CharacterDetailScreenProps {
   navigation: NavigationProp<RootStackParamList>;
 }
 
-const CharacterDetailScreen: React.FC<CharacterDetailScreenProps> = ({ route, navigation: _navigation }) => {
+const CharacterDetailScreen: React.FC<CharacterDetailScreenProps> = ({ route, navigation }) => {
   const { character: initialCharacter } = route.params || {};
   const { characters, updateCharacterName, loadCharacters } = useCharacter();
   const [currentEmotion, setCurrentEmotion] = useState<string>('default');
@@ -123,7 +123,18 @@ const CharacterDetailScreen: React.FC<CharacterDetailScreenProps> = ({ route, na
 
   return (
     <ScrollView style={styles.container}>
-      <Header />
+      <Header
+        title="캐릭터 상세"
+        leftButton={
+          <TouchableOpacity onPress={() => navigation.goBack()}>
+            <Image
+              source={require('../../assets/images/left.png')}
+              style={styles.backButtonIcon}
+              resizeMode="contain"
+            />
+          </TouchableOpacity>
+        }
+      />
 
       <View style={styles.content}>
         {/* 캐릭터 이미지 섹션 */}
@@ -280,6 +291,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background.secondary,
+  },
+  backButtonIcon: {
+    width: 24,
+    height: 24,
+    tintColor: colors.text.primary,
   },
   content: {
     padding: spacing[5],

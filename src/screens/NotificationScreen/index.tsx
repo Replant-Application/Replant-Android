@@ -11,6 +11,7 @@ import {
   FlatList,
   TouchableOpacity,
   RefreshControl,
+  Image,
 } from 'react-native';
 import { 
   getNotifications, 
@@ -305,14 +306,23 @@ const NotificationScreen: React.FC<NotificationScreenProps> = ({ navigation }) =
       {/* 헤더 섹션 */}
       <View style={styles.headerSection}>
         <View style={styles.headerContent}>
+          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+            <Image
+              source={require('../../assets/images/left.png')}
+              style={styles.backButtonIcon}
+              resizeMode="contain"
+            />
+          </TouchableOpacity>
           <Text style={styles.headerTitle}>알림</Text>
-          {unreadCount > 0 && (
-            <TouchableOpacity 
+          {unreadCount > 0 ? (
+            <TouchableOpacity
               style={styles.markAllButton}
               onPress={handleMarkAllAsRead}
             >
               <Text style={styles.markAllReadText}>모두 읽음</Text>
             </TouchableOpacity>
+          ) : (
+            <View style={styles.placeholderButton} />
           )}
         </View>
       </View>
@@ -370,6 +380,17 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background.secondary,
+  },
+  backButton: {
+    padding: spacing[2],
+  },
+  backButtonIcon: {
+    width: 24,
+    height: 24,
+    tintColor: colors.text.primary,
+  },
+  placeholderButton: {
+    width: 60,
   },
   headerSection: {
     backgroundColor: colors.white,

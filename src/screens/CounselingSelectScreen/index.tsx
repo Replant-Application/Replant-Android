@@ -5,6 +5,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   ScrollView,
+  Image,
 } from 'react-native';
 import { Header } from '../../components/ui';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
@@ -24,7 +25,18 @@ const CounselingSelectScreen: React.FC<CounselingSelectScreenProps> = ({ navigat
 
   return (
     <ScrollView style={styles.container}>
-      <Header />
+      <Header
+        title="상담 서비스"
+        leftButton={
+          <TouchableOpacity onPress={() => navigation.goBack()}>
+            <Image
+              source={require('../../assets/images/left.png')}
+              style={styles.backButtonIcon}
+              resizeMode="contain"
+            />
+          </TouchableOpacity>
+        }
+      />
 
       <View style={styles.content}>
         <Text style={styles.title}>상담 서비스</Text>
@@ -74,6 +86,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background.secondary,
+  },
+  backButtonIcon: {
+    width: 24,
+    height: 24,
+    tintColor: colors.text.primary,
   },
   content: {
     padding: spacing[4],

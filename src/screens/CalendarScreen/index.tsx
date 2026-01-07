@@ -1,12 +1,18 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Modal, TextInput } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Modal, TextInput, Image } from 'react-native';
 import { useCalendar } from '../../hooks/useCalendar';
 import { Card, Loading, ErrorBoundary, Header, SectionTitle, Button, FAB } from '../../components/ui';
 import { colors, spacing, typography, borderRadius, shadows } from '../../utils/designTokens';
 import { CalendarEventData } from '../../types';
 import { formatDateKorean } from '../../utils/dateUtils';
+import { NavigationProp } from '@react-navigation/native';
+import { RootStackParamList } from '../../types/navigation';
 
-const CalendarScreen: React.FC = () => {
+interface CalendarScreenProps {
+  navigation: NavigationProp<RootStackParamList>;
+}
+
+const CalendarScreen: React.FC<CalendarScreenProps> = ({ navigation }) => {
   const { loading, error, addEvent, updateEvent, deleteEvent, getEventsByDate } = useCalendar();
   const todayDateString = new Date().toISOString().split('T')[0] || '';
   const [selectedDate, setSelectedDate] = useState<string>(todayDateString);
@@ -132,7 +138,18 @@ const CalendarScreen: React.FC = () => {
   return (
     <View style={styles.container}>
       <ScrollView style={styles.scrollView}>
-        <Header />
+        <Header
+          title="캘린더"
+          leftButton={
+            <TouchableOpacity onPress={() => navigation.goBack()}>
+              <Image
+                source={require('../../assets/images/left.png')}
+                style={styles.backButtonIcon}
+                resizeMode="contain"
+              />
+            </TouchableOpacity>
+          }
+        />
         <View style={styles.content}>
           {/* 날짜 선택 */}
           <Card style={styles.dateCard}>
@@ -277,6 +294,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background.secondary,
+  },
+  backButtonIcon: {
+    width: 24,
+    height: 24,
+    tintColor: colors.text.primary,
   },
   scrollView: {
     flex: 1,

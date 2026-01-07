@@ -152,7 +152,18 @@ const StatisticsScreen: React.FC<StatisticsScreenProps> = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <Header />
+      <Header
+        title="통계"
+        leftButton={
+          <TouchableOpacity onPress={() => navigation.goBack()}>
+            <Image
+              source={require('../../assets/images/left.png')}
+              style={styles.backButtonIcon}
+              resizeMode="contain"
+            />
+          </TouchableOpacity>
+        }
+      />
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
         {/* 탭 */}
         <View style={styles.tabContainer}>
@@ -307,6 +318,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background.secondary,
+  },
+  backButtonIcon: {
+    width: 24,
+    height: 24,
+    tintColor: colors.text.primary,
   },
   scrollView: {
     flex: 1,
