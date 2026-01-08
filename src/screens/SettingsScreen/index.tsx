@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, Image, TextInput, Platform, ImageBackground } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, Image, TextInput, Platform, ImageBackground, Linking, Clipboard } from 'react-native';
 import { useUser } from '../../contexts/UserContext';
 import { useAdmin } from '../../hooks/useAdmin';
 import { useCharacter } from '../../hooks/useCharacter';
@@ -11,6 +11,10 @@ import { clearAllCommunityPosts } from '../../services/storage';
 import { SettingsScreenProps } from './SettingsScreen.types';
 import { TERMS_OF_SERVICE, PRIVACY_POLICY, OPEN_SOURCE_LICENSE } from './SettingsScreen.constants';
 import SettingItem from './SettingItem';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getStorageKeys } from '../../services/storage';
+import { clearAuthData } from '../../utils/tokenStorage';
+import { apiClient } from '../../api/client';
 
 const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
   const { user, logout, updateNickname } = useUser();
@@ -20,6 +24,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
   const [showNicknameForm, setShowNicknameForm] = useState(false);
   const [newNickname, setNewNickname] = useState('');
   const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [showWithdrawalModal, setShowWithdrawalModal] = useState(false);
 
   const handleLogout = () => {
     setShowLogoutModal(false);
@@ -113,6 +118,108 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
         }
       ]
     );
+  };
+
+  const handleSendFeedback = async () => {
+    const email = 'teamsda01@gmail.com';
+    const subject = encodeURIComponent('[Replant] 불편신고 및 개선 요청');
+    const body = encodeURIComponent(
+      `안녕하세요.\n\n불편사항이나 개선 요청사항을 작성해주세요.\n\n\n\n---\n앱 버전: 0.0.26\n기기: ${Platform.OS}`
+    );
+    const mailtoUrl = `mailto:${email}?subject=${subject}&body=${body}`;
+
+    try {
+      const supported = await Linking.canOpenURL(mailtoUrl);
+      if (supported) {
+        await Linking.openURL(mailtoUrl);
+      } else {
+        // 메일 앱이 없을 경우 이메일 주소를 클립보드에 복사
+        try {
+          await Clipboard.setString(email);
+          Alert.alert(
+            '이메일 주소 복사됨',
+            `메일 앱을 찾을 수 없습니다.\n\n이메일 주소가 클립보드에 복사되었습니다:\n${email}\n\n원하시는 메일 앱에서 이 주소로 문의해주세요.`,
+            [{ text: '확인', style: 'default' }]
+          );
+        } catch (clipboardError) {
+          // 클립보드 복사도 실패한 경우
+          Alert.alert(
+            '이메일 주소',
+            `메일 앱을 열 수 없습니다.\n\n아래 이메일 주소로 문의해주세요:\n\n${email}`,
+            [{ text: '확인', style: 'default' }]
+          );
+        }
+      }
+    } catch (error) {
+      // 메일 앱 열기 실패 시 이메일 주소 복사 시도
+      try {
+        await Clipboard.setString(email);
+        Alert.alert(
+          '이메일 주소 복사됨',
+          `메일 앱을 여는 중 오류가 발생했습니다.\n\n이메일 주소가 클립보드에 복사되었습니다:\n${email}\n\n원하시는 메일 앱에서 이 주소로 문의해주세요.`,
+          [{ text: '확인', style: 'default' }]
+        );
+      } catch (clipboardError) {
+        Alert.alert(
+          '이메일 주소',
+          `메일 앱을 여는 중 오류가 발생했습니다.\n\n아래 이메일 주소로 문의해주세요:\n\n${email}`,
+          [{ text: '확인', style: 'default' }]
+        );
+      }
+    }
+  };
+
+  const handleWithdrawal = async () => {
+    if (!user?.nickname) {
+      Alert.alert('오류', '사용자 정보를 찾을 수 없습니다.');
+      return;
+    }
+
+    try {
+      const storageKeys = getStorageKeys(user.nickname);
+      const allKeys = await AsyncStorage.getAllKeys();
+
+      // 사용자 관련 모든 데이터 키 수집
+      const keysToDelete: string[] = [];
+
+      // 사용자 기본 정보
+      if (allKeys.includes(storageKeys.USER)) keysToDelete.push(storageKeys.USER);
+      if (allKeys.includes(storageKeys.USER_NICKNAME)) keysToDelete.push(storageKeys.USER_NICKNAME);
+
+      // 사용자별 데이터
+      if (allKeys.includes(storageKeys.MISSIONS)) keysToDelete.push(storageKeys.MISSIONS);
+      if (allKeys.includes(storageKeys.DIARIES)) keysToDelete.push(storageKeys.DIARIES);
+      if (allKeys.includes(storageKeys.CHARACTERS)) keysToDelete.push(storageKeys.CHARACTERS);
+      if (allKeys.includes(storageKeys.SETTINGS)) keysToDelete.push(storageKeys.SETTINGS);
+      if (allKeys.includes(storageKeys.PREFERENCES)) keysToDelete.push(storageKeys.PREFERENCES);
+      if (allKeys.includes(storageKeys.USER_LIKES)) keysToDelete.push(storageKeys.USER_LIKES);
+      if (allKeys.includes(storageKeys.USER_SCRAPS)) keysToDelete.push(storageKeys.USER_SCRAPS);
+      if (allKeys.includes(storageKeys.CALENDAR_EVENTS)) keysToDelete.push(storageKeys.CALENDAR_EVENTS);
+      if (allKeys.includes(storageKeys.AI_ANALYSIS_RESULTS)) keysToDelete.push(storageKeys.AI_ANALYSIS_RESULTS);
+
+      // 기기별 닉네임 키도 삭제
+      const deviceId = await AsyncStorage.getItem('deviceId');
+      if (deviceId) {
+        const oldNicknameKey = `userNickname_${deviceId}`;
+        if (allKeys.includes(oldNicknameKey)) keysToDelete.push(oldNicknameKey);
+      }
+
+      // 모든 키 삭제
+      if (keysToDelete.length > 0) {
+        await AsyncStorage.multiRemove(keysToDelete);
+      }
+
+      // API 토큰 및 인증 데이터 삭제
+      await clearAuthData();
+      apiClient.setAccessToken(null);
+
+      // 로그아웃 처리
+      await logout();
+
+      Alert.alert('완료', '회원탈퇴가 완료되었습니다.');
+    } catch (error) {
+      Alert.alert('오류', '회원탈퇴 중 오류가 발생했습니다.');
+    }
   };
 
 
@@ -279,15 +386,35 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
           </View>
         </View>
 
+        {/* 고객지원 섹션 */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>고객지원</Text>
+          <View style={styles.settingsCard}>
+            <SettingItem
+              icon={require('../../assets/images/siren.png')}
+              title="불편신고 및 개선 요청"
+              onPress={handleSendFeedback}
+            />
+          </View>
+        </View>
+
         {/* 계정 설정 */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>계정</Text>
           <View style={styles.settingsCard}>
             <SettingItem
-              icon={require('../../assets/images/left.png')}
+              icon={require('../../assets/images/door.png')}
               title="로그아웃"
               onPress={() => setShowLogoutModal(true)}
-              showArrow={false}
+              showArrow={true}
+              danger={true}
+            />
+            <View style={styles.divider} />
+            <SettingItem
+              icon={require('../../assets/images/withdrawal.png')}
+              title="회원탈퇴"
+              onPress={() => setShowWithdrawalModal(true)}
+              showArrow={true}
               danger={true}
             />
           </View>
@@ -305,6 +432,19 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
         onCancel={() => setShowLogoutModal(false)}
         confirmButtonColor={colors.error}
         image={require('../../assets/images/logout.png')}
+      />
+
+      {/* 회원탈퇴 확인 모달 */}
+      <ConfirmModal
+        visible={showWithdrawalModal}
+        title="회원탈퇴"
+        message="정말로 회원탈퇴를 하시겠습니까? 탈퇴 시 모든 데이터가 삭제되며 복구할 수 없습니다."
+        confirmText="탈퇴하기"
+        cancelText="취소"
+        onConfirm={handleWithdrawal}
+        onCancel={() => setShowWithdrawalModal(false)}
+        confirmButtonColor={colors.error}
+        image={require('../../assets/images/crying.png')}
       />
     </ImageBackground>
   );

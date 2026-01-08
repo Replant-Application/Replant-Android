@@ -1,176 +1,43 @@
-# OSX
-#
-android/*
-!android/app/
-!android/app/src/
-!android/app/src/main/
-!android/app/src/main/**
-
-# Xcode
-#
-build/
-*.pbxuser
-!default.pbxuser
-*.mode1v3
-!default.mode1v3
-*.mode2v3
-!default.mode2v3
-*.perspectivev3
-!default.perspectivev3
-xcuserdata
-*.xccheckout
-*.moved-aside
-DerivedData
-*.hmap
-*.ipa
-*.xcuserstate
-**/.xcode.env.local
-
-# Android/IntelliJ
-#
-.idea
-.gradle
-local.properties
-*.iml
-*.hprof
-.cxx/
-*.keystore
-!debug.keystore
-.kotlin/
-
-# node.js
-#
+# Dependencies
 node_modules/
-npm-debug.log
-yarn-error.log
-
-# fastlane
-#
-# It is recommended to not store the screenshots in the git repo. Instead, use fastlane to re-generate the
-# screenshots whenever they are needed.
-# For more information about the recommended setup visit:
-# https://docs.fastlane.tools/best-practices/source-control/
-
-**/fastlane/report.xml
-**/fastlane/Preview.html
-**/fastlane/screenshots
-**/fastlane/test_output
-
-# Bundle artifact
-*.jsbundle
-
-# Ruby / CocoaPods
-**/Pods/
-/vendor/bundle/
-
-# Temporary files created by Metro to check the health of the file watcher
-.metro-health-check*
-
-# testing
-/coverage
-
-# Yarn
-.yarn/*
-!.yarn/patches
-!.yarn/plugins
-!.yarn/releases
-!.yarn/sdks
-!.yarn/versions
-
-# pnpm
-.pnpm-debug.log*
-.pnpm-store/
-
-# bun
-bun.lockb
-
-# Turbo
-.turbo/
-
-# React Native specific
-*.log
-*.tmp
-*.temp
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-
-# iOS specific
-ios/build/
-ios/Pods/
-ios/Podfile.lock
-ios/.xcode.env.local
-ios/ReplantMobileApp.xcworkspace/
-ios/ReplantMobileApp.xcodeproj/xcuserdata/
-ios/ReplantMobileApp.xcodeproj/project.xcworkspace/xcuserdata/
-ios/ReplantMobileApp.xcodeproj/xcshareddata/
-ios/ReplantMobileApp.xcodeproj/project.xcworkspace/xcshareddata/
-
-# Android specific
-android/app/build/
-android/build/
-android/.gradle/
-android/gradle/
-android/gradlew
-android/gradlew.bat
-android/local.properties
-android/app/release/
-
-# Flipper
-ios/Flipper-Folly
-
-# Watchman
-.watchmanconfig
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
 # Expo
 .expo/
 .expo-shared/
 
-# TypeScript
-*.tsbuildinfo
+# Build files
+android/app/build/
+android/build/
+android/.gradle/
+ios/build/
+ios/Pods/
+ios/*.xcworkspace
+ios/*.xcuserdata
+
+# Environment variables
+.env
+.env.local
+.env.*.local
 
 # IDE
 .vscode/
 .idea/
 *.swp
 *.swo
+*~
 
-# macOS
+# OS
 .DS_Store
-.AppleDouble
-.LSOverride
-
-# Windows
 Thumbs.db
-ehthumbs.db
-Desktop.ini
 
-# Cursor IDE
-.cursor/
-scripts/
+# Logs
+logs
+*.log
 
-# MCP Configuration
-mcp.json
+# Temporary files
+*.tmp
+*.temp
 
-# CSpell Configuration
-cspell.json
-*.apk
-*.aab
-
-# Build output
-build_output/
-builds/
-
-# Backup files
-build-config-backup/
-*.backup
-*.bak
-
-# Process ID files
-*.pid
-backend.pid
-
-# Documentation (moved to report folder)
-docs/

@@ -1,36 +1,4 @@
 {
-  "extends": "@react-native/typescript-config",
-  "compilerOptions": {
-    "strict": true,
-    "noImplicitAny": true,
-    "strictNullChecks": true,
-    "strictFunctionTypes": true,
-    "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true,
-    "noUncheckedIndexedAccess": true,
-    "exactOptionalPropertyTypes": false,
-    "baseUrl": ".",
-    "paths": {
-      "@/*": ["src/*"],
-      "@/types/*": ["src/types/*"],
-      "@/components/*": ["src/components/*"],
-      "@/screens/*": ["src/screens/*"],
-      "@/services/*": ["src/services/*"],
-      "@/hooks/*": ["src/hooks/*"],
-      "@/utils/*": ["src/utils/*"],
-      "@/contexts/*": ["src/contexts/*"],
-      "@/navigation/*": ["src/navigation/*"]
-    }
-  },
-  "include": [
-    "**/*.ts",
-    "**/*.tsx",
-    "src/**/*"
-  ],
-  "exclude": [
-    "**/node_modules",
-    "**/Pods",
-    "**/build",
-    "**/dist"
-  ]
+  "compilerOptions": {},
+  "extends": "expo/tsconfig.base"
 }

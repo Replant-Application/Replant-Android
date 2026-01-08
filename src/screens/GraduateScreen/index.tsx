@@ -322,7 +322,7 @@ const styles = StyleSheet.create({
   },
   bannerTitle: {
     fontSize: typography.fontSize.xl,
-    fontWeight: typography.fontWeight.bold,
+    fontWeight: typography.fontWeight.medium,
     color: colors.primary[700],
     marginBottom: spacing[1],
     fontFamily: Platform.select({

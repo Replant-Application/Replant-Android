@@ -400,7 +400,7 @@ const styles = StyleSheet.create({
   avatarText: {
     fontSize: typography.fontSize.xl,
     color: colors.primary[700],
-    fontWeight: typography.fontWeight.bold as any,
+    fontWeight: typography.fontWeight.medium as any,
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,
       android: typography.fontFamily.regular,
@@ -516,7 +516,7 @@ const styles = StyleSheet.create({
   unreadText: {
     fontSize: 10,
     color: colors.text.inverse,
-    fontWeight: typography.fontWeight.bold as any,
+    fontWeight: typography.fontWeight.medium as any,
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,
       android: typography.fontFamily.regular,

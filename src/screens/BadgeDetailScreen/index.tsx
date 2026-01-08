@@ -181,7 +181,7 @@ const styles = StyleSheet.create({
   },
   badgeTitle: {
     fontSize: typography.fontSize.xl,
-    fontWeight: typography.fontWeight.bold,
+    fontWeight: typography.fontWeight.medium,
     color: colors.text.primary,
     textAlign: 'center',
     marginBottom: spacing[2],
@@ -247,7 +247,7 @@ const styles = StyleSheet.create({
   },
   remainingDays: {
     fontSize: typography.fontSize.base,
-    fontWeight: typography.fontWeight.bold,
+    fontWeight: typography.fontWeight.medium,
     color: colors.primary[600],
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,
@@ -265,7 +265,7 @@ const styles = StyleSheet.create({
   },
   benefitTitle: {
     fontSize: typography.fontSize.lg,
-    fontWeight: typography.fontWeight.bold,
+    fontWeight: typography.fontWeight.medium,
     color: colors.text.primary,
     marginBottom: spacing[4],
     fontFamily: Platform.select({
@@ -284,7 +284,7 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.base,
     color: colors.primary[500],
     marginRight: spacing[3],
-    fontWeight: typography.fontWeight.bold,
+    fontWeight: typography.fontWeight.medium,
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,
       android: typography.fontFamily.regular,

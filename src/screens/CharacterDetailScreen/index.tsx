@@ -378,7 +378,7 @@ const styles = StyleSheet.create({
   },
   emotionLabelActive: {
     color: colors.primary[700],
-    fontWeight: typography.fontWeight.bold,
+    fontWeight: typography.fontWeight.medium,
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,
       android: typography.fontFamily.regular,
@@ -402,7 +402,7 @@ const styles = StyleSheet.create({
   },
   characterName: {
     fontSize: typography.fontSize['2xl'],
-    fontWeight: typography.fontWeight.bold,
+    fontWeight: typography.fontWeight.medium,
     color: colors.text.primary,
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,
@@ -439,7 +439,7 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     fontSize: typography.fontSize.xl,
-    fontWeight: typography.fontWeight.bold,
+    fontWeight: typography.fontWeight.medium,
     color: colors.text.primary,
     marginBottom: spacing[4],
     textAlign: 'center',
@@ -483,7 +483,7 @@ const styles = StyleSheet.create({
   },
   levelText: {
     fontSize: typography.fontSize.xl,
-    fontWeight: typography.fontWeight.bold,
+    fontWeight: typography.fontWeight.medium,
     color: colors.primary[500],
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,

@@ -385,7 +385,7 @@ const styles = StyleSheet.create({
   },
   selectedMissionTypeText: {
     color: colors.primary[600],
-    fontWeight: typography.fontWeight.semibold,
+    fontWeight: typography.fontWeight.medium,
   },
   emojiGrid: {
     flexDirection: 'row',
@@ -487,7 +487,7 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.md,
     padding: spacing[3],
     fontSize: typography.fontSize.lg,
-    fontWeight: typography.fontWeight.bold,
+    fontWeight: typography.fontWeight.medium,
     color: colors.text.primary,
     backgroundColor: colors.background.primary,
     width: 80,
@@ -503,7 +503,7 @@ const styles = StyleSheet.create({
   },
   expLabel: {
     fontSize: typography.fontSize.lg,
-    fontWeight: typography.fontWeight.bold,
+    fontWeight: typography.fontWeight.medium,
     color: colors.text.primary,
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,

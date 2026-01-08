@@ -358,7 +358,7 @@ const styles = StyleSheet.create({
   avatarInitial: {
     fontSize: typography.fontSize.sm,
     color: colors.primary[700],
-    fontWeight: typography.fontWeight.bold as any,
+    fontWeight: typography.fontWeight.medium as any,
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,
       android: typography.fontFamily.regular,

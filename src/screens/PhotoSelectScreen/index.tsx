@@ -314,7 +314,7 @@ const styles = StyleSheet.create({
   },
   previewTitle: {
     fontSize: typography.fontSize.xl,
-    fontWeight: typography.fontWeight.bold,
+    fontWeight: typography.fontWeight.medium,
     color: colors.text.primary,
     marginBottom: spacing[4],
     textAlign: 'center',

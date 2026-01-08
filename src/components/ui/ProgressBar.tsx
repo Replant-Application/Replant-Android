@@ -114,7 +114,7 @@ const styles = StyleSheet.create({
   percentageText: {
     fontSize: typography.fontSize.sm,
     color: colors.primary[600],
-    fontWeight: typography.fontWeight.bold,
+    fontWeight: typography.fontWeight.medium,
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,
       android: typography.fontFamily.regular,

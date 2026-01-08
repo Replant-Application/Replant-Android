@@ -19,11 +19,11 @@ import { Loading, ErrorBoundary, ConfirmModal, AlertModal } from '../../componen
 import { colors, spacing, typography, borderRadius, shadows } from '../../utils/designTokens';
 import { SimpleDiaryData } from '../../types';
 import { formatDateYYYYMMDD } from '../../utils/dateUtils';
-import { EMOTION_TAGS } from './DiaryScreen.constants';
 import { DiaryStep } from './DiaryScreen.types';
-import { getEmotionColor, addOpacity } from './DiaryScreen.utils';
 import { getCharacterImage } from '../../utils/characterUtils';
 import { getOptimizedLineHeight } from '../../utils/textStyles';
+import EmotionSelectionStep from './EmotionSelectionStep';
+import FactorSelectionStep from './FactorSelectionStep';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -33,7 +33,9 @@ const DiaryScreen: React.FC = () => {
   const [currentStep, setCurrentStep] = useState<DiaryStep>('welcome');
   const [moodValue, setMoodValue] = useState(50);
   const [selectedEmotions, setSelectedEmotions] = useState<string[]>([]);
+  const [selectedFactors, setSelectedFactors] = useState<string[]>([]);
   const [factorText, setFactorText] = useState('');
+  const [showCustomFactorInput, setShowCustomFactorInput] = useState(false);
   const [expressionText, setExpressionText] = useState('');
   const [selectedDiary, setSelectedDiary] = useState<(SimpleDiaryData & { id: string }) | null>(null);
   const [viewingDiaryIndex, setViewingDiaryIndex] = useState(0);
@@ -101,7 +103,7 @@ const DiaryScreen: React.FC = () => {
       case 'factors':
         return '감정에 영향을 준 요인이 있을까요?';
       case 'expression':
-        return '지금의 감정에 대해 얘기해보자면...?';
+        return '오늘 하루를 되돌아보면서 느낀 점을 자세히 말해줄래요?';
       case 'confirm':
         return '오늘의 감정일기가 작성됐어요!';
       default:
@@ -125,6 +127,8 @@ const DiaryScreen: React.FC = () => {
         showAlertModal('알림', '감정을 하나 이상 선택해주세요.');
         return;
       }
+      setCurrentStep('factors');
+    } else if (currentStep === 'factors') {
       setCurrentStep('expression');
     } else if (currentStep === 'expression') {
       if (!expressionText.trim()) {
@@ -141,8 +145,10 @@ const DiaryScreen: React.FC = () => {
       setCurrentStep('welcome');
     } else if (currentStep === 'emotions') {
       setCurrentStep('mood');
-    } else if (currentStep === 'expression') {
+    } else if (currentStep === 'factors') {
       setCurrentStep('emotions');
+    } else if (currentStep === 'expression') {
+      setCurrentStep('factors');
     } else if (currentStep === 'view') {
       setCurrentStep('welcome');
     } else if (currentStep === 'detail') {
@@ -170,7 +176,9 @@ const DiaryScreen: React.FC = () => {
         // 상태 초기화
         setMoodValue(50);
         setSelectedEmotions([]);
+        setSelectedFactors([]);
         setFactorText('');
+        setShowCustomFactorInput(false);
         setExpressionText('');
       }, 2000);
     } catch (saveError) {
@@ -184,6 +192,15 @@ const DiaryScreen: React.FC = () => {
       prev.includes(emotion) 
         ? prev.filter(e => e !== emotion)
         : [...prev, emotion]
+    );
+  };
+
+  // 요인 선택/해제
+  const toggleFactor = (factor: string) => {
+    setSelectedFactors(prev => 
+      prev.includes(factor) 
+        ? prev.filter(f => f !== factor)
+        : [...prev, factor]
     );
   };
 
@@ -359,35 +376,24 @@ const DiaryScreen: React.FC = () => {
                   onPress={() => handleViewDetail(diaries[viewingDiaryIndex] as any)}
                   activeOpacity={0.8}
                 >
+                  <View style={styles.paperContainer}>
+                    <Image
+                      source={require('../../assets/images/paper.png')}
+                      style={styles.paperImage}
+                      resizeMode="contain"
+                    />
+                    <View style={styles.paperTextOverlay}>
+                      <Text style={styles.paperDate}>
+                        {`${diaries[viewingDiaryIndex]?.date || ''}\n작성한 감성 일기`}
+                      </Text>
+                    </View>
+                  </View>
                   <Image
                     source={require('../../assets/images/book.png')}
                     style={styles.bookImage}
                     resizeMode="contain"
                   />
-                  <View style={styles.bookTextOverlay}>
-                    <Text style={styles.bookTitle}>감성 일기</Text>
-                    <Text style={styles.bookDate}>
-                      {diaries[viewingDiaryIndex]?.date || ''}
-                    </Text>
-                  </View>
                 </TouchableOpacity>
-
-                <View style={styles.bookNavigation}>
-                  <TouchableOpacity
-                    style={[styles.navButton, viewingDiaryIndex === 0 && styles.navButtonDisabled]}
-                    onPress={() => setViewingDiaryIndex(Math.max(0, viewingDiaryIndex - 1))}
-                    disabled={viewingDiaryIndex === 0}
-                  >
-                    <Text style={styles.navButtonText}>←</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={[styles.navButton, viewingDiaryIndex >= diaries.length - 1 && styles.navButtonDisabled]}
-                    onPress={() => setViewingDiaryIndex(Math.min(diaries.length - 1, viewingDiaryIndex + 1))}
-                    disabled={viewingDiaryIndex >= diaries.length - 1}
-                  >
-                    <Text style={styles.navButtonText}>→</Text>
-                  </TouchableOpacity>
-                </View>
               </View>
             </>
           ) : (
@@ -470,7 +476,13 @@ const DiaryScreen: React.FC = () => {
         <Text style={styles.modalQuestion}>{getStepMessage()}</Text>
 
         {/* 단계별 컨텐츠 */}
-        <View style={currentStep === 'expression' ? styles.modalContentExpression : styles.modalContent}>
+        <View style={
+          currentStep === 'expression' 
+            ? styles.modalContentExpression 
+            : currentStep === 'factors'
+            ? styles.modalContentFactors
+            : styles.modalContent
+        }>
           {currentStep === 'mood' && (
             <View style={styles.moodContainer}>
               <View 
@@ -489,54 +501,22 @@ const DiaryScreen: React.FC = () => {
           )}
 
           {currentStep === 'emotions' && (
-            <ScrollView 
-              style={styles.emotionsContainer}
-              contentContainerStyle={styles.emotionsContent}
-              showsVerticalScrollIndicator={false}
-            >
-              {EMOTION_TAGS.map((emotion) => {
-                const emotionColor = getEmotionColor(emotion);
-                const isSelected = selectedEmotions.includes(emotion);
-                return (
-                  <TouchableOpacity
-                    key={emotion}
-                    style={[
-                      styles.emotionTag,
-                      {
-                        backgroundColor: isSelected 
-                          ? emotionColor 
-                          : addOpacity(emotionColor, 0.2),
-                        borderColor: emotionColor,
-                      },
-                      isSelected && styles.emotionTagSelected
-                    ]}
-                    onPress={() => toggleEmotion(emotion)}
-                  >
-                    <Text style={[
-                      styles.emotionTagText,
-                      isSelected && styles.emotionTagTextSelected
-                    ]}>
-                      {emotion}
-                    </Text>
-                  </TouchableOpacity>
-                );
-              })}
-            </ScrollView>
+            <EmotionSelectionStep
+              selectedEmotions={selectedEmotions}
+              onToggleEmotion={toggleEmotion}
+            />
           )}
 
           {currentStep === 'factors' && (
-            <View style={styles.inputContainer}>
-              <TextInput
-                style={styles.textInput}
-                value={factorText}
-                onChangeText={setFactorText}
-                placeholder="자세히 입력해주세요"
-                placeholderTextColor={colors.text.tertiary}
-                multiline={true}
-                textAlignVertical="top"
-              />
-            </View>
-          )}
+            <FactorSelectionStep
+              selectedFactors={selectedFactors}
+              customFactor={factorText}
+              onToggleFactor={toggleFactor}
+              onCustomFactorChange={setFactorText}
+              onShowCustomInput={() => setShowCustomFactorInput(!showCustomFactorInput)}
+              showCustomInput={showCustomFactorInput}
+            />
+          )} 
 
           {currentStep === 'expression' && (
             <View style={styles.inputContainer}>
@@ -578,7 +558,7 @@ const DiaryScreen: React.FC = () => {
             )}
           </View>
         ) : currentStep === 'expression' ? (
-          <View style={styles.modalButtons}>
+          <View style={[styles.modalButtons, styles.modalButtonsExpression]}>
             <TouchableOpacity style={styles.skipButton} onPress={handleBack}>
               <Text style={styles.skipButtonText}>취소</Text>
             </TouchableOpacity>
@@ -625,7 +605,7 @@ const styles = StyleSheet.create({
   modalContainerWelcome: {
     backgroundColor: 'rgba(0, 0, 0, 0.6)',
     borderRadius: borderRadius.lg,
-    padding: spacing[6],
+    padding: spacing[3],
     marginHorizontal: spacing[4],
     marginTop: spacing[12],
     ...shadows.lg,
@@ -633,15 +613,15 @@ const styles = StyleSheet.create({
   modalContainer: {
     backgroundColor: 'rgba(0, 0, 0, 0.6)',
     borderRadius: borderRadius.lg,
-    padding: spacing[6],
+    padding: spacing[3],
     marginHorizontal: spacing[4],
     marginTop: spacing[12],
     maxHeight: SCREEN_HEIGHT * 0.8,
     ...shadows.lg,
   },
   modalQuestion: {
-    paddingVertical: spacing[3],
-    fontSize: typography.fontSize['2xl'],
+    paddingVertical: spacing[2],
+    fontSize: typography.fontSize['xl'],
     fontWeight: typography.fontWeight.medium,
     color: colors.white,
     textAlign: 'left',
@@ -654,10 +634,14 @@ const styles = StyleSheet.create({
     includeFontPadding: false,
   },
   modalContent: {
-    marginBottom: spacing[4],
+    marginBottom: spacing[3],
+  },
+  modalContentFactors: {
+    marginBottom: spacing[3],
+    minHeight: 300,
   },
   modalContentExpression: {
-    marginBottom: spacing[4],
+    marginBottom: spacing[1],
     flex: 1,
     minHeight: 260,
   },
@@ -666,6 +650,9 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     gap: spacing[3],
     marginTop: spacing[2],
+  },
+  modalButtonsExpression: {
+    marginTop: spacing[0],
   },
   moodContainer: {
     paddingVertical: spacing[1],
@@ -712,7 +699,7 @@ const styles = StyleSheet.create({
   },
   sliderValue: {
     fontSize: typography.fontSize.lg,
-    fontWeight: typography.fontWeight.bold,
+    fontWeight: typography.fontWeight.medium,
     color: colors.blue[400],
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,
@@ -749,7 +736,7 @@ const styles = StyleSheet.create({
   },
   emotionTagTextSelected: {
     color: colors.gray[900],
-    fontWeight: typography.fontWeight.bold,
+    fontWeight: typography.fontWeight.medium,
   },
   inputContainer: {
     flex: 1,
@@ -758,7 +745,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.gray[900],
     borderRadius: borderRadius.lg,
     padding: spacing[4],
-    minHeight: 200,
+    minHeight: 260,
     fontSize: typography.fontSize.base,
     color: colors.white,
     borderWidth: 1,
@@ -818,7 +805,7 @@ const styles = StyleSheet.create({
   confirmButtonText: {
     fontSize: typography.fontSize.sm,
     color: colors.gray[800],
-    fontWeight: typography.fontWeight.bold,
+    fontWeight: typography.fontWeight.medium,
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,
       android: typography.fontFamily.regular,
@@ -827,8 +814,8 @@ const styles = StyleSheet.create({
   },
   characterContainer: {
     position: 'absolute',
-    bottom: SCREEN_HEIGHT * 0.15 + 40,
-    left: '40%',
+    bottom: SCREEN_HEIGHT * 0.05,
+    left: '43%',
     transform: [{ translateX: -(SCREEN_WIDTH * 0.6) / 2 }],
     width: SCREEN_WIDTH * 0.8,
     height: SCREEN_WIDTH * 0.8,
@@ -863,7 +850,7 @@ const styles = StyleSheet.create({
   writeButtonText: {
     fontSize: typography.fontSize.base,
     color: colors.gray[900],
-    fontWeight: typography.fontWeight.bold,
+    fontWeight: typography.fontWeight.medium,
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,
       android: typography.fontFamily.regular,
@@ -880,7 +867,7 @@ const styles = StyleSheet.create({
   viewButtonText: {
     fontSize: typography.fontSize.base,
     color: colors.white,
-    fontWeight: typography.fontWeight.bold,
+    fontWeight: typography.fontWeight.medium,
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,
       android: typography.fontFamily.regular,
@@ -914,26 +901,39 @@ const styles = StyleSheet.create({
   },
   bookContainer: {
     alignItems: 'center',
-    marginTop: spacing[2],
+    marginTop: spacing[0],
     position: 'relative',
   },
   bookImage: {
     width: SCREEN_WIDTH * 0.8,
-    height: SCREEN_WIDTH * 0.8 * 1.2,
+    height: SCREEN_WIDTH * 0.8 * 1,
   },
-  bookTextOverlay: {
+  paperContainer: {
     position: 'absolute',
-    top: 0,
+    top: SCREEN_WIDTH * 0.4,
+    left: SCREEN_WIDTH * 0.1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: SCREEN_WIDTH * 0.6,
+    height: SCREEN_WIDTH * 0.6 * 1.3,
+  },
+  paperImage: {
+    width: SCREEN_WIDTH * 0.5,
+    height: SCREEN_WIDTH * 0.6 * 1.1 ,
+  },
+  paperTextOverlay: {
+    position: 'absolute',
+    top: spacing[15],
     left: 0,
     right: 0,
-    bottom: 0,
-    justifyContent: 'center',
     alignItems: 'center',
+    paddingHorizontal: spacing[4],
+    zIndex: 2,
   },
-  bookTitle: {
-    fontSize: typography.fontSize.xl,
+  paperTitle: {
+    fontSize: typography.fontSize.base,
     fontWeight: typography.fontWeight.medium,
-    color: colors.white,
+    color: colors.black,
     marginBottom: spacing[2],
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,
@@ -941,9 +941,11 @@ const styles = StyleSheet.create({
     }),
     includeFontPadding: false,
   },
-  bookDate: {
-    fontSize: typography.fontSize.sm,
-    color: colors.gray[300],
+  paperDate: {
+    fontSize: typography.fontSize.base,
+    fontWeight: typography.fontWeight.medium,
+    color: colors.black,
+    textAlign: 'center',
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,
       android: typography.fontFamily.regular,
@@ -1032,7 +1034,7 @@ const styles = StyleSheet.create({
   },
   signboardTitle: {
     fontSize: typography.fontSize.base,
-    fontWeight: typography.fontWeight.bold,
+    fontWeight: typography.fontWeight.medium,
     color: colors.text.primary,
     marginTop: spacing[3],
     marginBottom: spacing[2],

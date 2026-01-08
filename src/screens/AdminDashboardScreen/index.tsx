@@ -172,7 +172,7 @@ const styles = StyleSheet.create({
   },
   statValue: {
     fontSize: typography.fontSize['3xl'],
-    fontWeight: typography.fontWeight.bold,
+    fontWeight: typography.fontWeight.medium,
     color: colors.text.primary,
     marginBottom: spacing[2],
     fontFamily: Platform.select({

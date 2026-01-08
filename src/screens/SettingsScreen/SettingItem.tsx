@@ -18,7 +18,11 @@ const SettingItem: React.FC<SettingItemProps> = ({
   >
     <View style={styles.settingItemLeft}>
       <Image source={icon} style={styles.settingIcon} resizeMode="contain" />
-      <Text style={[styles.settingItemText, danger && styles.settingItemTextDanger]}>
+      <Text style={[
+        styles.settingItemText, 
+        danger && styles.settingItemTextDanger,
+        title === '로그아웃' && styles.settingItemTextLogout
+      ]}>
         {title}
       </Text>
     </View>
@@ -43,7 +47,7 @@ const styles = StyleSheet.create({
     borderBottomColor: colors.gray[100],
   },
   settingItemDanger: {
-    borderBottomColor: colors.error[100],
+    borderBottomColor: colors.red[50],
   },
   settingItemLeft: {
     flexDirection: 'row',
@@ -67,7 +71,16 @@ const styles = StyleSheet.create({
     lineHeight: getOptimizedLineHeight(typography.fontSize.base),
   },
   settingItemTextDanger: {
-    color: colors.error[600],
+    color: colors.error,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
+  },
+  settingItemTextLogout: {
+    color: colors.error[500],
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,
       android: typography.fontFamily.regular,

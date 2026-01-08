@@ -90,7 +90,7 @@ const styles = StyleSheet.create({
   },
   icon: {
     color: colors.text.inverse,
-    fontWeight: typography.fontWeight.bold,
+    fontWeight: typography.fontWeight.medium,
   },
   baseIcon: {
     fontSize: typography.fontSize['2xl'],
