@@ -40,6 +40,9 @@ import BadgeDetailScreen from '../screens/BadgeDetailScreen';
 import VerificationPostCreateScreen from '../screens/VerificationPostCreateScreen';
 import VerificationPostDetailScreen from '../screens/VerificationPostDetailScreen';
 import NotificationScreen from '../screens/NotificationScreen';
+import FindIdScreen from '../screens/FindIdScreen';
+import FindIdResultScreen from '../screens/FindIdResultScreen';
+import FindPasswordScreen from '../screens/FindPasswordScreen';
 
 // 간단한 상태 기반 네비게이션 (React Navigation 없이)
 const AppNavigator = () => {
@@ -164,7 +167,21 @@ const AppNavigator = () => {
 
   // 로그인하지 않은 경우 - 인증 화면들
   if (!isLoggedIn) {
+    // onNavigate 확장: params도 받을 수 있도록
+    const onNavigateWithParams = (screen: string, params?: any) => {
+      setCurrentScreen(screen);
+      if (params) {
+        setNavigationParams(params);
+      }
+    };
+
     const renderAuthScreen = () => {
+      const route = {
+        params: navigationParams || {},
+        key: currentScreen,
+        name: currentScreen
+      } as any;
+
       switch (currentScreen) {
         case SCREEN_NAMES.START:
           return <StartScreen onNavigate={setCurrentScreen} />;
@@ -174,6 +191,12 @@ const AppNavigator = () => {
           return <LoginScreen onNavigate={setCurrentScreen} />;
         case SCREEN_NAMES.NICKNAME:
           return <NicknameScreen onNavigate={setCurrentScreen} />;
+        case SCREEN_NAMES.FIND_ID:
+          return <FindIdScreen onNavigate={onNavigateWithParams} />;
+        case SCREEN_NAMES.FIND_ID_RESULT:
+          return <FindIdResultScreen onNavigate={onNavigateWithParams} route={route} />;
+        case SCREEN_NAMES.FIND_PASSWORD:
+          return <FindPasswordScreen onNavigate={onNavigateWithParams} />;
         default:
           return <StartScreen onNavigate={setCurrentScreen} />;
       }

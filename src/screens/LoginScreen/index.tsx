@@ -283,12 +283,28 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onNavigate }) => {
             </Text>
           </TouchableOpacity>
 
-          <TouchableOpacity
-            onPress={() => onNavigate(SCREEN_NAMES.SIGNUP as string)}
-            style={styles.signUpButton}
-          >
-            <Text style={styles.linkText}>아직 계정이 없으신가요? 회원가입</Text>
-          </TouchableOpacity>
+          <View style={styles.footerLinks}>
+            <TouchableOpacity
+              onPress={() => onNavigate(SCREEN_NAMES.FIND_PASSWORD as string)}
+              style={styles.footerLink}
+            >
+              <Text style={styles.footerLinkText}>비밀번호 찾기</Text>
+            </TouchableOpacity>
+            <Text style={styles.footerSeparator}>|</Text>
+            <TouchableOpacity
+              onPress={() => onNavigate(SCREEN_NAMES.FIND_ID as string)}
+              style={styles.footerLink}
+            >
+              <Text style={styles.footerLinkText}>아이디 찾기</Text>
+            </TouchableOpacity>
+            <Text style={styles.footerSeparator}>|</Text>
+            <TouchableOpacity
+              onPress={() => onNavigate(SCREEN_NAMES.SIGNUP as string)}
+              style={styles.footerLink}
+            >
+              <Text style={styles.footerLinkText}>회원가입</Text>
+            </TouchableOpacity>
+          </View>
 
           <View style={styles.socialSection}>
             <View style={styles.socialTitleContainer}>
@@ -508,15 +524,37 @@ const styles = StyleSheet.create({
     }),
     includeFontPadding: false,
   },
-  findPasswordText: {
+  footerLinks: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: spacing[2],
+    marginBottom: spacing[8],
+    paddingVertical: spacing[1],
+  },
+  footerLink: {
+    paddingHorizontal: spacing[2],
+  },
+  footerLinkText: {
     fontSize: typography.fontSize.sm,
-    color: '#666666',
+    color: colors.text.secondary,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,
       android: typography.fontFamily.regular,
     }),
     includeFontPadding: false,
+  },
+  footerSeparator: {
+    fontSize: typography.fontSize.sm,
+    color: colors.text.secondary,
+    marginHorizontal: spacing[1],
     lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
   },
   loginButton: {
     width: '100%',
@@ -525,7 +563,7 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.base,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: spacing[4],
+    marginBottom: spacing[2],
   },
   loginButtonDisabled: {
     opacity: 0.6,
@@ -561,6 +599,7 @@ const styles = StyleSheet.create({
   },
   socialSection: {
     alignItems: 'center',
+    marginTop: spacing[4],
   },
   socialTitleContainer: {
     flexDirection: 'row',

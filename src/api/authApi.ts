@@ -166,3 +166,163 @@ export const refreshToken = async (
 export const logout = async (): Promise<ServiceResult<LogoutResponse>> => {
   return apiClient.post<LogoutResponse>(API_CONFIG.endpoints.auth.logout);
 };
+
+/**
+ * 이메일 인증번호 발송 요청
+ */
+export interface SendVerificationRequest {
+  email: string;
+}
+
+/**
+ * 이메일 인증번호 발송 응답
+ */
+export interface SendVerificationResponse {
+  message: string;
+}
+
+/**
+ * 이메일 인증번호 확인 요청
+ */
+export interface VerifyEmailRequest {
+  email: string;
+  verificationCode: string;
+}
+
+/**
+ * 이메일 인증번호 확인 응답
+ */
+export interface VerifyEmailResponse {
+  message: string;
+  verified: boolean;
+}
+
+/**
+ * 비밀번호 재설정 (임시 비밀번호 발급) 요청
+ * Swagger 스펙: { id: string (이메일), name: string }
+ */
+export interface GenPasswordRequest {
+  id: string; // 이메일 주소
+  name: string; // 이름
+}
+
+/**
+ * 비밀번호 재설정 (임시 비밀번호 발급) 응답
+ */
+export interface GenPasswordResponse {
+  message: string;
+  temporaryPassword?: string;
+}
+
+/**
+ * 비밀번호 변경 요청
+ */
+export interface ResetPasswordRequest {
+  email: string;
+  currentPassword: string;
+  newPassword: string;
+}
+
+/**
+ * 비밀번호 변경 응답
+ */
+export interface ResetPasswordResponse {
+  message: string;
+}
+
+/**
+ * 아이디 찾기 요청
+ * 닉네임과 전화번호 또는 이메일
+ */
+export interface SearchIdRequest {
+  nickname: string; // 필수: 닉네임
+  phone?: string; // 선택: 전화번호
+  email?: string; // 선택: 이메일 (phone 또는 email 중 하나 필수)
+}
+
+/**
+ * 이메일 인증번호 발송
+ * POST /api/auth/send-verification
+ *
+ * @param data 이메일 주소
+ */
+export const sendVerification = async (
+  data: SendVerificationRequest
+): Promise<ServiceResult<SendVerificationResponse>> => {
+  return apiClient.post<SendVerificationResponse>(
+    API_CONFIG.endpoints.auth.sendVerification,
+    data
+  );
+};
+
+/**
+ * 이메일 인증번호 확인
+ * POST /api/auth/verify-email
+ *
+ * @param data 이메일과 인증번호
+ */
+export const verifyEmail = async (
+  data: VerifyEmailRequest
+): Promise<ServiceResult<VerifyEmailResponse>> => {
+  return apiClient.post<VerifyEmailResponse>(
+    API_CONFIG.endpoints.auth.verifyEmail,
+    data
+  );
+};
+
+/**
+ * 비밀번호 재설정 (임시 비밀번호 발급)
+ * PATCH /api/auth/genPw
+ * Swagger 스펙: 이름과 이메일로 본인 확인 후 임시 비밀번호를 이메일로 발송
+ *
+ * @param data 이메일(id)과 이름(name)
+ */
+export const genPassword = async (
+  data: GenPasswordRequest
+): Promise<ServiceResult<GenPasswordResponse>> => {
+  return apiClient.patch<GenPasswordResponse>(
+    API_CONFIG.endpoints.auth.genPw,
+    data
+  );
+};
+
+/**
+ * 비밀번호 변경
+ * PATCH /api/auth/resetPw
+ *
+ * @param data 이메일, 현재 비밀번호, 새 비밀번호
+ */
+export const resetPassword = async (
+  data: ResetPasswordRequest
+): Promise<ServiceResult<ResetPasswordResponse>> => {
+  return apiClient.patch<ResetPasswordResponse>(
+    API_CONFIG.endpoints.auth.resetPw,
+    data
+  );
+};
+
+/**
+ * 아이디 찾기
+ * GET /api/auth/searchId
+ * 닉네임과 전화번호 또는 이메일을 query parameter로 전달, 응답은 string (마스킹된 이메일)
+ *
+ * @param params 닉네임과 전화번호 또는 이메일
+ */
+export const searchId = async (
+  params: SearchIdRequest
+): Promise<ServiceResult<string>> => {
+  // nickname과 phone 또는 email을 query parameter로 전달
+  const queryParams: Record<string, string | number> = {
+    nickname: params.nickname,
+  };
+  if (params.phone) {
+    queryParams.phone = params.phone;
+  }
+  if (params.email) {
+    queryParams.email = params.email;
+  }
+  return apiClient.get<string>(
+    API_CONFIG.endpoints.auth.searchId,
+    queryParams
+  );
+};

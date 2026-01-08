@@ -36,6 +36,14 @@ export const API_CONFIG = {
       oauthLogin: '/auth/oauth/:provider', // provider: KAKAO, GOOGLE, APPLE, NAVER
       refresh: '/auth/refresh',
       logout: '/auth/logout',
+      // 비밀번호 찾기/재설정
+      genPw: '/auth/genPw', // 임시 비밀번호 발급
+      resetPw: '/auth/resetPw', // 비밀번호 변경
+      // 아이디 찾기
+      searchId: '/auth/searchId', // 아이디 찾기
+      // 이메일 인증
+      sendVerification: '/auth/send-verification', // 이메일 인증번호 발송
+      verifyEmail: '/auth/verify-email', // 이메일 인증번호 확인
     },
 
     // 사용자 (User)

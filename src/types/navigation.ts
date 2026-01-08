@@ -90,6 +90,11 @@ export type RootStackParamList = {
   };
   Login: undefined;
   SignUp: undefined;
+  FindId: undefined;
+  FindIdResult: {
+    email: string; // 마스킹된 이메일
+  };
+  FindPassword: undefined;
 };
 
 // 네비게이션 파라미터 타입
@@ -143,6 +148,11 @@ export interface NavigationParams {
   };
   [ScreenNames.MISSION_GROUP]: undefined;
   [ScreenNames.NOTIFICATION]: undefined;
+  [ScreenNames.FIND_ID]: undefined;
+  [ScreenNames.FIND_ID_RESULT]: {
+    email: string; // 마스킹된 이메일
+  };
+  [ScreenNames.FIND_PASSWORD]: undefined;
 }
 
 // 네비게이션 Props 타입
