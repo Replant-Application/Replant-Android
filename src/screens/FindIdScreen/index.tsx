@@ -158,7 +158,7 @@ const FindIdScreen: React.FC<FindIdScreenProps> = ({ onNavigate }) => {
           <View style={styles.inputContainer}>
             <Text style={styles.label}>전화번호 또는 이메일</Text>
             <Input
-              placeholder="전화번호 (01012345678) 또는 이메일을 입력해주세요"
+              placeholder="전화번호 또는 이메일을 입력해주세요"
               value={input}
               onChangeText={(text) => {
                 setInput(text);

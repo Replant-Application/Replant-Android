@@ -183,27 +183,28 @@ export interface SendVerificationResponse {
 
 /**
  * 이메일 인증번호 확인 요청
+ * Swagger 스펙: { email: string, code: string }
  */
 export interface VerifyEmailRequest {
   email: string;
-  verificationCode: string;
+  code: string; // verificationCode가 아니라 code
 }
 
 /**
  * 이메일 인증번호 확인 응답
+ * Swagger 스펙: { data: boolean, message: string, error: {...} }
+ * apiClient가 data.data를 추출하므로, result.data는 boolean이 됨
  */
-export interface VerifyEmailResponse {
-  message: string;
-  verified: boolean;
-}
+export type VerifyEmailResponse = boolean; // apiClient가 data.data를 추출하므로 boolean
 
 /**
  * 비밀번호 재설정 (임시 비밀번호 발급) 요청
  * Swagger 스펙: { id: string (이메일), name: string }
+ * TODO: 백엔드 스펙 변경 시 name을 선택사항으로 변경 가능
  */
 export interface GenPasswordRequest {
   id: string; // 이메일 주소
-  name: string; // 이름
+  name: string; // 이름 (현재 필수, 향후 선택사항으로 변경 가능)
 }
 
 /**

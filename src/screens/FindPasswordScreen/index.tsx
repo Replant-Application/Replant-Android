@@ -4,7 +4,7 @@ import { Button, Input, Header } from '../../components/ui';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
 import { getOptimizedLineHeight } from '../../utils/textStyles';
 import { SCREEN_NAMES } from '../../utils/constants';
-import { sendVerification, verifyEmail, genPassword } from '../../api/authApi';
+import { sendVerification, verifyEmail, genPassword, GenPasswordRequest } from '../../api/authApi';
 
 interface FindPasswordScreenProps {
   onNavigate: (screen: string, params?: any) => void;
@@ -97,13 +97,20 @@ const FindPasswordScreen: React.FC<FindPasswordScreenProps> = ({ onNavigate }) =
     try {
       const result = await verifyEmail({
         email,
-        verificationCode,
+        code: verificationCode, // Swagger 스펙에 맞게 code로 변경
       });
 
-      if (result.success && result.data && result.data.verified) {
-        // 인증 성공 → 3단계로 이동
-        setStep('complete');
-        Alert.alert('인증 완료', '이메일 인증이 완료되었습니다.\n임시 비밀번호를 발급받으세요.');
+      if (result.success && result.data !== undefined) {
+        // Swagger 스펙: { data: boolean } 형태로 응답
+        // apiClient가 data.data를 추출하므로 result.data는 boolean
+        if (result.data === true) {
+          // 인증 성공 → 3단계로 이동
+          setStep('complete');
+          Alert.alert('인증 완료', '이메일 인증이 완료되었습니다.\n임시 비밀번호를 발급받으세요.');
+        } else {
+          // 인증 실패 (data가 false)
+          setErrors({ email: '', verificationCode: '인증번호가 올바르지 않습니다.' });
+        }
       } else {
         // 에러 메시지 추출
         let errorMessage = '인증번호가 올바르지 않습니다.';
@@ -130,10 +137,20 @@ const FindPasswordScreen: React.FC<FindPasswordScreenProps> = ({ onNavigate }) =
     setIsLoading(true);
 
     try {
-      const result = await genPassword({
-        id: email, // 이메일을 id로 전달
-        name: '', // 이름은 빈 문자열로 전달 (API 스펙상 필수이지만 사용자 입력 없음)
-      });
+      // Swagger 스펙: { id: string (이메일), name: string }
+      // TODO: 백엔드 스펙 변경 시 name 필드 처리 방식 확인 필요
+      // 현재: name이 필수이므로 이메일 주소에서 추출
+      // 향후: name이 선택사항이 되면 아래 코드를 수정:
+      //   - GenPasswordRequest의 name을 optional로 변경
+      //   - requestData에서 name 제거 또는 조건부 처리
+      const requestData: GenPasswordRequest = {
+        id: email,
+        // 현재 스펙: name 필수 → 이메일에서 추출
+        // 향후 스펙 변경 시: 이 줄 제거 또는 조건부 처리
+        name: email.split('@')[0] || email,
+      };
+      
+      const result = await genPassword(requestData);
 
       if (result.success && result.data) {
         // 임시 비밀번호 발급 성공
@@ -232,7 +249,7 @@ const FindPasswordScreen: React.FC<FindPasswordScreenProps> = ({ onNavigate }) =
               autoCapitalize="none"
               autoCorrect={false}
               editable={step === 'email'}
-              inputStyle={step !== 'email' ? [styles.inputText, styles.inputDisabled] : styles.inputText}
+              inputStyle={step !== 'email' ? StyleSheet.flatten([styles.inputText, styles.inputDisabled]) : styles.inputText}
             />
             {errors.email ? <Text style={styles.errorText}>{errors.email}</Text> : null}
           </View>
@@ -255,7 +272,7 @@ const FindPasswordScreen: React.FC<FindPasswordScreenProps> = ({ onNavigate }) =
                 keyboardType="number-pad"
                 maxLength={6}
                 editable={step === 'verification'}
-                inputStyle={step !== 'verification' ? [styles.inputText, styles.inputDisabled] : styles.inputText}
+                inputStyle={step !== 'verification' ? StyleSheet.flatten([styles.inputText, styles.inputDisabled]) : styles.inputText}
               />
               {errors.verificationCode ? <Text style={styles.errorText}>{errors.verificationCode}</Text> : null}
             </View>
