@@ -8,7 +8,7 @@ import { API_CONFIG } from '../config/apiConfig';
 import { ServiceResult } from '../types';
 
 // ============================================
-// 타입 정의
+// 타입 정의 (백엔드 enum과 동기화)
 // ============================================
 
 export type MissionType = 'DAILY' | 'WEEKLY' | 'MONTHLY';
@@ -16,6 +16,12 @@ export type VerificationType = 'COMMUNITY' | 'GPS' | 'TIME';
 export type UserMissionStatus = 'ASSIGNED' | 'PENDING' | 'COMPLETED' | 'EXPIRED';
 export type VerificationStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
 export type VoteType = 'APPROVE' | 'REJECT';
+
+/**
+ * 미션 출처 타입 - 백엔드 MissionSource enum과 일치
+ * @see Replant-BE/domain/mission/enums/MissionSource.java
+ */
+export type MissionSource = 'OFFICIAL' | 'CUSTOM';
 
 // 사용자 맞춤 필터링 타입
 export type WorryType = 'RE_EMPLOYMENT' | 'JOB_PREPARATION' | 'ENTRANCE_EXAM' | 'ADVANCEMENT' | 'RETURN_TO_SCHOOL' | 'RELATIONSHIP' | 'SELF_MANAGEMENT';
@@ -367,7 +373,7 @@ export const deleteCustomMission = async (
 
 export interface UserMission {
   id: number;
-  missionType: 'SYSTEM' | 'CUSTOM';
+  missionType: MissionSource; // OFFICIAL | CUSTOM (구: SYSTEM | CUSTOM)
   mission?: SystemMission;
   customMission?: CustomMission;
   assignedAt: string;
@@ -490,7 +496,7 @@ export interface VerificationPost {
   userNickname: string;
   userProfileImg?: string;
   userMissionId: number;
-  missionType: 'SYSTEM' | 'CUSTOM';
+  missionType: MissionSource; // OFFICIAL | CUSTOM (구: SYSTEM | CUSTOM)
   mission?: {
     id: number;
     title: string;

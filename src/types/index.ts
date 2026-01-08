@@ -33,6 +33,18 @@ export type Emotion = 'happy' | 'excited' | 'calm' | 'grateful' | 'sad' | 'angry
 // 미션 상태 타입
 export type MissionStatus = 'ASSIGNED' | 'PENDING' | 'COMPLETED' | 'EXPIRED';
 
+/**
+ * 미션 출처 타입 - 백엔드 MissionSource enum과 일치
+ * @see Replant-BE/domain/mission/enums/MissionSource.java
+ */
+export type MissionSource = 'OFFICIAL' | 'CUSTOM';
+
+/**
+ * 댓글 대상 타입 - 백엔드 CommentTargetType enum과 일치
+ * @see Replant-BE/domain/post/enums/CommentTargetType.java
+ */
+export type CommentTargetType = 'POST' | 'VERIFICATION' | 'QNA' | 'DIARY';
+
 // Mission 관련 타입
 export interface Mission {
   id: number;
@@ -46,7 +58,8 @@ export interface Mission {
   category_id: MissionCategory;
   type?: 'DAILY' | 'WEEKLY' | 'MONTHLY'; // 미션 타입
   status?: MissionStatus; // 백엔드 UserMission 상태 (ASSIGNED, PENDING, COMPLETED, EXPIRED)
-  is_custom?: boolean;
+  mission_source?: MissionSource; // 미션 출처 (OFFICIAL / CUSTOM)
+  is_custom?: boolean; // @deprecated - mission_source 사용 권장
   created_by?: string;
   created_at?: string;
   updated_at?: string;

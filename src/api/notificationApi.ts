@@ -7,18 +7,36 @@ import { API_CONFIG } from '../config/apiConfig';
 import { ServiceResult } from '../types';
 
 // ============================================
-// 타입 정의
+// 타입 정의 (백엔드 NotificationType enum과 동기화)
 // ============================================
 
+/**
+ * 알림 타입 - 백엔드 NotificationType enum과 일치
+ * @see Replant-BE/domain/notification/enums/NotificationType.java
+ */
 export type NotificationType =
-  | 'MISSION_ASSIGNED'
-  | 'VERIFICATION_APPROVED'
-  | 'VERIFICATION_REJECTED'
-  | 'USER_RECOMMENDED'
-  | 'CHAT_MESSAGE'
-  | 'BADGE_EXPIRING'
-  | 'QNA_ANSWERED'
-  | 'QNA_ACCEPTED';
+  // 미션 관련
+  | 'MISSION_ASSIGNED'       // 미션 배정
+  // 댓글 관련
+  | 'COMMENT'                // 일반 게시글 댓글
+  | 'REPLY'                  // 일반 게시글 대댓글
+  | 'VERIFICATION_COMMENT'   // 인증글 댓글
+  | 'VERIFICATION_REPLY'     // 인증글 대댓글
+  // 인증 관련
+  | 'VERIFICATION_APPROVED'  // 인증 승인
+  | 'VERIFICATION_REJECTED'  // 인증 거절
+  | 'VOTE'                   // 투표
+  // 기타
+  | 'DIARY'                  // 다이어리
+  | 'REPORT'                 // 신고
+  | 'RECOMMENDATION'         // 추천 (구: USER_RECOMMENDED)
+  | 'CHAT_MESSAGE'           // 채팅 메시지
+  | 'SYSTEM'                 // 시스템 알림
+  | 'CUSTOM'                 // 커스텀 알림
+  // 프론트엔드 전용 (레거시 호환)
+  | 'BADGE_EXPIRING'         // 배지 만료 예정
+  | 'QNA_ANSWERED'           // QnA 답변
+  | 'QNA_ACCEPTED';          // QnA 채택
 
 export interface Notification {
   id: number;

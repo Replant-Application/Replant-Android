@@ -8,8 +8,20 @@ import { ServiceResult } from '../types';
 import { MissionType } from './missionApi';
 
 // ============================================
-// 타입 정의
+// 타입 정의 (백엔드 enum과 동기화)
 // ============================================
+
+/**
+ * 댓글 대상 타입 - 백엔드 CommentTargetType enum과 일치
+ * @see Replant-BE/domain/post/enums/CommentTargetType.java
+ */
+export type CommentTargetType = 'POST' | 'VERIFICATION' | 'QNA' | 'DIARY';
+
+/**
+ * 미션 출처 타입 - 백엔드 MissionSource enum과 일치
+ * @see Replant-BE/domain/mission/enums/MissionSource.java
+ */
+export type MissionSource = 'OFFICIAL' | 'CUSTOM';
 
 export interface Post {
   id: number;
@@ -19,7 +31,7 @@ export interface Post {
   missionTag?: {
     id: number;
     title: string;
-    type: 'SYSTEM' | 'CUSTOM';
+    type: MissionSource; // OFFICIAL | CUSTOM
   };
   title: string;
   content: string;
@@ -59,6 +71,10 @@ export interface Comment {
   content: string;
   createdAt: string;
   updatedAt?: string;
+  // 일반화된 댓글 대상 (QnA, Diary 등에서 사용)
+  targetType?: CommentTargetType;
+  targetId?: number;
+  parentId?: number; // 대댓글용
 }
 
 export interface CommentListResponse {
