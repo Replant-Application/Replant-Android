@@ -1,82 +1,83 @@
 /**
  * 관리자 기능 훅
- * 유저 관리 기능 제공
+ * 백엔드 AdminController API와 연동
  */
 
 import { useState, useCallback } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { getData, setData, getStorageKeys } from '../services/storage';
+import { apiClient } from '../api/client';
 import { logError } from '../utils/logger';
-import { ServiceResult, User } from '../types';
-import { UserInfo, UpdateUserRequest } from '../api/manageApi';
+import { ServiceResult } from '../types';
 
-const ADMIN_USERS_KEY = 'admin_users';
+// ============================================
+// 타입 정의
+// ============================================
 
 /**
- * 관리자 훅
+ * 회원 정보 - 백엔드 MemberResponseDto와 매칭
  */
+export interface MemberInfo {
+  id: number;
+  email: string;
+  nickname: string;
+  birthDate?: string;
+  gender?: 'MALE' | 'FEMALE';
+  profileImg?: string;
+  role: string;
+  isActive: boolean;
+  createdAt: string;
+  lastLoginAt?: string;
+}
+
+/**
+ * 회원 상세 정보 (통계 포함)
+ */
+export interface MemberDetail extends MemberInfo {
+  reant?: {
+    level?: number;
+    exp?: number;
+  };
+  statistics?: {
+    missionCount?: number;
+    postCount?: number;
+    diaryCount?: number;
+  };
+}
+
+// ============================================
+// 관리자 훅
+// ============================================
+
 export const useAdmin = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   /**
-   * 전체 유저 목록 조회
-   * AsyncStorage에서 user_로 시작하는 모든 키를 찾아서 실제 유저 데이터 수집
+   * 전체 회원 목록 조회
+   * GET /admin/members
    */
-  const getAllUsers = useCallback(async (params?: { page?: number; limit?: number }): Promise<ServiceResult<UserInfo[]>> => {
+  const getAllUsers = useCallback(async (params?: { page?: number; limit?: number }): Promise<ServiceResult<MemberInfo[]>> => {
     setLoading(true);
     setError(null);
 
     try {
-      // AsyncStorage의 모든 키 가져오기
-      const allKeys = await AsyncStorage.getAllKeys();
-
-      // user_로 시작하는 키들 필터링 (실제 유저 데이터)
-      const userKeys = allKeys.filter(key => key.startsWith('user_') && !key.includes('userNickname'));
-
-      // 각 유저 데이터 수집
-      const users: UserInfo[] = [];
-      for (const key of userKeys) {
-        try {
-          const userDataString = await AsyncStorage.getItem(key);
-          if (userDataString) {
-            const userData: User = JSON.parse(userDataString);
-
-            users.push({
-              id: parseInt(userData.id.replace('user_', ''), 10) || Date.now(),
-              nickname: userData.nickname,
-              email: undefined,
-              username: userData.nickname,
-              role: userData.role || 'user',
-              isActive: true,
-              createdAt: userData.createdAt,
-            });
-          }
-        } catch (parseError) {
-          logError(`유저 데이터 파싱 실패 (${key})`, parseError as Error);
-        }
-      }
-
-      // 가입일 기준 정렬 (최신순)
-      users.sort((a, b) => {
-        const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
-        const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
-        return dateB - dateA;
+      const result = await apiClient.get<MemberInfo[]>('/admin/members', {
+        page: params?.page || 0,
+        size: params?.limit || 50,
       });
 
-      // 페이지네이션 처리
-      const page = params?.page || 1;
-      const limit = params?.limit || 20;
-      const startIndex = (page - 1) * limit;
-      const endIndex = startIndex + limit;
-      const paginatedUsers = users.slice(startIndex, endIndex);
+      if (result.success) {
+        return {
+          success: true,
+          data: result.data || [],
+        };
+      }
 
       return {
-        success: true,
-        data: paginatedUsers,
+        success: false,
+        error: result.error || '회원 목록을 불러오는데 실패했습니다.',
       };
     } catch (err) {
-      const errorMessage = '유저 목록을 불러오는데 실패했습니다.';
+      const errorMessage = '회원 목록을 불러오는데 실패했습니다.';
       logError(errorMessage, err as Error);
       setError(errorMessage);
       return {
@@ -89,102 +90,29 @@ export const useAdmin = () => {
   }, []);
 
   /**
-   * 유저 상세 조회
+   * 회원 상세 조회
+   * GET /admin/members/:id
    */
-  const getUserDetail = useCallback(async (id: number): Promise<ServiceResult<UserInfo>> => {
+  const getUserDetail = useCallback(async (id: number): Promise<ServiceResult<MemberDetail>> => {
     setLoading(true);
     setError(null);
 
     try {
-      // 모든 유저 목록 가져오기
-      const allUsersResult = await getAllUsers({ page: 1, limit: 1000 });
+      const result = await apiClient.get<MemberDetail>(`/admin/members/${id}`);
 
-      if (!allUsersResult.success || !allUsersResult.data) {
+      if (result.success && result.data) {
         return {
-          success: false,
-          error: '유저 목록을 불러올 수 없습니다.',
+          success: true,
+          data: result.data,
         };
       }
 
-      const user = allUsersResult.data.find(u => u.id === id);
-
-      if (!user) {
-        return {
-          success: false,
-          error: '유저를 찾을 수 없습니다.',
-        };
-      }
-
-      return {
-        success: true,
-        data: {
-          id: user.id,
-          username: user.username || '',
-          nickname: user.nickname || '',
-          role: user.role || 'user',
-          email: user.email,
-          isActive: user.isActive,
-          createdAt: user.createdAt,
-        },
-      };
-    } catch (err) {
-      const errorMessage = '유저 정보를 불러오는데 실패했습니다.';
-      logError(errorMessage, err as Error);
-      setError(errorMessage);
       return {
         success: false,
-        error: errorMessage,
-      };
-    } finally {
-      setLoading(false);
-    }
-  }, [getAllUsers]);
-
-  /**
-   * 유저 수정
-   */
-  const updateUser = useCallback(async (id: number, data: UpdateUserRequest): Promise<ServiceResult<UserInfo>> => {
-    setLoading(true);
-    setError(null);
-
-    try {
-      const users: UserInfo[] = await getData(ADMIN_USERS_KEY) || [];
-      const userIndex = users.findIndex(u => u.id === id);
-
-      if (userIndex === -1) {
-        return {
-          success: false,
-          error: '유저를 찾을 수 없습니다.',
-        };
-      }
-
-      // 유저 정보 업데이트
-      const existingUser = users[userIndex];
-      if (!existingUser) {
-        return {
-          success: false,
-          error: '유저를 찾을 수 없습니다.',
-        };
-      }
-
-      users[userIndex] = {
-        id: existingUser.id,
-        username: existingUser.username || '',
-        nickname: (data.nickname ?? existingUser.nickname) || '',
-        role: (data.role ?? existingUser.role) || 'user',
-        email: data.email ?? existingUser.email,
-        isActive: existingUser.isActive,
-        createdAt: existingUser.createdAt,
-      };
-
-      await setData(ADMIN_USERS_KEY, users);
-
-      return {
-        success: true,
-        data: users[userIndex],
+        error: result.error || '회원 정보를 불러오는데 실패했습니다.',
       };
     } catch (err) {
-      const errorMessage = '유저 정보를 수정하는데 실패했습니다.';
+      const errorMessage = '회원 정보를 불러오는데 실패했습니다.';
       logError(errorMessage, err as Error);
       setError(errorMessage);
       return {
@@ -197,73 +125,246 @@ export const useAdmin = () => {
   }, []);
 
   /**
-   * 유저 비활성화
+   * 회원 역할 변경
+   * PATCH /admin/members/:id/role?role=xxx
    */
-  const deactivateUser = useCallback(async (id: number): Promise<ServiceResult<UserInfo>> => {
-    return updateUser(id, { isActive: false } as any);
-  }, [updateUser]);
-
-  /**
-   * 유저 활성화
-   */
-  const activateUser = useCallback(async (id: number): Promise<ServiceResult<UserInfo>> => {
-    return updateUser(id, { isActive: true } as any);
-  }, [updateUser]);
-
-  /**
-   * 전체 유저 삭제
-   * 모든 유저 데이터와 관련 데이터를 삭제합니다
-   */
-  const deleteAllUsers = useCallback(async (): Promise<ServiceResult<{ deletedCount: number }>> => {
+  const updateUserRole = useCallback(async (id: number, role: string): Promise<ServiceResult<MemberInfo>> => {
     setLoading(true);
     setError(null);
 
     try {
-      // AsyncStorage의 모든 키 가져오기
-      const allKeys = await AsyncStorage.getAllKeys();
+      const result = await apiClient.patch<MemberInfo>(`/admin/members/${id}/role?role=${role}`);
 
-      // 삭제할 키들 필터링
-      const keysToDelete: string[] = [];
-
-      // user_로 시작하는 키들 (유저 기본 정보)
-      const userKeys = allKeys.filter(key => key.startsWith('user_') && !key.includes('userNickname'));
-      keysToDelete.push(...userKeys);
-
-      // 각 유저의 관련 데이터 키들 찾기
-      for (const userKey of userKeys) {
-        const nickname = userKey.replace('user_', '');
-        const storageKeys = getStorageKeys(nickname);
-
-        // 유저별 데이터 키들 추가
-        if (allKeys.includes(storageKeys.MISSIONS)) keysToDelete.push(storageKeys.MISSIONS);
-        if (allKeys.includes(storageKeys.DIARIES)) keysToDelete.push(storageKeys.DIARIES);
-        if (allKeys.includes(storageKeys.CHARACTERS)) keysToDelete.push(storageKeys.CHARACTERS);
-        if (allKeys.includes(storageKeys.SETTINGS)) keysToDelete.push(storageKeys.SETTINGS);
-        if (allKeys.includes(storageKeys.PREFERENCES)) keysToDelete.push(storageKeys.PREFERENCES);
-        if (allKeys.includes(storageKeys.USER_LIKES)) keysToDelete.push(storageKeys.USER_LIKES);
-        if (allKeys.includes(storageKeys.USER_SCRAPS)) keysToDelete.push(storageKeys.USER_SCRAPS);
-        if (allKeys.includes(storageKeys.CALENDAR_EVENTS)) keysToDelete.push(storageKeys.CALENDAR_EVENTS);
-        if (allKeys.includes(storageKeys.AI_ANALYSIS_RESULTS)) keysToDelete.push(storageKeys.AI_ANALYSIS_RESULTS);
+      if (result.success && result.data) {
+        return {
+          success: true,
+          data: result.data,
+        };
       }
 
-      // userNickname_으로 시작하는 키들도 삭제
-      const nicknameKeys = allKeys.filter(key => key.startsWith('userNickname_'));
-      keysToDelete.push(...nicknameKeys);
-
-      // 중복 제거
-      const uniqueKeysToDelete = [...new Set(keysToDelete)];
-
-      // 모든 키 삭제
-      await AsyncStorage.multiRemove(uniqueKeysToDelete);
-
-      const deletedCount = userKeys.length;
-
       return {
-        success: true,
-        data: { deletedCount },
+        success: false,
+        error: result.error || '역할 변경에 실패했습니다.',
       };
     } catch (err) {
-      const errorMessage = '전체 유저 삭제에 실패했습니다.';
+      const errorMessage = '역할 변경에 실패했습니다.';
+      logError(errorMessage, err as Error);
+      setError(errorMessage);
+      return {
+        success: false,
+        error: errorMessage,
+      };
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  /**
+   * 커스텀 알림 전송
+   * POST /admin/send/custom
+   */
+  const sendCustomNotification = useCallback(async (memberId: string, message: string): Promise<ServiceResult<{ message: string }>> => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const result = await apiClient.post<{ message: string }>('/admin/send/custom', {
+        memberId,
+        message,
+      });
+
+      if (result.success) {
+        return {
+          success: true,
+          data: result.data,
+        };
+      }
+
+      return {
+        success: false,
+        error: result.error || '알림 전송에 실패했습니다.',
+      };
+    } catch (err) {
+      const errorMessage = '알림 전송에 실패했습니다.';
+      logError(errorMessage, err as Error);
+      setError(errorMessage);
+      return {
+        success: false,
+        error: errorMessage,
+      };
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  /**
+   * 일기 알림 전송
+   * POST /admin/send/diary
+   */
+  const sendDiaryNotification = useCallback(async (memberId: string): Promise<ServiceResult<{ message: string }>> => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const result = await apiClient.post<{ message: string }>('/admin/send/diary', {
+        memberId,
+      });
+
+      if (result.success) {
+        return {
+          success: true,
+          data: result.data,
+        };
+      }
+
+      return {
+        success: false,
+        error: result.error || '일기 알림 전송에 실패했습니다.',
+      };
+    } catch (err) {
+      const errorMessage = '일기 알림 전송에 실패했습니다.';
+      logError(errorMessage, err as Error);
+      setError(errorMessage);
+      return {
+        success: false,
+        error: errorMessage,
+      };
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  /**
+   * 리포트 알림 전송
+   * POST /admin/send/report
+   */
+  const sendReportNotification = useCallback(async (memberId: string): Promise<ServiceResult<{ message: string }>> => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const result = await apiClient.post<{ message: string }>('/admin/send/report', {
+        memberId,
+      });
+
+      if (result.success) {
+        return {
+          success: true,
+          data: result.data,
+        };
+      }
+
+      return {
+        success: false,
+        error: result.error || '리포트 알림 전송에 실패했습니다.',
+      };
+    } catch (err) {
+      const errorMessage = '리포트 알림 전송에 실패했습니다.';
+      logError(errorMessage, err as Error);
+      setError(errorMessage);
+      return {
+        success: false,
+        error: errorMessage,
+      };
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  /**
+   * 미션 수 조회
+   * GET /admin/mission-count
+   */
+  const getMissionCount = useCallback(async (): Promise<ServiceResult<number>> => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const result = await apiClient.get<number>('/admin/mission-count');
+
+      if (result.success) {
+        return {
+          success: true,
+          data: result.data || 0,
+        };
+      }
+
+      return {
+        success: false,
+        error: result.error || '미션 수 조회에 실패했습니다.',
+      };
+    } catch (err) {
+      const errorMessage = '미션 수 조회에 실패했습니다.';
+      logError(errorMessage, err as Error);
+      setError(errorMessage);
+      return {
+        success: false,
+        error: errorMessage,
+      };
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  /**
+   * 미션 데이터 초기화
+   * POST /admin/reset-missions
+   */
+  const resetMissions = useCallback(async (): Promise<ServiceResult<{ message: string }>> => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const result = await apiClient.post<{ message: string }>('/admin/reset-missions');
+
+      if (result.success) {
+        return {
+          success: true,
+          data: result.data,
+        };
+      }
+
+      return {
+        success: false,
+        error: result.error || '미션 초기화에 실패했습니다.',
+      };
+    } catch (err) {
+      const errorMessage = '미션 초기화에 실패했습니다.';
+      logError(errorMessage, err as Error);
+      setError(errorMessage);
+      return {
+        success: false,
+        error: errorMessage,
+      };
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  /**
+   * 관리자 설정
+   * POST /admin/setup-admin?email=xxx
+   */
+  const setupAdmin = useCallback(async (email: string): Promise<ServiceResult<{ message: string }>> => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const result = await apiClient.post<{ message: string }>(`/admin/setup-admin?email=${encodeURIComponent(email)}`);
+
+      if (result.success) {
+        return {
+          success: true,
+          data: result.data,
+        };
+      }
+
+      return {
+        success: false,
+        error: result.error || '관리자 설정에 실패했습니다.',
+      };
+    } catch (err) {
+      const errorMessage = '관리자 설정에 실패했습니다.';
       logError(errorMessage, err as Error);
       setError(errorMessage);
       return {
@@ -280,9 +381,12 @@ export const useAdmin = () => {
     error,
     getAllUsers,
     getUserDetail,
-    updateUser,
-    deactivateUser,
-    activateUser,
-    deleteAllUsers,
+    updateUserRole,
+    sendCustomNotification,
+    sendDiaryNotification,
+    sendReportNotification,
+    getMissionCount,
+    resetMissions,
+    setupAdmin,
   };
 };

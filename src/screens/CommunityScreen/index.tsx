@@ -244,12 +244,12 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation }) => {
         <SimpleTabBar
           tabs={[
             { key: 'all', label: '전체 게시판' },
-            { key: 'mission-group', label: '미션 도감' },
+            { key: 'todo-share', label: '투두 공유' },
           ]}
           activeTab={activeTab}
           onTabChange={(key) => {
-            if (key === 'mission-group') {
-              handleMissionGroupPress();
+            if (key === 'todo-share') {
+              navigation.navigate('MissionSetList' as any);
             } else {
               setActiveTab(key as CommunityTab);
             }

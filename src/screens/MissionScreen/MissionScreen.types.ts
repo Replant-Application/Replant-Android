@@ -9,4 +9,5 @@ export interface MissionScreenProps {
 export type MissionFilter = 'inProgress' | 'pendingVerification' | 'completed';
 export type MissionPeriodFilter = 'DAILY' | 'WEEKLY' | 'MONTHLY';
 export type MissionSourceFilter = 'REGULAR' | 'CUSTOM';
+export type MissionTab = 'myMission' | 'missionGroup';
 

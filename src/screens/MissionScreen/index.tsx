@@ -13,7 +13,7 @@ import * as Location from 'expo-location';
 import { formatDateYYYYMMDD } from '../../utils/dateUtils';
 import { getMyBadges, getBadgeHistory, Badge } from '../../api/badgeApi';
 import { logError } from '../../utils/logger';
-import { MissionScreenProps, MissionFilter } from './MissionScreen.types';
+import { MissionScreenProps, MissionFilter, MissionTab } from './MissionScreen.types';
 
 // 단일 카테고리: 성장
 
@@ -25,6 +25,7 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
   const routeParams = route?.params;
   const processedPhotoRef = useRef<string | null>(null);
   const [selectedFilter, setSelectedFilter] = useState<MissionFilter>('inProgress');
+  const [activeTab, setActiveTab] = useState<MissionTab>('myMission');
   const [refreshing, setRefreshing] = useState(false);
 
   // 인증 모달 상태
@@ -460,6 +461,25 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
     >
       <Header title="오늘의 미션" showBackButton={false} navigation={navigation} />
 
+      {/* 나의 미션 / 미션 도감 탭 */}
+      <View style={styles.topTabContainer}>
+        <SimpleTabBar
+          tabs={[
+            { key: 'myMission', label: '나의 미션' },
+            { key: 'missionGroup', label: '미션 도감' },
+          ]}
+          activeTab={activeTab}
+          onTabChange={(key) => {
+            if (key === 'missionGroup') {
+              navigation.navigate('MissionGroup' as any);
+            } else {
+              setActiveTab(key as MissionTab);
+            }
+          }}
+          style={styles.topTabBar}
+        />
+      </View>
+
       {/* 미션 완료 모달 */}
       <ConfirmModal
         visible={showCompleteModal}
@@ -671,6 +691,14 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  topTabContainer: {
+    paddingHorizontal: spacing[3],
+    paddingTop: spacing[2],
+    paddingBottom: spacing[1],
+  },
+  topTabBar: {
+    marginBottom: 0,
   },
   title: {
     fontSize: typography.fontSize['2xl'],

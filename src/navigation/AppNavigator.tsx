@@ -46,6 +46,7 @@ import FindIdScreen from '../screens/FindIdScreen';
 import FindIdResultScreen from '../screens/FindIdResultScreen';
 import FindPasswordScreen from '../screens/FindPasswordScreen';
 import SoundSettingsScreen from '../screens/SoundSettingsScreen';
+import MissionSetListScreen from '../screens/MissionSetListScreen';
 
 // 간단한 상태 기반 네비게이션 (React Navigation 없이)
 const AppNavigator = () => {
@@ -153,7 +154,8 @@ const AppNavigator = () => {
         currentScreen === SCREEN_NAMES.COMMUNITY_POST_DETAIL ||
         currentScreen === SCREEN_NAMES.COMMUNITY_POST_EDIT ||
         currentScreen === SCREEN_NAMES.MISSION_GROUP ||
-        currentScreen === SCREEN_NAMES.VERIFICATION_POST_DETAIL
+        currentScreen === SCREEN_NAMES.VERIFICATION_POST_DETAIL ||
+        currentScreen === SCREEN_NAMES.MISSION_SET_LIST
       ) {
         setCurrentScreen(SCREEN_NAMES.COMMUNITY);
       } else if (
@@ -258,7 +260,8 @@ const AppNavigator = () => {
       currentScreen === SCREEN_NAMES.COMMUNITY_POST_DETAIL ||
       currentScreen === SCREEN_NAMES.COMMUNITY_POST_EDIT ||
       currentScreen === SCREEN_NAMES.MISSION_GROUP ||
-      currentScreen === SCREEN_NAMES.VERIFICATION_POST_DETAIL
+      currentScreen === SCREEN_NAMES.VERIFICATION_POST_DETAIL ||
+      currentScreen === SCREEN_NAMES.MISSION_SET_LIST
     ) {
       setCurrentScreen(SCREEN_NAMES.COMMUNITY);
     } else if (
@@ -350,6 +353,8 @@ const AppNavigator = () => {
         return <NotificationScreen navigation={navigation} />;
       case SCREEN_NAMES.SOUND_SETTINGS:
         return <SoundSettingsScreen navigation={navigation} />;
+      case SCREEN_NAMES.MISSION_SET_LIST:
+        return <MissionSetListScreen navigation={navigation} />;
       default:
         return <HomeScreen navigation={navigation} />;
     }
