@@ -131,16 +131,21 @@ const ChangePasswordScreen: React.FC<ChangePasswordScreenProps> = ({ navigation 
         let errorMessage = '비밀번호 변경에 실패했습니다.';
         
         if (result.error) {
-          if (result.error.includes('ACCOUNT-011') || result.error.includes('비밀번호가 틀립니다')) {
+          const errorStr = typeof result.error === 'string' ? result.error : JSON.stringify(result.error);
+          
+          // 백엔드 에러 코드 매핑
+          if (errorStr.includes('ACCOUNT-011') || errorStr.includes('비밀번호가 틀립니다') || errorStr.includes('기존 비밀번호가 일치하지 않습니다')) {
             errorMessage = '현재 비밀번호가 일치하지 않습니다.';
             setErrors((prev) => ({ ...prev, oldPassword: errorMessage }));
-          } else if (result.error.includes('ACCOUNT-020') || result.error.includes('동일합니다')) {
+          } else if (errorStr.includes('ACCOUNT-020') || errorStr.includes('동일합니다') || errorStr.includes('새 비밀번호가 기존 비밀번호와 동일')) {
             errorMessage = '새 비밀번호는 현재 비밀번호와 달라야 합니다.';
             setErrors((prev) => ({ ...prev, newPassword: errorMessage }));
-          } else if (result.error.includes('ACCOUNT-010') || result.error.includes('존재하지 않습니다')) {
+          } else if (errorStr.includes('ACCOUNT-010') || errorStr.includes('존재하지 않습니다') || errorStr.includes('회원 정보를 찾을 수 없습니다')) {
             errorMessage = '회원 정보를 찾을 수 없습니다.';
+          } else if (errorStr.includes('ACCOUNT-007') || errorStr.includes('필수 요소')) {
+            errorMessage = '모든 필드를 입력해주세요.';
           } else {
-            errorMessage = result.error;
+            errorMessage = typeof result.error === 'string' ? result.error : '비밀번호 변경에 실패했습니다.';
           }
         }
 
