@@ -15,6 +15,7 @@ import { RootStackParamList } from '../../types/navigation';
 import { getVerifications, voteVerification, VerificationPost, VerificationStatus } from '../../api/missionApi';
 import { CommunityPost } from '../../types';
 import { logError } from '../../utils/logger';
+import { getHiddenPosts, hidePost } from '../../utils/hiddenContentStorage';
 
 interface CommunityScreenProps {
   navigation: NavigationProp<RootStackParamList>;
@@ -37,6 +38,9 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation }) => {
   const [verificationLoading, setVerificationLoading] = useState(false);
   const [verificationFilter, setVerificationFilter] = useState<VerificationFilter>('all');
 
+  // 숨긴 게시글 ID 목록
+  const [hiddenPostIds, setHiddenPostIds] = useState<string[]>([]);
+
   // 검색어 디바운싱 (300ms)
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -44,6 +48,19 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation }) => {
     }, 300);
     return () => clearTimeout(timer);
   }, [searchQuery]);
+
+  // 숨긴 게시글 목록 로드
+  useEffect(() => {
+    const loadHiddenPosts = async () => {
+      try {
+        const hiddenIds = await getHiddenPosts();
+        setHiddenPostIds(hiddenIds);
+      } catch (error) {
+        logError('숨긴 게시글 목록 로드 실패', error as Error);
+      }
+    };
+    loadHiddenPosts();
+  }, []);
 
   // 인증글 로딩
   const loadVerificationPosts = useCallback(async () => {
@@ -157,6 +174,9 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation }) => {
       ...convertedVerificationPosts
     ];
 
+    // 숨긴 글 필터링
+    allPosts = allPosts.filter(post => !hiddenPostIds.includes(post.post_id));
+
     // 인증 필터 적용
     if (verificationFilter === 'pending') {
       allPosts = allPosts.filter(post => post.isVerificationPost && !post.verified);
@@ -193,7 +213,18 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation }) => {
     }
 
     return allPosts;
-  }, [posts, convertedVerificationPosts, debouncedSearchQuery, filter, verificationFilter]);
+  }, [posts, convertedVerificationPosts, debouncedSearchQuery, filter, verificationFilter, hiddenPostIds]);
+
+  // 게시글 숨기기 처리
+  const handleHidePost = useCallback(async (postId: string) => {
+    try {
+      await hidePost(postId);
+      setHiddenPostIds(prev => [...prev, postId]);
+    } catch (error) {
+      logError('게시글 숨기기 실패', error as Error);
+      Alert.alert('오류', '게시글을 숨기는 중 문제가 발생했습니다.');
+    }
+  }, []);
 
   const handlePostPress = (postId: string) => {
     // 인증글인 경우 인증글 상세 화면으로 이동
@@ -348,6 +379,7 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation }) => {
                 post={post}
                 onPress={handlePostPress}
                 onLike={handleLike}
+                onHide={handleHidePost}
               />
             ))}
           </View>
