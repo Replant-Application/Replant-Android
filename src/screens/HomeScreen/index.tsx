@@ -261,6 +261,9 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                 onPress={handleCharacterPress}
                 onLongPress={handleCharacterDoublePress}
                 activeOpacity={0.9}
+                accessibilityRole="button"
+                accessibilityLabel={`${currentCharacter.name || '캐릭터'}, 레벨 ${currentCharacter.level || 1}`}
+                accessibilityHint="탭하여 말풍선 보기, 길게 눌러서 감정 변경"
               >
                 <Animated.View
                   style={[
@@ -282,6 +285,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                     source={getCharacterImage(currentCharacter.level || 1, characterEmotion)}
                     style={styles.characterImage}
                     resizeMode={FastImage.resizeMode.contain}
+                    accessibilityElementsHidden={true}
                   />
                 </Animated.View>
               </TouchableOpacity>
@@ -324,8 +328,11 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
             }).start();
           }}
           activeOpacity={0.7}
+          accessibilityRole="button"
+          accessibilityLabel="캐릭터 영역 접기/펼치기"
+          accessibilityHint="캐릭터 영역의 크기를 조절합니다"
         >
-          <View style={styles.dragHandleContainer}>
+          <View style={styles.dragHandleContainer} accessibilityElementsHidden={true}>
             <View style={styles.dragHandleDot} />
             <View style={styles.dragHandleDot} />
             <View style={styles.dragHandleDot} />
@@ -373,6 +380,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                   style={styles.missionListItem}
                   onPress={() => handleViewMissionDetails(mission.mission_id)}
                   activeOpacity={0.7}
+                  accessibilityRole="button"
+                  accessibilityLabel={`${mission.title}, ${mission.completed ? '완료' : '진행중'}`}
                 >
                   <View style={styles.missionListItemLeft}>
                     {mission.completed ? (
@@ -380,13 +389,14 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                         source={require('../../assets/images/check2.png')}
                         style={styles.missionCompletedIcon}
                         resizeMode="contain"
+                        accessibilityElementsHidden={true}
                       />
                     ) : (
-                      <View style={styles.missionInProgressIcon} />
+                      <View style={styles.missionInProgressIcon} accessibilityElementsHidden={true} />
                     )}
                     <Text style={styles.missionListItemTitle}>{mission.title}</Text>
                   </View>
-                  <Text style={styles.missionListItemArrow}>›</Text>
+                  <Text style={styles.missionListItemArrow} accessibilityElementsHidden={true}>›</Text>
                 </TouchableOpacity>
               ))
             ) : (

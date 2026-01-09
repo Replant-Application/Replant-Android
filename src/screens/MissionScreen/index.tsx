@@ -680,6 +680,8 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
           style={styles.createButtonTop}
           onPress={() => navigation.navigate('CustomMissionCreate' as any)}
           activeOpacity={0.7}
+          accessibilityRole="button"
+          accessibilityLabel="미션 만들기"
         >
           <Text style={styles.createButtonTopText}>미션 만들기</Text>
         </TouchableOpacity>
