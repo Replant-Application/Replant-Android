@@ -45,6 +45,7 @@ import NotificationScreen from '../screens/NotificationScreen';
 import FindIdScreen from '../screens/FindIdScreen';
 import FindIdResultScreen from '../screens/FindIdResultScreen';
 import FindPasswordScreen from '../screens/FindPasswordScreen';
+import ChangePasswordScreen from '../screens/ChangePasswordScreen';
 import SoundSettingsScreen from '../screens/SoundSettingsScreen';
 import MissionSetListScreen from '../screens/MissionSetListScreen';
 
@@ -251,7 +252,7 @@ const AppNavigator = () => {
     // 화면별 뒤로가기 목적지 정의
     if (currentScreen === SCREEN_NAMES.PLACES_SEARCH) {
       setCurrentScreen(SCREEN_NAMES.COUNSELING_SELECT);
-    } else if (currentScreen === SCREEN_NAMES.COUNSELING_SELECT || currentScreen === SCREEN_NAMES.INFO || currentScreen === SCREEN_NAMES.SOUND_SETTINGS) {
+    } else if (currentScreen === SCREEN_NAMES.COUNSELING_SELECT || currentScreen === SCREEN_NAMES.INFO || currentScreen === SCREEN_NAMES.SOUND_SETTINGS || currentScreen === SCREEN_NAMES.CHANGE_PASSWORD) {
       setCurrentScreen(SCREEN_NAMES.SETTINGS);
     } else if (currentScreen === SCREEN_NAMES.PHOTO_SELECT || currentScreen === SCREEN_NAMES.MISSION_DETAIL || currentScreen === SCREEN_NAMES.BADGE_DETAIL || currentScreen === SCREEN_NAMES.VERIFICATION_POST_CREATE) {
       setCurrentScreen(SCREEN_NAMES.MISSION);
@@ -353,6 +354,8 @@ const AppNavigator = () => {
         return <NotificationScreen navigation={navigation} />;
       case SCREEN_NAMES.SOUND_SETTINGS:
         return <SoundSettingsScreen navigation={navigation} />;
+      case SCREEN_NAMES.CHANGE_PASSWORD:
+        return <ChangePasswordScreen navigation={navigation} />;
       case SCREEN_NAMES.MISSION_SET_LIST:
         return <MissionSetListScreen navigation={navigation} />;
       default:

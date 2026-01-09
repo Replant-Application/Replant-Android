@@ -449,6 +449,13 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
           <Text style={styles.sectionTitle}>계정</Text>
           <View style={styles.settingsCard}>
             <SettingItem
+              icon={require('../../assets/images/notes.png')}
+              title="비밀번호 변경"
+              onPress={() => navigation?.navigate('ChangePassword')}
+              showArrow={true}
+            />
+            <View style={styles.divider} />
+            <SettingItem
               icon={require('../../assets/images/door.png')}
               title="로그아웃"
               onPress={() => setShowLogoutModal(true)}

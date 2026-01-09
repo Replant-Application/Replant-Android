@@ -38,6 +38,7 @@ export const SCREEN_NAMES: Record<string, string> = {
   FIND_ID: 'FindId',
   FIND_ID_RESULT: 'FindIdResult',
   FIND_PASSWORD: 'FindPassword',
+  CHANGE_PASSWORD: 'ChangePassword',
   SOUND_SETTINGS: 'SoundSettings',
   MISSION_SET_LIST: 'MissionSetList',
 } as const;

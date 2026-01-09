@@ -436,4 +436,5 @@ export enum ScreenNames {
   ADMIN_USER_LIST = 'AdminUserList',
   ADMIN_USER_DETAIL = 'AdminUserDetail',
   ADMIN_USER_EDIT = 'AdminUserEdit',
+  CHANGE_PASSWORD = 'ChangePassword',
 }

@@ -95,6 +95,7 @@ export type RootStackParamList = {
     email: string; // 마스킹된 이메일
   };
   FindPassword: undefined;
+  ChangePassword: undefined;
 };
 
 // 네비게이션 파라미터 타입
@@ -153,6 +154,7 @@ export interface NavigationParams {
     email: string; // 마스킹된 이메일
   };
   [ScreenNames.FIND_PASSWORD]: undefined;
+  [ScreenNames.CHANGE_PASSWORD]: undefined;
 }
 
 // 네비게이션 Props 타입
