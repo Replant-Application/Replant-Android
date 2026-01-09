@@ -116,11 +116,14 @@ const FindIdScreen: React.FC<FindIdScreenProps> = ({ onNavigate }) => {
           <TouchableOpacity
             onPress={() => onNavigate(SCREEN_NAMES.LOGIN as string)}
             style={styles.backButton}
+            accessibilityRole="button"
+            accessibilityLabel="뒤로가기"
           >
             <Image
               source={require('../../assets/images/left.png')}
               style={styles.backButtonIcon}
               resizeMode="contain"
+              accessibilityElementsHidden={true}
             />
           </TouchableOpacity>
         }
@@ -132,6 +135,7 @@ const FindIdScreen: React.FC<FindIdScreenProps> = ({ onNavigate }) => {
               source={require('../../assets/images/RePlant_Logo.png')}
               style={styles.logoIcon}
               resizeMode="contain"
+              accessibilityLabel="Replant 로고"
             />
             <Text style={styles.infoText} numberOfLines={1}>
               전화번호 또는 이메일을 입력해주세요
@@ -192,6 +196,8 @@ const FindIdScreen: React.FC<FindIdScreenProps> = ({ onNavigate }) => {
         <TouchableOpacity
           onPress={() => onNavigate(SCREEN_NAMES.LOGIN as string)}
           style={styles.linkButton}
+          accessibilityRole="button"
+          accessibilityLabel="로그인으로 돌아가기"
         >
           <Text style={styles.linkText}>로그인으로 돌아가기</Text>
         </TouchableOpacity>

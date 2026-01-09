@@ -166,11 +166,14 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onNavigate }) => {
           <TouchableOpacity
             onPress={() => onNavigate(SCREEN_NAMES.START as string)}
             style={styles.backButton}
+            accessibilityRole="button"
+            accessibilityLabel="뒤로가기"
           >
             <Image
               source={require('../../assets/images/left.png')}
               style={styles.backButtonIcon}
               resizeMode="contain"
+              accessibilityElementsHidden={true}
             />
           </TouchableOpacity>
         }
@@ -182,6 +185,7 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onNavigate }) => {
               source={require('../../assets/images/RePlant_Logo.png')}
               style={styles.logoIcon}
               resizeMode="contain"
+              accessibilityLabel="Replant 로고"
             />
             <Text style={styles.infoText} numberOfLines={1}>
             지금의 나에서, 한 단계 더 성장해보세요.
@@ -295,6 +299,8 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onNavigate }) => {
         <TouchableOpacity
           onPress={() => onNavigate(SCREEN_NAMES.LOGIN as string)}
           style={styles.linkButton}
+          accessibilityRole="button"
+          accessibilityLabel="이미 계정이 있으신가요? 로그인"
         >
           <Text style={styles.linkText}>이미 계정이 있으신가요? 로그인</Text>
         </TouchableOpacity>

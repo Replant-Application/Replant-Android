@@ -226,6 +226,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onNavigate }) => {
               source={require('../../assets/images/Replant_Loading.png')}
               style={styles.logo}
               resizeMode="contain"
+              accessibilityLabel="Replant 로고"
             />
           </View>
         </View>
@@ -241,6 +242,9 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onNavigate }) => {
               autoCapitalize="none"
               autoCorrect={false}
               style={styles.input}
+              accessibilityLabel="이메일"
+              accessibilityHint="이메일 주소를 입력하세요"
+              allowFontScaling={true}
               {...(Platform.OS === 'android' && { includeFontPadding: false })}
             />
           </View>
@@ -256,6 +260,9 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onNavigate }) => {
               autoCorrect={false}
               onSubmitEditing={handleLogin}
               style={styles.input}
+              accessibilityLabel="비밀번호"
+              accessibilityHint="비밀번호를 입력하세요"
+              allowFontScaling={true}
               {...(Platform.OS === 'android' && { includeFontPadding: false })}
             />
           </View>
@@ -264,9 +271,12 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onNavigate }) => {
             <TouchableOpacity
               onPress={() => setKeepLoggedIn(!keepLoggedIn)}
               style={styles.checkboxRow}
+              accessibilityRole="checkbox"
+              accessibilityLabel="로그인 유지"
+              accessibilityState={{ checked: keepLoggedIn }}
             >
               <View style={[styles.checkbox, keepLoggedIn && styles.checkboxChecked]}>
-                {keepLoggedIn && <Text style={styles.checkmark}>✓</Text>}
+                {keepLoggedIn && <Text style={styles.checkmark} accessibilityElementsHidden={true}>✓</Text>}
               </View>
               <Text style={styles.checkboxLabel}>로그인 유지</Text>
             </TouchableOpacity>
@@ -277,6 +287,9 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onNavigate }) => {
             onPress={handleLogin}
             disabled={isLoading}
             activeOpacity={0.8}
+            accessibilityRole="button"
+            accessibilityLabel={isLoading ? '처리 중' : '이메일로 로그인'}
+            accessibilityState={{ disabled: isLoading }}
           >
             <Text style={styles.loginButtonText}>
               {isLoading ? '처리 중...' : '이메일로 로그인'}
@@ -287,20 +300,26 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onNavigate }) => {
             <TouchableOpacity
               onPress={() => onNavigate(SCREEN_NAMES.FIND_PASSWORD as string)}
               style={styles.footerLink}
+              accessibilityRole="button"
+              accessibilityLabel="비밀번호 찾기"
             >
               <Text style={styles.footerLinkText}>비밀번호 찾기</Text>
             </TouchableOpacity>
-            <Text style={styles.footerSeparator}>|</Text>
+            <Text style={styles.footerSeparator} accessibilityElementsHidden={true}>|</Text>
             <TouchableOpacity
               onPress={() => onNavigate(SCREEN_NAMES.FIND_ID as string)}
               style={styles.footerLink}
+              accessibilityRole="button"
+              accessibilityLabel="아이디 찾기"
             >
               <Text style={styles.footerLinkText}>아이디 찾기</Text>
             </TouchableOpacity>
-            <Text style={styles.footerSeparator}>|</Text>
+            <Text style={styles.footerSeparator} accessibilityElementsHidden={true}>|</Text>
             <TouchableOpacity
               onPress={() => onNavigate(SCREEN_NAMES.SIGNUP as string)}
               style={styles.footerLink}
+              accessibilityRole="button"
+              accessibilityLabel="회원가입"
             >
               <Text style={styles.footerLinkText}>회원가입</Text>
             </TouchableOpacity>
@@ -318,12 +337,16 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onNavigate }) => {
                 onPress={handleKakaoLogin}
                 disabled={isLoading}
                 activeOpacity={0.8}
+                accessibilityRole="button"
+                accessibilityLabel="카카오로 로그인"
+                accessibilityState={{ disabled: isLoading }}
               >
                 <View style={[styles.socialIconCircle, { backgroundColor: '#FEE500' }]}>
                   <Image
                     source={require('../../assets/images/kakao_logo.png')}
                     style={styles.socialIconImage}
                     resizeMode="contain"
+                    accessibilityElementsHidden={true}
                   />
                 </View>
               </TouchableOpacity>
@@ -332,12 +355,16 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onNavigate }) => {
                 onPress={handleGoogleLogin}
                 disabled={isLoading}
                 activeOpacity={0.8}
+                accessibilityRole="button"
+                accessibilityLabel="구글로 로그인"
+                accessibilityState={{ disabled: isLoading }}
               >
                 <View style={[styles.socialIconCircle, { backgroundColor: colors.background.primary, borderWidth: 1, borderColor: colors.border.light }]}>
                   <Image
                     source={require('../../assets/images/google_logo.png')}
                     style={styles.socialIconImage}
                     resizeMode="contain"
+                    accessibilityElementsHidden={true}
                   />
                 </View>
               </TouchableOpacity>
@@ -369,6 +396,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onNavigate }) => {
                 source={require('../../assets/images/smile_replant.gif')}
                 style={styles.modalCharacter}
                 resizeMode={FastImage.resizeMode.contain}
+                accessibilityLabel="환영하는 캐릭터"
               />
             </View>
             <View style={styles.modalTextContainer}>
@@ -406,6 +434,8 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onNavigate }) => {
                 }, 100);
               }}
               activeOpacity={0.8}
+              accessibilityRole="button"
+              accessibilityLabel="시작하기"
             >
               <Text style={styles.modalButtonText}>시작하기</Text>
             </TouchableOpacity>
