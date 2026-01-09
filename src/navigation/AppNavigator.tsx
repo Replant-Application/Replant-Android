@@ -7,6 +7,8 @@ import { getOptimizedLineHeight } from '../utils/textStyles';
 import { RootStackParamList } from '../types/navigation';
 import { apiClient } from '../api/client';
 import { logout } from '../services/authService';
+import { backgroundMusicService } from '../services/backgroundMusicService';
+import { playButtonSound } from '../utils/soundUtils';
 
 // 화면 컴포넌트들
 import StartScreen from '../screens/StartScreen';
@@ -43,6 +45,7 @@ import NotificationScreen from '../screens/NotificationScreen';
 import FindIdScreen from '../screens/FindIdScreen';
 import FindIdResultScreen from '../screens/FindIdResultScreen';
 import FindPasswordScreen from '../screens/FindPasswordScreen';
+import SoundSettingsScreen from '../screens/SoundSettingsScreen';
 
 // 간단한 상태 기반 네비게이션 (React Navigation 없이)
 const AppNavigator = () => {
@@ -72,6 +75,23 @@ const AppNavigator = () => {
     setCurrentScreen(SCREEN_NAMES.START);
     });
   }, [userLogout]);
+
+  // 배경음악 초기화
+  useEffect(() => {
+    backgroundMusicService.initialize();
+    return () => {
+      backgroundMusicService.unload();
+    };
+  }, []);
+
+  // 화면 변경 시 배경음악 재생
+  useEffect(() => {
+    if (currentScreen && isLoggedIn) {
+      backgroundMusicService.playForScreen(currentScreen);
+    } else {
+      backgroundMusicService.stop();
+    }
+  }, [currentScreen, isLoggedIn]);
 
   // 화면 전환 애니메이션 (메인 탭 화면 간 전환은 제외)
   useEffect(() => {
@@ -124,7 +144,7 @@ const AppNavigator = () => {
       // 화면별 뒤로가기 목적지 정의
       if (currentScreen === SCREEN_NAMES.PLACES_SEARCH) {
         setCurrentScreen(SCREEN_NAMES.COUNSELING_SELECT);
-      } else if (currentScreen === SCREEN_NAMES.COUNSELING_SELECT || currentScreen === SCREEN_NAMES.INFO) {
+      } else if (currentScreen === SCREEN_NAMES.COUNSELING_SELECT || currentScreen === SCREEN_NAMES.INFO || currentScreen === SCREEN_NAMES.SOUND_SETTINGS) {
         setCurrentScreen(SCREEN_NAMES.SETTINGS);
       } else if (currentScreen === SCREEN_NAMES.PHOTO_SELECT || currentScreen === SCREEN_NAMES.MISSION_DETAIL || currentScreen === SCREEN_NAMES.BADGE_DETAIL || currentScreen === SCREEN_NAMES.VERIFICATION_POST_CREATE) {
         setCurrentScreen(SCREEN_NAMES.MISSION);
@@ -229,7 +249,7 @@ const AppNavigator = () => {
     // 화면별 뒤로가기 목적지 정의
     if (currentScreen === SCREEN_NAMES.PLACES_SEARCH) {
       setCurrentScreen(SCREEN_NAMES.COUNSELING_SELECT);
-    } else if (currentScreen === SCREEN_NAMES.COUNSELING_SELECT || currentScreen === SCREEN_NAMES.INFO) {
+    } else if (currentScreen === SCREEN_NAMES.COUNSELING_SELECT || currentScreen === SCREEN_NAMES.INFO || currentScreen === SCREEN_NAMES.SOUND_SETTINGS) {
       setCurrentScreen(SCREEN_NAMES.SETTINGS);
     } else if (currentScreen === SCREEN_NAMES.PHOTO_SELECT || currentScreen === SCREEN_NAMES.MISSION_DETAIL || currentScreen === SCREEN_NAMES.BADGE_DETAIL || currentScreen === SCREEN_NAMES.VERIFICATION_POST_CREATE) {
       setCurrentScreen(SCREEN_NAMES.MISSION);
@@ -328,6 +348,8 @@ const AppNavigator = () => {
         return <VerificationPostDetailScreen navigation={navigation} route={route} />;
       case SCREEN_NAMES.NOTIFICATION:
         return <NotificationScreen navigation={navigation} />;
+      case SCREEN_NAMES.SOUND_SETTINGS:
+        return <SoundSettingsScreen navigation={navigation} />;
       default:
         return <HomeScreen navigation={navigation} />;
     }

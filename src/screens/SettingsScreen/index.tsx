@@ -122,47 +122,75 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
 
   const handleSendFeedback = async () => {
     const email = 'teamsda01@gmail.com';
-    const subject = encodeURIComponent('[Replant] 불편신고 및 개선 요청');
-    const body = encodeURIComponent(
-      `안녕하세요.\n\n불편사항이나 개선 요청사항을 작성해주세요.\n\n\n\n---\n앱 버전: 0.0.26\n기기: ${Platform.OS}`
-    );
-    const mailtoUrl = `mailto:${email}?subject=${subject}&body=${body}`;
+    const subject = '[Replant] 불편신고 및 개선 요청';
+    const body = `안녕하세요.
 
+불편사항이나 개선 요청사항을 작성해주세요.
+
+
+
+---
+앱 버전: 0.0.26
+기기: ${Platform.OS}
+사용자: ${user?.nickname || '익명'}`;
+
+    // expo-mail-composer를 선택적으로 로드
+    let MailComposer: any = null;
     try {
-      const supported = await Linking.canOpenURL(mailtoUrl);
-      if (supported) {
-        await Linking.openURL(mailtoUrl);
-      } else {
-        // 메일 앱이 없을 경우 이메일 주소를 클립보드에 복사
-        try {
-          await Clipboard.setString(email);
-          Alert.alert(
-            '이메일 주소 복사됨',
-            `메일 앱을 찾을 수 없습니다.\n\n이메일 주소가 클립보드에 복사되었습니다:\n${email}\n\n원하시는 메일 앱에서 이 주소로 문의해주세요.`,
-            [{ text: '확인', style: 'default' }]
-          );
-        } catch (clipboardError) {
-          // 클립보드 복사도 실패한 경우
-          Alert.alert(
-            '이메일 주소',
-            `메일 앱을 열 수 없습니다.\n\n아래 이메일 주소로 문의해주세요:\n\n${email}`,
-            [{ text: '확인', style: 'default' }]
-          );
+      MailComposer = require('expo-mail-composer');
+    } catch (e) {
+      // 패키지가 없으면 null로 유지
+    }
+
+    // MailComposer가 있으면 사용
+    if (MailComposer && MailComposer.isAvailableAsync && MailComposer.composeAsync) {
+      try {
+        const isAvailable = await MailComposer.isAvailableAsync();
+        if (isAvailable) {
+          await MailComposer.composeAsync({
+            recipients: [email],
+            subject: subject,
+            body: body,
+          });
+          return;
         }
+      } catch (error) {
+        console.log('MailComposer error:', error);
+        // MailComposer 실패 시 fallback으로 진행
+      }
+    }
+
+    // MailComposer가 없거나 실패한 경우 - Android Intent URI 사용
+    try {
+      // Android Intent URI를 사용하여 메일 앱 열기
+      // 이 방식은 더 안정적이고 크래시를 일으키지 않음
+      const subjectEncoded = encodeURIComponent(subject);
+      const bodyEncoded = encodeURIComponent(body);
+      
+      // Intent URI 형식으로 메일 앱 열기
+      const intentUri = `intent://send?to=${encodeURIComponent(email)}&subject=${subjectEncoded}&body=${bodyEncoded}#Intent;scheme=mailto;action=android.intent.action.SENDTO;end`;
+      
+      try {
+        await Linking.openURL(intentUri);
+      } catch (intentError) {
+        // Intent URI 실패 시 일반 mailto 시도
+        const mailtoUrl = `mailto:${email}?subject=${subjectEncoded}&body=${bodyEncoded}`;
+        await Linking.openURL(mailtoUrl);
       }
     } catch (error) {
-      // 메일 앱 열기 실패 시 이메일 주소 복사 시도
+      // 모든 방법 실패 시 이메일 정보를 클립보드에 복사
       try {
-        await Clipboard.setString(email);
+        const emailInfo = `받는 사람: ${email}\n제목: ${subject}\n\n${body}`;
+        await Clipboard.setString(emailInfo);
         Alert.alert(
-          '이메일 주소 복사됨',
-          `메일 앱을 여는 중 오류가 발생했습니다.\n\n이메일 주소가 클립보드에 복사되었습니다:\n${email}\n\n원하시는 메일 앱에서 이 주소로 문의해주세요.`,
+          '이메일 정보 복사됨',
+          `메일 앱을 자동으로 열 수 없습니다.\n\n이메일 정보가 클립보드에 복사되었습니다.\n\nGmail 등 메일 앱을 열어서 붙여넣어 사용해주세요.`,
           [{ text: '확인', style: 'default' }]
         );
       } catch (clipboardError) {
         Alert.alert(
           '이메일 주소',
-          `메일 앱을 여는 중 오류가 발생했습니다.\n\n아래 이메일 주소로 문의해주세요:\n\n${email}`,
+          `아래 이메일 주소로 문의해주세요:\n\n${email}\n\n제목: ${subject}`,
           [{ text: '확인', style: 'default' }]
         );
       }
@@ -338,6 +366,12 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
               icon={require('../../assets/images/search.png')}
               title="통계"
               onPress={() => navigation?.navigate('Statistics')}
+            />
+            <View style={styles.divider} />
+            <SettingItem
+              icon={require('../../assets/images/alarm.png')}
+              title="사운드"
+              onPress={() => navigation?.navigate('SoundSettings' as any)}
             />
           </View>
         </View>

@@ -151,6 +151,10 @@ export class ApiClient {
     // URL 구성 (params가 있으면 query string 추가)
     let url = `${this.baseURL}${endpoint}`;
 
+    // 타임아웃 설정 (AbortController 사용)
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), API_CONFIG.timeout);
+
     try {
       // 토큰이 로드될 때까지 대기
       await this.ensureTokenLoaded();
@@ -189,11 +193,12 @@ export class ApiClient {
         headers['Authorization'] = `Bearer ${this.accessToken}`;
       }
 
-      // fetch 요청
+      // fetch 요청 (타임아웃을 위한 signal 추가)
       const response = await fetch(url, {
         method: options.method || 'GET',
         headers,
         body: options.body ? JSON.stringify(options.body) : undefined,
+        signal: controller.signal,
       });
 
       // 응답 처리
@@ -215,6 +220,7 @@ export class ApiClient {
 
       // 성공 응답
       if (response.ok) {
+        clearTimeout(timeoutId);
         // 백엔드가 { data: {...}, message: "...", code: ... } 형태로 응답하는 경우
         // data 필드를 추출하여 반환
         if (data && typeof data === 'object' && 'data' in data) {
@@ -228,6 +234,9 @@ export class ApiClient {
           data: data as T,
         };
       }
+
+      // 타임아웃 클리어
+      clearTimeout(timeoutId);
 
       // 401 Unauthorized - 토큰 만료 확인
       if (response.status === 401 && !url.includes('/auth/refresh')) {
@@ -298,22 +307,36 @@ export class ApiClient {
         data: data as T,
       };
     } catch (error) {
+      // 타임아웃 클리어
+      clearTimeout(timeoutId);
+
       // 네트워크 에러 등
       console.error('[API Client] Request failed:', {
         url,
         method: options.method || 'GET',
         error: error instanceof Error ? error.message : String(error),
-        errorType: error instanceof TypeError ? 'NetworkError' : 'UnknownError',
+        errorType: error instanceof TypeError ? 'NetworkError' :
+                   (error instanceof DOMException && error.name === 'AbortError') ? 'TimeoutError' : 'UnknownError',
       });
-      
+
+      // 타임아웃 에러 처리
+      if (error instanceof DOMException && error.name === 'AbortError') {
+        return {
+          success: false,
+          error: '서버 응답 시간이 초과되었습니다. 네트워크 연결을 확인해주세요.',
+        };
+      }
+
       // 네트워크 에러인 경우 더 자세한 메시지 제공
       let errorMessage = '알 수 없는 오류가 발생했습니다.';
       if (error instanceof TypeError && error.message.includes('fetch')) {
         errorMessage = '네트워크 연결에 실패했습니다. 인터넷 연결을 확인하거나 서버가 실행 중인지 확인해주세요.';
+      } else if (error instanceof TypeError && error.message.includes('Network')) {
+        errorMessage = '네트워크 연결에 실패했습니다. 인터넷 연결을 확인해주세요.';
       } else if (error instanceof Error) {
         errorMessage = error.message;
       }
-      
+
       return {
         success: false,
         error: errorMessage,
@@ -360,6 +383,10 @@ export class ApiClient {
    * 파일 업로드 (FormData)
    */
   async upload<T>(endpoint: string, formData: FormData): Promise<ServiceResult<T>> {
+    // 업로드는 더 긴 타임아웃 (30초)
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000);
+
     try {
       // 토큰이 로드될 때까지 대기
       await this.ensureTokenLoaded();
@@ -374,11 +401,12 @@ export class ApiClient {
         headers['Authorization'] = `Bearer ${this.accessToken}`;
       }
 
-      // fetch 요청
+      // fetch 요청 (타임아웃을 위한 signal 추가)
       const response = await fetch(url, {
         method: 'POST',
         headers,
         body: formData,
+        signal: controller.signal,
       });
 
       // 응답 처리
@@ -400,6 +428,7 @@ export class ApiClient {
 
       // 성공 응답
       if (response.ok) {
+        clearTimeout(timeoutId);
         if (data && typeof data === 'object' && 'data' in data) {
           return {
             success: true,
@@ -442,12 +471,26 @@ export class ApiClient {
         }
       }
 
+      // 타임아웃 클리어
+      clearTimeout(timeoutId);
+
       // 에러 응답
       return {
         success: false,
         error: data?.message || data?.error || `HTTP ${response.status}: ${response.statusText}`,
       };
     } catch (error) {
+      // 타임아웃 클리어
+      clearTimeout(timeoutId);
+
+      // 타임아웃 에러 처리
+      if (error instanceof DOMException && error.name === 'AbortError') {
+        return {
+          success: false,
+          error: '파일 업로드 시간이 초과되었습니다. 네트워크 연결을 확인해주세요.',
+        };
+      }
+
       return {
         success: false,
         error: error instanceof Error ? error.message : '파일 업로드 중 오류가 발생했습니다.',

@@ -11,24 +11,27 @@ import {
   Animated,
   Dimensions,
   PanResponder,
-  Platform
+  Platform,
+  FlatList,
+  RefreshControl
 } from 'react-native';
 import { useDiary } from '../../hooks/useDiary';
 import { useCharacter } from '../../hooks/useCharacter';
 import { Loading, ErrorBoundary, ConfirmModal, AlertModal } from '../../components/ui';
 import { colors, spacing, typography, borderRadius, shadows } from '../../utils/designTokens';
-import { SimpleDiaryData } from '../../types';
-import { formatDateYYYYMMDD } from '../../utils/dateUtils';
+import { SimpleDiaryData, Diary } from '../../types';
+import { formatDateYYYYMMDD, formatDateKorean, formatDateDivider } from '../../utils/dateUtils';
 import { DiaryStep } from './DiaryScreen.types';
 import { getCharacterImage } from '../../utils/characterUtils';
 import { getOptimizedLineHeight } from '../../utils/textStyles';
 import EmotionSelectionStep from './EmotionSelectionStep';
 import FactorSelectionStep from './FactorSelectionStep';
+import { playReadBookSound, playButtonSound } from '../../utils/soundUtils';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 const DiaryScreen: React.FC = () => {
-  const { diaries, loading, error, saveDiary, deleteDiary } = useDiary();
+  const { diaries, loading, error, saveDiary, deleteDiary, loadDiaries, getDiaryByDate } = useDiary();
   const { characters } = useCharacter();
   const [currentStep, setCurrentStep] = useState<DiaryStep>('welcome');
   const [moodValue, setMoodValue] = useState(50);
@@ -40,6 +43,10 @@ const DiaryScreen: React.FC = () => {
   const [selectedDiary, setSelectedDiary] = useState<(SimpleDiaryData & { id: string }) | null>(null);
   const [viewingDiaryIndex, setViewingDiaryIndex] = useState(0);
   const [showEmptyMessage, setShowEmptyMessage] = useState(false);
+  const [viewMode, setViewMode] = useState<'book' | 'list'>('list'); // 뷰 모드: 책 형태 / 목록 형태
+  const [searchDate, setSearchDate] = useState(''); // 날짜 검색 (YYYY-MM-DD)
+  const [refreshing, setRefreshing] = useState(false);
+  const [searchingByDate, setSearchingByDate] = useState(false);
   
   // 모달 상태
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -79,6 +86,82 @@ const DiaryScreen: React.FC = () => {
     return diaries.find(d => d.date === dateString);
   }, [diaries]);
 
+  // 날짜별 다이어리 조회
+  const handleSearchByDate = async (date: string) => {
+    if (!date.trim()) {
+      setSearchDate('');
+      setSearchingByDate(false);
+      return;
+    }
+
+    // 날짜 형식 검증 (YYYY-MM-DD)
+    const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+    if (!dateRegex.test(date)) {
+      showAlertModal('알림', '날짜 형식이 올바르지 않습니다. (예: 2026-01-09)');
+      return;
+    }
+
+    try {
+      setSearchingByDate(true);
+      const result = await getDiaryByDate(date);
+      
+      if (result.success && result.data) {
+        // 조회된 다이어리를 상세 화면으로 이동
+        const diaryData: SimpleDiaryData & { id: string } = {
+          id: result.data.id,
+          date: result.data.date,
+          emotion: result.data.emotion,
+          mood: result.data.mood,
+          emotions: result.data.emotions,
+          emotionFactors: result.data.emotionFactors,
+          content: result.data.content,
+        };
+        setSelectedDiary(diaryData);
+        setCurrentStep('detail');
+        setSearchDate('');
+      } else {
+        showAlertModal('알림', result.error || '해당 날짜에 작성한 일기가 없습니다.');
+      }
+    } catch (error) {
+      showAlertModal('오류', '일기 조회에 실패했습니다.');
+    } finally {
+      setSearchingByDate(false);
+    }
+  };
+
+  // 필터링된 일기 목록 (전체 목록)
+  const filteredDiaries = useMemo(() => {
+    return diaries;
+  }, [diaries]);
+
+  // 날짜별로 그룹화된 일기 목록
+  const groupedDiaries = useMemo(() => {
+    const groups: { [key: string]: typeof diaries } = {};
+    filteredDiaries.forEach(diary => {
+      const dateKey = diary.date;
+      if (!groups[dateKey]) {
+        groups[dateKey] = [];
+      }
+      groups[dateKey].push(diary);
+    });
+    // 날짜별로 정렬 (최신순)
+    return Object.keys(groups)
+      .sort((a, b) => new Date(b).getTime() - new Date(a).getTime())
+      .map(date => ({
+        date,
+        diaries: groups[date],
+      }));
+  }, [filteredDiaries]);
+
+  // 새로고침 처리
+  const onRefresh = async () => {
+    setRefreshing(true);
+    if (loadDiaries) {
+      await loadDiaries();
+    }
+    setRefreshing(false);
+  };
+
   // 말풍선 애니메이션
   useEffect(() => {
     Animated.timing(speechBubbleAnim, {
@@ -95,7 +178,7 @@ const DiaryScreen: React.FC = () => {
     }
     switch (currentStep) {
       case 'welcome':
-        return '감성일기에 오신걸 환영해요!';
+        return '감정일기에 오신걸 환영해요!';
       case 'mood':
         return '현재 기분이 어떤가요?';
       case 'emotions':
@@ -140,7 +223,8 @@ const DiaryScreen: React.FC = () => {
   };
 
   // 이전 단계로 이동
-  const handleBack = () => {
+  const handleBack = async () => {
+    await playButtonSound();
     if (currentStep === 'mood') {
       setCurrentStep('welcome');
     } else if (currentStep === 'emotions') {
@@ -161,13 +245,25 @@ const DiaryScreen: React.FC = () => {
     try {
       const dateString = formatDateYYYYMMDD(new Date());
 
+      // emotionFactors에 커스텀 요인 추가
+      const allFactors = [...selectedFactors];
+      if (factorText.trim() && showCustomFactorInput) {
+        allFactors.push(factorText.trim());
+      }
+
       const diaryData: SimpleDiaryData = {
         date: dateString,
-        emotion: selectedEmotions.join(', '),
-        content: `[기분 점수: ${moodValue}/100]\n\n${expressionText.trim()}`,
+        mood: moodValue,
+        emotions: selectedEmotions,
+        emotionFactors: allFactors,
+        content: expressionText.trim(),
       };
 
-      await saveDiary(diaryData as any);
+      const result = await saveDiary(diaryData);
+      if (!result.success) {
+        showAlertModal('오류', result.error || '일기 저장에 실패했습니다.');
+        return;
+      }
       setCurrentStep('confirm');
       
       // 2초 후 일기 보기로 이동
@@ -214,8 +310,18 @@ const DiaryScreen: React.FC = () => {
   };
 
   // 일기 상세 보기
-  const handleViewDetail = (diary: SimpleDiaryData & { id: string }) => {
-    setSelectedDiary(diary);
+  const handleViewDetail = (diary: Diary | (SimpleDiaryData & { id: string })) => {
+    // Diary 타입을 SimpleDiaryData로 변환
+    const diaryData: SimpleDiaryData & { id: string } = {
+      id: diary.id,
+      date: diary.date,
+      emotion: 'emotion' in diary ? diary.emotion : undefined,
+      mood: 'mood' in diary ? diary.mood : undefined,
+      emotions: 'emotions' in diary ? diary.emotions : undefined,
+      emotionFactors: 'emotionFactors' in diary ? diary.emotionFactors : undefined,
+      content: diary.content,
+    };
+    setSelectedDiary(diaryData);
     setCurrentStep('detail');
   };
 
@@ -279,52 +385,90 @@ const DiaryScreen: React.FC = () => {
             />
           </TouchableOpacity>
           
-          <View style={styles.signboardContainer}>
-            <View style={styles.signboard}>
-              <View style={styles.signboardPaper}>
-                <Text style={styles.signboardTitle}>오늘의 감정</Text>
-                <Text style={styles.signboardContent}>{selectedDiary.emotion}</Text>
-                
-                <Text style={styles.signboardTitle}>기분 점수</Text>
-                <Text style={styles.signboardContent}>
-                  {selectedDiary.content.match(/\[기분 점수: (.*?)\]/)?.[1] || '없음'}
-                </Text>
-                
-                <Text style={styles.signboardTitle}>감정 표현</Text>
-                <Text style={styles.signboardContent}>
-                  {selectedDiary.content.split('\n').slice(2).join('\n').trim() || '없음'}
-                </Text>
-                
-                <Text style={styles.signboardTitle}>작성일</Text>
-                <Text style={styles.signboardContent}>{selectedDiary.date}</Text>
+          <ScrollView 
+            style={styles.signboardScrollView}
+            contentContainerStyle={styles.signboardScrollContent}
+            showsVerticalScrollIndicator={false}
+          >
+            <View style={styles.signboardContainer}>
+              <View style={styles.signboard}>
+                <View style={styles.signboardPaper}>
+                  {/* 작성일 */}
+                  <Text style={styles.signboardTitle}>작성일</Text>
+                  <Text style={styles.signboardContent}>
+                    {formatDateKorean(selectedDiary.date, true)}
+                  </Text>
+                  
+                  {/* 기분 점수 */}
+                  <Text style={styles.signboardTitle}>기분 점수</Text>
+                  <Text style={styles.signboardContent}>
+                    {selectedDiary.mood !== undefined ? `${selectedDiary.mood}점` : '없음'}
+                  </Text>
+                  
+                  {/* 감정 */}
+                  <Text style={styles.signboardTitle}>감정</Text>
+                  {selectedDiary.emotions && selectedDiary.emotions.length > 0 ? (
+                    <View style={styles.emotionsList}>
+                      {selectedDiary.emotions.map((emotion, idx) => (
+                        <View key={idx} style={styles.detailEmotionTag}>
+                          <Text style={styles.detailEmotionTagText}>{emotion}</Text>
+                        </View>
+                      ))}
+                    </View>
+                  ) : (
+                    <Text style={styles.signboardContent}>
+                      {selectedDiary.emotion ? 
+                        (selectedDiary.emotion === 'happy' ? '행복' :
+                         selectedDiary.emotion === 'sad' ? '슬픔' :
+                         selectedDiary.emotion === 'angry' ? '화남' :
+                         selectedDiary.emotion === 'anxious' ? '불안' :
+                         selectedDiary.emotion === 'tired' ? '피곤' :
+                         selectedDiary.emotion === 'excited' ? '신남' :
+                         selectedDiary.emotion === 'calm' ? '평온' :
+                         selectedDiary.emotion === 'grateful' ? '감사' : selectedDiary.emotion) 
+                        : '없음'}
+                    </Text>
+                  )}
+                  
+                  {/* 감정 요인 */}
+                  <Text style={styles.signboardTitle}>감정 요인</Text>
+                  {selectedDiary.emotionFactors && selectedDiary.emotionFactors.length > 0 ? (
+                    <View style={styles.factorsList}>
+                      {selectedDiary.emotionFactors.map((factor, idx) => (
+                        <View key={idx} style={styles.factorTag}>
+                          <Text style={styles.factorTagText}>{factor}</Text>
+                        </View>
+                      ))}
+                    </View>
+                  ) : (
+                    <Text style={styles.signboardContent}>없음</Text>
+                  )}
+                  
+                  {/* 감정 표현 (내용) */}
+                  <Text style={styles.signboardTitle}>감정 표현</Text>
+                  <Text style={styles.signboardContentText}>
+                    {selectedDiary.content || '없음'}
+                  </Text>
+                </View>
               </View>
             </View>
-          </View>
-
-          {currentCharacter && (
-            <View style={styles.characterContainer}>
-              <Image
-                source={getCharacterImage(currentCharacter.level || 1, 'default')}
-                style={styles.characterImage}
-                resizeMode="contain"
-              />
+            
+            {/* 버튼을 ScrollView 안으로 이동 */}
+            <View style={styles.detailButtons}>
+              <TouchableOpacity 
+                style={styles.backToListButton}
+                onPress={handleBack}
+              >
+                <Text style={styles.backToListButtonText}>목록으로</Text>
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={styles.deleteButton}
+                onPress={() => handleDeleteDiary(selectedDiary.id)}
+              >
+                <Text style={styles.deleteButtonText}>삭제하기</Text>
+              </TouchableOpacity>
             </View>
-          )}
-
-          <View style={styles.detailButtons}>
-            <TouchableOpacity 
-              style={styles.backToListButton}
-              onPress={handleBack}
-            >
-              <Text style={styles.backToListButtonText}>목록으로</Text>
-            </TouchableOpacity>
-            <TouchableOpacity 
-              style={styles.deleteButton}
-              onPress={() => handleDeleteDiary(selectedDiary.id)}
-            >
-              <Text style={styles.deleteButtonText}>삭제하기</Text>
-            </TouchableOpacity>
-          </View>
+          </ScrollView>
         </View>
 
         {/* 모달 컴포넌트 */}
@@ -351,7 +495,7 @@ const DiaryScreen: React.FC = () => {
     );
   }
 
-  // 일기 보기 모드 (책 형태)
+  // 일기 보기 모드
   if (currentStep === 'view') {
     return (
       <ImageBackground
@@ -360,56 +504,225 @@ const DiaryScreen: React.FC = () => {
         resizeMode="cover"
       >
         <View style={styles.viewContainer}>
-          <TouchableOpacity style={styles.backButton} onPress={handleBack}>
-            <Image
-              source={require('../../assets/images/left.png')}
-              style={styles.backButtonIcon}
-              resizeMode="contain"
-            />
-          </TouchableOpacity>
-
-          {diaries.length > 0 ? (
-            <>
-              <View style={styles.topSection}>
-                <TouchableOpacity
-                  style={styles.bookContainer}
-                  onPress={() => handleViewDetail(diaries[viewingDiaryIndex] as any)}
-                  activeOpacity={0.8}
-                >
-                  <View style={styles.paperContainer}>
-                    <Image
-                      source={require('../../assets/images/paper.png')}
-                      style={styles.paperImage}
-                      resizeMode="contain"
-                    />
-                    <View style={styles.paperTextOverlay}>
-                      <Text style={styles.paperDate}>
-                        {`${diaries[viewingDiaryIndex]?.date || ''}\n작성한 감성 일기`}
-                      </Text>
-                    </View>
-                  </View>
-                  <Image
-                    source={require('../../assets/images/book.png')}
-                    style={styles.bookImage}
-                    resizeMode="contain"
-                  />
-                </TouchableOpacity>
-              </View>
-            </>
-          ) : (
-            <View style={styles.emptyView}>
-              <Text style={styles.emptyText}>작성된 일기가 없습니다</Text>
-            </View>
-          )}
-
-          {currentCharacter && (
-            <View style={styles.characterContainer}>
+          <View style={styles.viewHeader}>
+            <TouchableOpacity style={styles.backButton} onPress={handleBack}>
               <Image
-                source={getCharacterImage(currentCharacter.level || 1, 'default')}
-                style={styles.characterImage}
+                source={require('../../assets/images/left.png')}
+                style={styles.backButtonIcon}
                 resizeMode="contain"
               />
+            </TouchableOpacity>
+            
+            {/* 뷰 모드 전환 버튼 */}
+            <View style={styles.viewModeButtons}>
+              <TouchableOpacity
+                style={[styles.viewModeButton, viewMode === 'list' && styles.viewModeButtonActive]}
+                onPress={() => setViewMode('list')}
+              >
+                <Text style={[styles.viewModeButtonText, viewMode === 'list' && styles.viewModeButtonTextActive]}>
+                  목록
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.viewModeButton, viewMode === 'book' && styles.viewModeButtonActive]}
+                onPress={() => setViewMode('book')}
+              >
+                <Text style={[styles.viewModeButtonText, viewMode === 'book' && styles.viewModeButtonTextActive]}>
+                  책
+                </Text>
+              </TouchableOpacity>
             </View>
+          </View>
+
+          {/* 목록 뷰 */}
+          {viewMode === 'list' ? (
+            <>
+              {/* 날짜 검색 바 */}
+              <View style={styles.searchContainer}>
+                <View style={styles.searchInputContainer}>
+                  <TextInput
+                    style={styles.searchInput}
+                    placeholder="날짜 입력 (YYYY-MM-DD)"
+                    placeholderTextColor={colors.text.tertiary}
+                    value={searchDate}
+                    onChangeText={setSearchDate}
+                    keyboardType="numeric"
+                    maxLength={10}
+                  />
+                  {searchDate.length > 0 && (
+                    <TouchableOpacity
+                      style={styles.searchClearButton}
+                      onPress={() => {
+                        setSearchDate('');
+                        setSearchingByDate(false);
+                      }}
+                    >
+                      <Text style={styles.searchClearText}>✕</Text>
+                    </TouchableOpacity>
+                  )}
+                </View>
+                <TouchableOpacity
+                  style={[styles.searchButton, !searchDate.trim() && styles.searchButtonDisabled]}
+                  onPress={() => handleSearchByDate(searchDate)}
+                  disabled={searchingByDate || !searchDate.trim()}
+                >
+                  <Text style={styles.searchButtonText}>조회</Text>
+                </TouchableOpacity>
+              </View>
+
+              {/* 일기 목록 */}
+              {filteredDiaries.length > 0 ? (
+                <FlatList
+                  data={groupedDiaries}
+                  keyExtractor={(item) => item.date}
+                  renderItem={({ item }) => (
+                    <View style={styles.dateGroup}>
+                      <Text style={styles.dateGroupTitle}>
+                        {formatDateDivider(item.date)}
+                      </Text>
+                      {item.diaries.map((diary) => (
+                        <TouchableOpacity
+                          key={diary.id}
+                          style={styles.diaryListItem}
+                          onPress={() => handleViewDetail(diary)}
+                          activeOpacity={0.7}
+                        >
+                          <View style={styles.diaryListItemContent}>
+                            <View style={styles.diaryListItemHeader}>
+                              <Text style={styles.diaryListItemEmotion}>
+                                {diary.emotion === 'happy' ? '😊' :
+                                 diary.emotion === 'sad' ? '😢' :
+                                 diary.emotion === 'angry' ? '😠' :
+                                 diary.emotion === 'anxious' ? '😰' :
+                                 diary.emotion === 'tired' ? '😴' :
+                                 diary.emotion === 'excited' ? '🤩' :
+                                 diary.emotion === 'calm' ? '😌' :
+                                 diary.emotion === 'grateful' ? '🙏' : '😊'}
+                              </Text>
+                              <Text style={styles.diaryListItemDate}>
+                                {formatDateKorean(item.date)}
+                              </Text>
+                            </View>
+                            <Text 
+                              style={styles.diaryListItemText}
+                              numberOfLines={2}
+                            >
+                              {diary.content}
+                            </Text>
+                            {(diary as any).emotions && (diary as any).emotions.length > 0 && (
+                              <View style={styles.diaryListItemTags}>
+                                {(diary as any).emotions.slice(0, 3).map((emotion: string, idx: number) => (
+                                  <View key={idx} style={styles.diaryListItemTag}>
+                                    <Text style={styles.diaryListItemTagText}>{emotion}</Text>
+                                  </View>
+                                ))}
+                                {(diary as any).emotions.length > 3 && (
+                                  <Text style={styles.diaryListItemTagMore}>
+                                    +{(diary as any).emotions.length - 3}
+                                  </Text>
+                                )}
+                              </View>
+                            )}
+                          </View>
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+                  )}
+                  contentContainerStyle={styles.listContent}
+                  refreshControl={
+                    <RefreshControl
+                      refreshing={refreshing}
+                      onRefresh={onRefresh}
+                      tintColor={colors.white}
+                      colors={[colors.primary[500]]}
+                    />
+                  }
+                  ListEmptyComponent={
+                    <View style={styles.emptyView}>
+                      <Text style={styles.emptyText}>
+                        작성된 일기가 없습니다
+                      </Text>
+                    </View>
+                  }
+                />
+              ) : (
+                <View style={styles.emptyView}>
+                  <Text style={styles.emptyText}>
+                    작성된 일기가 없습니다
+                  </Text>
+                </View>
+              )}
+            </>
+          ) : (
+            /* 책 형태 뷰 */
+            <>
+              {diaries.length > 0 ? (
+                <>
+                  <View style={styles.topSection}>
+                    <TouchableOpacity
+                      style={styles.bookContainer}
+                      onPress={async () => {
+                        await playReadBookSound();
+                        handleViewDetail(diaries[viewingDiaryIndex]);
+                      }}
+                      activeOpacity={0.8}
+                    >
+                      <View style={styles.paperContainer}>
+                        <Image
+                          source={require('../../assets/images/paper.png')}
+                          style={styles.paperImage}
+                          resizeMode="contain"
+                        />
+                        <View style={styles.paperTextOverlay}>
+                          <Text style={styles.paperDate}>
+                            {`${diaries[viewingDiaryIndex]?.date || ''}\n작성한 감정 일기`}
+                          </Text>
+                        </View>
+                      </View>
+                      <Image
+                        source={require('../../assets/images/book.png')}
+                        style={styles.bookImage}
+                        resizeMode="contain"
+                      />
+                    </TouchableOpacity>
+                  </View>
+                  
+                  {/* 이전/다음 버튼 */}
+                  {diaries.length > 1 && (
+                    <View style={styles.bookNavigation}>
+                      <TouchableOpacity
+                        style={[styles.navButton, viewingDiaryIndex === 0 && styles.navButtonDisabled]}
+                        onPress={() => setViewingDiaryIndex(Math.max(0, viewingDiaryIndex - 1))}
+                        disabled={viewingDiaryIndex === 0}
+                      >
+                        <Text style={styles.navButtonText}>← 다음</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        style={[styles.navButton, viewingDiaryIndex >= diaries.length - 1 && styles.navButtonDisabled]}
+                        onPress={() => setViewingDiaryIndex(Math.min(diaries.length - 1, viewingDiaryIndex + 1))}
+                        disabled={viewingDiaryIndex >= diaries.length - 1}
+                      >
+                        <Text style={styles.navButtonText}>이전 →</Text>
+                      </TouchableOpacity>
+                    </View>
+                  )}
+                </>
+              ) : (
+                <View style={styles.emptyView}>
+                  <Text style={styles.emptyText}>작성된 일기가 없습니다</Text>
+                </View>
+              )}
+
+              {currentCharacter && (
+                <View style={styles.characterContainer}>
+                  <Image
+                    source={getCharacterImage(currentCharacter.level || 1, 'default')}
+                    style={styles.characterImage}
+                    resizeMode="contain"
+                  />
+                </View>
+              )}
+            </>
           )}
         </View>
 
@@ -605,9 +918,11 @@ const styles = StyleSheet.create({
   modalContainerWelcome: {
     backgroundColor: 'rgba(0, 0, 0, 0.6)',
     borderRadius: borderRadius.lg,
-    padding: spacing[3],
+    padding: spacing[6],
+    paddingVertical: spacing[8],
     marginHorizontal: spacing[4],
     marginTop: spacing[12],
+    minHeight: 180,
     ...shadows.lg,
   },
   modalContainer: {
@@ -896,6 +1211,207 @@ const styles = StyleSheet.create({
     paddingTop: spacing[1],
     paddingHorizontal: spacing[5],
   },
+  viewHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: spacing[4],
+    marginBottom: spacing[3],
+  },
+  viewModeButtons: {
+    flexDirection: 'row',
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+    borderRadius: borderRadius.lg,
+    padding: spacing[1],
+    gap: spacing[1],
+  },
+  viewModeButton: {
+    paddingHorizontal: spacing[4],
+    paddingVertical: spacing[2],
+    borderRadius: borderRadius.md,
+  },
+  viewModeButtonActive: {
+    backgroundColor: colors.primary[500],
+  },
+  viewModeButtonText: {
+    fontSize: typography.fontSize.sm,
+    color: colors.white,
+    fontWeight: typography.fontWeight.medium,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+  },
+  viewModeButtonTextActive: {
+    color: colors.white,
+  },
+  searchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: spacing[4],
+    marginBottom: spacing[3],
+    gap: spacing[2],
+  },
+  searchInputContainer: {
+    flex: 0,
+    width: 300,
+    position: 'relative',
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+    borderRadius: borderRadius.lg,
+    borderWidth: 1,
+    borderColor: colors.gray[700],
+  },
+  searchInput: {
+    width: '100%',
+    paddingVertical: spacing[2],
+    paddingLeft: spacing[3],
+    paddingRight: spacing[10], // X 버튼 공간 확보
+    fontSize: typography.fontSize.base,
+    color: colors.white,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+  },
+  searchButton: {
+    paddingHorizontal: spacing[4],
+    paddingVertical: spacing[2],
+    backgroundColor: colors.primary[500],
+    borderRadius: borderRadius.md,
+    minWidth: 60,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  searchButtonDisabled: {
+    backgroundColor: colors.gray[600],
+    opacity: 0.5,
+  },
+  searchButtonText: {
+    fontSize: typography.fontSize.sm,
+    color: colors.white,
+    fontWeight: typography.fontWeight.medium,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+  },
+  searchClearButton: {
+    position: 'absolute',
+    right: spacing[2],
+    top: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: spacing[2],
+    zIndex: 1,
+  },
+  searchClearText: {
+    fontSize: typography.fontSize.lg,
+    color: colors.white,
+    fontWeight: typography.fontWeight.medium,
+  },
+  listContent: {
+    paddingBottom: spacing[6],
+  },
+  dateGroup: {
+    marginBottom: spacing[4],
+  },
+  dateGroupTitle: {
+    fontSize: typography.fontSize.lg,
+    fontWeight: typography.fontWeight.medium,
+    color: colors.white,
+    marginBottom: spacing[2],
+    paddingHorizontal: spacing[2],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+  },
+  diaryListItem: {
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    borderRadius: borderRadius.lg,
+    padding: spacing[4],
+    marginBottom: spacing[2],
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.3)',
+  },
+  diaryListItemContent: {
+    width: '100%',
+  },
+  diaryListItemHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: spacing[2],
+  },
+  diaryListItemEmotion: {
+    fontSize: typography.fontSize.xl,
+  },
+  diaryListItemDate: {
+    fontSize: typography.fontSize.xs,
+    color: colors.gray[300],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+  },
+  diaryListItemText: {
+    fontSize: typography.fontSize.base,
+    color: colors.white,
+    marginBottom: spacing[2],
+    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+  },
+  diaryListItemTags: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing[1],
+    alignItems: 'center',
+  },
+  diaryListItemTag: {
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    borderRadius: borderRadius.sm,
+    paddingHorizontal: spacing[2],
+    paddingVertical: spacing[1],
+  },
+  diaryListItemTagText: {
+    fontSize: typography.fontSize.xs,
+    color: colors.white,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+  },
+  diaryListItemTagMore: {
+    fontSize: typography.fontSize.xs,
+    color: colors.gray[400],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+  },
+  bookPageInfo: {
+    fontSize: typography.fontSize.sm,
+    color: colors.white,
+    fontWeight: typography.fontWeight.medium,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+  },
   topSection: {
     alignItems: 'center',
   },
@@ -955,8 +1471,11 @@ const styles = StyleSheet.create({
   bookNavigation: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: spacing[2],
-    paddingHorizontal: spacing[4],
+    right: 20,
+    alignItems: 'center',
+    marginTop: -spacing[8],
+    paddingHorizontal: spacing[26],
+    width: '110%',
   },
   navButton: {
     padding: spacing[3],
@@ -1055,10 +1574,77 @@ const styles = StyleSheet.create({
     }),
     includeFontPadding: false,
   },
+  signboardContentText: {
+    fontSize: typography.fontSize.sm,
+    color: colors.text.secondary,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
+    marginBottom: spacing[4],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+  },
+  signboardScrollView: {
+    flex: 1,
+  },
+  signboardScrollContent: {
+    paddingBottom: spacing[5],
+  },
+  emotionsList: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing[2],
+    marginBottom: spacing[4],
+  },
+  detailEmotionTag: {
+    backgroundColor: colors.primary[100],
+    borderRadius: borderRadius.md,
+    paddingHorizontal: spacing[3],
+    paddingVertical: spacing[1],
+    borderWidth: 1,
+    borderColor: colors.primary[300],
+  },
+  detailEmotionTagText: {
+    fontSize: typography.fontSize.sm,
+    color: colors.primary[700],
+    fontWeight: typography.fontWeight.medium,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+  },
+  factorsList: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing[2],
+    marginBottom: spacing[4],
+  },
+  factorTag: {
+    backgroundColor: colors.orange[100],
+    borderRadius: borderRadius.md,
+    paddingHorizontal: spacing[3],
+    paddingVertical: spacing[1],
+    borderWidth: 1,
+    borderColor: colors.orange[300],
+  },
+  factorTagText: {
+    fontSize: typography.fontSize.sm,
+    color: colors.orange[700],
+    fontWeight: typography.fontWeight.medium,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+  },
   detailButtons: {
     flexDirection: 'row',
     gap: spacing[3],
-    marginTop: spacing[6],
+    marginTop: spacing[16],
+    marginBottom: spacing[6],
+    paddingHorizontal: spacing[2],
   },
   backToListButton: {
     flex: 1,

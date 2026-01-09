@@ -89,8 +89,8 @@ android {
         applicationId 'com.anonymous.replantmobileapp'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 27
-        versionName "0.0.27"
+        versionCode 1
+        versionName "0.0.19"
 
         buildConfigField "String", "REACT_NATIVE_RELEASE_LEVEL", "\"${findProperty('reactNativeReleaseLevel') ?: 'stable'}\""
     }

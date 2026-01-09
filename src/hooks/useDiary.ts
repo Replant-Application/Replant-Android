@@ -6,7 +6,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useUser } from '../contexts/UserContext';
 import { logError } from '../utils/logger';
-import { Diary, UseDiaryReturn, ServiceResult, SimpleDiaryData } from '../types';
+import { Diary, UseDiaryReturn, ServiceResult, SimpleDiaryData, Emotion } from '../types';
 import {
   getDiaries,
   getDiary as getDiaryApi,
@@ -15,24 +15,69 @@ import {
   updateDiary as updateDiaryApi,
   deleteDiary as deleteDiaryApi,
   DiaryResponse,
+  DiaryRequest,
 } from '../api/diaryApi';
+
+/**
+ * 한국어 감정을 영어 Emotion 타입으로 변환
+ */
+const mapKoreanEmotionToEnglish = (koreanEmotion: string): Emotion => {
+  const emotionMap: Record<string, Emotion> = {
+    '행복': 'happy',
+    '기쁨': 'happy',
+    '사랑': 'happy',
+    '만족': 'happy',
+    '감사': 'grateful',
+    '희망': 'happy',
+    '평온': 'calm',
+    '평화': 'calm',
+    '흥분': 'excited',
+    '자신감': 'excited',
+    '열정': 'excited',
+    '용기': 'excited',
+    '긍정': 'happy',
+    '슬픔': 'sad',
+    '우울': 'sad',
+    '외로움': 'sad',
+    '피곤': 'tired',
+    '지루함': 'tired',
+    '화남': 'angry',
+    '짜증': 'angry',
+    '불안': 'anxious',
+    '걱정': 'anxious',
+    '스트레스': 'anxious',
+  };
+  return emotionMap[koreanEmotion] || 'happy'; // 기본값은 'happy'
+};
 
 /**
  * API 응답을 로컬 Diary 타입으로 변환
  */
-const transformDiaryResponse = (response: DiaryResponse): Diary => ({
-  id: String(response.id),
-  diary_id: String(response.id),
-  date: response.date,
-  emotion: response.emotion,
-  content: response.content,
-  weather: response.weather,
-  location: response.location,
-  photos: response.imageUrls || [],
-  is_private: response.isPrivate,
-  created_at: response.createdAt,
-  updated_at: response.updatedAt,
-});
+const transformDiaryResponse = (response: DiaryResponse): Diary => {
+  // emotions 배열에서 첫 번째 감정을 사용하거나, emotion 필드가 있으면 사용
+  let emotion: Emotion = 'happy'; // 기본값
+  if (response.emotion) {
+    emotion = response.emotion;
+  } else if (response.emotions && response.emotions.length > 0) {
+    // 한국어 감정을 영어로 변환
+    emotion = mapKoreanEmotionToEnglish(response.emotions[0]);
+  }
+
+  return {
+    id: String(response.id),
+    diary_id: String(response.id),
+    date: response.date,
+    emotion,
+    content: response.content,
+    mood: response.mood,
+    emotions: response.emotions,
+    emotionFactors: response.emotionFactors,
+    weather: response.weather,
+    location: response.location,
+    photos: response.imageUrls || [],
+    is_private: response.isPrivate ?? false,
+  };
+};
 
 export const useDiary = (): UseDiaryReturn => {
   const { currentNickname, isLoggedIn } = useUser();
@@ -54,7 +99,7 @@ export const useDiary = (): UseDiaryReturn => {
         const transformedDiaries = result.data.content.map(transformDiaryResponse);
         // 날짜 기준 내림차순 정렬
         const sortedDiaries = transformedDiaries.sort((a, b) =>
-          new Date(b.created_at || '').getTime() - new Date(a.created_at || '').getTime()
+          new Date(b.date).getTime() - new Date(a.date).getTime()
         );
         setDiaries(sortedDiaries);
       } else {
@@ -82,12 +127,16 @@ export const useDiary = (): UseDiaryReturn => {
     try {
       setLoading(true);
 
-      const result = await createDiary({
+      // API 스펙에 맞게 데이터 구성
+      const requestData: DiaryRequest = {
         date: diaryData.date,
-        emotion: diaryData.emotion as any,
+        mood: diaryData.mood ?? 50, // 기본값 50
+        emotions: diaryData.emotions ?? [],
+        emotionFactors: diaryData.emotionFactors ?? [],
         content: diaryData.content,
-        isPrivate: false,
-      });
+      };
+
+      const result = await createDiary(requestData);
 
       if (result.success && result.data) {
         const newDiary = transformDiaryResponse(result.data);
@@ -117,11 +166,16 @@ export const useDiary = (): UseDiaryReturn => {
     try {
       setLoading(true);
 
-      const result = await updateDiaryApi(parseInt(diaryId, 10), {
+      // API 스펙에 맞게 데이터 구성
+      const requestData: DiaryRequest = {
         date: diaryData.date,
-        emotion: diaryData.emotion as any,
+        mood: diaryData.mood ?? 50, // 기본값 50
+        emotions: diaryData.emotions ?? [],
+        emotionFactors: diaryData.emotionFactors ?? [],
         content: diaryData.content,
-      });
+      };
+
+      const result = await updateDiaryApi(parseInt(diaryId, 10), requestData);
 
       if (result.success && result.data) {
         const updatedDiary = transformDiaryResponse(result.data);
