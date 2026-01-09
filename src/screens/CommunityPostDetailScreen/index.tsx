@@ -343,7 +343,7 @@ const CommunityPostDetailScreen: React.FC<CommunityPostDetailScreenProps> = ({
                     ) : (
                       <CommentCard
                         comment={parentComment}
-                        isAuthor={parentComment.author === currentNickname}
+                        isAuthor={parentComment.author_nickname === currentNickname}
                         onEdit={handleEditComment}
                         onDelete={handleDeleteComment}
                         onReply={handleReplyComment}

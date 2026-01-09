@@ -158,7 +158,7 @@ const PostCard: React.FC<PostCardProps> = ({
                 </TouchableOpacity>
               </>
             )}
-            {onHide && (
+            {!isOwnPost && onHide && (
               <>
                 {canEditDelete && <View style={styles.menuDivider} />}
                 <TouchableOpacity style={styles.menuItem} onPress={handleHide}>
