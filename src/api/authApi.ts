@@ -217,11 +217,12 @@ export interface GenPasswordResponse {
 
 /**
  * 비밀번호 변경 요청
+ * 백엔드 DTO와 일치: id (이메일), oldPassword, newPassword
  */
 export interface ResetPasswordRequest {
-  email: string;
-  currentPassword: string;
-  newPassword: string;
+  id: string;              // 회원 ID (이메일) - 백엔드의 memberId와 매핑
+  oldPassword: string;     // 현재 비밀번호 - 백엔드의 oldPassword와 일치
+  newPassword: string;     // 새 비밀번호
 }
 
 /**
@@ -290,8 +291,10 @@ export const genPassword = async (
 /**
  * 비밀번호 변경
  * PATCH /api/auth/resetPw
+ * 기존 비밀번호를 확인하고 새 비밀번호로 변경합니다.
  *
- * @param data 이메일, 현재 비밀번호, 새 비밀번호
+ * @param data 비밀번호 변경 요청 정보 (id: 이메일, oldPassword: 현재 비밀번호, newPassword: 새 비밀번호)
+ * @returns 비밀번호 변경 결과
  */
 export const resetPassword = async (
   data: ResetPasswordRequest
