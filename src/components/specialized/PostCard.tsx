@@ -13,6 +13,7 @@ interface PostCardProps {
   onScrap?: (postId: string) => void;
   onEdit?: (postId: string) => void;
   onDelete?: (postId: string) => void;
+  onHide?: (postId: string) => void;
   style?: ViewStyle;
 }
 
@@ -24,6 +25,7 @@ const PostCard: React.FC<PostCardProps> = ({
   onScrap,
   onEdit,
   onDelete,
+  onHide,
   style
 }) => {
   const [showMenu, setShowMenu] = useState(false);
@@ -49,6 +51,21 @@ const PostCard: React.FC<PostCardProps> = ({
           text: '삭제',
           style: 'destructive',
           onPress: () => onDelete?.(post.post_id)
+        }
+      ]
+    );
+  };
+
+  const handleHide = () => {
+    setShowMenu(false);
+    Alert.alert(
+      '게시글 숨기기',
+      '이 게시글을 숨기시겠습니까? 숨긴 게시글은 목록에서 보이지 않습니다.',
+      [
+        { text: '취소', style: 'cancel' },
+        {
+          text: '숨기기',
+          onPress: () => onHide?.(post.post_id)
         }
       ]
     );
@@ -97,7 +114,7 @@ const PostCard: React.FC<PostCardProps> = ({
         </View>
         <View style={styles.headerRight}>
           <Text style={styles.date}>{formatTimeAgo(post.created_at, { longFormat: true })}</Text>
-          {canEditDelete && (
+          {(canEditDelete || onHide) && (
             <TouchableOpacity
               style={styles.menuButton}
               onPress={(e) => {
@@ -107,7 +124,7 @@ const PostCard: React.FC<PostCardProps> = ({
               activeOpacity={0.7}
               accessibilityRole="button"
               accessibilityLabel="게시글 메뉴"
-              accessibilityHint="게시글 수정 및 삭제 옵션"
+              accessibilityHint="게시글 수정, 삭제 및 숨기기 옵션"
             >
               <Text style={styles.menuIcon}>⋮</Text>
             </TouchableOpacity>
@@ -128,15 +145,28 @@ const PostCard: React.FC<PostCardProps> = ({
           onPress={() => setShowMenu(false)}
         >
           <View style={styles.menuContainer}>
-            <TouchableOpacity style={styles.menuItem} onPress={handleEdit}>
-              <Text style={styles.menuItemIcon}>✏️</Text>
-              <Text style={styles.menuItemText}>수정</Text>
-            </TouchableOpacity>
-            <View style={styles.menuDivider} />
-            <TouchableOpacity style={styles.menuItem} onPress={handleDelete}>
-              <Text style={styles.menuItemIcon}>🗑️</Text>
-              <Text style={[styles.menuItemText, styles.deleteText]}>삭제</Text>
-            </TouchableOpacity>
+            {canEditDelete && (
+              <>
+                <TouchableOpacity style={styles.menuItem} onPress={handleEdit}>
+                  <Text style={styles.menuItemIcon}>✏️</Text>
+                  <Text style={styles.menuItemText}>수정</Text>
+                </TouchableOpacity>
+                <View style={styles.menuDivider} />
+                <TouchableOpacity style={styles.menuItem} onPress={handleDelete}>
+                  <Text style={styles.menuItemIcon}>🗑️</Text>
+                  <Text style={[styles.menuItemText, styles.deleteText]}>삭제</Text>
+                </TouchableOpacity>
+              </>
+            )}
+            {onHide && (
+              <>
+                {canEditDelete && <View style={styles.menuDivider} />}
+                <TouchableOpacity style={styles.menuItem} onPress={handleHide}>
+                  <Text style={styles.menuItemIcon}>🚫</Text>
+                  <Text style={styles.menuItemText}>숨기기</Text>
+                </TouchableOpacity>
+              </>
+            )}
           </View>
         </TouchableOpacity>
       </Modal>
