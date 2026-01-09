@@ -268,6 +268,7 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation }) => {
                 source={require('../../assets/images/search.png')}
                 style={styles.searchIcon}
                 resizeMode="contain"
+                accessibilityElementsHidden={true}
               />
               <TextInput
                 style={styles.searchInput}
@@ -275,20 +276,28 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation }) => {
                 onChangeText={setSearchQuery}
                 placeholder="게시글 검색..."
                 placeholderTextColor={colors.text.tertiary}
+                accessibilityLabel="게시글 검색"
+                accessibilityHint="게시글을 검색하려면 입력하세요"
+                allowFontScaling={true}
               />
             </View>
             <TouchableOpacity
               style={styles.filterButton}
               onPress={() => setShowFilterModal(true)}
               activeOpacity={0.7}
+              accessibilityRole="button"
+              accessibilityLabel="필터"
+              accessibilityHint="게시글 필터 옵션 열기"
+              accessibilityState={{ selected: verificationFilter !== 'all' || filter !== 'all' }}
             >
               <Image
                 source={require('../../assets/images/filter.png')}
                 style={styles.filterIcon}
                 resizeMode="contain"
+                accessibilityElementsHidden={true}
               />
               {(verificationFilter !== 'all' || filter !== 'all') && (
-                <View style={styles.filterBadge} />
+                <View style={styles.filterBadge} accessibilityElementsHidden={true} />
               )}
             </TouchableOpacity>
           </View>
@@ -300,11 +309,13 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation }) => {
                 style={styles.chip}
                 onPress={() => setVerificationFilter('all')}
                 activeOpacity={0.7}
+                accessibilityRole="button"
+                accessibilityLabel={`${verificationFilter === 'pending' ? '인증대기' : '인증완료'} 필터 제거`}
               >
                 <Text style={styles.chipText}>
                   {verificationFilter === 'pending' ? '인증대기' : '인증완료'}
                 </Text>
-                <Text style={styles.chipClose}>×</Text>
+                <Text style={styles.chipClose} accessibilityElementsHidden={true}>×</Text>
               </TouchableOpacity>
             </View>
           )}
@@ -350,11 +361,15 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation }) => {
           style={styles.fab}
           onPress={() => navigation.navigate('CommunityPostCreate' as any, { type: 'GENERAL' })}
           activeOpacity={0.8}
+          accessibilityRole="button"
+          accessibilityLabel="게시글 작성"
+          accessibilityHint="새 게시글을 작성합니다"
         >
           <Image
             source={require('../../assets/images/pencil.png')}
             style={styles.fabIconImage}
             resizeMode="contain"
+            accessibilityElementsHidden={true}
           />
         </TouchableOpacity>
       )}
@@ -388,6 +403,9 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation }) => {
                   setFilter(option.value as 'all' | 'popular');
                 }}
                 activeOpacity={0.7}
+                accessibilityRole="button"
+                accessibilityLabel={option.label}
+                accessibilityState={{ selected: filter === option.value }}
               >
                 <Text
                   style={[
@@ -398,7 +416,7 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation }) => {
                   {option.label}
                 </Text>
                 {filter === option.value && (
-                  <Text style={styles.filterOptionCheck}>✓</Text>
+                  <Text style={styles.filterOptionCheck} accessibilityElementsHidden={true}>✓</Text>
                 )}
               </TouchableOpacity>
             ))}
@@ -420,6 +438,9 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation }) => {
                   setVerificationFilter(option.key as VerificationFilter);
                 }}
                 activeOpacity={0.7}
+                accessibilityRole="button"
+                accessibilityLabel={option.label}
+                accessibilityState={{ selected: verificationFilter === option.key }}
               >
                 <Text
                   style={[
@@ -430,7 +451,7 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation }) => {
                   {option.label}
                 </Text>
                 {verificationFilter === option.key && (
-                  <Text style={styles.filterOptionCheck}>✓</Text>
+                  <Text style={styles.filterOptionCheck} accessibilityElementsHidden={true}>✓</Text>
                 )}
               </TouchableOpacity>
             ))}
@@ -440,6 +461,8 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation }) => {
               style={styles.modalApplyButton}
               onPress={() => setShowFilterModal(false)}
               activeOpacity={0.7}
+              accessibilityRole="button"
+              accessibilityLabel="필터 적용"
             >
               <Text style={styles.modalApplyButtonText}>적용</Text>
             </TouchableOpacity>

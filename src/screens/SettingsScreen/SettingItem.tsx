@@ -15,9 +15,12 @@ const SettingItem: React.FC<SettingItemProps> = ({
     style={[styles.settingItem, danger && styles.settingItemDanger]}
     onPress={onPress}
     activeOpacity={0.7}
+    accessibilityRole="button"
+    accessibilityLabel={title}
+    accessibilityHint={showArrow ? "설정 화면으로 이동" : undefined}
   >
     <View style={styles.settingItemLeft}>
-      <Image source={icon} style={styles.settingIcon} resizeMode="contain" />
+      <Image source={icon} style={styles.settingIcon} resizeMode="contain" accessibilityElementsHidden={true} />
       <Text style={[
         styles.settingItemText, 
         danger && styles.settingItemTextDanger,
@@ -31,6 +34,7 @@ const SettingItem: React.FC<SettingItemProps> = ({
         source={require('../../assets/images/left.png')}
         style={[styles.arrowIcon, { transform: [{ rotate: '180deg' }] }]}
         resizeMode="contain"
+        accessibilityElementsHidden={true}
       />
     )}
   </TouchableOpacity>

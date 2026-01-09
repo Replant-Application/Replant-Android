@@ -273,12 +273,14 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
                   source={getCharacterImage(currentCharacter.level || 1, 'default')}
                   style={styles.userIcon}
                   resizeMode="contain"
+                  accessibilityLabel={`${currentCharacter.name || '캐릭터'} 이미지`}
                 />
               ) : (
                 <Image
                   source={require('../../assets/images/home.png')}
                   style={styles.userIcon}
                   resizeMode="contain"
+                  accessibilityLabel="사용자 아이콘"
                 />
               )}
               <View style={styles.userDetails}>
@@ -300,6 +302,9 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
                       onChangeText={setNewNickname}
                       placeholder="새 닉네임을 입력하세요"
                       placeholderTextColor={colors.text.tertiary}
+                      accessibilityLabel="새 닉네임"
+                      accessibilityHint="변경할 닉네임을 입력하세요"
+                      allowFontScaling={true}
                     />
                   </View>
                 </View>
@@ -311,6 +316,8 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
                       setNewNickname('');
                     }}
                     activeOpacity={0.7}
+                    accessibilityRole="button"
+                    accessibilityLabel="취소"
                   >
                     <Text style={styles.cancelButtonText}>취소</Text>
                   </TouchableOpacity>
@@ -318,6 +325,8 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
                     style={styles.saveButton}
                     onPress={handleNicknameChange}
                     activeOpacity={0.7}
+                    accessibilityRole="button"
+                    accessibilityLabel="변경"
                   >
                     <Text style={styles.saveButtonText}>변경</Text>
                   </TouchableOpacity>
@@ -328,11 +337,14 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
                 style={styles.changeNicknameButton}
                 onPress={() => setShowNicknameForm(true)}
                 activeOpacity={0.7}
+                accessibilityRole="button"
+                accessibilityLabel="닉네임 변경"
               >
                 <Image
                   source={require('../../assets/images/pencil.png')}
                   style={styles.editIcon}
                   resizeMode="contain"
+                  accessibilityElementsHidden={true}
                 />
                 <Text style={styles.changeNicknameText}>닉네임 변경</Text>
               </TouchableOpacity>
