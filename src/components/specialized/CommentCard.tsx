@@ -104,8 +104,8 @@ const CommentCard: React.FC<CommentCardProps> = ({
             </TouchableOpacity>
           )}
 
-          {/* 숨기기 버튼 - 본인 댓글이 아닌 경우에도 표시 */}
-          {onHide && (
+          {/* 숨기기 버튼 - 본인 댓글이 아닌 경우에만 표시 */}
+          {!isAuthor && onHide && (
             <TouchableOpacity
               style={styles.actionButton}
               onPress={handleHide}
