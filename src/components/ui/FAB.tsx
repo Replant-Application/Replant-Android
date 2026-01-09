@@ -36,6 +36,14 @@ const FAB: React.FC<FABProps> = ({
     lg: styles.lgIcon,
   };
 
+  // FAB 접근성 라벨 생성 (icon 기반)
+  const getAccessibilityLabel = () => {
+    if (icon === '+') return '추가';
+    if (icon === '✏️') return '수정';
+    if (icon === '✕' || icon === '×') return '닫기';
+    return `액션 버튼 ${icon}`;
+  };
+
   return (
     <TouchableOpacity
       testID="fab-button"
@@ -47,6 +55,9 @@ const FAB: React.FC<FABProps> = ({
       ]}
       onPress={onPress}
       activeOpacity={0.8}
+      accessibilityRole="button"
+      accessibilityLabel={getAccessibilityLabel()}
+      accessibilityHint="플로팅 액션 버튼"
     >
       <Text style={[
         styles.icon,

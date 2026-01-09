@@ -42,6 +42,9 @@ export const FilterBar: React.FC<FilterBarProps> = ({
             ]}
             onPress={() => onFilterChange(filter.key)}
             activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel={filter.label}
+            accessibilityState={{ selected: selectedFilter === filter.key }}
           >
             <Text
               style={[
@@ -68,6 +71,9 @@ export const FilterBar: React.FC<FilterBarProps> = ({
           ]}
           onPress={() => onFilterChange(filter.key)}
           activeOpacity={0.7}
+          accessibilityRole="button"
+          accessibilityLabel={filter.label}
+          accessibilityState={{ selected: selectedFilter === filter.key }}
         >
           <Text
             style={[

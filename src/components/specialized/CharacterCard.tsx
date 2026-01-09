@@ -45,6 +45,13 @@ const CharacterCard: React.FC<CharacterCardProps> = ({
   const experienceProgress = (character.experience || 0) % 100;
   const nextLevelExp = 100 - experienceProgress;
 
+  // 접근성 라벨 생성
+  const getAccessibilityLabel = () => {
+    const levelName = getLevelName(character.level || 1);
+    const experienceProgress = (character.experience || 0) % 100;
+    return `${character.name || '캐릭터'}, ${levelName}, 레벨 ${character.level || 1}, 경험치 ${experienceProgress}%`;
+  };
+
   return (
     <TouchableOpacity
       style={[
@@ -54,6 +61,9 @@ const CharacterCard: React.FC<CharacterCardProps> = ({
       ]}
       onPress={() => onPress(character)}
       activeOpacity={0.7}
+      accessibilityRole="button"
+      accessibilityLabel={getAccessibilityLabel()}
+      accessibilityState={{ selected }}
     >
       <View style={styles.header}>
         <View style={styles.characterImageContainer}>
@@ -61,6 +71,7 @@ const CharacterCard: React.FC<CharacterCardProps> = ({
             source={getCharacterImage(character.level || 1)}
             style={styles.characterImage}
             resizeMode="contain"
+            accessibilityLabel={`${character.name || '캐릭터'} 이미지, ${getLevelName(character.level || 1)}`}
           />
         </View>
         <View style={styles.info}>

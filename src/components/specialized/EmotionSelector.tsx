@@ -71,8 +71,12 @@ const EmotionSelector: React.FC<EmotionSelectorProps> = ({
             ]}
             onPress={() => handleSelect(emotion)}
             activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel={emotion.label}
+            accessibilityState={{ selected: isSelected(emotion.id) }}
+            accessibilityHint={multiple ? "다중 선택 가능" : undefined}
           >
-            <Text style={styles.emoji}>{emotion.emoji}</Text>
+            <Text style={styles.emoji} accessibilityElementsHidden={true}>{emotion.emoji}</Text>
             <Text style={[
               styles.label,
               isSelected(emotion.id) && styles.selectedLabel

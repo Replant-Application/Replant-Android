@@ -57,11 +57,27 @@ const PostCard: React.FC<PostCardProps> = ({
 
   // formatDate는 formatTimeAgo의 longFormat 버전 사용
 
+  // 접근성 라벨 생성
+  const getAccessibilityLabel = () => {
+    let label = `${post.author_nickname}의 게시글, ${post.title}`;
+    if (post.mission_title) {
+      label += `, ${post.mission_title} 미션`;
+    }
+    if (post.verified === true) {
+      label += ', 인증완료';
+    } else if (post.verified === false) {
+      label += ', 인증대기';
+    }
+    return label;
+  };
+
   return (
     <TouchableOpacity
       style={[styles.container, style]}
       onPress={() => onPress?.(post.post_id)}
       activeOpacity={0.8}
+      accessibilityRole="button"
+      accessibilityLabel={getAccessibilityLabel()}
     >
       <View style={styles.header}>
         <View style={styles.authorInfo}>
@@ -89,6 +105,9 @@ const PostCard: React.FC<PostCardProps> = ({
                 setShowMenu(true);
               }}
               activeOpacity={0.7}
+              accessibilityRole="button"
+              accessibilityLabel="게시글 메뉴"
+              accessibilityHint="게시글 수정 및 삭제 옵션"
             >
               <Text style={styles.menuIcon}>⋮</Text>
             </TouchableOpacity>
@@ -129,6 +148,7 @@ const PostCard: React.FC<PostCardProps> = ({
               source={require('../../assets/images/goal.png')}
               style={styles.missionEmojiImage}
               resizeMode="contain"
+              accessibilityLabel="미션 아이콘"
             />
             <Text style={styles.missionTitle} numberOfLines={1}>
               {post.mission_title}
@@ -161,6 +181,7 @@ const PostCard: React.FC<PostCardProps> = ({
             source={{ uri: post.images[0] }}
             style={styles.thumbnail}
             resizeMode="cover"
+            accessibilityLabel={`${post.title} 이미지`}
           />
         </View>
       )}
@@ -184,6 +205,9 @@ const PostCard: React.FC<PostCardProps> = ({
               onLike?.(post.post_id);
             }}
             activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel={post.is_liked ? `좋아요 취소, ${post.like_count}개` : `좋아요, ${post.like_count}개`}
+            accessibilityState={{ selected: post.is_liked }}
           >
             {post.is_liked ? (
               <Text style={[styles.statIcon, styles.likedIcon]}>❤️</Text>
@@ -192,6 +216,7 @@ const PostCard: React.FC<PostCardProps> = ({
                 source={require('../../assets/images/heart.png')}
                 style={styles.statIconImage}
                 resizeMode="contain"
+                accessibilityElementsHidden={true}
               />
             )}
             <Text style={[styles.statText, post.is_liked && styles.statTextActive]}>
@@ -199,11 +224,12 @@ const PostCard: React.FC<PostCardProps> = ({
             </Text>
           </TouchableOpacity>
 
-          <View style={styles.statButton}>
+          <View style={styles.statButton} accessibilityRole="text" accessibilityLabel={`댓글 ${post.comment_count}개`}>
             <Image
               source={require('../../assets/images/say.png')}
               style={styles.statIconImage}
               resizeMode="contain"
+              accessibilityElementsHidden={true}
             />
             <Text style={styles.statText}>{post.comment_count}</Text>
           </View>
@@ -215,6 +241,11 @@ const PostCard: React.FC<PostCardProps> = ({
               onScrap?.(post.post_id);
             }}
             activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel={post.is_scrapped 
+              ? `스크랩 취소${post.scrap_count > 0 ? `, ${post.scrap_count}개` : ''}` 
+              : `스크랩${post.scrap_count > 0 ? `, ${post.scrap_count}개` : ''}`}
+            accessibilityState={{ selected: post.is_scrapped }}
           >
             {post.is_scrapped ? (
               <Text style={[styles.statIcon, styles.scrappedIcon]}>🔖</Text>
@@ -223,6 +254,7 @@ const PostCard: React.FC<PostCardProps> = ({
                 source={require('../../assets/images/clip.png')}
                 style={styles.statIconImage}
                 resizeMode="contain"
+                accessibilityElementsHidden={true}
               />
             )}
             {post.scrap_count > 0 && (

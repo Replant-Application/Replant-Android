@@ -89,12 +89,24 @@ const MissionCard: React.FC<MissionCardProps> = ({
     }
   };
 
+  // 접근성 라벨 생성
+  const getAccessibilityLabel = () => {
+    const categoryName = getCategoryName(mission.category_id || '');
+    const status = mission.completed 
+      ? (mission.verified === true ? '인증완료' : '인증대기중')
+      : '진행중';
+    return `${categoryName} 미션, ${mission.title}, ${status}`;
+  };
+
   return (
     <TouchableOpacity 
       style={[styles.container, style]}
       onPress={handleCardPress}
       activeOpacity={0.7}
       disabled={readonly && !onViewDetails}
+      accessibilityRole="button"
+      accessibilityLabel={getAccessibilityLabel()}
+      accessibilityState={{ disabled: readonly && !onViewDetails }}
     >
       <View style={styles.header}>
         <View style={styles.categoryInfo}>
@@ -108,6 +120,7 @@ const MissionCard: React.FC<MissionCardProps> = ({
                 source={getCategoryImage(mission.category_id || '')}
                 style={styles.categoryImage}
                 resizeMode="contain"
+                accessibilityLabel={`${getCategoryName(mission.category_id || '')} 카테고리 아이콘`}
               />
             )}
             <Text style={styles.categoryName} numberOfLines={1}>
@@ -152,6 +165,7 @@ const MissionCard: React.FC<MissionCardProps> = ({
               source={{ uri: mission.photo_url }}
               style={styles.photo}
               resizeMode="cover"
+              accessibilityLabel={`${mission.title} 인증 사진`}
             />
             {onDeletePhoto && !readonly && (
               <TouchableOpacity
@@ -159,6 +173,9 @@ const MissionCard: React.FC<MissionCardProps> = ({
                 onPress={() => onDeletePhoto(mission.mission_id)}
                 disabled={disabled}
                 activeOpacity={0.7}
+                accessibilityRole="button"
+                accessibilityLabel="사진 삭제"
+                accessibilityState={{ disabled }}
               >
                 <Text style={styles.deletePhotoIcon}>✕</Text>
               </TouchableOpacity>
@@ -179,6 +196,8 @@ const MissionCard: React.FC<MissionCardProps> = ({
             style={[styles.actionButton, styles.viewButton]}
             onPress={() => onViewDetails?.(mission.mission_id)}
             activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel="자세히 보기"
           >
             <Text style={[styles.actionText, styles.viewText]}>
               자세히 보기
@@ -193,11 +212,15 @@ const MissionCard: React.FC<MissionCardProps> = ({
                 onPress={() => onWriteReview(mission.mission_id)}
                 disabled={disabled}
                 activeOpacity={disabled ? 1 : 0.7}
+                accessibilityRole="button"
+                accessibilityLabel="후기 쓰기"
+                accessibilityState={{ disabled }}
               >
                 <Image
                   source={require('../../assets/images/edit.png')}
                   style={styles.reviewIcon}
                   resizeMode="contain"
+                  accessibilityElementsHidden={true}
                 />
                 <Text style={styles.reviewButtonText}>후기 쓰기</Text>
               </TouchableOpacity>
@@ -215,6 +238,9 @@ const MissionCard: React.FC<MissionCardProps> = ({
                 onPress={disabled ? undefined : handleVerifyPress}
                 disabled={loading || disabled}
                 activeOpacity={disabled ? 1 : 0.7}
+                accessibilityRole="button"
+                accessibilityLabel={disabled ? '비활성화' : loading ? '처리중' : getVerifyButtonLabel()}
+                accessibilityState={{ disabled: loading || disabled }}
               >
                 <Text style={[
                   styles.actionText,
