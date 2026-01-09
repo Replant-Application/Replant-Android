@@ -34,9 +34,11 @@ const CommunityPostCreateScreen: React.FC<CommunityPostCreateScreenProps> = ({
 }) => {
   // 안전한 기본값 설정 (크래시 방지)
   const params = route.params || {};
+  const postType = params.type || 'VERIFICATION'; // GENERAL or VERIFICATION
+  const isGeneralPost = postType === 'GENERAL';
   const missionId = params.missionId || '';
-  const missionTitle = params.missionTitle || '미션';
-  const missionEmoji = params.missionEmoji || '🎯';
+  const missionTitle = isGeneralPost ? '자유게시판' : (params.missionTitle || '미션');
+  const missionEmoji = isGeneralPost ? '📝' : (params.missionEmoji || '🎯');
   const photoUrl = params.photoUrl;
   const { createPost } = useCommunity();
   const [title, setTitle] = useState(missionTitle);
@@ -60,6 +62,7 @@ const CommunityPostCreateScreen: React.FC<CommunityPostCreateScreenProps> = ({
         title: title.trim() || missionTitle,
         content: content.trim(),
         images: photoUrl ? [photoUrl] : [],
+        category: postType, // GENERAL or VERIFICATION
       };
 
       const result = await createPost(postData);
@@ -103,12 +106,17 @@ const CommunityPostCreateScreen: React.FC<CommunityPostCreateScreenProps> = ({
         {/* 미션 정보 표시 */}
         <View style={styles.missionInfo}>
           <Image
-            source={require('../../assets/images/alarm.png')}
+            source={isGeneralPost
+              ? require('../../assets/images/pencil.png')
+              : require('../../assets/images/alarm.png')
+            }
             style={styles.missionIcon}
             resizeMode="contain"
           />
           <View style={styles.missionTextContainer}>
-            <Text style={styles.missionLabel}>완료한 미션</Text>
+            <Text style={styles.missionLabel}>
+              {isGeneralPost ? '게시판' : '완료한 미션'}
+            </Text>
             <Text style={styles.missionTitle}>{missionTitle}</Text>
           </View>
         </View>
@@ -132,7 +140,10 @@ const CommunityPostCreateScreen: React.FC<CommunityPostCreateScreenProps> = ({
             style={styles.contentInput}
             value={content}
             onChangeText={setContent}
-            placeholder="미션을 완료한 소감이나 경험을 공유해주세요..."
+            placeholder={isGeneralPost
+              ? "자유롭게 이야기를 나눠보세요..."
+              : "미션을 완료한 소감이나 경험을 공유해주세요..."
+            }
             placeholderTextColor={colors.text.tertiary}
             multiline
             numberOfLines={8}

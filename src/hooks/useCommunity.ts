@@ -151,23 +151,25 @@ export const useCommunity = (): UseCommunityReturn => {
       try {
         const result = await toggleLikeService(postId, currentNickname);
 
-        if (result.success) {
-          // 로컬 상태 업데이트
+        if (result.success && result.data) {
+          // 백엔드 응답으로 로컬 상태 업데이트
           setPosts(prev =>
             prev.map(p => {
               if (p.post_id === postId) {
                 return {
                   ...p,
-                  is_liked: !p.is_liked,
-                  like_count: p.is_liked ? p.like_count - 1 : p.like_count + 1,
+                  is_liked: result.data!.isLiked,
+                  like_count: result.data!.likeCount,
                 };
               }
               return p;
             })
           );
+        } else if (!result.success) {
+          Alert.alert('오류', result.error || '좋아요 처리에 실패했습니다.');
         }
 
-        return result;
+        return { success: result.success, error: result.error };
       } catch (toggleError) {
         logError('좋아요 토글 실패', toggleError as Error, { postId, currentNickname });
         Alert.alert('오류', '좋아요 처리 중 문제가 발생했습니다.');

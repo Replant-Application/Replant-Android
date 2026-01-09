@@ -128,8 +128,14 @@ export const useDiary = (): UseDiaryReturn => {
       setLoading(true);
 
       // API 스펙에 맞게 데이터 구성
+      // emotions 배열의 첫 번째 감정을 emotion 필드로 변환
+      const primaryEmotion = diaryData.emotions?.[0]
+        ? mapKoreanEmotionToEnglish(diaryData.emotions[0])
+        : 'happy';
+
       const requestData: DiaryRequest = {
         date: diaryData.date,
+        emotion: primaryEmotion,
         mood: diaryData.mood ?? 50, // 기본값 50
         emotions: diaryData.emotions ?? [],
         emotionFactors: diaryData.emotionFactors ?? [],
@@ -167,8 +173,14 @@ export const useDiary = (): UseDiaryReturn => {
       setLoading(true);
 
       // API 스펙에 맞게 데이터 구성
+      // emotions 배열의 첫 번째 감정을 emotion 필드로 변환
+      const primaryEmotion = diaryData.emotions?.[0]
+        ? mapKoreanEmotionToEnglish(diaryData.emotions[0])
+        : 'happy';
+
       const requestData: DiaryRequest = {
         date: diaryData.date,
+        emotion: primaryEmotion,
         mood: diaryData.mood ?? 50, // 기본값 50
         emotions: diaryData.emotions ?? [],
         emotionFactors: diaryData.emotionFactors ?? [],

@@ -340,6 +340,26 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
           </View>
         </View>
 
+        {/* 관리자 메뉴 (기능 섹션 위에 표시) */}
+        {(user?.role === 'ADMIN' || user?.role === 'admin') && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>관리자</Text>
+            <View style={styles.settingsCard}>
+              <SettingItem
+                icon={require('../../assets/images/alarm.png')}
+                title="관리자 대시보드"
+                onPress={() => navigation?.navigate('AdminDashboard')}
+              />
+              <View style={styles.divider} />
+              <SettingItem
+                icon={require('../../assets/images/notes.png')}
+                title="전체 유저 목록"
+                onPress={() => navigation?.navigate('AdminUserList')}
+              />
+            </View>
+          </View>
+        )}
+
         {/* 기능 섹션 */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>기능</Text>
@@ -375,26 +395,6 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
             />
           </View>
         </View>
-
-        {/* 관리자 메뉴 */}
-        {user?.role === 'admin' && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>관리자</Text>
-            <View style={styles.settingsCard}>
-              <SettingItem
-                icon={require('../../assets/images/alarm.png')}
-                title="관리자 대시보드"
-                onPress={() => navigation?.navigate('AdminDashboard')}
-              />
-              <View style={styles.divider} />
-              <SettingItem
-                icon={require('../../assets/images/notes.png')}
-                title="전체 유저 목록"
-                onPress={() => navigation?.navigate('AdminUserList')}
-              />
-            </View>
-          </View>
-        )}
 
         {/* 정보 섹션 */}
         <View style={styles.section}>

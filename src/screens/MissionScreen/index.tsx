@@ -459,7 +459,7 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
       style={styles.container}
       resizeMode="cover"
     >
-      <Header title="오늘의 미션" showBackButton={false} navigation={navigation} />
+      <Header title="미션" showBackButton={false} navigation={navigation} />
 
       {/* 나의 미션 / 미션 도감 탭 */}
       <View style={styles.topTabContainer}>

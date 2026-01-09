@@ -5,12 +5,11 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Platform } from 'react-native';
 import { NavigationProp } from '@react-navigation/native';
-import { useAdmin } from '../../hooks/useAdmin';
+import { useAdmin, MemberInfo } from '../../hooks/useAdmin';
 import { Card, Header, Loading, ErrorBoundary, SectionTitle } from '../../components/ui';
 import { colors, spacing, typography, borderRadius, shadows } from '../../utils/designTokens';
 import { getOptimizedLineHeight } from '../../utils/textStyles';
 import { RootStackParamList } from '../../types/navigation';
-import { UserInfo } from '../../api/manageApi';
 
 interface AdminDashboardScreenProps {
   navigation: NavigationProp<RootStackParamList>;
@@ -23,14 +22,14 @@ const AdminDashboardScreen: React.FC<AdminDashboardScreenProps> = ({ navigation 
     activeUsers: 0,
     inactiveUsers: 0,
   });
-  const [recentUsers, setRecentUsers] = useState<UserInfo[]>([]);
+  const [recentUsers, setRecentUsers] = useState<MemberInfo[]>([]);
 
   const loadDashboardData = useCallback(async () => {
     const result = await getAllUsers({ page: 1, limit: 100 });
     if (result.success && result.data) {
       const users = result.data;
-      const activeUsers = users.filter(u => u.isActive !== false).length;
-      const inactiveUsers = users.filter(u => u.isActive === false).length;
+      const activeUsers = users.filter(u => u.status === 'ACTIVE').length;
+      const inactiveUsers = users.filter(u => u.status === 'INACTIVE').length;
 
       setStats({
         totalUsers: users.length,

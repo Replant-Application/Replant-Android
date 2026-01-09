@@ -18,15 +18,14 @@ export const createPost = async (
 ): Promise<ServiceResult<CommunityPost>> => {
   try {
     // 백엔드 API로 게시글 생성
+    // missionId가 빈 문자열이면 undefined로 처리 (GENERAL 게시글)
+    const missionIdNum = postData.mission_id ? parseInt(postData.mission_id, 10) : undefined;
+
     const result = await apiClient.post<CommunityPost>(API_CONFIG.endpoints.post.create, {
-      title: postData.title || postData.mission_title,
+      title: postData.title || postData.mission_title || '자유게시글',
       content: postData.content,
-      missionId: postData.mission_id,
-      missionTitle: postData.mission_title,
-      missionEmoji: postData.mission_emoji,
-      images: postData.images || [],
-      tags: postData.tags || [],
-      category: postData.category,
+      missionId: !isNaN(missionIdNum as number) ? missionIdNum : undefined,
+      imageUrls: postData.images || [],
     });
 
     if (result.success && result.data) {
@@ -131,6 +130,8 @@ interface BackendPostResponse {
   imageUrls: string[];
   hasValidBadge: boolean;
   commentCount: number;
+  likeCount: number;
+  isLiked: boolean;
   createdAt: string;
   updatedAt?: string;
 }
@@ -153,16 +154,18 @@ const transformBackendPost = (post: BackendPostResponse): CommunityPost => ({
   mission_emoji: '📝', // 기본 이모지
   title: post.title || post.missionTag?.title || '제목 없음',
   content: post.content,
-  author: post.userId.toString(),
-  author_nickname: post.userNickname,
+  author: post.userId?.toString() || '',
+  author_id: post.userId?.toString() || '',
+  author_nickname: post.userNickname || '익명',
   created_at: post.createdAt,
   updated_at: post.updatedAt,
-  like_count: 0, // 백엔드에서 제공하지 않음 - 로컬 관리
+  like_count: post.likeCount || 0,
   comment_count: post.commentCount || 0,
   scrap_count: 0, // 백엔드에서 제공하지 않음 - 로컬 관리
   images: post.imageUrls || [],
   tags: post.missionTag ? [post.missionTag.title] : [],
   category: post.missionTag?.type || 'GENERAL',
+  is_liked: post.isLiked || false,
 });
 
 /**
@@ -185,17 +188,16 @@ export const getPosts = async (nickname: string): Promise<CommunityPost[]> => {
         backendPosts = result.data;
       }
 
-      // 사용자의 좋아요/스크랩 정보 가져오기 (로컬)
+      // 스크랩 정보 가져오기 (로컬 - 백엔드에 스크랩 기능 없음)
       const storageKeys = getStorageKeys(nickname);
-      const userLikes: string[] = await getData(storageKeys.USER_LIKES) || [];
       const userScraps: string[] = await getData(storageKeys.USER_SCRAPS) || [];
 
-      // 백엔드 응답을 프론트엔드 형식으로 변환 + 좋아요/스크랩 상태 추가
+      // 백엔드 응답을 프론트엔드 형식으로 변환 + 스크랩 상태 추가
+      // 좋아요(likeCount, isLiked)는 백엔드에서 제공
       return backendPosts.map(post => {
         const transformed = transformBackendPost(post);
         return {
           ...transformed,
-          is_liked: userLikes.includes(transformed.post_id),
           is_scrapped: userScraps.includes(transformed.post_id),
         };
       });
@@ -464,33 +466,34 @@ export const getComments = async (
 };
 
 /**
- * 좋아요 토글 - 로컬 저장 + 백엔드 연동 (백엔드 API 있으면 사용)
+ * 좋아요 토글 - 백엔드 API 사용
  */
 export const toggleLike = async (
   postId: string,
-  nickname: string
-): Promise<ServiceResult<void>> => {
+  _nickname: string
+): Promise<ServiceResult<{ isLiked: boolean; likeCount: number }>> => {
   try {
-    const storageKeys = getStorageKeys(nickname);
-    const userLikes: string[] = await getData(storageKeys.USER_LIKES) || [];
+    // 백엔드 좋아요 토글 API 호출
+    const result = await apiClient.post<{ isLiked: boolean; likeCount: number }>(
+      `/community/posts/${postId}/like`
+    );
 
-    const isLiked = userLikes.includes(postId);
-
-    if (isLiked) {
-      // 좋아요 취소
-      const filteredLikes = userLikes.filter(id => id !== postId);
-      await setData(storageKeys.USER_LIKES, filteredLikes);
-    } else {
-      // 좋아요 추가
-      await setData(storageKeys.USER_LIKES, [...userLikes, postId]);
+    if (result.success && result.data) {
+      return {
+        success: true,
+        data: {
+          isLiked: result.data.isLiked,
+          likeCount: result.data.likeCount,
+        }
+      };
     }
 
-    // TODO: 백엔드에 좋아요 API가 있으면 호출
-    // await apiClient.post(`/posts/${postId}/like`);
-
-    return { success: true };
+    return {
+      success: false,
+      error: result.error || '좋아요 처리에 실패했습니다.'
+    };
   } catch (error) {
-    logError('좋아요 토글 실패', error as Error, { postId, nickname });
+    logError('좋아요 토글 실패', error as Error, { postId });
     return {
       success: false,
       error: (error as Error).message

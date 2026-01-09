@@ -344,6 +344,21 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation }) => {
       </ScrollView>
       )}
 
+      {/* GENERAL 글쓰기 FAB */}
+      {activeTab === 'all' && (
+        <TouchableOpacity
+          style={styles.fab}
+          onPress={() => navigation.navigate('CommunityPostCreate' as any, { type: 'GENERAL' })}
+          activeOpacity={0.8}
+        >
+          <Image
+            source={require('../../assets/images/pencil.png')}
+            style={styles.fabIconImage}
+            resizeMode="contain"
+          />
+        </TouchableOpacity>
+      )}
+
       {/* 필터 모달 */}
       <Modal
         visible={showFilterModal}
@@ -709,6 +724,34 @@ const styles = StyleSheet.create({
   postsList: {
     gap: spacing[3],
     paddingBottom: spacing[16], // 추가 하단 여백
+  },
+  fab: {
+    position: 'absolute',
+    bottom: 100,
+    right: 20,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: colors.primary[500],
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    zIndex: 100,
+  },
+  fabIcon: {
+    fontSize: 28,
+    color: colors.white,
+    fontWeight: '300',
+    lineHeight: 32,
+  },
+  fabIconImage: {
+    width: 24,
+    height: 24,
+    tintColor: colors.white,
   },
 });
 

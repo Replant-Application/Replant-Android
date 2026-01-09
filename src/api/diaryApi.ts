@@ -15,7 +15,10 @@ export type EmotionType = 'happy' | 'excited' | 'calm' | 'grateful' | 'sad' | 'a
 export interface DiaryResponse {
   id: number;
   date: string;
-  emotion: EmotionType;
+  emotion?: EmotionType;
+  mood?: number;
+  emotions?: string[];
+  emotionFactors?: string[];
   content: string;
   weather?: string;
   location?: string;
@@ -27,7 +30,10 @@ export interface DiaryResponse {
 
 export interface DiaryRequest {
   date: string;
-  emotion: EmotionType;
+  emotion?: EmotionType;
+  mood?: number;
+  emotions?: string[];
+  emotionFactors?: string[];
   content: string;
   weather?: string;
   location?: string;

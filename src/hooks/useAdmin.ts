@@ -13,19 +13,23 @@ import { ServiceResult } from '../types';
 // ============================================
 
 /**
- * 회원 정보 - 백엔드 MemberResponseDto와 매칭
+ * 회원 정보 - 백엔드 UserResponseDto와 매칭
  */
 export interface MemberInfo {
   id: number;
   email: string;
   nickname: string;
+  phone?: string;
   birthDate?: string;
   gender?: 'MALE' | 'FEMALE';
   profileImg?: string;
   role: string;
-  isActive: boolean;
+  status: 'ACTIVE' | 'INACTIVE';  // 백엔드 status 필드
+  isActive?: boolean;  // 하위 호환성을 위해 유지
   createdAt: string;
   lastLoginAt?: string;
+  totalMissionsCompleted?: number;
+  totalExpGained?: number;
 }
 
 /**
@@ -376,12 +380,120 @@ export const useAdmin = () => {
     }
   }, []);
 
+  /**
+   * 회원 비활성화
+   * PATCH /admin/members/:id/status?status=INACTIVE
+   */
+  const deactivateUser = useCallback(async (id: number): Promise<ServiceResult<MemberInfo>> => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const result = await apiClient.patch<MemberInfo>(`/admin/members/${id}/status?status=INACTIVE`);
+
+      if (result.success && result.data) {
+        return {
+          success: true,
+          data: result.data,
+        };
+      }
+
+      return {
+        success: false,
+        error: result.error || '회원 비활성화에 실패했습니다.',
+      };
+    } catch (err) {
+      const errorMessage = '회원 비활성화에 실패했습니다.';
+      logError(errorMessage, err as Error);
+      setError(errorMessage);
+      return {
+        success: false,
+        error: errorMessage,
+      };
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  /**
+   * 회원 활성화
+   * PATCH /admin/members/:id/status?status=ACTIVE
+   */
+  const activateUser = useCallback(async (id: number): Promise<ServiceResult<MemberInfo>> => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const result = await apiClient.patch<MemberInfo>(`/admin/members/${id}/status?status=ACTIVE`);
+
+      if (result.success && result.data) {
+        return {
+          success: true,
+          data: result.data,
+        };
+      }
+
+      return {
+        success: false,
+        error: result.error || '회원 활성화에 실패했습니다.',
+      };
+    } catch (err) {
+      const errorMessage = '회원 활성화에 실패했습니다.';
+      logError(errorMessage, err as Error);
+      setError(errorMessage);
+      return {
+        success: false,
+        error: errorMessage,
+      };
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  /**
+   * 전체 회원 삭제 (개발용)
+   * DELETE /admin/members/all
+   */
+  const deleteAllUsers = useCallback(async (): Promise<ServiceResult<{ deletedCount: number }>> => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const result = await apiClient.delete<{ deletedCount: number }>('/admin/members/all');
+
+      if (result.success) {
+        return {
+          success: true,
+          data: result.data,
+        };
+      }
+
+      return {
+        success: false,
+        error: result.error || '회원 전체 삭제에 실패했습니다.',
+      };
+    } catch (err) {
+      const errorMessage = '회원 전체 삭제에 실패했습니다.';
+      logError(errorMessage, err as Error);
+      setError(errorMessage);
+      return {
+        success: false,
+        error: errorMessage,
+      };
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   return {
     loading,
     error,
     getAllUsers,
     getUserDetail,
     updateUserRole,
+    deactivateUser,
+    activateUser,
+    deleteAllUsers,
     sendCustomNotification,
     sendDiaryNotification,
     sendReportNotification,

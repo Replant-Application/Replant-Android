@@ -21,31 +21,57 @@ import {
 } from 'react-native';
 import { NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types/navigation';
-import { Header, Loading, ErrorBoundary, EmptyState } from '../../components/ui';
+import { Header, Loading, ErrorBoundary, EmptyState, SimpleTabBar } from '../../components/ui';
 import { colors, spacing, typography, borderRadius, shadows } from '../../utils/designTokens';
 import { getOptimizedLineHeight } from '../../utils/textStyles';
 import {
   getSystemMissions,
+  getCustomMissions,
   getMissionReviews,
   createMissionReview,
   SystemMission,
+  CustomMission,
   MissionReview,
 } from '../../api/missionApi';
 import { useUser } from '../../contexts/UserContext';
+
+type MissionGroupTab = 'official' | 'custom';
 
 interface MissionGroupScreenProps {
   navigation: NavigationProp<RootStackParamList>;
 }
 
+// 통합 미션 타입 (공식/커스텀 모두 표시용)
+interface UnifiedMission {
+  id: number;
+  title: string;
+  description: string;
+  type?: string;
+  verificationType: string;
+  requiredMinutes?: number;
+  expReward: number;
+  badgeDurationDays: number;
+  participantCount?: number;
+  isCustom: boolean;
+  creatorNickname?: string;
+}
+
 const MissionGroupScreen: React.FC<MissionGroupScreenProps> = ({ navigation }) => {
   const { user } = useUser();
-  const [missions, setMissions] = useState<SystemMission[]>([]);
-  const [selectedMission, setSelectedMission] = useState<SystemMission | null>(null);
+  const [activeTab, setActiveTab] = useState<MissionGroupTab>('official');
+  const [missions, setMissions] = useState<UnifiedMission[]>([]);
+  const [selectedMission, setSelectedMission] = useState<UnifiedMission | null>(null);
   const [reviews, setReviews] = useState<MissionReview[]>([]);
   const [loading, setLoading] = useState(true);
   const [reviewsLoading, setReviewsLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // 페이지네이션
+  const [currentPage, setCurrentPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  const PAGE_SIZE = 10;
 
   // 후기 작성 모달
   const [showReviewModal, setShowReviewModal] = useState(false);
@@ -53,22 +79,82 @@ const MissionGroupScreen: React.FC<MissionGroupScreenProps> = ({ navigation }) =
   const [submitting, setSubmitting] = useState(false);
 
   // 미션 목록 로드
-  const loadMissions = useCallback(async () => {
+  const loadMissions = useCallback(async (page: number = 0, append: boolean = false) => {
     try {
-      setLoading(true);
+      if (!append) {
+        setLoading(true);
+      }
       setError(null);
-      const result = await getSystemMissions();
-      if (result.success && result.data) {
-        setMissions(result.data.content || []);
+
+      if (activeTab === 'official') {
+        const result = await getSystemMissions({ page, size: PAGE_SIZE });
+        if (result.success && result.data) {
+          const unifiedMissions: UnifiedMission[] = (result.data.content || []).map(m => ({
+            id: m.id,
+            title: m.title,
+            description: m.description,
+            type: m.type,
+            verificationType: m.verificationType,
+            requiredMinutes: m.requiredMinutes,
+            expReward: m.expReward,
+            badgeDurationDays: m.badgeDurationDays,
+            participantCount: (m as any).participantCount,
+            isCustom: false,
+          }));
+
+          if (append) {
+            setMissions(prev => [...prev, ...unifiedMissions]);
+          } else {
+            setMissions(unifiedMissions);
+          }
+          setTotalPages(result.data.totalPages);
+          setHasMore(page < result.data.totalPages - 1);
+        } else {
+          throw new Error(result.error || '미션 목록을 불러올 수 없습니다.');
+        }
       } else {
-        throw new Error(result.error || '미션 목록을 불러올 수 없습니다.');
+        const result = await getCustomMissions({ page, size: PAGE_SIZE });
+        if (result.success && result.data) {
+          const unifiedMissions: UnifiedMission[] = (result.data.content || []).map(m => ({
+            id: m.id,
+            title: m.title,
+            description: m.description,
+            type: m.missionType,
+            verificationType: m.verificationType,
+            requiredMinutes: m.requiredMinutes,
+            expReward: m.expReward,
+            badgeDurationDays: m.badgeDurationDays,
+            participantCount: m.participantCount,
+            isCustom: true,
+            creatorNickname: m.creatorNickname,
+          }));
+
+          if (append) {
+            setMissions(prev => [...prev, ...unifiedMissions]);
+          } else {
+            setMissions(unifiedMissions);
+          }
+          setTotalPages(result.data.totalPages);
+          setHasMore(page < result.data.totalPages - 1);
+        } else {
+          throw new Error(result.error || '미션 목록을 불러올 수 없습니다.');
+        }
       }
     } catch (err) {
       setError((err as Error).message);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [activeTab]);
+
+  // 더 보기 (페이지네이션)
+  const loadMore = useCallback(() => {
+    if (hasMore && !loading) {
+      const nextPage = currentPage + 1;
+      setCurrentPage(nextPage);
+      loadMissions(nextPage, true);
+    }
+  }, [hasMore, loading, currentPage, loadMissions]);
 
   // 리뷰 목록 로드
   const loadReviews = useCallback(async (missionId: number) => {
@@ -91,16 +177,25 @@ const MissionGroupScreen: React.FC<MissionGroupScreenProps> = ({ navigation }) =
   // 새로고침
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    await loadMissions();
+    setCurrentPage(0);
+    await loadMissions(0, false);
     if (selectedMission) {
       await loadReviews(selectedMission.id);
     }
     setRefreshing(false);
   }, [loadMissions, loadReviews, selectedMission]);
 
+  // 탭 변경시 목록 초기화 및 로드
   useEffect(() => {
-    loadMissions();
-  }, [loadMissions]);
+    setCurrentPage(0);
+    setSelectedMission(null);
+    setReviews([]);
+    loadMissions(0, false);
+  }, [activeTab]);
+
+  useEffect(() => {
+    loadMissions(0, false);
+  }, []);
 
   // 미션 선택 시 리뷰 로드
   useEffect(() => {
@@ -216,6 +311,19 @@ const MissionGroupScreen: React.FC<MissionGroupScreenProps> = ({ navigation }) =
             </TouchableOpacity>
           }
         />
+
+        {/* 공식미션 / 커스텀미션 탭 */}
+        <View style={styles.tabContainer}>
+          <SimpleTabBar
+            tabs={[
+              { key: 'official', label: '공식 미션' },
+              { key: 'custom', label: '커스텀 미션' },
+            ]}
+            activeTab={activeTab}
+            onTabChange={(key) => setActiveTab(key as MissionGroupTab)}
+            style={styles.tabBar}
+          />
+        </View>
 
       <ScrollView
         style={styles.content}
@@ -360,8 +468,8 @@ const MissionGroupScreen: React.FC<MissionGroupScreenProps> = ({ navigation }) =
                         </TouchableOpacity>
                       </View>
 
-                      {/* 후기 섹션 */}
-                      <View style={styles.inlineReviewSection}>
+                      {/* 후기 섹션 - 주석처리 (미션 상세에서 뱃지 소유자만 작성 가능하도록 변경) */}
+                      {/* <View style={styles.inlineReviewSection}>
                           <View style={styles.reviewSectionHeader}>
                             <Text style={styles.sectionTitle}>미션 후기</Text>
                             <TouchableOpacity
@@ -408,12 +516,30 @@ const MissionGroupScreen: React.FC<MissionGroupScreenProps> = ({ navigation }) =
                               ))}
                             </View>
                           )}
-                        </View>
+                        </View> */}
                       </View>
                   )}
                 </View>
               ))}
             </View>
+
+            {/* 페이지네이션: 더 보기 버튼 */}
+            {hasMore && (
+              <TouchableOpacity
+                style={styles.loadMoreButton}
+                onPress={loadMore}
+                activeOpacity={0.7}
+              >
+                <Text style={styles.loadMoreButtonText}>더 보기</Text>
+              </TouchableOpacity>
+            )}
+
+            {/* 현재 페이지 정보 */}
+            {totalPages > 1 && (
+              <Text style={styles.pageInfo}>
+                {currentPage + 1} / {totalPages} 페이지
+              </Text>
+            )}
 
           </>
         )}
@@ -499,10 +625,48 @@ const styles = StyleSheet.create({
     height: 24,
     tintColor: colors.text.primary,
   },
+  tabContainer: {
+    paddingHorizontal: spacing[3],
+    paddingTop: spacing[2],
+    paddingBottom: spacing[1],
+  },
+  tabBar: {
+    marginBottom: 0,
+  },
   content: {
     flex: 1,
     padding: spacing[4],
     paddingBottom: spacing[20], // 하단 탭바 높이 + 여유 공간
+  },
+  loadMoreButton: {
+    backgroundColor: colors.primary[500],
+    paddingVertical: spacing[3],
+    paddingHorizontal: spacing[6],
+    borderRadius: borderRadius.md,
+    alignItems: 'center',
+    marginTop: spacing[4],
+    marginBottom: spacing[2],
+  },
+  loadMoreButtonText: {
+    color: colors.white,
+    fontSize: typography.fontSize.base,
+    fontWeight: typography.fontWeight.medium,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+  },
+  pageInfo: {
+    textAlign: 'center',
+    fontSize: typography.fontSize.sm,
+    color: colors.text.tertiary,
+    marginBottom: spacing[4],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
   },
   sectionTitle: {
     fontSize: typography.fontSize.xl,

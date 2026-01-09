@@ -175,7 +175,10 @@ export interface User {
 export interface Diary {
   id: string;
   date: string;
-  emotion: Emotion;
+  emotion?: Emotion | string;
+  mood?: number;
+  emotions?: string[];
+  emotionFactors?: string[];
   content: string;
   created_at?: string;
   updated_at?: string;
@@ -199,7 +202,10 @@ export interface DiaryData {
 // 간단한 일기 데이터 타입 (중복 제거용)
 export interface SimpleDiaryData {
   date: string;
-  emotion: string;
+  emotion?: string;
+  mood?: number;
+  emotions?: string[];
+  emotionFactors?: string[];
   content: string;
 }
 

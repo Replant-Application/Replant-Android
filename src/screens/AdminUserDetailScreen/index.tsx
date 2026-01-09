@@ -5,12 +5,11 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { View, Text, StyleSheet, ScrollView, Alert, Platform } from 'react-native';
 import { NavigationProp, RouteProp } from '@react-navigation/native';
-import { useAdmin } from '../../hooks/useAdmin';
+import { useAdmin, MemberInfo } from '../../hooks/useAdmin';
 import { Card, Header, Loading, ErrorBoundary, SectionTitle, Button } from '../../components/ui';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
 import { getOptimizedLineHeight } from '../../utils/textStyles';
 import { RootStackParamList } from '../../types/navigation';
-import { UserInfo } from '../../api/manageApi';
 
 interface AdminUserDetailScreenProps {
   navigation: NavigationProp<RootStackParamList>;
@@ -20,7 +19,7 @@ interface AdminUserDetailScreenProps {
 const AdminUserDetailScreen: React.FC<AdminUserDetailScreenProps> = ({ navigation, route }) => {
   const { userId } = route.params;
   const { getUserDetail, deactivateUser, activateUser, loading, error } = useAdmin();
-  const [user, setUser] = useState<UserInfo | null>(null);
+  const [user, setUser] = useState<MemberInfo | null>(null);
 
   const loadUserDetail = useCallback(async () => {
     const result = await getUserDetail(userId);
@@ -42,7 +41,8 @@ const AdminUserDetailScreen: React.FC<AdminUserDetailScreenProps> = ({ navigatio
   const handleToggleActive = async () => {
     if (!user) return;
 
-    const action = user.isActive === false ? '활성화' : '비활성화';
+    const isInactive = user.status === 'INACTIVE';
+    const action = isInactive ? '활성화' : '비활성화';
     Alert.alert(
       `유저 ${action}`,
       `이 유저를 ${action}하시겠습니까?`,
@@ -50,9 +50,9 @@ const AdminUserDetailScreen: React.FC<AdminUserDetailScreenProps> = ({ navigatio
         { text: '취소', style: 'cancel' },
         {
           text: action,
-          style: user.isActive === false ? 'default' : 'destructive',
+          style: isInactive ? 'default' : 'destructive',
           onPress: async () => {
-            const result = user.isActive === false
+            const result = isInactive
               ? await activateUser(user.id)
               : await deactivateUser(user.id);
 
@@ -120,9 +120,9 @@ const AdminUserDetailScreen: React.FC<AdminUserDetailScreenProps> = ({ navigatio
             <Text style={styles.infoLabel}>역할</Text>
             <View style={[
               styles.roleBadge,
-              user.role === 'admin' && styles.roleBadgeAdmin
+              user.role?.toUpperCase() === 'ADMIN' && styles.roleBadgeAdmin
             ]}>
-              <Text style={styles.roleText}>{user.role || 'user'}</Text>
+              <Text style={styles.roleText}>{user.role || 'USER'}</Text>
             </View>
           </View>
 
@@ -130,10 +130,10 @@ const AdminUserDetailScreen: React.FC<AdminUserDetailScreenProps> = ({ navigatio
             <Text style={styles.infoLabel}>상태</Text>
             <View style={[
               styles.statusBadge,
-              user.isActive === false && styles.statusBadgeInactive
+              user.status === 'INACTIVE' && styles.statusBadgeInactive
             ]}>
               <Text style={styles.statusText}>
-                {user.isActive === false ? '비활성' : '활성'}
+                {user.status === 'INACTIVE' ? '비활성' : '활성'}
               </Text>
             </View>
           </View>
@@ -161,12 +161,12 @@ const AdminUserDetailScreen: React.FC<AdminUserDetailScreenProps> = ({ navigatio
             size="lg"
           />
           <Button
-            title={user.isActive === false ? '활성화' : '비활성화'}
+            title={user.status === 'INACTIVE' ? '활성화' : '비활성화'}
             onPress={handleToggleActive}
-            variant={user.isActive === false ? 'primary' : 'outline'}
+            variant={user.status === 'INACTIVE' ? 'primary' : 'outline'}
             style={[
               styles.toggleButton,
-              user.isActive === false ? styles.activateButton : null
+              user.status === 'INACTIVE' ? styles.activateButton : null
             ].filter(Boolean) as any}
             size="lg"
           />

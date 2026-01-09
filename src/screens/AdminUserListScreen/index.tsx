@@ -5,12 +5,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Platform } from 'react-native';
 import { NavigationProp } from '@react-navigation/native';
-import { useAdmin } from '../../hooks/useAdmin';
+import { useAdmin, MemberInfo } from '../../hooks/useAdmin';
 import { Header, Loading, ErrorBoundary } from '../../components/ui';
 import { colors, spacing, typography, borderRadius, shadows } from '../../utils/designTokens';
 import { getOptimizedLineHeight } from '../../utils/textStyles';
 import { RootStackParamList } from '../../types/navigation';
-import { UserInfo } from '../../api/manageApi';
 
 interface AdminUserListScreenProps {
   navigation: NavigationProp<RootStackParamList>;
@@ -20,7 +19,7 @@ type FilterType = 'all' | 'active' | 'inactive';
 
 const AdminUserListScreen: React.FC<AdminUserListScreenProps> = ({ navigation }) => {
   const { getAllUsers, loading, error } = useAdmin();
-  const [users, setUsers] = useState<UserInfo[]>([]);
+  const [users, setUsers] = useState<MemberInfo[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState<FilterType>('all');
   const [page] = useState(1);
@@ -44,17 +43,16 @@ const AdminUserListScreen: React.FC<AdminUserListScreenProps> = ({ navigation })
       const query = searchQuery.toLowerCase();
       const matchesSearch =
         user.nickname.toLowerCase().includes(query) ||
-        (user.email && user.email.toLowerCase().includes(query)) ||
-        (user.username && user.username.toLowerCase().includes(query));
+        (user.email && user.email.toLowerCase().includes(query));
       if (!matchesSearch) return false;
     }
 
-    // 상태 필터
+    // 상태 필터 (status 필드 사용)
     if (filter === 'active') {
-      return user.isActive !== false;
+      return user.status === 'ACTIVE';
     }
     if (filter === 'inactive') {
-      return user.isActive === false;
+      return user.status === 'INACTIVE';
     }
 
     return true;
@@ -131,16 +129,16 @@ const AdminUserListScreen: React.FC<AdminUserListScreenProps> = ({ navigation })
                     <Text style={styles.userCardNickname}>{user.nickname}</Text>
                     <View style={[
                       styles.statusBadge,
-                      user.isActive === false && styles.statusBadgeInactive
+                      user.status === 'INACTIVE' && styles.statusBadgeInactive
                     ]}>
                       <Text style={styles.statusText}>
-                        {user.isActive === false ? '비활성' : '활성'}
+                        {user.status === 'INACTIVE' ? '비활성' : '활성'}
                       </Text>
                     </View>
                   </View>
                   <Text style={styles.userCardEmail}>{user.email || '이메일 없음'}</Text>
                   <View style={styles.userCardFooter}>
-                    <Text style={styles.userCardRole}>역할: {user.role || 'user'}</Text>
+                    <Text style={styles.userCardRole}>역할: {user.role || 'USER'}</Text>
                     {user.createdAt && (
                       <Text style={styles.userCardDate}>
                         가입: {new Date(user.createdAt).toLocaleDateString('ko-KR')}
