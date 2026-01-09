@@ -4,7 +4,7 @@ import { Button, Input, Header } from '../../components/ui';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
 import { getOptimizedLineHeight } from '../../utils/textStyles';
 import { SCREEN_NAMES } from '../../utils/constants';
-import { join } from '../../api/authApi';
+import { join, sendVerification, verifyEmail } from '../../api/authApi';
 import { saveTokens, saveUserInfo } from '../../utils/tokenStorage';
 import { apiClient } from '../../api/client';
 import { useUser } from '../../contexts/UserContext';
@@ -20,6 +20,11 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onNavigate }) => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [nickname, setNickname] = useState('');
   const [phone, setPhone] = useState('');
+  const [verificationCode, setVerificationCode] = useState('');
+  const [isEmailVerified, setIsEmailVerified] = useState(false);
+  const [isSendingVerification, setIsSendingVerification] = useState(false);
+  const [isVerifyingCode, setIsVerifyingCode] = useState(false);
+  const [showVerificationCodeInput, setShowVerificationCodeInput] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState({
     email: '',
@@ -27,6 +32,7 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onNavigate }) => {
     confirmPassword: '',
     nickname: '',
     phone: '',
+    verificationCode: '',
   });
 
   const validateEmail = (email: string): boolean => {
@@ -39,6 +45,106 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onNavigate }) => {
     return phoneRegex.test(phone.replace(/-/g, ''));
   };
 
+  const validateVerificationCode = (code: string): boolean => {
+    return /^\d{6}$/.test(code);
+  };
+
+  // 이메일 인증번호 발송
+  const handleSendVerification = async () => {
+    setErrors({ ...errors, email: '', verificationCode: '' });
+    setIsEmailVerified(false);
+    setVerificationCode('');
+    setShowVerificationCodeInput(false);
+
+    // 이메일 검증
+    if (!email.trim()) {
+      setErrors({ ...errors, email: '이메일을 입력해주세요.', verificationCode: '' });
+      return;
+    }
+
+    if (!validateEmail(email)) {
+      setErrors({ ...errors, email: '올바른 이메일 형식으로 입력해주세요.', verificationCode: '' });
+      return;
+    }
+
+    setIsSendingVerification(true);
+
+    try {
+      const result = await sendVerification({ email });
+
+      if (result.success && result.data) {
+        setShowVerificationCodeInput(true);
+        Alert.alert('인증번호 발송', '이메일로 인증번호를 보냈습니다.\n인증번호를 입력해주세요.');
+      } else {
+        let errorMessage = '인증번호 발송에 실패했습니다.';
+        if (result.error) {
+          if (typeof result.error === 'string') {
+            errorMessage = result.error;
+          } else if (typeof result.error === 'object') {
+            const errorObj = result.error as any;
+            errorMessage = errorObj.message || errorObj.error || errorMessage;
+          }
+        }
+        setErrors({ ...errors, email: errorMessage, verificationCode: '' });
+      }
+    } catch (error) {
+      console.error('Send verification error:', error);
+      setErrors({ ...errors, email: '인증번호 발송 중 오류가 발생했습니다.\n잠시 후 다시 시도해주세요.', verificationCode: '' });
+    } finally {
+      setIsSendingVerification(false);
+    }
+  };
+
+  // 이메일 인증번호 확인
+  const handleVerifyEmail = async () => {
+    setErrors({ ...errors, email: '', verificationCode: '' });
+
+    // 인증번호 검증
+    if (!verificationCode.trim()) {
+      setErrors({ ...errors, email: '', verificationCode: '인증번호를 입력해주세요.' });
+      return;
+    }
+
+    if (!validateVerificationCode(verificationCode)) {
+      setErrors({ ...errors, email: '', verificationCode: '인증번호는 6자리 숫자로 입력해주세요.' });
+      return;
+    }
+
+    setIsVerifyingCode(true);
+
+    try {
+      const result = await verifyEmail({
+        email,
+        code: verificationCode,
+      });
+
+      if (result.success && result.data !== undefined) {
+        if (result.data === true) {
+          setIsEmailVerified(true);
+          Alert.alert('인증 완료', '이메일 인증이 완료되었습니다.');
+        } else {
+          setErrors({ ...errors, email: '', verificationCode: '인증번호가 올바르지 않습니다.' });
+        }
+      } else {
+        let errorMessage = '인증번호가 올바르지 않습니다.';
+        if (result.error) {
+          if (typeof result.error === 'string') {
+            errorMessage = result.error;
+          } else if (typeof result.error === 'object') {
+            const errorObj = result.error as any;
+            errorMessage = errorObj.message || errorObj.error || errorMessage;
+          }
+        }
+        setErrors({ ...errors, email: '', verificationCode: errorMessage });
+      }
+    } catch (error) {
+      console.error('Verify email error:', error);
+      setErrors({ ...errors, email: '', verificationCode: '인증번호 확인 중 오류가 발생했습니다.\n잠시 후 다시 시도해주세요.' });
+    } finally {
+      setIsVerifyingCode(false);
+    }
+  };
+
   const handleSignUp = async () => {
     // 에러 초기화
     setErrors({
@@ -47,6 +153,7 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onNavigate }) => {
       confirmPassword: '',
       nickname: '',
       phone: '',
+      verificationCode: '',
     });
 
     let hasError = false;
@@ -56,6 +163,7 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onNavigate }) => {
       confirmPassword: '',
       nickname: '',
       phone: '',
+      verificationCode: '',
     };
 
     // 유효성 검사
@@ -64,6 +172,9 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onNavigate }) => {
       hasError = true;
     } else if (!validateEmail(email)) {
       newErrors.email = '올바른 이메일 형식으로 입력해주세요.';
+      hasError = true;
+    } else if (!isEmailVerified) {
+      newErrors.email = '이메일 인증을 완료해주세요.';
       hasError = true;
     }
 
@@ -199,8 +310,11 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onNavigate }) => {
               value={email}
               onChangeText={(text) => {
                 setEmail(text);
+                setIsEmailVerified(false);
+                setVerificationCode('');
+                setShowVerificationCodeInput(false);
                 if (errors.email) {
-                  setErrors({ ...errors, email: '' });
+                  setErrors({ ...errors, email: '', verificationCode: '' });
                 }
               }}
               keyboardType="email-address"
@@ -209,8 +323,73 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onNavigate }) => {
               returnKeyType="next"
               blurOnSubmit={false}
               inputStyle={styles.inputText}
+              editable={!isEmailVerified}
             />
+            {isEmailVerified && (
+              <View style={styles.verifiedBadgeContainer}>
+                <View style={styles.verifiedBadge}>
+                  <Text style={styles.verifiedText}>✓ 인증완료</Text>
+                </View>
+              </View>
+            )}
             {errors.email ? <Text style={styles.errorText}>{errors.email}</Text> : null}
+            
+            {!isEmailVerified && (
+              <>
+                <TouchableOpacity
+                  onPress={handleSendVerification}
+                  disabled={isSendingVerification || !validateEmail(email)}
+                  style={[
+                    styles.verificationButton,
+                    (!validateEmail(email) || isSendingVerification) && styles.verificationButtonDisabled,
+                  ]}
+                >
+                  <Text style={[
+                    styles.verificationButtonText,
+                    (!validateEmail(email) || isSendingVerification) && styles.verificationButtonTextDisabled,
+                  ]}>
+                    {isSendingVerification ? '발송 중...' : '인증번호 발송'}
+                  </Text>
+                </TouchableOpacity>
+                
+                {showVerificationCodeInput && (
+                  <View style={styles.verificationCodeContainer}>
+                    <Text style={styles.label}>인증번호</Text>
+                    <Input
+                      placeholder="인증번호 6자리 입력"
+                      value={verificationCode}
+                      onChangeText={(text) => {
+                        setVerificationCode(text);
+                        if (errors.verificationCode) {
+                          setErrors({ ...errors, verificationCode: '' });
+                        }
+                      }}
+                      keyboardType="number-pad"
+                      maxLength={6}
+                      returnKeyType="done"
+                      blurOnSubmit={true}
+                      inputStyle={styles.inputText}
+                    />
+                    <TouchableOpacity
+                      onPress={handleVerifyEmail}
+                      disabled={isVerifyingCode || !validateVerificationCode(verificationCode)}
+                      style={[
+                        styles.verifyButton,
+                        (!validateVerificationCode(verificationCode) || isVerifyingCode) && styles.verifyButtonDisabled,
+                      ]}
+                    >
+                      <Text style={[
+                        styles.verifyButtonText,
+                        (!validateVerificationCode(verificationCode) || isVerifyingCode) && styles.verifyButtonTextDisabled,
+                      ]}>
+                        {isVerifyingCode ? '확인 중...' : '인증번호 확인'}
+                      </Text>
+                    </TouchableOpacity>
+                    {errors.verificationCode ? <Text style={styles.errorText}>{errors.verificationCode}</Text> : null}
+                  </View>
+                )}
+              </>
+            )}
           </View>
 
           <View style={styles.inputContainer}>
@@ -300,10 +479,13 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onNavigate }) => {
         <Button
           title={isLoading ? '처리 중...' : '회원가입'}
           onPress={handleSignUp}
-          disabled={isLoading}
+          disabled={isLoading || !isEmailVerified}
           loading={isLoading}
           size="lg"
-          style={styles.button}
+          style={[
+            styles.button,
+            !isEmailVerified && styles.buttonDisabled,
+          ]}
           textStyle={styles.buttonText}
         />
         <TouchableOpacity
@@ -440,6 +622,88 @@ const styles = StyleSheet.create({
   backButtonIcon: {
     width: 24,
     height: 24,
+  },
+  verifiedBadgeContainer: {
+    marginTop: spacing[1],
+  },
+  verifiedBadge: {
+    backgroundColor: colors.green[100],
+    paddingHorizontal: spacing[3],
+    paddingVertical: spacing[2],
+    borderRadius: borderRadius.base,
+    borderWidth: 1,
+    borderColor: colors.green[300],
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  verifiedText: {
+    fontSize: typography.fontSize.sm,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
+    color: colors.green[700],
+    fontWeight: typography.fontWeight.semibold,
+    textAlign: 'center',
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+  },
+  verificationButton: {
+    marginTop: spacing[1],
+    height: 44,
+    width: '100%',
+    borderRadius: borderRadius.base,
+    backgroundColor: colors.primary[500],
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  verificationButtonDisabled: {
+    backgroundColor: colors.gray[300],
+  },
+  verificationButtonText: {
+    fontSize: typography.fontSize.sm,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
+    color: colors.white,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+  },
+  verificationButtonTextDisabled: {
+    color: colors.gray[500],
+  },
+  verificationCodeContainer: {
+    marginTop: spacing[4],
+    gap: 0,
+  },
+  verifyButton: {
+    marginTop: 0,
+    height: 44,
+    width: '100%',
+    borderRadius: borderRadius.base,
+    backgroundColor: colors.primary[500],
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  verifyButtonDisabled: {
+    backgroundColor: colors.gray[300],
+  },
+  verifyButtonText: {
+    fontSize: typography.fontSize.sm,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
+    color: colors.white,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+  },
+  verifyButtonTextDisabled: {
+    color: colors.gray[500],
+  },
+  buttonDisabled: {
+    backgroundColor: colors.gray[300],
   },
 });
 
