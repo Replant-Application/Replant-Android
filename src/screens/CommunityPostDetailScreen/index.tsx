@@ -2,7 +2,7 @@
  * 커뮤니티 게시글 상세 화면
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -25,6 +25,8 @@ import { colors, spacing, typography, borderRadius, shadows } from '../../utils/
 import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types/navigation';
 import { useUser } from '../../contexts/UserContext';
+import { getHiddenComments, hideComment } from '../../utils/hiddenContentStorage';
+import { logError } from '../../utils/logger';
 
 interface CommunityPostDetailScreenProps {
   navigation: NavigationProp<RootStackParamList>;
@@ -44,8 +46,35 @@ const CommunityPostDetailScreen: React.FC<CommunityPostDetailScreenProps> = ({
   const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
   const [editingContent, setEditingContent] = useState('');
   const [replyingToComment, setReplyingToComment] = useState<{ id: string; nickname: string } | null>(null);
+  
+  // 숨긴 댓글 ID 목록
+  const [hiddenCommentIds, setHiddenCommentIds] = useState<string[]>([]);
 
   const isAuthor = post?.author === currentNickname;
+
+  // 숨긴 댓글 목록 로드
+  useEffect(() => {
+    const loadHiddenComments = async () => {
+      try {
+        const hiddenIds = await getHiddenComments();
+        setHiddenCommentIds(hiddenIds);
+      } catch (error) {
+        logError('숨긴 댓글 목록 로드 실패', error as Error);
+      }
+    };
+    loadHiddenComments();
+  }, []);
+
+  // 댓글 숨기기 처리
+  const handleHideComment = useCallback(async (commentId: string) => {
+    try {
+      await hideComment(commentId);
+      setHiddenCommentIds(prev => [...prev, commentId]);
+    } catch (error) {
+      logError('댓글 숨기기 실패', error as Error);
+      Alert.alert('오류', '댓글을 숨기는 중 문제가 발생했습니다.');
+    }
+  }, []);
 
   const handleLike = async () => {
     if (post) {
@@ -274,6 +303,7 @@ const CommunityPostDetailScreen: React.FC<CommunityPostDetailScreenProps> = ({
               {/* 부모 댓글만 먼저 렌더링하고, 대댓글은 부모 댓글 아래에 표시 */}
               {comments
                 .filter(comment => !comment.parent_comment_id)
+                .filter(comment => !hiddenCommentIds.includes(comment.comment_id))
                 .map(parentComment => (
                   <View key={parentComment.comment_id}>
                     {/* 부모 댓글 */}
@@ -317,12 +347,14 @@ const CommunityPostDetailScreen: React.FC<CommunityPostDetailScreenProps> = ({
                         onEdit={handleEditComment}
                         onDelete={handleDeleteComment}
                         onReply={handleReplyComment}
+                        onHide={handleHideComment}
                       />
                     )}
 
                     {/* 대댓글 (부모 댓글에 속한 댓글들) */}
                     {comments
                       .filter(reply => reply.parent_comment_id === parentComment.comment_id)
+                      .filter(reply => !hiddenCommentIds.includes(reply.comment_id))
                       .map(reply => (
                         <View key={reply.comment_id}>
                           {editingCommentId === reply.comment_id ? (
@@ -365,6 +397,7 @@ const CommunityPostDetailScreen: React.FC<CommunityPostDetailScreenProps> = ({
                               isReply={true}
                               onEdit={handleEditComment}
                               onDelete={handleDeleteComment}
+                              onHide={handleHideComment}
                             />
                           )}
                         </View>
