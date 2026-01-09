@@ -21,11 +21,26 @@ const CommentCard: React.FC<CommentCardProps> = ({
   onEdit,
   onDelete,
   onReply,
+  onHide,
   isAuthor = false,
   isReply = false,
   style
 }) => {
   if (!comment) return null;
+
+  const handleHide = () => {
+    Alert.alert(
+      '댓글 숨기기',
+      '이 댓글을 숨기시겠습니까? 숨긴 댓글은 목록에서 보이지 않습니다.',
+      [
+        { text: '취소', style: 'cancel' },
+        {
+          text: '숨기기',
+          onPress: () => onHide?.(comment.comment_id)
+        }
+      ]
+    );
+  };
 
   // formatDate는 formatTimeAgo의 longFormat 버전 사용
 
@@ -86,6 +101,17 @@ const CommentCard: React.FC<CommentCardProps> = ({
               activeOpacity={0.7}
             >
               <Text style={styles.deleteText}>🗑️ 삭제</Text>
+            </TouchableOpacity>
+          )}
+
+          {/* 숨기기 버튼 - 본인 댓글이 아닌 경우에도 표시 */}
+          {onHide && (
+            <TouchableOpacity
+              style={styles.actionButton}
+              onPress={handleHide}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.hideText}>🚫 숨기기</Text>
             </TouchableOpacity>
           )}
         </View>
@@ -216,6 +242,17 @@ const styles = StyleSheet.create({
   deleteText: {
     fontSize: typography.fontSize.xs,
     color: colors.error,
+    fontWeight: typography.fontWeight.normal,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
+  },
+  hideText: {
+    fontSize: typography.fontSize.xs,
+    color: colors.text.primary,
     fontWeight: typography.fontWeight.normal,
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,
