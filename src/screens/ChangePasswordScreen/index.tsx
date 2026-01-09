@@ -177,13 +177,6 @@ const ChangePasswordScreen: React.FC<ChangePasswordScreenProps> = ({ navigation 
           keyboardShouldPersistTaps="handled"
         >
           <View style={styles.content}>
-            <View style={styles.infoBox}>
-              <Text style={styles.infoText}>
-                비밀번호를 변경하려면 현재 비밀번호를 입력한 후,{'\n'}
-                새로운 비밀번호를 입력해주세요.
-              </Text>
-            </View>
-
             <View style={styles.form}>
               {/* 현재 비밀번호 */}
               <View style={styles.inputContainer}>
@@ -326,7 +319,8 @@ const styles = StyleSheet.create({
   form: {
     backgroundColor: colors.background.primary,
     borderRadius: borderRadius.xl,
-    padding: spacing[5],
+    paddingHorizontal: spacing[5],
+    paddingVertical: spacing[12],
     ...shadows.lg,
   },
   inputContainer: {
