@@ -75,14 +75,18 @@ const HeaderActions: React.FC<HeaderActionsProps> = ({
           onPress={handleChatPress}
           activeOpacity={0.7}
           hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          accessibilityRole="button"
+          accessibilityLabel={unreadChatCount > 0 ? `채팅, ${unreadChatCount}개의 읽지 않은 메시지` : '채팅'}
+          accessibilityState={{ selected: activeOverlay === 'chat' }}
         >
           <Image
             source={require('../../assets/images/say.png')}
             style={styles.iconImage}
             resizeMode="contain"
+            accessibilityElementsHidden={true}
           />
           {unreadChatCount > 0 && (
-            <View style={styles.badge}>
+            <View style={styles.badge} accessibilityElementsHidden={true}>
               <Text style={styles.badgeText}>
                 {unreadChatCount > 99 ? '99+' : unreadChatCount}
               </Text>
@@ -102,10 +106,13 @@ const HeaderActions: React.FC<HeaderActionsProps> = ({
           onPress={handleNotificationPress}
           activeOpacity={0.7}
           hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          accessibilityRole="button"
+          accessibilityLabel={unreadNotificationCount > 0 ? `알림, ${unreadNotificationCount}개의 읽지 않은 알림` : '알림'}
+          accessibilityState={{ selected: activeOverlay === 'notification' }}
         >
-          <Text style={styles.icon}>🔔</Text>
+          <Text style={styles.icon} accessibilityElementsHidden={true}>🔔</Text>
           {unreadNotificationCount > 0 && (
-            <View style={styles.badge}>
+            <View style={styles.badge} accessibilityElementsHidden={true}>
               <Text style={styles.badgeText}>
                 {unreadNotificationCount > 99 ? '99+' : unreadNotificationCount}
               </Text>

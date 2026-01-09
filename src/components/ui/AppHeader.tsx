@@ -47,15 +47,18 @@ const AppHeader: React.FC<AppHeaderProps> = ({ navigation }) => {
           style={styles.iconButton}
           onPress={() => navigation.navigate('Notification' as any)}
           activeOpacity={0.6}
+          accessibilityRole="button"
+          accessibilityLabel={unreadNotificationCount > 0 ? `알림, ${unreadNotificationCount}개의 읽지 않은 알림` : '알림'}
         >
           <View style={styles.iconWrapper}>
             <Image
               source={require('../../assets/images/notification.png')}
               style={styles.iconImage}
               resizeMode="contain"
+              accessibilityElementsHidden={true}
             />
             {unreadNotificationCount > 0 && (
-              <View style={styles.notificationBadge}>
+              <View style={styles.notificationBadge} accessibilityElementsHidden={true}>
                 <Text style={styles.badgeText}>
                   {unreadNotificationCount > 99 ? '99+' : unreadNotificationCount}
                 </Text>
@@ -67,11 +70,15 @@ const AppHeader: React.FC<AppHeaderProps> = ({ navigation }) => {
           style={styles.menuButton}
           onPress={toggleMenu}
           activeOpacity={0.6}
+          accessibilityRole="button"
+          accessibilityLabel="메뉴"
+          accessibilityState={{ expanded: menuVisible }}
         >
           <Image
             source={require('../../assets/images/menu.png')}
             style={styles.menuIcon}
             resizeMode="contain"
+            accessibilityElementsHidden={true}
           />
         </TouchableOpacity>
       </View>
@@ -100,11 +107,14 @@ const AppHeader: React.FC<AppHeaderProps> = ({ navigation }) => {
               style={styles.menuItem}
               onPress={() => handleMenuPress('MyPage')}
               activeOpacity={0.7}
+              accessibilityRole="button"
+              accessibilityLabel="프로필"
             >
               <Image
                 source={require('../../assets/images/boy.png')}
                 style={styles.menuItemIcon}
                 resizeMode="contain"
+                accessibilityElementsHidden={true}
               />
               <Text style={styles.menuItemText}>프로필</Text>
             </TouchableOpacity>
@@ -112,11 +122,14 @@ const AppHeader: React.FC<AppHeaderProps> = ({ navigation }) => {
               style={styles.menuItem}
               onPress={() => handleMenuPress('CounselingSelect')}
               activeOpacity={0.7}
+              accessibilityRole="button"
+              accessibilityLabel="상담"
             >
               <Image
                 source={require('../../assets/images/hospital.png')}
                 style={styles.menuItemIcon}
                 resizeMode="contain"
+                accessibilityElementsHidden={true}
               />
               <Text style={styles.menuItemText}>상담</Text>
             </TouchableOpacity>
@@ -124,11 +137,14 @@ const AppHeader: React.FC<AppHeaderProps> = ({ navigation }) => {
               style={styles.menuItem}
               onPress={() => handleMenuPress('Calendar')}
               activeOpacity={0.7}
+              accessibilityRole="button"
+              accessibilityLabel="캘린더"
             >
               <Image
                 source={require('../../assets/images/calendar.png')}
                 style={styles.menuItemIcon}
                 resizeMode="contain"
+                accessibilityElementsHidden={true}
               />
               <Text style={styles.menuItemText}>캘린더</Text>
             </TouchableOpacity>
@@ -136,11 +152,14 @@ const AppHeader: React.FC<AppHeaderProps> = ({ navigation }) => {
               style={styles.menuItem}
               onPress={() => handleMenuPress('Statistics')}
               activeOpacity={0.7}
+              accessibilityRole="button"
+              accessibilityLabel="통계"
             >
               <Image
                 source={require('../../assets/images/search.png')}
                 style={styles.menuItemIcon}
                 resizeMode="contain"
+                accessibilityElementsHidden={true}
               />
               <Text style={styles.menuItemText}>통계</Text>
             </TouchableOpacity>

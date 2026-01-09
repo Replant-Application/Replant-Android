@@ -216,9 +216,12 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
                     ]}
                     onPress={() => handleNotificationPress(notification)}
                     activeOpacity={0.7}
+                    accessibilityRole="button"
+                    accessibilityLabel={`${notification.title}, ${notification.content}`}
+                    accessibilityState={{ selected: !notification.isRead }}
                   >
                     {typeof getNotificationIcon(notification.type) === 'string' ? (
-                      <Text style={styles.notificationIcon}>
+                      <Text style={styles.notificationIcon} accessibilityElementsHidden={true}>
                         {getNotificationIcon(notification.type) as string}
                       </Text>
                     ) : (
@@ -226,6 +229,7 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
                         source={getNotificationIcon(notification.type) as any}
                         style={styles.notificationIconImage}
                         resizeMode="contain"
+                        accessibilityElementsHidden={true}
                       />
                     )}
                     <View style={styles.notificationContent}>
@@ -254,7 +258,12 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
             </ScrollView>
 
             {/* 푸터 */}
-            <TouchableOpacity style={styles.footer} onPress={handleViewAll}>
+            <TouchableOpacity 
+              style={styles.footer} 
+              onPress={handleViewAll}
+              accessibilityRole="button"
+              accessibilityLabel="전체 보기"
+            >
               <Text style={styles.footerText}>전체 보기</Text>
             </TouchableOpacity>
           </Animated.View>
