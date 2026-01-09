@@ -537,7 +537,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   checkboxChecked: {
-    backgroundColor: colors.primary[500],
+    backgroundColor: colors.primary[700], // WCAG AA 대비율 개선
   },
   checkmark: {
     color: colors.text.inverse,
@@ -589,7 +589,7 @@ const styles = StyleSheet.create({
   loginButton: {
     width: '100%',
     height: 44,
-    backgroundColor: colors.primary[500],
+    backgroundColor: colors.primary[700], // WCAG AA 대비율 개선
     borderRadius: borderRadius.base,
     alignItems: 'center',
     justifyContent: 'center',

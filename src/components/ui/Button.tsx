@@ -97,7 +97,7 @@ const styles = StyleSheet.create({
 
   // Variants
   primary: {
-    backgroundColor: colors.primary[500],
+    backgroundColor: colors.primary[700], // WCAG AA 대비율 개선: primary[500] → primary[700]
   },
   secondary: {
     backgroundColor: colors.gray[200],

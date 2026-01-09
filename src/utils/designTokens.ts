@@ -111,7 +111,7 @@ export const colors: Colors = {
   // Semantic colors
   success: '#89C17E', // 자연스러운 녹색으로 변경
   warning: '#f59e0b',
-  error: '#ef4444',
+  error: '#dc2626', // WCAG AA 대비율 개선: error[500] → error[600]
   info: '#3b82f6',
 
   // Background colors

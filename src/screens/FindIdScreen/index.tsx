@@ -293,7 +293,7 @@ const styles = StyleSheet.create({
     height: 44,
     width: '100%',
     borderRadius: borderRadius.base,
-    backgroundColor: colors.primary[500],
+    backgroundColor: colors.primary[700], // WCAG AA 대비율 개선
   },
   buttonText: {
     fontSize: typography.fontSize.sm,
