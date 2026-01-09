@@ -63,10 +63,22 @@ const Input: React.FC<InputProps> = ({
         autoCapitalize="none"
         keyboardType="default"
         returnKeyType="done"
+        accessibilityLabel={label || placeholder}
+        accessibilityHint={error ? error : undefined}
+        accessibilityLiveRegion={error ? "polite" : undefined}
+        allowFontScaling={true}
         {...(Platform.OS === 'android' && { includeFontPadding: false })}
         {...props}
       />
-      {error && <Text style={styles.errorText}>{error}</Text>}
+      {error && (
+        <Text 
+          style={styles.errorText}
+          accessibilityLiveRegion="polite"
+          accessibilityRole="alert"
+        >
+          {error}
+        </Text>
+      )}
     </View>
   );
 };

@@ -43,6 +43,9 @@ export const TabBar: React.FC<TabBarProps> = ({
             ]}
             onPress={() => onTabChange(tab.key)}
             activeOpacity={0.7}
+            accessibilityRole="tab"
+            accessibilityLabel={tab.label}
+            accessibilityState={{ selected: activeTab === tab.key }}
           >
             <Text
               style={[
@@ -69,6 +72,11 @@ export const TabBar: React.FC<TabBarProps> = ({
           ]}
           onPress={() => onTabChange(tab.key)}
           activeOpacity={0.7}
+          accessibilityRole="tab"
+          accessibilityLabel={tab.badge !== undefined && tab.badge > 0 
+            ? `${tab.label}, 알림 ${tab.badge}개`
+            : tab.label}
+          accessibilityState={{ selected: activeTab === tab.key }}
         >
           <Text
             style={[
@@ -101,6 +109,9 @@ export const TabBar: React.FC<TabBarProps> = ({
           ]}
           onPress={() => onTabChange(tab.key)}
           activeOpacity={0.7}
+          accessibilityRole="tab"
+          accessibilityLabel={tab.label}
+          accessibilityState={{ selected: activeTab === tab.key }}
         >
           <Text
             style={[

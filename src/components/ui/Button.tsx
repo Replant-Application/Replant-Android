@@ -56,12 +56,23 @@ const Button: React.FC<ButtonProps> = ({
     textStyle,
   ];
 
+  // hitSlop 계산: sm(32px)는 6px 추가, base(40px)는 2px 추가, lg(48px)는 불필요
+  const hitSlopValue = size === 'sm' 
+    ? { top: 6, bottom: 6, left: 6, right: 6 }
+    : size === 'base'
+    ? { top: 2, bottom: 2, left: 2, right: 2 }
+    : undefined;
+
   return (
     <TouchableOpacity
       style={buttonStyle}
       onPress={onPress}
       disabled={disabled || loading}
       activeOpacity={0.7}
+      accessibilityRole="button"
+      accessibilityLabel={title}
+      accessibilityState={{ disabled: disabled || loading }}
+      hitSlop={hitSlopValue}
       {...props}
     >
       {loading ? (

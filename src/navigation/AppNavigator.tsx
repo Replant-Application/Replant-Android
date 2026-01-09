@@ -373,6 +373,9 @@ const AppNavigator = () => {
           style={[styles.tab, currentScreen === SCREEN_NAMES.HOME && styles.activeTab]}
           onPress={() => setCurrentScreen(SCREEN_NAMES.HOME)}
           activeOpacity={0.7}
+          accessibilityRole="tab"
+          accessibilityLabel="홈"
+          accessibilityState={{ selected: currentScreen === SCREEN_NAMES.HOME }}
         >
           <Image
             source={require('../assets/images/home.png')}
@@ -381,6 +384,7 @@ const AppNavigator = () => {
               currentScreen === SCREEN_NAMES.HOME && styles.tabIconImageActive
             ]}
             resizeMode="contain"
+            accessibilityElementsHidden={true}
           />
           <Text style={[
             styles.tabLabel,
@@ -392,6 +396,9 @@ const AppNavigator = () => {
           style={[styles.tab, currentScreen === SCREEN_NAMES.MISSION && styles.activeTab]}
           onPress={() => setCurrentScreen(SCREEN_NAMES.MISSION)}
           activeOpacity={0.7}
+          accessibilityRole="tab"
+          accessibilityLabel="미션"
+          accessibilityState={{ selected: currentScreen === SCREEN_NAMES.MISSION }}
         >
           <Image
             source={require('../assets/images/goal.png')}
@@ -400,6 +407,7 @@ const AppNavigator = () => {
               currentScreen === SCREEN_NAMES.MISSION && styles.tabIconImageActive
             ]}
             resizeMode="contain"
+            accessibilityElementsHidden={true}
           />
           <Text style={[
             styles.tabLabel,
@@ -411,6 +419,9 @@ const AppNavigator = () => {
           style={[styles.tab, currentScreen === SCREEN_NAMES.COMMUNITY && styles.activeTab]}
           onPress={() => setCurrentScreen(SCREEN_NAMES.COMMUNITY)}
           activeOpacity={0.7}
+          accessibilityRole="tab"
+          accessibilityLabel="커뮤니티"
+          accessibilityState={{ selected: currentScreen === SCREEN_NAMES.COMMUNITY }}
         >
           <Image
             source={require('../assets/images/chat.png')}
@@ -419,6 +430,7 @@ const AppNavigator = () => {
               currentScreen === SCREEN_NAMES.COMMUNITY && styles.tabIconImageActive
             ]}
             resizeMode="contain"
+            accessibilityElementsHidden={true}
           />
           <Text style={[
             styles.tabLabel,
@@ -430,6 +442,9 @@ const AppNavigator = () => {
           style={[styles.tab, currentScreen === SCREEN_NAMES.DIARY && styles.activeTab]}
           onPress={() => setCurrentScreen(SCREEN_NAMES.DIARY)}
           activeOpacity={0.7}
+          accessibilityRole="tab"
+          accessibilityLabel="감성일기"
+          accessibilityState={{ selected: currentScreen === SCREEN_NAMES.DIARY }}
         >
           <Image
             source={require('../assets/images/books.png')}
@@ -438,6 +453,7 @@ const AppNavigator = () => {
               currentScreen === SCREEN_NAMES.DIARY && styles.tabIconImageActive
             ]}
             resizeMode="contain"
+            accessibilityElementsHidden={true}
           />
           <Text style={[
             styles.tabLabel,
@@ -449,6 +465,9 @@ const AppNavigator = () => {
           style={[styles.tab, currentScreen === SCREEN_NAMES.SETTINGS && styles.activeTab]}
           onPress={() => setCurrentScreen(SCREEN_NAMES.SETTINGS)}
           activeOpacity={0.7}
+          accessibilityRole="tab"
+          accessibilityLabel="설정"
+          accessibilityState={{ selected: currentScreen === SCREEN_NAMES.SETTINGS }}
         >
           <Image
             source={require('../assets/images/settings.png')}
@@ -457,6 +476,7 @@ const AppNavigator = () => {
               currentScreen === SCREEN_NAMES.SETTINGS && styles.tabIconImageActive
             ]}
             resizeMode="contain"
+            accessibilityElementsHidden={true}
           />
           <Text style={[
             styles.tabLabel,
