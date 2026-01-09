@@ -155,6 +155,8 @@ const FindIdScreen: React.FC<FindIdScreenProps> = ({ onNavigate }) => {
               }}
               autoCapitalize="none"
               autoCorrect={false}
+              returnKeyType="next"
+              blurOnSubmit={false}
               inputStyle={styles.inputText}
             />
           </View>
@@ -176,6 +178,8 @@ const FindIdScreen: React.FC<FindIdScreenProps> = ({ onNavigate }) => {
               keyboardType={inputType === 'phone' ? 'phone-pad' : 'email-address'}
               autoCapitalize="none"
               autoCorrect={false}
+              returnKeyType="done"
+              blurOnSubmit={true}
               inputStyle={styles.inputText}
             />
             {error ? <Text style={styles.errorText}>{error}</Text> : null}

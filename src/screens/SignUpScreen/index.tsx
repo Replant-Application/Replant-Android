@@ -206,6 +206,8 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onNavigate }) => {
               keyboardType="email-address"
               autoCapitalize="none"
               autoCorrect={false}
+              returnKeyType="next"
+              blurOnSubmit={false}
               inputStyle={styles.inputText}
             />
             {errors.email ? <Text style={styles.errorText}>{errors.email}</Text> : null}
@@ -225,6 +227,8 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onNavigate }) => {
               secureTextEntry
               autoCapitalize="none"
               autoCorrect={false}
+              returnKeyType="next"
+              blurOnSubmit={false}
               inputStyle={styles.inputText}
             />
             {errors.password ? <Text style={styles.errorText}>{errors.password}</Text> : null}
@@ -244,6 +248,8 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onNavigate }) => {
               secureTextEntry
               autoCapitalize="none"
               autoCorrect={false}
+              returnKeyType="next"
+              blurOnSubmit={false}
               inputStyle={styles.inputText}
             />
             {errors.confirmPassword ? <Text style={styles.errorText}>{errors.confirmPassword}</Text> : null}
@@ -261,6 +267,8 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onNavigate }) => {
                 }
               }}
               maxLength={20}
+              returnKeyType="next"
+              blurOnSubmit={false}
               inputStyle={styles.inputText}
             />
             {errors.nickname ? <Text style={styles.errorText}>{errors.nickname}</Text> : null}
@@ -279,6 +287,8 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onNavigate }) => {
               }}
               keyboardType="phone-pad"
               maxLength={11}
+              returnKeyType="done"
+              blurOnSubmit={true}
               inputStyle={styles.inputText}
             />
             {errors.phone ? <Text style={styles.errorText}>{errors.phone}</Text> : null}

@@ -241,6 +241,8 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onNavigate }) => {
               keyboardType="email-address"
               autoCapitalize="none"
               autoCorrect={false}
+              returnKeyType="next"
+              blurOnSubmit={false}
               style={styles.input}
               accessibilityLabel="이메일"
               accessibilityHint="이메일 주소를 입력하세요"
@@ -258,7 +260,9 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onNavigate }) => {
               secureTextEntry
               autoCapitalize="none"
               autoCorrect={false}
+              returnKeyType="done"
               onSubmitEditing={handleLogin}
+              blurOnSubmit={true}
               style={styles.input}
               accessibilityLabel="비밀번호"
               accessibilityHint="비밀번호를 입력하세요"
