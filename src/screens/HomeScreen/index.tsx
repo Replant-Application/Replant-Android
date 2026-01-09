@@ -402,8 +402,18 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
             ) : (
               <EmptyState
                 icon=""
-                title="목표가 없습니다"
-                description="새로운 목표를 추가해보세요."
+                title={
+                  filter === 'completed' 
+                    ? '완료된 목표가 없습니다' 
+                    : filter === 'inProgress'
+                    ? '진행 중인 목표가 없습니다'
+                    : '목표가 없습니다'
+                }
+                description={
+                  filter === 'completed'
+                    ? '목표를 완료해보세요.'
+                    : '새로운 목표를 추가해보세요.'
+                }
               />
             )}
           </View>
@@ -553,6 +563,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing[2],
     paddingTop: spacing[3],
     paddingBottom: spacing[2],
+    paddingHorizontal: spacing[3],
   },
   mainTitle: {
     fontSize: typography.fontSize['2xl'],
