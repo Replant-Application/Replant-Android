@@ -4,6 +4,7 @@ import { colors, spacing, typography, borderRadius } from '../../utils/designTok
 import { getOptimizedLineHeight } from '../../utils/textStyles';
 import { CommunityPost } from '../../types';
 import { formatTimeAgo } from '../../utils/dateUtils';
+import { useUser } from '../../contexts/UserContext';
 
 interface PostCardProps {
   post: CommunityPost;
@@ -29,9 +30,10 @@ const PostCard: React.FC<PostCardProps> = ({
   style
 }) => {
   const [showMenu, setShowMenu] = useState(false);
+  const { currentNickname } = useUser();
 
-  // 본인 게시글인지 확인
-  const isOwnPost = currentUserId && post.author_id === currentUserId;
+  // 본인 게시글인지 확인 (author_nickname으로 비교)
+  const isOwnPost = currentNickname && post.author_nickname === currentNickname;
   // 인증되지 않은 게시글인지 확인 (verified가 false이거나 undefined인 경우)
   const canEditDelete = isOwnPost && !post.verified;
 
