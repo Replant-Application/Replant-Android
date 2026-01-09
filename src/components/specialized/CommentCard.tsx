@@ -142,12 +142,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: spacing[1],
+    marginBottom: spacing[2],
   },
   authorInfo: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing[1.5],
+    paddingLeft: spacing[1],
   },
   authorName: {
     fontSize: typography.fontSize.sm,
@@ -188,7 +189,9 @@ const styles = StyleSheet.create({
     lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
   },
   content: {
+    marginTop: spacing[1],
     marginBottom: spacing[1],
+    paddingLeft: spacing[1],
   },
   text: {
     fontSize: typography.fontSize.sm,
@@ -213,8 +216,6 @@ const styles = StyleSheet.create({
     lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
   },
   footer: {
-    borderTopWidth: 1,
-    borderTopColor: colors.border.light,
     paddingTop: spacing[1],
   },
   actions: {

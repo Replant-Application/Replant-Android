@@ -306,7 +306,7 @@ const VerificationPostDetailScreen: React.FC<VerificationPostDetailScreenProps> 
                   </Text>
                 )}
               </View>
-              <View>
+              <View style={styles.authorNameContainer}>
                 <Text style={styles.authorName}>{post.userNickname || '알 수 없음'}</Text>
                 <Text style={styles.missionTypeBadge}>
                   {post.missionType === 'SYSTEM' ? '시스템 미션' : '커스텀 미션'}
@@ -340,32 +340,51 @@ const VerificationPostDetailScreen: React.FC<VerificationPostDetailScreenProps> 
               onPress={() => handleVote('APPROVE')}
               disabled={isAuthor}
             >
-              <Text style={[styles.voteIcon, isAuthor && styles.voteIconDisabled]}>👍</Text>
+              {post.myVote === 'APPROVE' ? (
+                <Text style={[styles.voteIcon, isAuthor && styles.voteIconDisabled]}>❤️</Text>
+              ) : (
+                <Image
+                  source={require('../../assets/images/heart.png')}
+                  style={styles.voteIconImage}
+                  resizeMode="contain"
+                />
+              )}
               <Text style={[styles.voteText, post.myVote === 'APPROVE' && styles.voteTextActive, isAuthor && styles.voteTextDisabled]}>
                 {post.approveCount}
               </Text>
             </TouchableOpacity>
 
-            <TouchableOpacity
-              style={[styles.voteButton, post.myVote === 'REJECT' && styles.voteButtonRejectActive, isAuthor && styles.voteButtonDisabled]}
-              onPress={() => handleVote('REJECT')}
-              disabled={isAuthor}
-            >
-              <Text style={[styles.voteIcon, isAuthor && styles.voteIconDisabled]}>👎</Text>
-              <Text style={[styles.voteText, post.myVote === 'REJECT' && styles.voteTextRejectActive, isAuthor && styles.voteTextDisabled]}>
-                {post.rejectCount}
-              </Text>
-            </TouchableOpacity>
-
             <View style={styles.actionButton}>
-              <Text style={styles.actionIcon}>💬</Text>
+              <Image
+                source={require('../../assets/images/say.png')}
+                style={styles.actionIconImage}
+                resizeMode="contain"
+              />
               <Text style={styles.actionText}>{post.commentCount || comments.length}</Text>
             </View>
 
             {isAuthor && post.status === 'PENDING' && (
-              <TouchableOpacity style={styles.actionButton} onPress={handleDeletePost}>
-                <Text style={[styles.actionText, styles.deleteText]}>🗑️ 삭제</Text>
-              </TouchableOpacity>
+              <>
+                <TouchableOpacity
+                  style={styles.actionButton}
+                  onPress={() => {
+                    navigation.navigate('VerificationPostCreate' as any, {
+                      mode: 'edit',
+                      verificationId: verificationId,
+                      initialContent: post.content,
+                      photoUrl: post.imageUrls?.[0],
+                      missionId: post.mission?.id,
+                      missionTitle: post.missionTitle,
+                      missionEmoji: '🎯',
+                    });
+                  }}
+                >
+                  <Text style={styles.actionText}>✏️ 수정</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.actionButton} onPress={handleDeletePost}>
+                  <Text style={[styles.actionText, styles.deleteText]}>🗑️ 삭제</Text>
+                </TouchableOpacity>
+              </>
             )}
           </View>
         </View>
@@ -555,8 +574,8 @@ const styles = StyleSheet.create({
   postHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: spacing[2],
+    alignItems: 'center',
+    marginBottom: spacing[3],
   },
   authorInfo: {
     flexDirection: 'row',
@@ -583,15 +602,23 @@ const styles = StyleSheet.create({
     fontWeight: typography.fontWeight.normal,
     color: colors.white,
   },
+  authorNameContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing[1.5],
+  },
   authorName: {
     fontSize: typography.fontSize.sm,
     fontWeight: typography.fontWeight.normal,
     color: colors.text.primary,
-    marginBottom: 2,
   },
   missionTypeBadge: {
     fontSize: typography.fontSize.xs,
     color: colors.text.tertiary,
+    backgroundColor: colors.primary[100],
+    paddingHorizontal: spacing[1.5],
+    paddingVertical: 2,
+    borderRadius: borderRadius.base,
   },
   date: {
     fontSize: typography.fontSize.xs,
@@ -601,7 +628,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing[1.5],
-    marginBottom: spacing[2],
+    marginBottom: spacing[3],
     paddingHorizontal: spacing[2],
     paddingVertical: spacing[1],
     backgroundColor: colors.primary[100],
@@ -667,10 +694,10 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.sm,
     color: colors.text.secondary,
     lineHeight: 18,
-    marginBottom: spacing[2],
+    marginBottom: spacing[3],
   },
   imageContainer: {
-    marginBottom: spacing[2],
+    marginBottom: spacing[3],
     gap: spacing[2],
   },
   image: {
@@ -684,9 +711,7 @@ const styles = StyleSheet.create({
   actions: {
     flexDirection: 'row',
     gap: spacing[4],
-    paddingTop: spacing[2],
-    borderTopWidth: 1,
-    borderTopColor: colors.border.light,
+    paddingTop: spacing[3],
   },
   voteButton: {
     flexDirection: 'row',
@@ -700,11 +725,12 @@ const styles = StyleSheet.create({
   voteButtonActive: {
     backgroundColor: colors.primary[100],
   },
-  voteButtonRejectActive: {
-    backgroundColor: colors.red[100],
-  },
   voteIcon: {
     fontSize: typography.fontSize.base,
+  },
+  voteIconImage: {
+    width: 20,
+    height: 20,
   },
   voteText: {
     fontSize: typography.fontSize.sm,
@@ -713,10 +739,6 @@ const styles = StyleSheet.create({
   },
   voteTextActive: {
     color: colors.primary[700],
-    fontWeight: typography.fontWeight.medium,
-  },
-  voteTextRejectActive: {
-    color: colors.red[700],
     fontWeight: typography.fontWeight.medium,
   },
   voteButtonDisabled: {
@@ -735,6 +757,10 @@ const styles = StyleSheet.create({
   },
   actionIcon: {
     fontSize: typography.fontSize.base,
+  },
+  actionIconImage: {
+    width: 20,
+    height: 20,
   },
   actionText: {
     fontSize: typography.fontSize.sm,

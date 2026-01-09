@@ -105,7 +105,7 @@ const PostCard: React.FC<PostCardProps> = ({
               {post.author_nickname.charAt(0).toUpperCase()}
             </Text>
           </View>
-          <View>
+          <View style={styles.authorNameContainer}>
             <Text style={styles.authorName}>{post.author_nickname}</Text>
             {post.category && (
               <View style={styles.categoryBadge}>
@@ -116,7 +116,7 @@ const PostCard: React.FC<PostCardProps> = ({
         </View>
         <View style={styles.headerRight}>
           <Text style={styles.date}>{formatTimeAgo(post.created_at, { longFormat: true })}</Text>
-          {(canEditDelete || onHide) && (
+          {!isOwnPost && onHide && (
             <TouchableOpacity
               style={styles.menuButton}
               onPress={(e) => {
@@ -126,7 +126,7 @@ const PostCard: React.FC<PostCardProps> = ({
               activeOpacity={0.7}
               accessibilityRole="button"
               accessibilityLabel="게시글 메뉴"
-              accessibilityHint="게시글 수정, 삭제 및 숨기기 옵션"
+              accessibilityHint="게시글 숨기기 옵션"
             >
               <Text style={styles.menuIcon}>⋮</Text>
             </TouchableOpacity>
@@ -134,18 +134,14 @@ const PostCard: React.FC<PostCardProps> = ({
         </View>
       </View>
 
-      {/* 수정/삭제 메뉴 모달 */}
-      <Modal
-        visible={showMenu}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setShowMenu(false)}
-      >
-        <TouchableOpacity
-          style={styles.modalOverlay}
-          activeOpacity={1}
-          onPress={() => setShowMenu(false)}
-        >
+      {/* 수정/삭제 메뉴 */}
+      {showMenu && (
+        <>
+          <TouchableOpacity
+            style={styles.menuOverlay}
+            activeOpacity={1}
+            onPress={() => setShowMenu(false)}
+          />
           <View style={styles.menuContainer}>
             {canEditDelete && (
               <>
@@ -170,8 +166,8 @@ const PostCard: React.FC<PostCardProps> = ({
               </>
             )}
           </View>
-        </TouchableOpacity>
-      </Modal>
+        </>
+      )}
 
       <View style={styles.content}>
         {post.mission_title && (
@@ -265,36 +261,6 @@ const PostCard: React.FC<PostCardProps> = ({
             />
             <Text style={styles.statText}>{post.comment_count}</Text>
           </View>
-
-          <TouchableOpacity
-            style={styles.statButton}
-            onPress={(e) => {
-              e.stopPropagation();
-              onScrap?.(post.post_id);
-            }}
-            activeOpacity={0.7}
-            accessibilityRole="button"
-            accessibilityLabel={post.is_scrapped 
-              ? `스크랩 취소${post.scrap_count > 0 ? `, ${post.scrap_count}개` : ''}` 
-              : `스크랩${post.scrap_count > 0 ? `, ${post.scrap_count}개` : ''}`}
-            accessibilityState={{ selected: post.is_scrapped }}
-          >
-            {post.is_scrapped ? (
-              <Text style={[styles.statIcon, styles.scrappedIcon]}>🔖</Text>
-            ) : (
-              <Image
-                source={require('../../assets/images/clip.png')}
-                style={styles.statIconImage}
-                resizeMode="contain"
-                accessibilityElementsHidden={true}
-              />
-            )}
-            {post.scrap_count > 0 && (
-              <Text style={[styles.statText, post.is_scrapped && styles.statTextActive]}>
-                {post.scrap_count}
-              </Text>
-            )}
-          </TouchableOpacity>
         </View>
       </View>
     </TouchableOpacity>
@@ -313,8 +279,8 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: spacing[2],
+    alignItems: 'center',
+    marginBottom: spacing[3],
   },
   authorInfo: {
     flexDirection: 'row',
@@ -341,11 +307,15 @@ const styles = StyleSheet.create({
     includeFontPadding: false,
     lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
   },
+  authorNameContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing[1.5],
+  },
   authorName: {
     fontSize: typography.fontSize.sm,
     fontWeight: typography.fontWeight.normal,
     color: colors.text.primary,
-    marginBottom: 2,
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,
       android: typography.fontFamily.regular,
@@ -358,7 +328,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing[2],
     paddingVertical: 2,
     borderRadius: borderRadius.base,
-    alignSelf: 'flex-start',
   },
   categoryText: {
     fontSize: typography.fontSize.xs,
@@ -374,7 +343,6 @@ const styles = StyleSheet.create({
   date: {
     fontSize: typography.fontSize.xs,
     color: colors.text.tertiary,
-    marginTop: spacing[1],
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,
       android: typography.fontFamily.regular,
@@ -402,37 +370,48 @@ const styles = StyleSheet.create({
     includeFontPadding: false,
     lineHeight: getOptimizedLineHeight(typography.fontSize.xl),
   },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
+  menuOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    zIndex: 1,
   },
   menuContainer: {
+    position: 'absolute',
+    top: 40,
+    right: spacing[2],
     backgroundColor: colors.background.primary,
     borderRadius: borderRadius.base,
-    minWidth: 150,
+    minWidth: 100,
     borderWidth: 1,
     borderColor: colors.border.light,
+    zIndex: 2,
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
   },
   menuItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: spacing[4],
-    paddingHorizontal: spacing[5],
-    gap: spacing[3],
+    paddingVertical: spacing[2],
+    paddingHorizontal: spacing[3],
+    gap: spacing[2],
   },
   menuItemIcon: {
-    fontSize: typography.fontSize.lg,
+    fontSize: typography.fontSize.base,
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,
       android: typography.fontFamily.regular,
     }),
     includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.lg),
+    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
   },
   menuItemText: {
-    fontSize: typography.fontSize.base,
+    fontSize: typography.fontSize.sm,
     color: colors.text.primary,
     fontWeight: typography.fontWeight.medium,
     fontFamily: Platform.select({
@@ -440,7 +419,7 @@ const styles = StyleSheet.create({
       android: typography.fontFamily.regular,
     }),
     includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
   },
   menuDivider: {
     height: 1,
@@ -450,13 +429,13 @@ const styles = StyleSheet.create({
     color: colors.red[500],
   },
   content: {
-    marginBottom: spacing[2],
+    marginBottom: spacing[3],
   },
   missionInfo: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing[1.5],
-    marginBottom: spacing[2],
+    marginBottom: spacing[3],
     paddingHorizontal: spacing[2],
     paddingVertical: spacing[1],
     backgroundColor: colors.primary[100],
@@ -553,7 +532,7 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.base,
     fontWeight: typography.fontWeight.normal,
     color: colors.text.primary,
-    marginBottom: spacing[1],
+    marginBottom: spacing[2],
     lineHeight: getOptimizedLineHeight(typography.fontSize.base),
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,
@@ -565,6 +544,7 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.sm,
     color: colors.text.secondary,
     lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
+    marginBottom: spacing[2],
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,
       android: typography.fontFamily.regular,
@@ -572,7 +552,7 @@ const styles = StyleSheet.create({
     includeFontPadding: false,
   },
   imageContainer: {
-    marginBottom: spacing[2],
+    marginBottom: spacing[3],
     borderRadius: borderRadius.base,
     overflow: 'hidden',
     borderWidth: 1,
@@ -587,7 +567,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: spacing[1.5],
-    marginBottom: spacing[2],
+    marginBottom: spacing[3],
   },
   tag: {
     backgroundColor: colors.gray[100],
@@ -609,13 +589,11 @@ const styles = StyleSheet.create({
     lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
   },
   footer: {
-    borderTopWidth: 1,
-    borderTopColor: colors.border.light,
-    paddingTop: spacing[2],
+    paddingTop: 0,
   },
   stats: {
     flexDirection: 'row',
-    gap: spacing[4],
+    gap: spacing[2],
   },
   statButton: {
     flexDirection: 'row',
