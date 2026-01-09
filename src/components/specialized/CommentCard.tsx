@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ViewStyle, Platform, Image } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ViewStyle, Platform, Image, Alert } from 'react-native';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
 import { getOptimizedLineHeight } from '../../utils/textStyles';
 import { CommunityComment } from '../../types';
@@ -10,6 +10,7 @@ interface CommentCardProps {
   onEdit?: (comment: CommunityComment) => void;
   onDelete?: (commentId: string) => void;
   onReply?: (comment: CommunityComment) => void;
+  onHide?: (commentId: string) => void;
   isAuthor?: boolean;
   isReply?: boolean;
   style?: ViewStyle;
@@ -196,6 +197,8 @@ const styles = StyleSheet.create({
     gap: spacing[2],
   },
   actionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingHorizontal: spacing[1],
     paddingVertical: 2,
   },
