@@ -175,3 +175,96 @@ export const copyMissionSet = async (
 ): Promise<ServiceResult<MissionSetDetail>> => {
   return apiClient.post<MissionSetDetail>(`/mission-sets/${id}/copy`);
 };
+
+// ============================================
+// 리뷰 관련 타입 정의
+// ============================================
+
+export interface MissionSetReview {
+  id: number;
+  missionSetId: number;
+  missionSetTitle: string;
+  user: {
+    id: number;
+    nickname: string;
+  };
+  rating: number;
+  content?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface MissionSetReviewListResponse {
+  content: MissionSetReview[];
+  totalElements: number;
+  totalPages: number;
+  number: number;
+  size: number;
+}
+
+export interface CreateReviewRequest {
+  rating: number;
+  content?: string;
+}
+
+export interface UpdateReviewRequest {
+  rating?: number;
+  content?: string;
+}
+
+// ============================================
+// 리뷰 API 함수
+// ============================================
+
+/**
+ * 리뷰 작성
+ * POST /api/mission-sets/:missionSetId/reviews
+ */
+export const createReview = async (
+  missionSetId: number,
+  data: CreateReviewRequest
+): Promise<ServiceResult<MissionSetReview>> => {
+  return apiClient.post<MissionSetReview>(`/mission-sets/${missionSetId}/reviews`, data);
+};
+
+/**
+ * 리뷰 목록 조회
+ * GET /api/mission-sets/:missionSetId/reviews
+ */
+export const getReviews = async (
+  missionSetId: number,
+  params?: { page?: number; size?: number }
+): Promise<ServiceResult<MissionSetReviewListResponse>> => {
+  return apiClient.get<MissionSetReviewListResponse>(`/mission-sets/${missionSetId}/reviews`, params);
+};
+
+/**
+ * 내 리뷰 조회
+ * GET /api/mission-sets/:missionSetId/reviews/my
+ */
+export const getMyReview = async (
+  missionSetId: number
+): Promise<ServiceResult<MissionSetReview | null>> => {
+  return apiClient.get<MissionSetReview | null>(`/mission-sets/${missionSetId}/reviews/my`);
+};
+
+/**
+ * 리뷰 수정
+ * PUT /api/mission-sets/reviews/:reviewId
+ */
+export const updateReview = async (
+  reviewId: number,
+  data: UpdateReviewRequest
+): Promise<ServiceResult<MissionSetReview>> => {
+  return apiClient.put<MissionSetReview>(`/mission-sets/reviews/${reviewId}`, data);
+};
+
+/**
+ * 리뷰 삭제
+ * DELETE /api/mission-sets/reviews/:reviewId
+ */
+export const deleteReview = async (
+  reviewId: number
+): Promise<ServiceResult<{ message: string }>> => {
+  return apiClient.delete<{ message: string }>(`/mission-sets/reviews/${reviewId}`);
+};

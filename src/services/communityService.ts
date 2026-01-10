@@ -117,13 +117,14 @@ export const deletePost = async (
 // 백엔드 API 응답 타입
 interface BackendPostResponse {
   id: number;
+  postType: 'GENERAL' | 'VERIFICATION';  // 게시글 타입
   userId: number;
   userNickname: string;
   userProfileImg?: string;
   missionTag?: {
     id: number;
     title: string;
-    type: 'SYSTEM' | 'CUSTOM';
+    type: 'OFFICIAL' | 'CUSTOM';
   };
   title: string;
   content: string;
@@ -134,6 +135,11 @@ interface BackendPostResponse {
   isLiked: boolean;
   createdAt: string;
   updatedAt?: string;
+  // 인증글 전용 필드
+  status?: 'PENDING' | 'APPROVED' | 'REJECTED';
+  approveCount?: number;
+  rejectCount?: number;
+  verifiedAt?: string;
 }
 
 interface BackendPageResponse {
@@ -146,27 +152,39 @@ interface BackendPageResponse {
 /**
  * 백엔드 응답을 프론트엔드 형식으로 변환
  */
-const transformBackendPost = (post: BackendPostResponse): CommunityPost => ({
-  id: post.id.toString(),
-  post_id: post.id.toString(),
-  mission_id: post.missionTag?.id?.toString() || '',
-  mission_title: post.missionTag?.title || '자유 게시글',
-  mission_emoji: '📝', // 기본 이모지
-  title: post.title || post.missionTag?.title || '제목 없음',
-  content: post.content,
-  author: post.userId?.toString() || '',
-  author_id: post.userId?.toString() || '',
-  author_nickname: post.userNickname || '익명',
-  created_at: post.createdAt,
-  updated_at: post.updatedAt,
-  like_count: post.likeCount || 0,
-  comment_count: post.commentCount || 0,
-  scrap_count: 0, // 백엔드에서 제공하지 않음 - 로컬 관리
-  images: post.imageUrls || [],
-  tags: post.missionTag ? [post.missionTag.title] : [],
-  category: post.missionTag?.type || 'GENERAL',
-  is_liked: post.isLiked || false,
-});
+const transformBackendPost = (post: BackendPostResponse): CommunityPost => {
+  // 인증 상태 결정
+  // - 인증글(VERIFICATION)이고 APPROVED 상태면 verified = true
+  // - 인증글이고 PENDING 상태면 verified = false
+  // - 일반글(GENERAL)이면 verified = undefined (인증 개념 없음)
+  let verified: boolean | undefined = undefined;
+  if (post.postType === 'VERIFICATION') {
+    verified = post.status === 'APPROVED';
+  }
+
+  return {
+    id: post.id.toString(),
+    post_id: post.id.toString(),
+    mission_id: post.missionTag?.id?.toString() || '',
+    mission_title: post.missionTag?.title || (post.postType === 'VERIFICATION' ? '미션 인증' : '자유 게시글'),
+    mission_emoji: post.postType === 'VERIFICATION' ? '✅' : '📝',
+    title: post.title || post.missionTag?.title || '제목 없음',
+    content: post.content,
+    author: post.userId?.toString() || '',
+    author_id: post.userId?.toString() || '',
+    author_nickname: post.userNickname || '익명',
+    created_at: post.createdAt,
+    updated_at: post.updatedAt,
+    like_count: post.likeCount || 0,
+    comment_count: post.commentCount || 0,
+    scrap_count: 0, // 백엔드에서 제공하지 않음 - 로컬 관리
+    images: post.imageUrls || [],
+    tags: post.missionTag ? [post.missionTag.title] : [],
+    category: post.postType === 'VERIFICATION' ? 'VERIFICATION' : (post.missionTag?.type || 'GENERAL'),
+    is_liked: post.isLiked || false,
+    verified,  // 인증 완료 여부
+  };
+};
 
 /**
  * 게시글 목록 조회 - 백엔드 API 사용

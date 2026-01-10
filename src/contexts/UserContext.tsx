@@ -136,6 +136,9 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     const result = await executeWithErrorHandling(async () => {
       const storageKeys = getStorageKeys(nickname);
 
+      // 먼저 tokenStorage에서 API 기반 사용자 정보 확인
+      const storedUserInfo = await getUserInfo();
+
       // 기존 사용자 확인
       const existingUserData: User | null = await AsyncStorage.getItem(storageKeys.USER)
         ? JSON.parse(await AsyncStorage.getItem(storageKeys.USER) || 'null')
@@ -143,8 +146,12 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
 
       if (existingUserData) {
         // 기존 사용자인 경우 - 데이터 초기화하지 않음
-        // role이 없고 닉네임이 "admin"이면 admin 역할 부여
-        if (!existingUserData.role && nickname.toLowerCase() === 'admin') {
+        // tokenStorage에서 role 정보 동기화
+        if (storedUserInfo?.role) {
+          const backendRole = storedUserInfo.role.toLowerCase();
+          existingUserData.role = backendRole === 'admin' ? 'admin' : 'user';
+          await AsyncStorage.setItem(storageKeys.USER, JSON.stringify(existingUserData));
+        } else if (!existingUserData.role && nickname.toLowerCase() === 'admin') {
           existingUserData.role = 'admin';
           await AsyncStorage.setItem(storageKeys.USER, JSON.stringify(existingUserData));
         }
@@ -154,11 +161,18 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         return true;
       }
 
-      // 신규 사용자인 경우 - 데이터 초기화
-      const userId = `user_${Date.now()}`;
+      // 신규 사용자인 경우 - tokenStorage 정보 기반으로 User 객체 생성
+      const userId = storedUserInfo?.id ? `user_${storedUserInfo.id}` : `user_${Date.now()}`;
       const createdAt = new Date().toISOString();
-      // 닉네임이 "admin"이면 admin 역할 부여
-      const role = nickname.toLowerCase() === 'admin' ? 'admin' : 'user';
+      // tokenStorage에서 role 정보 사용, 없으면 닉네임 기반 판단
+      let role: 'admin' | 'user' = 'user';
+      if (storedUserInfo?.role) {
+        const backendRole = storedUserInfo.role.toLowerCase();
+        role = backendRole === 'admin' ? 'admin' : 'user';
+      } else if (nickname.toLowerCase() === 'admin') {
+        role = 'admin';
+      }
+
       const newUser: User = {
         nickname,
         id: userId,
@@ -182,6 +196,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     // 에러가 발생해도 강제로 성공 처리
     if (!result.success) {
       const storageKeys = getStorageKeys(nickname);
+      const storedUserInfo = await getUserInfo();
 
       // 기존 사용자 확인
       let existingUserData: User | null = null;
@@ -195,22 +210,31 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
       }
 
       if (existingUserData) {
-        // 기존 사용자인 경우
-        if (!existingUserData.role && nickname.toLowerCase() === 'admin') {
+        // 기존 사용자인 경우 - tokenStorage에서 role 동기화
+        if (storedUserInfo?.role) {
+          const backendRole = storedUserInfo.role.toLowerCase();
+          existingUserData.role = backendRole === 'admin' ? 'admin' : 'user';
+        } else if (!existingUserData.role && nickname.toLowerCase() === 'admin') {
           existingUserData.role = 'admin';
-          try {
-            await AsyncStorage.setItem(storageKeys.USER, JSON.stringify(existingUserData));
-          } catch (storageError) {
-            logError('User 저장 실패', storageError as Error);
-          }
+        }
+        try {
+          await AsyncStorage.setItem(storageKeys.USER, JSON.stringify(existingUserData));
+        } catch (storageError) {
+          logError('User 저장 실패', storageError as Error);
         }
         setUser(existingUserData);
         setCurrentNickname(nickname);
       } else {
-        // 신규 사용자인 경우
-        const userId = `user_${Date.now()}`;
+        // 신규 사용자인 경우 - tokenStorage 정보 기반으로 생성
+        const userId = storedUserInfo?.id ? `user_${storedUserInfo.id}` : `user_${Date.now()}`;
         const createdAt = new Date().toISOString();
-        const role = nickname.toLowerCase() === 'admin' ? 'admin' : 'user';
+        let role: 'admin' | 'user' = 'user';
+        if (storedUserInfo?.role) {
+          const backendRole = storedUserInfo.role.toLowerCase();
+          role = backendRole === 'admin' ? 'admin' : 'user';
+        } else if (nickname.toLowerCase() === 'admin') {
+          role = 'admin';
+        }
         const newUser: User = {
           nickname,
           id: userId,
@@ -262,14 +286,40 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   // 사용자 정보 새로고침
   const refreshUser = useCallback(async () => {
     try {
-      if (currentNickname) {
-        const storageKeys = getStorageKeys(currentNickname);
-        const userData: User | null = await AsyncStorage.getItem(storageKeys.USER)
+      // tokenStorage에서 사용자 정보 확인
+      const storedUserInfo = await getUserInfo();
+
+      // 현재 닉네임이 있으면 해당 닉네임으로, 없으면 tokenStorage의 닉네임 사용
+      const nickname = currentNickname || storedUserInfo?.nickname;
+
+      if (nickname) {
+        const storageKeys = getStorageKeys(nickname);
+        let userData: User | null = await AsyncStorage.getItem(storageKeys.USER)
           ? JSON.parse(await AsyncStorage.getItem(storageKeys.USER) || 'null')
           : null;
 
+        // tokenStorage에 정보는 있지만 로컬 User 객체가 없는 경우 생성
+        if (!userData && storedUserInfo) {
+          const backendRole = storedUserInfo.role?.toLowerCase() || 'user';
+          const role = backendRole === 'admin' ? 'admin' : 'user';
+          userData = {
+            nickname: storedUserInfo.nickname,
+            id: `user_${storedUserInfo.id}`,
+            createdAt: new Date().toISOString(),
+            role
+          };
+          await AsyncStorage.setItem(storageKeys.USER, JSON.stringify(userData));
+        }
+
         if (userData) {
+          // tokenStorage의 role 정보로 동기화
+          if (storedUserInfo?.role) {
+            const backendRole = storedUserInfo.role.toLowerCase();
+            userData.role = backendRole === 'admin' ? 'admin' : 'user';
+            await AsyncStorage.setItem(storageKeys.USER, JSON.stringify(userData));
+          }
           setUser(userData);
+          setCurrentNickname(nickname);
         }
       }
     } catch (error) {

@@ -32,6 +32,7 @@ import {
   MissionReview,
 } from '../../api/missionApi';
 import { getMyBadges, Badge } from '../../api/badgeApi';
+import { getCurrentUser } from '../../services/authService';
 
 interface MissionDetailScreenProps {
   navigation: NavigationProp<RootStackParamList>;
@@ -66,6 +67,17 @@ const getMissionTypeLabel = (type: string): string => {
   }
 };
 
+// 별점 표시 컴포넌트
+const RatingStars: React.FC<{ rating: number }> = ({ rating }) => (
+  <View style={styles.ratingStarsDisplay}>
+    {[1, 2, 3, 4, 5].map((star) => (
+      <Text key={star} style={styles.ratingStarDisplay}>
+        {star <= rating ? '★' : '☆'}
+      </Text>
+    ))}
+  </View>
+);
+
 // 리뷰 카드 컴포넌트
 const ReviewCard: React.FC<{
   review: MissionReview;
@@ -87,7 +99,10 @@ const ReviewCard: React.FC<{
               </Text>
             </View>
           )}
-          <Text style={styles.reviewAuthor}>{review.userNickname}</Text>
+          <View>
+            <Text style={styles.reviewAuthor}>{review.userNickname}</Text>
+            {review.rating && <RatingStars rating={review.rating} />}
+          </View>
         </View>
         <Text style={styles.reviewDate}>{formatDateKorean(review.createdAt)}</Text>
       </View>
@@ -112,8 +127,11 @@ const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
 
   // 뱃지 확인 및 후기 작성 상태
   const [hasBadge, setHasBadge] = useState(false);
+  const [hasWrittenReview, setHasWrittenReview] = useState(false);
   const [reviewContent, setReviewContent] = useState('');
+  const [reviewRating, setReviewRating] = useState(5);
   const [submittingReview, setSubmittingReview] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState<number | null>(null);
 
   // 미션 데이터 로드
   const loadMission = useCallback(async () => {
@@ -138,7 +156,7 @@ const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
   }, [missionId]);
 
   // 리뷰 데이터 로드
-  const loadReviews = useCallback(async (page: number = 0) => {
+  const loadReviews = useCallback(async (page: number = 0, userId?: number | null) => {
     if (!missionId) return;
 
     try {
@@ -147,10 +165,16 @@ const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
 
       const result = await getMissionReviews(numericMissionId, { page, size: 10 });
       if (result.success && result.data) {
+        const reviewList = result.data.content;
         if (page === 0) {
-          setReviews(result.data.content);
+          setReviews(reviewList);
+          // 현재 사용자가 이미 후기를 작성했는지 확인
+          if (userId) {
+            const hasMyReview = reviewList.some(review => review.userId === userId);
+            setHasWrittenReview(hasMyReview);
+          }
         } else {
-          setReviews(prev => [...prev, ...result.data!.content]);
+          setReviews(prev => [...prev, ...reviewList]);
         }
         setCurrentPage(result.data.number);
         setTotalPages(result.data.totalPages);
@@ -198,13 +222,16 @@ const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
 
       const result = await createMissionReview(numericMissionId, {
         content: reviewContent.trim(),
+        rating: reviewRating,
       });
 
       if (result.success) {
         Alert.alert('성공', '후기가 등록되었습니다.');
         setReviewContent('');
+        setReviewRating(5);
+        setHasWrittenReview(true);
         // 리뷰 목록 새로고침
-        await loadReviews(0);
+        await loadReviews(0, currentUserId);
       } else {
         if (result.error?.includes('뱃지') || result.error?.includes('badge')) {
           Alert.alert(
@@ -220,21 +247,26 @@ const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
     } finally {
       setSubmittingReview(false);
     }
-  }, [missionId, reviewContent, loadReviews]);
+  }, [missionId, reviewContent, reviewRating, loadReviews, currentUserId]);
 
   // 초기 데이터 로드
   const loadData = useCallback(async () => {
     setLoading(true);
-    await Promise.all([loadMission(), loadReviews(0), checkBadgeOwnership()]);
+    // 현재 사용자 정보 가져오기
+    const user = await getCurrentUser();
+    const userId = user?.id || null;
+    setCurrentUserId(userId);
+
+    await Promise.all([loadMission(), loadReviews(0, userId), checkBadgeOwnership()]);
     setLoading(false);
   }, [loadMission, loadReviews, checkBadgeOwnership]);
 
   // 새로고침
   const handleRefresh = useCallback(async () => {
     setRefreshing(true);
-    await Promise.all([loadMission(), loadReviews(0)]);
+    await Promise.all([loadMission(), loadReviews(0, currentUserId), checkBadgeOwnership()]);
     setRefreshing(false);
-  }, [loadMission, loadReviews]);
+  }, [loadMission, loadReviews, checkBadgeOwnership, currentUserId]);
 
   // 더 많은 리뷰 로드
   const loadMoreReviews = useCallback(() => {
@@ -354,13 +386,55 @@ const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
           </View>
         </View>
 
-        {/* 후기 작성 섹션 (뱃지 소유자만) */}
-        {hasBadge && (
+        {/* 후기 작성 섹션 */}
+        {/* 뱃지가 없는 경우 안내 메시지 */}
+        {!hasBadge && (
+          <View style={styles.noBadgeSection}>
+            <Text style={styles.noBadgeIcon}>🏅</Text>
+            <Text style={styles.noBadgeTitle}>후기 작성 안내</Text>
+            <Text style={styles.noBadgeDescription}>
+              이 미션을 완료하고 유효한 뱃지를 획득하면{'\n'}후기를 작성할 수 있습니다.
+            </Text>
+          </View>
+        )}
+
+        {/* 뱃지가 있고 이미 후기를 작성한 경우 */}
+        {hasBadge && hasWrittenReview && (
+          <View style={styles.alreadyWrittenSection}>
+            <Text style={styles.alreadyWrittenIcon}>✅</Text>
+            <Text style={styles.alreadyWrittenText}>
+              이 뱃지로 후기를 이미 작성하셨습니다.{'\n'}
+              다시 미션을 완료하면 새 후기를 작성할 수 있어요!
+            </Text>
+          </View>
+        )}
+
+        {/* 뱃지가 있고 후기를 작성하지 않은 경우 */}
+        {hasBadge && !hasWrittenReview && (
           <View style={styles.writeReviewSection}>
             <Text style={styles.sectionTitle}>후기 작성</Text>
             <Text style={styles.writeReviewHint}>
               미션 뱃지를 보유하고 계시네요! 후기를 남겨주세요.
             </Text>
+            {/* 별점 선택 */}
+            <View style={styles.ratingContainer}>
+              <Text style={styles.ratingLabel}>별점</Text>
+              <View style={styles.starsContainer}>
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <TouchableOpacity
+                    key={star}
+                    onPress={() => setReviewRating(star)}
+                    activeOpacity={0.7}
+                    style={styles.starButton}
+                  >
+                    <Text style={styles.starText}>
+                      {star <= reviewRating ? '★' : '☆'}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+              <Text style={styles.ratingValue}>{reviewRating}점</Text>
+            </View>
             <TextInput
               style={styles.reviewInput}
               placeholder="후기를 작성해주세요..."
@@ -656,6 +730,14 @@ const styles = StyleSheet.create({
     includeFontPadding: false,
     lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
   },
+  ratingStarsDisplay: {
+    flexDirection: 'row',
+    marginTop: 2,
+  },
+  ratingStarDisplay: {
+    fontSize: 12,
+    color: colors.warning,
+  },
   reviewDate: {
     fontSize: typography.fontSize.xs,
     color: colors.text.tertiary,
@@ -693,6 +775,67 @@ const styles = StyleSheet.create({
     includeFontPadding: false,
     lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
   },
+  // 뱃지 없음 안내 섹션
+  noBadgeSection: {
+    backgroundColor: colors.gray[50],
+    borderRadius: borderRadius.lg,
+    padding: spacing[5],
+    marginBottom: spacing[4],
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: colors.gray[200],
+  },
+  noBadgeIcon: {
+    fontSize: 40,
+    marginBottom: spacing[2],
+  },
+  noBadgeTitle: {
+    fontSize: typography.fontSize.base,
+    fontWeight: typography.fontWeight.medium,
+    color: colors.text.primary,
+    marginBottom: spacing[2],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+  },
+  noBadgeDescription: {
+    fontSize: typography.fontSize.sm,
+    color: colors.text.secondary,
+    textAlign: 'center',
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm, 1.5),
+  },
+  // 이미 후기 작성 완료 섹션
+  alreadyWrittenSection: {
+    backgroundColor: colors.success + '10',
+    borderRadius: borderRadius.lg,
+    padding: spacing[4],
+    marginBottom: spacing[4],
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: colors.success + '30',
+  },
+  alreadyWrittenIcon: {
+    fontSize: 32,
+    marginBottom: spacing[2],
+  },
+  alreadyWrittenText: {
+    fontSize: typography.fontSize.sm,
+    color: colors.text.secondary,
+    textAlign: 'center',
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm, 1.5),
+  },
   // 후기 작성 섹션 스타일
   writeReviewSection: {
     backgroundColor: colors.background.primary,
@@ -712,6 +855,43 @@ const styles = StyleSheet.create({
     }),
     includeFontPadding: false,
     lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
+  },
+  // 별점 선택 스타일
+  ratingContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: spacing[3],
+    gap: spacing[2],
+  },
+  ratingLabel: {
+    fontSize: typography.fontSize.sm,
+    color: colors.text.secondary,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+  },
+  starsContainer: {
+    flexDirection: 'row',
+    gap: spacing[1],
+  },
+  starButton: {
+    padding: spacing[1],
+  },
+  starText: {
+    fontSize: 28,
+    color: colors.warning,
+  },
+  ratingValue: {
+    fontSize: typography.fontSize.sm,
+    color: colors.text.secondary,
+    marginLeft: spacing[2],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
   },
   reviewInput: {
     backgroundColor: colors.background.secondary,

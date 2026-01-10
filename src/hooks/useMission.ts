@@ -26,11 +26,10 @@ import {
   createCustomMission as createCustomMissionApi,
   updateCustomMission as updateCustomMissionApi,
   deleteCustomMission as deleteCustomMissionApi,
-  SystemMission,
-  CustomMission,
+  Mission as ApiMission,
   UserMission,
-  MissionType,
-  CreateCustomMissionRequest,
+  MissionCategory as ApiMissionCategory,
+  CreateMissionRequest,
 } from '../api/missionApi';
 import { uploadMissionVerifyPhoto } from '../api/fileApi';
 
@@ -52,44 +51,26 @@ const getMissionEmoji = (title: string): string => {
 };
 
 /**
- * 백엔드 시스템 미션을 로컬 미션 형식으로 변환
+ * 백엔드 미션을 로컬 미션 형식으로 변환 (공식/커스텀 통합)
  */
-const transformSystemMission = (systemMission: SystemMission, missionType: MissionType): Mission => {
-  return {
-    id: systemMission.id,
-    mission_id: systemMission.id.toString(),
-    title: systemMission.title,
-    description: systemMission.description,
-    emoji: getMissionEmoji(systemMission.title),
-    experience: systemMission.expReward || 10,
-    category_id: 'growth',
-    type: missionType,
-    difficulty: 'medium' as const,
-    completed: false,
-    created_at: new Date().toISOString(),
-    is_custom: false,
-    verification_type: systemMission.verificationType || 'COMMUNITY',
-  };
-};
+const transformApiMission = (apiMission: ApiMission): Mission => {
+  const isCustom = apiMission.missionType === 'CUSTOM';
 
-/**
- * 백엔드 커스텀 미션을 로컬 미션 형식으로 변환
- */
-const transformCustomMission = (customMission: CustomMission): Mission => {
   return {
-    id: customMission.id,
-    mission_id: `custom_${customMission.id}`,
-    title: customMission.title,
-    description: customMission.description,
-    emoji: getMissionEmoji(customMission.title),
-    experience: customMission.expReward || 10,
+    id: apiMission.id,
+    mission_id: isCustom ? `custom_${apiMission.id}` : apiMission.id.toString(),
+    title: apiMission.title,
+    description: apiMission.description,
+    emoji: getMissionEmoji(apiMission.title),
+    experience: apiMission.expReward || 10,
     category_id: 'growth',
-    type: 'DAILY' as MissionType, // 커스텀 미션은 기본 DAILY
+    category: apiMission.category || 'DAILY_LIFE',
+    missionType: apiMission.missionType,
     difficulty: 'medium' as const,
     completed: false,
-    created_at: customMission.createdAt,
-    is_custom: true,
-    verification_type: customMission.verificationType || 'COMMUNITY',
+    created_at: apiMission.createdAt || new Date().toISOString(),
+    is_custom: isCustom,
+    verification_type: apiMission.verificationType || 'COMMUNITY',
   };
 };
 
@@ -97,25 +78,26 @@ const transformCustomMission = (customMission: CustomMission): Mission => {
  * 백엔드 UserMission을 로컬 미션 형식으로 변환
  */
 const transformUserMission = (userMission: UserMission): Mission => {
+  // mission 필드 사용 (통합됨)
   const mission = userMission.mission || userMission.customMission;
   if (!mission) {
     throw new Error('UserMission has no mission data');
   }
 
   const isCustom = userMission.missionType === 'CUSTOM';
-  const missionType = userMission.mission?.type || 'DAILY';
 
   return {
     id: userMission.id,
     mission_id: isCustom ? `custom_${mission.id}` : mission.id.toString(),
-    user_mission_id: userMission.id, // 백엔드 UserMission ID 저장
+    user_mission_id: userMission.id,
     title: mission.title,
     description: mission.description,
     emoji: getMissionEmoji(mission.title),
     experience: mission.expReward || 10,
     category_id: 'growth',
-    type: missionType as MissionType,
-    status: userMission.status, // 백엔드 상태 그대로 저장 (ASSIGNED, PENDING, COMPLETED, EXPIRED)
+    category: mission.category || 'DAILY_LIFE',
+    missionType: userMission.missionType,
+    status: userMission.status,
     difficulty: 'medium' as const,
     completed: userMission.status === 'COMPLETED',
     completed_at: userMission.status === 'COMPLETED' ? userMission.verification?.verifiedAt : undefined,
@@ -145,21 +127,11 @@ export const useMission = (
 
       const allMissions: Mission[] = [];
 
-      // 1. 시스템 미션 불러오기 (DAILY, WEEKLY, MONTHLY)
-      const [dailyResult, weeklyResult, monthlyResult] = await Promise.all([
-        getSystemMissions({ type: 'DAILY', size: 50 }),
-        getSystemMissions({ type: 'WEEKLY', size: 50 }),
-        getSystemMissions({ type: 'MONTHLY', size: 50 }),
-      ]);
+      // 1. 공식 미션 불러오기
+      const officialMissionsResult = await getSystemMissions({ size: 100 });
 
-      if (dailyResult.success && dailyResult.data) {
-        allMissions.push(...dailyResult.data.content.map(m => transformSystemMission(m, 'DAILY')));
-      }
-      if (weeklyResult.success && weeklyResult.data) {
-        allMissions.push(...weeklyResult.data.content.map(m => transformSystemMission(m, 'WEEKLY')));
-      }
-      if (monthlyResult.success && monthlyResult.data) {
-        allMissions.push(...monthlyResult.data.content.map(m => transformSystemMission(m, 'MONTHLY')));
+      if (officialMissionsResult.success && officialMissionsResult.data) {
+        allMissions.push(...officialMissionsResult.data.content.map(transformApiMission));
       }
 
       // 2. 사용자 미션 목록 불러오기 (할당된 미션, 완료된 미션 포함)
@@ -194,7 +166,7 @@ export const useMission = (
       // 3. 커스텀 미션 불러오기
       const customMissionsResult = await getCustomMissions({ size: 50 });
       if (customMissionsResult.success && customMissionsResult.data) {
-        allMissions.push(...customMissionsResult.data.content.map(transformCustomMission));
+        allMissions.push(...customMissionsResult.data.content.map(transformApiMission));
       }
 
       // 중복 제거 및 정렬
@@ -417,22 +389,36 @@ export const useMission = (
     }
 
     try {
+      // difficulty를 DifficultyLevel로 변환
+      const difficultyMap: Record<string, 'EASY' | 'MEDIUM' | 'HARD'> = {
+        'easy': 'EASY',
+        'medium': 'MEDIUM',
+        'hard': 'HARD',
+      };
+      const difficultyLevel = missionData.difficulty ? difficultyMap[missionData.difficulty] : undefined;
+
       // 백엔드 API 형식으로 변환
-      const createRequest: CreateCustomMissionRequest = {
+      const createRequest: CreateMissionRequest = {
         title: missionData.title,
         description: missionData.description || '',
-        durationDays: missionData.durationDays || 7,
+        durationDays: missionData.durationDays || 1,
         isPublic: missionData.isPublic ?? true,
         verificationType: (missionData.verificationType as 'COMMUNITY' | 'GPS' | 'TIME') || 'COMMUNITY',
         expReward: missionData.experience || 10,
-        badgeDurationDays: missionData.badgeDurationDays || 7,
+        badgeDurationDays: missionData.badgeDurationDays || 3,
+        // 추가 필드
+        worryType: missionData.worryType as any,
+        category: missionData.category as ApiMissionCategory,  // 미션 카테고리 (DAILY_LIFE, GROWTH 등)
+        difficultyLevel: difficultyLevel,
+        challengeDays: missionData.challengeDays || 1,
+        deadlineDays: missionData.deadlineDays || 3,
       };
 
       const result = await createCustomMissionApi(createRequest);
 
       if (result.success && result.data) {
         // 새 미션을 로컬 형식으로 변환하여 추가
-        const newMission = transformCustomMission(result.data);
+        const newMission = transformApiMission(result.data);
         setMissions(prev => [...prev, newMission]);
         return { success: true, data: newMission };
       }
@@ -466,7 +452,7 @@ export const useMission = (
       const result = await updateCustomMissionApi(numericId, updateData);
 
       if (result.success && result.data) {
-        const updatedMission = transformCustomMission(result.data);
+        const updatedMission = transformApiMission(result.data);
         setMissions(prev =>
           prev.map(m =>
             m.mission_id === missionId ? updatedMission : m

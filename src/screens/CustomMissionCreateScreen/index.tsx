@@ -14,7 +14,7 @@ import {
 import { Button, Header, SectionTitle, FormCard } from '../../components/ui';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
 import { getOptimizedLineHeight } from '../../utils/textStyles';
-import { createCustomMission } from '../../services/missionService';
+import { useMission } from '../../hooks/useMission';
 import { useUser } from '../../contexts/UserContext';
 import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types/navigation';
@@ -42,15 +42,44 @@ const WORRY_TYPE_OPTIONS: { id: WorryType; name: string; emoji: string }[] = [
   { id: 'SELF_MANAGEMENT', name: '자기관리', emoji: '🧘' },
 ];
 
-const MISSION_TYPE_OPTIONS = [
-  { id: 'DAILY', name: '일간', emoji: '📅', days: 1 },
-  { id: 'WEEKLY', name: '주간', emoji: '📆', days: 7 },
-  { id: 'MONTHLY', name: '월간', emoji: '🗓️', days: 30 },
+// 미션 카테고리 옵션
+type MissionCategoryOption = 'DAILY_LIFE' | 'GROWTH' | 'EXERCISE' | 'STUDY' | 'HEALTH' | 'RELATIONSHIP';
+const MISSION_CATEGORY_OPTIONS: { id: MissionCategoryOption; name: string; emoji: string }[] = [
+  { id: 'DAILY_LIFE', name: '일상', emoji: '🏠' },
+  { id: 'GROWTH', name: '성장', emoji: '🌱' },
+  { id: 'EXERCISE', name: '운동', emoji: '🏃' },
+  { id: 'STUDY', name: '학습', emoji: '📖' },
+  { id: 'HEALTH', name: '건강', emoji: '💪' },
+  { id: 'RELATIONSHIP', name: '관계', emoji: '🤝' },
+];
+
+// 인증방식 옵션
+type VerificationTypeOption = 'COMMUNITY' | 'GPS' | 'TIME';
+const VERIFICATION_TYPE_OPTIONS: { id: VerificationTypeOption; name: string; emoji: string; description: string }[] = [
+  { id: 'COMMUNITY', name: '커뮤니티', emoji: '👥', description: '다른 사용자들의 인증' },
+  { id: 'GPS', name: 'GPS', emoji: '📍', description: '위치 기반 인증' },
+  { id: 'TIME', name: '시간', emoji: '⏱️', description: '시간 기반 인증' },
+];
+
+// 챌린지 기간 옵션
+const CHALLENGE_DAYS_OPTIONS = [
+  { id: 1, name: '1일', emoji: '1️⃣' },
+  { id: 7, name: '7일', emoji: '7️⃣' },
+  { id: 14, name: '14일', emoji: '🔢' },
+  { id: 30, name: '30일', emoji: '📅' },
+];
+
+// 완료 기한 옵션
+const DEADLINE_DAYS_OPTIONS = [
+  { id: 1, name: '1일', emoji: '⚡' },
+  { id: 3, name: '3일', emoji: '📆' },
+  { id: 7, name: '7일', emoji: '📅' },
 ];
 
 
 const CustomMissionCreateScreen: React.FC<CustomMissionCreateScreenProps> = ({ navigation, route }) => {
   const { currentNickname } = useUser();
+  const { createCustomMission } = useMission();
   const generatedMission = route?.params?.generatedMission;
 
   const [title, setTitle] = useState('');
@@ -60,7 +89,12 @@ const CustomMissionCreateScreen: React.FC<CustomMissionCreateScreenProps> = ({ n
   const [customExp, setCustomExp] = useState(50);
   const [loading, setLoading] = useState(false);
   const [worryType, setWorryType] = useState<WorryType | null>(null);
-  const [missionType, setMissionType] = useState<'DAILY' | 'WEEKLY' | 'MONTHLY'>('DAILY');
+  // 새로운 필드들
+  const [category, setCategory] = useState<MissionCategoryOption>('DAILY_LIFE');
+  const [verificationType, setVerificationType] = useState<VerificationTypeOption>('COMMUNITY');
+  const [isChallenge, setIsChallenge] = useState(false);  // 챌린지 미션 여부
+  const [challengeDays, setChallengeDays] = useState(7);
+  const [deadlineDays, setDeadlineDays] = useState(3);
 
   // AI 생성 미션이 있으면 초기값 설정
   useEffect(() => {
@@ -87,18 +121,27 @@ const CustomMissionCreateScreen: React.FC<CustomMissionCreateScreenProps> = ({ n
     try {
       setLoading(true);
 
+      // 백엔드 API 형식에 맞게 데이터 구성
       const missionData = {
         title: title.trim(),
         description: description.trim(),
         emoji: selectedEmoji,
         difficulty: difficulty as 'easy' | 'medium' | 'hard',
         experience: customExp,
-        category_id: 'growth' as const, // 기존 구조에 맞춰 growth로 설정
+        // 백엔드 필수 필드들
+        durationDays: isChallenge ? challengeDays : deadlineDays,  // 미션 기간
+        isPublic: true,  // 기본값: 공개
+        verificationType: verificationType,
+        badgeDurationDays: isChallenge ? challengeDays : 7,  // 뱃지 유효 기간
         worryType: worryType,
-        missionType: missionType,
+        // 새로운 필드들
+        category: category,  // 미션 카테고리
+        isChallenge: isChallenge,  // 챌린지 미션 여부
+        challengeDays: isChallenge ? challengeDays : undefined,  // 챌린지 미션일 때만
+        deadlineDays: isChallenge ? undefined : deadlineDays,    // 일반 미션일 때만
       };
 
-      const result = await createCustomMission(missionData as any, currentNickname || 'default');
+      const result = await createCustomMission(missionData);
 
       if (result.success) {
         Alert.alert(
@@ -199,21 +242,21 @@ const CustomMissionCreateScreen: React.FC<CustomMissionCreateScreenProps> = ({ n
         </FormCard>
 
         <FormCard>
-          <SectionTitle title="기간 선택" size="lg" marginBottom={spacing[3]} />
-          <View style={styles.missionTypeContainer}>
-            {MISSION_TYPE_OPTIONS.map((option) => (
+          <SectionTitle title="미션 카테고리" size="lg" marginBottom={spacing[3]} />
+          <View style={styles.categoryContainer}>
+            {MISSION_CATEGORY_OPTIONS.map((option) => (
               <TouchableOpacity
                 key={option.id}
                 style={[
-                  styles.missionTypeButton,
-                  missionType === option.id && styles.selectedMissionType
+                  styles.categoryButton,
+                  category === option.id && styles.selectedCategory
                 ]}
-                onPress={() => setMissionType(option.id as 'DAILY' | 'WEEKLY' | 'MONTHLY')}
+                onPress={() => setCategory(option.id)}
               >
-                <Text style={styles.missionTypeEmoji}>{option.emoji}</Text>
+                <Text style={styles.categoryEmoji}>{option.emoji}</Text>
                 <Text style={[
-                  styles.missionTypeText,
-                  missionType === option.id && styles.selectedMissionTypeText
+                  styles.categoryText,
+                  category === option.id && styles.selectedCategoryText
                 ]}>
                   {option.name}
                 </Text>
@@ -221,6 +264,121 @@ const CustomMissionCreateScreen: React.FC<CustomMissionCreateScreenProps> = ({ n
             ))}
           </View>
         </FormCard>
+
+        <FormCard>
+          <SectionTitle title="인증 방식" size="lg" marginBottom={spacing[3]} />
+          <View style={styles.verificationContainer}>
+            {VERIFICATION_TYPE_OPTIONS.map((option) => (
+              <TouchableOpacity
+                key={option.id}
+                style={[
+                  styles.verificationButton,
+                  verificationType === option.id && styles.selectedVerification
+                ]}
+                onPress={() => setVerificationType(option.id)}
+              >
+                <Text style={styles.verificationEmoji}>{option.emoji}</Text>
+                <Text style={[
+                  styles.verificationText,
+                  verificationType === option.id && styles.selectedVerificationText
+                ]}>
+                  {option.name}
+                </Text>
+                <Text style={styles.verificationDesc}>{option.description}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </FormCard>
+
+        <FormCard>
+          <SectionTitle title="미션 유형" size="lg" marginBottom={spacing[3]} />
+          <View style={styles.missionTypeToggle}>
+            <TouchableOpacity
+              style={[
+                styles.missionTypeButton,
+                !isChallenge && styles.selectedMissionType
+              ]}
+              onPress={() => setIsChallenge(false)}
+            >
+              <Text style={styles.missionTypeEmoji}>📋</Text>
+              <Text style={[
+                styles.missionTypeText,
+                !isChallenge && styles.selectedMissionTypeText
+              ]}>
+                일반 미션
+              </Text>
+              <Text style={styles.missionTypeDesc}>기한 내 1회 완료</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[
+                styles.missionTypeButton,
+                isChallenge && styles.selectedMissionType
+              ]}
+              onPress={() => setIsChallenge(true)}
+            >
+              <Text style={styles.missionTypeEmoji}>🔥</Text>
+              <Text style={[
+                styles.missionTypeText,
+                isChallenge && styles.selectedMissionTypeText
+              ]}>
+                챌린지 미션
+              </Text>
+              <Text style={styles.missionTypeDesc}>기간 동안 매일 인증</Text>
+            </TouchableOpacity>
+          </View>
+        </FormCard>
+
+        {isChallenge ? (
+          <FormCard>
+            <SectionTitle title="챌린지 기간" size="lg" marginBottom={spacing[3]} />
+            <View style={styles.daysContainer}>
+              {CHALLENGE_DAYS_OPTIONS.map((option) => (
+                <TouchableOpacity
+                  key={option.id}
+                  style={[
+                    styles.daysButton,
+                    challengeDays === option.id && styles.selectedDays
+                  ]}
+                  onPress={() => setChallengeDays(option.id)}
+                >
+                  <Text style={styles.daysEmoji}>{option.emoji}</Text>
+                  <Text style={[
+                    styles.daysText,
+                    challengeDays === option.id && styles.selectedDaysText
+                  ]}>
+                    {option.name}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+            <Text style={styles.optionalHint}>챌린지 기간 동안 매일 인증해야 합니다</Text>
+          </FormCard>
+        ) : (
+          <FormCard>
+            <SectionTitle title="완료 기한" size="lg" marginBottom={spacing[3]} />
+            <View style={styles.daysContainer}>
+              {DEADLINE_DAYS_OPTIONS.map((option) => (
+                <TouchableOpacity
+                  key={option.id}
+                  style={[
+                    styles.daysButton,
+                    deadlineDays === option.id && styles.selectedDays
+                  ]}
+                  onPress={() => setDeadlineDays(option.id)}
+                >
+                  <Text style={styles.daysEmoji}>{option.emoji}</Text>
+                  <Text style={[
+                    styles.daysText,
+                    deadlineDays === option.id && styles.selectedDaysText
+                  ]}>
+                    {option.name}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+            <Text style={styles.optionalHint}>미션 할당 후 이 기간 내에 완료해야 합니다</Text>
+          </FormCard>
+        )}
 
         <FormCard>
           <SectionTitle title="난이도 선택" size="lg" marginBottom={spacing[3]} />
@@ -356,11 +514,44 @@ const styles = StyleSheet.create({
     color: colors.text.tertiary,
     marginTop: spacing[2],
   },
-  missionTypeContainer: {
+  // 카테고리 스타일
+  categoryContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing[2],
+  },
+  categoryButton: {
+    paddingHorizontal: spacing[3],
+    paddingVertical: spacing[2],
+    borderRadius: borderRadius.full,
+    backgroundColor: colors.background.primary,
+    borderWidth: 1,
+    borderColor: colors.border.light,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing[1],
+  },
+  selectedCategory: {
+    backgroundColor: colors.primary[100],
+    borderColor: colors.primary[500],
+  },
+  categoryEmoji: {
+    fontSize: typography.fontSize.base,
+  },
+  categoryText: {
+    fontSize: typography.fontSize.sm,
+    color: colors.text.secondary,
+  },
+  selectedCategoryText: {
+    color: colors.primary[600],
+    fontWeight: typography.fontWeight.medium,
+  },
+  // 인증방식 스타일
+  verificationContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
-  missionTypeButton: {
+  verificationButton: {
     flex: 1,
     alignItems: 'center',
     padding: spacing[3],
@@ -370,20 +561,96 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border.light,
   },
+  selectedVerification: {
+    backgroundColor: colors.primary[100],
+    borderColor: colors.primary[500],
+  },
+  verificationEmoji: {
+    fontSize: typography.fontSize.xl,
+    marginBottom: spacing[1],
+  },
+  verificationText: {
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.medium,
+    color: colors.text.secondary,
+    marginBottom: spacing[1],
+  },
+  selectedVerificationText: {
+    color: colors.primary[600],
+    fontWeight: typography.fontWeight.medium,
+  },
+  verificationDesc: {
+    fontSize: typography.fontSize.xs,
+    color: colors.text.tertiary,
+    textAlign: 'center',
+  },
+  // 미션 유형 토글 스타일
+  missionTypeToggle: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  missionTypeButton: {
+    flex: 1,
+    alignItems: 'center',
+    padding: spacing[4],
+    marginHorizontal: spacing[1],
+    borderRadius: borderRadius.md,
+    backgroundColor: colors.background.primary,
+    borderWidth: 2,
+    borderColor: colors.border.light,
+  },
   selectedMissionType: {
     backgroundColor: colors.primary[100],
     borderColor: colors.primary[500],
   },
   missionTypeEmoji: {
+    fontSize: typography.fontSize['2xl'],
+    marginBottom: spacing[2],
+  },
+  missionTypeText: {
+    fontSize: typography.fontSize.base,
+    fontWeight: typography.fontWeight.medium,
+    color: colors.text.secondary,
+    marginBottom: spacing[1],
+  },
+  selectedMissionTypeText: {
+    color: colors.primary[600],
+    fontWeight: typography.fontWeight.bold,
+  },
+  missionTypeDesc: {
+    fontSize: typography.fontSize.xs,
+    color: colors.text.tertiary,
+    textAlign: 'center',
+  },
+  // 기간 선택 스타일
+  daysContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  daysButton: {
+    flex: 1,
+    alignItems: 'center',
+    padding: spacing[3],
+    marginHorizontal: spacing[1],
+    borderRadius: borderRadius.md,
+    backgroundColor: colors.background.primary,
+    borderWidth: 1,
+    borderColor: colors.border.light,
+  },
+  selectedDays: {
+    backgroundColor: colors.primary[100],
+    borderColor: colors.primary[500],
+  },
+  daysEmoji: {
     fontSize: typography.fontSize.xl,
     marginBottom: spacing[1],
   },
-  missionTypeText: {
+  daysText: {
     fontSize: typography.fontSize.sm,
     fontWeight: typography.fontWeight.medium,
     color: colors.text.secondary,
   },
-  selectedMissionTypeText: {
+  selectedDaysText: {
     color: colors.primary[600],
     fontWeight: typography.fontWeight.medium,
   },

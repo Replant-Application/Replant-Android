@@ -42,4 +42,8 @@ export const SCREEN_NAMES: Record<string, string> = {
   CHANGE_PASSWORD: 'ChangePassword',
   SOUND_SETTINGS: 'SoundSettings',
   MISSION_SET_LIST: 'MissionSetList',
+  MISSION_SET_CREATE: 'MissionSetCreate',
+  MISSION_SET_DETAIL: 'MissionSetDetail',
+  MY_MISSION_SETS: 'MyMissionSets',
+  MY_PROGRESS_DETAIL: 'MyProgressDetail',
 } as const;

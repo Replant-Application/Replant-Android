@@ -11,6 +11,78 @@ import { playButtonSound } from '../../utils/soundUtils';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
+
+// VolumeSlider 전용 스타일 (컴포넌트보다 먼저 정의)
+const sliderStyles = StyleSheet.create({
+  sliderContainer: {
+    width: "100%",
+    height: 40,
+    justifyContent: "center",
+    position: "relative",
+  },
+  sliderTrack: {
+    width: "100%",
+    height: 6,
+    backgroundColor: colors.gray[200],
+    borderRadius: 3,
+    position: "relative",
+  },
+  sliderFill: {
+    height: "100%",
+    backgroundColor: colors.primary[500],
+    borderRadius: 3,
+  },
+});
+
+// 볼륨 슬라이더 컴포넌트 (SoundSettingsScreen 위에 정의)
+const VolumeSlider: React.FC<{
+  value: number;
+  onValueChange: (value: number) => void;
+}> = ({ value, onValueChange }) => {
+  const sliderContainerRef = useRef<View>(null);
+  const isMountedRef = useRef(true);
+
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
+
+  const panResponder = useMemo(() => PanResponder.create({
+    onStartShouldSetPanResponder: () => true,
+    onMoveShouldSetPanResponder: () => true,
+    onPanResponderGrant: (evt) => {
+      if (sliderContainerRef.current) {
+        sliderContainerRef.current.measure((x, y, width, height, pageX, pageY) => {
+          if (!isMountedRef.current || width === 0) return;
+          const touchX = evt.nativeEvent.pageX - pageX;
+          const newValue = Math.max(0, Math.min(1, touchX / width));
+          onValueChange(newValue);
+        });
+      }
+    },
+    onPanResponderMove: (evt) => {
+      if (sliderContainerRef.current) {
+        sliderContainerRef.current.measure((x, y, width, height, pageX, pageY) => {
+          if (!isMountedRef.current || width === 0) return;
+          const touchX = evt.nativeEvent.pageX - pageX;
+          const newValue = Math.max(0, Math.min(1, touchX / width));
+          onValueChange(newValue);
+        });
+      }
+    },
+  }), [onValueChange]);
+
+  return (
+    <View style={sliderStyles.sliderContainer} ref={sliderContainerRef} {...panResponder.panHandlers}>
+      <View style={sliderStyles.sliderTrack}>
+        <View style={[sliderStyles.sliderFill, { width: `${value * 100}%` }]} />
+      </View>
+    </View>
+  );
+};
+
 const SoundSettingsScreen: React.FC<SoundSettingsScreenProps> = ({ navigation }) => {
   const [settings, setSettings] = useState<SoundSettings>(getDefaultSoundSettings());
   const [effectVolumeDragging, setEffectVolumeDragging] = useState(false);
@@ -265,49 +337,6 @@ const styles = StyleSheet.create({
   },
 });
 
-// 볼륨 슬라이더 컴포넌트 (thumb 없이)
-const VolumeSlider: React.FC<{
-  value: number;
-  onValueChange: (value: number) => void;
-}> = ({ value, onValueChange }) => {
-  const sliderContainerRef = useRef<View>(null);
-  const containerPadding = 0; // padding 제거
 
-  const panResponder = useMemo(() => PanResponder.create({
-    onStartShouldSetPanResponder: () => true,
-    onMoveShouldSetPanResponder: () => true,
-    onPanResponderGrant: (evt) => {
-      if (sliderContainerRef.current) {
-        sliderContainerRef.current.measure((x, y, width, height, pageX, pageY) => {
-          const touchX = evt.nativeEvent.pageX - pageX;
-          const newValue = Math.max(0, Math.min(1, touchX / width));
-          onValueChange(newValue);
-        });
-      }
-    },
-    onPanResponderMove: (evt) => {
-      if (sliderContainerRef.current) {
-        sliderContainerRef.current.measure((x, y, width, height, pageX, pageY) => {
-          const touchX = evt.nativeEvent.pageX - pageX;
-          const newValue = Math.max(0, Math.min(1, touchX / width));
-          onValueChange(newValue);
-        });
-      }
-    },
-  }), [onValueChange]);
-
-  return (
-    <View style={styles.sliderContainer} ref={sliderContainerRef} {...panResponder.panHandlers}>
-      <View style={styles.sliderTrack}>
-        <View 
-          style={[
-            styles.sliderFill, 
-            { width: `${value * 100}%` }
-          ]} 
-        />
-      </View>
-    </View>
-  );
-};
 
 export default SoundSettingsScreen;

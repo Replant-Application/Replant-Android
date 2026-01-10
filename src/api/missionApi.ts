@@ -11,34 +11,38 @@ import { ServiceResult } from '../types';
 // 타입 정의 (백엔드 enum과 동기화)
 // ============================================
 
-export type MissionType = 'DAILY' | 'WEEKLY' | 'MONTHLY';
+// 미션 타입: OFFICIAL(공식 미션), CUSTOM(커스텀 미션)
+export type MissionType = 'OFFICIAL' | 'CUSTOM';
+
+// 미션 카테고리: DAILY_LIFE(일상), GROWTH(성장), EXERCISE(운동), STUDY(학습), HEALTH(건강), RELATIONSHIP(관계)
+export type MissionCategory = 'DAILY_LIFE' | 'GROWTH' | 'EXERCISE' | 'STUDY' | 'HEALTH' | 'RELATIONSHIP';
+
 export type VerificationType = 'COMMUNITY' | 'GPS' | 'TIME';
-export type UserMissionStatus = 'ASSIGNED' | 'PENDING' | 'COMPLETED' | 'EXPIRED';
+export type UserMissionStatus = 'ASSIGNED' | 'PENDING' | 'COMPLETED' | 'EXPIRED' | 'FAILED';
 export type VerificationStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
 export type VoteType = 'APPROVE' | 'REJECT';
-
-/**
- * 미션 출처 타입 - 백엔드 MissionSource enum과 일치
- * @see Replant-BE/domain/mission/enums/MissionSource.java
- */
-export type MissionSource = 'OFFICIAL' | 'CUSTOM';
 
 // 사용자 맞춤 필터링 타입
 export type WorryType = 'RE_EMPLOYMENT' | 'JOB_PREPARATION' | 'ENTRANCE_EXAM' | 'ADVANCEMENT' | 'RETURN_TO_SCHOOL' | 'RELATIONSHIP' | 'SELF_MANAGEMENT';
 export type AgeRange = 'LATE_TEENS' | 'EARLY_TWENTIES' | 'MID_TWENTIES' | 'LATE_TWENTIES' | 'EARLY_THIRTIES' | 'MID_THIRTIES' | 'LATE_THIRTIES' | 'FORTIES_PLUS';
 export type GenderType = 'MALE' | 'FEMALE' | 'ALL';
-export type DifficultyLevel = 'LEVEL1' | 'LEVEL2' | 'LEVEL3';
+export type DifficultyLevel = 'EASY' | 'MEDIUM' | 'HARD';
 export type PlaceType = 'HOME' | 'OUTDOOR' | 'INDOOR';
 
 // ============================================
-// 시스템 미션 (Mission)
+// 통합 미션 (Mission) - 공식/커스텀 미션 통합
 // ============================================
 
-export interface SystemMission {
+/**
+ * 통합 미션 인터페이스
+ * missionType으로 OFFICIAL(공식 미션)과 CUSTOM(커스텀 미션) 구분
+ */
+export interface Mission {
   id: number;
   title: string;
   description: string;
-  type: MissionType;
+  missionType: MissionType;  // OFFICIAL | CUSTOM
+  category?: MissionCategory;  // 미션 카테고리
   verificationType: VerificationType;
   requiredMinutes?: number;
   gpsLatitude?: number;
@@ -46,30 +50,51 @@ export interface SystemMission {
   gpsRadiusMeters?: number;
   expReward: number;
   badgeDurationDays: number;
+
+  // 공통 필드
+  worryType?: WorryType;
+  difficultyLevel?: DifficultyLevel;
+
+  // 공식 미션 전용 필드 (OFFICIAL)
   reviewCount?: number;
   qnaCount?: number;
-  // 사용자 맞춤 필드
-  worryType?: WorryType;
   ageRanges?: AgeRange[];
   genderType?: GenderType;
   regionType?: string;
   placeType?: PlaceType;
-  difficultyLevel?: DifficultyLevel;
+
+  // 커스텀 미션 전용 필드 (CUSTOM)
+  creatorId?: number;
+  creatorNickname?: string;
+  isChallenge?: boolean;   // 챌린지 미션 여부
+  challengeDays?: number;  // 챌린지 기간 (일수) - 챌린지 미션일 때만
+  deadlineDays?: number;   // 완료 기한 (일수) - 일반 미션일 때만
+  durationDays?: number;
+  isPublic?: boolean;
+  participantCount?: number;
+  completionCount?: number;
+  createdAt?: string;
 }
 
-export interface SystemMissionListResponse {
-  content: SystemMission[];
+export interface MissionListResponse {
+  content: Mission[];
   totalElements: number;
   totalPages: number;
   number: number;
 }
+
+// 하위 호환성을 위한 별칭
+export type SystemMission = Mission;
+export type CustomMission = Mission;
+export type SystemMissionListResponse = MissionListResponse;
+export type CustomMissionListResponse = MissionListResponse;
 
 /**
  * 시스템 미션 목록 조회
  * GET /api/missions
  */
 export const getSystemMissions = async (params?: {
-  type?: MissionType;
+  category?: MissionCategory;
   verificationType?: VerificationType;
   page?: number;
   size?: number;
@@ -82,7 +107,7 @@ export const getSystemMissions = async (params?: {
  * GET /api/missions/filtered
  */
 export const getFilteredSystemMissions = async (params?: {
-  type?: MissionType;
+  category?: MissionCategory;
   verificationType?: VerificationType;
   worryType?: WorryType;
   ageRange?: AgeRange;
@@ -263,18 +288,13 @@ export const acceptMissionAnswer = async (
 };
 
 // ============================================
-// 커스텀 미션 (CustomMission)
+// 커스텀 미션 생성 요청
 // ============================================
 
-export interface CustomMission {
-  id: number;
+export interface CreateMissionRequest {
   title: string;
   description: string;
-  creatorId: number;
-  creatorNickname: string;
-  missionType?: MissionType;
-  durationDays: number;
-  isPublic: boolean;
+  category?: MissionCategory;
   verificationType: VerificationType;
   requiredMinutes?: number;
   gpsLatitude?: number;
@@ -282,31 +302,18 @@ export interface CustomMission {
   gpsRadiusMeters?: number;
   expReward: number;
   badgeDurationDays: number;
-  participantCount?: number;
-  completionCount?: number;
-  createdAt: string;
+  // 커스텀 미션 필드
+  durationDays?: number;
+  isPublic?: boolean;
+  worryType?: WorryType;
+  difficultyLevel?: DifficultyLevel;
+  isChallenge?: boolean;   // 챌린지 미션 여부
+  challengeDays?: number;  // 챌린지 기간 (일수) - 챌린지 미션일 때만
+  deadlineDays?: number;   // 완료 기한 (일수) - 일반 미션일 때만
 }
 
-export interface CustomMissionListResponse {
-  content: CustomMission[];
-  totalElements: number;
-  totalPages: number;
-  number: number;
-}
-
-export interface CreateCustomMissionRequest {
-  title: string;
-  description: string;
-  durationDays: number;
-  isPublic: boolean;
-  verificationType: VerificationType;
-  requiredMinutes?: number;
-  gpsLatitude?: number;
-  gpsLongitude?: number;
-  gpsRadiusMeters?: number;
-  expReward: number;
-  badgeDurationDays: number;
-}
+// 하위 호환성을 위한 별칭
+export type CreateCustomMissionRequest = CreateMissionRequest;
 
 /**
  * 커스텀 미션 목록 조회
@@ -316,8 +323,8 @@ export const getCustomMissions = async (params?: {
   verificationType?: VerificationType;
   page?: number;
   size?: number;
-}): Promise<ServiceResult<CustomMissionListResponse>> => {
-  return apiClient.get<CustomMissionListResponse>(API_CONFIG.endpoints.customMission.list, params);
+}): Promise<ServiceResult<MissionListResponse>> => {
+  return apiClient.get<MissionListResponse>(API_CONFIG.endpoints.customMission.list, params);
 };
 
 /**
@@ -326,9 +333,9 @@ export const getCustomMissions = async (params?: {
  */
 export const getCustomMission = async (
   customMissionId: number
-): Promise<ServiceResult<CustomMission>> => {
+): Promise<ServiceResult<Mission>> => {
   const endpoint = API_CONFIG.endpoints.customMission.detail.replace(':customMissionId', String(customMissionId));
-  return apiClient.get<CustomMission>(endpoint);
+  return apiClient.get<Mission>(endpoint);
 };
 
 /**
@@ -337,9 +344,9 @@ export const getCustomMission = async (
  * 인증 필요
  */
 export const createCustomMission = async (
-  data: CreateCustomMissionRequest
-): Promise<ServiceResult<CustomMission>> => {
-  return apiClient.post<CustomMission>(API_CONFIG.endpoints.customMission.create, data);
+  data: CreateMissionRequest
+): Promise<ServiceResult<Mission>> => {
+  return apiClient.post<Mission>(API_CONFIG.endpoints.customMission.create, data);
 };
 
 /**
@@ -349,10 +356,10 @@ export const createCustomMission = async (
  */
 export const updateCustomMission = async (
   customMissionId: number,
-  data: Partial<CreateCustomMissionRequest>
-): Promise<ServiceResult<CustomMission>> => {
+  data: Partial<CreateMissionRequest>
+): Promise<ServiceResult<Mission>> => {
   const endpoint = API_CONFIG.endpoints.customMission.update.replace(':customMissionId', String(customMissionId));
-  return apiClient.put<CustomMission>(endpoint, data);
+  return apiClient.put<Mission>(endpoint, data);
 };
 
 /**
@@ -373,9 +380,10 @@ export const deleteCustomMission = async (
 
 export interface UserMission {
   id: number;
-  missionType: MissionSource; // OFFICIAL | CUSTOM (구: SYSTEM | CUSTOM)
-  mission?: SystemMission;
-  customMission?: CustomMission;
+  missionType: MissionType; // OFFICIAL | CUSTOM
+  mission?: Mission;  // 통합된 미션 (공식/커스텀 모두)
+  // 하위 호환성을 위해 유지
+  customMission?: Mission;
   assignedAt: string;
   dueDate: string;
   status: UserMissionStatus;
@@ -496,12 +504,13 @@ export interface VerificationPost {
   userNickname: string;
   userProfileImg?: string;
   userMissionId: number;
-  missionType: MissionSource; // OFFICIAL | CUSTOM (구: SYSTEM | CUSTOM)
+  missionType: MissionType; // OFFICIAL | CUSTOM
   mission?: {
     id: number;
     title: string;
-    type?: MissionType;
+    category?: MissionCategory;
   };
+  // 하위 호환성을 위해 유지 (mission으로 통합됨)
   customMission?: {
     id: number;
     title: string;

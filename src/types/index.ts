@@ -31,13 +31,22 @@ export type MissionCategory = 'growth';
 export type Emotion = 'happy' | 'excited' | 'calm' | 'grateful' | 'sad' | 'angry' | 'anxious' | 'tired';
 
 // 미션 상태 타입
-export type MissionStatus = 'ASSIGNED' | 'PENDING' | 'COMPLETED' | 'EXPIRED';
+export type MissionStatus = 'ASSIGNED' | 'PENDING' | 'COMPLETED' | 'EXPIRED' | 'FAILED';
 
 /**
- * 미션 출처 타입 - 백엔드 MissionSource enum과 일치
- * @see Replant-BE/domain/mission/enums/MissionSource.java
+ * 미션 타입 - 공식/커스텀 구분
+ * @see Replant-BE/domain/mission/enums/MissionType.java
  */
-export type MissionSource = 'OFFICIAL' | 'CUSTOM';
+export type MissionType = 'OFFICIAL' | 'CUSTOM';
+
+/** @deprecated MissionType 사용 권장 */
+export type MissionSourceType = MissionType;
+
+/**
+ * 미션 카테고리 타입 - 백엔드 MissionCategory enum과 일치
+ * @see Replant-BE/domain/mission/enums/MissionCategory.java
+ */
+export type MissionCategoryType = 'DAILY_LIFE' | 'GROWTH' | 'EXERCISE' | 'STUDY' | 'HEALTH' | 'RELATIONSHIP';
 
 /**
  * 댓글 대상 타입 - 백엔드 CommentTargetType enum과 일치
@@ -45,7 +54,10 @@ export type MissionSource = 'OFFICIAL' | 'CUSTOM';
  */
 export type CommentTargetType = 'POST' | 'VERIFICATION' | 'QNA' | 'DIARY';
 
-// Mission 관련 타입
+/**
+ * 통합 미션 타입 - 공식/커스텀 미션을 하나의 인터페이스로 관리
+ * missionType 필드로 OFFICIAL/CUSTOM 구분
+ */
 export interface Mission {
   id: number;
   mission_id: string;
@@ -56,10 +68,10 @@ export interface Mission {
   difficulty: Difficulty;
   experience: number;
   category_id: MissionCategory;
-  type?: 'DAILY' | 'WEEKLY' | 'MONTHLY'; // 미션 타입
-  status?: MissionStatus; // 백엔드 UserMission 상태 (ASSIGNED, PENDING, COMPLETED, EXPIRED)
-  mission_source?: MissionSource; // 미션 출처 (OFFICIAL / CUSTOM)
-  is_custom?: boolean; // @deprecated - mission_source 사용 권장
+  category?: MissionCategoryType; // 미션 카테고리
+  status?: MissionStatus; // 백엔드 UserMission 상태 (ASSIGNED, PENDING, COMPLETED, EXPIRED, FAILED)
+  missionType?: MissionType; // 미션 타입 (OFFICIAL / CUSTOM)
+  is_custom?: boolean; // @deprecated - missionType 사용 권장
   created_by?: string;
   created_at?: string;
   updated_at?: string;
@@ -75,6 +87,14 @@ export interface Mission {
   verified_at?: string;
   related_post_id?: string; // 좋아요 인증인 경우 게시글 ID
   verification_requirements?: VerificationRequirements;
+  // 커스텀 미션 전용 필드 (missionType === 'CUSTOM'일 때 사용)
+  isChallenge?: boolean;    // 챌린지 미션 여부
+  challengeDays?: number;   // 챌린지 기간 (일수) - 챌린지 미션일 때만
+  deadlineDays?: number;    // 완료 기한 (일수) - 일반 미션일 때만
+  durationDays?: number;    // 미션 기간
+  isPublic?: boolean;       // 공개 여부
+  creatorId?: number;       // 생성자 ID
+  creatorNickname?: string; // 생성자 닉네임
 }
 
 // 템플릿 전용 타입 (사용자 인스턴스 필드 제외)
@@ -101,6 +121,14 @@ export interface MissionData {
   isPublic?: boolean;
   verificationType?: 'COMMUNITY' | 'GPS' | 'TIME';
   badgeDurationDays?: number;
+  // 미션 타입 및 카테고리
+  missionType?: MissionType;
+  category?: MissionCategoryType;  // 미션 카테고리
+  // 커스텀 미션 추가 필드
+  worryType?: string;
+  isChallenge?: boolean;    // 챌린지 미션 여부
+  challengeDays?: number;   // 챌린지 기간 (일수) - 챌린지 미션일 때만
+  deadlineDays?: number;    // 완료 기한 (일수) - 일반 미션일 때만
 }
 
 export interface MissionCompletionResult {

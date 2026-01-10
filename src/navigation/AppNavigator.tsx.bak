@@ -50,11 +50,6 @@ import FindPasswordScreen from '../screens/FindPasswordScreen';
 import ChangePasswordScreen from '../screens/ChangePasswordScreen';
 import SoundSettingsScreen from '../screens/SoundSettingsScreen';
 import MissionSetListScreen from '../screens/MissionSetListScreen';
-import MissionSetCreateScreen from '../screens/MissionSetCreateScreen';
-import MissionSetDetailScreen from '../screens/MissionSetDetailScreen';
-import MyMissionSetsScreen from '../screens/MyMissionSetsScreen';
-import MyProgressDetailScreen from '../screens/MyProgressDetailScreen';
-import RoutineSettingScreen from '../screens/RoutineSettingScreen';
 
 // 간단한 상태 기반 네비게이션 (React Navigation 없이)
 const AppNavigator = () => {
@@ -95,13 +90,6 @@ const AppNavigator = () => {
       checkOnboardingAndSetScreen();
     }
   }, [isLoading, isLoggedIn]);
-
-  // 로그인 상태 변경 감지 - 로그인 성공 시 HOME 화면으로 전환
-  useEffect(() => {
-    if (isLoggedIn && !isLoading && !isCheckingOnboarding) {
-      setCurrentScreen(SCREEN_NAMES.HOME);
-    }
-  }, [isLoggedIn, isLoading, isCheckingOnboarding]);
 
   // 토큰 만료 콜백 설정 - 바로 로그아웃 처리
   useEffect(() => {
@@ -190,10 +178,7 @@ const AppNavigator = () => {
         currentScreen === SCREEN_NAMES.COMMUNITY_POST_EDIT ||
         currentScreen === SCREEN_NAMES.MISSION_GROUP ||
         currentScreen === SCREEN_NAMES.VERIFICATION_POST_DETAIL ||
-        currentScreen === SCREEN_NAMES.MISSION_SET_LIST ||
-        currentScreen === SCREEN_NAMES.MISSION_SET_CREATE ||
-        currentScreen === SCREEN_NAMES.MISSION_SET_DETAIL ||
-        currentScreen === SCREEN_NAMES.MY_MISSION_SETS
+        currentScreen === SCREEN_NAMES.MISSION_SET_LIST
       ) {
         setCurrentScreen(SCREEN_NAMES.COMMUNITY);
       } else if (
@@ -201,7 +186,7 @@ const AppNavigator = () => {
         currentScreen === SCREEN_NAMES.CALENDAR
       ) {
         setCurrentScreen(SCREEN_NAMES.SETTINGS);
-      } else if (currentScreen === SCREEN_NAMES.NOTIFICATION || currentScreen === SCREEN_NAMES.MY_PROGRESS_DETAIL || currentScreen === 'RoutineSetting') {
+      } else if (currentScreen === SCREEN_NAMES.NOTIFICATION) {
         setCurrentScreen(SCREEN_NAMES.HOME);
       } else {
         setCurrentScreen(SCREEN_NAMES.HOME);
@@ -301,10 +286,7 @@ const AppNavigator = () => {
       currentScreen === SCREEN_NAMES.COMMUNITY_POST_EDIT ||
       currentScreen === SCREEN_NAMES.MISSION_GROUP ||
       currentScreen === SCREEN_NAMES.VERIFICATION_POST_DETAIL ||
-      currentScreen === SCREEN_NAMES.MISSION_SET_LIST ||
-        currentScreen === SCREEN_NAMES.MISSION_SET_CREATE ||
-        currentScreen === SCREEN_NAMES.MISSION_SET_DETAIL ||
-        currentScreen === SCREEN_NAMES.MY_MISSION_SETS
+      currentScreen === SCREEN_NAMES.MISSION_SET_LIST
     ) {
       setCurrentScreen(SCREEN_NAMES.COMMUNITY);
     } else if (
@@ -312,7 +294,7 @@ const AppNavigator = () => {
       currentScreen === SCREEN_NAMES.CALENDAR
     ) {
       setCurrentScreen(SCREEN_NAMES.SETTINGS);
-    } else if (currentScreen === SCREEN_NAMES.NOTIFICATION || currentScreen === SCREEN_NAMES.MY_PROGRESS_DETAIL || currentScreen === 'RoutineSetting') {
+    } else if (currentScreen === SCREEN_NAMES.NOTIFICATION) {
       setCurrentScreen(SCREEN_NAMES.HOME);
     } else {
       setCurrentScreen(SCREEN_NAMES.HOME);
@@ -400,16 +382,6 @@ const AppNavigator = () => {
         return <ChangePasswordScreen navigation={navigation} />;
       case SCREEN_NAMES.MISSION_SET_LIST:
         return <MissionSetListScreen navigation={navigation} />;
-      case SCREEN_NAMES.MISSION_SET_CREATE:
-        return <MissionSetCreateScreen navigation={navigation} />;
-      case SCREEN_NAMES.MISSION_SET_DETAIL:
-        return <MissionSetDetailScreen navigation={navigation} route={route} />;
-      case SCREEN_NAMES.MY_MISSION_SETS:
-        return <MyMissionSetsScreen navigation={navigation} />;
-      case SCREEN_NAMES.MY_PROGRESS_DETAIL:
-        return <MyProgressDetailScreen navigation={navigation} />;
-      case 'RoutineSetting':
-        return <RoutineSettingScreen navigation={navigation} />;
       default:
         return <HomeScreen navigation={navigation} />;
     }

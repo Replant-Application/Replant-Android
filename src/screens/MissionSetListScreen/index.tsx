@@ -24,6 +24,7 @@ import { colors, spacing, typography, borderRadius } from '../../utils/designTok
 import { getOptimizedLineHeight } from '../../utils/textStyles';
 import { getMissionSets, searchMissionSets, copyMissionSet, MissionSetSimple } from '../../api/missionSetApi';
 import { logError } from '../../utils/logger';
+import { SCREEN_NAMES } from '../../utils/constants';
 
 interface MissionSetListScreenProps {
   navigation: NavigationProp<RootStackParamList>;
@@ -172,7 +173,12 @@ const MissionSetListScreen: React.FC<MissionSetListScreenProps> = ({ navigation 
         ) : (
           <View style={styles.missionSetList}>
             {missionSets.map(missionSet => (
-              <View key={missionSet.id} style={styles.missionSetCard}>
+              <TouchableOpacity
+                key={missionSet.id}
+                style={styles.missionSetCard}
+                onPress={() => navigation.navigate(SCREEN_NAMES.MISSION_SET_DETAIL as any, { missionSetId: missionSet.id })}
+                activeOpacity={0.7}
+              >
                 <View style={styles.cardHeader}>
                   <Text style={styles.missionSetTitle} numberOfLines={1}>
                     {missionSet.title}
@@ -215,11 +221,20 @@ const MissionSetListScreen: React.FC<MissionSetListScreenProps> = ({ navigation 
                     {missionSet.addedCount}명이 담음
                   </Text>
                 </View>
-              </View>
+              </TouchableOpacity>
             ))}
           </View>
         )}
       </ScrollView>
+
+      {/* 플로팅 생성 버튼 */}
+      <TouchableOpacity
+        style={styles.floatingButton}
+        onPress={() => navigation.navigate(SCREEN_NAMES.MISSION_SET_CREATE as any)}
+        activeOpacity={0.8}
+      >
+        <Text style={styles.floatingButtonText}>+</Text>
+      </TouchableOpacity>
     </ImageBackground>
   );
 };
@@ -332,6 +347,28 @@ const styles = StyleSheet.create({
     }),
     includeFontPadding: false,
     lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
+  },
+  floatingButton: {
+    position: 'absolute',
+    right: spacing[4],
+    bottom: spacing[8],
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: colors.primary[500],
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+  },
+  floatingButtonText: {
+    fontSize: 28,
+    color: colors.white,
+    fontWeight: typography.fontWeight.bold,
+    marginTop: -2,
   },
   metaDot: {
     fontSize: typography.fontSize.xs,

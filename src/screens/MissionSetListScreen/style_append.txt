@@ -1,0 +1,23 @@
+
+  floatingButton: {
+    position: 'absolute',
+    right: spacing[4],
+    bottom: spacing[8],
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: colors.primary[500],
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+  },
+  floatingButtonText: {
+    fontSize: 28,
+    color: colors.white,
+    fontWeight: typography.fontWeight.bold,
+    marginTop: -2,
+  },

@@ -16,12 +16,14 @@ import { getVerifications, voteVerification, VerificationPost, VerificationStatu
 import { CommunityPost } from '../../types';
 import { logError } from '../../utils/logger';
 import { getHiddenPosts, hidePost } from '../../utils/hiddenContentStorage';
+import { getMissionSets, searchMissionSets, copyMissionSet, MissionSetSimple } from '../../api/missionSetApi';
+import { SCREEN_NAMES } from '../../utils/constants';
 
 interface CommunityScreenProps {
   navigation: NavigationProp<RootStackParamList>;
 }
 
-type CommunityTab = 'all' | 'mission-group';
+type CommunityTab = 'all' | 'todo-share';
 type VerificationFilter = 'all' | 'pending' | 'approved';
 
 const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation }) => {
@@ -40,6 +42,12 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation }) => {
 
   // 숨긴 게시글 ID 목록
   const [hiddenPostIds, setHiddenPostIds] = useState<string[]>([]);
+
+  // 투두 공유 (미션세트) 관련 상태
+  const [missionSets, setMissionSets] = useState<MissionSetSimple[]>([]);
+  const [missionSetLoading, setMissionSetLoading] = useState(false);
+  const [missionSetSearchQuery, setMissionSetSearchQuery] = useState('');
+  const [debouncedMissionSetSearchQuery, setDebouncedMissionSetSearchQuery] = useState('');
 
   // 검색어 디바운싱 (300ms)
   useEffect(() => {
@@ -61,6 +69,90 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation }) => {
     };
     loadHiddenPosts();
   }, []);
+
+  // 미션세트 검색어 디바운싱
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedMissionSetSearchQuery(missionSetSearchQuery);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [missionSetSearchQuery]);
+
+  // 미션세트 목록 로드
+  const loadMissionSets = useCallback(async () => {
+    try {
+      setMissionSetLoading(true);
+      let result;
+      if (debouncedMissionSetSearchQuery.trim()) {
+        result = await searchMissionSets({
+          keyword: debouncedMissionSetSearchQuery,
+          page: 0,
+          size: 50,
+        });
+      } else {
+        result = await getMissionSets({ page: 0, size: 50 });
+      }
+
+      if (result.success && result.data) {
+        setMissionSets(result.data.content);
+      }
+    } catch (error) {
+      logError('미션세트 로딩 실패', error as Error);
+    } finally {
+      setMissionSetLoading(false);
+    }
+  }, [debouncedMissionSetSearchQuery]);
+
+  // 탭 변경 시 미션세트 로드
+  useEffect(() => {
+    if (activeTab === 'todo-share') {
+      loadMissionSets();
+    }
+  }, [activeTab, loadMissionSets]);
+
+  // 미션세트 담기
+  const handleCopyMissionSet = async (missionSet: MissionSetSimple) => {
+    try {
+      const result = await copyMissionSet(missionSet.id);
+      if (result.success) {
+        Alert.alert(
+          '담기 완료',
+          `"${missionSet.title}" 미션세트를 내 목록에 추가했습니다.`
+        );
+        setMissionSets(prev =>
+          prev.map(ms =>
+            ms.id === missionSet.id
+              ? { ...ms, addedCount: ms.addedCount + 1 }
+              : ms
+          )
+        );
+      } else {
+        Alert.alert('담기 실패', result.error || '미션세트를 담는데 실패했습니다.');
+      }
+    } catch (error) {
+      logError('미션세트 담기 실패', error as Error);
+      Alert.alert('오류', '미션세트를 담는 중 문제가 발생했습니다.');
+    }
+  };
+
+  // 별점 렌더링
+  const renderStars = (rating: number) => {
+    const fullStars = Math.floor(rating);
+    const hasHalfStar = rating - fullStars >= 0.5;
+    const stars = [];
+
+    for (let i = 0; i < 5; i++) {
+      if (i < fullStars) {
+        stars.push('★');
+      } else if (i === fullStars && hasHalfStar) {
+        stars.push('☆');
+      } else {
+        stars.push('☆');
+      }
+    }
+
+    return stars.join('');
+  };
 
   // 인증글 로딩
   const loadVerificationPosts = useCallback(async () => {
@@ -127,11 +219,15 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation }) => {
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     try {
-      await Promise.all([loadPosts(), loadVerificationPosts()]);
+      if (activeTab === 'all') {
+        await Promise.all([loadPosts(), loadVerificationPosts()]);
+      } else {
+        await loadMissionSets();
+      }
     } finally {
       setRefreshing(false);
     }
-  }, [loadPosts, loadVerificationPosts]);
+  }, [loadPosts, loadVerificationPosts, loadMissionSets, activeTab]);
 
   const filterOptions = [
     { value: 'all', label: '최신순' },
@@ -278,13 +374,7 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation }) => {
             { key: 'todo-share', label: '투두 공유' },
           ]}
           activeTab={activeTab}
-          onTabChange={(key) => {
-            if (key === 'todo-share') {
-              navigation.navigate('MissionSetList' as any);
-            } else {
-              setActiveTab(key as CommunityTab);
-            }
-          }}
+          onTabChange={(key) => setActiveTab(key as CommunityTab)}
           style={styles.tabBar}
         />
       </View>
@@ -387,6 +477,105 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation }) => {
       </ScrollView>
       )}
 
+      {/* 투두 공유 탭 콘텐츠 */}
+      {activeTab === 'todo-share' && (
+        <>
+          {/* 검색창 */}
+          <View style={styles.missionSetSearchContainer}>
+            <Image
+              source={require('../../assets/images/search.png')}
+              style={styles.searchIcon}
+              resizeMode="contain"
+            />
+            <TextInput
+              style={styles.searchInput}
+              value={missionSetSearchQuery}
+              onChangeText={setMissionSetSearchQuery}
+              placeholder="투두리스트 검색..."
+              placeholderTextColor={colors.text.tertiary}
+            />
+          </View>
+
+          {missionSetLoading ? (
+            <Loading text="투두리스트를 불러오는 중..." />
+          ) : (
+            <ScrollView
+              style={styles.content}
+              refreshControl={
+                <RefreshControl
+                  refreshing={refreshing}
+                  onRefresh={onRefresh}
+                  colors={[colors.primary[500]]}
+                  tintColor={colors.primary[500]}
+                />
+              }
+            >
+              {missionSets.length === 0 ? (
+                <EmptyState
+                  iconImage={require('../../assets/images/notes.png')}
+                  title="공유된 투두리스트가 없어요"
+                  description="다른 사용자들의 투두리스트를 기다려주세요!"
+                />
+              ) : (
+                <View style={styles.missionSetList}>
+                  {missionSets.map(missionSet => (
+                    <TouchableOpacity
+                      key={missionSet.id}
+                      style={styles.missionSetCard}
+                      onPress={() => navigation.navigate(SCREEN_NAMES.MISSION_SET_DETAIL as any, { missionSetId: missionSet.id })}
+                      activeOpacity={0.7}
+                    >
+                      <View style={styles.missionSetCardHeader}>
+                        <Text style={styles.missionSetTitle} numberOfLines={1}>
+                          {missionSet.title}
+                        </Text>
+                        <TouchableOpacity
+                          style={styles.copyButton}
+                          onPress={() => handleCopyMissionSet(missionSet)}
+                          activeOpacity={0.7}
+                        >
+                          <Text style={styles.copyButtonText}>담기</Text>
+                        </TouchableOpacity>
+                      </View>
+
+                      {missionSet.description && (
+                        <Text style={styles.missionSetDescription} numberOfLines={2}>
+                          {missionSet.description}
+                        </Text>
+                      )}
+
+                      <View style={styles.missionSetMeta}>
+                        <Text style={styles.metaText}>
+                          by {missionSet.creatorNickname}
+                        </Text>
+                        <Text style={styles.metaDot}>·</Text>
+                        <Text style={styles.metaText}>
+                          {missionSet.missionCount}개 미션
+                        </Text>
+                      </View>
+
+                      <View style={styles.missionSetFooter}>
+                        <View style={styles.ratingContainer}>
+                          <Text style={styles.stars}>
+                            {renderStars(missionSet.averageRating)}
+                          </Text>
+                          <Text style={styles.ratingText}>
+                            {missionSet.averageRating.toFixed(1)}
+                          </Text>
+                        </View>
+                        <Text style={styles.addedCount}>
+                          {missionSet.addedCount}명이 담음
+                        </Text>
+                      </View>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              )}
+            </ScrollView>
+          )}
+        </>
+      )}
+
       {/* GENERAL 글쓰기 FAB */}
       {activeTab === 'all' && (
         <TouchableOpacity
@@ -403,6 +592,20 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation }) => {
             resizeMode="contain"
             accessibilityElementsHidden={true}
           />
+        </TouchableOpacity>
+      )}
+
+      {/* 투두리스트 생성 FAB */}
+      {activeTab === 'todo-share' && (
+        <TouchableOpacity
+          style={styles.fab}
+          onPress={() => navigation.navigate(SCREEN_NAMES.MISSION_SET_CREATE as any)}
+          activeOpacity={0.8}
+          accessibilityRole="button"
+          accessibilityLabel="투두리스트 생성"
+          accessibilityHint="새 투두리스트를 생성합니다"
+        >
+          <Text style={styles.fabText}>+</Text>
         </TouchableOpacity>
       )}
 
@@ -807,6 +1010,151 @@ const styles = StyleSheet.create({
     width: 24,
     height: 24,
     tintColor: colors.white,
+  },
+  fabText: {
+    fontSize: 28,
+    color: colors.white,
+    fontWeight: typography.fontWeight.bold,
+    marginTop: -2,
+  },
+  // 투두 공유 관련 스타일
+  missionSetSearchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.background.secondary,
+    borderRadius: borderRadius.lg,
+    paddingHorizontal: spacing[3],
+    paddingVertical: spacing[3],
+    marginHorizontal: spacing[4],
+    marginVertical: spacing[3],
+    borderWidth: 1,
+    borderColor: '#D4A574',
+  },
+  missionSetList: {
+    gap: spacing[3],
+    paddingBottom: spacing[16],
+  },
+  missionSetCard: {
+    backgroundColor: colors.background.primary,
+    borderRadius: borderRadius.lg,
+    padding: spacing[4],
+    borderWidth: 1,
+    borderColor: colors.border.light,
+  },
+  missionSetCardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: spacing[2],
+  },
+  missionSetTitle: {
+    flex: 1,
+    fontSize: typography.fontSize.lg,
+    fontWeight: typography.fontWeight.medium,
+    color: colors.text.primary,
+    marginRight: spacing[2],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.lg),
+  },
+  copyButton: {
+    backgroundColor: colors.primary[500],
+    paddingHorizontal: spacing[3],
+    paddingVertical: spacing[1.5],
+    borderRadius: borderRadius.base,
+  },
+  copyButtonText: {
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.medium,
+    color: colors.white,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
+  },
+  missionSetDescription: {
+    fontSize: typography.fontSize.sm,
+    color: colors.text.secondary,
+    marginBottom: spacing[3],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
+  },
+  missionSetMeta: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: spacing[2],
+  },
+  metaText: {
+    fontSize: typography.fontSize.xs,
+    color: colors.text.tertiary,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
+  },
+  metaDot: {
+    fontSize: typography.fontSize.xs,
+    color: colors.text.tertiary,
+    marginHorizontal: spacing[1],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+  },
+  missionSetFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: spacing[2],
+    paddingTop: spacing[2],
+    borderTopWidth: 1,
+    borderTopColor: colors.border.light,
+  },
+  ratingContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing[1],
+  },
+  stars: {
+    fontSize: typography.fontSize.sm,
+    color: colors.warning,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+  },
+  ratingText: {
+    fontSize: typography.fontSize.xs,
+    color: colors.text.secondary,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
+  },
+  addedCount: {
+    fontSize: typography.fontSize.xs,
+    color: colors.text.tertiary,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
   },
 });
 

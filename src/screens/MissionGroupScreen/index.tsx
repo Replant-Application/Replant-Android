@@ -29,9 +29,9 @@ import {
   getCustomMissions,
   getMissionReviews,
   createMissionReview,
-  SystemMission,
-  CustomMission,
+  Mission,
   MissionReview,
+  MissionCategory,
 } from '../../api/missionApi';
 import { useUser } from '../../contexts/UserContext';
 
@@ -46,7 +46,7 @@ interface UnifiedMission {
   id: number;
   title: string;
   description: string;
-  type?: string;
+  category?: MissionCategory;  // 미션 카테고리 (DAILY_LIFE, GROWTH 등)
   verificationType: string;
   requiredMinutes?: number;
   expReward: number;
@@ -93,12 +93,12 @@ const MissionGroupScreen: React.FC<MissionGroupScreenProps> = ({ navigation }) =
             id: m.id,
             title: m.title,
             description: m.description,
-            type: m.type,
+            category: m.category,
             verificationType: m.verificationType,
             requiredMinutes: m.requiredMinutes,
             expReward: m.expReward,
             badgeDurationDays: m.badgeDurationDays,
-            participantCount: (m as any).participantCount,
+            participantCount: m.participantCount,
             isCustom: false,
           }));
 
@@ -119,7 +119,7 @@ const MissionGroupScreen: React.FC<MissionGroupScreenProps> = ({ navigation }) =
             id: m.id,
             title: m.title,
             description: m.description,
-            type: m.missionType,
+            category: m.category,
             verificationType: m.verificationType,
             requiredMinutes: m.requiredMinutes,
             expReward: m.expReward,
@@ -265,15 +265,21 @@ const MissionGroupScreen: React.FC<MissionGroupScreenProps> = ({ navigation }) =
     }
   };
 
-  // 미션 타입 한글 변환
-  const getMissionTypeLabel = (type?: string) => {
-    switch (type) {
-      case 'DAILY':
-        return '일일';
-      case 'WEEKLY':
-        return '주간';
-      case 'MONTHLY':
-        return '월간';
+  // 미션 카테고리 한글 변환
+  const getMissionCategoryLabel = (category?: MissionCategory) => {
+    switch (category) {
+      case 'DAILY_LIFE':
+        return '일상';
+      case 'GROWTH':
+        return '성장';
+      case 'EXERCISE':
+        return '운동';
+      case 'STUDY':
+        return '학습';
+      case 'HEALTH':
+        return '건강';
+      case 'RELATIONSHIP':
+        return '관계';
       default:
         return '';
     }
@@ -375,11 +381,13 @@ const MissionGroupScreen: React.FC<MissionGroupScreenProps> = ({ navigation }) =
                             resizeMode="contain"
                           />
                           <Text style={styles.missionTitle}>{mission.title}</Text>
-                          <View style={styles.missionTypeBadge}>
-                            <Text style={styles.missionTypeText}>
-                              {getMissionTypeLabel(mission.type)}
-                            </Text>
-                          </View>
+                          {mission.category && (
+                            <View style={styles.missionTypeBadge}>
+                              <Text style={styles.missionTypeText}>
+                                {getMissionCategoryLabel(mission.category)}
+                              </Text>
+                            </View>
+                          )}
                         </View>
                         <Text style={styles.missionDescription} numberOfLines={2}>
                           {mission.description}

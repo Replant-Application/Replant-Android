@@ -19,10 +19,10 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   // 배경 이미지 상태 및 애니메이션
   const [backgroundType, setBackgroundType] = useState<'day' | 'night'>(getBackgroundImage());
   const fadeAnim = useRef(new Animated.Value(1)).current;
-  
+
   // 필터 상태
   const [filter, setFilter] = useState<'all' | 'completed' | 'inProgress'>('all');
-  
+
   // 말풍선 표시 상태
   const [showSpeechBubble, setShowSpeechBubble] = useState(false);
   const speechBubbleAnim = useRef(new Animated.Value(0)).current;
@@ -346,12 +346,30 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
           nestedScrollEnabled={true}
           bounces={true}
         >
+          {/* 나의 루틴 설정하기 탭 */}
+          <TouchableOpacity
+            style={styles.routineSettingTab}
+            onPress={() => navigation.navigate('RoutineSetting' as any)}
+            activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel="나의 루틴 설정하기"
+          >
+            <View style={styles.routineSettingLeft}>
+              <Text style={styles.routineSettingIcon}>⚙️</Text>
+              <View>
+                <Text style={styles.routineSettingTitle}>나의 루틴 설정하기</Text>
+                <Text style={styles.routineSettingSubtitle}>기상시간, 다짐, 매일 갈 장소 등</Text>
+              </View>
+            </View>
+            <Text style={styles.routineSettingArrow}>›</Text>
+          </TouchableOpacity>
+
           {/* 메인 제목 */}
           <View style={styles.mainHeader}>
             <Text style={styles.mainTitle}>나의 목표</Text>
             <View style={styles.simpleStats}>
               <Text style={styles.simpleStatsText}>
-                진행 중 <Text style={styles.simpleStatsNumber}>{stats.inProgressMissions}</Text> · 
+                진행 중 <Text style={styles.simpleStatsNumber}>{stats.inProgressMissions}</Text> ·
                 완료 <Text style={styles.simpleStatsNumber}>{stats.completedMissions}</Text>
               </Text>
             </View>
@@ -403,8 +421,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
               <EmptyState
                 icon=""
                 title={
-                  filter === 'completed' 
-                    ? '완료된 목표가 없습니다' 
+                  filter === 'completed'
+                    ? '완료된 목표가 없습니다'
                     : filter === 'inProgress'
                     ? '진행 중인 목표가 없습니다'
                     : '목표가 없습니다'
@@ -678,6 +696,65 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.lg,
     color: colors.gray[400],
     fontWeight: typography.fontWeight.normal,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+  },
+  routineSettingTab: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: '#E8F5E9', // 연한 초록색 배경
+    borderRadius: borderRadius.lg,
+    paddingVertical: spacing[3],
+    paddingHorizontal: spacing[4],
+    marginBottom: spacing[4],
+    borderWidth: 2,
+    borderColor: '#81C784', // 초록색 테두리
+    shadowColor: '#4CAF50',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 2,
+  },
+  routineSettingLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  routineSettingIcon: {
+    fontSize: 24,
+    marginRight: spacing[3],
+  },
+  routineSettingTitle: {
+    fontSize: typography.fontSize.base,
+    fontWeight: typography.fontWeight.semibold,
+    color: '#2E7D32', // 진한 초록색
+    marginBottom: spacing[0.5],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+  },
+  routineSettingSubtitle: {
+    fontSize: typography.fontSize.xs,
+    color: '#558B2F', // 중간 초록색
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+  },
+  routineSettingArrow: {
+    fontSize: typography.fontSize.xl,
+    color: '#81C784',
+    fontWeight: typography.fontWeight.bold,
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,
       android: typography.fontFamily.regular,

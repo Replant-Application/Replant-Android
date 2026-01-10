@@ -289,7 +289,12 @@ export class ApiClient {
         if (typeof data === 'string') {
           errorMessage = data;
         } else if (typeof data === 'object') {
-          errorMessage = data?.message || data?.error || data?.msg || data?.detail || errorMessage;
+          // error가 객체인 경우 (백엔드 ApiResponse 에러 구조: { error: { code, message } })
+          const errorDetail = data?.error;
+          const errorMsg = typeof errorDetail === 'object' && errorDetail !== null
+            ? errorDetail.message
+            : errorDetail;
+          errorMessage = data?.message || errorMsg || data?.msg || data?.detail || errorMessage;
         }
       }
       
@@ -475,9 +480,14 @@ export class ApiClient {
       clearTimeout(timeoutId);
 
       // 에러 응답
+      // error가 객체인 경우 (백엔드 ApiResponse 에러 구조: { error: { code, message } })
+      const errorDetail = data?.error;
+      const errorMsg = typeof errorDetail === 'object' && errorDetail !== null
+        ? errorDetail.message
+        : errorDetail;
       return {
         success: false,
-        error: data?.message || data?.error || `HTTP ${response.status}: ${response.statusText}`,
+        error: data?.message || errorMsg || `HTTP ${response.status}: ${response.statusText}`,
       };
     } catch (error) {
       // 타임아웃 클리어
