@@ -1161,6 +1161,7 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.lg,
     backgroundColor: 'rgba(255, 255, 255, 0.9)',
     alignItems: 'center',
+    justifyContent: 'center',
   },
   writeButtonText: {
     fontSize: typography.fontSize.base,
@@ -1171,6 +1172,8 @@ const styles = StyleSheet.create({
       android: typography.fontFamily.regular,
     }),
     includeFontPadding: false,
+    textAlign: 'center',
+    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
   },
   viewButton: {
     flex: 1,

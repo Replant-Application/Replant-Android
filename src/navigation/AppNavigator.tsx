@@ -9,8 +9,10 @@ import { apiClient } from '../api/client';
 import { logout } from '../services/authService';
 import { backgroundMusicService } from '../services/backgroundMusicService';
 import { playButtonSound } from '../utils/soundUtils';
+import { isOnboardingCompleted } from '../services/onboardingService';
 
 // 화면 컴포넌트들
+import OnboardingScreen from '../screens/OnboardingScreen';
 import StartScreen from '../screens/StartScreen';
 import SignUpScreen from '../screens/SignUpScreen';
 import LoginScreen from '../screens/LoginScreen';
@@ -52,9 +54,10 @@ import MissionSetListScreen from '../screens/MissionSetListScreen';
 // 간단한 상태 기반 네비게이션 (React Navigation 없이)
 const AppNavigator = () => {
   const { isLoggedIn, isLoading, logout: userLogout } = useUser();
-  const [currentScreen, setCurrentScreen] = useState(SCREEN_NAMES.START);
+  const [currentScreen, setCurrentScreen] = useState<string | null>(null);
   const [navigationParams, setNavigationParams] = useState({});
   const [backPressedOnce, setBackPressedOnce] = useState(false);
+  const [isCheckingOnboarding, setIsCheckingOnboarding] = useState(true);
   const fadeAnim = useRef(new Animated.Value(1)).current;
   const slideAnim = useRef(new Animated.Value(0)).current;
 
@@ -68,6 +71,25 @@ const AppNavigator = () => {
       SCREEN_NAMES.SETTINGS,
     ].includes(screen);
   }, []);
+
+  // 온보딩 체크 및 초기 화면 결정
+  useEffect(() => {
+    const checkOnboardingAndSetScreen = async () => {
+      if (!isLoggedIn) {
+        const completed = await isOnboardingCompleted();
+        if (!completed) {
+          setCurrentScreen(SCREEN_NAMES.ONBOARDING);
+        } else {
+          setCurrentScreen(SCREEN_NAMES.START);
+        }
+      }
+      setIsCheckingOnboarding(false);
+    };
+
+    if (!isLoading) {
+      checkOnboardingAndSetScreen();
+    }
+  }, [isLoading, isLoggedIn]);
 
   // 토큰 만료 콜백 설정 - 바로 로그아웃 처리
   useEffect(() => {
@@ -176,7 +198,7 @@ const AppNavigator = () => {
     return () => backHandler.remove();
   }, [currentScreen, isLoggedIn, backPressedOnce, isMainTabScreen]);
 
-  if (isLoading) {
+  if (isLoading || isCheckingOnboarding || currentScreen === null) {
     return (
       <View style={styles.loadingContainer}>
         <Image
@@ -206,6 +228,8 @@ const AppNavigator = () => {
       } as any;
 
       switch (currentScreen) {
+        case SCREEN_NAMES.ONBOARDING:
+          return <OnboardingScreen onNavigate={setCurrentScreen} />;
         case SCREEN_NAMES.START:
           return <StartScreen onNavigate={setCurrentScreen} />;
         case SCREEN_NAMES.SIGNUP:
@@ -446,7 +470,7 @@ const AppNavigator = () => {
           onPress={() => setCurrentScreen(SCREEN_NAMES.DIARY)}
           activeOpacity={0.7}
           accessibilityRole="tab"
-          accessibilityLabel="감성일기"
+          accessibilityLabel="감정일기"
           accessibilityState={{ selected: currentScreen === SCREEN_NAMES.DIARY }}
         >
           <Image
@@ -461,7 +485,7 @@ const AppNavigator = () => {
           <Text style={[
             styles.tabLabel,
             currentScreen === SCREEN_NAMES.DIARY && styles.tabLabelActive
-          ]}>감성일기</Text>
+          ]}>감정일기</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
