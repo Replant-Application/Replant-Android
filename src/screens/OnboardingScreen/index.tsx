@@ -38,8 +38,8 @@ const ONBOARDING_SLIDES: OnboardingSlide[] = [
   {
     id: 2,
     image: require('../../assets/images/onboarding_mission.png'),
-    title: '작은 미션으로 시작하는 변화',
-    description: '매일 작은 미션을 완료하며 성장해요',
+    title: '간단한 미션으로 시작하는 변화',
+    description: '매일 간단한 미션을 완료하며 성장해요',
   },
   {
     id: 3,
@@ -267,10 +267,10 @@ const styles = StyleSheet.create({
     width: SCREEN_WIDTH * 0.62, // 너비를 62%로 살짝 줄임
     height: (SCREEN_WIDTH * 0.62) * (2400 / 1080), // 비율 유지하면서 전체 크기 조정
     borderRadius: borderRadius.lg,
-    borderWidth: 4,
+    borderWidth: 8,
     borderColor: colors.gray[800],
     overflow: 'hidden',
-    backgroundColor: colors.gray[800], // 테두리 안쪽 배경색
+    backgroundColor: colors.gray[800],
     ...shadows.lg,
   },
   screenshotImage: {
