@@ -845,7 +845,7 @@ const styles = StyleSheet.create({
   errorText: {
     fontSize: typography.fontSize.xs,
     color: colors.red[500],
-    marginTop: -5,
+    marginTop: 3,
     lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,
@@ -993,10 +993,10 @@ const styles = StyleSheet.create({
     minWidth: 50,
   },
   timerContainerBelow: {
-    marginTop: -spacing[3],
+    marginTop: spacing[1],
     paddingTop: 0,
     alignItems: 'flex-start',
-    paddingLeft: spacing[3],
+    paddingLeft: spacing[1],
   },
   verifyButtonInline: {
     height: 36,
