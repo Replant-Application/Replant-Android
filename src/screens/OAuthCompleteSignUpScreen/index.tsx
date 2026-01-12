@@ -151,8 +151,8 @@ const OAuthCompleteSignUpScreen: React.FC<OAuthCompleteSignUpScreenProps> = ({
     setIsLoading(true);
 
     try {
-      // 사용자 정보 업데이트 API 호출
-      const result = await apiClient.put('/users/profile', {
+      // 사용자 정보 업데이트 API 호출 (PUT /api/users/me)
+      const result = await apiClient.put('/users/me', {
         nickname: nickname,
         phone: phone.replace(/-/g, ''),
         gender: gender,
