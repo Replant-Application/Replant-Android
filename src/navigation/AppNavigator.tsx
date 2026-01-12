@@ -58,6 +58,7 @@ import RoutineSettingScreen from '../screens/RoutineSettingScreen';
 import TodoListScreen from '../screens/TodoListScreen';
 import TodoListCreateScreen from '../screens/TodoListCreateScreen';
 import TodoListDetailScreen from '../screens/TodoListDetailScreen';
+import OAuthCompleteSignUpScreen from '../screens/OAuthCompleteSignUpScreen';
 
 // 간단한 상태 기반 네비게이션 (React Navigation 없이)
 const AppNavigator = () => {
@@ -251,6 +252,25 @@ const AppNavigator = () => {
       }
     };
 
+    // 쿼리스트링 파싱을 위한 네비게이션 처리
+    const handleAuthNavigate = (screenWithParams: string) => {
+      // 쿼리스트링 형태 파싱 (예: OAuthCompleteSignUp?email=xxx&nickname=yyy)
+      const [screenName, queryString] = screenWithParams.split('?');
+      const params: Record<string, string> = {};
+
+      if (queryString) {
+        queryString.split('&').forEach(param => {
+          const [key, value] = param.split('=');
+          if (key && value) {
+            params[key] = decodeURIComponent(value);
+          }
+        });
+      }
+
+      setCurrentScreen(screenName);
+      setNavigationParams(params);
+    };
+
     const renderAuthScreen = () => {
       const route = {
         params: navigationParams || {},
@@ -260,23 +280,25 @@ const AppNavigator = () => {
 
       switch (currentScreen) {
         case SCREEN_NAMES.ONBOARDING:
-          return <OnboardingScreen onNavigate={setCurrentScreen} />;
+          return <OnboardingScreen onNavigate={handleAuthNavigate} />;
         case SCREEN_NAMES.START:
-          return <StartScreen onNavigate={setCurrentScreen} />;
+          return <StartScreen onNavigate={handleAuthNavigate} />;
         case SCREEN_NAMES.SIGNUP:
-          return <SignUpScreen onNavigate={setCurrentScreen} />;
+          return <SignUpScreen onNavigate={handleAuthNavigate} />;
         case SCREEN_NAMES.LOGIN:
-          return <LoginScreen onNavigate={setCurrentScreen} />;
+          return <LoginScreen onNavigate={handleAuthNavigate} />;
         case SCREEN_NAMES.NICKNAME:
-          return <NicknameScreen onNavigate={setCurrentScreen} />;
+          return <NicknameScreen onNavigate={handleAuthNavigate} />;
         case SCREEN_NAMES.FIND_ID:
           return <FindIdScreen onNavigate={onNavigateWithParams} />;
         case SCREEN_NAMES.FIND_ID_RESULT:
           return <FindIdResultScreen onNavigate={onNavigateWithParams} route={route} />;
         case SCREEN_NAMES.FIND_PASSWORD:
           return <FindPasswordScreen onNavigate={onNavigateWithParams} />;
+        case SCREEN_NAMES.OAUTH_COMPLETE_SIGNUP:
+          return <OAuthCompleteSignUpScreen onNavigate={handleAuthNavigate} route={route} />;
         default:
-          return <StartScreen onNavigate={setCurrentScreen} />;
+          return <StartScreen onNavigate={handleAuthNavigate} />;
       }
     };
 

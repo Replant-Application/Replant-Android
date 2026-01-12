@@ -22,7 +22,7 @@ import { RootStackParamList } from '../../types/navigation';
 import { Header, Loading } from '../../components/ui';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
 import { getOptimizedLineHeight } from '../../utils/textStyles';
-import { createMissionSet } from '../../api/missionSetApi';
+import { createMissionSet } from '../../api/todolistApi';
 import { getUserMissions, UserMission } from '../../api/missionApi';
 import { logError } from '../../utils/logger';
 import { SCREEN_NAMES } from '../../utils/constants';

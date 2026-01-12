@@ -123,6 +123,7 @@ export const API_CONFIG = {
       createComment: '/community/posts/:postId/comments',
       updateComment: '/community/posts/:postId/comments/:commentId',
       deleteComment: '/community/posts/:postId/comments/:commentId',
+      like: '/community/posts/:postId/like',
     },
 
     // 뱃지 (Badge)

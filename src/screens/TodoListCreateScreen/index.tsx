@@ -104,9 +104,8 @@ const TodoListCreateScreen: React.FC<Props> = ({ navigation }) => {
           {
             text: '확인',
             onPress: () => {
-              navigation.navigate(SCREEN_NAMES.TODO_LIST_DETAIL, {
-                todoListId: result.data!.id,
-              });
+              // 투두리스트 목록 화면으로 이동
+              navigation.navigate(SCREEN_NAMES.TODO_LIST);
             },
           },
         ]);

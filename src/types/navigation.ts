@@ -98,6 +98,11 @@ export type RootStackParamList = {
   ChangePassword: undefined;
   SoundSettings: undefined;
   MyProgressDetail: undefined;
+  OAuthCompleteSignUp: {
+    email?: string;
+    nickname?: string;
+    provider?: string;
+  };
 };
 
 // 네비게이션 파라미터 타입

@@ -711,8 +711,9 @@ const styles = StyleSheet.create({
   routineSection: {
     backgroundColor: '#F3E5F5',
     borderRadius: borderRadius.lg,
-    padding: spacing[4],
-    marginBottom: spacing[4],
+    paddingVertical: spacing[2.5],
+    paddingHorizontal: spacing[3],
+    marginBottom: spacing[3],
     borderWidth: 2,
     borderColor: '#AB47BC',
     shadowColor: '#9C27B0',
@@ -778,8 +779,9 @@ const styles = StyleSheet.create({
   todoListSection: {
     backgroundColor: '#E3F2FD',
     borderRadius: borderRadius.lg,
-    padding: spacing[4],
-    marginBottom: spacing[4],
+    paddingVertical: spacing[2.5],
+    paddingHorizontal: spacing[3],
+    marginBottom: spacing[3],
     borderWidth: 2,
     borderColor: '#42A5F5',
     shadowColor: '#2196F3',

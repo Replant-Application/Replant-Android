@@ -16,7 +16,7 @@ import { getVerifications, voteVerification, VerificationPost, VerificationStatu
 import { CommunityPost } from '../../types';
 import { logError } from '../../utils/logger';
 import { getHiddenPosts, hidePost } from '../../utils/hiddenContentStorage';
-import { getMissionSets, searchMissionSets, copyMissionSet, getMyMissionSets, updateMissionSet, MissionSetSimple } from '../../api/missionSetApi';
+import { getMissionSets, searchMissionSets, copyMissionSet, getMyMissionSets, updateMissionSet, MissionSetSimple } from '../../api/todolistApi';
 import { SCREEN_NAMES } from '../../utils/constants';
 
 interface CommunityScreenProps {

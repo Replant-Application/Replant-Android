@@ -21,7 +21,7 @@ import { RootStackParamList } from '../../types/navigation';
 import { Header, Loading, EmptyState } from '../../components/ui';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
 import { getOptimizedLineHeight } from '../../utils/textStyles';
-import { getMyMissionSets, deleteMissionSet, MissionSetSimple } from '../../api/missionSetApi';
+import { getMyMissionSets, deleteMissionSet, MissionSetSimple } from '../../api/todolistApi';
 import { logError } from '../../utils/logger';
 import { SCREEN_NAMES } from '../../utils/constants';
 

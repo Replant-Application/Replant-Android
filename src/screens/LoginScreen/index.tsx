@@ -158,12 +158,19 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onNavigate }) => {
       const result = await loginWithOAuth(provider, providerAccessToken);
 
       if (result.success && result.data) {
-        const { user } = result.data;
+        const { user, isNewUser } = result.data;
 
         // 로그인 유지 설정 저장
         await saveKeepLoggedIn(keepLoggedIn);
 
-        // 성공 모달 표시
+        // 신규 사용자인 경우 추가 정보 입력 화면으로 이동
+        if (isNewUser) {
+          console.log('[LoginScreen] New OAuth user, navigating to OAuthCompleteSignUp');
+          onNavigate(`${SCREEN_NAMES.OAUTH_COMPLETE_SIGNUP}?email=${encodeURIComponent(user.email)}&nickname=${encodeURIComponent(user.nickname || '')}&provider=${provider}`);
+          return;
+        }
+
+        // 기존 사용자 - 성공 모달 표시
         setUserName(user.nickname || user.email);
         setShowSuccessModal(true);
       } else {

@@ -4,7 +4,7 @@ import { Button, Input, Header, AlertModal } from '../../components/ui';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
 import { getOptimizedLineHeight } from '../../utils/textStyles';
 import { SCREEN_NAMES } from '../../utils/constants';
-import { join, sendVerification, verifyEmail, getRegions, RegionInfo } from '../../api/authApi';
+import { join, sendVerification, verifyEmail, RegionInfo } from '../../api/authApi';
 import { saveTokens, saveUserInfo } from '../../utils/tokenStorage';
 import { apiClient } from '../../api/client';
 import { useUser } from '../../contexts/UserContext';
@@ -33,8 +33,29 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onNavigate }) => {
   const [gender, setGender] = useState<'MALE' | 'FEMALE' | null>(null);
   const [region, setRegion] = useState<string | null>(null);
   const [regionName, setRegionName] = useState<string>('');
-  const [regions, setRegions] = useState<RegionInfo[]>([]);
   const [showRegionModal, setShowRegionModal] = useState(false);
+
+  // 지역 목록 (백엔드 MetropolitanArea enum과 동일)
+  const regions: RegionInfo[] = [
+    { code: 'SEOUL', name: '서울특별시' },
+    { code: 'BUSAN', name: '부산광역시' },
+    { code: 'DAEGU', name: '대구광역시' },
+    { code: 'INCHEON', name: '인천광역시' },
+    { code: 'GWANGJU', name: '광주광역시' },
+    { code: 'DAEJEON', name: '대전광역시' },
+    { code: 'ULSAN', name: '울산광역시' },
+    { code: 'SEJONG', name: '세종특별자치시' },
+    { code: 'GYEONGGI', name: '경기도' },
+    { code: 'GANGWON', name: '강원특별자치도' },
+    { code: 'CHUNGBUK', name: '충청북도' },
+    { code: 'CHUNGNAM', name: '충청남도' },
+    { code: 'JEONBUK', name: '전북특별자치도' },
+    { code: 'JEONNAM', name: '전라남도' },
+    { code: 'GYEONGBUK', name: '경상북도' },
+    { code: 'GYEONGNAM', name: '경상남도' },
+    { code: 'JEJU', name: '제주특별자치도' },
+  ];
+
   const [birthYear, setBirthYear] = useState<number | null>(null);
   const [showBirthYearModal, setShowBirthYearModal] = useState(false);
 
@@ -53,21 +74,6 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onNavigate }) => {
     region: '',
     birthYear: '',
   });
-
-  // 지역 목록 로드
-  useEffect(() => {
-    const loadRegions = async () => {
-      try {
-        const result = await getRegions();
-        if (result.success && result.data) {
-          setRegions(result.data);
-        }
-      } catch (error) {
-        console.error('Failed to load regions:', error);
-      }
-    };
-    loadRegions();
-  }, []);
 
   // 타이머 카운트다운
   useEffect(() => {

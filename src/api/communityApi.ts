@@ -202,3 +202,27 @@ export const deleteComment = async (
     .replace(':commentId', String(commentId));
   return apiClient.delete(endpoint);
 };
+
+// ============================================
+// 좋아요 API
+// ============================================
+
+/**
+ * 좋아요 응답
+ */
+export interface LikeResponse {
+  isLiked: boolean;
+  likeCount: number;
+  verified?: boolean; // VERIFICATION 타입일 때만: 이번 좋아요로 인증 완료 여부
+}
+
+/**
+ * 게시글 좋아요 토글
+ * POST /api/community/posts/{postId}/like
+ * - 이미 좋아요한 경우 취소
+ * - VERIFICATION 타입 게시글의 경우, 좋아요 수가 기준치 이상이면 자동 인증 완료
+ */
+export const toggleLike = async (postId: number): Promise<ServiceResult<LikeResponse>> => {
+  const endpoint = `/community/posts/${postId}/like`;
+  return apiClient.post<LikeResponse>(endpoint);
+};

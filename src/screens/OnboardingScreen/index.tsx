@@ -242,7 +242,7 @@ const styles = StyleSheet.create({
     width: '100%',
     alignItems: 'center',
     justifyContent: 'flex-start',
-    paddingHorizontal: spacing[4],
+    paddingHorizontal: spacing[2], // 가로 여백 줄여서 텍스트 범위 넓힘
     paddingTop: 0,
     paddingBottom: 0,
     marginTop: 0,
@@ -280,21 +280,22 @@ const styles = StyleSheet.create({
     resizeMode: 'cover', // cover로 변경하여 프레임을 채우도록
   },
   title: {
-    fontSize: typography.fontSize['2xl'],
+    fontSize: typography.fontSize.xl, // 2xl에서 xl로 줄임
     color: colors.text.primary,
     textAlign: 'center',
-    marginBottom: spacing[4],
+    marginBottom: spacing[3],
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,
       android: typography.fontFamily.regular,
     }),
     includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize['2xl']),
+    lineHeight: getOptimizedLineHeight(typography.fontSize.xl),
     letterSpacing: 0.3,
     fontWeight: typography.fontWeight.medium,
+    paddingHorizontal: spacing[2], // 가로 범위 넓힘
   },
   description: {
-    fontSize: typography.fontSize.base,
+    fontSize: typography.fontSize.sm, // base에서 sm으로 줄임
     color: colors.text.secondary,
     textAlign: 'center',
     fontFamily: Platform.select({
@@ -302,8 +303,9 @@ const styles = StyleSheet.create({
       android: typography.fontFamily.regular,
     }),
     includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
     letterSpacing: 0.2,
+    paddingHorizontal: spacing[4], // 가로 범위 넓힘
   },
   paginationContainer: {
     flexDirection: 'row',
@@ -319,7 +321,7 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     paddingHorizontal: spacing[6],
-    paddingBottom: spacing[10],
+    paddingBottom: spacing[14], // 하단바 여백 고려하여 더 위로 올림
     paddingTop: 0, // 스크린샷과 버튼 사이 여백 제거
   },
   nextButton: {

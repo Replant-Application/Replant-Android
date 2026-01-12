@@ -1,6 +1,8 @@
 /**
  * 투두리스트 API
  * 백엔드 TodoListController와 연동
+ *
+ * 기존 missionSetApi.ts 기능을 통합 (하위 호환성 유지)
  */
 
 import { apiClient } from './client';
@@ -17,6 +19,86 @@ import {
   ReviewRequest,
   PageResponse
 } from '../types/todolist';
+
+// ============================================
+// 기존 MissionSet 타입 정의 (하위 호환성)
+// ============================================
+
+export interface MissionSetMission {
+  missionId: number;
+  missionTitle: string;
+  displayOrder: number;
+}
+
+export interface MissionSetSimple {
+  id: number;
+  title: string;
+  description?: string;
+  creatorId: number;
+  creatorNickname: string;
+  isPublic: boolean;
+  missionCount: number;
+  addedCount: number;
+  averageRating: number;
+  createdAt: string;
+}
+
+export interface MissionSetDetail extends MissionSetSimple {
+  missions: MissionSetMission[];
+}
+
+export interface MissionSetListResponse {
+  content: MissionSetSimple[];
+  totalElements: number;
+  totalPages: number;
+  number: number;
+  size: number;
+}
+
+export interface CreateMissionSetRequest {
+  title: string;
+  description?: string;
+  isPublic: boolean;
+  missionIds?: number[];
+}
+
+export interface UpdateMissionSetRequest {
+  title?: string;
+  description?: string;
+  isPublic?: boolean;
+}
+
+export interface MissionSetReview {
+  id: number;
+  missionSetId: number;
+  missionSetTitle: string;
+  user: {
+    id: number;
+    nickname: string;
+  };
+  rating: number;
+  content?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface MissionSetReviewListResponse {
+  content: MissionSetReview[];
+  totalElements: number;
+  totalPages: number;
+  number: number;
+  size: number;
+}
+
+export interface CreateReviewRequest {
+  rating: number;
+  content?: string;
+}
+
+export interface UpdateReviewRequest {
+  rating?: number;
+  content?: string;
+}
 
 // ============================================
 // API 함수
@@ -214,4 +296,181 @@ export const getTodoListReviews = async (
   size: number = 10
 ): Promise<ServiceResult<PageResponse<TodoListReview>>> => {
   return apiClient.get(`/todolists/${todoListId}/reviews?page=${page}&size=${size}`);
+};
+
+// ============================================
+// 기존 MissionSet API 함수 (하위 호환성 별칭)
+// ============================================
+
+/**
+ * 공개 투두리스트 목록 조회 (getMissionSets 별칭)
+ * GET /api/todolists/public
+ */
+export const getMissionSets = async (params?: {
+  page?: number;
+  size?: number;
+  sortBy?: 'popular' | 'latest';
+}): Promise<ServiceResult<MissionSetListResponse>> => {
+  return apiClient.get<MissionSetListResponse>('/todolists/public', params);
+};
+
+/**
+ * 내 투두리스트 목록 조회 (getMyMissionSets 별칭)
+ * GET /api/todolists
+ */
+export const getMyMissionSets = async (params?: {
+  page?: number;
+  size?: number;
+}): Promise<ServiceResult<MissionSetListResponse>> => {
+  return apiClient.get<MissionSetListResponse>('/todolists', params);
+};
+
+/**
+ * 투두리스트 검색 (searchMissionSets 별칭)
+ * GET /api/todolists/public/search
+ */
+export const searchMissionSets = async (params: {
+  keyword: string;
+  page?: number;
+  size?: number;
+  sortBy?: 'popular' | 'latest';
+}): Promise<ServiceResult<MissionSetListResponse>> => {
+  return apiClient.get<MissionSetListResponse>('/todolists/public/search', params);
+};
+
+/**
+ * 투두리스트 상세 조회 (getMissionSetDetail 별칭)
+ * GET /api/todolists/:id
+ */
+export const getMissionSetDetail = async (
+  id: number
+): Promise<ServiceResult<MissionSetDetail>> => {
+  return apiClient.get<MissionSetDetail>(`/todolists/${id}`);
+};
+
+/**
+ * 투두리스트 생성 (createMissionSet 별칭)
+ * POST /api/todolists
+ */
+export const createMissionSet = async (
+  data: CreateMissionSetRequest
+): Promise<ServiceResult<MissionSetDetail>> => {
+  return apiClient.post<MissionSetDetail>('/todolists', data);
+};
+
+/**
+ * 투두리스트 수정 (updateMissionSet 별칭)
+ * PUT /api/todolists/:id
+ */
+export const updateMissionSet = async (
+  id: number,
+  data: UpdateMissionSetRequest
+): Promise<ServiceResult<MissionSetDetail>> => {
+  return apiClient.put<MissionSetDetail>(`/todolists/${id}`, data);
+};
+
+/**
+ * 투두리스트 삭제 (deleteMissionSet 별칭)
+ * DELETE /api/todolists/:id
+ */
+export const deleteMissionSet = async (
+  id: number
+): Promise<ServiceResult<{ message: string }>> => {
+  return apiClient.delete<{ message: string }>(`/todolists/${id}`);
+};
+
+/**
+ * 투두리스트에 미션 추가 (addMissionToSet 별칭)
+ * POST /api/todolists/:id/missions
+ */
+export const addMissionToSet = async (
+  setId: number,
+  missionId: number
+): Promise<ServiceResult<MissionSetDetail>> => {
+  return apiClient.post<MissionSetDetail>(`/todolists/${setId}/missions`, { missionId });
+};
+
+/**
+ * 투두리스트에서 미션 제거 (removeMissionFromSet 별칭)
+ * DELETE /api/todolists/:id/missions/:missionId
+ */
+export const removeMissionFromSet = async (
+  setId: number,
+  missionId: number
+): Promise<ServiceResult<MissionSetDetail>> => {
+  return apiClient.delete<MissionSetDetail>(`/todolists/${setId}/missions/${missionId}`);
+};
+
+/**
+ * 투두리스트 미션 순서 변경 (reorderMissions 별칭)
+ * PUT /api/todolists/:id/missions/reorder
+ */
+export const reorderMissions = async (
+  setId: number,
+  missionIds: number[]
+): Promise<ServiceResult<MissionSetDetail>> => {
+  return apiClient.put<MissionSetDetail>(`/todolists/${setId}/missions/reorder`, { missionIds });
+};
+
+/**
+ * 투두리스트 담기/복사 (copyMissionSet 별칭)
+ * POST /api/todolists/:id/copy
+ */
+export const copyMissionSet = async (
+  id: number
+): Promise<ServiceResult<MissionSetDetail>> => {
+  return apiClient.post<MissionSetDetail>(`/todolists/${id}/copy`);
+};
+
+/**
+ * 리뷰 작성 (createReview 별칭)
+ * POST /api/todolists/:todoListId/reviews
+ */
+export const createReview = async (
+  missionSetId: number,
+  data: CreateReviewRequest
+): Promise<ServiceResult<MissionSetReview>> => {
+  return apiClient.post<MissionSetReview>(`/todolists/${missionSetId}/reviews`, data);
+};
+
+/**
+ * 리뷰 목록 조회 (getReviews 별칭)
+ * GET /api/todolists/:todoListId/reviews
+ */
+export const getReviews = async (
+  missionSetId: number,
+  params?: { page?: number; size?: number }
+): Promise<ServiceResult<MissionSetReviewListResponse>> => {
+  return apiClient.get<MissionSetReviewListResponse>(`/todolists/${missionSetId}/reviews`, params);
+};
+
+/**
+ * 내 리뷰 조회 (getMyReview 별칭)
+ * GET /api/todolists/:todoListId/reviews/my
+ */
+export const getMyReview = async (
+  missionSetId: number
+): Promise<ServiceResult<MissionSetReview | null>> => {
+  return apiClient.get<MissionSetReview | null>(`/todolists/${missionSetId}/reviews/my`);
+};
+
+/**
+ * 리뷰 수정 (updateReview 별칭)
+ * PUT /api/todolists/reviews/:reviewId
+ */
+export const updateReview = async (
+  reviewId: number,
+  data: UpdateReviewRequest
+): Promise<ServiceResult<MissionSetReview>> => {
+  return apiClient.put<MissionSetReview>(`/todolists/reviews/${reviewId}`, data);
+};
+
+/**
+ * 리뷰 삭제 (deleteReview 별칭)
+ * DELETE /api/todolists/reviews/:reviewId
+ */
+export const deleteReview = async (
+  reviewId: number
+): Promise<ServiceResult<{ message: string }>> => {
+  return apiClient.delete<{ message: string }>(`/todolists/reviews/${reviewId}`);
 };
