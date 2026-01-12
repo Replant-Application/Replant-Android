@@ -71,6 +71,11 @@ class SSEService {
 
       const eventSource = new EventSource(sseUrl, options);
 
+      // 모든 이벤트를 로깅하기 위한 전역 리스너
+      eventSource.addEventListener('open', () => {
+        console.log('[SSE] ✅ 연결 열림 (open 이벤트)');
+      });
+
       // 이벤트 리스너 설정
       const listener: EventSourceListener = (event) => {
         const eventAny = event as any;

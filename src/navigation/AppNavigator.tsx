@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Image, Platform, BackHandler, ToastAndroid, Animated, Easing } from 'react-native';
 import { useUser } from '../contexts/UserContext';
+import { useSse } from '../contexts/SseContext';
 import { SCREEN_NAMES } from '../utils/constants';
 import { colors, spacing, typography } from '../utils/designTokens';
 import { getOptimizedLineHeight } from '../utils/textStyles';
@@ -33,7 +34,6 @@ import CommunityPostDetailScreen from '../screens/CommunityPostDetailScreen';
 import CommunityPostEditScreen from '../screens/CommunityPostEditScreen';
 import MyPageScreen from '../screens/MyPageScreen';
 import CalendarScreen from '../screens/CalendarScreen';
-import StatisticsScreen from '../screens/StatisticsScreen';
 import AdminDashboardScreen from '../screens/AdminDashboardScreen';
 import AdminUserListScreen from '../screens/AdminUserListScreen';
 import AdminUserDetailScreen from '../screens/AdminUserDetailScreen';
@@ -63,10 +63,12 @@ import OAuthCompleteSignUpScreen from '../screens/OAuthCompleteSignUpScreen';
 // 간단한 상태 기반 네비게이션 (React Navigation 없이)
 const AppNavigator = () => {
   const { isLoggedIn, isLoading, logout: userLogout } = useUser();
+  const { lastNotification } = useSse();
   const [currentScreen, setCurrentScreen] = useState<string | null>(null);
   const [navigationParams, setNavigationParams] = useState({});
   const [backPressedOnce, setBackPressedOnce] = useState(false);
   const [isCheckingOnboarding, setIsCheckingOnboarding] = useState(true);
+  const processedNotificationIdRef = useRef<number | null>(null);
   const fadeAnim = useRef(new Animated.Value(1)).current;
   const slideAnim = useRef(new Animated.Value(0)).current;
 
@@ -132,6 +134,27 @@ const AppNavigator = () => {
       }
     };
   }, []);
+
+  // SSE 알림 수신 시 투두리스트 작성 화면으로 이동
+  useEffect(() => {
+    if (!lastNotification || !isLoggedIn) {
+      return;
+    }
+
+    // 이미 처리한 알림인지 확인
+    const notificationId = lastNotification.id || lastNotification.notificationId;
+    if (notificationId && notificationId === processedNotificationIdRef.current) {
+      return;
+    }
+
+    // 투두리스트 작성 알림인지 확인
+    const title = lastNotification.title || '';
+    if (title === '투두리스트 작성 알림' || title.includes('투두리스트')) {
+      console.log('[AppNavigator] 투두리스트 작성 알림 수신, 투두리스트 작성 화면으로 이동');
+      processedNotificationIdRef.current = notificationId || null;
+      setCurrentScreen(SCREEN_NAMES.TODO_LIST_CREATE);
+    }
+  }, [lastNotification, isLoggedIn]);
 
   // 화면 변경 시 배경음악 재생
   useEffect(() => {
@@ -414,8 +437,6 @@ const AppNavigator = () => {
         return <MyPageScreen navigation={navigation} />;
       case SCREEN_NAMES.CALENDAR:
         return <CalendarScreen navigation={navigation} />;
-      case SCREEN_NAMES.STATISTICS:
-        return <StatisticsScreen navigation={navigation} />;
       case SCREEN_NAMES.ADMIN_DASHBOARD:
         return <AdminDashboardScreen navigation={navigation} />;
       case SCREEN_NAMES.ADMIN_USER_LIST:

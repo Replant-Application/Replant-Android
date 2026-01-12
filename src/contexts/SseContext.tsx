@@ -48,9 +48,14 @@ export const SseProvider: React.FC<SseProviderProps> = ({ children }) => {
 
   // 알림 수신 핸들러
   const handleNotification = useCallback((notification: any) => {
-    console.log('[SseContext] 알림 수신:', JSON.stringify(notification, null, 2));
+    console.log('[SseContext] ========== 알림 수신 ==========');
+    console.log('[SseContext] 알림 전체:', JSON.stringify(notification, null, 2));
     console.log('[SseContext] 알림 타입:', typeof notification);
     console.log('[SseContext] 알림 키:', notification ? Object.keys(notification) : 'null');
+    console.log('[SseContext] 알림 title:', notification?.title);
+    console.log('[SseContext] 알림 content:', notification?.content);
+    console.log('[SseContext] 알림 type:', notification?.type);
+    console.log('[SseContext] =================================');
     
     setLastNotification(notification);
 

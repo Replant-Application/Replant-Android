@@ -83,14 +83,14 @@ interface ApiResponse<T> {
 
 // 루틴 타입 목록 조회
 export const getRoutineTypes = async (): Promise<RoutineTypeInfo[]> => {
-  const response = await apiClient.get<ApiResponse<RoutineTypeInfo[]>>('/api/routines/types');
+  const response = await apiClient.get<ApiResponse<RoutineTypeInfo[]>>('/routines/types');
   return response.data.data;
 };
 
 // 활성 루틴 전체 조회
 export const getActiveRoutines = async (): Promise<UserRoutine[]> => {
   try {
-    const response = await apiClient.get<ApiResponse<UserRoutine[]>>('/api/routines');
+    const response = await apiClient.get<ApiResponse<UserRoutine[]>>('/routines');
     // 안전한 데이터 접근
     if (response?.data?.data && Array.isArray(response.data.data)) {
       return response.data.data;
@@ -104,13 +104,13 @@ export const getActiveRoutines = async (): Promise<UserRoutine[]> => {
 
 // 주기별 활성 루틴 조회
 export const getRoutinesByPeriod = async (periodType: PeriodType): Promise<UserRoutine[]> => {
-  const response = await apiClient.get<ApiResponse<UserRoutine[]>>(`/api/routines/period/${periodType}`);
+  const response = await apiClient.get<ApiResponse<UserRoutine[]>>(`/routines/period/${periodType}`);
   return response.data.data;
 };
 
 // 특정 타입 활성 루틴 조회
 export const getRoutineByType = async (routineType: RoutineType): Promise<UserRoutine | null> => {
-  const response = await apiClient.get<ApiResponse<UserRoutine | null>>(`/api/routines/type/${routineType}`);
+  const response = await apiClient.get<ApiResponse<UserRoutine | null>>(`/routines/type/${routineType}`);
   return response.data.data;
 };
 
@@ -121,26 +121,26 @@ export const getRoutineHistory = async (
   size: number = 10
 ): Promise<{ content: UserRoutine[]; totalElements: number; totalPages: number }> => {
   const response = await apiClient.get<ApiResponse<{ content: UserRoutine[]; totalElements: number; totalPages: number }>>(
-    `/api/routines/type/${routineType}/history?page=${page}&size=${size}`
+    `/routines/type/${routineType}/history?page=${page}&size=${size}`
   );
   return response.data.data;
 };
 
 // 루틴 저장 (생성 또는 업데이트)
 export const saveRoutine = async (request: UserRoutineRequest): Promise<UserRoutine> => {
-  const response = await apiClient.post<ApiResponse<UserRoutine>>('/api/routines', request);
+  const response = await apiClient.post<ApiResponse<UserRoutine>>('/routines', request);
   return response.data.data;
 };
 
 // 루틴 삭제
 export const deleteRoutine = async (routineId: number): Promise<void> => {
-  await apiClient.delete(`/api/routines/${routineId}`);
+  await apiClient.delete(`/routines/${routineId}`);
 };
 
 // 루틴 알림 토글
 export const toggleRoutineNotification = async (routineId: number, enabled: boolean): Promise<UserRoutine> => {
   const response = await apiClient.patch<ApiResponse<UserRoutine>>(
-    `/api/routines/${routineId}/notification?enabled=${enabled}`
+    `/routines/${routineId}/notification?enabled=${enabled}`
   );
   return response.data.data;
 };

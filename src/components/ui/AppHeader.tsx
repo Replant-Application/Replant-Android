@@ -98,20 +98,8 @@ const AppHeader: React.FC<AppHeaderProps> = ({ navigation }) => {
 
   return (
     <View style={styles.header}>
-      {/* 오른쪽: 사운드 + 알림 + 메뉴 */}
+      {/* 오른쪽: 알림 + 메뉴 */}
       <View style={styles.rightSection}>
-        {/* 사운드 버튼 */}
-        <TouchableOpacity
-          style={styles.iconButton}
-          onPress={toggleSound}
-          activeOpacity={0.6}
-          accessibilityRole="button"
-          accessibilityLabel={soundEnabled ? '사운드 끄기' : '사운드 켜기'}
-        >
-          <View style={styles.iconWrapper}>
-            <Text style={styles.soundIcon}>{soundEnabled ? '🔊' : '🔇'}</Text>
-          </View>
-        </TouchableOpacity>
         {/* 알림 버튼 */}
         <TouchableOpacity
           style={styles.iconButton}
@@ -220,18 +208,18 @@ const AppHeader: React.FC<AppHeaderProps> = ({ navigation }) => {
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.menuItem}
-              onPress={() => handleMenuPress('Statistics')}
+              onPress={() => handleMenuPress('SoundSettings')}
               activeOpacity={0.7}
               accessibilityRole="button"
-              accessibilityLabel="통계"
+              accessibilityLabel="사운드 설정"
             >
               <Image
-                source={require('../../assets/images/search.png')}
+                source={require('../../assets/images/sound.png')}
                 style={styles.menuItemIcon}
                 resizeMode="contain"
                 accessibilityElementsHidden={true}
               />
-              <Text style={styles.menuItemText}>통계</Text>
+              <Text style={styles.menuItemText}>사운드 설정</Text>
             </TouchableOpacity>
           </Animated.View>
         </TouchableOpacity>

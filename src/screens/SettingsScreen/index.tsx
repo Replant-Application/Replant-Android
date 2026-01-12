@@ -395,12 +395,6 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
             />
             <View style={styles.divider} />
             <SettingItem
-              icon={require('../../assets/images/search.png')}
-              title="통계"
-              onPress={() => navigation?.navigate('Statistics')}
-            />
-            <View style={styles.divider} />
-            <SettingItem
               icon={require('../../assets/images/alarm.png')}
               title="사운드"
               onPress={() => navigation?.navigate('SoundSettings' as any)}
