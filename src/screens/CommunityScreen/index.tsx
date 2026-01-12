@@ -38,6 +38,7 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation }) => {
   // 인증글 관련 상태
   const [verificationPosts, setVerificationPosts] = useState<VerificationPost[]>([]);
   const [verificationLoading, setVerificationLoading] = useState(false);
+
   const [verificationFilter, setVerificationFilter] = useState<VerificationFilter>('all');
 
   // 숨긴 게시글 ID 목록

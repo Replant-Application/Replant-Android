@@ -40,29 +40,30 @@ interface MissionDetailScreenProps {
   route: RouteProp<RootStackParamList, 'MissionDetail'>;
 }
 
-// 난이도 라벨 반환
-const getDifficultyLabel = (type: string): { label: string; color: string } => {
-  switch (type) {
-    case 'DAILY':
+// 난이도 라벨 반환 (difficultyLevel: EASY/LEVEL1, MEDIUM/LEVEL2, HARD/LEVEL3)
+const getDifficultyLabel = (difficultyLevel?: string): { label: string; color: string } => {
+  switch (difficultyLevel) {
+    case 'EASY':
+    case 'LEVEL1':
       return { label: '쉬움', color: colors.success };
-    case 'WEEKLY':
+    case 'MEDIUM':
+    case 'LEVEL2':
       return { label: '보통', color: colors.warning };
-    case 'MONTHLY':
+    case 'HARD':
+    case 'LEVEL3':
       return { label: '어려움', color: colors.error };
     default:
       return { label: '일반', color: colors.text.secondary };
   }
 };
 
-// 미션 타입 라벨 반환
-const getMissionTypeLabel = (type: string): string => {
-  switch (type) {
-    case 'DAILY':
-      return '일일 미션';
-    case 'WEEKLY':
-      return '주간 미션';
-    case 'MONTHLY':
-      return '월간 미션';
+// 미션 타입 라벨 반환 (missionType: OFFICIAL, CUSTOM)
+const getMissionTypeLabel = (missionType?: string): string => {
+  switch (missionType) {
+    case 'OFFICIAL':
+      return '공식 미션';
+    case 'CUSTOM':
+      return '커스텀 미션';
     default:
       return '미션';
   }
@@ -305,7 +306,7 @@ const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
     );
   }
 
-  const difficulty = getDifficultyLabel(mission.type);
+  const difficulty = getDifficultyLabel(mission.difficultyLevel);
 
   return (
     <ImageBackground
@@ -338,7 +339,7 @@ const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
               <Text style={styles.missionTitle}>{mission.title}</Text>
               <View style={styles.missionMeta}>
                 <Text style={styles.missionType}>
-                  {getMissionTypeLabel(mission.type)}
+                  {getMissionTypeLabel(mission.missionType)}
                 </Text>
                 <View style={[styles.difficultyBadge, { backgroundColor: difficulty.color + '20' }]}>
                   <Text style={[styles.difficultyText, { color: difficulty.color }]}>
