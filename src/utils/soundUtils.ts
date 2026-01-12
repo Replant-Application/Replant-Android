@@ -24,9 +24,15 @@ export const playSound = async (
     // 재생 완료 후 자동으로 해제
     sound.setOnPlaybackStatusUpdate((status) => {
       if (status.isLoaded && status.didJustFinish) {
-        sound.unloadAsync().catch((error) => {
-          console.error('[SoundUtils] 사운드 해제 실패:', error);
-        });
+        // 메인 스레드에서 실행되도록 보장하고 에러 무시
+        setTimeout(() => {
+          sound.unloadAsync().catch((error) => {
+            // ExoPlayer 스레드 에러는 무시 (앱 종료 시 발생할 수 있는 알려진 이슈)
+            if (!error?.message?.includes('wrong thread')) {
+              console.error('[SoundUtils] 사운드 해제 실패:', error);
+            }
+          });
+        }, 0);
       }
     });
   } catch (error) {

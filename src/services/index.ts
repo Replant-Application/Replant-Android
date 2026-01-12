@@ -5,3 +5,4 @@ export * from './userService';
 export * from './missionService';
 export * from './communityService';
 export * from './petService';
+export * from './amplitudeService';

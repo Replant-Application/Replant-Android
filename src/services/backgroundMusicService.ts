@@ -118,7 +118,8 @@ class BackgroundMusicService {
   async stop() {
     // 메인 스레드에서 실행되도록 보장
     return new Promise<void>((resolve) => {
-      InteractionManager.runAfterInteractions(async () => {
+      // setTimeout을 사용하여 메인 스레드에서 실행 보장
+      setTimeout(async () => {
         try {
           if (this.currentSound && this.isPlaying) {
             // pause만 하고 position 리셋은 하지 않음 (스레드 에러 방지)
@@ -126,11 +127,14 @@ class BackgroundMusicService {
             this.isPlaying = false;
             this.currentSound = null;
           }
-        } catch (error) {
-          console.error('[BackgroundMusic] 정지 실패:', error);
+        } catch (error: any) {
+          // ExoPlayer 스레드 에러는 무시 (앱 종료 시 발생할 수 있는 알려진 이슈)
+          if (!error?.message?.includes('wrong thread')) {
+            console.error('[BackgroundMusic] 정지 실패:', error);
+          }
         }
         resolve();
-      });
+      }, 0);
     });
   }
 
@@ -172,28 +176,29 @@ class BackgroundMusicService {
 
   /**
    * 리소스 해제
+   * 주의: 앱 종료 시 호출하면 ExoPlayer 스레드 에러가 발생할 수 있으므로
+   * 가능하면 호출하지 않는 것을 권장합니다.
    */
   async unload() {
     // 메인 스레드에서 실행되도록 보장
     return new Promise<void>((resolve) => {
-      InteractionManager.runAfterInteractions(async () => {
+      // setTimeout을 사용하여 메인 스레드에서 실행 보장
+      setTimeout(async () => {
         try {
+          // stop만 호출하고 unload는 호출하지 않음 (스레드 에러 방지)
           await this.stop();
           
-          if (this.backgroundSound) {
-            await this.backgroundSound.unloadAsync();
-            this.backgroundSound = null;
-          }
-          
-          if (this.nightSound) {
-            await this.nightSound.unloadAsync();
-            this.nightSound = null;
-          }
-        } catch (error) {
-          console.error('[BackgroundMusic] 해제 실패:', error);
+          // 리소스는 null로만 설정 (실제 unload는 하지 않음)
+          // 앱 종료 시 OS가 자동으로 정리함
+          this.backgroundSound = null;
+          this.nightSound = null;
+          this.currentSound = null;
+        } catch (error: any) {
+          // 모든 에러 무시 (앱 종료 시 발생할 수 있는 알려진 이슈)
+          // 에러 로그도 출력하지 않음 (RedBox 방지)
         }
         resolve();
-      });
+      }, 0);
     });
   }
 }

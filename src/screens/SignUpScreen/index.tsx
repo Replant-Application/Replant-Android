@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Alert, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform, Image, Modal, FlatList } from 'react-native';
-import { Button, Input, Header } from '../../components/ui';
+import { Button, Input, Header, AlertModal } from '../../components/ui';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
 import { getOptimizedLineHeight } from '../../utils/textStyles';
 import { SCREEN_NAMES } from '../../utils/constants';
@@ -26,6 +26,8 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onNavigate }) => {
   const [isVerifyingCode, setIsVerifyingCode] = useState(false);
   const [showVerificationCodeInput, setShowVerificationCodeInput] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [timer, setTimer] = useState<number>(0); // 타이머 초 단위
+  const [showVerificationModal, setShowVerificationModal] = useState(false);
 
   // 성별, 지역, 출생연도 상태
   const [gender, setGender] = useState<'MALE' | 'FEMALE' | null>(null);
@@ -67,6 +69,21 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onNavigate }) => {
     loadRegions();
   }, []);
 
+  // 타이머 카운트다운
+  useEffect(() => {
+    if (timer > 0) {
+      const interval = setInterval(() => {
+        setTimer((prev) => {
+          if (prev <= 1) {
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+      return () => clearInterval(interval);
+    }
+  }, [timer]);
+
   const validateEmail = (email: string): boolean => {
     const emailRegex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,6}$/;
     return emailRegex.test(email);
@@ -87,6 +104,7 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onNavigate }) => {
     setIsEmailVerified(false);
     setVerificationCode('');
     setShowVerificationCodeInput(false);
+    setTimer(0);
 
     // 이메일 검증
     if (!email.trim()) {
@@ -106,7 +124,8 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onNavigate }) => {
 
       if (result.success && result.data) {
         setShowVerificationCodeInput(true);
-        Alert.alert('인증번호 발송', '이메일로 인증번호를 보냈습니다.\n인증번호를 입력해주세요.');
+        setTimer(180); // 3분(180초) 타이머 시작
+        setShowVerificationModal(true);
       } else {
         let errorMessage = '인증번호 발송에 실패했습니다.';
         if (result.error) {
@@ -153,6 +172,7 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onNavigate }) => {
       if (result.success && result.data !== undefined) {
         if (result.data === true) {
           setIsEmailVerified(true);
+          setTimer(0);
           Alert.alert('인증 완료', '이메일 인증이 완료되었습니다.');
         } else {
           setErrors({ ...errors, email: '', verificationCode: '인증번호가 올바르지 않습니다.' });
@@ -361,26 +381,49 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onNavigate }) => {
 
           <View style={styles.inputContainer}>
             <Text style={styles.label}>이메일</Text>
-            <Input
-              placeholder="이메일 주소를 입력해주세요"
-              value={email}
-              onChangeText={(text) => {
-                setEmail(text);
-                setIsEmailVerified(false);
-                setVerificationCode('');
-                setShowVerificationCodeInput(false);
-                if (errors.email) {
-                  setErrors({ ...errors, email: '', verificationCode: '' });
-                }
-              }}
-              keyboardType="email-address"
-              autoCapitalize="none"
-              autoCorrect={false}
-              returnKeyType="next"
-              blurOnSubmit={false}
-              inputStyle={styles.inputText}
-              editable={!isEmailVerified}
-            />
+            <View style={styles.emailRow}>
+              <View style={styles.emailInputWrapper}>
+                <Input
+                  placeholder="이메일 주소를 입력해주세요"
+                  value={email}
+                  onChangeText={(text) => {
+                    setEmail(text);
+                    setIsEmailVerified(false);
+                    setVerificationCode('');
+                    setShowVerificationCodeInput(false);
+                    setTimer(0);
+                    if (errors.email) {
+                      setErrors({ ...errors, email: '', verificationCode: '' });
+                    }
+                  }}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  returnKeyType="next"
+                  blurOnSubmit={false}
+                  inputStyle={[styles.inputText, styles.emailInputHeight]}
+                  style={styles.emailInputContainer}
+                  editable={!isEmailVerified}
+                />
+              </View>
+              {!isEmailVerified && (
+                <TouchableOpacity
+                  onPress={handleSendVerification}
+                  disabled={isSendingVerification || !validateEmail(email)}
+                  style={[
+                    styles.verificationButtonInline,
+                    (!validateEmail(email) || isSendingVerification) && styles.verificationButtonDisabled,
+                  ]}
+                >
+                  <Text style={[
+                    styles.verificationButtonText,
+                    (!validateEmail(email) || isSendingVerification) && styles.verificationButtonTextDisabled,
+                  ]}>
+                    {isSendingVerification ? '발송 중...' : '인증번호 발송'}
+                  </Text>
+                </TouchableOpacity>
+              )}
+            </View>
             {isEmailVerified && (
               <View style={styles.verifiedBadgeContainer}>
                 <View style={styles.verifiedBadge}>
@@ -392,55 +435,70 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onNavigate }) => {
             
             {!isEmailVerified && (
               <>
-                <TouchableOpacity
-                  onPress={handleSendVerification}
-                  disabled={isSendingVerification || !validateEmail(email)}
-                  style={[
-                    styles.verificationButton,
-                    (!validateEmail(email) || isSendingVerification) && styles.verificationButtonDisabled,
-                  ]}
-                >
-                  <Text style={[
-                    styles.verificationButtonText,
-                    (!validateEmail(email) || isSendingVerification) && styles.verificationButtonTextDisabled,
-                  ]}>
-                    {isSendingVerification ? '발송 중...' : '인증번호 발송'}
-                  </Text>
-                </TouchableOpacity>
                 
                 {showVerificationCodeInput && (
                   <View style={styles.verificationCodeContainer}>
                     <Text style={styles.label}>인증번호</Text>
-                    <Input
-                      placeholder="인증번호 6자리 입력"
-                      value={verificationCode}
-                      onChangeText={(text) => {
-                        setVerificationCode(text);
-                        if (errors.verificationCode) {
-                          setErrors({ ...errors, verificationCode: '' });
-                        }
-                      }}
-                      keyboardType="number-pad"
-                      maxLength={6}
-                      returnKeyType="done"
-                      blurOnSubmit={true}
-                      inputStyle={styles.inputText}
-                    />
-                    <TouchableOpacity
-                      onPress={handleVerifyEmail}
-                      disabled={isVerifyingCode || !validateVerificationCode(verificationCode)}
-                      style={[
-                        styles.verifyButton,
-                        (!validateVerificationCode(verificationCode) || isVerifyingCode) && styles.verifyButtonDisabled,
-                      ]}
-                    >
-                      <Text style={[
-                        styles.verifyButtonText,
-                        (!validateVerificationCode(verificationCode) || isVerifyingCode) && styles.verifyButtonTextDisabled,
-                      ]}>
-                        {isVerifyingCode ? '확인 중...' : '인증번호 확인'}
-                      </Text>
-                    </TouchableOpacity>
+                    <View style={styles.verificationCodeRow}>
+                      <View style={styles.verificationCodeInputWrapper}>
+                        <Input
+                          placeholder="인증번호 6자리 입력"
+                          value={verificationCode}
+                          onChangeText={(text) => {
+                            setVerificationCode(text);
+                            if (errors.verificationCode) {
+                              setErrors({ ...errors, verificationCode: '' });
+                            }
+                          }}
+                          keyboardType="number-pad"
+                          maxLength={6}
+                          returnKeyType="done"
+                          blurOnSubmit={true}
+                          inputStyle={[styles.inputText, styles.emailInputHeight]}
+                          style={styles.emailInputContainer}
+                        />
+                      </View>
+                      {timer > 0 ? (
+                        <TouchableOpacity
+                          onPress={handleVerifyEmail}
+                          disabled={isVerifyingCode || !validateVerificationCode(verificationCode)}
+                          style={[
+                            styles.verifyButtonInline,
+                            (!validateVerificationCode(verificationCode) || isVerifyingCode) && styles.verifyButtonDisabled,
+                          ]}
+                        >
+                          <Text style={[
+                            styles.verifyButtonText,
+                            (!validateVerificationCode(verificationCode) || isVerifyingCode) && styles.verifyButtonTextDisabled,
+                          ]}>
+                            {isVerifyingCode ? '확인 중...' : '인증번호 확인'}
+                          </Text>
+                        </TouchableOpacity>
+                      ) : (
+                        <TouchableOpacity
+                          onPress={handleSendVerification}
+                          disabled={isSendingVerification || !validateEmail(email)}
+                          style={[
+                            styles.verifyButtonInline,
+                            (!validateEmail(email) || isSendingVerification) && styles.verifyButtonDisabled,
+                          ]}
+                        >
+                          <Text style={[
+                            styles.verifyButtonText,
+                            (!validateEmail(email) || isSendingVerification) && styles.verifyButtonTextDisabled,
+                          ]}>
+                            {isSendingVerification ? '발송 중...' : '재전송'}
+                          </Text>
+                        </TouchableOpacity>
+                      )}
+                    </View>
+                    {timer > 0 && (
+                      <View style={styles.timerContainerBelow}>
+                        <Text style={styles.timerText}>
+                          {Math.floor(timer / 60)}:{(timer % 60).toString().padStart(2, '0')}
+                        </Text>
+                      </View>
+                    )}
                     {errors.verificationCode ? <Text style={styles.errorText}>{errors.verificationCode}</Text> : null}
                   </View>
                 )}
@@ -574,7 +632,10 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onNavigate }) => {
             <Text style={styles.label}>지역</Text>
             <TouchableOpacity
               style={styles.dropdownButton}
-              onPress={() => setShowRegionModal(true)}
+              onPress={() => {
+                setShowBirthYearModal(false);
+                setShowRegionModal(!showRegionModal);
+              }}
             >
               <Text style={[
                 styles.dropdownButtonText,
@@ -584,6 +645,41 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onNavigate }) => {
               </Text>
               <Text style={styles.dropdownArrow}>▼</Text>
             </TouchableOpacity>
+            {showRegionModal && (
+              <View style={styles.dropdownList}>
+                <ScrollView
+                  nestedScrollEnabled={true}
+                  showsVerticalScrollIndicator={true}
+                  style={styles.dropdownScrollView}
+                >
+                  {regions.map((item, index) => (
+                    <TouchableOpacity
+                      key={item.code}
+                      style={[
+                        styles.dropdownListItem,
+                        index === 0 && styles.dropdownListItemFirst,
+                        region === item.code && styles.dropdownListItemSelected,
+                      ]}
+                      onPress={() => {
+                        setRegion(item.code);
+                        setRegionName(item.name);
+                        setShowRegionModal(false);
+                        if (errors.region) {
+                          setErrors({ ...errors, region: '' });
+                        }
+                      }}
+                    >
+                      <Text style={[
+                        styles.dropdownListItemText,
+                        region === item.code && styles.dropdownListItemTextSelected,
+                      ]}>
+                        {item.name}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+              </View>
+            )}
             {errors.region ? <Text style={styles.errorText}>{errors.region}</Text> : null}
           </View>
 
@@ -591,7 +687,10 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onNavigate }) => {
             <Text style={styles.label}>출생연도</Text>
             <TouchableOpacity
               style={styles.dropdownButton}
-              onPress={() => setShowBirthYearModal(true)}
+              onPress={() => {
+                setShowRegionModal(false);
+                setShowBirthYearModal(!showBirthYearModal);
+              }}
             >
               <Text style={[
                 styles.dropdownButtonText,
@@ -601,97 +700,54 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onNavigate }) => {
               </Text>
               <Text style={styles.dropdownArrow}>▼</Text>
             </TouchableOpacity>
+            {showBirthYearModal && (
+              <View style={styles.dropdownList}>
+                <ScrollView
+                  nestedScrollEnabled={true}
+                  showsVerticalScrollIndicator={true}
+                  style={styles.dropdownScrollView}
+                >
+                  {birthYears.map((item, index) => (
+                    <TouchableOpacity
+                      key={item.toString()}
+                      style={[
+                        styles.dropdownListItem,
+                        index === 0 && styles.dropdownListItemFirst,
+                        birthYear === item && styles.dropdownListItemSelected,
+                      ]}
+                      onPress={() => {
+                        setBirthYear(item);
+                        setShowBirthYearModal(false);
+                        if (errors.birthYear) {
+                          setErrors({ ...errors, birthYear: '' });
+                        }
+                      }}
+                    >
+                      <Text style={[
+                        styles.dropdownListItemText,
+                        birthYear === item && styles.dropdownListItemTextSelected,
+                      ]}>
+                        {item}년
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+              </View>
+            )}
             {errors.birthYear ? <Text style={styles.errorText}>{errors.birthYear}</Text> : null}
           </View>
         </View>
       </ScrollView>
 
-      {/* 지역 선택 모달 */}
-      <Modal
-        visible={showRegionModal}
-        transparent={true}
-        animationType="slide"
-        onRequestClose={() => setShowRegionModal(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>지역 선택</Text>
-              <TouchableOpacity onPress={() => setShowRegionModal(false)}>
-                <Text style={styles.modalCloseButton}>닫기</Text>
-              </TouchableOpacity>
-            </View>
-            <FlatList
-              data={regions}
-              keyExtractor={(item) => item.code}
-              renderItem={({ item }) => (
-                <TouchableOpacity
-                  style={[
-                    styles.regionItem,
-                    region === item.code && styles.regionItemSelected,
-                  ]}
-                  onPress={() => {
-                    setRegion(item.code);
-                    setRegionName(item.name);
-                    setShowRegionModal(false);
-                    if (errors.region) {
-                      setErrors({ ...errors, region: '' });
-                    }
-                  }}
-                >
-                  <Text style={[
-                    styles.regionItemText,
-                    region === item.code && styles.regionItemTextSelected,
-                  ]}>{item.name}</Text>
-                </TouchableOpacity>
-              )}
-            />
-          </View>
-        </View>
-      </Modal>
 
-      {/* 출생연도 선택 모달 */}
-      <Modal
-        visible={showBirthYearModal}
-        transparent={true}
-        animationType="slide"
-        onRequestClose={() => setShowBirthYearModal(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>출생연도 선택</Text>
-              <TouchableOpacity onPress={() => setShowBirthYearModal(false)}>
-                <Text style={styles.modalCloseButton}>닫기</Text>
-              </TouchableOpacity>
-            </View>
-            <FlatList
-              data={birthYears}
-              keyExtractor={(item) => item.toString()}
-              renderItem={({ item }) => (
-                <TouchableOpacity
-                  style={[
-                    styles.regionItem,
-                    birthYear === item && styles.regionItemSelected,
-                  ]}
-                  onPress={() => {
-                    setBirthYear(item);
-                    setShowBirthYearModal(false);
-                    if (errors.birthYear) {
-                      setErrors({ ...errors, birthYear: '' });
-                    }
-                  }}
-                >
-                  <Text style={[
-                    styles.regionItemText,
-                    birthYear === item && styles.regionItemTextSelected,
-                  ]}>{item}년</Text>
-                </TouchableOpacity>
-              )}
-            />
-          </View>
-        </View>
-      </Modal>
+      {/* 인증번호 발송 알림 모달 */}
+      <AlertModal
+        visible={showVerificationModal}
+        title="인증번호 발송"
+        message="이메일로 인증번호를 보냈습니다. 인증번호를 입력해주세요."
+        buttonText="확인"
+        onClose={() => setShowVerificationModal(false)}
+      />
 
       <View style={styles.buttonContainer}>
         <Button
@@ -866,6 +922,22 @@ const styles = StyleSheet.create({
     }),
     includeFontPadding: false,
   },
+  emailRow: {
+    flexDirection: 'row',
+    gap: spacing[2],
+    alignItems: 'flex-start',
+  },
+  emailInputWrapper: {
+    flex: 1,
+    minWidth: 0,
+  },
+  emailInputContainer: {
+    marginBottom: 0,
+  },
+  emailInputHeight: {
+    height: 36,
+    paddingVertical: spacing[1],
+  },
   verificationButton: {
     marginTop: spacing[1],
     height: 44,
@@ -874,6 +946,16 @@ const styles = StyleSheet.create({
     backgroundColor: colors.primary[500],
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  verificationButtonInline: {
+    height: 36,
+    minWidth: 90,
+    paddingHorizontal: spacing[2],
+    borderRadius: borderRadius.base,
+    backgroundColor: colors.primary[500],
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 0,
   },
   verificationButtonDisabled: {
     backgroundColor: colors.gray[300],
@@ -894,6 +976,48 @@ const styles = StyleSheet.create({
   verificationCodeContainer: {
     marginTop: spacing[4],
     gap: 0,
+  },
+  verificationCodeRow: {
+    flexDirection: 'row',
+    gap: spacing[2],
+    alignItems: 'flex-start',
+  },
+  verificationCodeInputWrapper: {
+    flex: 1,
+    minWidth: 0,
+  },
+  timerContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: spacing[2],
+    minWidth: 50,
+  },
+  timerContainerBelow: {
+    marginTop: -spacing[3],
+    paddingTop: 0,
+    alignItems: 'flex-start',
+    paddingLeft: spacing[3],
+  },
+  verifyButtonInline: {
+    height: 36,
+    minWidth: 107,
+    paddingHorizontal: spacing[3],
+    borderRadius: borderRadius.base,
+    backgroundColor: colors.primary[500],
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 0,
+  },
+  timerText: {
+    fontSize: typography.fontSize.base,
+    fontWeight: typography.fontWeight.medium,
+    color: colors.red[500],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
   },
   verifyButton: {
     marginTop: 0,
@@ -930,7 +1054,7 @@ const styles = StyleSheet.create({
   },
   genderButton: {
     flex: 1,
-    height: 44,
+    height: 100,
     borderRadius: borderRadius.base,
     borderWidth: 1,
     borderColor: colors.gray[300],
@@ -949,6 +1073,10 @@ const styles = StyleSheet.create({
       ios: typography.fontFamily.regular,
       android: typography.fontFamily.regular,
     }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
+    textAlignVertical: 'center',
+    ...(Platform.OS === 'android' && { paddingTop: 2 }),
   },
   genderButtonTextSelected: {
     color: colors.primary[600],
@@ -973,6 +1101,10 @@ const styles = StyleSheet.create({
       ios: typography.fontFamily.regular,
       android: typography.fontFamily.regular,
     }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
+    textAlignVertical: 'center',
+    ...(Platform.OS === 'android' && { paddingTop: 2 }),
   },
   dropdownPlaceholder: {
     color: colors.gray[400],
@@ -980,6 +1112,44 @@ const styles = StyleSheet.create({
   dropdownArrow: {
     fontSize: 12,
     color: colors.gray[400],
+  },
+  dropdownList: {
+    marginTop: spacing[1],
+    maxHeight: 200,
+    backgroundColor: colors.white,
+    borderRadius: borderRadius.base,
+    borderWidth: 1,
+    borderColor: colors.gray[300],
+    overflow: 'hidden',
+  },
+  dropdownScrollView: {
+    maxHeight: 200,
+  },
+  dropdownListItem: {
+    paddingVertical: spacing[3],
+    paddingHorizontal: spacing[4],
+    borderBottomWidth: 1,
+    borderBottomColor: colors.gray[100],
+  },
+  dropdownListItemFirst: {
+    paddingTop: spacing[2],
+  },
+  dropdownListItemSelected: {
+    backgroundColor: colors.primary[50],
+  },
+  dropdownListItemText: {
+    fontSize: typography.fontSize.sm,
+    color: colors.text.primary,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
+  },
+  dropdownListItemTextSelected: {
+    color: colors.primary[600],
+    fontWeight: typography.fontWeight.semibold,
   },
   // 모달 스타일
   modalOverlay: {
@@ -992,12 +1162,15 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: borderRadius.lg,
     borderTopRightRadius: borderRadius.lg,
     maxHeight: '70%',
+    paddingBottom: 0,
   },
   modalHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: spacing[4],
+    paddingHorizontal: spacing[3],
+    paddingTop: spacing[3],
+    paddingBottom: spacing[1],
     borderBottomWidth: 1,
     borderBottomColor: colors.gray[200],
   },
@@ -1019,10 +1192,14 @@ const styles = StyleSheet.create({
     }),
   },
   regionItem: {
-    paddingVertical: spacing[4],
-    paddingHorizontal: spacing[5],
+    paddingTop: spacing[2],
+    paddingBottom: spacing[2],
+    paddingHorizontal: spacing[4],
     borderBottomWidth: 1,
     borderBottomColor: colors.gray[100],
+  },
+  regionItemFirst: {
+    paddingTop: spacing[1],
   },
   regionItemSelected: {
     backgroundColor: colors.primary[50],
@@ -1034,10 +1211,18 @@ const styles = StyleSheet.create({
       ios: typography.fontFamily.regular,
       android: typography.fontFamily.regular,
     }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
   },
   regionItemTextSelected: {
     color: colors.primary[600],
     fontWeight: typography.fontWeight.semibold,
+  },
+  modalListContent: {
+    paddingTop: 0,
+    paddingBottom: 0,
+    marginTop: 0,
+    marginBottom: 0,
   },
 });
 

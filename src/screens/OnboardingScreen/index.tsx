@@ -220,14 +220,15 @@ const styles = StyleSheet.create({
     minHeight: 40,
   },
   skipButtonText: {
-    fontSize: 13,
+    fontSize: typography.fontSize.sm,
     color: colors.gray[500],
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,
       android: typography.fontFamily.regular,
     }),
     includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(13),
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
+    letterSpacing: 0.2,
   },
   slideContainer: {
     width: SCREEN_WIDTH,
@@ -279,7 +280,7 @@ const styles = StyleSheet.create({
     resizeMode: 'cover', // cover로 변경하여 프레임을 채우도록
   },
   title: {
-    fontSize: 20,
+    fontSize: typography.fontSize['2xl'],
     color: colors.text.primary,
     textAlign: 'center',
     marginBottom: spacing[4],
@@ -288,11 +289,12 @@ const styles = StyleSheet.create({
       android: typography.fontFamily.regular,
     }),
     includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(20),
-    letterSpacing: 0.5,
+    lineHeight: getOptimizedLineHeight(typography.fontSize['2xl']),
+    letterSpacing: 0.3,
+    fontWeight: typography.fontWeight.medium,
   },
   description: {
-    fontSize: 14,
+    fontSize: typography.fontSize.base,
     color: colors.text.secondary,
     textAlign: 'center',
     fontFamily: Platform.select({
@@ -300,8 +302,8 @@ const styles = StyleSheet.create({
       android: typography.fontFamily.regular,
     }),
     includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(14),
-    letterSpacing: 0.3,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
+    letterSpacing: 0.2,
   },
   paginationContainer: {
     flexDirection: 'row',
@@ -329,15 +331,16 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   nextButtonText: {
-    fontSize: 16,
+    fontSize: typography.fontSize.lg,
     color: colors.white,
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,
       android: typography.fontFamily.regular,
     }),
     includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(16),
-    letterSpacing: 0.3,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.lg),
+    letterSpacing: 0.5,
+    fontWeight: typography.fontWeight.medium,
   },
   startButton: {
     width: '100%',
@@ -348,15 +351,16 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   startButtonText: {
-    fontSize: 16,
+    fontSize: typography.fontSize.lg,
     color: colors.white,
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,
       android: typography.fontFamily.regular,
     }),
     includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(16),
-    letterSpacing: 0.3,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.lg),
+    letterSpacing: 0.5,
+    fontWeight: typography.fontWeight.medium,
   },
 });
 

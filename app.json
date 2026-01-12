@@ -21,6 +21,18 @@
     "ios": {
       "bundleIdentifier": "com.anonymous.replantmobileapp"
     },
-    "main": "index.js"
+    "main": "index.js",
+    "plugins": [
+      [
+        "expo-font",
+        {
+          "fonts": [
+            "./src/assets/fonts/Neo-Regular.ttf",
+            "./src/assets/fonts/Maplestory Bold.ttf",
+            "./src/assets/fonts/Maplestory Light.ttf"
+          ]
+        }
+      ]
+    ]
   }
 }

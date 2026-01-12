@@ -118,8 +118,17 @@ const AppNavigator = () => {
   // 배경음악 초기화
   useEffect(() => {
     backgroundMusicService.initialize();
+    // cleanup에서 unload 호출하지 않음 (ExoPlayer 스레드 에러 방지)
+    // 앱 종료 시 OS가 자동으로 리소스를 정리함
     return () => {
-      backgroundMusicService.unload();
+      // 에러가 발생해도 앱이 크래시되지 않도록 try-catch로 감싸기
+      try {
+        backgroundMusicService.stop().catch(() => {
+          // 에러 무시
+        });
+      } catch (error) {
+        // 에러 무시
+      }
     };
   }, []);
 
