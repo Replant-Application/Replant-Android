@@ -30,12 +30,6 @@ const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 const ONBOARDING_SLIDES: OnboardingSlide[] = [
   {
-    id: 1,
-    image: require('../../assets/images/Replant_Loading.png'),
-    title: 'Replant에 오신 것을 환영합니다',
-    description: '다시 살아갈 당신에게 희망을 🍀',
-  },
-  {
     id: 2,
     image: require('../../assets/images/onboarding_first.png'),
     title: '투두리스트로 하루를 계획하기',
@@ -102,9 +96,8 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onNavigate }) => {
   }).current;
 
   const renderSlide = ({ item, index }: { item: OnboardingSlide; index: number }) => {
-    // 스크린샷 이미지인지 확인 (id가 1은 일반 이미지, id가 2, 3, 4, 5인 경우는 스크린샷)
-    // index 0은 id 1 (일반 이미지), index 1부터는 스크린샷
-    const isScreenshot = index >= 1;
+    // 모든 슬라이드가 스크린샷 이미지
+    const isScreenshot = true;
     
     return (
       <View style={styles.slideContainer}>

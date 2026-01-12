@@ -10,7 +10,6 @@ import { apiClient } from '../api/client';
 import { logout } from '../services/authService';
 import { backgroundMusicService } from '../services/backgroundMusicService';
 import { playButtonSound } from '../utils/soundUtils';
-import { isOnboardingCompleted } from '../services/onboardingService';
 
 // 화면 컴포넌트들
 import OnboardingScreen from '../screens/OnboardingScreen';
@@ -87,12 +86,8 @@ const AppNavigator = () => {
   useEffect(() => {
     const checkOnboardingAndSetScreen = async () => {
       if (!isLoggedIn) {
-        const completed = await isOnboardingCompleted();
-        if (!completed) {
-          setCurrentScreen(SCREEN_NAMES.ONBOARDING);
-        } else {
-          setCurrentScreen(SCREEN_NAMES.LOGIN);
-        }
+        // 항상 온보딩 표시 (건너뛰기 버튼으로 로그인 화면으로 이동 가능)
+        setCurrentScreen(SCREEN_NAMES.ONBOARDING);
       }
       setIsCheckingOnboarding(false);
     };
