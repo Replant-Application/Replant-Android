@@ -21,6 +21,7 @@ import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types/navigation';
 import { ScreenNames } from '../../types';
 import { WorryType } from '../../api/userApi';
+import { updateCustomMission } from '../../api/missionApi';
 
 interface CustomMissionCreateScreenProps {
   navigation: NavigationProp<RootStackParamList>;
@@ -83,6 +84,11 @@ const CustomMissionCreateScreen: React.FC<CustomMissionCreateScreenProps> = ({ n
   const { createCustomMission } = useMission();
   const generatedMission = route?.params?.generatedMission;
 
+  // 수정 모드 관련
+  const isEditMode = route?.params?.mode === 'edit';
+  const editMissionId = route?.params?.missionId;
+  const missionData = route?.params?.missionData;
+
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [selectedEmoji, setSelectedEmoji] = useState('🎯');
@@ -103,18 +109,33 @@ const CustomMissionCreateScreen: React.FC<CustomMissionCreateScreenProps> = ({ n
   const [showStartTimePicker, setShowStartTimePicker] = useState(false);
   const [showEndTimePicker, setShowEndTimePicker] = useState(false);
 
+  // 수정 모드일 때 기존 데이터로 초기화
+  useEffect(() => {
+    if (isEditMode && missionData) {
+      setTitle(missionData.title || '');
+      setDescription(missionData.description || '');
+      setCategory((missionData.category as MissionCategoryOption) || 'DAILY_LIFE');
+      setVerificationType((missionData.verificationType as VerificationTypeOption) || 'COMMUNITY');
+      setIsChallenge(missionData.isChallenge || false);
+      setChallengeDays(missionData.challengeDays || 7);
+      setDeadlineDays(missionData.deadlineDays || 3);
+      setCustomExp(missionData.expReward || 50);
+      setWorryType((missionData.worryType as WorryType) || null);
+    }
+  }, [isEditMode, missionData]);
+
   // AI 생성 미션이 있으면 초기값 설정
   useEffect(() => {
-    if (generatedMission) {
+    if (generatedMission && !isEditMode) {
       setTitle(generatedMission.title || '');
       setDescription(generatedMission.description || '');
       setSelectedEmoji(generatedMission.emoji || '🎯');
       setDifficulty(generatedMission.difficulty || 'medium');
       setCustomExp(generatedMission.experience || 50);
     }
-  }, [generatedMission]);
+  }, [generatedMission, isEditMode]);
 
-  const handleCreateMission = async () => {
+  const handleSubmitMission = async () => {
     if (!title.trim()) {
       Alert.alert('오류', '미션 제목을 입력해주세요.');
       return;
@@ -129,7 +150,7 @@ const CustomMissionCreateScreen: React.FC<CustomMissionCreateScreenProps> = ({ n
       setLoading(true);
 
       // 백엔드 API 형식에 맞게 데이터 구성
-      const missionData = {
+      const missionPayload = {
         title: title.trim(),
         description: description.trim(),
         emoji: selectedEmoji,
@@ -151,12 +172,19 @@ const CustomMissionCreateScreen: React.FC<CustomMissionCreateScreenProps> = ({ n
         endTime: verificationType === 'TIME' ? formatTime(endTime) : undefined,
       };
 
-      const result = await createCustomMission(missionData);
+      let result;
+      if (isEditMode && editMissionId) {
+        // 수정 모드: updateCustomMission 호출
+        result = await updateCustomMission(editMissionId, missionPayload);
+      } else {
+        // 생성 모드: createCustomMission 호출
+        result = await createCustomMission(missionPayload);
+      }
 
       if (result.success) {
         Alert.alert(
           '성공!',
-          '나만의 미션이 생성되었습니다!',
+          isEditMode ? '미션이 수정되었습니다!' : '나만의 미션이 생성되었습니다!',
           [
             {
               text: '확인',
@@ -165,10 +193,10 @@ const CustomMissionCreateScreen: React.FC<CustomMissionCreateScreenProps> = ({ n
           ]
         );
       } else {
-        Alert.alert('오류', result.error || '미션 생성에 실패했습니다.');
+        Alert.alert('오류', result.error || (isEditMode ? '미션 수정에 실패했습니다.' : '미션 생성에 실패했습니다.'));
       }
     } catch (error) {
-      Alert.alert('오류', '미션 생성 중 오류가 발생했습니다.');
+      Alert.alert('오류', isEditMode ? '미션 수정 중 오류가 발생했습니다.' : '미션 생성 중 오류가 발생했습니다.');
     } finally {
       setLoading(false);
     }
@@ -215,7 +243,7 @@ const CustomMissionCreateScreen: React.FC<CustomMissionCreateScreenProps> = ({ n
     >
       {/* 헤더 */}
       <Header
-        title="미션 만들기"
+        title={isEditMode ? "미션 수정" : "미션 만들기"}
         leftButton={
           <TouchableOpacity onPress={() => navigation.goBack()}>
             <Image
@@ -517,8 +545,8 @@ const CustomMissionCreateScreen: React.FC<CustomMissionCreateScreenProps> = ({ n
           textStyle={styles.cancelButtonText}
         />
         <Button
-          title={loading ? "생성 중..." : "미션 생성"}
-          onPress={handleCreateMission}
+          title={loading ? (isEditMode ? "수정 중..." : "생성 중...") : (isEditMode ? "미션 수정" : "미션 생성")}
+          onPress={handleSubmitMission}
           style={StyleSheet.flatten([styles.button, styles.createButton])}
           disabled={loading}
         />

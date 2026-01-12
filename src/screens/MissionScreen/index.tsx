@@ -16,6 +16,7 @@ import * as Location from 'expo-location';
 import { formatDateYYYYMMDD } from '../../utils/dateUtils';
 import { logError } from '../../utils/logger';
 import { MissionScreenProps, MissionFilter, MissionTab } from './MissionScreen.types';
+import { getCurrentUser } from '../../services/authService';
 
 // 미션 도감용 통합 미션 타입
 interface UnifiedMission {
@@ -29,7 +30,13 @@ interface UnifiedMission {
   badgeDurationDays: number;
   participantCount?: number;
   isCustom: boolean;
+  creatorId?: number;
   creatorNickname?: string;
+  isChallenge?: boolean;
+  challengeDays?: number;
+  deadlineDays?: number;
+  isPublic?: boolean;
+  worryType?: string;
 }
 
 type MissionGroupTab = 'official' | 'custom';
@@ -65,6 +72,20 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
   const [selectedGroupMission, setSelectedGroupMission] = useState<UnifiedMission | null>(null);
   const [currentGroupPage, setCurrentGroupPage] = useState(0);
   const groupFlatListRef = useRef<FlatList>(null);
+
+  // 현재 사용자 ID (커스텀 미션 수정 권한 확인용)
+  const [currentUserId, setCurrentUserId] = useState<number | null>(null);
+
+  // 현재 사용자 정보 로드
+  useEffect(() => {
+    const loadCurrentUser = async () => {
+      const user = await getCurrentUser();
+      if (user?.id) {
+        setCurrentUserId(user.id);
+      }
+    };
+    loadCurrentUser();
+  }, []);
 
 
   // 필터링된 미션 목록 (진행중/인증대기/완료)
@@ -313,6 +334,8 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
     if (!selectedMissionForVerification) return;
 
     navigation.navigate('CommunityPostCreate', {
+      type: 'VERIFICATION', // 인증 게시글 타입
+      userMissionId: selectedMissionForVerification.user_mission_id, // 인증에 필요한 UserMission ID
       missionId: selectedMissionForVerification.mission_id,
       missionTitle: selectedMissionForVerification.title,
       missionEmoji: selectedMissionForVerification.emoji,
@@ -532,7 +555,13 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
             badgeDurationDays: m.badgeDurationDays,
             participantCount: m.participantCount,
             isCustom: true,
+            creatorId: m.creatorId,
             creatorNickname: m.creatorNickname,
+            isChallenge: m.isChallenge,
+            challengeDays: m.challengeDays,
+            deadlineDays: m.deadlineDays,
+            isPublic: m.isPublic,
+            worryType: m.worryType,
           }));
           setGroupMissions(unifiedMissions);
         }
@@ -1010,13 +1039,48 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
                                     </View>
                                   )}
 
-                                  <TouchableOpacity
-                                    style={styles.groupDetailButton}
-                                    onPress={() => navigation.navigate('MissionDetail', { missionId: String(selectedGroupMission.id) })}
-                                    activeOpacity={0.7}
-                                  >
-                                    <Text style={styles.groupDetailButtonText}>미션 상세 보기</Text>
-                                  </TouchableOpacity>
+                                  <View style={styles.groupDetailButtonRow}>
+                                    <TouchableOpacity
+                                      style={styles.groupDetailButton}
+                                      onPress={() => navigation.navigate('MissionDetail', { missionId: String(selectedGroupMission.id) })}
+                                      activeOpacity={0.7}
+                                    >
+                                      <Text style={styles.groupDetailButtonText}>미션 상세 보기</Text>
+                                    </TouchableOpacity>
+
+                                    {/* 생성자만 수정 버튼 표시 */}
+                                    {selectedGroupMission.isCustom &&
+                                     selectedGroupMission.creatorId === currentUserId && (
+                                      <TouchableOpacity
+                                        style={styles.editMissionButton}
+                                        onPress={() => {
+                                          navigation.navigate('CustomMissionCreate', {
+                                            mode: 'edit',
+                                            missionId: selectedGroupMission.id,
+                                            missionData: {
+                                              title: selectedGroupMission.title,
+                                              description: selectedGroupMission.description,
+                                              category: selectedGroupMission.category,
+                                              verificationType: selectedGroupMission.verificationType,
+                                              isChallenge: selectedGroupMission.isChallenge,
+                                              challengeDays: selectedGroupMission.challengeDays,
+                                              deadlineDays: selectedGroupMission.deadlineDays,
+                                              expReward: selectedGroupMission.expReward,
+                                              isPublic: selectedGroupMission.isPublic,
+                                              worryType: selectedGroupMission.worryType,
+                                            },
+                                          });
+                                        }}
+                                        activeOpacity={0.7}
+                                      >
+                                        <Image
+                                          source={require('../../assets/images/edit.png')}
+                                          style={styles.editMissionIcon}
+                                          resizeMode="contain"
+                                        />
+                                      </TouchableOpacity>
+                                    )}
+                                  </View>
                                 </View>
                               </View>
                             )}
@@ -1446,12 +1510,12 @@ const styles = StyleSheet.create({
     lineHeight: getOptimizedLineHeight(typography.fontSize.base),
   },
   groupDetailButton: {
+    flex: 1,
     backgroundColor: colors.green[500],
     paddingVertical: spacing[3],
     paddingHorizontal: spacing[4],
     borderRadius: borderRadius.md,
     alignItems: 'center',
-    marginTop: spacing[4],
   },
   groupDetailButtonText: {
     color: colors.white,
@@ -1463,6 +1527,24 @@ const styles = StyleSheet.create({
     }),
     includeFontPadding: false,
     lineHeight: getOptimizedLineHeight(typography.fontSize.base),
+  },
+  groupDetailButtonRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing[2],
+    marginTop: spacing[4],
+  },
+  editMissionButton: {
+    backgroundColor: colors.gray[200],
+    padding: spacing[3],
+    borderRadius: borderRadius.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  editMissionIcon: {
+    width: 20,
+    height: 20,
+    tintColor: colors.gray[600],
   },
   // 미션 만들기 버튼 스타일
   createMissionButton: {

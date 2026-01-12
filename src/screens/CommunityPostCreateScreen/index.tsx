@@ -20,6 +20,7 @@ import { Header, AlertModal } from '../../components/ui';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
 import { getOptimizedLineHeight } from '../../utils/textStyles';
 import { useCommunity } from '../../hooks/useCommunity';
+import { createVerificationPost } from '../../api/verificationApi';
 import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types/navigation';
 
@@ -36,6 +37,7 @@ const CommunityPostCreateScreen: React.FC<CommunityPostCreateScreenProps> = ({
   const params = route.params || {};
   const postType = params.type || 'VERIFICATION'; // GENERAL or VERIFICATION
   const isGeneralPost = postType === 'GENERAL';
+  const userMissionId = params.userMissionId; // 인증글 작성 시 필요한 UserMission ID
   const missionId = params.missionId || '';
   const missionTitle = isGeneralPost ? '자유게시판' : (params.missionTitle || '미션');
   const missionEmoji = isGeneralPost ? '📝' : (params.missionEmoji || '🎯');
@@ -52,20 +54,37 @@ const CommunityPostCreateScreen: React.FC<CommunityPostCreateScreenProps> = ({
       return;
     }
 
+    // 인증글인데 userMissionId가 없으면 오류
+    if (!isGeneralPost && !userMissionId) {
+      Alert.alert('오류', '미션 정보가 없습니다. 다시 시도해주세요.');
+      return;
+    }
+
     try {
       setLoading(true);
 
-      const postData = {
-        mission_id: missionId,
-        mission_title: missionTitle,
-        mission_emoji: missionEmoji,
-        title: title.trim() || missionTitle,
-        content: content.trim(),
-        images: photoUrl ? [photoUrl] : [],
-        category: postType, // GENERAL or VERIFICATION
-      };
+      let result;
 
-      const result = await createPost(postData);
+      if (isGeneralPost) {
+        // 일반 게시글: communityService 사용
+        const postData = {
+          mission_id: missionId,
+          mission_title: missionTitle,
+          mission_emoji: missionEmoji,
+          title: title.trim() || missionTitle,
+          content: content.trim(),
+          images: photoUrl ? [photoUrl] : [],
+          category: postType,
+        };
+        result = await createPost(postData);
+      } else {
+        // 인증 게시글: verificationApi 사용
+        result = await createVerificationPost({
+          userMissionId: userMissionId!,
+          content: content.trim(),
+          imageUrls: photoUrl ? [photoUrl] : undefined,
+        });
+      }
 
       if (result.success) {
         setShowSuccessModal(true);

@@ -257,7 +257,11 @@ const GraduateScreen: React.FC<GraduateScreenProps> = ({ navigation }) => {
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.actionButton}
-            onPress={() => navigation.navigate('CommunityPostCreate')}
+            onPress={() => navigation.navigate('CommunityPostCreate', {
+              type: 'GENERAL', // 일반 게시글 타입
+              missionTitle: '경험담 공유',
+              missionEmoji: '📝',
+            })}
           >
             <Text style={styles.actionIcon}>📝</Text>
             <View style={styles.actionContent}>

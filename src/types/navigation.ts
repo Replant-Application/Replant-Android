@@ -18,6 +18,20 @@ export type RootStackParamList = {
   };
   CustomMissionCreate: {
     generatedMission?: any;
+    mode?: 'create' | 'edit';  // 생성 또는 수정 모드
+    missionId?: number;        // 수정 모드일 때 미션 ID
+    missionData?: {            // 수정 모드일 때 기존 미션 데이터
+      title: string;
+      description: string;
+      category?: string;
+      verificationType?: string;
+      isChallenge?: boolean;
+      challengeDays?: number;
+      deadlineDays?: number;
+      expReward?: number;
+      isPublic?: boolean;
+      worryType?: string;
+    };
   };
   CounselingSelect: undefined;
   PlacesSearch: undefined;
@@ -36,9 +50,11 @@ export type RootStackParamList = {
   };
   Community: undefined;
   CommunityPostCreate: {
-    missionId: string;
-    missionTitle: string;
-    missionEmoji: string;
+    type?: 'GENERAL' | 'VERIFICATION'; // 게시글 타입
+    userMissionId?: number; // 인증글 작성 시 필요한 UserMission ID
+    missionId?: string;
+    missionTitle?: string;
+    missionEmoji?: string;
     photoUrl?: string;
   };
   CommunityPostDetail: {

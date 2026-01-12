@@ -379,6 +379,7 @@ const ContributorDashboardScreen: React.FC<ContributorDashboardScreenProps> = ({
             <TouchableOpacity
               style={styles.actionItem}
               onPress={() => navigation.navigate('CommunityPostCreate' as any, {
+                type: 'GENERAL', // 일반 게시글 타입
                 missionId: '',
                 missionTitle: '정보 공유',
                 missionEmoji: '📝',

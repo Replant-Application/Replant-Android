@@ -94,6 +94,8 @@ export const useMissionHandlers = ({
     const nav = navigation as { navigate: (screen: string, params: unknown) => void };
     const createPostScreen = ScreenNames.COMMUNITY_POST_CREATE || '';
     nav.navigate(createPostScreen, {
+      type: 'VERIFICATION', // 인증 게시글 타입
+      userMissionId: mission.user_mission_id, // 인증에 필요한 UserMission ID
       missionId: mission.mission_id,
       missionTitle: mission.title,
       missionEmoji: mission.emoji,
@@ -162,6 +164,8 @@ export const useMissionHandlers = ({
     const nav = navigation as { navigate: (screen: string, params: unknown) => void };
     const createPostScreen = ScreenNames.COMMUNITY_POST_CREATE || '';
     nav.navigate(createPostScreen, {
+      type: 'VERIFICATION', // 인증 게시글 타입
+      userMissionId: selectedMission.user_mission_id, // 인증에 필요한 UserMission ID
       missionId: selectedMission.mission_id,
       missionTitle: selectedMission.title,
       missionEmoji: selectedMission.emoji,
