@@ -89,7 +89,7 @@ const AppNavigator = () => {
         if (!completed) {
           setCurrentScreen(SCREEN_NAMES.ONBOARDING);
         } else {
-          setCurrentScreen(SCREEN_NAMES.START);
+          setCurrentScreen(SCREEN_NAMES.LOGIN);
         }
       }
       setIsCheckingOnboarding(false);
@@ -112,7 +112,7 @@ const AppNavigator = () => {
     apiClient.setOnTokenExpiredCallback(async () => {
     await logout();
     await userLogout();
-    setCurrentScreen(SCREEN_NAMES.START);
+    setCurrentScreen(SCREEN_NAMES.LOGIN);
     });
   }, [userLogout]);
 
@@ -298,7 +298,7 @@ const AppNavigator = () => {
         case SCREEN_NAMES.OAUTH_COMPLETE_SIGNUP:
           return <OAuthCompleteSignUpScreen onNavigate={handleAuthNavigate} route={route} />;
         default:
-          return <StartScreen onNavigate={handleAuthNavigate} />;
+          return <LoginScreen onNavigate={handleAuthNavigate} />;
       }
     };
 

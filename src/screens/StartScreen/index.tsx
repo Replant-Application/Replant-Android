@@ -1,20 +1,129 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Alert, Image, Platform } from 'react-native';
-import { spacing, typography } from '../../utils/designTokens';
+import React, { useState, useRef } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Image, Platform, Modal, Animated } from 'react-native';
+import FastImage from 'react-native-fast-image';
+import { spacing, typography, colors, borderRadius } from '../../utils/designTokens';
 import { getOptimizedLineHeight } from '../../utils/textStyles';
 import { SCREEN_NAMES } from '../../utils/constants';
+import { saveKeepLoggedIn } from '../../utils/tokenStorage';
+import { useUser } from '../../contexts/UserContext';
+import { AlertModal } from '../../components/ui';
+import { signInWithKakao } from '../../services/kakaoSignIn';
+import { signInWithGoogle } from '../../services/googleSignIn';
+import { loginWithOAuth } from '../../services/authService';
 
 interface StartScreenProps {
   onNavigate: (screen: string) => void;
 }
 
 const StartScreen: React.FC<StartScreenProps> = ({ onNavigate }) => {
+  const { login, refreshUser } = useUser();
+  const [isLoading, setIsLoading] = useState(false);
+  const [keepLoggedIn, setKeepLoggedIn] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [userName, setUserName] = useState('');
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertTitle, setAlertTitle] = useState('');
+  const [alertMessage, setAlertMessage] = useState('');
+  const modalScaleAnim = useRef(new Animated.Value(0)).current;
+  const modalFadeAnim = useRef(new Animated.Value(0)).current;
+
+  const showAlertModal = (title: string, message: string) => {
+    setAlertTitle(title);
+    setAlertMessage(message);
+    setShowAlert(true);
+  };
+
+  const handleOAuthLogin = async (provider: 'KAKAO' | 'GOOGLE') => {
+    if (isLoading) {
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      let providerAccessToken: string | null = null;
+
+      if (provider === 'KAKAO') {
+        providerAccessToken = await signInWithKakao();
+      } else if (provider === 'GOOGLE') {
+        providerAccessToken = await signInWithGoogle();
+      }
+
+      if (!providerAccessToken) {
+        setIsLoading(false);
+        return;
+      }
+
+      const result = await loginWithOAuth(provider, providerAccessToken);
+
+      if (result.success && result.data) {
+        const { user, isNewUser } = result.data;
+
+        // OAuth 로그인은 기본적으로 로그인 상태 유지
+        await saveKeepLoggedIn(true);
+
+        if (isNewUser) {
+          onNavigate(`${SCREEN_NAMES.OAUTH_COMPLETE_SIGNUP}?email=${encodeURIComponent(user.email)}&nickname=${encodeURIComponent(user.nickname || '')}&provider=${provider}`);
+          return;
+        }
+
+        setUserName(user.nickname || user.email);
+        setShowSuccessModal(true);
+        Animated.parallel([
+          Animated.spring(modalScaleAnim, {
+            toValue: 1,
+            useNativeDriver: true,
+            tension: 50,
+            friction: 7,
+          }),
+          Animated.timing(modalFadeAnim, {
+            toValue: 1,
+            duration: 300,
+            useNativeDriver: true,
+          }),
+        ]).start();
+      } else {
+        let errorMessage = '로그인에 실패했습니다.';
+        if (typeof result.error === 'string') {
+          errorMessage = result.error;
+        } else if (result.error && typeof result.error === 'object') {
+          const errorObj = result.error as any;
+          errorMessage = errorObj.message || errorObj.error || errorObj.msg || errorMessage;
+        }
+        
+        if (errorMessage.includes('회원가입에 실패') || errorMessage.includes('ACCOUNT-009')) {
+          errorMessage = '회원가입 처리 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.';
+        }
+        
+        showAlertModal('로그인 실패', errorMessage);
+      }
+    } catch (error) {
+      console.error('OAuth login error:', error);
+      const errorMessage = error instanceof Error 
+        ? error.message 
+        : '로그인 중 오류가 발생했습니다.';
+      showAlertModal('오류', errorMessage);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleKakaoLogin = () => {
-    Alert.alert('Kakao 계정으로 로그인', '카카오 로그인 기능은 준비 중입니다.');
+    try {
+      handleOAuthLogin('KAKAO');
+    } catch (error) {
+      console.error('Error in handleKakaoLogin:', error);
+      showAlertModal('오류', '카카오 로그인을 시작할 수 없습니다.');
+    }
   };
 
   const handleGoogleLogin = () => {
-    Alert.alert('Google 계정으로 로그인', '구글 로그인 기능은 준비 중입니다.');
+    try {
+      handleOAuthLogin('GOOGLE');
+    } catch (error) {
+      console.error('Error in handleGoogleLogin:', error);
+      showAlertModal('오류', '구글 로그인을 시작할 수 없습니다.');
+    }
   };
 
   const handleSignUp = () => {
@@ -42,29 +151,35 @@ const StartScreen: React.FC<StartScreenProps> = ({ onNavigate }) => {
 
       <View style={styles.buttonContainer}>
         <TouchableOpacity
-          style={styles.kakaoButton}
+          style={[styles.kakaoButton, isLoading && styles.buttonDisabled]}
           onPress={handleKakaoLogin}
           activeOpacity={0.8}
+          disabled={isLoading}
         >
           <Image
             source={require('../../assets/images/kakao_logo.png')}
             style={styles.kakaoLogo}
             resizeMode="contain"
           />
-          <Text style={styles.kakaoButtonText}>Kakao 계정으로 로그인</Text>
+          <Text style={styles.kakaoButtonText}>
+            {isLoading ? '처리 중...' : 'Kakao 계정으로 로그인'}
+          </Text>
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={styles.googleButton}
+          style={[styles.googleButton, isLoading && styles.buttonDisabled]}
           onPress={handleGoogleLogin}
           activeOpacity={0.8}
+          disabled={isLoading}
         >
           <Image
             source={require('../../assets/images/google_logo.png')}
             style={styles.googleLogo}
             resizeMode="contain"
           />
-          <Text style={styles.googleButtonText}>Google 계정으로 로그인</Text>
+          <Text style={styles.googleButtonText}>
+            {isLoading ? '처리 중...' : 'Google 계정으로 로그인'}
+          </Text>
         </TouchableOpacity>
 
         <View style={styles.textButtonContainer}>
@@ -85,6 +200,85 @@ const StartScreen: React.FC<StartScreenProps> = ({ onNavigate }) => {
           </TouchableOpacity>
         </View>
       </View>
+
+      {/* 성공 모달 */}
+      <Modal
+        visible={showSuccessModal}
+        transparent
+        animationType="none"
+        onRequestClose={() => {}}
+      >
+        <Animated.View
+          style={[
+            styles.modalOverlay,
+            {
+              opacity: modalFadeAnim,
+            },
+          ]}
+        >
+          <Animated.View
+            style={[
+              styles.modalContent,
+              {
+                transform: [{ scale: modalScaleAnim }],
+              },
+            ]}
+          >
+            <View style={styles.modalCharacterContainer}>
+              <FastImage
+                source={require('../../assets/images/smile_replant.gif')}
+                style={styles.modalCharacter}
+                resizeMode={FastImage.resizeMode.contain}
+                accessibilityLabel="환영하는 캐릭터"
+              />
+            </View>
+            <View style={styles.modalTextContainer}>
+              <Text style={styles.modalMessage}>
+                환영합니다! <Text style={styles.modalUserName}>{userName}</Text>님,{'\n'}
+                함께 성장해요 🌱
+              </Text>
+            </View>
+            <TouchableOpacity
+              style={styles.modalButton}
+              onPress={async () => {
+                Animated.parallel([
+                  Animated.timing(modalScaleAnim, {
+                    toValue: 0,
+                    duration: 200,
+                    useNativeDriver: true,
+                  }),
+                  Animated.timing(modalFadeAnim, {
+                    toValue: 0,
+                    duration: 200,
+                    useNativeDriver: true,
+                  }),
+                ]).start(() => {
+                  setShowSuccessModal(false);
+                  modalScaleAnim.setValue(0);
+                  modalFadeAnim.setValue(0);
+                });
+                await login(userName);
+                await refreshUser();
+                setTimeout(() => {
+                  onNavigate((SCREEN_NAMES.HOME || 'Home') as string);
+                }, 100);
+              }}
+              activeOpacity={0.8}
+              accessibilityRole="button"
+              accessibilityLabel="시작하기"
+            >
+              <Text style={styles.modalButtonText}>시작하기</Text>
+            </TouchableOpacity>
+          </Animated.View>
+        </Animated.View>
+      </Modal>
+
+      <AlertModal
+        visible={showAlert}
+        title={alertTitle}
+        message={alertMessage}
+        onClose={() => setShowAlert(false)}
+      />
     </View>
   );
 };
@@ -203,6 +397,9 @@ const styles = StyleSheet.create({
     }),
     includeFontPadding: false,
   },
+  buttonDisabled: {
+    opacity: 0.6,
+  },
   textButtonContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -233,6 +430,69 @@ const styles = StyleSheet.create({
     }),
     includeFontPadding: false,
     lineHeight: getOptimizedLineHeight(14),
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    backgroundColor: colors.background.primary,
+    borderRadius: borderRadius.xl,
+    padding: spacing[5],
+    width: '80%',
+    maxWidth: 300,
+    alignItems: 'center',
+  },
+  modalCharacterContainer: {
+    width: 70,
+    height: 70,
+    marginBottom: spacing[3],
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  modalCharacter: {
+    width: '100%',
+    height: '100%',
+  },
+  modalTextContainer: {
+    alignItems: 'center',
+    marginBottom: spacing[5],
+  },
+  modalUserName: {
+    fontWeight: typography.fontWeight.medium,
+    color: colors.primary[600],
+  },
+  modalMessage: {
+    fontSize: typography.fontSize.lg,
+    color: colors.text.primary,
+    textAlign: 'center',
+    lineHeight: 22,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+  },
+  modalButton: {
+    width: '100%',
+    height: 44,
+    backgroundColor: colors.primary[500],
+    borderRadius: borderRadius.base,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalButtonText: {
+    fontSize: typography.fontSize.base,
+    lineHeight: 22,
+    fontWeight: typography.fontWeight.medium,
+    color: colors.text.inverse,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
   },
 });
 

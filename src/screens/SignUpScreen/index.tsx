@@ -357,7 +357,7 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onNavigate }) => {
         title="회원가입"
         leftButton={
           <TouchableOpacity
-            onPress={() => onNavigate(SCREEN_NAMES.START as string)}
+            onPress={() => onNavigate(SCREEN_NAMES.LOGIN as string)}
             style={styles.backButton}
             accessibilityRole="button"
             accessibilityLabel="뒤로가기"
