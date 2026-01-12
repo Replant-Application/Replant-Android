@@ -28,6 +28,8 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onNavigate }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [timer, setTimer] = useState<number>(0); // 타이머 초 단위
   const [showVerificationModal, setShowVerificationModal] = useState(false);
+  const [showVerificationCompleteModal, setShowVerificationCompleteModal] = useState(false);
+  const [showSignUpCompleteModal, setShowSignUpCompleteModal] = useState(false);
 
   // 성별, 지역, 출생연도 상태
   const [gender, setGender] = useState<'MALE' | 'FEMALE' | null>(null);
@@ -179,7 +181,7 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onNavigate }) => {
         if (result.data === true) {
           setIsEmailVerified(true);
           setTimer(0);
-          Alert.alert('인증 완료', '이메일 인증이 완료되었습니다.');
+          setShowVerificationCompleteModal(true);
         } else {
           setErrors({ ...errors, email: '', verificationCode: '인증번호가 올바르지 않습니다.' });
         }
@@ -328,15 +330,8 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onNavigate }) => {
         // API 클라이언트에 토큰 설정
         apiClient.setAccessToken(finalAccessToken || null);
 
-        // 로컬 로그인 처리
-        await login(name);
-
-        Alert.alert('회원가입 완료', '환영합니다!\n홈 화면으로 이동합니다.', [
-          {
-            text: '확인',
-            onPress: () => onNavigate(SCREEN_NAMES.HOME as string),
-          },
-        ]);
+        // 회원가입 완료 모달 표시 (로그인 처리 전에 먼저 표시)
+        setShowSignUpCompleteModal(true);
       } else {
         Alert.alert('회원가입 실패', result.error || '회원가입에 실패했습니다.\n잠시 후 다시 시도해주세요.');
       }
@@ -432,9 +427,7 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onNavigate }) => {
             </View>
             {isEmailVerified && (
               <View style={styles.verifiedBadgeContainer}>
-                <View style={styles.verifiedBadge}>
-                  <Text style={styles.verifiedText}>✓ 인증완료</Text>
-                </View>
+                <Text style={styles.verifiedText}>이메일 인증이 완료되었습니다.</Text>
               </View>
             )}
             {errors.email ? <Text style={styles.errorText}>{errors.email}</Text> : null}
@@ -460,9 +453,16 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onNavigate }) => {
                           maxLength={6}
                           returnKeyType="done"
                           blurOnSubmit={true}
-                          inputStyle={[styles.inputText, styles.emailInputHeight]}
+                          inputStyle={[styles.inputText, styles.emailInputHeight, styles.verificationCodeInputWithTimer]}
                           style={styles.emailInputContainer}
                         />
+                        {timer > 0 && !isEmailVerified && (
+                          <View style={styles.timerInsideInput}>
+                            <Text style={styles.timerText}>
+                              {Math.floor(timer / 60)}:{(timer % 60).toString().padStart(2, '0')}
+                            </Text>
+                          </View>
+                        )}
                       </View>
                       {timer > 0 ? (
                         <TouchableOpacity
@@ -498,13 +498,6 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onNavigate }) => {
                         </TouchableOpacity>
                       )}
                     </View>
-                    {timer > 0 && (
-                      <View style={styles.timerContainerBelow}>
-                        <Text style={styles.timerText}>
-                          {Math.floor(timer / 60)}:{(timer % 60).toString().padStart(2, '0')}
-                        </Text>
-                      </View>
-                    )}
                     {errors.verificationCode ? <Text style={styles.errorText}>{errors.verificationCode}</Text> : null}
                   </View>
                 )}
@@ -755,6 +748,33 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onNavigate }) => {
         onClose={() => setShowVerificationModal(false)}
       />
 
+      <AlertModal
+        visible={showVerificationCompleteModal}
+        title="인증 완료"
+        message="이메일 인증이 완료되었습니다."
+        buttonText="확인"
+        onClose={() => setShowVerificationCompleteModal(false)}
+      />
+
+      <AlertModal
+        visible={showSignUpCompleteModal}
+        title="회원가입 완료"
+        message="환영합니다! 지금의 나에서 한 단계 더 성장해보세요."
+        buttonText="시작하기"
+        onClose={async () => {
+          setShowSignUpCompleteModal(false);
+          // 모달이 닫힌 후 로그인 처리 및 홈으로 이동
+          try {
+            await login(nickname);
+          } catch (error) {
+            console.error('Login error after signup:', error);
+          }
+          setTimeout(() => {
+            onNavigate(SCREEN_NAMES.HOME as string);
+          }, 100);
+        }}
+      />
+
       <View style={styles.buttonContainer}>
         <Button
           title={isLoading ? '처리 중...' : '회원가입'}
@@ -905,23 +925,13 @@ const styles = StyleSheet.create({
   },
   verifiedBadgeContainer: {
     marginTop: spacing[1],
-  },
-  verifiedBadge: {
-    backgroundColor: colors.green[100],
-    paddingHorizontal: spacing[3],
-    paddingVertical: spacing[2],
-    borderRadius: borderRadius.base,
-    borderWidth: 1,
-    borderColor: colors.green[300],
-    alignItems: 'center',
-    justifyContent: 'center',
+    paddingLeft: spacing[1],
   },
   verifiedText: {
     fontSize: typography.fontSize.sm,
     lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
-    color: colors.green[700],
-    fontWeight: typography.fontWeight.semibold,
-    textAlign: 'center',
+    color: colors.green[600],
+    fontWeight: typography.fontWeight.medium,
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,
       android: typography.fontFamily.regular,
@@ -991,6 +1001,19 @@ const styles = StyleSheet.create({
   verificationCodeInputWrapper: {
     flex: 1,
     minWidth: 0,
+    position: 'relative',
+  },
+  verificationCodeInputWithTimer: {
+    paddingRight: 60,
+  },
+  timerInsideInput: {
+    position: 'absolute',
+    right: spacing[3],
+    top: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+    pointerEvents: 'none',
   },
   timerContainer: {
     justifyContent: 'center',
@@ -1015,7 +1038,7 @@ const styles = StyleSheet.create({
     marginTop: 0,
   },
   timerText: {
-    fontSize: typography.fontSize.base,
+    fontSize: typography.fontSize.sm,
     fontWeight: typography.fontWeight.medium,
     color: colors.red[500],
     fontFamily: Platform.select({
@@ -1023,7 +1046,7 @@ const styles = StyleSheet.create({
       android: typography.fontFamily.regular,
     }),
     includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
   },
   verifyButton: {
     marginTop: 0,
