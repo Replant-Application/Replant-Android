@@ -355,7 +355,7 @@ export const searchId = async (
  * GET /api/auth/regions
  */
 export const getRegions = async (): Promise<ServiceResult<RegionInfo[]>> => {
-  return apiClient.get<RegionInfo[]>('/api/auth/regions');
+  return apiClient.get<RegionInfo[]>('/auth/regions');
 };
 
 /**
@@ -363,5 +363,5 @@ export const getRegions = async (): Promise<ServiceResult<RegionInfo[]>> => {
  * GET /api/auth/genders
  */
 export const getGenders = async (): Promise<ServiceResult<GenderInfo[]>> => {
-  return apiClient.get<GenderInfo[]>('/api/auth/genders');
+  return apiClient.get<GenderInfo[]>('/auth/genders');
 };
