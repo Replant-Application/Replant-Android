@@ -1,32 +1,40 @@
-import React, { useMemo, useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions, ImageBackground, Animated, Image, PanResponder, Platform } from 'react-native';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions, ImageBackground, Animated, PanResponder, Platform, ActivityIndicator, Modal, Alert, Image } from 'react-native';
 import FastImage from 'react-native-fast-image';
 import { useCharacter } from '../../hooks/useCharacter';
-import { useMission } from '../../hooks/useMission';
-import { Loading, ErrorBoundary, EmptyState, AppHeader, SimpleTabBar } from '../../components/ui';
+import { Loading, ErrorBoundary, AppHeader } from '../../components/ui';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
 import { getOptimizedLineHeight } from '../../utils/textStyles';
 import { getCharacterImage } from '../../utils/characterUtils';
 import { HomeScreenProps } from './HomeScreen.types';
 import { getBackgroundImage } from './HomeScreen.utils';
+import { getActiveTodoLists } from '../../api/todolistApi';
+import { getActiveChallenges, completeTodayChallenge } from '../../api/challengeApi';
+import { getActiveRoutines, UserRoutine, formatTimeDisplay, getRoutineIcon } from '../../api/routineApi';
+import { TodoList, Challenge } from '../../types/todolist';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const { characters, error: characterError } = useCharacter();
-  const { missions, loading: missionLoading, error: missionError } = useMission();
-  
+
   // 배경 이미지 상태 및 애니메이션
   const [backgroundType, setBackgroundType] = useState<'day' | 'night'>(getBackgroundImage());
   const fadeAnim = useRef(new Animated.Value(1)).current;
 
-  // 필터 상태
-  const [filter, setFilter] = useState<'all' | 'completed' | 'inProgress'>('all');
+  // 투두리스트, 챌린지, 루틴 상태
+  const [activeTodoLists, setActiveTodoLists] = useState<TodoList[]>([]);
+  const [challenges, setChallenges] = useState<Challenge[]>([]);
+  const [routines, setRoutines] = useState<UserRoutine[]>([]);
+  const [dataLoading, setDataLoading] = useState(true);
+  const [dataError, setDataError] = useState<string | null>(null);
+  const [completingChallengeId, setCompletingChallengeId] = useState<number | null>(null);
 
   // 말풍선 표시 상태
   const [showSpeechBubble, setShowSpeechBubble] = useState(false);
   const speechBubbleAnim = useRef(new Animated.Value(0)).current;
-  
+
+
   // 캐릭터 감정 상태
   const [characterEmotion, setCharacterEmotion] = useState<'default' | 'happy'>('default');
 
@@ -34,8 +42,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const [_isHeroCollapsed, setIsHeroCollapsed] = useState(false);
 
   // 캐릭터 영역 슬라이딩 상태
-  const MIN_HERO_HEIGHT = SCREEN_HEIGHT * 0.2;  // 최소 높이
-  const MAX_HERO_HEIGHT = SCREEN_HEIGHT * 0.45; // 최대 높이 (기본값)
+  const MIN_HERO_HEIGHT = SCREEN_HEIGHT * 0.1;
+  const MAX_HERO_HEIGHT = SCREEN_HEIGHT * 0.45;
   const heroHeightAnim = useRef(new Animated.Value(MAX_HERO_HEIGHT)).current;
 
   // PanResponder 설정
@@ -43,24 +51,17 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
     PanResponder.create({
       onStartShouldSetPanResponder: () => true,
       onMoveShouldSetPanResponder: (_, gestureState) => {
-        // 수직 움직임이 더 클 때만 반응
         return Math.abs(gestureState.dy) > Math.abs(gestureState.dx) && Math.abs(gestureState.dy) > 10;
       },
       onPanResponderMove: (_, gestureState) => {
-        // 현재 높이에서 드래그 거리만큼 변경
         const currentHeight = (heroHeightAnim as any)._value;
         let newHeight = currentHeight + gestureState.dy * 0.5;
-
-        // 범위 제한
         newHeight = Math.max(MIN_HERO_HEIGHT, Math.min(MAX_HERO_HEIGHT, newHeight));
         heroHeightAnim.setValue(newHeight);
       },
       onPanResponderRelease: (_, gestureState) => {
         const currentHeight = (heroHeightAnim as any)._value;
-
-        // 드래그 방향에 따라 스냅
         if (gestureState.dy < -30) {
-          // 위로 드래그: 축소
           setIsHeroCollapsed(true);
           Animated.spring(heroHeightAnim, {
             toValue: MIN_HERO_HEIGHT,
@@ -68,7 +69,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
             friction: 8,
           }).start();
         } else if (gestureState.dy > 30) {
-          // 아래로 드래그: 확대
           setIsHeroCollapsed(false);
           Animated.spring(heroHeightAnim, {
             toValue: MAX_HERO_HEIGHT,
@@ -76,7 +76,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
             friction: 8,
           }).start();
         } else {
-          // 중간 상태면 가까운 쪽으로 스냅
           const midPoint = (MIN_HERO_HEIGHT + MAX_HERO_HEIGHT) / 2;
           const willCollapse = currentHeight < midPoint;
           setIsHeroCollapsed(willCollapse);
@@ -93,19 +92,74 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   // 단일 캐릭터 시스템이므로 첫 번째 캐릭터 사용
   const currentCharacter = characters.length > 0 ? characters[0] : null;
 
+  // 데이터 로딩 - 각 API 개별적으로 안전하게 처리
+  const loadData = useCallback(async () => {
+    try {
+      setDataLoading(true);
+      setDataError(null);
+
+      // 투두리스트 로드 (개별 try-catch)
+      try {
+        const todoListResult = await getActiveTodoLists();
+        if (todoListResult?.success && Array.isArray(todoListResult.data)) {
+          setActiveTodoLists(todoListResult.data);
+        } else {
+          setActiveTodoLists([]);
+        }
+      } catch (e) {
+        console.log('투두리스트 로드 실패:', e);
+        setActiveTodoLists([]);
+      }
+
+      // 챌린지 로드 (개별 try-catch)
+      try {
+        const challengeResult = await getActiveChallenges();
+        if (challengeResult?.success && Array.isArray(challengeResult.data)) {
+          setChallenges(challengeResult.data);
+        } else {
+          setChallenges([]);
+        }
+      } catch (e) {
+        console.log('챌린지 로드 실패:', e);
+        setChallenges([]);
+      }
+
+      // 루틴 로드 (개별 try-catch)
+      try {
+        const routineData = await getActiveRoutines();
+        if (Array.isArray(routineData)) {
+          setRoutines(routineData);
+        } else {
+          setRoutines([]);
+        }
+      } catch (e) {
+        console.log('루틴 로드 실패:', e);
+        setRoutines([]);
+      }
+
+    } catch (error) {
+      console.log('데이터 로드 전체 실패:', error);
+      setDataError('데이터를 불러오는데 실패했습니다.');
+    } finally {
+      setDataLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
+
   // 시간에 따른 배경 변경 감지
   useEffect(() => {
     const checkTime = () => {
       const newBackgroundType = getBackgroundImage();
       if (newBackgroundType !== backgroundType) {
-        // 페이드 아웃
         Animated.timing(fadeAnim, {
           toValue: 0,
           duration: 2000,
           useNativeDriver: true,
         }).start(() => {
           setBackgroundType(newBackgroundType);
-          // 페이드 인
           Animated.timing(fadeAnim, {
             toValue: 1,
             duration: 2000,
@@ -114,58 +168,40 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
         });
       }
     };
-    
-    // 초기 체크
+
     checkTime();
-    
-    // 1분마다 체크
     const interval = setInterval(checkTime, 60000);
-    
     return () => clearInterval(interval);
   }, [backgroundType, fadeAnim]);
 
-  // 필터링된 미션 목록
-  const filteredMissions = useMemo(() => {
-    if (filter === 'completed') {
-      return missions.filter(m => m.completed);
-    } else if (filter === 'inProgress') {
-      return missions.filter(m => !m.completed);
+  // 챌린지 완료 핸들러
+  const handleCompleteChallenge = async (challengeId: number) => {
+    try {
+      setCompletingChallengeId(challengeId);
+      const result = await completeTodayChallenge(challengeId);
+
+      if (result.success && result.data) {
+        setChallenges(prev =>
+          prev.map(c => c.id === challengeId ? result.data! : c)
+        );
+      }
+    } catch (error) {
+      // 에러 처리
+    } finally {
+      setCompletingChallengeId(null);
     }
-    return missions;
-  }, [missions, filter]);
-
-  // 통계 계산
-  const stats = useMemo(() => {
-    const completedMissions = missions.filter(m => m.completed).length;
-    const inProgressMissions = missions.filter(m => !m.completed).length;
-    const currentYear = new Date().getFullYear();
-    return {
-      completedMissions,
-      inProgressMissions,
-      currentYear,
-    };
-  }, [missions]);
-
-
-  // 미션 상세 보기 핸들러 (미션 페이지로 이동)
-  const handleViewMissionDetails = (_missionId: string): void => {
-    navigation.navigate('Mission' as any);
   };
 
-  // 캐릭터 클릭 핸들러 - 말풍선 표시 및 happy.gif로 변경
+  // 캐릭터 클릭 핸들러
   const handleCharacterPress = (): void => {
-    // happy.gif로 변경
     setCharacterEmotion('happy');
-    
     setShowSpeechBubble(true);
-    // 말풍선 페이드 인 애니메이션
     Animated.timing(speechBubbleAnim, {
       toValue: 1,
       duration: 300,
       useNativeDriver: true,
     }).start();
-    
-    // 3초 후 말풍선 자동 숨김 및 default로 복귀
+
     setTimeout(() => {
       Animated.timing(speechBubbleAnim, {
         toValue: 0,
@@ -185,12 +221,12 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
     }
   };
 
-  // 에러 처리 - 모든 hooks 호출 후에 처리
-  if (characterError || missionError) {
+  // 에러 처리
+  if (characterError) {
     return (
       <Animated.View style={[styles.container, { opacity: fadeAnim }]}>
         <ImageBackground
-          source={backgroundType === 'day' 
+          source={backgroundType === 'day'
             ? require('../../assets/images/day.png')
             : require('../../assets/images/night.png')
           }
@@ -198,7 +234,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
           resizeMode="cover"
         >
           <AppHeader navigation={navigation} />
-          <ErrorBoundary error={characterError || missionError || 'Unknown error'} />
+          <ErrorBoundary error={characterError || 'Unknown error'} />
         </ImageBackground>
       </Animated.View>
     );
@@ -207,7 +243,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   return (
     <Animated.View style={[styles.container, { opacity: fadeAnim }]}>
       <ImageBackground
-        source={backgroundType === 'day' 
+        source={backgroundType === 'day'
           ? require('../../assets/images/day.png')
           : require('../../assets/images/night.png')
         }
@@ -215,15 +251,14 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
         resizeMode="cover"
       >
         <AppHeader navigation={navigation} />
-        
-        {/* 상단: 큰 캐릭터 영역 (드래그로 크기 조절 가능) */}
+
+        {/* 상단: 큰 캐릭터 영역 */}
         <Animated.View
           style={[styles.heroSection, { height: heroHeightAnim }]}
           {...panResponder.panHandlers}
         >
           {currentCharacter && (
             <>
-              {/* 말풍선 - 클릭 시에만 표시 */}
               {showSpeechBubble && (
                 <Animated.View
                   style={[
@@ -255,7 +290,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                 </Animated.View>
               )}
 
-              {/* 큰 캐릭터 이미지 - 중앙에 배치 */}
               <TouchableOpacity
                 style={styles.characterImageContainer}
                 onPress={handleCharacterPress}
@@ -263,17 +297,16 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                 activeOpacity={0.9}
                 accessibilityRole="button"
                 accessibilityLabel={`${currentCharacter.name || '캐릭터'}, 레벨 ${currentCharacter.level || 1}`}
-                accessibilityHint="탭하여 말풍선 보기, 길게 눌러서 감정 변경"
+                accessibilityHint="탭하여 말풍선 보기, 길게 눌러서 상세 페이지로 이동"
               >
                 <Animated.View
                   style={[
                     styles.characterAnimatedContainer,
                     {
-                      // 높이에 따라 캐릭터 크기도 조절
                       transform: [{
                         scale: heroHeightAnim.interpolate({
                           inputRange: [MIN_HERO_HEIGHT, MAX_HERO_HEIGHT],
-                          outputRange: [0.6, 1],
+                          outputRange: [0.3, 1],
                           extrapolate: 'clamp',
                         }),
                       }],
@@ -293,150 +326,227 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
           )}
         </Animated.View>
 
-      {/* 하단: 바텀 시트 스타일 */}
-      <View style={styles.bottomSheet}>
-        {/* 도트 패턴 배경 */}
-        <View style={styles.dotPattern} pointerEvents="none">
-          {Array.from({ length: Math.ceil(SCREEN_HEIGHT / 20) }).map((_item, row) =>
-            Array.from({ length: Math.ceil(SCREEN_WIDTH / 20) }).map((_item2, col) => (
-              <View
-                key={`${row}-${col}`}
-                style={[
-                  styles.dot,
-                  {
-                    left: col * 20,
-                    top: row * 20,
-                  },
-                ]}
-              />
-            ))
-          )}
-        </View>
-        {/* 드래그 핸들 - 터치하면 토글 */}
-        <TouchableOpacity
-          style={styles.dragHandleArea}
-          onPress={() => {
-            // 현재 높이에 따라 접거나 펼치기
-            const currentHeight = (heroHeightAnim as any)._value;
-            const willCollapse = currentHeight > (MIN_HERO_HEIGHT + MAX_HERO_HEIGHT) / 2;
-            const targetHeight = willCollapse ? MIN_HERO_HEIGHT : MAX_HERO_HEIGHT;
-            setIsHeroCollapsed(willCollapse);
-            Animated.spring(heroHeightAnim, {
-              toValue: targetHeight,
-              useNativeDriver: false,
-              friction: 8,
-            }).start();
-          }}
-          activeOpacity={0.7}
-          accessibilityRole="button"
-          accessibilityLabel="캐릭터 영역 접기/펼치기"
-          accessibilityHint="캐릭터 영역의 크기를 조절합니다"
-        >
-          <View style={styles.dragHandleContainer} accessibilityElementsHidden={true}>
-            <View style={styles.dragHandleDot} />
-            <View style={styles.dragHandleDot} />
-            <View style={styles.dragHandleDot} />
-          </View>
-        </TouchableOpacity>
-        
-        <ScrollView
-          style={styles.contentScroll}
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={styles.contentScrollContent}
-          nestedScrollEnabled={true}
-          bounces={true}
-        >
-          {/* 나의 루틴 설정하기 탭 */}
-          <TouchableOpacity
-            style={styles.routineSettingTab}
-            onPress={() => navigation.navigate('RoutineSetting' as any)}
-            activeOpacity={0.7}
-            accessibilityRole="button"
-            accessibilityLabel="나의 루틴 설정하기"
-          >
-            <View style={styles.routineSettingLeft}>
-              <Text style={styles.routineSettingIcon}>⚙️</Text>
-              <View>
-                <Text style={styles.routineSettingTitle}>나의 루틴 설정하기</Text>
-                <Text style={styles.routineSettingSubtitle}>기상시간, 다짐, 매일 갈 장소 등</Text>
-              </View>
-            </View>
-            <Text style={styles.routineSettingArrow}>›</Text>
-          </TouchableOpacity>
-
-          {/* 메인 제목 */}
-          <View style={styles.mainHeader}>
-            <Text style={styles.mainTitle}>나의 목표</Text>
-            <View style={styles.simpleStats}>
-              <Text style={styles.simpleStatsText}>
-                진행 중 <Text style={styles.simpleStatsNumber}>{stats.inProgressMissions}</Text> ·
-                완료 <Text style={styles.simpleStatsNumber}>{stats.completedMissions}</Text>
-              </Text>
-            </View>
-          </View>
-
-          {/* 필터 탭 */}
-          <SimpleTabBar
-            tabs={[
-              { key: 'all', label: '전체' },
-              { key: 'completed', label: '완료' },
-              { key: 'inProgress', label: '진행중' },
-            ]}
-            activeTab={filter}
-            onTabChange={(tabId) => setFilter(tabId as 'all' | 'completed' | 'inProgress')}
-            style={styles.tabBar}
-          />
-
-          {/* 미션 리스트 */}
-          <View style={styles.missionSection}>
-            {missionLoading ? (
-              <Loading text="미션을 불러오는 중..." />
-            ) : filteredMissions.length > 0 ? (
-              filteredMissions.map((mission) => (
-                <TouchableOpacity
-                  key={mission.mission_id}
-                  style={styles.missionListItem}
-                  onPress={() => handleViewMissionDetails(mission.mission_id)}
-                  activeOpacity={0.7}
-                  accessibilityRole="button"
-                  accessibilityLabel={`${mission.title}, ${mission.completed ? '완료' : '진행중'}`}
-                >
-                  <View style={styles.missionListItemLeft}>
-                    {mission.completed ? (
-                      <Image
-                        source={require('../../assets/images/check2.png')}
-                        style={styles.missionCompletedIcon}
-                        resizeMode="contain"
-                        accessibilityElementsHidden={true}
-                      />
-                    ) : (
-                      <View style={styles.missionInProgressIcon} accessibilityElementsHidden={true} />
-                    )}
-                    <Text style={styles.missionListItemTitle}>{mission.title}</Text>
-                  </View>
-                  <Text style={styles.missionListItemArrow} accessibilityElementsHidden={true}>›</Text>
-                </TouchableOpacity>
+        {/* 하단: 바텀 시트 스타일 */}
+        <View style={styles.bottomSheet}>
+          {/* 도트 패턴 배경 */}
+          <View style={styles.dotPattern} pointerEvents="none">
+            {Array.from({ length: Math.ceil(SCREEN_HEIGHT / 20) }).map((_item, row) =>
+              Array.from({ length: Math.ceil(SCREEN_WIDTH / 20) }).map((_item2, col) => (
+                <View
+                  key={`${row}-${col}`}
+                  style={[
+                    styles.dot,
+                    {
+                      left: col * 20,
+                      top: row * 20,
+                    },
+                  ]}
+                />
               ))
-            ) : (
-              <EmptyState
-                icon=""
-                title={
-                  filter === 'completed'
-                    ? '완료된 목표가 없습니다'
-                    : filter === 'inProgress'
-                    ? '진행 중인 목표가 없습니다'
-                    : '목표가 없습니다'
-                }
-                description={
-                  filter === 'completed'
-                    ? '목표를 완료해보세요.'
-                    : '새로운 목표를 추가해보세요.'
-                }
-              />
             )}
           </View>
-        </ScrollView>
-      </View>
+
+          {/* 드래그 핸들 */}
+          <TouchableOpacity
+            style={styles.dragHandleArea}
+            onPress={() => {
+              const currentHeight = (heroHeightAnim as any)._value;
+              const willCollapse = currentHeight > (MIN_HERO_HEIGHT + MAX_HERO_HEIGHT) / 2;
+              const targetHeight = willCollapse ? MIN_HERO_HEIGHT : MAX_HERO_HEIGHT;
+              setIsHeroCollapsed(willCollapse);
+              Animated.spring(heroHeightAnim, {
+                toValue: targetHeight,
+                useNativeDriver: false,
+                friction: 8,
+              }).start();
+            }}
+            activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel="캐릭터 영역 접기/펼치기"
+          >
+            <View style={styles.dragHandleContainer} accessibilityElementsHidden={true}>
+              <View style={styles.dragHandleDot} />
+              <View style={styles.dragHandleDot} />
+              <View style={styles.dragHandleDot} />
+            </View>
+          </TouchableOpacity>
+
+          <ScrollView
+            style={styles.contentScroll}
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={styles.contentScrollContent}
+            nestedScrollEnabled={true}
+            bounces={true}
+          >
+            {dataLoading ? (
+              <Loading text="데이터를 불러오는 중..." />
+            ) : dataError ? (
+              <View style={styles.errorContainer}>
+                <Text style={styles.errorText}>{dataError}</Text>
+                <TouchableOpacity style={styles.retryButton} onPress={loadData}>
+                  <Text style={styles.retryButtonText}>다시 시도</Text>
+                </TouchableOpacity>
+              </View>
+            ) : (
+              <>
+                {/* 나의 루틴 설정 섹션 */}
+                <TouchableOpacity
+                  style={styles.routineSection}
+                  onPress={() => navigation.navigate('RoutineSetting' as any)}
+                  activeOpacity={0.7}
+                  accessibilityRole="button"
+                  accessibilityLabel="나의 루틴 설정"
+                >
+                  <View style={styles.sectionHeader}>
+                    <View style={styles.sectionTitleRow}>
+                      <Text style={styles.sectionIcon}>⚙️</Text>
+                      <Text style={styles.routineSectionTitle}>나의 루틴 설정</Text>
+                    </View>
+                    <Text style={styles.routineSectionArrow}>›</Text>
+                  </View>
+                  <View style={styles.sectionContent}>
+                    <Text style={styles.routineSectionCount}>
+                      {(routines || []).length}개 설정됨
+                    </Text>
+                    {(routines || []).length > 0 ? (
+                      <View style={styles.routinePreview}>
+                        {(routines || []).slice(0, 3).map((routine) => (
+                          <View key={routine?.id || Math.random()} style={styles.routinePreviewItem}>
+                            <Text style={styles.routinePreviewIcon}>
+                              {getRoutineIcon(routine?.routineType || 'CUSTOM')}
+                            </Text>
+                            <Text style={styles.routinePreviewTitle} numberOfLines={1}>
+                              {routine?.title || routine?.routineTypeName || '루틴'}
+                            </Text>
+                            <Text style={styles.routinePreviewValue} numberOfLines={1}>
+                              {routine?.valueTimeStart
+                                ? formatTimeDisplay(routine.valueTimeStart)
+                                : routine?.valueText || ''}
+                            </Text>
+                          </View>
+                        ))}
+                      </View>
+                    ) : (
+                      <Text style={styles.routineEmptyText}>
+                        기상시간, 장소 등을 설정해보세요
+                      </Text>
+                    )}
+                  </View>
+                </TouchableOpacity>
+
+                {/* 나의 투두리스트 섹션 */}
+                <TouchableOpacity
+                  style={styles.todoListSection}
+                  onPress={() => navigation.navigate('TodoList' as any)}
+                  activeOpacity={0.7}
+                  accessibilityRole="button"
+                  accessibilityLabel="나의 투두리스트"
+                >
+                  <View style={styles.sectionHeader}>
+                    <View style={styles.sectionTitleRow}>
+                      <Text style={styles.sectionIcon}>📋</Text>
+                      <Text style={styles.sectionTitle}>나의 투두리스트</Text>
+                    </View>
+                    <Text style={styles.sectionArrow}>›</Text>
+                  </View>
+                  <View style={styles.sectionContent}>
+                    <Text style={styles.sectionCount}>
+                      {(activeTodoLists || []).length}개 진행중
+                    </Text>
+                    {(activeTodoLists || []).length > 0 && (
+                      <View style={styles.todoListPreview}>
+                        {(activeTodoLists || []).slice(0, 2).map((todoList, index) => (
+                          <View key={todoList?.id || index} style={styles.todoListPreviewItem}>
+                            <Text style={styles.todoListPreviewTitle} numberOfLines={1}>
+                              {index + 1}. {todoList?.title || '투두리스트'}
+                            </Text>
+                            <Text style={styles.todoListPreviewProgress}>
+                              {todoList?.completedCount ?? 0}/{todoList?.totalCount ?? 0}
+                            </Text>
+                          </View>
+                        ))}
+                      </View>
+                    )}
+                  </View>
+                </TouchableOpacity>
+
+                {/* 나의 챌린지 섹션 */}
+                <View style={styles.challengeSection}>
+                  <View style={styles.challengeSectionHeader}>
+                    <View style={styles.sectionTitleRow}>
+                      <Text style={styles.sectionIcon}>🔥</Text>
+                      <Text style={styles.sectionTitle}>나의 챌린지</Text>
+                    </View>
+                    <Text style={styles.challengeCount}>{(challenges || []).length}개 진행중</Text>
+                  </View>
+
+                  {(challenges || []).length > 0 ? (
+                    (challenges || []).map((challenge) => (
+                      <View key={challenge?.id || Math.random()} style={styles.challengeCard}>
+                        <View style={styles.challengeCardHeader}>
+                          <Text style={styles.challengeTitle} numberOfLines={1}>
+                            {challenge?.missionTitle || '챌린지'}
+                          </Text>
+                          <View style={styles.challengeStreak}>
+                            <Text style={styles.streakIcon}>🔥</Text>
+                            <Text style={styles.streakText}>{challenge?.currentStreak ?? 0}일 연속</Text>
+                          </View>
+                        </View>
+
+                        <View style={styles.challengeProgressContainer}>
+                          <View style={styles.challengeProgressBar}>
+                            <View
+                              style={[
+                                styles.challengeProgressFill,
+                                { width: `${challenge?.progressRate ?? 0}%` }
+                              ]}
+                            />
+                          </View>
+                          <Text style={styles.challengeProgressText}>
+                            {challenge?.totalCompletedDays ?? 0}/{challenge?.durationDays ?? 0}일
+                          </Text>
+                        </View>
+
+                        <View style={styles.challengeCardFooter}>
+                          <Text style={styles.challengeRemaining}>
+                            D-{challenge?.remainingDays ?? 0}
+                          </Text>
+                          {challenge?.todayCompleted ? (
+                            <View style={styles.completedBadge}>
+                              <Text style={styles.completedBadgeText}>오늘 완료!</Text>
+                            </View>
+                          ) : (
+                            <TouchableOpacity
+                              style={styles.completeButton}
+                              onPress={() => challenge?.id && handleCompleteChallenge(challenge.id)}
+                              disabled={!challenge?.id || completingChallengeId === challenge.id}
+                              activeOpacity={0.7}
+                            >
+                              {completingChallengeId === challenge?.id ? (
+                                <ActivityIndicator size="small" color="#FFFFFF" />
+                              ) : (
+                                <Text style={styles.completeButtonText}>오늘 완료하기</Text>
+                              )}
+                            </TouchableOpacity>
+                          )}
+                        </View>
+                      </View>
+                    ))
+                  ) : (
+                    <View style={styles.emptyChallengeContainer}>
+                      <Text style={styles.emptyChallengeText}>
+                        진행 중인 챌린지가 없습니다
+                      </Text>
+                      <Text style={styles.emptyChallengeSubtext}>
+                        미션 도감에서 챌린지를 시작해보세요!
+                      </Text>
+                    </View>
+                  )}
+                </View>
+              </>
+            )}
+          </ScrollView>
+        </View>
       </ImageBackground>
     </Animated.View>
   );
@@ -517,14 +627,14 @@ const styles = StyleSheet.create({
   },
   bottomSheet: {
     flex: 1,
-    backgroundColor: '#FFFFFF', // 흰색 배경
+    backgroundColor: '#FFFFFF',
     borderTopLeftRadius: borderRadius.xl + 8,
     borderTopRightRadius: borderRadius.xl + 8,
-    borderColor: '#0E0F37', // 남색 테두리
+    borderColor: '#0E0F37',
     borderTopWidth: 12,
     borderLeftWidth: 12,
     borderRightWidth: 12,
-    borderBottomWidth: 0, // 바닥 테두리 제거
+    borderBottomWidth: 0,
     overflow: 'hidden',
     position: 'relative',
   },
@@ -570,196 +680,308 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   contentScrollContent: {
-    paddingHorizontal: spacing[3],
-    paddingBottom: 150, // 하단 탭바 높이 + 네비게이션바 + 여유 공간
+    paddingHorizontal: spacing[4],
+    paddingBottom: 150,
     flexGrow: 1,
   },
-  mainHeader: {
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: spacing[8],
+  },
+  errorText: {
+    fontSize: typography.fontSize.base,
+    color: colors.text.secondary,
+    marginBottom: spacing[4],
+  },
+  retryButton: {
+    backgroundColor: colors.primary[500],
+    paddingVertical: spacing[2],
+    paddingHorizontal: spacing[4],
+    borderRadius: borderRadius.md,
+  },
+  retryButtonText: {
+    color: '#FFFFFF',
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.medium,
+  },
+
+  // 루틴 설정 섹션 스타일
+  routineSection: {
+    backgroundColor: '#F3E5F5',
+    borderRadius: borderRadius.lg,
+    padding: spacing[4],
+    marginBottom: spacing[4],
+    borderWidth: 2,
+    borderColor: '#AB47BC',
+    shadowColor: '#9C27B0',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  routineSectionTitle: {
+    fontSize: typography.fontSize.lg,
+    fontWeight: typography.fontWeight.semibold,
+    color: '#7B1FA2',
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+  },
+  routineSectionArrow: {
+    fontSize: typography.fontSize['2xl'],
+    color: '#AB47BC',
+    fontWeight: typography.fontWeight.bold,
+  },
+  routineSectionCount: {
+    fontSize: typography.fontSize.sm,
+    color: '#8E24AA',
+    fontWeight: typography.fontWeight.medium,
+    marginBottom: spacing[2],
+  },
+  routinePreview: {
+    backgroundColor: 'rgba(255, 255, 255, 0.7)',
+    borderRadius: borderRadius.md,
+    padding: spacing[2],
+  },
+  routinePreviewItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: spacing[1],
+  },
+  routinePreviewIcon: {
+    fontSize: 16,
+    marginRight: spacing[2],
+    width: 24,
+    textAlign: 'center',
+  },
+  routinePreviewTitle: {
+    fontSize: typography.fontSize.sm,
+    color: '#7B1FA2',
+    flex: 1,
+  },
+  routinePreviewValue: {
+    fontSize: typography.fontSize.sm,
+    color: '#AB47BC',
+    fontWeight: typography.fontWeight.medium,
+    marginLeft: spacing[2],
+  },
+  routineEmptyText: {
+    fontSize: typography.fontSize.sm,
+    color: '#9C27B0',
+    fontStyle: 'italic',
+  },
+
+  // 투두리스트 섹션 스타일
+  todoListSection: {
+    backgroundColor: '#E3F2FD',
+    borderRadius: borderRadius.lg,
+    padding: spacing[4],
+    marginBottom: spacing[4],
+    borderWidth: 2,
+    borderColor: '#42A5F5',
+    shadowColor: '#2196F3',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: spacing[2],
-    paddingTop: spacing[3],
-    paddingBottom: spacing[2],
-    paddingHorizontal: spacing[3],
   },
-  mainTitle: {
+  sectionTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  sectionIcon: {
+    fontSize: 24,
+    marginRight: spacing[2],
+  },
+  sectionTitle: {
+    fontSize: typography.fontSize.lg,
+    fontWeight: typography.fontWeight.semibold,
+    color: '#1565C0',
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+  },
+  sectionArrow: {
     fontSize: typography.fontSize['2xl'],
-    fontWeight: typography.fontWeight.medium,
-    color: '#000000', // 책 제목 같은 어두운 갈색
-    lineHeight: getOptimizedLineHeight(typography.fontSize['2xl']),
-    letterSpacing: 0.5,
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    textShadowColor: 'rgba(139, 111, 71, 0.1)',
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 2,
+    color: '#42A5F5',
+    fontWeight: typography.fontWeight.bold,
   },
-  simpleStats: {
-    paddingVertical: spacing[1],
-    paddingHorizontal: spacing[2],
-    backgroundColor: '#F5F0E8', // 연한 베이지 배경
-    borderRadius: borderRadius.md,
-    borderWidth: 1,
-    borderColor: '#E8DCC8',
+  sectionContent: {
+    marginTop: spacing[2],
   },
-  simpleStatsText: {
+  sectionCount: {
     fontSize: typography.fontSize.sm,
-    color: '#8B6F47',
+    color: '#1976D2',
     fontWeight: typography.fontWeight.medium,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
-    letterSpacing: 0.3,
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
+    marginBottom: spacing[2],
   },
-  simpleStatsNumber: {
-    fontWeight: typography.fontWeight.medium,
-    color: '#5A4A3A',
-    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
-    letterSpacing: 0.3,
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
+  todoListPreview: {
+    backgroundColor: 'rgba(255, 255, 255, 0.7)',
+    borderRadius: borderRadius.md,
+    padding: spacing[2],
   },
-  tabBar: {
-    marginBottom: spacing[3],
-  },
-  missionSection: {
-    marginTop: spacing[1],
-  },
-  missionListItem: {
+  todoListPreviewItem: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: '#FFF8E7', // 책 페이지 같은 크림색
-    borderRadius: borderRadius.base,
-    paddingVertical: 8,
-    paddingHorizontal: spacing[3],
-    paddingLeft: spacing[4], // 왼쪽 여백을 더 크게 (책 등 부분 공간)
+    paddingVertical: spacing[1],
+  },
+  todoListPreviewTitle: {
+    fontSize: typography.fontSize.sm,
+    color: '#1565C0',
+    flex: 1,
+  },
+  todoListPreviewProgress: {
+    fontSize: typography.fontSize.sm,
+    color: '#42A5F5',
+    fontWeight: typography.fontWeight.medium,
+  },
+
+  // 챌린지 섹션 스타일
+  challengeSection: {
+    marginBottom: spacing[4],
+  },
+  challengeSectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: spacing[3],
+    paddingHorizontal: spacing[1],
+  },
+  challengeCount: {
+    fontSize: typography.fontSize.sm,
+    color: colors.text.secondary,
+    fontWeight: typography.fontWeight.medium,
+  },
+  challengeCard: {
+    backgroundColor: '#FFF3E0',
+    borderRadius: borderRadius.lg,
+    padding: spacing[4],
     marginBottom: spacing[3],
     borderWidth: 2,
-    borderColor: '#D4A574', // 책 표지 같은 갈색 테두리
-    borderLeftWidth: 6, // 왼쪽 테두리를 더 두껍게 (책 등 부분)
-    borderLeftColor: '#8B6F47', // 어두운 갈색 (책 등)
-    height: 48,
-    shadowColor: '#8B6F47',
-    shadowOffset: {
-      width: 2,
-      height: 2,
-    },
-    shadowOpacity: 0.2,
+    borderColor: '#FF9800',
+    shadowColor: '#FF9800',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
   },
-  missionListItemLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-    marginLeft: -4, // 왼쪽 테두리 공간 보정
-  },
-  missionCompletedIcon: {
-    width: 18,
-    height: 18,
-    marginRight: spacing[2],
-  },
-  missionInProgressIcon: {
-    width: 18,
-    height: 18,
-    backgroundColor: colors.gray[200],
-    borderRadius: borderRadius.base,
-    marginRight: spacing[2],
-    borderWidth: 1,
-    borderColor: colors.gray[300],
-  },
-  missionListItemTitle: {
-    fontSize: typography.fontSize.sm,
-    fontWeight: typography.fontWeight.normal,
-    color: colors.text.primary,
-    flex: 1,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
-    letterSpacing: 0,
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-  },
-  missionListItemArrow: {
-    fontSize: typography.fontSize.lg,
-    color: colors.gray[400],
-    fontWeight: typography.fontWeight.normal,
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-  },
-  routineSettingTab: {
+  challengeCardHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: '#E8F5E9', // 연한 초록색 배경
-    borderRadius: borderRadius.lg,
-    paddingVertical: spacing[3],
-    paddingHorizontal: spacing[4],
-    marginBottom: spacing[4],
-    borderWidth: 2,
-    borderColor: '#81C784', // 초록색 테두리
-    shadowColor: '#4CAF50',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 2,
+    marginBottom: spacing[3],
   },
-  routineSettingLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-  },
-  routineSettingIcon: {
-    fontSize: 24,
-    marginRight: spacing[3],
-  },
-  routineSettingTitle: {
+  challengeTitle: {
     fontSize: typography.fontSize.base,
     fontWeight: typography.fontWeight.semibold,
-    color: '#2E7D32', // 진한 초록색
-    marginBottom: spacing[0.5],
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
+    color: '#E65100',
+    flex: 1,
+    marginRight: spacing[2],
   },
-  routineSettingSubtitle: {
+  challengeStreak: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 152, 0, 0.2)',
+    paddingVertical: spacing[1],
+    paddingHorizontal: spacing[2],
+    borderRadius: borderRadius.full,
+  },
+  streakIcon: {
+    fontSize: 14,
+    marginRight: spacing[1],
+  },
+  streakText: {
     fontSize: typography.fontSize.xs,
-    color: '#558B2F', // 중간 초록색
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
+    color: '#E65100',
+    fontWeight: typography.fontWeight.medium,
   },
-  routineSettingArrow: {
-    fontSize: typography.fontSize.xl,
-    color: '#81C784',
+  challengeProgressContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: spacing[3],
+  },
+  challengeProgressBar: {
+    flex: 1,
+    height: 8,
+    backgroundColor: 'rgba(255, 152, 0, 0.2)',
+    borderRadius: borderRadius.full,
+    marginRight: spacing[2],
+    overflow: 'hidden',
+  },
+  challengeProgressFill: {
+    height: '100%',
+    backgroundColor: '#FF9800',
+    borderRadius: borderRadius.full,
+  },
+  challengeProgressText: {
+    fontSize: typography.fontSize.xs,
+    color: '#E65100',
+    fontWeight: typography.fontWeight.medium,
+    minWidth: 50,
+    textAlign: 'right',
+  },
+  challengeCardFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  challengeRemaining: {
+    fontSize: typography.fontSize.sm,
+    color: '#F57C00',
     fontWeight: typography.fontWeight.bold,
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
+  },
+  completedBadge: {
+    backgroundColor: '#4CAF50',
+    paddingVertical: spacing[1.5],
+    paddingHorizontal: spacing[3],
+    borderRadius: borderRadius.full,
+  },
+  completedBadgeText: {
+    fontSize: typography.fontSize.sm,
+    color: '#FFFFFF',
+    fontWeight: typography.fontWeight.medium,
+  },
+  completeButton: {
+    backgroundColor: '#FF9800',
+    paddingVertical: spacing[2],
+    paddingHorizontal: spacing[4],
+    borderRadius: borderRadius.md,
+    minWidth: 100,
+    alignItems: 'center',
+  },
+  completeButtonText: {
+    fontSize: typography.fontSize.sm,
+    color: '#FFFFFF',
+    fontWeight: typography.fontWeight.semibold,
+  },
+  emptyChallengeContainer: {
+    backgroundColor: '#F5F5F5',
+    borderRadius: borderRadius.lg,
+    padding: spacing[6],
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: colors.gray[200],
+    borderStyle: 'dashed',
+  },
+  emptyChallengeText: {
+    fontSize: typography.fontSize.base,
+    color: colors.text.secondary,
+    marginBottom: spacing[1],
+  },
+  emptyChallengeSubtext: {
+    fontSize: typography.fontSize.sm,
+    color: colors.text.tertiary,
   },
 });
 

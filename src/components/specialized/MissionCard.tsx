@@ -80,11 +80,9 @@ const MissionCard: React.FC<MissionCardProps> = ({
     return nameMap[categoryId] || '성장';
   };
 
-  // 미션 카드 클릭 핸들러
+  // 미션 카드 클릭 핸들러 - 항상 상세보기로 이동
   const handleCardPress = () => {
-    if (!readonly && !disabled && !mission.completed && onVerify) {
-      onVerify(mission, verificationType);
-    } else if (onViewDetails) {
+    if (onViewDetails) {
       onViewDetails(mission.mission_id);
     }
   };

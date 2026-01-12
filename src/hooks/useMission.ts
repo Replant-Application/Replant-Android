@@ -17,12 +17,10 @@ import { getData, setData, updateData, getStorageKeys } from '../services';
 import { deleteMissionPhoto as deleteMissionPhotoService } from '../services/missionService';
 import { useUser } from '../contexts/UserContext';
 import { logError } from '../utils/logger';
-import { sortMissionsByTitle, removeDuplicateMissions } from '../utils/missionUtils';
+import { sortMissionsByTitle } from '../utils/missionUtils';
 import { Mission, MissionData, UseMissionReturn, MissionCompletionResult, ServiceResult, ExperienceResult, MissionCategory } from '../types';
 import {
-  getSystemMissions,
   getUserMissions,
-  getCustomMissions,
   createCustomMission as createCustomMissionApi,
   updateCustomMission as updateCustomMissionApi,
   deleteCustomMission as deleteCustomMissionApi,
@@ -118,6 +116,7 @@ export const useMission = (
   const [error, setError] = useState<string | null>(null);
 
   // 미션 데이터 로드 (백엔드 API 사용)
+  // 투두리스트에 추가된 미션들만 로드 (UserMission 기반)
   const loadMissions = useCallback(async (): Promise<void> => {
     if (!currentNickname) return;
 
@@ -127,51 +126,23 @@ export const useMission = (
 
       const allMissions: Mission[] = [];
 
-      // 1. 공식 미션 불러오기
-      const officialMissionsResult = await getSystemMissions({ size: 100 });
-
-      if (officialMissionsResult.success && officialMissionsResult.data) {
-        allMissions.push(...officialMissionsResult.data.content.map(transformApiMission));
-      }
-
-      // 2. 사용자 미션 목록 불러오기 (할당된 미션, 완료된 미션 포함)
+      // 사용자 미션 목록만 불러오기 (투두리스트에 추가된 미션들)
       const userMissionsResult = await getUserMissions({ size: 100 });
       if (userMissionsResult.success && userMissionsResult.data) {
-        // 사용자 미션 상태를 시스템 미션에 반영
-        const userMissionMap = new Map<string, UserMission>();
+        // UserMission을 Mission 형식으로 변환
         userMissionsResult.data.content.forEach(um => {
-          const mission = um.mission || um.customMission;
-          if (mission) {
-            const key = um.missionType === 'CUSTOM' ? `custom_${mission.id}` : mission.id.toString();
-            userMissionMap.set(key, um);
-          }
-        });
-
-        // 시스템 미션에 사용자 상태 반영
-        allMissions.forEach(m => {
-          const userMission = userMissionMap.get(m.mission_id);
-          if (userMission) {
-            m.user_mission_id = userMission.id;
-            m.status = userMission.status; // 백엔드 상태 저장 (ASSIGNED, PENDING, COMPLETED, EXPIRED)
-            m.completed = userMission.status === 'COMPLETED';
-            m.verified = userMission.status === 'COMPLETED';
-            m.due_date = userMission.dueDate;
-            if (userMission.verification?.verifiedAt) {
-              m.completed_at = userMission.verification.verifiedAt;
-            }
+          try {
+            const mission = transformUserMission(um);
+            allMissions.push(mission);
+          } catch (e) {
+            // 미션 데이터가 없는 경우 스킵
+            logError('UserMission 변환 실패', e as Error, { userMissionId: um.id });
           }
         });
       }
 
-      // 3. 커스텀 미션 불러오기
-      const customMissionsResult = await getCustomMissions({ size: 50 });
-      if (customMissionsResult.success && customMissionsResult.data) {
-        allMissions.push(...customMissionsResult.data.content.map(transformApiMission));
-      }
-
-      // 중복 제거 및 정렬
-      const uniqueMissions = removeDuplicateMissions(allMissions);
-      const sortedMissions = sortMissionsByTitle(uniqueMissions);
+      // 정렬
+      const sortedMissions = sortMissionsByTitle(allMissions);
 
       setMissions(sortedMissions);
     } catch (loadError) {
@@ -442,7 +413,7 @@ export const useMission = (
         ? parseInt(missionId.replace('custom_', ''), 10)
         : parseInt(missionId, 10);
 
-      const updateData: Partial<CreateCustomMissionRequest> = {
+      const updateData: Partial<CreateMissionRequest> = {
         title: missionData.title,
         description: missionData.description,
         isPublic: missionData.isPublic,

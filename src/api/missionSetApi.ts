@@ -59,12 +59,14 @@ export interface UpdateMissionSetRequest {
 // ============================================
 
 /**
- * 공개 미션세트 목록 조회 (담은수+평점순)
+ * 공개 미션세트 목록 조회
  * GET /api/mission-sets
+ * @param sortBy - 정렬 기준 (popular: 인기순, latest: 최신순)
  */
 export const getMissionSets = async (params?: {
   page?: number;
   size?: number;
+  sortBy?: 'popular' | 'latest';
 }): Promise<ServiceResult<MissionSetListResponse>> => {
   return apiClient.get<MissionSetListResponse>('/mission-sets', params);
 };
@@ -83,11 +85,13 @@ export const getMyMissionSets = async (params?: {
 /**
  * 미션세트 검색
  * GET /api/mission-sets/search
+ * @param sortBy - 정렬 기준 (popular: 인기순, latest: 최신순)
  */
 export const searchMissionSets = async (params: {
   keyword: string;
   page?: number;
   size?: number;
+  sortBy?: 'popular' | 'latest';
 }): Promise<ServiceResult<MissionSetListResponse>> => {
   return apiClient.get<MissionSetListResponse>('/mission-sets/search', params);
 };

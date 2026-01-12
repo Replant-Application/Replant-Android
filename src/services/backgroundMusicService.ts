@@ -68,6 +68,11 @@ class BackgroundMusicService {
     this.currentScreen = screenName;
 
     try {
+      // 볼륨이 0이면 재생하지 않음
+      if (this.currentVolume <= 0) {
+        return;
+      }
+
       // 감정일기 화면이면 night_sound, 나머지는 background_sound
       const shouldPlayNightSound = screenName === 'Diary' || screenName === 'EmotionDiary';
       
@@ -135,11 +140,23 @@ class BackgroundMusicService {
   async setVolume(volume: number) {
     this.currentVolume = volume;
     try {
+      // 볼륨이 0이면 음악 정지
+      if (volume <= 0) {
+        await this.stop();
+        return;
+      }
+
+      // 볼륨이 0보다 크면 볼륨 적용
       if (this.backgroundSound) {
         await this.backgroundSound.setVolumeAsync(volume);
       }
       if (this.nightSound) {
         await this.nightSound.setVolumeAsync(volume);
+      }
+
+      // 볼륨이 0에서 0보다 큰 값으로 변경되면 현재 화면에 맞는 음악 재생
+      if (!this.isPlaying && this.currentScreen) {
+        await this._playForScreenInternal(this.currentScreen);
       }
     } catch (error) {
       console.error('[BackgroundMusic] 볼륨 설정 실패:', error);

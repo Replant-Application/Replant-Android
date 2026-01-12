@@ -46,4 +46,7 @@ export const SCREEN_NAMES: Record<string, string> = {
   MISSION_SET_DETAIL: 'MissionSetDetail',
   MY_MISSION_SETS: 'MyMissionSets',
   MY_PROGRESS_DETAIL: 'MyProgressDetail',
+  TODO_LIST: 'TodoList',
+  TODO_LIST_CREATE: 'TodoListCreate',
+  TODO_LIST_DETAIL: 'TodoListDetail',
 } as const;

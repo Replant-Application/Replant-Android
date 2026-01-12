@@ -55,6 +55,9 @@ import MissionSetDetailScreen from '../screens/MissionSetDetailScreen';
 import MyMissionSetsScreen from '../screens/MyMissionSetsScreen';
 import MyProgressDetailScreen from '../screens/MyProgressDetailScreen';
 import RoutineSettingScreen from '../screens/RoutineSettingScreen';
+import TodoListScreen from '../screens/TodoListScreen';
+import TodoListCreateScreen from '../screens/TodoListCreateScreen';
+import TodoListDetailScreen from '../screens/TodoListDetailScreen';
 
 // 간단한 상태 기반 네비게이션 (React Navigation 없이)
 const AppNavigator = () => {
@@ -203,6 +206,10 @@ const AppNavigator = () => {
         setCurrentScreen(SCREEN_NAMES.SETTINGS);
       } else if (currentScreen === SCREEN_NAMES.NOTIFICATION || currentScreen === SCREEN_NAMES.MY_PROGRESS_DETAIL || currentScreen === 'RoutineSetting') {
         setCurrentScreen(SCREEN_NAMES.HOME);
+      } else if (currentScreen === SCREEN_NAMES.TODO_LIST || currentScreen === SCREEN_NAMES.TODO_LIST_CREATE) {
+        setCurrentScreen(SCREEN_NAMES.HOME);
+      } else if (currentScreen === SCREEN_NAMES.TODO_LIST_DETAIL) {
+        setCurrentScreen(SCREEN_NAMES.TODO_LIST);
       } else {
         setCurrentScreen(SCREEN_NAMES.HOME);
       }
@@ -314,6 +321,10 @@ const AppNavigator = () => {
       setCurrentScreen(SCREEN_NAMES.SETTINGS);
     } else if (currentScreen === SCREEN_NAMES.NOTIFICATION || currentScreen === SCREEN_NAMES.MY_PROGRESS_DETAIL || currentScreen === 'RoutineSetting') {
       setCurrentScreen(SCREEN_NAMES.HOME);
+    } else if (currentScreen === SCREEN_NAMES.TODO_LIST || currentScreen === SCREEN_NAMES.TODO_LIST_CREATE) {
+      setCurrentScreen(SCREEN_NAMES.HOME);
+    } else if (currentScreen === SCREEN_NAMES.TODO_LIST_DETAIL) {
+      setCurrentScreen(SCREEN_NAMES.TODO_LIST);
     } else {
       setCurrentScreen(SCREEN_NAMES.HOME);
     }
@@ -410,6 +421,12 @@ const AppNavigator = () => {
         return <MyProgressDetailScreen navigation={navigation} />;
       case 'RoutineSetting':
         return <RoutineSettingScreen navigation={navigation} />;
+      case SCREEN_NAMES.TODO_LIST:
+        return <TodoListScreen navigation={navigation} />;
+      case SCREEN_NAMES.TODO_LIST_CREATE:
+        return <TodoListCreateScreen navigation={navigation} />;
+      case SCREEN_NAMES.TODO_LIST_DETAIL:
+        return <TodoListDetailScreen navigation={navigation} route={route} />;
       default:
         return <HomeScreen navigation={navigation} />;
     }

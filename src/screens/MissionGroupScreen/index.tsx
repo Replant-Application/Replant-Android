@@ -316,6 +316,20 @@ const MissionGroupScreen: React.FC<MissionGroupScreenProps> = ({ navigation }) =
               />
             </TouchableOpacity>
           }
+          rightButton={
+            activeTab === 'custom' ? (
+              <TouchableOpacity
+                onPress={() => navigation.navigate('CustomMissionCreate' as any)}
+                style={styles.createButton}
+              >
+                <Image
+                  source={require('../../assets/images/pencil.png')}
+                  style={styles.createButtonIcon}
+                  resizeMode="contain"
+                />
+              </TouchableOpacity>
+            ) : undefined
+          }
         />
 
         {/* 공식미션 / 커스텀미션 탭 */}
@@ -632,6 +646,13 @@ const styles = StyleSheet.create({
     width: 24,
     height: 24,
     tintColor: colors.text.primary,
+  },
+  createButton: {
+    padding: spacing[2],
+  },
+  createButtonIcon: {
+    width: 24,
+    height: 24,
   },
   tabContainer: {
     paddingHorizontal: spacing[3],

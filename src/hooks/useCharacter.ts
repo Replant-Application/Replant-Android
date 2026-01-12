@@ -18,6 +18,7 @@ import { updateCharacterName as updateCharacterNameService } from '../services/c
 import { useUser } from '../contexts/UserContext';
 import { logError } from '../utils/logger';
 import { Character, UseCharacterReturn, ExperienceResult, ServiceResult, MissionCategory } from '../types';
+import { getMyReant, updateReant, ReantResponse } from '../api/reantApi';
 
 export const useCharacter = (): UseCharacterReturn => {
   const { currentNickname } = useUser();
@@ -26,7 +27,29 @@ export const useCharacter = (): UseCharacterReturn => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  // 캐릭터 데이터 로드
+  // Reant 정보를 Character 형태로 변환
+  const convertReantToCharacter = useCallback((reant: ReantResponse): Character => {
+    return {
+      id: `reant_${reant.id}`,
+      character_id: `reant_${reant.id}`,
+      name: reant.name,
+      title: '성장하는 동반자',
+      description: '성장 여정을 함께해요',
+      emoji: '🌱',
+      level: reant.level,
+      experience: reant.exp,
+      total_experience: reant.exp,
+      max_experience: reant.level * 100, // 다음 레벨까지 필요한 경험치
+      unlocked: true,
+      unlocked_date: reant.createdAt,
+      category_id: 'growth',
+      completed_missions: 0,
+      created_at: reant.createdAt,
+      updated_at: reant.updatedAt,
+    };
+  }, []);
+
+  // 캐릭터 데이터 로드 (백엔드 Reant와 동기화)
   const loadCharacters = useCallback(async (): Promise<void> => {
     if (!currentNickname) return;
 
@@ -34,6 +57,29 @@ export const useCharacter = (): UseCharacterReturn => {
       setLoading(true);
       setError(null);
 
+      // 백엔드에서 Reant 정보 가져오기 시도
+      const reantResult = await getMyReant();
+
+      if (reantResult.success && reantResult.data) {
+        // 백엔드 Reant 정보를 Character 형태로 변환
+        const reantCharacter = convertReantToCharacter(reantResult.data);
+
+        // 로컬 스토리지에도 동기화
+        const storageKeys = getStorageKeys(currentNickname);
+        await setData(storageKeys.CHARACTERS, [reantCharacter]);
+
+        setCharacters([reantCharacter]);
+        if (!selectedCharacter) {
+          setSelectedCharacter(reantCharacter);
+        } else {
+          // 선택된 캐릭터도 업데이트
+          setSelectedCharacter(reantCharacter);
+        }
+        setLoading(false);
+        return;
+      }
+
+      // 백엔드 연결 실패 시 로컬 스토리지에서 로드 (폴백)
       const storageKeys = getStorageKeys(currentNickname);
       const charactersData: Character[] = await getData(storageKeys.CHARACTERS) || [];
 
@@ -97,14 +143,16 @@ export const useCharacter = (): UseCharacterReturn => {
       setError((loadError as Error).message);
       setLoading(false);
     }
-  }, [selectedCharacter, currentNickname]);
+  }, [selectedCharacter, currentNickname, convertReantToCharacter]);
 
   // 초기 로드
   useEffect(() => {
     loadCharacters();
   }, [loadCharacters]);
 
-  // 경험치 추가 (카테고리별)
+  // 경험치 추가 (카테고리별) - 백엔드 연동
+  // 주의: 미션 완료 시 백엔드에서 자동으로 경험치를 지급하므로,
+  // 이 함수는 UI에서 즉각적인 피드백을 주고 백엔드와 동기화합니다.
   const addExperienceByCategory = useCallback(async (
     categoryId: MissionCategory,
     experience: number
@@ -114,11 +162,37 @@ export const useCharacter = (): UseCharacterReturn => {
     }
 
     try {
-      // 해당 카테고리의 캐릭터 찾기
+      // 현재 캐릭터 정보
       const character: Character | undefined = characters.find(char => char.category_id === categoryId);
       if (!character) return { success: false, experienceGained: 0, levelUp: false, error: '캐릭터를 찾을 수 없습니다.' };
 
-      // autoLevelupCharacter 함수 사용
+      const oldLevel = character.level;
+
+      // 백엔드에서 최신 Reant 정보 가져오기 (미션 완료 API에서 이미 경험치가 지급됨)
+      const reantResult = await getMyReant();
+
+      if (reantResult.success && reantResult.data) {
+        const updatedCharacter = convertReantToCharacter(reantResult.data);
+        const newLevel = updatedCharacter.level;
+        const levelUp = newLevel > oldLevel;
+
+        // 로컬 상태 업데이트
+        setCharacters([updatedCharacter]);
+        setSelectedCharacter(updatedCharacter);
+
+        // 로컬 스토리지에도 동기화
+        const storageKeys = getStorageKeys(currentNickname);
+        await setData(storageKeys.CHARACTERS, [updatedCharacter]);
+
+        return {
+          success: true,
+          experienceGained: experience,
+          levelUp,
+          newLevel,
+        };
+      }
+
+      // 백엔드 연결 실패 시 로컬에서 처리 (폴백)
       const result = await autoLevelupCharacter(character.id, experience, currentNickname);
 
       if (result.success) {
@@ -148,7 +222,7 @@ export const useCharacter = (): UseCharacterReturn => {
       logError('경험치 추가 실패', expError as Error, { categoryId, experience });
       return { success: false, experienceGained: 0, levelUp: false, error: (expError as Error).message };
     }
-  }, [characters, selectedCharacter, currentNickname]);
+  }, [characters, selectedCharacter, currentNickname, convertReantToCharacter]);
 
   // 캐릭터 선택
   const selectCharacter = useCallback((character: Character): void => {

@@ -17,6 +17,7 @@ import {
   RefreshControl,
   TextInput,
   ActivityIndicator,
+  ImageBackground,
 } from 'react-native';
 import { Loading, Header, EmptyState } from '../../components/ui';
 import { formatDateKorean } from '../../utils/dateUtils';
@@ -285,48 +286,43 @@ const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
 
   if (!mission) {
     return (
-      <View style={styles.container}>
+      <ImageBackground
+        source={require('../../assets/images/background.png')}
+        style={styles.container}
+        resizeMode="cover"
+      >
         <Header
           title="미션 상세"
-          leftButton={
-            <TouchableOpacity onPress={() => navigation.goBack()}>
-              <Image
-                source={require('../../assets/images/left.png')}
-                style={styles.backButtonIcon}
-                resizeMode="contain"
-              />
-            </TouchableOpacity>
-          }
+          showBackButton={true}
+          navigation={navigation}
         />
         <EmptyState
           icon="📭"
           title="미션을 찾을 수 없습니다"
           description="해당 미션을 찾을 수 없습니다."
         />
-      </View>
+      </ImageBackground>
     );
   }
 
   const difficulty = getDifficultyLabel(mission.type);
 
   return (
-    <KeyboardAvoidingView
+    <ImageBackground
+      source={require('../../assets/images/background.png')}
       style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+      resizeMode="cover"
     >
-      <Header
-        title="미션 상세"
-        leftButton={
-          <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Image
-              source={require('../../assets/images/left.png')}
-              style={styles.backButtonIcon}
-              resizeMode="contain"
-            />
-          </TouchableOpacity>
-        }
-      />
+      <KeyboardAvoidingView
+        style={styles.keyboardView}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+      >
+        <Header
+          title="미션 상세"
+          showBackButton={true}
+          navigation={navigation}
+        />
 
       <ScrollView
         style={styles.content}
@@ -491,19 +487,22 @@ const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
           )}
         </View>
       </ScrollView>
-    </KeyboardAvoidingView>
+      </KeyboardAvoidingView>
+    </ImageBackground>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background.secondary,
+  },
+  keyboardView: {
+    flex: 1,
   },
   content: {
     flex: 1,
     padding: spacing[4],
-    paddingBottom: spacing[20], // 하단 탭바 높이 + 여유 공간
+    paddingBottom: spacing[20],
   },
   backButtonIcon: {
     width: 24,
@@ -511,10 +510,12 @@ const styles = StyleSheet.create({
   },
   // 미션 정보
   missionContainer: {
-    backgroundColor: colors.background.primary,
-    borderRadius: borderRadius.lg,
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    borderRadius: borderRadius.xl,
     padding: spacing[5],
     marginBottom: spacing[4],
+    borderWidth: 2,
+    borderColor: '#D4A574',
   },
   missionHeader: {
     flexDirection: 'row',
@@ -680,9 +681,11 @@ const styles = StyleSheet.create({
     gap: spacing[3],
   },
   reviewCard: {
-    backgroundColor: colors.background.primary,
-    borderRadius: borderRadius.md,
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    borderRadius: borderRadius.lg,
     padding: spacing[4],
+    borderWidth: 1,
+    borderColor: '#D4A574',
   },
   reviewHeader: {
     flexDirection: 'row',
@@ -777,13 +780,13 @@ const styles = StyleSheet.create({
   },
   // 뱃지 없음 안내 섹션
   noBadgeSection: {
-    backgroundColor: colors.gray[50],
-    borderRadius: borderRadius.lg,
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    borderRadius: borderRadius.xl,
     padding: spacing[5],
     marginBottom: spacing[4],
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: colors.gray[200],
+    borderWidth: 2,
+    borderColor: '#D4A574',
   },
   noBadgeIcon: {
     fontSize: 40,
@@ -813,13 +816,13 @@ const styles = StyleSheet.create({
   },
   // 이미 후기 작성 완료 섹션
   alreadyWrittenSection: {
-    backgroundColor: colors.success + '10',
-    borderRadius: borderRadius.lg,
+    backgroundColor: 'rgba(232, 245, 233, 0.95)',
+    borderRadius: borderRadius.xl,
     padding: spacing[4],
     marginBottom: spacing[4],
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: colors.success + '30',
+    borderWidth: 2,
+    borderColor: '#4CAF50',
   },
   alreadyWrittenIcon: {
     fontSize: 32,
@@ -838,12 +841,12 @@ const styles = StyleSheet.create({
   },
   // 후기 작성 섹션 스타일
   writeReviewSection: {
-    backgroundColor: colors.background.primary,
-    borderRadius: borderRadius.lg,
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    borderRadius: borderRadius.xl,
     padding: spacing[4],
     marginBottom: spacing[4],
-    borderWidth: 1,
-    borderColor: colors.primary[200],
+    borderWidth: 2,
+    borderColor: '#D4A574',
   },
   writeReviewHint: {
     fontSize: typography.fontSize.sm,

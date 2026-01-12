@@ -140,18 +140,50 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
 
     closeOverlay();
 
-    // 화면 이동
-    if (onNavigate && notification.referenceType) {
-      const screenMap: Record<string, string> = {
-        'MISSION': 'Mission',
-        'VERIFICATION': 'Community',
-        'RECOMMENDATION': 'Connections',
-        'CHAT': 'Connections',
-        'BADGE': 'MyPage',
-      };
-      const screen = screenMap[notification.referenceType];
-      if (screen) {
-        onNavigate(screen, { referenceId: notification.referenceId });
+    // 화면 이동 - referenceType에 따라 적절한 상세 화면으로 이동
+    if (onNavigate) {
+      const { referenceType, referenceId } = notification;
+
+      switch (referenceType) {
+        case 'VERIFICATION':
+          // 인증글 상세 화면으로 이동
+          if (referenceId) {
+            onNavigate('VerificationPostDetail', { verificationId: referenceId });
+          } else {
+            onNavigate('Community');
+          }
+          break;
+        case 'POST':
+          // 커뮤니티 게시글 상세 화면으로 이동
+          if (referenceId) {
+            onNavigate('CommunityPostDetail', { postId: String(referenceId) });
+          } else {
+            onNavigate('Community');
+          }
+          break;
+        case 'MISSION':
+          // 미션 상세 화면으로 이동
+          if (referenceId) {
+            onNavigate('MissionDetail', { missionId: String(referenceId) });
+          } else {
+            onNavigate('Mission');
+          }
+          break;
+        case 'USER_MISSION':
+          // 유저 미션 관련 알림 (인증 승인 등) - 미션 화면으로 이동
+          onNavigate('Mission');
+          break;
+        case 'RECOMMENDATION':
+          onNavigate('Connections');
+          break;
+        case 'CHAT':
+          onNavigate('Connections');
+          break;
+        case 'BADGE':
+          onNavigate('MyPage');
+          break;
+        default:
+          break;
       }
     }
   };

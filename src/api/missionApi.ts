@@ -45,9 +45,6 @@ export interface Mission {
   category?: MissionCategory;  // 미션 카테고리
   verificationType: VerificationType;
   requiredMinutes?: number;
-  gpsLatitude?: number;
-  gpsLongitude?: number;
-  gpsRadiusMeters?: number;
   expReward: number;
   badgeDurationDays: number;
 
@@ -297,9 +294,6 @@ export interface CreateMissionRequest {
   category?: MissionCategory;
   verificationType: VerificationType;
   requiredMinutes?: number;
-  gpsLatitude?: number;
-  gpsLongitude?: number;
-  gpsRadiusMeters?: number;
   expReward: number;
   badgeDurationDays: number;
   // 커스텀 미션 필드
@@ -610,27 +604,49 @@ export const deleteVerification = async (
 };
 
 /**
- * 인증 투표
- * POST /api/verifications/{verificationId}/votes
+ * 인증 투표 (좋아요 API 활용)
+ * POST /api/community/posts/{verificationId}/like
  * 본인 글 투표 불가
+ *
+ * 백엔드에서 투표 API가 좋아요로 대체되었으므로 좋아요 API를 호출하고
+ * 결과를 VoteVerificationResponse 형태로 변환하여 반환합니다.
  */
 export const voteVerification = async (
   verificationId: number,
   data: { vote: VoteType }
 ): Promise<ServiceResult<VoteVerificationResponse>> => {
-  const endpoint = API_CONFIG.endpoints.verification.vote.replace(':verificationId', String(verificationId));
-  return apiClient.post<VoteVerificationResponse>(endpoint, data);
+  // 좋아요 API 호출 (인증글도 Post 테이블에 저장됨)
+  const result = await apiClient.post<{ isLiked: boolean; likeCount: number; verified?: boolean }>(
+    `/community/posts/${verificationId}/like`
+  );
+
+  if (result.success && result.data) {
+    // 좋아요 결과를 VoteVerificationResponse 형태로 변환
+    return {
+      success: true,
+      data: {
+        verificationId,
+        vote: result.data.isLiked ? 'APPROVE' : 'REJECT',
+        approveCount: result.data.likeCount,
+        rejectCount: 0, // 좋아요 시스템에서는 reject count가 없음
+        status: result.data.verified ? 'APPROVED' : 'PENDING',
+        message: result.data.isLiked ? '좋아요를 눌렀습니다.' : '좋아요를 취소했습니다.',
+      },
+    };
+  }
+
+  return {
+    success: false,
+    error: result.error || '투표 처리에 실패했습니다.',
+  };
 };
 
 // ============================================
-// GPS 인증 관련
+// 인증 관련
 // ============================================
 
 export interface VerificationRequirements {
   verificationType: VerificationType;
-  gpsLatitude?: number;
-  gpsLongitude?: number;
-  gpsRadiusMeters?: number;
   requiredMinutes?: number;
 }
 
@@ -657,9 +673,6 @@ export const getVerificationRequirements = async (
     success: true,
     data: {
       verificationType: mission.verificationType,
-      gpsLatitude: mission.gpsLatitude,
-      gpsLongitude: mission.gpsLongitude,
-      gpsRadiusMeters: mission.gpsRadiusMeters,
       requiredMinutes: mission.requiredMinutes,
     },
   };

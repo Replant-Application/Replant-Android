@@ -16,13 +16,22 @@ import {
   Image,
   Platform,
   ImageBackground,
+  Modal,
+  FlatList,
 } from 'react-native';
 import { NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types/navigation';
 import { Header, Loading, EmptyState } from '../../components/ui';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
 import { getOptimizedLineHeight } from '../../utils/textStyles';
-import { getMissionSets, searchMissionSets, copyMissionSet, MissionSetSimple } from '../../api/missionSetApi';
+import {
+  getPublicTodoLists,
+  searchPublicTodoLists,
+  copyTodoList,
+  getShareableTodoLists,
+  shareTodoList
+} from '../../api/todolistApi';
+import { PublicTodoList, TodoList } from '../../types/todolist';
 import { logError } from '../../utils/logger';
 import { SCREEN_NAMES } from '../../utils/constants';
 
@@ -31,11 +40,16 @@ interface MissionSetListScreenProps {
 }
 
 const MissionSetListScreen: React.FC<MissionSetListScreenProps> = ({ navigation }) => {
-  const [missionSets, setMissionSets] = useState<MissionSetSimple[]>([]);
+  const [publicTodoLists, setPublicTodoLists] = useState<PublicTodoList[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
+
+  // 공유 모달 관련 상태
+  const [shareModalVisible, setShareModalVisible] = useState(false);
+  const [myTodoLists, setMyTodoLists] = useState<TodoList[]>([]);
+  const [loadingMyTodoLists, setLoadingMyTodoLists] = useState(false);
 
   // 검색어 디바운싱 (300ms)
   useEffect(() => {
@@ -45,64 +59,106 @@ const MissionSetListScreen: React.FC<MissionSetListScreenProps> = ({ navigation 
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  // 미션세트 목록 로딩
-  const loadMissionSets = useCallback(async () => {
+  // 공개 투두리스트 목록 로딩
+  const loadPublicTodoLists = useCallback(async () => {
     try {
       let result;
       if (debouncedSearchQuery.trim()) {
-        result = await searchMissionSets({
-          keyword: debouncedSearchQuery,
-          page: 0,
-          size: 50,
-        });
+        result = await searchPublicTodoLists(debouncedSearchQuery, 0, 50);
       } else {
-        result = await getMissionSets({ page: 0, size: 50 });
+        result = await getPublicTodoLists(0, 50);
       }
 
       if (result.success && result.data) {
-        setMissionSets(result.data.content);
+        setPublicTodoLists(result.data.content);
       }
     } catch (error) {
-      logError('미션세트 로딩 실패', error as Error);
+      logError('공개 투두리스트 로딩 실패', error as Error);
     } finally {
       setLoading(false);
     }
   }, [debouncedSearchQuery]);
 
   useEffect(() => {
-    loadMissionSets();
-  }, [loadMissionSets]);
+    loadPublicTodoLists();
+  }, [loadPublicTodoLists]);
 
   // Pull-to-Refresh
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    await loadMissionSets();
+    await loadPublicTodoLists();
     setRefreshing(false);
-  }, [loadMissionSets]);
+  }, [loadPublicTodoLists]);
 
-  // 미션세트 담기
-  const handleCopy = async (missionSet: MissionSetSimple) => {
+  // 공유 모달 열기 - 내 투두리스트 로드
+  const openShareModal = async () => {
+    setShareModalVisible(true);
+    setLoadingMyTodoLists(true);
     try {
-      const result = await copyMissionSet(missionSet.id);
+      const result = await getShareableTodoLists();
+      if (result.success && result.data) {
+        setMyTodoLists(result.data);
+      }
+    } catch (error) {
+      logError('내 투두리스트 로딩 실패', error as Error);
+    } finally {
+      setLoadingMyTodoLists(false);
+    }
+  };
+
+  // 투두리스트 공유하기 (공개로 변경)
+  const handleShare = async (todoList: TodoList) => {
+    Alert.alert(
+      '공유 확인',
+      `"${todoList.title}" 투두리스트를 공유하시겠습니까?\n공유하면 다른 사용자들이 담을 수 있습니다.`,
+      [
+        { text: '취소', style: 'cancel' },
+        {
+          text: '공유',
+          onPress: async () => {
+            try {
+              const result = await shareTodoList(todoList.id);
+              if (result.success) {
+                Alert.alert('공유 완료', `"${todoList.title}" 투두리스트가 공유되었습니다.`);
+                setShareModalVisible(false);
+                // 목록 새로고침
+                loadPublicTodoLists();
+              } else {
+                Alert.alert('공유 실패', result.error || '공유에 실패했습니다.');
+              }
+            } catch (error) {
+              logError('투두리스트 공유 실패', error as Error);
+              Alert.alert('오류', '공유 중 문제가 발생했습니다.');
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  // 투두리스트 담기
+  const handleCopy = async (todoList: PublicTodoList) => {
+    try {
+      const result = await copyTodoList(todoList.id);
       if (result.success) {
         Alert.alert(
           '담기 완료',
-          `"${missionSet.title}" 미션세트를 내 목록에 추가했습니다.`
+          `"${todoList.title}" 투두리스트를 내 목록에 추가했습니다.`
         );
         // 담은 수 증가 반영
-        setMissionSets(prev =>
-          prev.map(ms =>
-            ms.id === missionSet.id
-              ? { ...ms, addedCount: ms.addedCount + 1 }
-              : ms
+        setPublicTodoLists(prev =>
+          prev.map(tl =>
+            tl.id === todoList.id
+              ? { ...tl, addedCount: tl.addedCount + 1 }
+              : tl
           )
         );
       } else {
-        Alert.alert('담기 실패', result.error || '미션세트를 담는데 실패했습니다.');
+        Alert.alert('담기 실패', result.error || '투두리스트를 담는데 실패했습니다.');
       }
     } catch (error) {
-      logError('미션세트 담기 실패', error as Error);
-      Alert.alert('오류', '미션세트를 담는 중 문제가 발생했습니다.');
+      logError('투두리스트 담기 실패', error as Error);
+      Alert.alert('오류', '투두리스트를 담는 중 문제가 발생했습니다.');
     }
   };
 
@@ -132,133 +188,272 @@ const MissionSetListScreen: React.FC<MissionSetListScreenProps> = ({ navigation 
   return (
     <ImageBackground
       source={require('../../assets/images/background.png')}
-      style={styles.container}
+      style={styles.backgroundImage}
       resizeMode="cover"
     >
-      <Header title="투두 공유" showBackButton={true} navigation={navigation} />
-
-      {/* 검색창 */}
-      <View style={styles.searchContainer}>
-        <Image
-          source={require('../../assets/images/search.png')}
-          style={styles.searchIcon}
-          resizeMode="contain"
+      <View style={styles.container}>
+        <Header
+          title="투두 공유"
+          leftButton={
+            <TouchableOpacity onPress={() => navigation.goBack()}>
+              <Image
+                source={require('../../assets/images/left.png')}
+                style={styles.backButtonIcon}
+                resizeMode="contain"
+              />
+            </TouchableOpacity>
+          }
+          rightButton={
+            <TouchableOpacity onPress={openShareModal} style={styles.shareButton}>
+              <Image
+                source={require('../../assets/images/pencil.png')}
+                style={styles.shareButtonIcon}
+                resizeMode="contain"
+              />
+            </TouchableOpacity>
+          }
         />
-        <TextInput
-          style={styles.searchInput}
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-          placeholder="투두리스트 검색..."
-          placeholderTextColor={colors.text.tertiary}
-        />
-      </View>
 
-      <ScrollView
-        style={styles.content}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            colors={[colors.primary[500]]}
-            tintColor={colors.primary[500]}
+        {/* 검색창 */}
+        <View style={styles.searchContainer}>
+          <Image
+            source={require('../../assets/images/search.png')}
+            style={styles.searchIcon}
+            resizeMode="contain"
           />
-        }
-      >
-        {missionSets.length === 0 ? (
-          <EmptyState
-            iconImage={require('../../assets/images/notes.png')}
-            title="공유된 투두리스트가 없어요"
-            description="다른 사용자들의 투두리스트를 기다려주세요!"
+          <TextInput
+            style={styles.searchInput}
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            placeholder="투두리스트 검색..."
+            placeholderTextColor={colors.text.tertiary}
           />
-        ) : (
-          <View style={styles.missionSetList}>
-            {missionSets.map(missionSet => (
-              <TouchableOpacity
-                key={missionSet.id}
-                style={styles.missionSetCard}
-                onPress={() => navigation.navigate(SCREEN_NAMES.MISSION_SET_DETAIL as any, { missionSetId: missionSet.id })}
-                activeOpacity={0.7}
-              >
-                <View style={styles.cardHeader}>
-                  <Text style={styles.missionSetTitle} numberOfLines={1}>
-                    {missionSet.title}
-                  </Text>
-                  <TouchableOpacity
-                    style={styles.copyButton}
-                    onPress={() => handleCopy(missionSet)}
-                    activeOpacity={0.7}
-                  >
-                    <Text style={styles.copyButtonText}>담기</Text>
-                  </TouchableOpacity>
-                </View>
+        </View>
 
-                {missionSet.description && (
-                  <Text style={styles.missionSetDescription} numberOfLines={2}>
-                    {missionSet.description}
-                  </Text>
-                )}
+        <ScrollView
+          style={styles.content}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              colors={[colors.primary[500]]}
+              tintColor={colors.primary[500]}
+            />
+          }
+        >
+          {/* 안내 박스 */}
+          <View style={styles.infoBox}>
+            <Image
+              source={require('../../assets/images/notes.png')}
+              style={styles.infoIcon}
+              resizeMode="contain"
+            />
+            <Text style={styles.infoText}>
+              다른 사용자의 투두리스트를 담아서 사용해보세요
+            </Text>
+          </View>
 
-                <View style={styles.cardMeta}>
-                  <Text style={styles.metaText}>
-                    by {missionSet.creatorNickname}
-                  </Text>
-                  <Text style={styles.metaDot}>·</Text>
-                  <Text style={styles.metaText}>
-                    {missionSet.missionCount}개 미션
-                  </Text>
-                </View>
+          {publicTodoLists.length === 0 ? (
+            <EmptyState
+              iconImage={require('../../assets/images/notes.png')}
+              title="공유된 투두리스트가 없어요"
+              description="다른 사용자들의 투두리스트를 기다려주세요!"
+            />
+          ) : (
+            <View style={styles.missionSetList}>
+              {publicTodoLists.map(todoList => (
+                <TouchableOpacity
+                  key={todoList.id}
+                  style={styles.missionSetCard}
+                  onPress={() => navigation.navigate(SCREEN_NAMES.MISSION_SET_DETAIL as any, { missionSetId: todoList.id })}
+                  activeOpacity={0.7}
+                >
+                  {/* 카드 헤더 */}
+                  <View style={styles.cardHeader}>
+                    <View style={styles.titleRow}>
+                      <Image
+                        source={require('../../assets/images/notes.png')}
+                        style={styles.cardIcon}
+                        resizeMode="contain"
+                      />
+                      <Text style={styles.missionSetTitle} numberOfLines={1}>
+                        {todoList.title}
+                      </Text>
+                    </View>
+                    <TouchableOpacity
+                      style={styles.copyButton}
+                      onPress={(e) => {
+                        e.stopPropagation();
+                        handleCopy(todoList);
+                      }}
+                      activeOpacity={0.7}
+                    >
+                      <Text style={styles.copyButtonText}>담기</Text>
+                    </TouchableOpacity>
+                  </View>
 
-                <View style={styles.cardFooter}>
-                  <View style={styles.ratingContainer}>
-                    <Text style={styles.stars}>
-                      {renderStars(missionSet.averageRating)}
+                  {/* 설명 */}
+                  {todoList.description && (
+                    <Text style={styles.missionSetDescription} numberOfLines={2}>
+                      {todoList.description}
                     </Text>
-                    <Text style={styles.ratingText}>
-                      {missionSet.averageRating.toFixed(1)}
+                  )}
+
+                  {/* 작성자 정보 */}
+                  <View style={styles.authorInfo}>
+                    <Text style={styles.authorText}>
+                      by {todoList.creatorNickname}
                     </Text>
                   </View>
-                  <Text style={styles.addedCount}>
-                    {missionSet.addedCount}명이 담음
-                  </Text>
-                </View>
-              </TouchableOpacity>
-            ))}
-          </View>
-        )}
-      </ScrollView>
 
-      {/* 플로팅 생성 버튼 */}
-      <TouchableOpacity
-        style={styles.floatingButton}
-        onPress={() => navigation.navigate(SCREEN_NAMES.MISSION_SET_CREATE as any)}
-        activeOpacity={0.8}
-      >
-        <Text style={styles.floatingButtonText}>+</Text>
-      </TouchableOpacity>
+                  {/* 카드 푸터 */}
+                  <View style={styles.cardFooter}>
+                    <View style={styles.statsRow}>
+                      <View style={styles.statItem}>
+                        <Image
+                          source={require('../../assets/images/goal.png')}
+                          style={styles.statIcon}
+                          resizeMode="contain"
+                        />
+                        <Text style={styles.statText}>{todoList.missionCount}개</Text>
+                      </View>
+                      <View style={styles.statItem}>
+                        <Image
+                          source={require('../../assets/images/high-five.png')}
+                          style={styles.statIcon}
+                          resizeMode="contain"
+                        />
+                        <Text style={styles.statText}>{todoList.addedCount}명</Text>
+                      </View>
+                    </View>
+                    <View style={styles.ratingContainer}>
+                      <Text style={styles.stars}>
+                        {renderStars(todoList.averageRating)}
+                      </Text>
+                      <Text style={styles.ratingText}>
+                        {todoList.averageRating.toFixed(1)}
+                      </Text>
+                    </View>
+                  </View>
+                </TouchableOpacity>
+              ))}
+            </View>
+          )}
+
+          {/* 하단 여백 */}
+          <View style={{ height: spacing[20] }} />
+        </ScrollView>
+
+        {/* 공유 모달 */}
+        <Modal
+          visible={shareModalVisible}
+          animationType="slide"
+          transparent={true}
+          onRequestClose={() => setShareModalVisible(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContent}>
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalTitle}>내 투두리스트 공유하기</Text>
+                <TouchableOpacity onPress={() => setShareModalVisible(false)}>
+                  <Text style={styles.modalCloseText}>닫기</Text>
+                </TouchableOpacity>
+              </View>
+
+              {loadingMyTodoLists ? (
+                <View style={styles.modalLoading}>
+                  <Text style={styles.modalLoadingText}>불러오는 중...</Text>
+                </View>
+              ) : myTodoLists.length === 0 ? (
+                <View style={styles.modalEmpty}>
+                  <Text style={styles.modalEmptyText}>공유할 수 있는 투두리스트가 없습니다.</Text>
+                  <Text style={styles.modalEmptySubText}>비공개 투두리스트를 먼저 만들어주세요.</Text>
+                </View>
+              ) : (
+                <FlatList
+                  data={myTodoLists}
+                  keyExtractor={(item) => item.id.toString()}
+                  renderItem={({ item }) => (
+                    <TouchableOpacity
+                      style={styles.modalItem}
+                      onPress={() => handleShare(item)}
+                    >
+                      <View style={styles.modalItemContent}>
+                        <Image
+                          source={require('../../assets/images/notes.png')}
+                          style={styles.modalItemIcon}
+                          resizeMode="contain"
+                        />
+                        <View style={styles.modalItemTextContainer}>
+                          <Text style={styles.modalItemTitle} numberOfLines={1}>
+                            {item.title}
+                          </Text>
+                          {item.description && (
+                            <Text style={styles.modalItemDescription} numberOfLines={1}>
+                              {item.description}
+                            </Text>
+                          )}
+                          <Text style={styles.modalItemMissionCount}>
+                            {item.totalCount}개 미션
+                          </Text>
+                        </View>
+                      </View>
+                      <Image
+                        source={require('../../assets/images/chevron.png')}
+                        style={styles.modalItemArrow}
+                        resizeMode="contain"
+                      />
+                    </TouchableOpacity>
+                  )}
+                  style={styles.modalList}
+                />
+              )}
+            </View>
+          </View>
+        </Modal>
+      </View>
     </ImageBackground>
   );
 };
 
 const styles = StyleSheet.create({
+  backgroundImage: {
+    flex: 1,
+    width: '100%',
+    height: '100%',
+  },
   container: {
     flex: 1,
+  },
+  backButtonIcon: {
+    width: 24,
+    height: 24,
+    tintColor: colors.text.primary,
+  },
+  createButton: {
+    padding: spacing[2],
+  },
+  createButtonIcon: {
+    width: 24,
+    height: 24,
   },
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: colors.background.secondary,
-    borderRadius: borderRadius.lg,
+    borderRadius: borderRadius.base,
     paddingHorizontal: spacing[3],
     paddingVertical: spacing[3],
     marginHorizontal: spacing[4],
     marginVertical: spacing[3],
     borderWidth: 1,
-    borderColor: '#D4A574',
+    borderColor: colors.border.light,
   },
   searchIcon: {
     width: 16,
     height: 16,
     marginRight: spacing[2],
+    tintColor: colors.text.tertiary,
   },
   searchInput: {
     flex: 1,
@@ -273,16 +468,41 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    padding: spacing[4],
+    paddingHorizontal: spacing[4],
+  },
+  infoBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.primary[50],
+    borderRadius: borderRadius.base,
+    padding: spacing[3],
+    marginBottom: spacing[3],
+    borderWidth: 1,
+    borderColor: colors.primary[200],
+    gap: spacing[3],
+  },
+  infoIcon: {
+    width: 24,
+    height: 24,
+  },
+  infoText: {
+    flex: 1,
+    fontSize: typography.fontSize.sm,
+    color: colors.primary[700],
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
   },
   missionSetList: {
-    gap: spacing[3],
-    paddingBottom: spacing[16],
+    gap: spacing[2],
   },
   missionSetCard: {
     backgroundColor: colors.background.primary,
-    borderRadius: borderRadius.lg,
-    padding: spacing[4],
+    borderRadius: borderRadius.base,
+    padding: spacing[3],
     borderWidth: 1,
     borderColor: colors.border.light,
   },
@@ -292,18 +512,28 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: spacing[2],
   },
+  titleRow: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing[2],
+    marginRight: spacing[2],
+  },
+  cardIcon: {
+    width: 20,
+    height: 20,
+  },
   missionSetTitle: {
     flex: 1,
-    fontSize: typography.fontSize.lg,
-    fontWeight: typography.fontWeight.medium,
+    fontSize: typography.fontSize.base,
+    fontWeight: typography.fontWeight.normal,
     color: colors.text.primary,
-    marginRight: spacing[2],
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,
       android: typography.fontFamily.regular,
     }),
     includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.lg),
+    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
   },
   copyButton: {
     backgroundColor: colors.primary[500],
@@ -325,20 +555,18 @@ const styles = StyleSheet.create({
   missionSetDescription: {
     fontSize: typography.fontSize.sm,
     color: colors.text.secondary,
-    marginBottom: spacing[3],
+    marginBottom: spacing[2],
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,
       android: typography.fontFamily.regular,
     }),
     includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
   },
-  cardMeta: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  authorInfo: {
     marginBottom: spacing[2],
   },
-  metaText: {
+  authorText: {
     fontSize: typography.fontSize.xs,
     color: colors.text.tertiary,
     fontFamily: Platform.select({
@@ -348,46 +576,37 @@ const styles = StyleSheet.create({
     includeFontPadding: false,
     lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
   },
-  floatingButton: {
-    position: 'absolute',
-    right: spacing[4],
-    bottom: spacing[8],
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: colors.primary[500],
-    justifyContent: 'center',
+  cardFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    elevation: 5,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
+    paddingTop: spacing[2],
+    borderTopWidth: 1,
+    borderTopColor: colors.border.light,
   },
-  floatingButtonText: {
-    fontSize: 28,
-    color: colors.white,
-    fontWeight: typography.fontWeight.bold,
-    marginTop: -2,
+  statsRow: {
+    flexDirection: 'row',
+    gap: spacing[4],
   },
-  metaDot: {
-    fontSize: typography.fontSize.xs,
-    color: colors.text.tertiary,
-    marginHorizontal: spacing[1],
+  statItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing[1],
+  },
+  statIcon: {
+    width: 16,
+    height: 16,
+  },
+  statText: {
+    fontSize: typography.fontSize.sm,
+    color: colors.text.secondary,
+    fontWeight: typography.fontWeight.medium,
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,
       android: typography.fontFamily.regular,
     }),
     includeFontPadding: false,
-  },
-  cardFooter: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: spacing[2],
-    paddingTop: spacing[2],
-    borderTopWidth: 1,
-    borderTopColor: colors.border.light,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
   },
   ratingContainer: {
     flexDirection: 'row',
@@ -413,7 +632,137 @@ const styles = StyleSheet.create({
     includeFontPadding: false,
     lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
   },
-  addedCount: {
+  shareButton: {
+    padding: spacing[2],
+  },
+  shareButtonIcon: {
+    width: 24,
+    height: 24,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-end',
+  },
+  modalContent: {
+    backgroundColor: colors.background.primary,
+    borderTopLeftRadius: borderRadius.lg,
+    borderTopRightRadius: borderRadius.lg,
+    maxHeight: '70%',
+    paddingBottom: spacing[6],
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: spacing[4],
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border.light,
+  },
+  modalTitle: {
+    fontSize: typography.fontSize.lg,
+    fontWeight: typography.fontWeight.medium,
+    color: colors.text.primary,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+  },
+  modalCloseText: {
+    fontSize: typography.fontSize.base,
+    color: colors.primary[500],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+  },
+  modalLoading: {
+    padding: spacing[8],
+    alignItems: 'center',
+  },
+  modalLoadingText: {
+    fontSize: typography.fontSize.base,
+    color: colors.text.secondary,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+  },
+  modalEmpty: {
+    padding: spacing[8],
+    alignItems: 'center',
+  },
+  modalEmptyText: {
+    fontSize: typography.fontSize.base,
+    color: colors.text.primary,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    marginBottom: spacing[2],
+  },
+  modalEmptySubText: {
+    fontSize: typography.fontSize.sm,
+    color: colors.text.secondary,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+  },
+  modalList: {
+    padding: spacing[4],
+  },
+  modalItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: colors.background.secondary,
+    borderRadius: borderRadius.base,
+    padding: spacing[3],
+    marginBottom: spacing[2],
+    borderWidth: 1,
+    borderColor: colors.border.light,
+  },
+  modalItemContent: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing[3],
+  },
+  modalItemIcon: {
+    width: 24,
+    height: 24,
+  },
+  modalItemTextContainer: {
+    flex: 1,
+  },
+  modalItemTitle: {
+    fontSize: typography.fontSize.base,
+    fontWeight: typography.fontWeight.medium,
+    color: colors.text.primary,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    marginBottom: spacing[0.5],
+  },
+  modalItemDescription: {
+    fontSize: typography.fontSize.sm,
+    color: colors.text.secondary,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    marginBottom: spacing[0.5],
+  },
+  modalItemMissionCount: {
     fontSize: typography.fontSize.xs,
     color: colors.text.tertiary,
     fontFamily: Platform.select({
@@ -421,7 +770,12 @@ const styles = StyleSheet.create({
       android: typography.fontFamily.regular,
     }),
     includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
+  },
+  modalItemArrow: {
+    width: 16,
+    height: 16,
+    tintColor: colors.text.tertiary,
+    marginLeft: spacing[2],
   },
 });
 

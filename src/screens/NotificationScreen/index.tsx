@@ -265,13 +265,43 @@ const NotificationScreen: React.FC<NotificationScreenProps> = ({ navigation }) =
       await handleMarkAsRead(notification.id);
     }
 
+    const { referenceType, referenceId } = notification;
+
     // 알림 타입에 따라 해당 화면으로 이동
-    switch (notification.referenceType) {
-      case 'MISSION':
-        navigation.navigate(SCREEN_NAMES.MISSION as any);
-        break;
+    switch (referenceType) {
       case 'VERIFICATION':
-        navigation.navigate(SCREEN_NAMES.COMMUNITY as any);
+        // 인증글 상세 화면으로 이동
+        if (referenceId) {
+          navigation.navigate(SCREEN_NAMES.VERIFICATION_POST_DETAIL as any, {
+            verificationId: referenceId,
+          });
+        } else {
+          navigation.navigate(SCREEN_NAMES.COMMUNITY as any);
+        }
+        break;
+      case 'POST':
+        // 커뮤니티 게시글 상세 화면으로 이동
+        if (referenceId) {
+          navigation.navigate(SCREEN_NAMES.COMMUNITY_POST_DETAIL as any, {
+            postId: String(referenceId),
+          });
+        } else {
+          navigation.navigate(SCREEN_NAMES.COMMUNITY as any);
+        }
+        break;
+      case 'MISSION':
+        // 미션 상세 화면으로 이동
+        if (referenceId) {
+          navigation.navigate(SCREEN_NAMES.MISSION_DETAIL as any, {
+            missionId: String(referenceId),
+          });
+        } else {
+          navigation.navigate(SCREEN_NAMES.MISSION as any);
+        }
+        break;
+      case 'USER_MISSION':
+        // 유저 미션 관련 알림 (인증 승인 등) - 미션 화면으로 이동
+        navigation.navigate(SCREEN_NAMES.MISSION as any);
         break;
       case 'RECOMMENDATION':
         navigation.navigate(SCREEN_NAMES.CONNECTIONS as any);

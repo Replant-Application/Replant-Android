@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, Alert, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform, Image } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, Alert, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform, Image, Modal, FlatList } from 'react-native';
 import { Button, Input, Header } from '../../components/ui';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
 import { getOptimizedLineHeight } from '../../utils/textStyles';
 import { SCREEN_NAMES } from '../../utils/constants';
-import { join, sendVerification, verifyEmail } from '../../api/authApi';
+import { join, sendVerification, verifyEmail, getRegions, RegionInfo } from '../../api/authApi';
 import { saveTokens, saveUserInfo } from '../../utils/tokenStorage';
 import { apiClient } from '../../api/client';
 import { useUser } from '../../contexts/UserContext';
@@ -26,6 +26,20 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onNavigate }) => {
   const [isVerifyingCode, setIsVerifyingCode] = useState(false);
   const [showVerificationCodeInput, setShowVerificationCodeInput] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+
+  // 성별, 지역, 출생연도 상태
+  const [gender, setGender] = useState<'MALE' | 'FEMALE' | null>(null);
+  const [region, setRegion] = useState<string | null>(null);
+  const [regionName, setRegionName] = useState<string>('');
+  const [regions, setRegions] = useState<RegionInfo[]>([]);
+  const [showRegionModal, setShowRegionModal] = useState(false);
+  const [birthYear, setBirthYear] = useState<number | null>(null);
+  const [showBirthYearModal, setShowBirthYearModal] = useState(false);
+
+  // 출생연도 목록 생성 (1950년 ~ 현재년도 - 14세)
+  const currentYear = new Date().getFullYear();
+  const birthYears = Array.from({ length: currentYear - 14 - 1950 + 1 }, (_, i) => currentYear - 14 - i);
+
   const [errors, setErrors] = useState({
     email: '',
     password: '',
@@ -33,7 +47,25 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onNavigate }) => {
     nickname: '',
     phone: '',
     verificationCode: '',
+    gender: '',
+    region: '',
+    birthYear: '',
   });
+
+  // 지역 목록 로드
+  useEffect(() => {
+    const loadRegions = async () => {
+      try {
+        const result = await getRegions();
+        if (result.success && result.data) {
+          setRegions(result.data);
+        }
+      } catch (error) {
+        console.error('Failed to load regions:', error);
+      }
+    };
+    loadRegions();
+  }, []);
 
   const validateEmail = (email: string): boolean => {
     const emailRegex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,6}$/;
@@ -154,6 +186,9 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onNavigate }) => {
       nickname: '',
       phone: '',
       verificationCode: '',
+      gender: '',
+      region: '',
+      birthYear: '',
     });
 
     let hasError = false;
@@ -164,6 +199,9 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onNavigate }) => {
       nickname: '',
       phone: '',
       verificationCode: '',
+      gender: '',
+      region: '',
+      birthYear: '',
     };
 
     // 유효성 검사
@@ -210,6 +248,21 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onNavigate }) => {
       hasError = true;
     }
 
+    if (!gender) {
+      newErrors.gender = '성별을 선택해주세요.';
+      hasError = true;
+    }
+
+    if (!region) {
+      newErrors.region = '지역을 선택해주세요.';
+      hasError = true;
+    }
+
+    if (!birthYear) {
+      newErrors.birthYear = '출생연도를 선택해주세요.';
+      hasError = true;
+    }
+
     if (hasError) {
       setErrors(newErrors);
       return;
@@ -223,6 +276,9 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onNavigate }) => {
         password: password,
         name: nickname,
         phone: phone.replace(/-/g, ''),
+        gender: gender || undefined,
+        region: region || undefined,
+        birthYear: birthYear || undefined,
       });
 
       if (result.success && result.data) {
@@ -472,8 +528,170 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onNavigate }) => {
             />
             {errors.phone ? <Text style={styles.errorText}>{errors.phone}</Text> : null}
           </View>
+
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>성별</Text>
+            <View style={styles.genderContainer}>
+              <TouchableOpacity
+                style={[
+                  styles.genderButton,
+                  gender === 'MALE' && styles.genderButtonSelected,
+                ]}
+                onPress={() => {
+                  setGender('MALE');
+                  if (errors.gender) {
+                    setErrors({ ...errors, gender: '' });
+                  }
+                }}
+              >
+                <Text style={[
+                  styles.genderButtonText,
+                  gender === 'MALE' && styles.genderButtonTextSelected,
+                ]}>남성</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[
+                  styles.genderButton,
+                  gender === 'FEMALE' && styles.genderButtonSelected,
+                ]}
+                onPress={() => {
+                  setGender('FEMALE');
+                  if (errors.gender) {
+                    setErrors({ ...errors, gender: '' });
+                  }
+                }}
+              >
+                <Text style={[
+                  styles.genderButtonText,
+                  gender === 'FEMALE' && styles.genderButtonTextSelected,
+                ]}>여성</Text>
+              </TouchableOpacity>
+            </View>
+            {errors.gender ? <Text style={styles.errorText}>{errors.gender}</Text> : null}
+          </View>
+
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>지역</Text>
+            <TouchableOpacity
+              style={styles.dropdownButton}
+              onPress={() => setShowRegionModal(true)}
+            >
+              <Text style={[
+                styles.dropdownButtonText,
+                !regionName && styles.dropdownPlaceholder,
+              ]}>
+                {regionName || '지역을 선택해주세요'}
+              </Text>
+              <Text style={styles.dropdownArrow}>▼</Text>
+            </TouchableOpacity>
+            {errors.region ? <Text style={styles.errorText}>{errors.region}</Text> : null}
+          </View>
+
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>출생연도</Text>
+            <TouchableOpacity
+              style={styles.dropdownButton}
+              onPress={() => setShowBirthYearModal(true)}
+            >
+              <Text style={[
+                styles.dropdownButtonText,
+                !birthYear && styles.dropdownPlaceholder,
+              ]}>
+                {birthYear ? `${birthYear}년` : '출생연도를 선택해주세요'}
+              </Text>
+              <Text style={styles.dropdownArrow}>▼</Text>
+            </TouchableOpacity>
+            {errors.birthYear ? <Text style={styles.errorText}>{errors.birthYear}</Text> : null}
+          </View>
         </View>
       </ScrollView>
+
+      {/* 지역 선택 모달 */}
+      <Modal
+        visible={showRegionModal}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setShowRegionModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>지역 선택</Text>
+              <TouchableOpacity onPress={() => setShowRegionModal(false)}>
+                <Text style={styles.modalCloseButton}>닫기</Text>
+              </TouchableOpacity>
+            </View>
+            <FlatList
+              data={regions}
+              keyExtractor={(item) => item.code}
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  style={[
+                    styles.regionItem,
+                    region === item.code && styles.regionItemSelected,
+                  ]}
+                  onPress={() => {
+                    setRegion(item.code);
+                    setRegionName(item.name);
+                    setShowRegionModal(false);
+                    if (errors.region) {
+                      setErrors({ ...errors, region: '' });
+                    }
+                  }}
+                >
+                  <Text style={[
+                    styles.regionItemText,
+                    region === item.code && styles.regionItemTextSelected,
+                  ]}>{item.name}</Text>
+                </TouchableOpacity>
+              )}
+            />
+          </View>
+        </View>
+      </Modal>
+
+      {/* 출생연도 선택 모달 */}
+      <Modal
+        visible={showBirthYearModal}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setShowBirthYearModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>출생연도 선택</Text>
+              <TouchableOpacity onPress={() => setShowBirthYearModal(false)}>
+                <Text style={styles.modalCloseButton}>닫기</Text>
+              </TouchableOpacity>
+            </View>
+            <FlatList
+              data={birthYears}
+              keyExtractor={(item) => item.toString()}
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  style={[
+                    styles.regionItem,
+                    birthYear === item && styles.regionItemSelected,
+                  ]}
+                  onPress={() => {
+                    setBirthYear(item);
+                    setShowBirthYearModal(false);
+                    if (errors.birthYear) {
+                      setErrors({ ...errors, birthYear: '' });
+                    }
+                  }}
+                >
+                  <Text style={[
+                    styles.regionItemText,
+                    birthYear === item && styles.regionItemTextSelected,
+                  ]}>{item}년</Text>
+                </TouchableOpacity>
+              )}
+            />
+          </View>
+        </View>
+      </Modal>
 
       <View style={styles.buttonContainer}>
         <Button
@@ -704,6 +922,122 @@ const styles = StyleSheet.create({
   },
   buttonDisabled: {
     backgroundColor: colors.gray[300],
+  },
+  // 성별 선택 스타일
+  genderContainer: {
+    flexDirection: 'row',
+    gap: spacing[3],
+  },
+  genderButton: {
+    flex: 1,
+    height: 44,
+    borderRadius: borderRadius.base,
+    borderWidth: 1,
+    borderColor: colors.gray[300],
+    backgroundColor: colors.white,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  genderButtonSelected: {
+    borderColor: colors.primary[500],
+    backgroundColor: colors.primary[50],
+  },
+  genderButtonText: {
+    fontSize: typography.fontSize.sm,
+    color: colors.text.secondary,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+  },
+  genderButtonTextSelected: {
+    color: colors.primary[600],
+    fontWeight: typography.fontWeight.semibold,
+  },
+  // 드롭다운 스타일
+  dropdownButton: {
+    height: 44,
+    borderRadius: borderRadius.base,
+    borderWidth: 1,
+    borderColor: colors.gray[300],
+    backgroundColor: colors.white,
+    paddingHorizontal: spacing[4],
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  dropdownButtonText: {
+    fontSize: typography.fontSize.sm,
+    color: colors.text.primary,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+  },
+  dropdownPlaceholder: {
+    color: colors.gray[400],
+  },
+  dropdownArrow: {
+    fontSize: 12,
+    color: colors.gray[400],
+  },
+  // 모달 스타일
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-end',
+  },
+  modalContent: {
+    backgroundColor: colors.white,
+    borderTopLeftRadius: borderRadius.lg,
+    borderTopRightRadius: borderRadius.lg,
+    maxHeight: '70%',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: spacing[4],
+    borderBottomWidth: 1,
+    borderBottomColor: colors.gray[200],
+  },
+  modalTitle: {
+    fontSize: typography.fontSize.lg,
+    fontWeight: typography.fontWeight.semibold,
+    color: colors.text.primary,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+  },
+  modalCloseButton: {
+    fontSize: typography.fontSize.sm,
+    color: colors.primary[500],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+  },
+  regionItem: {
+    paddingVertical: spacing[4],
+    paddingHorizontal: spacing[5],
+    borderBottomWidth: 1,
+    borderBottomColor: colors.gray[100],
+  },
+  regionItemSelected: {
+    backgroundColor: colors.primary[50],
+  },
+  regionItemText: {
+    fontSize: typography.fontSize.base,
+    color: colors.text.primary,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+  },
+  regionItemTextSelected: {
+    color: colors.primary[600],
+    fontWeight: typography.fontWeight.semibold,
   },
 });
 

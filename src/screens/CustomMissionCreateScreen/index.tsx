@@ -11,6 +11,7 @@ import {
   Platform,
   Image,
 } from 'react-native';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { Button, Header, SectionTitle, FormCard } from '../../components/ui';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
 import { getOptimizedLineHeight } from '../../utils/textStyles';
@@ -96,6 +97,12 @@ const CustomMissionCreateScreen: React.FC<CustomMissionCreateScreenProps> = ({ n
   const [challengeDays, setChallengeDays] = useState(7);
   const [deadlineDays, setDeadlineDays] = useState(3);
 
+  // 시간 미션용 상태
+  const [startTime, setStartTime] = useState<Date>(new Date());
+  const [endTime, setEndTime] = useState<Date>(new Date());
+  const [showStartTimePicker, setShowStartTimePicker] = useState(false);
+  const [showEndTimePicker, setShowEndTimePicker] = useState(false);
+
   // AI 생성 미션이 있으면 초기값 설정
   useEffect(() => {
     if (generatedMission) {
@@ -139,6 +146,9 @@ const CustomMissionCreateScreen: React.FC<CustomMissionCreateScreenProps> = ({ n
         isChallenge: isChallenge,  // 챌린지 미션 여부
         challengeDays: isChallenge ? challengeDays : undefined,  // 챌린지 미션일 때만
         deadlineDays: isChallenge ? undefined : deadlineDays,    // 일반 미션일 때만
+        // 시간 미션용 필드
+        startTime: verificationType === 'TIME' ? formatTime(startTime) : undefined,
+        endTime: verificationType === 'TIME' ? formatTime(endTime) : undefined,
       };
 
       const result = await createCustomMission(missionData);
@@ -169,6 +179,32 @@ const CustomMissionCreateScreen: React.FC<CustomMissionCreateScreenProps> = ({ n
     const difficultyOption = DIFFICULTY_OPTIONS.find(opt => opt.id === selectedDifficulty);
     if (difficultyOption) {
       setCustomExp(difficultyOption.exp);
+    }
+  };
+
+  // 시간 포맷팅 (HH:mm)
+  const formatTime = (date: Date): string => {
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    return `${hours}:${minutes}`;
+  };
+
+  // 시간 선택 핸들러
+  const handleStartTimeChange = (_event: any, selectedDate?: Date) => {
+    if (Platform.OS === 'android') {
+      setShowStartTimePicker(false);
+    }
+    if (selectedDate) {
+      setStartTime(selectedDate);
+    }
+  };
+
+  const handleEndTimeChange = (_event: any, selectedDate?: Date) => {
+    if (Platform.OS === 'android') {
+      setShowEndTimePicker(false);
+    }
+    if (selectedDate) {
+      setEndTime(selectedDate);
     }
   };
 
@@ -288,6 +324,53 @@ const CustomMissionCreateScreen: React.FC<CustomMissionCreateScreenProps> = ({ n
               </TouchableOpacity>
             ))}
           </View>
+
+          {/* 시간 미션일 때 시작/종료 시간 설정 */}
+          {verificationType === 'TIME' && (
+            <View style={styles.timeSettingContainer}>
+              <Text style={styles.timeSettingTitle}>인증 가능 시간대 설정</Text>
+              <View style={styles.timePickerRow}>
+                <View style={styles.timePickerItem}>
+                  <Text style={styles.timeLabel}>시작 시간</Text>
+                  <TouchableOpacity
+                    style={styles.timeButton}
+                    onPress={() => setShowStartTimePicker(true)}
+                  >
+                    <Text style={styles.timeButtonText}>{formatTime(startTime)}</Text>
+                  </TouchableOpacity>
+                  {showStartTimePicker && (
+                    <DateTimePicker
+                      value={startTime}
+                      mode="time"
+                      is24Hour={true}
+                      display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                      onChange={handleStartTimeChange}
+                    />
+                  )}
+                </View>
+                <Text style={styles.timeSeparator}>~</Text>
+                <View style={styles.timePickerItem}>
+                  <Text style={styles.timeLabel}>종료 시간</Text>
+                  <TouchableOpacity
+                    style={styles.timeButton}
+                    onPress={() => setShowEndTimePicker(true)}
+                  >
+                    <Text style={styles.timeButtonText}>{formatTime(endTime)}</Text>
+                  </TouchableOpacity>
+                  {showEndTimePicker && (
+                    <DateTimePicker
+                      value={endTime}
+                      mode="time"
+                      is24Hour={true}
+                      display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                      onChange={handleEndTimeChange}
+                    />
+                  )}
+                </View>
+              </View>
+              <Text style={styles.timeHint}>이 시간대에만 미션 인증이 가능합니다</Text>
+            </View>
+          )}
         </FormCard>
 
         <FormCard>
@@ -583,6 +666,62 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.xs,
     color: colors.text.tertiary,
     textAlign: 'center',
+  },
+  // 시간 설정 스타일
+  timeSettingContainer: {
+    marginTop: spacing[4],
+    padding: spacing[3],
+    backgroundColor: colors.primary[50],
+    borderRadius: borderRadius.md,
+    borderWidth: 1,
+    borderColor: colors.primary[200],
+  },
+  timeSettingTitle: {
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.medium,
+    color: colors.primary[700],
+    marginBottom: spacing[3],
+    textAlign: 'center',
+  },
+  timePickerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  timePickerItem: {
+    alignItems: 'center',
+  },
+  timeLabel: {
+    fontSize: typography.fontSize.xs,
+    color: colors.text.secondary,
+    marginBottom: spacing[1],
+  },
+  timeButton: {
+    backgroundColor: colors.background.primary,
+    paddingVertical: spacing[3],
+    paddingHorizontal: spacing[4],
+    borderRadius: borderRadius.md,
+    borderWidth: 1,
+    borderColor: colors.primary[300],
+    minWidth: 100,
+    alignItems: 'center',
+  },
+  timeButtonText: {
+    fontSize: typography.fontSize.xl,
+    fontWeight: typography.fontWeight.bold,
+    color: colors.primary[600],
+  },
+  timeSeparator: {
+    fontSize: typography.fontSize.xl,
+    color: colors.text.secondary,
+    marginHorizontal: spacing[3],
+    marginTop: spacing[4],
+  },
+  timeHint: {
+    fontSize: typography.fontSize.xs,
+    color: colors.text.tertiary,
+    textAlign: 'center',
+    marginTop: spacing[3],
   },
   // 미션 유형 토글 스타일
   missionTypeToggle: {

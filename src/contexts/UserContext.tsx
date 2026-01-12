@@ -7,6 +7,7 @@ import { executeWithErrorHandling } from '../utils/errorHandler';
 import { User } from '../types';
 import { checkAutoLogin, getUserInfo, clearAuthData } from '../utils/tokenStorage';
 import { apiClient } from '../api/client';
+import { initializeGoogleSignIn } from '../services/googleSignIn';
 
 // UserContext 타입 정의
 interface UserContextType {
@@ -39,8 +40,11 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   const [currentNickname, setCurrentNickname] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  // 사용자 정보 로드
+  // OAuth 초기화 및 사용자 정보 로드
   useEffect(() => {
+    // Google Sign-In 초기화
+    initializeGoogleSignIn();
+
     loadUser();
   }, []);
 

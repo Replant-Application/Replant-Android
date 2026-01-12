@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Image, Modal, RefreshControl, Alert, Platform, ImageBackground } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Image, Modal, RefreshControl, Alert, Platform, ImageBackground, ActivityIndicator } from 'react-native';
 import { useCommunity } from '../../hooks/useCommunity';
 import { PostCard } from '../../components/specialized';
 import { Loading, ErrorBoundary, EmptyState, SimpleTabBar, Header } from '../../components/ui';
@@ -16,7 +16,7 @@ import { getVerifications, voteVerification, VerificationPost, VerificationStatu
 import { CommunityPost } from '../../types';
 import { logError } from '../../utils/logger';
 import { getHiddenPosts, hidePost } from '../../utils/hiddenContentStorage';
-import { getMissionSets, searchMissionSets, copyMissionSet, MissionSetSimple } from '../../api/missionSetApi';
+import { getMissionSets, searchMissionSets, copyMissionSet, getMyMissionSets, updateMissionSet, MissionSetSimple } from '../../api/missionSetApi';
 import { SCREEN_NAMES } from '../../utils/constants';
 
 interface CommunityScreenProps {
@@ -48,6 +48,14 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation }) => {
   const [missionSetLoading, setMissionSetLoading] = useState(false);
   const [missionSetSearchQuery, setMissionSetSearchQuery] = useState('');
   const [debouncedMissionSetSearchQuery, setDebouncedMissionSetSearchQuery] = useState('');
+  const [missionSetSortBy, setMissionSetSortBy] = useState<'popular' | 'latest'>('popular');
+  const [showMissionSetFilterModal, setShowMissionSetFilterModal] = useState(false);
+
+  // 투두리스트 공유 모달 관련 상태
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [myMissionSets, setMyMissionSets] = useState<MissionSetSimple[]>([]);
+  const [myMissionSetsLoading, setMyMissionSetsLoading] = useState(false);
+  const [sharingId, setSharingId] = useState<number | null>(null);
 
   // 검색어 디바운싱 (300ms)
   useEffect(() => {
@@ -88,9 +96,10 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation }) => {
           keyword: debouncedMissionSetSearchQuery,
           page: 0,
           size: 50,
+          sortBy: missionSetSortBy,
         });
       } else {
-        result = await getMissionSets({ page: 0, size: 50 });
+        result = await getMissionSets({ page: 0, size: 50, sortBy: missionSetSortBy });
       }
 
       if (result.success && result.data) {
@@ -101,7 +110,7 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation }) => {
     } finally {
       setMissionSetLoading(false);
     }
-  }, [debouncedMissionSetSearchQuery]);
+  }, [debouncedMissionSetSearchQuery, missionSetSortBy]);
 
   // 탭 변경 시 미션세트 로드
   useEffect(() => {
@@ -132,6 +141,54 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation }) => {
     } catch (error) {
       logError('미션세트 담기 실패', error as Error);
       Alert.alert('오류', '미션세트를 담는 중 문제가 발생했습니다.');
+    }
+  };
+
+  // 투두리스트 공유 모달 열기
+  const handleOpenShareModal = async () => {
+    try {
+      setMyMissionSetsLoading(true);
+      const result = await getMyMissionSets({ page: 0, size: 100 });
+      if (result.success && result.data) {
+        setMyMissionSets(result.data.content);
+        setShowShareModal(true);
+      } else {
+        Alert.alert('오류', '투두리스트를 불러오는데 실패했습니다.');
+      }
+    } catch (error) {
+      logError('내 미션세트 로드 실패', error as Error);
+      Alert.alert('오류', '투두리스트를 불러오는데 실패했습니다.');
+    } finally {
+      setMyMissionSetsLoading(false);
+    }
+  };
+
+  // 투두리스트 공유하기 (공개로 변경)
+  const handleShareMissionSet = async (missionSet: MissionSetSimple) => {
+    if (missionSet.isPublic) {
+      Alert.alert('알림', '이미 공개된 투두리스트입니다.');
+      return;
+    }
+
+    try {
+      setSharingId(missionSet.id);
+      const result = await updateMissionSet(missionSet.id, { isPublic: true });
+      if (result.success) {
+        Alert.alert('공유 완료', `"${missionSet.title}" 투두리스트가 커뮤니티에 공유되었습니다.`);
+        setMyMissionSets(prev =>
+          prev.map(ms => ms.id === missionSet.id ? { ...ms, isPublic: true } : ms)
+        );
+        setShowShareModal(false);
+        // 공유 후 미션세트 목록 새로고침
+        loadMissionSets();
+      } else {
+        Alert.alert('오류', result.error || '공유에 실패했습니다.');
+      }
+    } catch (error) {
+      logError('미션세트 공유 실패', error as Error);
+      Alert.alert('오류', '공유 중 문제가 발생했습니다.');
+    } finally {
+      setSharingId(null);
     }
   };
 
@@ -480,20 +537,39 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation }) => {
       {/* 투두 공유 탭 콘텐츠 */}
       {activeTab === 'todo-share' && (
         <>
-          {/* 검색창 */}
-          <View style={styles.missionSetSearchContainer}>
-            <Image
-              source={require('../../assets/images/search.png')}
-              style={styles.searchIcon}
-              resizeMode="contain"
-            />
-            <TextInput
-              style={styles.searchInput}
-              value={missionSetSearchQuery}
-              onChangeText={setMissionSetSearchQuery}
-              placeholder="투두리스트 검색..."
-              placeholderTextColor={colors.text.tertiary}
-            />
+          {/* 검색창과 필터 버튼 */}
+          <View style={styles.missionSetFilterContainer}>
+            <View style={styles.searchRow}>
+              <View style={styles.missionSetSearchContainer}>
+                <Image
+                  source={require('../../assets/images/search.png')}
+                  style={styles.searchIcon}
+                  resizeMode="contain"
+                />
+                <TextInput
+                  style={styles.searchInput}
+                  value={missionSetSearchQuery}
+                  onChangeText={setMissionSetSearchQuery}
+                  placeholder="투두리스트 검색..."
+                  placeholderTextColor={colors.text.tertiary}
+                />
+              </View>
+              <TouchableOpacity
+                style={styles.filterButton}
+                onPress={() => setShowMissionSetFilterModal(true)}
+                activeOpacity={0.7}
+                accessibilityRole="button"
+                accessibilityLabel="필터"
+                accessibilityHint="투두 공유 필터 옵션 열기"
+              >
+                <Image
+                  source={require('../../assets/images/filter.png')}
+                  style={styles.filterIcon}
+                  resizeMode="contain"
+                  accessibilityElementsHidden={true}
+                />
+              </TouchableOpacity>
+            </View>
           </View>
 
           {missionSetLoading ? (
@@ -595,15 +671,16 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation }) => {
         </TouchableOpacity>
       )}
 
-      {/* 투두리스트 생성 FAB */}
+      {/* 투두리스트 공유 FAB */}
       {activeTab === 'todo-share' && (
         <TouchableOpacity
           style={styles.fab}
-          onPress={() => navigation.navigate(SCREEN_NAMES.MISSION_SET_CREATE as any)}
+          onPress={handleOpenShareModal}
           activeOpacity={0.8}
           accessibilityRole="button"
-          accessibilityLabel="투두리스트 생성"
-          accessibilityHint="새 투두리스트를 생성합니다"
+          accessibilityLabel="투두리스트 공유"
+          accessibilityHint="내 투두리스트를 공유합니다"
+          disabled={myMissionSetsLoading}
         >
           <Text style={styles.fabText}>+</Text>
         </TouchableOpacity>
@@ -701,6 +778,148 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation }) => {
             >
               <Text style={styles.modalApplyButtonText}>적용</Text>
             </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      {/* 투두 공유 필터 모달 */}
+      <Modal
+        visible={showMissionSetFilterModal}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setShowMissionSetFilterModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <TouchableOpacity
+            style={styles.modalOverlayTouchable}
+            activeOpacity={1}
+            onPress={() => setShowMissionSetFilterModal(false)}
+          />
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>정렬 선택</Text>
+
+            {/* 정렬 옵션 */}
+            {[
+              { value: 'popular', label: '인기순' },
+              { value: 'latest', label: '최신순' },
+            ].map((option) => (
+              <TouchableOpacity
+                key={option.value}
+                style={[
+                  styles.filterOption,
+                  missionSetSortBy === option.value && styles.filterOptionActive,
+                ]}
+                onPress={() => {
+                  setMissionSetSortBy(option.value as 'popular' | 'latest');
+                }}
+                activeOpacity={0.7}
+                accessibilityRole="button"
+                accessibilityLabel={option.label}
+                accessibilityState={{ selected: missionSetSortBy === option.value }}
+              >
+                <Text
+                  style={[
+                    styles.filterOptionText,
+                    missionSetSortBy === option.value && styles.filterOptionTextActive,
+                  ]}
+                >
+                  {option.label}
+                </Text>
+                {missionSetSortBy === option.value && (
+                  <Text style={styles.filterOptionCheck} accessibilityElementsHidden={true}>✓</Text>
+                )}
+              </TouchableOpacity>
+            ))}
+
+            {/* 적용 버튼 */}
+            <TouchableOpacity
+              style={styles.modalApplyButton}
+              onPress={() => setShowMissionSetFilterModal(false)}
+              activeOpacity={0.7}
+              accessibilityRole="button"
+              accessibilityLabel="필터 적용"
+            >
+              <Text style={styles.modalApplyButtonText}>적용</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      {/* 투두리스트 공유 모달 */}
+      <Modal
+        visible={showShareModal}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setShowShareModal(false)}
+      >
+        <View style={styles.shareModalOverlay}>
+          <View style={styles.shareModalContent}>
+            <View style={styles.shareModalHeader}>
+              <Text style={styles.shareModalTitle}>투두리스트 공유하기</Text>
+              <TouchableOpacity
+                onPress={() => setShowShareModal(false)}
+                style={styles.shareModalCloseButton}
+              >
+                <Text style={styles.shareModalCloseText}>×</Text>
+              </TouchableOpacity>
+            </View>
+
+            <Text style={styles.shareModalSubtitle}>
+              커뮤니티에 공유할 투두리스트를 선택하세요
+            </Text>
+
+            <ScrollView style={styles.shareModalList}>
+              {myMissionSets.length === 0 ? (
+                <View style={styles.shareModalEmpty}>
+                  <Text style={styles.shareModalEmptyText}>
+                    아직 만든 투두리스트가 없습니다.
+                  </Text>
+                  <Text style={styles.shareModalEmptySubtext}>
+                    홈에서 투두리스트를 먼저 만들어보세요!
+                  </Text>
+                </View>
+              ) : (
+                myMissionSets.map(missionSet => (
+                  <TouchableOpacity
+                    key={missionSet.id}
+                    style={[
+                      styles.shareModalItem,
+                      missionSet.isPublic && styles.shareModalItemShared,
+                    ]}
+                    onPress={() => handleShareMissionSet(missionSet)}
+                    disabled={sharingId === missionSet.id || missionSet.isPublic}
+                    activeOpacity={0.7}
+                  >
+                    <View style={styles.shareModalItemContent}>
+                      <Text style={styles.shareModalItemTitle} numberOfLines={1}>
+                        {missionSet.title}
+                      </Text>
+                      {missionSet.description && (
+                        <Text style={styles.shareModalItemDesc} numberOfLines={1}>
+                          {missionSet.description}
+                        </Text>
+                      )}
+                      <Text style={styles.shareModalItemMeta}>
+                        {missionSet.missionCount}개 미션
+                      </Text>
+                    </View>
+                    <View style={styles.shareModalItemAction}>
+                      {sharingId === missionSet.id ? (
+                        <ActivityIndicator size="small" color={colors.primary[500]} />
+                      ) : missionSet.isPublic ? (
+                        <View style={styles.sharedBadge}>
+                          <Text style={styles.sharedBadgeText}>공유됨</Text>
+                        </View>
+                      ) : (
+                        <View style={styles.shareButton}>
+                          <Text style={styles.shareButtonText}>공유</Text>
+                        </View>
+                      )}
+                    </View>
+                  </TouchableOpacity>
+                ))
+              )}
+            </ScrollView>
           </View>
         </View>
       </Modal>
@@ -985,7 +1204,7 @@ const styles = StyleSheet.create({
   },
   fab: {
     position: 'absolute',
-    bottom: 100,
+    bottom: 120,
     right: 20,
     width: 56,
     height: 56,
@@ -1018,15 +1237,19 @@ const styles = StyleSheet.create({
     marginTop: -2,
   },
   // 투두 공유 관련 스타일
+  missionSetFilterContainer: {
+    paddingHorizontal: spacing[4],
+    paddingTop: spacing[1],
+    paddingBottom: spacing[3],
+  },
   missionSetSearchContainer: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: colors.background.secondary,
     borderRadius: borderRadius.lg,
     paddingHorizontal: spacing[3],
     paddingVertical: spacing[3],
-    marginHorizontal: spacing[4],
-    marginVertical: spacing[3],
     borderWidth: 1,
     borderColor: '#D4A574',
   },
@@ -1155,6 +1378,160 @@ const styles = StyleSheet.create({
     }),
     includeFontPadding: false,
     lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
+  },
+  // 투두리스트 공유 모달 스타일
+  shareModalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-end',
+  },
+  shareModalContent: {
+    backgroundColor: colors.background.primary,
+    borderTopLeftRadius: borderRadius.xl,
+    borderTopRightRadius: borderRadius.xl,
+    maxHeight: '80%',
+    paddingBottom: spacing[6],
+  },
+  shareModalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: spacing[4],
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border.light,
+  },
+  shareModalTitle: {
+    fontSize: typography.fontSize.xl,
+    fontWeight: typography.fontWeight.semibold,
+    color: colors.text.primary,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+  },
+  shareModalCloseButton: {
+    width: 32,
+    height: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  shareModalCloseText: {
+    fontSize: 28,
+    color: colors.text.secondary,
+    lineHeight: 28,
+  },
+  shareModalSubtitle: {
+    fontSize: typography.fontSize.sm,
+    color: colors.text.secondary,
+    paddingHorizontal: spacing[4],
+    paddingVertical: spacing[3],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+  },
+  shareModalList: {
+    paddingHorizontal: spacing[4],
+  },
+  shareModalEmpty: {
+    alignItems: 'center',
+    paddingVertical: spacing[8],
+  },
+  shareModalEmptyText: {
+    fontSize: typography.fontSize.base,
+    color: colors.text.secondary,
+    marginBottom: spacing[2],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+  },
+  shareModalEmptySubtext: {
+    fontSize: typography.fontSize.sm,
+    color: colors.text.tertiary,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+  },
+  shareModalItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.white,
+    borderRadius: borderRadius.lg,
+    padding: spacing[4],
+    marginBottom: spacing[3],
+    borderWidth: 1,
+    borderColor: colors.border.light,
+  },
+  shareModalItemShared: {
+    backgroundColor: colors.gray[50],
+    borderColor: colors.gray[200],
+  },
+  shareModalItemContent: {
+    flex: 1,
+    marginRight: spacing[3],
+  },
+  shareModalItemTitle: {
+    fontSize: typography.fontSize.base,
+    fontWeight: typography.fontWeight.medium,
+    color: colors.text.primary,
+    marginBottom: spacing[1],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+  },
+  shareModalItemDesc: {
+    fontSize: typography.fontSize.sm,
+    color: colors.text.secondary,
+    marginBottom: spacing[1],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+  },
+  shareModalItemMeta: {
+    fontSize: typography.fontSize.xs,
+    color: colors.text.tertiary,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+  },
+  shareModalItemAction: {
+    minWidth: 60,
+    alignItems: 'center',
+  },
+  sharedBadge: {
+    backgroundColor: colors.gray[200],
+    paddingVertical: spacing[1.5],
+    paddingHorizontal: spacing[3],
+    borderRadius: borderRadius.full,
+  },
+  sharedBadgeText: {
+    fontSize: typography.fontSize.xs,
+    color: colors.text.tertiary,
+    fontWeight: typography.fontWeight.medium,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+  },
+  shareButton: {
+    backgroundColor: colors.primary[500],
+    paddingVertical: spacing[2],
+    paddingHorizontal: spacing[4],
+    borderRadius: borderRadius.md,
+  },
+  shareButtonText: {
+    fontSize: typography.fontSize.sm,
+    color: colors.white,
+    fontWeight: typography.fontWeight.medium,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
   },
 });
 

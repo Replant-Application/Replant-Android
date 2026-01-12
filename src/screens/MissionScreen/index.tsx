@@ -705,17 +705,6 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
           />
         )}
 
-        {/* 미션 만들기 버튼 */}
-        <TouchableOpacity
-          style={styles.createButtonTop}
-          onPress={() => navigation.navigate('CustomMissionCreate' as any)}
-          activeOpacity={0.7}
-          accessibilityRole="button"
-          accessibilityLabel="미션 만들기"
-        >
-          <Text style={styles.createButtonTopText}>미션 만들기</Text>
-        </TouchableOpacity>
-
         {/* 진행중/인증대기 탭 */}
         <SimpleTabBar
           tabs={[
@@ -750,24 +739,17 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
               renderItem={({ item: pageMissions }) => (
                 <View style={styles.missionPageContainer}>
                   {pageMissions.map((mission, index) => (
-                    <TouchableOpacity
+                    <MissionCard
                       key={`${mission.mission_id}-${mission.id || index}`}
-                      activeOpacity={0.7}
-                      onPress={() => {
-                        navigation.navigate('MissionDetail', { missionId: mission.mission_id || String(mission.id) || '' });
-                      }}
-                    >
-                      <MissionCard
-                        mission={mission}
-                        onComplete={handleMissionComplete}
-                        onUncomplete={handleMissionUncomplete}
-                        onUploadPhoto={handlePhotoUpload}
-                        onDeletePhoto={handleDeletePhoto}
-                        onWriteReview={(missionId) => navigation.navigate('MissionDetail', { missionId })}
-                        onVerify={handleVerify}
-                        onViewDetails={() => navigation.navigate('MissionDetail', { missionId: mission.mission_id || String(mission.id) || '' })}
-                      />
-                    </TouchableOpacity>
+                      mission={mission}
+                      onComplete={handleMissionComplete}
+                      onUncomplete={handleMissionUncomplete}
+                      onUploadPhoto={handlePhotoUpload}
+                      onDeletePhoto={handleDeletePhoto}
+                      onWriteReview={(missionId) => navigation.navigate('MissionDetail', { missionId })}
+                      onVerify={handleVerify}
+                      onViewDetails={() => navigation.navigate('MissionDetail', { missionId: mission.mission_id || String(mission.id) || '' })}
+                    />
                   ))}
                 </View>
               )}
@@ -792,7 +774,15 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
                   onPress={() => goToMissionPage(currentMissionPage - 1)}
                   disabled={currentMissionPage === 0}
                 >
-                  <Text style={[styles.pageArrowText, currentMissionPage === 0 && styles.pageArrowTextDisabled]}>‹</Text>
+                  <Image
+                    source={require('../../assets/images/chevron.png')}
+                    style={[
+                      styles.pageArrowIcon,
+                      styles.pageArrowIconLeft,
+                      currentMissionPage === 0 && styles.pageArrowIconDisabled,
+                    ]}
+                    resizeMode="contain"
+                  />
                 </TouchableOpacity>
 
                 <View style={styles.pageIndicators}>
@@ -813,7 +803,14 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
                   onPress={() => goToMissionPage(currentMissionPage + 1)}
                   disabled={currentMissionPage === totalMissionPages - 1}
                 >
-                  <Text style={[styles.pageArrowText, currentMissionPage === totalMissionPages - 1 && styles.pageArrowTextDisabled]}>›</Text>
+                  <Image
+                    source={require('../../assets/images/chevron.png')}
+                    style={[
+                      styles.pageArrowIcon,
+                      currentMissionPage === totalMissionPages - 1 && styles.pageArrowIconDisabled,
+                    ]}
+                    resizeMode="contain"
+                  />
                 </TouchableOpacity>
               </View>
             )}
@@ -863,6 +860,22 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
                 />
               }
             >
+              {/* 커스텀 미션 탭: 미션 만들기 버튼 */}
+              {missionGroupTab === 'custom' && (
+                <TouchableOpacity
+                  style={styles.createMissionButton}
+                  onPress={() => navigation.navigate('CustomMissionCreate' as any)}
+                  activeOpacity={0.7}
+                >
+                  <Image
+                    source={require('../../assets/images/goal.png')}
+                    style={styles.createMissionIcon}
+                    resizeMode="contain"
+                  />
+                  <Text style={styles.createMissionText}>미션 만들기</Text>
+                </TouchableOpacity>
+              )}
+
               {groupMissions.length === 0 ? (
                 <EmptyState
                   iconImage={require('../../assets/images/goal.png')}
@@ -1032,7 +1045,15 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
                         onPress={() => goToGroupPage(currentGroupPage - 1)}
                         disabled={currentGroupPage === 0}
                       >
-                        <Text style={[styles.pageArrowText, currentGroupPage === 0 && styles.pageArrowTextDisabled]}>‹</Text>
+                        <Image
+                          source={require('../../assets/images/chevron.png')}
+                          style={[
+                            styles.pageArrowIcon,
+                            styles.pageArrowIconLeft,
+                            currentGroupPage === 0 && styles.pageArrowIconDisabled,
+                          ]}
+                          resizeMode="contain"
+                        />
                       </TouchableOpacity>
 
                       <View style={styles.pageIndicators}>
@@ -1053,7 +1074,14 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
                         onPress={() => goToGroupPage(currentGroupPage + 1)}
                         disabled={currentGroupPage === totalGroupPages - 1}
                       >
-                        <Text style={[styles.pageArrowText, currentGroupPage === totalGroupPages - 1 && styles.pageArrowTextDisabled]}>›</Text>
+                        <Image
+                          source={require('../../assets/images/chevron.png')}
+                          style={[
+                            styles.pageArrowIcon,
+                            currentGroupPage === totalGroupPages - 1 && styles.pageArrowIconDisabled,
+                          ]}
+                          resizeMode="contain"
+                        />
                       </TouchableOpacity>
                     </View>
                   )}
@@ -1108,28 +1136,6 @@ const styles = StyleSheet.create({
     padding: spacing[4],
     paddingBottom: spacing[20], // 하단 탭바 높이 + 여유 공간
   },
-  createButtonTop: {
-    backgroundColor: colors.white,
-    borderWidth: 1,
-    borderColor: colors.primary[500],
-    borderRadius: borderRadius.base,
-    paddingVertical: spacing[2],
-    paddingHorizontal: spacing[3],
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: spacing[4],
-  },
-  createButtonTopText: {
-    fontSize: typography.fontSize.sm,
-    fontWeight: typography.fontWeight.normal,
-    color: colors.primary[500],
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
-  },
   missionList: {
     gap: spacing[1],
   },
@@ -1163,6 +1169,17 @@ const styles = StyleSheet.create({
   },
   pageArrowTextDisabled: {
     color: colors.gray[400],
+  },
+  pageArrowIcon: {
+    width: 16,
+    height: 16,
+    tintColor: colors.primary[600],
+  },
+  pageArrowIconLeft: {
+    transform: [{ rotate: '180deg' }],
+  },
+  pageArrowIconDisabled: {
+    tintColor: colors.gray[400],
   },
   pageIndicators: {
     flexDirection: 'row',
@@ -1440,6 +1457,34 @@ const styles = StyleSheet.create({
     color: colors.white,
     fontSize: typography.fontSize.base,
     fontWeight: typography.fontWeight.medium,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
+  },
+  // 미션 만들기 버튼 스타일
+  createMissionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.primary[500],
+    borderRadius: borderRadius.md,
+    paddingVertical: spacing[3],
+    paddingHorizontal: spacing[4],
+    marginBottom: spacing[4],
+    gap: spacing[2],
+  },
+  createMissionIcon: {
+    width: 20,
+    height: 20,
+    tintColor: colors.white,
+  },
+  createMissionText: {
+    fontSize: typography.fontSize.base,
+    fontWeight: typography.fontWeight.medium,
+    color: colors.white,
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,
       android: typography.fontFamily.regular,

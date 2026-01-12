@@ -1,14 +1,21 @@
-import apiClient from './apiClient';
+import { apiClient } from './client';
 
 // 루틴 타입
 export type RoutineType =
   | 'WAKE_UP_TIME'       // 기상 시간
+  | 'STUDY_TIME'         // 공부 시간 (시작~종료)
   | 'DAILY_PLACE'        // 매일 갈 장소
+  | 'GYM_LOCATION'       // 헬스장
+  | 'LIBRARY_LOCATION'   // 도서관
+  | 'CUSTOM_LOCATION'    // 기타 장소
   | 'WEEKLY_RESOLUTION'  // 이번 주 다짐
   | 'MONTHLY_RESOLUTION' // 이번 달 다짐
   | 'EXERCISE_TARGET'    // 운동 목표
   | 'STUDY_TARGET'       // 학습 목표
   | 'CUSTOM';            // 사용자 정의
+
+// 입력 타입
+export type InputType = 'time' | 'time_range' | 'place' | 'text' | 'number';
 
 // 주기 타입
 export type PeriodType = 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'NONE';
@@ -18,12 +25,18 @@ export interface UserRoutine {
   id: number;
   routineType: RoutineType;
   routineTypeName: string;
+  inputType: InputType;           // time, time_range, place, text, number
+  defaultDescription: string;     // 기본 설명
   periodType: PeriodType;
   periodTypeName: string;
   periodStart: string | null;
   periodEnd: string | null;
+  title: string | null;           // 루틴 제목 (사용자 지정)
+  description: string | null;     // 루틴 설명
   valueText: string | null;
-  valueTime: string | null; // HH:mm:ss 형식
+  valueTimeStart: string | null;  // HH:mm:ss 형식 (시작시간)
+  valueTimeEnd: string | null;    // HH:mm:ss 형식 (종료시간)
+  valueTime: string | null;       // HH:mm:ss 형식 (기존 호환용)
   valueNumber: number | null;
   valueLatitude: number | null;
   valueLongitude: number | null;
@@ -39,13 +52,17 @@ export interface UserRoutineRequest {
   routineType: RoutineType;
   periodType?: PeriodType;
   periodStart?: string;
+  title?: string;              // 루틴 제목 (예: "우리동네 헬스장")
+  description?: string;        // 루틴 설명
   valueText?: string;
-  valueTime?: string; // HH:mm:ss 형식
+  valueTimeStart?: string;     // HH:mm:ss 형식 (시작시간)
+  valueTimeEnd?: string;       // HH:mm:ss 형식 (종료시간)
+  valueTime?: string;          // HH:mm:ss 형식 (기존 호환용)
   valueNumber?: number;
   valueLatitude?: number;
   valueLongitude?: number;
   notificationEnabled?: boolean;
-  notificationTime?: string; // HH:mm:ss 형식
+  notificationTime?: string;   // HH:mm:ss 형식
 }
 
 // 루틴 타입 정보
@@ -53,6 +70,8 @@ export interface RoutineTypeInfo {
   type: RoutineType;
   displayName: string;
   defaultPeriodType: PeriodType;
+  inputType: InputType;
+  defaultDescription: string;
 }
 
 // API 응답 타입
@@ -70,8 +89,17 @@ export const getRoutineTypes = async (): Promise<RoutineTypeInfo[]> => {
 
 // 활성 루틴 전체 조회
 export const getActiveRoutines = async (): Promise<UserRoutine[]> => {
-  const response = await apiClient.get<ApiResponse<UserRoutine[]>>('/api/routines');
-  return response.data.data;
+  try {
+    const response = await apiClient.get<ApiResponse<UserRoutine[]>>('/api/routines');
+    // 안전한 데이터 접근
+    if (response?.data?.data && Array.isArray(response.data.data)) {
+      return response.data.data;
+    }
+    return [];
+  } catch (error) {
+    console.log('getActiveRoutines 에러:', error);
+    return [];
+  }
 };
 
 // 주기별 활성 루틴 조회
@@ -93,8 +121,7 @@ export const getRoutineHistory = async (
   size: number = 10
 ): Promise<{ content: UserRoutine[]; totalElements: number; totalPages: number }> => {
   const response = await apiClient.get<ApiResponse<{ content: UserRoutine[]; totalElements: number; totalPages: number }>>(
-    `/api/routines/type/${routineType}/history`,
-    { params: { page, size } }
+    `/api/routines/type/${routineType}/history?page=${page}&size=${size}`
   );
   return response.data.data;
 };
@@ -113,9 +140,7 @@ export const deleteRoutine = async (routineId: number): Promise<void> => {
 // 루틴 알림 토글
 export const toggleRoutineNotification = async (routineId: number, enabled: boolean): Promise<UserRoutine> => {
   const response = await apiClient.patch<ApiResponse<UserRoutine>>(
-    `/api/routines/${routineId}/notification`,
-    null,
-    { params: { enabled } }
+    `/api/routines/${routineId}/notification?enabled=${enabled}`
   );
   return response.data.data;
 };
@@ -125,8 +150,16 @@ export const getRoutineIcon = (routineType: RoutineType): string => {
   switch (routineType) {
     case 'WAKE_UP_TIME':
       return '⏰';
+    case 'STUDY_TIME':
+      return '📖';
     case 'DAILY_PLACE':
       return '📍';
+    case 'GYM_LOCATION':
+      return '🏋️';
+    case 'LIBRARY_LOCATION':
+      return '📚';
+    case 'CUSTOM_LOCATION':
+      return '🗺️';
     case 'WEEKLY_RESOLUTION':
       return '📝';
     case 'MONTHLY_RESOLUTION':
@@ -134,7 +167,7 @@ export const getRoutineIcon = (routineType: RoutineType): string => {
     case 'EXERCISE_TARGET':
       return '💪';
     case 'STUDY_TARGET':
-      return '📚';
+      return '📊';
     case 'CUSTOM':
       return '✨';
     default:

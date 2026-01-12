@@ -85,3 +85,12 @@ export const getBadgeHistory = async (params?: {
 }): Promise<ServiceResult<BadgeHistoryResponse>> => {
   return apiClient.get<BadgeHistoryResponse>(API_CONFIG.endpoints.badge.history, params);
 };
+
+/**
+ * 특정 미션에 대한 유효 뱃지 보유 여부 확인
+ * GET /api/badges/check/{missionId}
+ * 인증 필요
+ */
+export const checkBadgeForMission = async (missionId: number): Promise<ServiceResult<{ hasBadge: boolean }>> => {
+  return apiClient.get<{ hasBadge: boolean }>(`/badges/check/${missionId}`);
+};

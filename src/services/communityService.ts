@@ -180,7 +180,7 @@ const transformBackendPost = (post: BackendPostResponse): CommunityPost => {
     scrap_count: 0, // 백엔드에서 제공하지 않음 - 로컬 관리
     images: post.imageUrls || [],
     tags: post.missionTag ? [post.missionTag.title] : [],
-    category: post.postType === 'VERIFICATION' ? 'VERIFICATION' : (post.missionTag?.type || 'GENERAL'),
+    category: post.postType === 'VERIFICATION' ? '인증' : '일반',
     is_liked: post.isLiked || false,
     verified,  // 인증 완료 여부
   };

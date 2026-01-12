@@ -40,6 +40,8 @@ export const playSound = async (
 export const playTouchSound = async (): Promise<void> => {
   try {
     const settings = await loadSoundSettings();
+    // 볼륨이 0이면 재생하지 않음
+    if (settings.effectVolume <= 0) return;
     await playSound(require('../assets/sounds/touch_sound.mp3'), settings.effectVolume);
   } catch (error) {
     await playSound(require('../assets/sounds/touch_sound.mp3'), 1.0);
@@ -52,6 +54,8 @@ export const playTouchSound = async (): Promise<void> => {
 export const playReadBookSound = async (): Promise<void> => {
   try {
     const settings = await loadSoundSettings();
+    // 볼륨이 0이면 재생하지 않음
+    if (settings.effectVolume <= 0) return;
     await playSound(require('../assets/sounds/read_book.mp3'), settings.effectVolume);
   } catch (error) {
     await playSound(require('../assets/sounds/read_book.mp3'), 1.0);
@@ -64,6 +68,8 @@ export const playReadBookSound = async (): Promise<void> => {
 export const playButtonSound = async (): Promise<void> => {
   try {
     const settings = await loadSoundSettings();
+    // 볼륨이 0이면 재생하지 않음
+    if (settings.effectVolume <= 0) return;
     await playSound(require('../assets/sounds/right_sound.mp3'), settings.effectVolume);
   } catch (error) {
     await playSound(require('../assets/sounds/right_sound.mp3'), 1.0);

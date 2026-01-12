@@ -10,14 +10,17 @@ import {
   Alert,
   Platform,
   ActivityIndicator,
+  Modal,
+  ImageBackground,
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
 import { getOptimizedLineHeight } from '../../utils/textStyles';
-import { AppHeader } from '../../components/ui';
+import { Header, SimpleTabBar } from '../../components/ui';
 import {
   UserRoutine,
   RoutineType,
+  InputType,
   UserRoutineRequest,
   getActiveRoutines,
   saveRoutine,
@@ -37,41 +40,76 @@ interface RoutineConfig {
   name: string;
   icon: string;
   description: string;
-  inputType: 'time' | 'text' | 'place';
+  inputType: InputType;
   placeholder?: string;
+  category: 'time' | 'place' | 'goal';
 }
 
+// 루틴 카테고리별 설정
 const ROUTINE_CONFIGS: RoutineConfig[] = [
+  // 시간 관련
   {
     type: 'WAKE_UP_TIME',
     name: '기상 시간',
     icon: '⏰',
-    description: '매일 일어날 시간을 설정해요',
+    description: '기상 미션용 시간대 설정',
     inputType: 'time',
+    category: 'time',
   },
   {
-    type: 'DAILY_PLACE',
-    name: '매일 갈 장소',
-    icon: '📍',
-    description: '매일 방문할 장소를 설정해요',
+    type: 'STUDY_TIME',
+    name: '공부 시간',
+    icon: '📖',
+    description: '공부 미션용 시간대 설정',
+    inputType: 'time_range',
+    category: 'time',
+  },
+  // 장소 관련
+  {
+    type: 'GYM_LOCATION',
+    name: '헬스장',
+    icon: '🏋️',
+    description: '헬스장 방문 미션용',
+    inputType: 'place',
+    placeholder: '헬스장 이름을 입력하세요',
+    category: 'place',
+  },
+  {
+    type: 'LIBRARY_LOCATION',
+    name: '도서관',
+    icon: '📚',
+    description: '도서관 방문 미션용',
+    inputType: 'place',
+    placeholder: '도서관 이름을 입력하세요',
+    category: 'place',
+  },
+  {
+    type: 'CUSTOM_LOCATION',
+    name: '기타 장소',
+    icon: '🗺️',
+    description: '기타 장소 방문 미션용',
     inputType: 'place',
     placeholder: '장소 이름을 입력하세요',
+    category: 'place',
   },
+  // 목표 관련
   {
     type: 'WEEKLY_RESOLUTION',
     name: '이번 주 다짐',
     icon: '📝',
-    description: '이번 주 목표를 적어보세요',
+    description: '이번 주 목표',
     inputType: 'text',
     placeholder: '이번 주 다짐을 입력하세요',
+    category: 'goal',
   },
   {
     type: 'MONTHLY_RESOLUTION',
     name: '이번 달 다짐',
     icon: '🎯',
-    description: '이번 달 목표를 적어보세요',
+    description: '이번 달 목표',
     inputType: 'text',
     placeholder: '이번 달 다짐을 입력하세요',
+    category: 'goal',
   },
 ];
 
@@ -82,10 +120,21 @@ const RoutineSettingScreen: React.FC<RoutineSettingScreenProps> = ({ navigation 
 
   // 편집 상태
   const [editingType, setEditingType] = useState<RoutineType | null>(null);
+  const [editTitle, setEditTitle] = useState<string>('');
+  const [editDescription, setEditDescription] = useState<string>('');
   const [editValue, setEditValue] = useState<string>('');
-  const [editTime, setEditTime] = useState<Date>(new Date());
-  const [showTimePicker, setShowTimePicker] = useState(false);
+  const [editTimeStart, setEditTimeStart] = useState<Date>(new Date());
+  const [editTimeEnd, setEditTimeEnd] = useState<Date>(new Date());
+  const [showTimeStartPicker, setShowTimeStartPicker] = useState(false);
+  const [showTimeEndPicker, setShowTimeEndPicker] = useState(false);
   const [notificationEnabled, setNotificationEnabled] = useState(false);
+
+  // 장소 좌표 (맵 API 연동 시 사용)
+  const [editLatitude, setEditLatitude] = useState<number | null>(null);
+  const [editLongitude, setEditLongitude] = useState<number | null>(null);
+
+  // 카테고리 탭
+  const [activeCategory, setActiveCategory] = useState<'time' | 'place' | 'goal'>('time');
 
   // 데이터 로드
   const loadRoutines = useCallback(async () => {
@@ -116,9 +165,17 @@ const RoutineSettingScreen: React.FC<RoutineSettingScreenProps> = ({ navigation 
 
     switch (config.inputType) {
       case 'time':
-        return routine.valueTime ? formatTimeDisplay(routine.valueTime) : '설정하기';
-      case 'text':
+        return routine.valueTimeStart
+          ? formatTimeDisplay(routine.valueTimeStart)
+          : (routine.valueTime ? formatTimeDisplay(routine.valueTime) : '설정하기');
+      case 'time_range':
+        if (routine.valueTimeStart && routine.valueTimeEnd) {
+          return `${formatTimeDisplay(routine.valueTimeStart)} ~ ${formatTimeDisplay(routine.valueTimeEnd)}`;
+        }
+        return '설정하기';
       case 'place':
+        return routine.title || routine.valueText || '설정하기';
+      case 'text':
         return routine.valueText || '설정하기';
       default:
         return '설정하기';
@@ -130,31 +187,76 @@ const RoutineSettingScreen: React.FC<RoutineSettingScreenProps> = ({ navigation 
     const routine = getRoutineByType(config.type);
     setEditingType(config.type);
 
+    // 공통
+    setEditTitle(routine?.title || '');
+    setEditDescription(routine?.description || config.description);
+    setNotificationEnabled(routine?.notificationEnabled || false);
+
     if (config.inputType === 'time') {
-      if (routine?.valueTime) {
+      // 시간 타입
+      if (routine?.valueTimeStart) {
+        const [hours, minutes] = routine.valueTimeStart.split(':');
+        const date = new Date();
+        date.setHours(parseInt(hours, 10));
+        date.setMinutes(parseInt(minutes, 10));
+        setEditTimeStart(date);
+      } else if (routine?.valueTime) {
         const [hours, minutes] = routine.valueTime.split(':');
         const date = new Date();
         date.setHours(parseInt(hours, 10));
         date.setMinutes(parseInt(minutes, 10));
-        setEditTime(date);
+        setEditTimeStart(date);
       } else {
         const defaultTime = new Date();
         defaultTime.setHours(7, 0, 0, 0);
-        setEditTime(defaultTime);
+        setEditTimeStart(defaultTime);
       }
-      setShowTimePicker(true);
+      setShowTimeStartPicker(true);
+    } else if (config.inputType === 'time_range') {
+      // 시간 범위 타입
+      if (routine?.valueTimeStart) {
+        const [hours, minutes] = routine.valueTimeStart.split(':');
+        const date = new Date();
+        date.setHours(parseInt(hours, 10));
+        date.setMinutes(parseInt(minutes, 10));
+        setEditTimeStart(date);
+      } else {
+        const defaultStart = new Date();
+        defaultStart.setHours(9, 0, 0, 0);
+        setEditTimeStart(defaultStart);
+      }
+      if (routine?.valueTimeEnd) {
+        const [hours, minutes] = routine.valueTimeEnd.split(':');
+        const date = new Date();
+        date.setHours(parseInt(hours, 10));
+        date.setMinutes(parseInt(minutes, 10));
+        setEditTimeEnd(date);
+      } else {
+        const defaultEnd = new Date();
+        defaultEnd.setHours(18, 0, 0, 0);
+        setEditTimeEnd(defaultEnd);
+      }
+    } else if (config.inputType === 'place') {
+      // 장소 타입
+      setEditValue(routine?.valueText || '');
+      setEditLatitude(routine?.valueLatitude || null);
+      setEditLongitude(routine?.valueLongitude || null);
     } else {
+      // 텍스트 타입
       setEditValue(routine?.valueText || '');
     }
-
-    setNotificationEnabled(routine?.notificationEnabled || false);
   };
 
   // 편집 취소
   const cancelEditing = () => {
     setEditingType(null);
+    setEditTitle('');
+    setEditDescription('');
     setEditValue('');
-    setShowTimePicker(false);
+    setShowTimeStartPicker(false);
+    setShowTimeEndPicker(false);
+    setEditLatitude(null);
+    setEditLongitude(null);
   };
 
   // 루틴 저장
@@ -164,15 +266,34 @@ const RoutineSettingScreen: React.FC<RoutineSettingScreenProps> = ({ navigation 
 
       const request: UserRoutineRequest = {
         routineType: config.type,
+        title: editTitle || config.name,
+        description: editDescription || config.description,
         notificationEnabled,
       };
 
       if (config.inputType === 'time') {
-        const hours = editTime.getHours().toString().padStart(2, '0');
-        const minutes = editTime.getMinutes().toString().padStart(2, '0');
-        request.valueTime = formatTimeForApi(`${hours}:${minutes}`);
+        const hours = editTimeStart.getHours().toString().padStart(2, '0');
+        const minutes = editTimeStart.getMinutes().toString().padStart(2, '0');
+        request.valueTimeStart = formatTimeForApi(`${hours}:${minutes}`);
+        request.valueTime = request.valueTimeStart; // 기존 호환
         if (notificationEnabled) {
-          request.notificationTime = request.valueTime;
+          request.notificationTime = request.valueTimeStart;
+        }
+      } else if (config.inputType === 'time_range') {
+        const startHours = editTimeStart.getHours().toString().padStart(2, '0');
+        const startMinutes = editTimeStart.getMinutes().toString().padStart(2, '0');
+        const endHours = editTimeEnd.getHours().toString().padStart(2, '0');
+        const endMinutes = editTimeEnd.getMinutes().toString().padStart(2, '0');
+        request.valueTimeStart = formatTimeForApi(`${startHours}:${startMinutes}`);
+        request.valueTimeEnd = formatTimeForApi(`${endHours}:${endMinutes}`);
+        if (notificationEnabled) {
+          request.notificationTime = request.valueTimeStart;
+        }
+      } else if (config.inputType === 'place') {
+        request.valueText = editValue;
+        if (editLatitude && editLongitude) {
+          request.valueLatitude = editLatitude;
+          request.valueLongitude = editLongitude;
         }
       } else {
         request.valueText = editValue;
@@ -216,13 +337,31 @@ const RoutineSettingScreen: React.FC<RoutineSettingScreenProps> = ({ navigation 
   };
 
   // 시간 선택 처리
-  const handleTimeChange = (_event: any, selectedDate?: Date) => {
+  const handleTimeStartChange = (_event: any, selectedDate?: Date) => {
     if (Platform.OS === 'android') {
-      setShowTimePicker(false);
+      setShowTimeStartPicker(false);
     }
     if (selectedDate) {
-      setEditTime(selectedDate);
+      setEditTimeStart(selectedDate);
     }
+  };
+
+  const handleTimeEndChange = (_event: any, selectedDate?: Date) => {
+    if (Platform.OS === 'android') {
+      setShowTimeEndPicker(false);
+    }
+    if (selectedDate) {
+      setEditTimeEnd(selectedDate);
+    }
+  };
+
+  // 장소 검색 (맵 API 연동 시 구현)
+  const handleSearchLocation = () => {
+    Alert.alert(
+      '장소 검색',
+      '맵 API 연동이 필요합니다.\n\n추천 옵션:\n1. Google Maps API\n2. Kakao Maps API\n3. Naver Maps API\n\n현재는 장소명만 저장됩니다.',
+      [{ text: '확인' }]
+    );
   };
 
   // 히스토리 보기
@@ -230,34 +369,58 @@ const RoutineSettingScreen: React.FC<RoutineSettingScreenProps> = ({ navigation 
     navigation.navigate('RoutineHistory', { routineType: config.type, routineName: config.name });
   };
 
+  // 카테고리별 필터링된 루틴
+  const filteredConfigs = ROUTINE_CONFIGS.filter(c => c.category === activeCategory);
+
   if (loading) {
     return (
-      <View style={styles.container}>
-        <AppHeader navigation={navigation} title="나의 루틴 설정" showBack />
+      <ImageBackground
+        source={require('../../assets/images/background.png')}
+        style={styles.container}
+        resizeMode="cover"
+      >
+        <Header navigation={navigation} title="나의 루틴 설정" showBackButton />
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={colors.primary[500]} />
           <Text style={styles.loadingText}>불러오는 중...</Text>
         </View>
-      </View>
+      </ImageBackground>
     );
   }
 
   return (
-    <View style={styles.container}>
-      <AppHeader navigation={navigation} title="나의 루틴 설정" showBack />
+    <ImageBackground
+      source={require('../../assets/images/background.png')}
+      style={styles.container}
+      resizeMode="cover"
+    >
+      <Header navigation={navigation} title="나의 루틴 설정" showBackButton />
+
+      {/* 카테고리 탭 */}
+      <View style={styles.tabContainer}>
+        <SimpleTabBar
+          tabs={[
+            { key: 'time', label: '⏰ 시간' },
+            { key: 'place', label: '📍 장소' },
+            { key: 'goal', label: '🎯 목표' },
+          ]}
+          activeTab={activeCategory}
+          onTabChange={(key) => setActiveCategory(key as 'time' | 'place' | 'goal')}
+        />
+      </View>
 
       <ScrollView
         style={styles.content}
         contentContainerStyle={styles.contentContainer}
         showsVerticalScrollIndicator={false}
       >
-        <Text style={styles.sectionTitle}>루틴 설정</Text>
         <Text style={styles.sectionDescription}>
-          미션 달성에 필요한 정보를 설정해요.{'\n'}
-          알림을 켜면 설정한 시간에 알려드려요.
+          {activeCategory === 'time' && '미션에 필요한 시간대를 설정해요.'}
+          {activeCategory === 'place' && '자주 가는 장소를 등록해요.\n맵에서 검색하여 정확한 위치를 저장할 수 있어요.'}
+          {activeCategory === 'goal' && '다짐과 목표를 적어보세요.'}
         </Text>
 
-        {ROUTINE_CONFIGS.map((config) => {
+        {filteredConfigs.map((config) => {
           const routine = getRoutineByType(config.type);
           const isEditing = editingType === config.type;
           const isSaving = saving === config.type;
@@ -269,8 +432,10 @@ const RoutineSettingScreen: React.FC<RoutineSettingScreenProps> = ({ navigation 
                   <Text style={styles.routineIcon}>{config.icon}</Text>
                 </View>
                 <View style={styles.routineInfo}>
-                  <Text style={styles.routineName}>{config.name}</Text>
-                  <Text style={styles.routineDescription}>{config.description}</Text>
+                  <Text style={styles.routineName}>{routine?.title || config.name}</Text>
+                  <Text style={styles.routineDescription}>
+                    {routine?.description || config.description}
+                  </Text>
                 </View>
                 {routine && (
                   <TouchableOpacity
@@ -285,39 +450,135 @@ const RoutineSettingScreen: React.FC<RoutineSettingScreenProps> = ({ navigation 
               {isEditing ? (
                 // 편집 모드
                 <View style={styles.editContainer}>
-                  {config.inputType === 'time' ? (
+                  {/* 제목 입력 */}
+                  {config.inputType === 'place' && (
+                    <View style={styles.inputGroup}>
+                      <Text style={styles.inputLabel}>장소명</Text>
+                      <TextInput
+                        style={styles.textInput}
+                        value={editTitle}
+                        onChangeText={setEditTitle}
+                        placeholder="예: 우리동네 헬스장"
+                        placeholderTextColor={colors.gray[400]}
+                      />
+                    </View>
+                  )}
+
+                  {/* 시간 입력 (단일) */}
+                  {config.inputType === 'time' && (
                     <View style={styles.timeEditContainer}>
+                      <Text style={styles.inputLabel}>시간 설정</Text>
                       <TouchableOpacity
                         style={styles.timeDisplay}
-                        onPress={() => setShowTimePicker(true)}
+                        onPress={() => setShowTimeStartPicker(true)}
                       >
                         <Text style={styles.timeText}>
-                          {editTime.getHours().toString().padStart(2, '0')}:
-                          {editTime.getMinutes().toString().padStart(2, '0')}
+                          {editTimeStart.getHours().toString().padStart(2, '0')}:
+                          {editTimeStart.getMinutes().toString().padStart(2, '0')}
                         </Text>
                       </TouchableOpacity>
-                      {showTimePicker && (
+                      {showTimeStartPicker && (
                         <DateTimePicker
-                          value={editTime}
+                          value={editTimeStart}
                           mode="time"
                           is24Hour={true}
                           display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-                          onChange={handleTimeChange}
+                          onChange={handleTimeStartChange}
                         />
                       )}
                     </View>
-                  ) : (
+                  )}
+
+                  {/* 시간 범위 입력 */}
+                  {config.inputType === 'time_range' && (
+                    <View style={styles.timeRangeContainer}>
+                      <View style={styles.timeRangeItem}>
+                        <Text style={styles.inputLabel}>시작 시간</Text>
+                        <TouchableOpacity
+                          style={styles.timeDisplay}
+                          onPress={() => setShowTimeStartPicker(true)}
+                        >
+                          <Text style={styles.timeText}>
+                            {editTimeStart.getHours().toString().padStart(2, '0')}:
+                            {editTimeStart.getMinutes().toString().padStart(2, '0')}
+                          </Text>
+                        </TouchableOpacity>
+                        {showTimeStartPicker && (
+                          <DateTimePicker
+                            value={editTimeStart}
+                            mode="time"
+                            is24Hour={true}
+                            display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                            onChange={handleTimeStartChange}
+                          />
+                        )}
+                      </View>
+                      <Text style={styles.timeRangeSeparator}>~</Text>
+                      <View style={styles.timeRangeItem}>
+                        <Text style={styles.inputLabel}>종료 시간</Text>
+                        <TouchableOpacity
+                          style={styles.timeDisplay}
+                          onPress={() => setShowTimeEndPicker(true)}
+                        >
+                          <Text style={styles.timeText}>
+                            {editTimeEnd.getHours().toString().padStart(2, '0')}:
+                            {editTimeEnd.getMinutes().toString().padStart(2, '0')}
+                          </Text>
+                        </TouchableOpacity>
+                        {showTimeEndPicker && (
+                          <DateTimePicker
+                            value={editTimeEnd}
+                            mode="time"
+                            is24Hour={true}
+                            display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                            onChange={handleTimeEndChange}
+                          />
+                        )}
+                      </View>
+                    </View>
+                  )}
+
+                  {/* 장소 입력 */}
+                  {config.inputType === 'place' && (
+                    <View style={styles.inputGroup}>
+                      <Text style={styles.inputLabel}>위치</Text>
+                      <View style={styles.locationInputRow}>
+                        <TextInput
+                          style={[styles.textInput, styles.locationInput]}
+                          value={editValue}
+                          onChangeText={setEditValue}
+                          placeholder={config.placeholder}
+                          placeholderTextColor={colors.gray[400]}
+                        />
+                        <TouchableOpacity
+                          style={styles.mapButton}
+                          onPress={handleSearchLocation}
+                        >
+                          <Text style={styles.mapButtonText}>🗺️ 지도</Text>
+                        </TouchableOpacity>
+                      </View>
+                      {editLatitude && editLongitude && (
+                        <Text style={styles.coordinateText}>
+                          좌표: {editLatitude.toFixed(6)}, {editLongitude.toFixed(6)}
+                        </Text>
+                      )}
+                    </View>
+                  )}
+
+                  {/* 텍스트 입력 */}
+                  {config.inputType === 'text' && (
                     <TextInput
-                      style={styles.textInput}
+                      style={[styles.textInput, styles.textAreaInput]}
                       value={editValue}
                       onChangeText={setEditValue}
                       placeholder={config.placeholder}
                       placeholderTextColor={colors.gray[400]}
-                      multiline={config.inputType === 'text'}
-                      numberOfLines={config.inputType === 'text' ? 3 : 1}
+                      multiline
+                      numberOfLines={3}
                     />
                   )}
 
+                  {/* 알림 설정 */}
                   <View style={styles.notificationRow}>
                     <Text style={styles.notificationLabel}>알림 받기</Text>
                     <Switch
@@ -328,6 +589,7 @@ const RoutineSettingScreen: React.FC<RoutineSettingScreenProps> = ({ navigation 
                     />
                   </View>
 
+                  {/* 버튼 */}
                   <View style={styles.editActions}>
                     <TouchableOpacity
                       style={styles.cancelButton}
@@ -373,7 +635,7 @@ const RoutineSettingScreen: React.FC<RoutineSettingScreenProps> = ({ navigation 
                   </View>
                   <TouchableOpacity
                     style={styles.deleteButton}
-                    onPress={() => handleDelete(routine.id, config.name)}
+                    onPress={() => handleDelete(routine.id, routine.title || config.name)}
                   >
                     <Text style={styles.deleteButtonText}>삭제</Text>
                   </TouchableOpacity>
@@ -385,14 +647,13 @@ const RoutineSettingScreen: React.FC<RoutineSettingScreenProps> = ({ navigation 
 
         <View style={styles.bottomSpacer} />
       </ScrollView>
-    </View>
+    </ImageBackground>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background.primary,
   },
   loadingContainer: {
     flex: 1,
@@ -404,17 +665,20 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.base,
     color: colors.text.secondary,
   },
+  tabContainer: {
+    paddingHorizontal: spacing[3],
+    paddingTop: spacing[2],
+    paddingBottom: spacing[3],
+  },
+  tabTextActive: {
+    color: colors.primary[500],
+    fontWeight: typography.fontWeight.semibold,
+  },
   content: {
     flex: 1,
   },
   contentContainer: {
     padding: spacing[4],
-  },
-  sectionTitle: {
-    fontSize: typography.fontSize.xl,
-    fontWeight: typography.fontWeight.bold,
-    color: colors.text.primary,
-    marginBottom: spacing[2],
   },
   sectionDescription: {
     fontSize: typography.fontSize.sm,
@@ -423,17 +687,12 @@ const styles = StyleSheet.create({
     marginBottom: spacing[4],
   },
   routineCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: borderRadius.lg,
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    borderRadius: borderRadius.xl,
     padding: spacing[4],
     marginBottom: spacing[3],
-    borderWidth: 1,
-    borderColor: colors.gray[200],
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
+    borderWidth: 2,
+    borderColor: '#D4A574',
   },
   routineHeader: {
     flexDirection: 'row',
@@ -441,10 +700,12 @@ const styles = StyleSheet.create({
     marginBottom: spacing[3],
   },
   routineIconContainer: {
-    width: 44,
-    height: 44,
-    borderRadius: borderRadius.md,
-    backgroundColor: colors.primary[50],
+    width: 48,
+    height: 48,
+    borderRadius: borderRadius.lg,
+    backgroundColor: '#FFF8F0',
+    borderWidth: 1,
+    borderColor: '#E8DDD4',
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: spacing[3],
@@ -479,16 +740,20 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: colors.gray[50],
-    borderRadius: borderRadius.md,
-    padding: spacing[3],
+    backgroundColor: '#FFF8F0',
+    borderRadius: borderRadius.lg,
+    padding: spacing[4],
+    borderWidth: 1,
+    borderColor: '#E8DDD4',
   },
   valueText: {
-    fontSize: typography.fontSize.base,
-    fontWeight: typography.fontWeight.medium,
-    color: colors.text.primary,
+    fontSize: typography.fontSize.lg,
+    fontWeight: typography.fontWeight.bold,
+    color: '#6B5344',
   },
   valueTextPlaceholder: {
+    fontSize: typography.fontSize.base,
+    fontWeight: typography.fontWeight.medium,
     color: colors.text.tertiary,
   },
   editIcon: {
@@ -499,6 +764,15 @@ const styles = StyleSheet.create({
     backgroundColor: colors.gray[50],
     borderRadius: borderRadius.md,
     padding: spacing[3],
+  },
+  inputGroup: {
+    marginBottom: spacing[3],
+  },
+  inputLabel: {
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.medium,
+    color: colors.text.secondary,
+    marginBottom: spacing[2],
   },
   timeEditContainer: {
     alignItems: 'center',
@@ -517,6 +791,46 @@ const styles = StyleSheet.create({
     fontWeight: typography.fontWeight.bold,
     color: colors.primary[600],
   },
+  timeRangeContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: spacing[3],
+  },
+  timeRangeItem: {
+    alignItems: 'center',
+  },
+  timeRangeSeparator: {
+    fontSize: typography.fontSize.xl,
+    color: colors.text.secondary,
+    marginHorizontal: spacing[3],
+    marginTop: spacing[6],
+  },
+  locationInputRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  locationInput: {
+    flex: 1,
+    marginBottom: 0,
+    marginRight: spacing[2],
+  },
+  mapButton: {
+    backgroundColor: colors.primary[500],
+    paddingVertical: spacing[3],
+    paddingHorizontal: spacing[3],
+    borderRadius: borderRadius.md,
+  },
+  mapButtonText: {
+    color: '#FFFFFF',
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.medium,
+  },
+  coordinateText: {
+    fontSize: typography.fontSize.xs,
+    color: colors.text.tertiary,
+    marginTop: spacing[2],
+  },
   textInput: {
     backgroundColor: '#FFFFFF',
     borderRadius: borderRadius.md,
@@ -527,6 +841,9 @@ const styles = StyleSheet.create({
     borderColor: colors.gray[300],
     marginBottom: spacing[3],
     minHeight: 44,
+  },
+  textAreaInput: {
+    minHeight: 88,
     textAlignVertical: 'top',
   },
   notificationRow: {

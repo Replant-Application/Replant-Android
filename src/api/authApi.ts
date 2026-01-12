@@ -36,6 +36,25 @@ export interface JoinRequest {
   password: string;
   name: string;
   phone: string;
+  gender?: 'MALE' | 'FEMALE';
+  region?: string; // MetropolitanArea enum code (예: 'SEOUL', 'BUSAN')
+  birthYear?: number; // 출생연도 (예: 1995)
+}
+
+/**
+ * 지역(광역자치단체) 정보
+ */
+export interface RegionInfo {
+  code: string;
+  name: string;
+}
+
+/**
+ * 성별 정보
+ */
+export interface GenderInfo {
+  code: string;
+  name: string;
 }
 
 /**
@@ -329,4 +348,20 @@ export const searchId = async (
     API_CONFIG.endpoints.auth.searchId,
     queryParams
   );
+};
+
+/**
+ * 지역(광역자치단체) 목록 조회
+ * GET /api/auth/regions
+ */
+export const getRegions = async (): Promise<ServiceResult<RegionInfo[]>> => {
+  return apiClient.get<RegionInfo[]>('/api/auth/regions');
+};
+
+/**
+ * 성별 목록 조회
+ * GET /api/auth/genders
+ */
+export const getGenders = async (): Promise<ServiceResult<GenderInfo[]>> => {
+  return apiClient.get<GenderInfo[]>('/api/auth/genders');
 };

@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, Platform, Modal, Animated } from 'react-native';
 import { NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types/navigation';
 import { colors, spacing, typography, borderRadius, shadows } from '../../utils/designTokens';
 import { getOptimizedLineHeight } from '../../utils/textStyles';
 import { useOverlay } from '../../contexts/OverlayContext';
+import { loadSoundSettings, saveSoundSettings, SoundSettings } from '../../utils/soundSettings';
+import { backgroundMusicService } from '../../services/backgroundMusicService';
 
 interface AppHeaderProps {
   navigation: NavigationProp<RootStackParamList>;
@@ -13,7 +15,62 @@ interface AppHeaderProps {
 const AppHeader: React.FC<AppHeaderProps> = ({ navigation }) => {
   const { unreadNotificationCount } = useOverlay();
   const [menuVisible, setMenuVisible] = useState(false);
+  const [soundEnabled, setSoundEnabled] = useState(true);
+  const [savedSettings, setSavedSettings] = useState<SoundSettings | null>(null);
   const slideAnim = React.useRef(new Animated.Value(300)).current;
+
+  // 사운드 설정 불러오기 (soundSettings 사용)
+  useEffect(() => {
+    const loadSettings = async () => {
+      try {
+        const settings = await loadSoundSettings();
+        setSavedSettings(settings);
+        // 효과음과 배경음 둘 다 0이면 사운드 꺼짐
+        const isEnabled = settings.effectVolume > 0 || settings.backgroundVolume > 0;
+        setSoundEnabled(isEnabled);
+      } catch (error) {
+        console.error('Failed to load sound setting:', error);
+      }
+    };
+    loadSettings();
+  }, []);
+
+  // 사운드 토글 (soundSettings와 연동)
+  const toggleSound = async () => {
+    try {
+      const newValue = !soundEnabled;
+      setSoundEnabled(newValue);
+
+      if (newValue) {
+        // 사운드 켜기: 이전 설정 복원 또는 기본값 사용
+        const newSettings: SoundSettings = {
+          effectVolume: savedSettings?.effectVolume && savedSettings.effectVolume > 0
+            ? savedSettings.effectVolume
+            : 1.0,
+          backgroundVolume: savedSettings?.backgroundVolume && savedSettings.backgroundVolume > 0
+            ? savedSettings.backgroundVolume
+            : 0.5,
+        };
+        await saveSoundSettings(newSettings);
+        await backgroundMusicService.setVolume(newSettings.backgroundVolume);
+        setSavedSettings(newSettings);
+      } else {
+        // 사운드 끄기: 현재 설정 저장 후 볼륨 0으로
+        if (savedSettings && (savedSettings.effectVolume > 0 || savedSettings.backgroundVolume > 0)) {
+          // 현재 설정이 0이 아니면 저장해둠 (나중에 복원용)
+          setSavedSettings({ ...savedSettings });
+        }
+        const mutedSettings: SoundSettings = {
+          effectVolume: 0,
+          backgroundVolume: 0,
+        };
+        await saveSoundSettings(mutedSettings);
+        await backgroundMusicService.setVolume(0);
+      }
+    } catch (error) {
+      console.error('Failed to save sound setting:', error);
+    }
+  };
 
   const toggleMenu = () => {
     if (menuVisible) {
@@ -41,8 +98,21 @@ const AppHeader: React.FC<AppHeaderProps> = ({ navigation }) => {
 
   return (
     <View style={styles.header}>
-      {/* 오른쪽: 알림 + 메뉴 */}
+      {/* 오른쪽: 사운드 + 알림 + 메뉴 */}
       <View style={styles.rightSection}>
+        {/* 사운드 버튼 */}
+        <TouchableOpacity
+          style={styles.iconButton}
+          onPress={toggleSound}
+          activeOpacity={0.6}
+          accessibilityRole="button"
+          accessibilityLabel={soundEnabled ? '사운드 끄기' : '사운드 켜기'}
+        >
+          <View style={styles.iconWrapper}>
+            <Text style={styles.soundIcon}>{soundEnabled ? '🔊' : '🔇'}</Text>
+          </View>
+        </TouchableOpacity>
+        {/* 알림 버튼 */}
         <TouchableOpacity
           style={styles.iconButton}
           onPress={() => navigation.navigate('Notification' as any)}
@@ -268,6 +338,9 @@ const styles = StyleSheet.create({
   iconImage: {
     width: 36,
     height: 36,
+  },
+  soundIcon: {
+    fontSize: 28,
   },
   notificationBadge: {
     position: 'absolute',
