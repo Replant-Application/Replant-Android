@@ -227,7 +227,6 @@ const TodoListScreen: React.FC<Props> = ({ navigation }) => {
             )}
           </View>
         )}
-        )}
       </ScrollView>
     </ImageBackground>
   );
