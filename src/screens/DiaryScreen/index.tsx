@@ -30,6 +30,20 @@ import { playReadBookSound, playButtonSound } from '../../utils/soundUtils';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
+// 기분 값에 따른 색상 계산
+const getMoodColor = (value: number): string => {
+  if (value < 33) {
+    // 0-33: 빨강 (좋지 않음)
+    return colors.red[500];
+  } else if (value < 67) {
+    // 33-67: 노랑 (보통)
+    return colors.orange[400];
+  } else {
+    // 67-100: 초록 (좋음)
+    return colors.green[500];
+  }
+};
+
 const DiaryScreen: React.FC = () => {
   const { diaries, loading, error, saveDiary, deleteDiary, loadDiaries, getDiaryByDate } = useDiary();
   const { characters } = useCharacter();
@@ -58,22 +72,46 @@ const DiaryScreen: React.FC = () => {
   const speechBubbleAnim = React.useRef(new Animated.Value(0)).current;
   const currentCharacter = characters.length > 0 ? characters[0] : null;
   const sliderRef = React.useRef<View>(null);
+  const isMountedRef = React.useRef(true);
+
+  // 마운트 상태 관리
+  React.useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
 
   // 슬라이더 PanResponder
   const panResponder = React.useMemo(
     () =>
       PanResponder.create({
         onStartShouldSetPanResponder: () => true,
-        onMoveShouldSetPanResponder: () => true,
-        onPanResponderGrant: () => {},
+        onMoveShouldSetPanResponder: (_, gestureState) => {
+          // 수평 드래그만 허용 (수직 스크롤 무시)
+          return Math.abs(gestureState.dx) > Math.abs(gestureState.dy);
+        },
+        onPanResponderGrant: (evt) => {
+          if (!evt.nativeEvent || !sliderRef.current) return;
+          const pageX = evt.nativeEvent.pageX;
+          
+          sliderRef.current.measure((_x, _y, width, _height, sliderPageX, _pageY) => {
+            if (!isMountedRef.current || width === 0) return;
+            const touchX = pageX - sliderPageX;
+            const newValue = Math.max(0, Math.min(100, (touchX / width) * 100));
+            setMoodValue(newValue);
+          });
+        },
         onPanResponderMove: (evt) => {
-          if (sliderRef.current) {
-            sliderRef.current.measure((_x, _y, width, _height, pageX, _pageY) => {
-              const touchX = evt.nativeEvent.pageX - pageX;
-              const newValue = Math.max(0, Math.min(100, (touchX / width) * 100));
-              setMoodValue(newValue);
-            });
-          }
+          if (!evt.nativeEvent || !sliderRef.current) return;
+          const pageX = evt.nativeEvent.pageX;
+          
+          sliderRef.current.measure((_x, _y, width, _height, sliderPageX, _pageY) => {
+            if (!isMountedRef.current || width === 0) return;
+            const touchX = pageX - sliderPageX;
+            const newValue = Math.max(0, Math.min(100, (touchX / width) * 100));
+            setMoodValue(newValue);
+          });
         },
         onPanResponderRelease: () => {},
       }),
@@ -798,12 +836,22 @@ const DiaryScreen: React.FC = () => {
         }>
           {currentStep === 'mood' && (
             <View style={styles.moodContainer}>
+              {/* 숫자 표시 */}
+              <View style={styles.sliderValueContainer}>
+                <Text style={styles.sliderValue}>{Math.round(moodValue)}</Text>
+              </View>
               <View 
                 ref={sliderRef}
                 style={styles.sliderTrack}
                 {...panResponder.panHandlers}
               >
-                <View style={[styles.sliderFill, { width: `${moodValue}%` }]} />
+                <View style={[
+                  styles.sliderFill, 
+                  { 
+                    width: `${moodValue}%`,
+                    backgroundColor: getMoodColor(moodValue)
+                  }
+                ]} />
                 <View style={[styles.sliderThumb, { left: `${moodValue}%` }]} />
               </View>
               <View style={styles.sliderLabels}>
@@ -972,30 +1020,39 @@ const styles = StyleSheet.create({
   moodContainer: {
     paddingVertical: spacing[1],
   },
+  sliderValueContainer: {
+    alignItems: 'center',
+    marginBottom: spacing[2],
+  },
   sliderTrack: {
     width: '100%',
-    height: 29,
-    backgroundColor: colors.white,
-    borderRadius: borderRadius.full,
+    height: 32,
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+    borderRadius: borderRadius.md,
+    borderWidth: 2,
+    borderColor: 'rgba(255, 255, 255, 0.3)',
     position: 'relative',
-    marginVertical: spacing[4],
+    marginVertical: spacing[3],
     justifyContent: 'center',
   },
   sliderFill: {
     position: 'absolute',
-    height: 3,
-    backgroundColor: colors.blue[500],
-    borderRadius: borderRadius.full,
+    height: 28,
+    borderRadius: borderRadius.sm,
     left: 0,
+    top: 0,
   },
   sliderThumb: {
     position: 'absolute',
-    width: 20,
-    height: 20,
-    backgroundColor: colors.blue[500],
-    borderRadius: borderRadius.full,
-    marginLeft: -12,
-    ...shadows.base,
+    width: 28,
+    height: 28,
+    backgroundColor: colors.white,
+    borderRadius: borderRadius.md,
+    marginLeft: -14,
+    top: 2,
+    borderWidth: 2,
+    borderColor: colors.primary[500],
+    ...shadows.lg,
   },
   sliderLabels: {
     flexDirection: 'row',
@@ -1013,14 +1070,17 @@ const styles = StyleSheet.create({
     includeFontPadding: false,
   },
   sliderValue: {
-    fontSize: typography.fontSize.lg,
-    fontWeight: typography.fontWeight.medium,
-    color: colors.blue[400],
+    fontSize: typography.fontSize['2xl'],
+    fontWeight: typography.fontWeight.bold,
+    color: colors.white,
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,
       android: typography.fontFamily.regular,
     }),
     includeFontPadding: false,
+    textShadowColor: 'rgba(0, 0, 0, 0.5)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 4,
   },
   emotionsContainer: {
     maxHeight: 450,
