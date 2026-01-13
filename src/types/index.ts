@@ -319,6 +319,7 @@ export interface UseDiaryReturn {
   saveDiary: (diaryData: SimpleDiaryData) => Promise<ServiceResult<Diary>>;
   updateDiary: (diaryId: string, diaryData: SimpleDiaryData) => Promise<ServiceResult<Diary>>;
   deleteDiary: (diaryId: string) => Promise<ServiceResult<void>>;
+  getDiaryByDate: (date: string) => Promise<ServiceResult<Diary>>;
 }
 
 // 커뮤니티 Hook 반환 타입

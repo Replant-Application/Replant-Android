@@ -1,44 +1,32 @@
 import { colors } from '../../utils/designTokens';
+import { EMOTION_CATEGORIES } from './DiaryScreen.constants';
 
-// 감정별 색상 매핑
+// 감정 카테고리 확인
+const getEmotionCategory = (emotion: string): 'positive' | 'neutral' | 'negative' => {
+  if (EMOTION_CATEGORIES.positive.includes(emotion)) return 'positive';
+  if (EMOTION_CATEGORIES.neutral.includes(emotion)) return 'neutral';
+  if (EMOTION_CATEGORIES.negative.includes(emotion)) return 'negative';
+  return 'neutral';
+};
+
+// 카테고리별 색상 매핑
+const getCategoryColor = (category: 'positive' | 'neutral' | 'negative'): string => {
+  switch (category) {
+    case 'positive':
+      return colors.green[500];
+    case 'neutral':
+      return colors.blue[400];
+    case 'negative':
+      return colors.orange[600];
+    default:
+      return colors.gray[500];
+  }
+};
+
+// 감정별 색상 매핑 (카테고리 기반)
 export const getEmotionColor = (emotion: string): string => {
-  const colorMap: { [key: string]: string } = {
-    '행복': colors.orange[400],
-    '기쁨': colors.orange[300],
-    '사랑': colors.purple[400],
-    '만족': colors.green[400],
-    '감사': colors.purple[300],
-    '희망': colors.blue[400],
-    '흥분': colors.orange[500],
-    '자신감': colors.blue[500],
-    '열정': colors.orange[600],
-    '평화': colors.blue[300],
-    '자유': colors.purple[500],
-    '용기': colors.blue[600],
-    '긍정': colors.green[500],
-    '평온': colors.blue[200],
-    '슬픔': colors.gray[400],
-    '우울': colors.gray[500],
-    '외로움': colors.gray[600],
-    '피곤': colors.gray[500],
-    '지루함': colors.gray[400],
-    '무관심': colors.gray[300],
-    '중립': colors.gray[400],
-    '화남': colors.error,
-    '짜증': colors.orange[700],
-    '불만': colors.orange[600],
-    '부정': colors.gray[700],
-    '불안': colors.orange[500],
-    '걱정': colors.orange[400],
-    '스트레스': colors.orange[600],
-    '혼란': colors.purple[400],
-    '당황': colors.orange[500],
-    '후회': colors.gray[600],
-    '죄책감': colors.gray[700],
-    '부끄러움': colors.purple[500],
-    '놀람': colors.blue[400],
-  };
-  return colorMap[emotion] || colors.gray[500];
+  const category = getEmotionCategory(emotion);
+  return getCategoryColor(category);
 };
 
 // hex 색상에 투명도 추가

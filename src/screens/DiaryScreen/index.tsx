@@ -30,17 +30,29 @@ import { playReadBookSound, playButtonSound } from '../../utils/soundUtils';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
-// 기분 값에 따른 색상 계산
+// 기분 값에 따른 그라데이션 색상 계산 (0: 연한 빨강 → 100: 진한 초록)
 const getMoodColor = (value: number): string => {
-  if (value < 33) {
-    // 0-33: 빨강 (좋지 않음)
-    return colors.red[500];
-  } else if (value < 67) {
-    // 33-67: 노랑 (보통)
-    return colors.orange[400];
+  // 0-100 값을 0-1 범위로 정규화
+  const normalized = value / 100;
+  
+  // 빨강 (0) → 노랑 (50) → 초록 (100) 그라데이션
+  // 값이 낮을수록 연하게, 높을수록 진하게
+  if (normalized < 0.5) {
+    // 0-50: 연한 빨강 → 진한 노랑
+    const t = normalized * 2; // 0-1로 변환
+    // 연한 빨강 (255, 100, 100) → 진한 노랑 (255, 200, 0)
+    const r = Math.round(255);
+    const g = Math.round(100 + (200 - 100) * t);
+    const b = Math.round(100 - 100 * t);
+    return `rgb(${r}, ${g}, ${b})`;
   } else {
-    // 67-100: 초록 (좋음)
-    return colors.green[500];
+    // 50-100: 진한 노랑 → 진한 초록
+    const t = (normalized - 0.5) * 2; // 0-1로 변환
+    // 진한 노랑 (255, 200, 0) → 진한 초록 (34, 139, 34)
+    const r = Math.round(255 - (255 - 34) * t);
+    const g = Math.round(200 - (200 - 139) * t);
+    const b = Math.round(0 + (34 - 0) * t);
+    return `rgb(${r}, ${g}, ${b})`;
   }
 };
 
@@ -52,7 +64,7 @@ const DiaryScreen: React.FC = () => {
   const [selectedEmotions, setSelectedEmotions] = useState<string[]>([]);
   const [selectedFactors, setSelectedFactors] = useState<string[]>([]);
   const [factorText, setFactorText] = useState('');
-  const [showCustomFactorInput, setShowCustomFactorInput] = useState(false);
+  const [emotionText, setEmotionText] = useState('');
   const [expressionText, setExpressionText] = useState('');
   const [selectedDiary, setSelectedDiary] = useState<(SimpleDiaryData & { id: string }) | null>(null);
   const [viewingDiaryIndex, setViewingDiaryIndex] = useState(0);
@@ -220,11 +232,11 @@ const DiaryScreen: React.FC = () => {
       case 'mood':
         return '현재 기분이 어떤가요?';
       case 'emotions':
-        return '지금 느끼는 감정을 자세히 말해줄래요?';
+        return '지금 느끼는 감정을 선택해주세요';
       case 'factors':
-        return '감정에 영향을 준 요인이 있을까요?';
+        return '감정에 영향을 준 요인을 선택해주세요';
       case 'expression':
-        return '오늘 하루를 되돌아보면서 느낀 점을 자세히 말해줄래요?';
+        return '오늘 하루를 되돌아보면서 느낀 점을 자세히 적어볼까요?';
       case 'confirm':
         return '오늘의 감정일기가 작성됐어요!';
       default:
@@ -244,7 +256,7 @@ const DiaryScreen: React.FC = () => {
     if (currentStep === 'mood') {
       setCurrentStep('emotions');
     } else if (currentStep === 'emotions') {
-      if (selectedEmotions.length === 0) {
+      if (selectedEmotions.length === 0 && !emotionText.trim()) {
         showAlertModal('알림', '감정을 하나 이상 선택해주세요.');
         return;
       }
@@ -285,14 +297,20 @@ const DiaryScreen: React.FC = () => {
 
       // emotionFactors에 커스텀 요인 추가
       const allFactors = [...selectedFactors];
-      if (factorText.trim() && showCustomFactorInput) {
+      if (factorText.trim()) {
         allFactors.push(factorText.trim());
+      }
+
+      // emotions에 커스텀 감정 추가
+      const allEmotions = [...selectedEmotions];
+      if (emotionText.trim()) {
+        allEmotions.push(emotionText.trim());
       }
 
       const diaryData: SimpleDiaryData = {
         date: dateString,
         mood: moodValue,
-        emotions: selectedEmotions,
+        emotions: allEmotions,
         emotionFactors: allFactors,
         content: expressionText.trim(),
       };
@@ -312,7 +330,7 @@ const DiaryScreen: React.FC = () => {
         setSelectedEmotions([]);
         setSelectedFactors([]);
         setFactorText('');
-        setShowCustomFactorInput(false);
+        setEmotionText('');
         setExpressionText('');
       }, 2000);
     } catch (saveError) {
@@ -864,7 +882,9 @@ const DiaryScreen: React.FC = () => {
           {currentStep === 'emotions' && (
             <EmotionSelectionStep
               selectedEmotions={selectedEmotions}
+              customEmotion={emotionText}
               onToggleEmotion={toggleEmotion}
+              onCustomEmotionChange={setEmotionText}
             />
           )}
 
@@ -874,8 +894,6 @@ const DiaryScreen: React.FC = () => {
               customFactor={factorText}
               onToggleFactor={toggleFactor}
               onCustomFactorChange={setFactorText}
-              onShowCustomInput={() => setShowCustomFactorInput(!showCustomFactorInput)}
-              showCustomInput={showCustomFactorInput}
             />
           )} 
 
@@ -885,7 +903,7 @@ const DiaryScreen: React.FC = () => {
                 style={styles.textInput}
                 value={expressionText}
                 onChangeText={setExpressionText}
-                placeholder="자세히 입력해주세요"
+                placeholder="직접 입력하기"
                 placeholderTextColor={colors.text.tertiary}
                 multiline={true}
                 textAlignVertical="top"
@@ -921,7 +939,7 @@ const DiaryScreen: React.FC = () => {
         ) : currentStep === 'expression' ? (
           <View style={[styles.modalButtons, styles.modalButtonsExpression]}>
             <TouchableOpacity style={styles.skipButton} onPress={handleBack}>
-              <Text style={styles.skipButtonText}>취소</Text>
+              <Text style={styles.skipButtonText}>이전</Text>
             </TouchableOpacity>
             <TouchableOpacity 
               style={[styles.confirmButton, !expressionText.trim() && styles.confirmButtonDisabled]}
@@ -934,7 +952,7 @@ const DiaryScreen: React.FC = () => {
         ) : (
           <View style={styles.modalButtons}>
             <TouchableOpacity style={styles.cancelButton} onPress={handleBack}>
-              <Text style={styles.cancelButtonText}>취소</Text>
+              <Text style={styles.cancelButtonText}>이전</Text>
             </TouchableOpacity>
             <TouchableOpacity 
               style={styles.confirmButton}
@@ -984,12 +1002,13 @@ const styles = StyleSheet.create({
   },
   modalQuestion: {
     paddingVertical: spacing[2],
-    fontSize: typography.fontSize['xl'],
+    paddingHorizontal: spacing[4],
+    fontSize: typography.fontSize.base,
     fontWeight: typography.fontWeight.medium,
     color: colors.white,
     textAlign: 'left',
     marginBottom: spacing[1],
-    lineHeight: getOptimizedLineHeight(typography.fontSize['2xl']),
+    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,
       android: typography.fontFamily.regular,
@@ -1004,8 +1023,8 @@ const styles = StyleSheet.create({
     minHeight: 300,
   },
   modalContentExpression: {
-    marginBottom: spacing[1],
-    flex: 1,
+    marginTop: spacing[8],
+    marginBottom: spacing[4],
     minHeight: 260,
   },
   modalButtons: {
@@ -1015,7 +1034,7 @@ const styles = StyleSheet.create({
     marginTop: spacing[2],
   },
   modalButtonsExpression: {
-    marginTop: spacing[0],
+    marginTop: spacing[3],
   },
   moodContainer: {
     paddingVertical: spacing[1],
@@ -1114,7 +1133,7 @@ const styles = StyleSheet.create({
     fontWeight: typography.fontWeight.medium,
   },
   inputContainer: {
-    flex: 1,
+    width: '100%',
   },
   textInput: {
     backgroundColor: colors.gray[900],
