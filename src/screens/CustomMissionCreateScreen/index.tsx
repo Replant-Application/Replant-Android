@@ -28,12 +28,6 @@ interface CustomMissionCreateScreenProps {
   route?: RouteProp<RootStackParamList, 'CustomMissionCreate'>;
 }
 
-const DIFFICULTY_OPTIONS = [
-  { id: 'easy', name: '쉬움', emoji: '😊', exp: 30 },
-  { id: 'medium', name: '보통', emoji: '😐', exp: 50 },
-  { id: 'hard', name: '어려움', emoji: '😤', exp: 80 },
-];
-
 const WORRY_TYPE_OPTIONS: { id: WorryType; name: string; emoji: string }[] = [
   { id: 'RE_EMPLOYMENT', name: '재취업', emoji: '💼' },
   { id: 'JOB_PREPARATION', name: '취업준비', emoji: '📝' },
@@ -92,7 +86,6 @@ const CustomMissionCreateScreen: React.FC<CustomMissionCreateScreenProps> = ({ n
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [selectedEmoji, setSelectedEmoji] = useState('🎯');
-  const [difficulty, setDifficulty] = useState('medium');
   const [loading, setLoading] = useState(false);
   const [worryType, setWorryType] = useState<WorryType | null>(null);
   // 새로운 필드들
@@ -118,7 +111,6 @@ const CustomMissionCreateScreen: React.FC<CustomMissionCreateScreenProps> = ({ n
       setIsChallenge(missionData.isChallenge || false);
       setChallengeDays(missionData.challengeDays || 7);
       setDeadlineDays(missionData.deadlineDays || 3);
-      setCustomExp(missionData.expReward || 50);
       setWorryType((missionData.worryType as WorryType) || null);
     }
   }, [isEditMode, missionData]);
@@ -129,7 +121,6 @@ const CustomMissionCreateScreen: React.FC<CustomMissionCreateScreenProps> = ({ n
       setTitle(generatedMission.title || '');
       setDescription(generatedMission.description || '');
       setSelectedEmoji(generatedMission.emoji || '🎯');
-      setDifficulty(generatedMission.difficulty || 'medium');
     }
   }, [generatedMission, isEditMode]);
 
@@ -152,7 +143,6 @@ const CustomMissionCreateScreen: React.FC<CustomMissionCreateScreenProps> = ({ n
         title: title.trim(),
         description: description.trim(),
         emoji: selectedEmoji,
-        difficulty: difficulty as 'easy' | 'medium' | 'hard',
         experience: 0, // 커스텀 미션은 경험치 지급 없음
         // 백엔드 필수 필드들
         durationDays: isChallenge ? challengeDays : deadlineDays,  // 미션 기간
@@ -197,14 +187,6 @@ const CustomMissionCreateScreen: React.FC<CustomMissionCreateScreenProps> = ({ n
       Alert.alert('오류', isEditMode ? '미션 수정 중 오류가 발생했습니다.' : '미션 생성 중 오류가 발생했습니다.');
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleDifficultyChange = (selectedDifficulty: string) => {
-    setDifficulty(selectedDifficulty);
-    const difficultyOption = DIFFICULTY_OPTIONS.find(opt => opt.id === selectedDifficulty);
-    if (difficultyOption) {
-      setCustomExp(difficultyOption.exp);
     }
   };
 
@@ -488,30 +470,6 @@ const CustomMissionCreateScreen: React.FC<CustomMissionCreateScreenProps> = ({ n
             <Text style={styles.optionalHint}>미션 할당 후 이 기간 내에 완료해야 합니다</Text>
           </FormCard>
         )}
-
-        <FormCard>
-          <SectionTitle title="난이도 선택" size="lg" marginBottom={spacing[3]} />
-          <View style={styles.difficultyContainer}>
-            {DIFFICULTY_OPTIONS.map((option) => (
-              <TouchableOpacity
-                key={option.id}
-                style={[
-                  styles.difficultyButton,
-                  difficulty === option.id && styles.selectedDifficulty
-                ]}
-                onPress={() => handleDifficultyChange(option.id)}
-              >
-                <Text style={styles.difficultyEmoji}>{option.emoji}</Text>
-                <Text style={[
-                  styles.difficultyText,
-                  difficulty === option.id && styles.selectedDifficultyText
-                ]}>
-                  {option.name}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </FormCard>
       </ScrollView>
 
       <View style={styles.buttonContainer}>
@@ -826,66 +784,6 @@ const styles = StyleSheet.create({
     }),
     includeFontPadding: false,
     lineHeight: getOptimizedLineHeight(typography.fontSize.xl),
-  },
-  difficultyContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  difficultyButton: {
-    flex: 1,
-    alignItems: 'center',
-    padding: spacing[3],
-    marginHorizontal: spacing[1],
-    borderRadius: borderRadius.md,
-    backgroundColor: colors.background.primary,
-    borderWidth: 1,
-    borderColor: colors.border.light,
-  },
-  selectedDifficulty: {
-    backgroundColor: colors.primary[100],
-    borderColor: colors.primary[500],
-  },
-  difficultyEmoji: {
-    fontSize: typography.fontSize.xl,
-    marginBottom: spacing[1],
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.xl),
-  },
-  difficultyText: {
-    fontSize: typography.fontSize.sm,
-    fontWeight: typography.fontWeight.medium,
-    color: colors.text.secondary,
-    marginBottom: spacing[1],
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
-  },
-  selectedDifficultyText: {
-    color: colors.primary[500],
-    fontWeight: typography.fontWeight.medium,
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
-  },
-  difficultyExp: {
-    fontSize: typography.fontSize.xs,
-    color: colors.text.tertiary,
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
   },
   expContainer: {
     flexDirection: 'row',
