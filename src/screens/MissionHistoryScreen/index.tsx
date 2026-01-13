@@ -127,9 +127,9 @@ const MissionHistoryScreen: React.FC<MissionHistoryScreenProps> = ({ navigation 
           </Text>
         </View>
 
-        {item.status === 'COMPLETED' && (
+        {item.status === 'COMPLETED' && item.missionType !== 'CUSTOM' && (
           <View style={styles.rewardInfo}>
-            <Text style={styles.rewardText}>+{mission.expReward} EXP 획득</Text>
+            <Text style={styles.rewardText}>+{mission.expReward || 0} EXP 획득</Text>
           </View>
         )}
       </TouchableOpacity>

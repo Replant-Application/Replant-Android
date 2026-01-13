@@ -138,6 +138,7 @@ export interface MissionReview {
   userNickname: string;
   userProfileImg?: string;
   content: string;
+  rating?: number; // 1-5 별점
   createdAt: string;
 }
 

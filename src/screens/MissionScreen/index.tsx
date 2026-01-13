@@ -373,15 +373,20 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
     if (!selectedMissionForVerification) return;
 
     try {
-      // 경험치 지급
+      // 경험치 지급 (커스텀 미션은 제외)
+      const isCustomMission = selectedMissionForVerification.missionType === 'CUSTOM' || 
+                              selectedMissionForVerification.is_custom === true;
       const experienceToGrant = selectedMissionForVerification.experience || 50;
-      if (addExperienceByCategory && selectedMissionForVerification.category_id) {
+
+      if (!isCustomMission && addExperienceByCategory && selectedMissionForVerification.category_id) {
         const expResult = await addExperienceByCategory(selectedMissionForVerification.category_id, experienceToGrant);
         if (expResult.levelUp) {
           Alert.alert('🎉 레벨업!', `레벨 ${expResult.newLevel}이 되었습니다!\n+${experienceToGrant} EXP 획득!`);
         } else {
           Alert.alert('✅ 시간 인증 완료', `+${experienceToGrant} EXP를 획득했습니다!`);
         }
+      } else if (isCustomMission) {
+        Alert.alert('✅ 시간 인증 완료', '미션이 완료되었습니다!');
       }
 
       setVerificationModalVisible(false);
@@ -551,7 +556,7 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
             category: m.category,
             verificationType: m.verificationType,
             requiredMinutes: m.requiredMinutes,
-            expReward: m.expReward,
+            expReward: 0, // 커스텀 미션은 경험치 지급 없음
             badgeDurationDays: m.badgeDurationDays,
             participantCount: m.participantCount,
             isCustom: true,
@@ -985,14 +990,16 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
 
                               <View style={styles.groupMissionFooter}>
                                 <View style={styles.groupMissionStats}>
-                                  <View style={styles.groupStatItem}>
-                                    <Image
-                                      source={require('../../assets/images/sun.png')}
-                                      style={styles.groupStatIcon}
-                                      resizeMode="contain"
-                                    />
-                                    <Text style={styles.groupStatText}>{mission.expReward} EXP</Text>
-                                  </View>
+                                  {mission.expReward > 0 && (
+                                    <View style={styles.groupStatItem}>
+                                      <Image
+                                        source={require('../../assets/images/sun.png')}
+                                        style={styles.groupStatIcon}
+                                        resizeMode="contain"
+                                      />
+                                      <Text style={styles.groupStatText}>{mission.expReward} EXP</Text>
+                                    </View>
+                                  )}
                                   <View style={styles.groupStatItem}>
                                     <Image
                                       source={require('../../assets/images/high-five.png')}
@@ -1029,7 +1036,10 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
                                   <View style={styles.groupDetailRow}>
                                     <Text style={styles.groupDetailLabel}>보상</Text>
                                     <Text style={styles.groupDetailValue}>
-                                      {selectedGroupMission.expReward} EXP + 뱃지 ({selectedGroupMission.badgeDurationDays}일)
+                                      {selectedGroupMission.isCustom
+                                        ? `뱃지 (${selectedGroupMission.badgeDurationDays}일)`
+                                        : `${selectedGroupMission.expReward} EXP + 뱃지 (${selectedGroupMission.badgeDurationDays}일)`
+                                      }
                                     </Text>
                                   </View>
                                   {selectedGroupMission.requiredMinutes && (

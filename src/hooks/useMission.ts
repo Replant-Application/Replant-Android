@@ -60,7 +60,7 @@ const transformApiMission = (apiMission: ApiMission): Mission => {
     title: apiMission.title,
     description: apiMission.description,
     emoji: getMissionEmoji(apiMission.title),
-    experience: apiMission.expReward || 10,
+    experience: isCustom ? 0 : (apiMission.expReward || 10),
     category_id: 'growth',
     category: apiMission.category || 'DAILY_LIFE',
     missionType: apiMission.missionType,
@@ -91,7 +91,7 @@ const transformUserMission = (userMission: UserMission): Mission => {
     title: mission.title,
     description: mission.description,
     emoji: getMissionEmoji(mission.title),
-    experience: mission.expReward || 10,
+    experience: isCustom ? 0 : (mission.expReward || 10),
     category_id: 'growth',
     category: mission.category || 'DAILY_LIFE',
     missionType: userMission.missionType,
@@ -291,12 +291,13 @@ export const useMission = (
       );
 
       // 경험치 추가 (캐릭터 시스템과 연동)
-      // COMMUNITY 인증 타입은 좋아요를 받은 후에 XP 지급
+      // 커스텀 미션은 경험치 지급 없음
       const verificationType = mission.verification_type || 'COMMUNITY';
+      const isCustomMission = mission.missionType === 'CUSTOM' || mission.is_custom === true;
       let experienceResult: ExperienceResult | null = null;
 
-      if (verificationType !== 'COMMUNITY') {
-        // COMMUNITY 타입이 아닌 경우에만 즉시 XP 지급
+      if (!isCustomMission && verificationType !== 'COMMUNITY') {
+        // 공식 미션이고 COMMUNITY 타입이 아닌 경우에만 즉시 XP 지급
         if (addExperienceByCategory && mission.category_id) {
           experienceResult = await addExperienceByCategory(mission.category_id, mission.experience);
         }
@@ -375,7 +376,7 @@ export const useMission = (
         durationDays: missionData.durationDays || 1,
         isPublic: missionData.isPublic ?? true,
         verificationType: (missionData.verificationType as 'COMMUNITY' | 'GPS' | 'TIME') || 'COMMUNITY',
-        expReward: missionData.experience || 10,
+        expReward: 0, // 커스텀 미션은 경험치 지급 없음
         badgeDurationDays: missionData.badgeDurationDays || 3,
         // 추가 필드
         worryType: missionData.worryType as any,

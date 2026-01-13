@@ -184,9 +184,11 @@ const MissionCard: React.FC<MissionCardProps> = ({
 
       <View style={styles.footer}>
         <View style={styles.experienceInfo}>
-          <Text style={styles.experienceText}>
-            +{mission.experience || 50} EXP
-          </Text>
+          {!(mission.missionType === 'CUSTOM' || mission.is_custom === true) && (
+            <Text style={styles.experienceText}>
+              +{mission.experience || 50} EXP
+            </Text>
+          )}
         </View>
 
         {readonly ? (

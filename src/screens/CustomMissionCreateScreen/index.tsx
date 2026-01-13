@@ -93,7 +93,6 @@ const CustomMissionCreateScreen: React.FC<CustomMissionCreateScreenProps> = ({ n
   const [description, setDescription] = useState('');
   const [selectedEmoji, setSelectedEmoji] = useState('🎯');
   const [difficulty, setDifficulty] = useState('medium');
-  const [customExp, setCustomExp] = useState(50);
   const [loading, setLoading] = useState(false);
   const [worryType, setWorryType] = useState<WorryType | null>(null);
   // 새로운 필드들
@@ -131,7 +130,6 @@ const CustomMissionCreateScreen: React.FC<CustomMissionCreateScreenProps> = ({ n
       setDescription(generatedMission.description || '');
       setSelectedEmoji(generatedMission.emoji || '🎯');
       setDifficulty(generatedMission.difficulty || 'medium');
-      setCustomExp(generatedMission.experience || 50);
     }
   }, [generatedMission, isEditMode]);
 
@@ -155,7 +153,7 @@ const CustomMissionCreateScreen: React.FC<CustomMissionCreateScreenProps> = ({ n
         description: description.trim(),
         emoji: selectedEmoji,
         difficulty: difficulty as 'easy' | 'medium' | 'hard',
-        experience: customExp,
+        experience: 0, // 커스텀 미션은 경험치 지급 없음
         // 백엔드 필수 필드들
         durationDays: isChallenge ? challengeDays : deadlineDays,  // 미션 기간
         isPublic: true,  // 기본값: 공개
@@ -510,30 +508,9 @@ const CustomMissionCreateScreen: React.FC<CustomMissionCreateScreenProps> = ({ n
                 ]}>
                   {option.name}
                 </Text>
-                <Text style={styles.difficultyExp}>+{option.exp} EXP</Text>
               </TouchableOpacity>
             ))}
           </View>
-        </FormCard>
-
-        <FormCard>
-          <SectionTitle title="경험치 설정" size="lg" marginBottom={spacing[3]} />
-          <View style={styles.expContainer}>
-            <TextInput
-              style={styles.expInput}
-              value={customExp.toString()}
-              onChangeText={(text) => {
-                const num = parseInt(text, 10) || 0;
-                if (num >= 0 && num <= 200) {
-                  setCustomExp(num);
-                }
-              }}
-              keyboardType="numeric"
-              maxLength={3}
-            />
-            <Text style={styles.expLabel}>EXP</Text>
-          </View>
-          <Text style={styles.expHint}>0~200 사이의 값을 입력하세요</Text>
         </FormCard>
       </ScrollView>
 

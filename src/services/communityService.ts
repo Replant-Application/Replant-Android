@@ -598,12 +598,15 @@ export const checkLikeVerification = async (
       );
       await setData(storageKeys.MISSIONS, updatedMissions);
 
+      // 커스텀 미션은 경험치 지급 없음
+      const isCustomMission = mission.missionType === 'CUSTOM' || mission.is_custom === true;
+      
       return {
         success: true,
         data: {
           verified: true,
           missionId,
-          experience: mission.experience || 10
+          experience: isCustomMission ? 0 : (mission.experience || 10)
         }
       };
     }
