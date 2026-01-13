@@ -245,7 +245,9 @@ const TodoListCreateScreen: React.FC<Props> = ({ navigation }) => {
                   </Text>
                   <View style={styles.missionMeta}>
                     <Text style={styles.missionCategory}>{mission.category}</Text>
-                    <Text style={styles.missionExp}>+{mission.expReward} EXP</Text>
+                    {mission.missionType !== 'CUSTOM' && (
+                      <Text style={styles.missionExp}>+{mission.expReward} EXP</Text>
+                    )}
                   </View>
                 </View>
               </TouchableOpacity>

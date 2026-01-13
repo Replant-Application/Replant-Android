@@ -27,10 +27,12 @@ import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types/navigation';
 import {
   getSystemMission,
+  getCustomMission,
   getMissionReviews,
   createMissionReview,
   SystemMission,
   MissionReview,
+  Mission,
 } from '../../api/missionApi';
 import { getMyBadges, Badge } from '../../api/badgeApi';
 import { getCurrentUser } from '../../services/authService';
@@ -119,7 +121,7 @@ const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
 }) => {
   const { missionId } = route.params;
 
-  const [mission, setMission] = useState<SystemMission | null>(null);
+  const [mission, setMission] = useState<SystemMission | Mission | null>(null);
   const [reviews, setReviews] = useState<MissionReview[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -140,17 +142,37 @@ const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
     if (!missionId) return;
 
     try {
-      const numericMissionId = parseInt(missionId, 10);
-      if (isNaN(numericMissionId)) {
-        Alert.alert('오류', '잘못된 미션 ID입니다.');
-        return;
-      }
-
-      const result = await getSystemMission(numericMissionId);
-      if (result.success && result.data) {
-        setMission(result.data);
+      // 커스텀 미션 ID 형식 확인 (custom_${id})
+      const isCustomMission = missionId.startsWith('custom_');
+      
+      if (isCustomMission) {
+        // 커스텀 미션: custom_368 -> 368 추출
+        const numericId = parseInt(missionId.replace('custom_', ''), 10);
+        if (isNaN(numericId)) {
+          Alert.alert('오류', '잘못된 미션 ID입니다.');
+          return;
+        }
+        
+        const result = await getCustomMission(numericId);
+        if (result.success && result.data) {
+          setMission(result.data);
+        } else {
+          Alert.alert('오류', result.error || '미션 정보를 불러올 수 없습니다.');
+        }
       } else {
-        Alert.alert('오류', result.error || '미션 정보를 불러올 수 없습니다.');
+        // 공식 미션: 숫자 ID 직접 사용
+        const numericMissionId = parseInt(missionId, 10);
+        if (isNaN(numericMissionId)) {
+          Alert.alert('오류', '잘못된 미션 ID입니다.');
+          return;
+        }
+
+        const result = await getSystemMission(numericMissionId);
+        if (result.success && result.data) {
+          setMission(result.data);
+        } else {
+          Alert.alert('오류', result.error || '미션 정보를 불러올 수 없습니다.');
+        }
       }
     } catch (error) {
       Alert.alert('오류', '미션 정보를 불러오는데 실패했습니다.');
@@ -162,7 +184,11 @@ const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
     if (!missionId) return;
 
     try {
-      const numericMissionId = parseInt(missionId, 10);
+      // 커스텀 미션 ID 형식 확인 (custom_${id})
+      const isCustomMission = missionId.startsWith('custom_');
+      const numericMissionId = isCustomMission 
+        ? parseInt(missionId.replace('custom_', ''), 10)
+        : parseInt(missionId, 10);
       if (isNaN(numericMissionId)) return;
 
       const result = await getMissionReviews(numericMissionId, { page, size: 10 });
@@ -192,7 +218,11 @@ const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
     if (!missionId) return;
 
     try {
-      const numericMissionId = parseInt(missionId, 10);
+      // 커스텀 미션 ID 형식 확인 (custom_${id})
+      const isCustomMission = missionId.startsWith('custom_');
+      const numericMissionId = isCustomMission 
+        ? parseInt(missionId.replace('custom_', ''), 10)
+        : parseInt(missionId, 10);
       if (isNaN(numericMissionId)) return;
 
       const result = await getMyBadges();
@@ -200,8 +230,13 @@ const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
         const badges = result.data.badges || [];
         // 해당 미션에 대한 유효한 뱃지가 있는지 확인
         const hasMissionBadge = badges.some((badge: Badge) => {
-          const badgeMissionId = badge.mission?.id || badge.customMission?.id;
-          return badgeMissionId === numericMissionId && !badge.isExpired;
+          if (isCustomMission) {
+            // 커스텀 미션: customMission.id와 비교
+            return badge.customMission?.id === numericMissionId && !badge.isExpired;
+          } else {
+            // 공식 미션: mission.id와 비교
+            return badge.mission?.id === numericMissionId && !badge.isExpired;
+          }
         });
         setHasBadge(hasMissionBadge);
       }
@@ -216,7 +251,11 @@ const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
 
     try {
       setSubmittingReview(true);
-      const numericMissionId = parseInt(missionId, 10);
+      // 커스텀 미션 ID 형식 확인 (custom_${id})
+      const isCustomMission = missionId.startsWith('custom_');
+      const numericMissionId = isCustomMission 
+        ? parseInt(missionId.replace('custom_', ''), 10)
+        : parseInt(missionId, 10);
       if (isNaN(numericMissionId)) {
         Alert.alert('오류', '잘못된 미션 ID입니다.');
         return;
@@ -346,7 +385,9 @@ const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
                     {difficulty.label}
                   </Text>
                 </View>
-                <Text style={styles.missionExp}>+{mission.expReward} EXP</Text>
+                {mission.missionType !== 'CUSTOM' && (
+                  <Text style={styles.missionExp}>+{mission.expReward} EXP</Text>
+                )}
               </View>
             </View>
           </View>
@@ -813,7 +854,7 @@ const styles = StyleSheet.create({
       android: typography.fontFamily.regular,
     }),
     includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.sm, 1.5),
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
   },
   // 이미 후기 작성 완료 섹션
   alreadyWrittenSection: {
@@ -838,7 +879,7 @@ const styles = StyleSheet.create({
       android: typography.fontFamily.regular,
     }),
     includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.sm, 1.5),
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
   },
   // 후기 작성 섹션 스타일
   writeReviewSection: {

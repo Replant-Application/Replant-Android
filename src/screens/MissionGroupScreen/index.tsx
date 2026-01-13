@@ -122,7 +122,7 @@ const MissionGroupScreen: React.FC<MissionGroupScreenProps> = ({ navigation }) =
             category: m.category,
             verificationType: m.verificationType,
             requiredMinutes: m.requiredMinutes,
-            expReward: m.expReward,
+            expReward: 0, // 커스텀 미션은 경험치 지급 없음
             badgeDurationDays: m.badgeDurationDays,
             participantCount: m.participantCount,
             isCustom: true,
@@ -426,14 +426,16 @@ const MissionGroupScreen: React.FC<MissionGroupScreenProps> = ({ navigation }) =
 
                     <View style={styles.missionFooter}>
                       <View style={styles.missionStats}>
-                        <View style={styles.statItem}>
-                          <Image
-                            source={require('../../assets/images/sun.png')}
-                            style={styles.statIcon}
-                            resizeMode="contain"
-                          />
-                          <Text style={styles.statText}>{mission.expReward} EXP</Text>
-                        </View>
+                        {mission.expReward > 0 && (
+                          <View style={styles.statItem}>
+                            <Image
+                              source={require('../../assets/images/sun.png')}
+                              style={styles.statIcon}
+                              resizeMode="contain"
+                            />
+                            <Text style={styles.statText}>{mission.expReward} EXP</Text>
+                          </View>
+                        )}
                         <View style={styles.statItem}>
                           <Image
                             source={require('../../assets/images/high-five.png')}
@@ -471,7 +473,10 @@ const MissionGroupScreen: React.FC<MissionGroupScreenProps> = ({ navigation }) =
                         <View style={styles.detailRow}>
                           <Text style={styles.detailLabel}>보상</Text>
                           <Text style={styles.detailValue}>
-                            {selectedMission.expReward} EXP + 뱃지 ({selectedMission.badgeDurationDays}일)
+                            {selectedMission.isCustom 
+                              ? `뱃지 (${selectedMission.badgeDurationDays}일)`
+                              : `${selectedMission.expReward} EXP + 뱃지 (${selectedMission.badgeDurationDays}일)`
+                            }
                           </Text>
                         </View>
                         {selectedMission.requiredMinutes && (
