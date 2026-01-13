@@ -5,9 +5,10 @@ import { getDeviceId } from '../services/storage';
 import { logError, logUserAction } from '../utils/logger';
 import { executeWithErrorHandling } from '../utils/errorHandler';
 import { User } from '../types';
-import { checkAutoLogin, getUserInfo, clearAuthData } from '../utils/tokenStorage';
+import { checkAutoLogin, getUserInfo, clearAuthData, saveUserInfo } from '../utils/tokenStorage';
 import { apiClient } from '../api/client';
 import { initializeGoogleSignIn } from '../services/googleSignIn';
+import { updateMyInfo } from '../api/userApi';
 
 // UserContext 타입 정의
 interface UserContextType {
@@ -338,6 +339,27 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         throw new Error('닉네임이 필요합니다.');
       }
 
+      // 백엔드 API 호출하여 닉네임 변경
+      const storedUserInfo = await getUserInfo();
+      if (storedUserInfo) {
+        // API 기반 로그인 사용자인 경우 백엔드에 먼저 업데이트
+        const apiResult = await updateMyInfo({ nickname: newNickname });
+        if (!apiResult.success) {
+          throw new Error(apiResult.error || '닉네임 변경에 실패했습니다.');
+        }
+
+        // tokenStorage의 사용자 정보 업데이트
+        if (apiResult.data) {
+          await saveUserInfo({
+            id: apiResult.data.id,
+            email: apiResult.data.email,
+            nickname: apiResult.data.nickname,
+            profileImg: apiResult.data.profileImg,
+            role: storedUserInfo.role, // role은 유지
+          });
+        }
+      }
+
       // 기존 데이터 백업
 
       // 모든 기존 데이터를 새 닉네임으로 복사
@@ -359,7 +381,8 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
       const updatedUser: User = {
         nickname: newNickname,
         id: user?.id || `user_${Date.now()}`,
-        createdAt: user?.createdAt || new Date().toISOString()
+        createdAt: user?.createdAt || new Date().toISOString(),
+        role: user?.role || 'user'
       };
 
       // 새 닉네임으로 User 객체 저장
@@ -375,7 +398,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
       logError('닉네임 변경 실패', error as Error);
       return { success: false, error: (error as Error).message };
     }
-  }, [currentNickname, user?.id, user?.createdAt]);
+  }, [currentNickname, user?.id, user?.createdAt, user?.role]);
 
   // 메모이제이션된 Context 값
   const value = useMemo(() => ({
