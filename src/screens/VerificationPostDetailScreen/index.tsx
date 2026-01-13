@@ -34,6 +34,7 @@ import { colors, spacing, typography, borderRadius } from '../../utils/designTok
 import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types/navigation';
 import { useUser } from '../../contexts/UserContext';
+import { getUserInfo } from '../../utils/tokenStorage';
 
 interface VerificationPostDetailScreenProps {
   navigation: NavigationProp<RootStackParamList>;
@@ -56,6 +57,7 @@ const VerificationPostDetailScreen: React.FC<VerificationPostDetailScreenProps> 
   const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
   const [editingContent, setEditingContent] = useState('');
   const [replyingToComment, setReplyingToComment] = useState<{ id: string; nickname: string } | null>(null);
+  const [currentUserId, setCurrentUserId] = useState<number | null>(null);
 
   const isAuthor = post?.userNickname === currentNickname;
 
@@ -88,6 +90,21 @@ const VerificationPostDetailScreen: React.FC<VerificationPostDetailScreenProps> 
     await Promise.all([loadPost(), loadComments()]);
     setLoading(false);
   }, [loadPost, loadComments]);
+
+  // 현재 사용자 ID 로드
+  useEffect(() => {
+    const loadCurrentUserId = async () => {
+      try {
+        const userInfo = await getUserInfo();
+        if (userInfo?.id) {
+          setCurrentUserId(userInfo.id);
+        }
+      } catch (error) {
+        console.error('사용자 ID 로드 실패', error);
+      }
+    };
+    loadCurrentUserId();
+  }, []);
 
   useEffect(() => {
     loadData();
@@ -432,7 +449,7 @@ const VerificationPostDetailScreen: React.FC<VerificationPostDetailScreenProps> 
                     ) : (
                       <CommentCard
                         comment={parentComment}
-                        isAuthor={parentComment.author_nickname === currentNickname}
+                        isAuthor={currentUserId !== null && parseInt(parentComment.author) === currentUserId}
                         onEdit={handleEditComment}
                         onDelete={handleDeleteComment}
                         onReply={handleReplyComment}
@@ -474,7 +491,7 @@ const VerificationPostDetailScreen: React.FC<VerificationPostDetailScreenProps> 
                           ) : (
                             <CommentCard
                               comment={reply}
-                              isAuthor={reply.author_nickname === currentNickname}
+                              isAuthor={currentUserId !== null && parseInt(reply.author) === currentUserId}
                               isReply={true}
                               onEdit={handleEditComment}
                               onDelete={handleDeleteComment}

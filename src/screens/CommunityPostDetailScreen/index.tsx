@@ -27,6 +27,7 @@ import { RootStackParamList } from '../../types/navigation';
 import { useUser } from '../../contexts/UserContext';
 import { getHiddenComments, hideComment } from '../../utils/hiddenContentStorage';
 import { logError } from '../../utils/logger';
+import { getUserInfo } from '../../utils/tokenStorage';
 
 interface CommunityPostDetailScreenProps {
   navigation: NavigationProp<RootStackParamList>;
@@ -49,8 +50,24 @@ const CommunityPostDetailScreen: React.FC<CommunityPostDetailScreenProps> = ({
   
   // 숨긴 댓글 ID 목록
   const [hiddenCommentIds, setHiddenCommentIds] = useState<string[]>([]);
+  const [currentUserId, setCurrentUserId] = useState<number | null>(null);
 
   const isAuthor = post?.author === currentNickname;
+
+  // 현재 사용자 ID 로드
+  useEffect(() => {
+    const loadCurrentUserId = async () => {
+      try {
+        const userInfo = await getUserInfo();
+        if (userInfo?.id) {
+          setCurrentUserId(userInfo.id);
+        }
+      } catch (error) {
+        logError('사용자 ID 로드 실패', error as Error);
+      }
+    };
+    loadCurrentUserId();
+  }, []);
 
   // 숨긴 댓글 목록 로드
   useEffect(() => {
@@ -343,7 +360,7 @@ const CommunityPostDetailScreen: React.FC<CommunityPostDetailScreenProps> = ({
                     ) : (
                       <CommentCard
                         comment={parentComment}
-                        isAuthor={parentComment.author_nickname === currentNickname}
+                        isAuthor={currentUserId !== null && parseInt(parentComment.author) === currentUserId}
                         onEdit={handleEditComment}
                         onDelete={handleDeleteComment}
                         onReply={handleReplyComment}
@@ -393,7 +410,7 @@ const CommunityPostDetailScreen: React.FC<CommunityPostDetailScreenProps> = ({
                           ) : (
                             <CommentCard
                               comment={reply}
-                              isAuthor={reply.author_nickname === currentNickname}
+                              isAuthor={currentUserId !== null && parseInt(reply.author) === currentUserId}
                               isReply={true}
                               onEdit={handleEditComment}
                               onDelete={handleDeleteComment}
