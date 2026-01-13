@@ -1,8 +1,8 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, Platform } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, Platform, ImageBackground } from 'react-native';
 import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types/navigation';
-import { colors, spacing, typography, borderRadius, shadows } from '../../utils/designTokens';
+import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
 import { getOptimizedLineHeight } from '../../utils/textStyles';
 import { Header } from '../../components/ui';
 import { formatDateKorean } from '../../utils/dateUtils';
@@ -22,24 +22,30 @@ const BadgeDetailScreen: React.FC<BadgeDetailScreenProps> = ({ navigation, route
   // 날짜 포맷팅 (formatDateKorean 사용)
 
   return (
-    <View style={styles.container}>
-      <Header
-        title="뱃지 상세"
-        leftButton={
-          <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Image
-              source={require('../../assets/images/left.png')}
-              style={styles.backButtonIcon}
-              resizeMode="contain"
-            />
-          </TouchableOpacity>
-        }
-      />
+    <ImageBackground
+      source={require('../../assets/images/background.png')}
+      style={styles.backgroundImage}
+      resizeMode="cover"
+    >
+      <View style={styles.container}>
+        <Header
+          title="뱃지 상세"
+          leftButton={
+            <TouchableOpacity onPress={() => navigation.goBack()}>
+              <Image
+                source={require('../../assets/images/left.png')}
+                style={styles.backButtonIcon}
+                resizeMode="contain"
+              />
+            </TouchableOpacity>
+          }
+        />
 
-      <ScrollView
-        style={styles.content}
-        contentContainerStyle={styles.scrollContent}
-      >
+        <ScrollView
+          style={styles.content}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+        >
         {/* 뱃지 아이콘 */}
         <View style={styles.badgeIconContainer}>
           <View style={[styles.badgeIcon, isExpired && styles.badgeIconExpired]}>
@@ -110,15 +116,20 @@ const BadgeDetailScreen: React.FC<BadgeDetailScreenProps> = ({ navigation, route
             <Text style={styles.viewMissionButtonText}>미션 상세 보기</Text>
           </TouchableOpacity>
         )}
-      </ScrollView>
-    </View>
+        </ScrollView>
+      </View>
+    </ImageBackground>
   );
 };
 
 const styles = StyleSheet.create({
+  backgroundImage: {
+    flex: 1,
+    width: '100%',
+    height: '100%',
+  },
   container: {
     flex: 1,
-    backgroundColor: colors.background.secondary,
   },
   backButtonIcon: {
     width: 24,
@@ -129,12 +140,14 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    padding: spacing[5],
+    paddingHorizontal: spacing[5],
+    paddingTop: spacing[4],
     paddingBottom: spacing[20],
   },
   badgeIconContainer: {
     alignItems: 'center',
-    marginBottom: spacing[6],
+    marginTop: spacing[2],
+    marginBottom: spacing[5],
     position: 'relative',
   },
   badgeIcon: {
@@ -144,7 +157,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.primary[100],
     justifyContent: 'center',
     alignItems: 'center',
-    ...shadows.lg,
   },
   badgeIconExpired: {
     backgroundColor: colors.gray[200],
@@ -174,10 +186,9 @@ const styles = StyleSheet.create({
   },
   infoCard: {
     backgroundColor: colors.background.primary,
-    borderRadius: borderRadius.xl,
+    borderRadius: borderRadius.base,
     padding: spacing[5],
     marginBottom: spacing[4],
-    ...shadows.base,
   },
   badgeTitle: {
     fontSize: typography.fontSize.xl,
@@ -258,10 +269,9 @@ const styles = StyleSheet.create({
   },
   benefitCard: {
     backgroundColor: colors.background.primary,
-    borderRadius: borderRadius.xl,
+    borderRadius: borderRadius.base,
     padding: spacing[5],
-    marginBottom: spacing[4],
-    ...shadows.base,
+    marginBottom: spacing[5],
   },
   benefitTitle: {
     fontSize: typography.fontSize.lg,
@@ -304,10 +314,11 @@ const styles = StyleSheet.create({
   },
   viewMissionButton: {
     backgroundColor: colors.primary[500],
-    borderRadius: borderRadius.lg,
+    borderRadius: borderRadius.base,
     paddingVertical: spacing[4],
+    paddingHorizontal: spacing[5],
     alignItems: 'center',
-    ...shadows.base,
+    marginTop: spacing[2],
   },
   viewMissionButtonText: {
     fontSize: typography.fontSize.base,

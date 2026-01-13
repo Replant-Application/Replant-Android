@@ -67,18 +67,33 @@ const CommunityPostCreateScreen: React.FC<CommunityPostCreateScreenProps> = ({
 
       if (isGeneralPost) {
         // 일반 게시글: communityService 사용
+        // title이 비어있으면 missionTitle 사용, 그것도 없으면 기본값
+        const postTitle = title.trim() || missionTitle || '자유게시글';
+        
+        console.log('[CommunityPostCreateScreen] 일반 게시글 작성:', {
+          postTitle,
+          missionTitle,
+          hasContent: !!content.trim(),
+        });
+        
         const postData = {
           mission_id: missionId,
           mission_title: missionTitle,
           mission_emoji: missionEmoji,
-          title: title.trim() || missionTitle,
+          title: postTitle,
           content: content.trim(),
           images: photoUrl ? [photoUrl] : [],
           category: postType,
         };
         result = await createPost(postData);
       } else {
-        // 인증 게시글: verificationApi 사용
+        // 인증 게시글: verificationApi 사용 (일반 게시글 API 호출하지 않음)
+        console.log('[CommunityPostCreateScreen] 인증글 작성:', {
+          userMissionId: userMissionId!,
+          hasContent: !!content.trim(),
+          hasPhoto: !!photoUrl,
+        });
+        
         result = await createVerificationPost({
           userMissionId: userMissionId!,
           content: content.trim(),

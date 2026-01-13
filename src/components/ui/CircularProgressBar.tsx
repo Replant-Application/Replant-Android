@@ -31,6 +31,7 @@ const CircularProgressBar: React.FC<CircularProgressBarProps> = ({
   const percentage = total > 0 ? Math.min((current / total) * 100, 100) : 0;
   const radius = size / 2;
   const innerSize = size - strokeWidth * 2;
+  const isComplete = percentage >= 100;
 
   return (
     <View style={[styles.container, { width: size, height: size }]}>
@@ -59,9 +60,11 @@ const CircularProgressBar: React.FC<CircularProgressBarProps> = ({
               borderRadius: radius,
               borderWidth: strokeWidth,
               borderColor: progressColor,
-              borderRightColor: 'transparent',
-              borderBottomColor: 'transparent',
-              transform: [{ rotate: `${(percentage / 100) * 360 - 90}deg` }],
+              ...(isComplete ? {} : {
+                borderRightColor: 'transparent',
+                borderBottomColor: 'transparent',
+                transform: [{ rotate: `${(percentage / 100) * 360 - 90}deg` }],
+              }),
             },
           ]}
         />

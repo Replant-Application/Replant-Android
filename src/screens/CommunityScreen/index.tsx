@@ -7,7 +7,7 @@ import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Image, Modal, RefreshControl, Alert, Platform, ImageBackground, ActivityIndicator } from 'react-native';
 import { useCommunity } from '../../hooks/useCommunity';
 import { PostCard } from '../../components/specialized';
-import { Loading, ErrorBoundary, EmptyState, SimpleTabBar, Header } from '../../components/ui';
+import { Loading, ErrorBoundary, EmptyState, SimpleTabBar, Header, AlertModal } from '../../components/ui';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
 import { getOptimizedLineHeight } from '../../utils/textStyles';
 import { NavigationProp } from '@react-navigation/native';
@@ -43,6 +43,10 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation }) => {
 
   // 숨긴 게시글 ID 목록
   const [hiddenPostIds, setHiddenPostIds] = useState<string[]>([]);
+  // AlertModal 상태
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertTitle, setAlertTitle] = useState('');
+  const [alertMessage, setAlertMessage] = useState('');
 
   // 투두 공유 (미션세트) 관련 상태
   const [missionSets, setMissionSets] = useState<MissionSetSimple[]>([]);
@@ -294,30 +298,35 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation }) => {
 
   // VerificationPost를 CommunityPost 형태로 변환
   const convertedVerificationPosts = useMemo((): (CommunityPost & { isVerificationPost: boolean; verificationId: number })[] => {
-    return verificationPosts.map(vPost => ({
-      id: `verification_${vPost.id}`,
-      post_id: `verification_${vPost.id}`,
-      author: vPost.userNickname,
-      author_id: String(vPost.userId),
-      author_nickname: vPost.userNickname,
-      title: `[인증] ${vPost.missionTitle}`,
-      content: vPost.content,
-      images: vPost.imageUrls,
-      tags: [],
-      category: '인증',
-      mission_id: vPost.mission?.id ? String(vPost.mission.id) : '',
-      mission_title: vPost.missionTitle,
-      mission_emoji: '✅',
-      created_at: vPost.createdAt,
-      like_count: vPost.approveCount,
-      comment_count: 0,
-      scrap_count: 0,
-      is_liked: vPost.myVote === 'APPROVE',
-      is_scrapped: false,
-      verified: vPost.status === 'APPROVED',
-      isVerificationPost: true,
-      verificationId: vPost.id,
-    }));
+    return verificationPosts.map(vPost => {
+      // missionTitle이 null이거나 undefined인 경우 기본값 사용
+      const missionTitle = vPost.missionTitle || vPost.mission?.title || vPost.customMission?.title || '미션';
+      
+      return {
+        id: `verification_${vPost.id}`,
+        post_id: `verification_${vPost.id}`,
+        author: vPost.userNickname,
+        author_id: String(vPost.userId),
+        author_nickname: vPost.userNickname,
+        title: `[인증] ${missionTitle}`,
+        content: vPost.content,
+        images: vPost.imageUrls,
+        tags: [],
+        category: '인증',
+        mission_id: vPost.mission?.id ? String(vPost.mission.id) : '',
+        mission_title: missionTitle,
+        mission_emoji: '✅',
+        created_at: vPost.createdAt,
+        like_count: vPost.approveCount,
+        comment_count: 0,
+        scrap_count: 0,
+        is_liked: vPost.myVote === 'APPROVE',
+        is_scrapped: false,
+        verified: vPost.status === 'APPROVED',
+        isVerificationPost: true,
+        verificationId: vPost.id,
+      };
+    });
   }, [verificationPosts]);
 
   // 검색 및 필터링 (디바운싱된 검색어 사용)
@@ -398,7 +407,13 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation }) => {
       await handleVerificationVote(verificationId);
     } else {
       // 일반 게시글 좋아요
-      await toggleLike(postId);
+      const result = await toggleLike(postId);
+      // 내 게시글에는 좋아요를 누를 수 없음 에러 처리
+      if (!result.success && result.error === '내 게시글에는 좋아요를 누를 수 없습니다.') {
+        setAlertTitle('알림');
+        setAlertMessage('내 게시글에는 좋아요를 누를 수 없습니다.');
+        setShowAlert(true);
+      }
     }
   };
 
@@ -924,6 +939,12 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation }) => {
           </View>
         </View>
       </Modal>
+      <AlertModal
+        visible={showAlert}
+        title={alertTitle}
+        message={alertMessage}
+        onClose={() => setShowAlert(false)}
+      />
     </ImageBackground>
   );
 };
@@ -1234,7 +1255,7 @@ const styles = StyleSheet.create({
   fabText: {
     fontSize: 28,
     color: colors.white,
-    fontWeight: typography.fontWeight.bold,
+    fontWeight: typography.fontWeight.medium,
     marginTop: -2,
   },
   // 투두 공유 관련 스타일
@@ -1403,7 +1424,7 @@ const styles = StyleSheet.create({
   },
   shareModalTitle: {
     fontSize: typography.fontSize.xl,
-    fontWeight: typography.fontWeight.semibold,
+    fontWeight: typography.fontWeight.medium,
     color: colors.text.primary,
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,

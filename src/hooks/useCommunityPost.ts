@@ -78,64 +78,42 @@ export const useCommunityPost = (postId: string): UseCommunityPostReturn => {
 
       // 내 게시글에는 좋아요를 누를 수 없음 (닉네임 비교)
       if (post.author_nickname === currentNickname) {
-        Alert.alert('알림', '내 게시글에는 좋아요를 누를 수 없습니다.');
         return { success: false, error: '내 게시글에는 좋아요를 누를 수 없습니다.' };
       }
 
       try {
         const result = await toggleLikeService(postId, currentNickname);
 
-        if (result.success) {
-          // 좋아요가 추가되는 경우에만 인증 확인 (취소가 아닌 경우)
-          const isAddingLike = !post.is_liked;
-          const newLikeCount = isAddingLike ? post.like_count + 1 : Math.max(0, post.like_count - 1);
+        if (result.success && result.data) {
+          // 백엔드에서 반환한 최신 상태 사용
+          // 백엔드에서 좋아요 3개 이상 시 자동으로 status = "APPROVED"로 변경하고 UserMission.status = COMPLETED로 변경
+          const updatedPost = {
+            ...post,
+            is_liked: result.data.isLiked,
+            like_count: result.data.likeCount, // 백엔드에서 countByPostId()로 최신 카운트 반환
+            verified: result.data.verified ?? post.verified, // 백엔드에서 인증 처리된 경우
+            status: result.data.status ?? post.status, // 백엔드에서 status = "APPROVED"로 변경된 경우
+          };
 
-          // 로컬 상태 즉시 업데이트 (UI 반응성 향상)
-          setPost(prev => {
-            if (!prev) return prev;
-            return {
-              ...prev,
-              is_liked: !prev.is_liked,
-              like_count: newLikeCount,
-            };
-          });
+          // 로컬 상태 업데이트 (백엔드 응답 기반)
+          setPost(updatedPost);
 
-          // 좋아요 추가 시 인증 확인 (게시글 작성자의 미션 인증)
-          if (isAddingLike && post.mission_id && post.author_nickname !== currentNickname) {
+          // 백엔드에서 인증이 완료된 경우 알림 표시
+          if (result.data.verified && result.data.status === 'APPROVED' && post.mission_id && post.author_nickname !== currentNickname) {
             try {
-              const verificationResult = await checkLikeVerification(
-                postId,
-                newLikeCount,
-                post.mission_id,
-                post.author_nickname // 게시글 작성자 닉네임으로 변경
-              );
-
-              if (verificationResult.success && verificationResult.data?.verified && verificationResult.data.experience > 0) {
-                // XP 지급 처리: 작성자의 캐릭터에 경험치 추가
-                const authorNickname = post.author_nickname;
-                const storageKeys = getStorageKeys(authorNickname);
-
-                // 작성자의 캐릭터 찾기 (첫 번째 캐릭터에 경험치 추가)
-                const characters: Character[] = await getData(storageKeys.CHARACTERS) || [];
-                const character = characters[0]; // 기본 캐릭터
-                if (character && character.id) {
-                  const levelUpResult = await autoLevelupCharacter(
-                    character.id,
-                    verificationResult.data.experience,
-                    authorNickname
-                  );
-
-                  // 알림: 게시글 작성자에게 알림 (현재는 로컬 알림만)
-                  const message = levelUpResult.levelUp
-                    ? `게시글이 인증되었습니다!\n+${verificationResult.data.experience} EXP 획득!\n🎉 레벨 ${levelUpResult.newLevel}로 레벨업!`
-                    : `게시글이 좋아요 인증되었습니다!\n+${verificationResult.data.experience} EXP가 작성자에게 지급되었습니다.`;
-
-                  Alert.alert('🎉 인증 완료!', message);
-                }
+              // 작성자의 캐릭터에 경험치 추가 (백엔드에서 이미 처리했을 수 있지만, UI 업데이트를 위해)
+              const authorNickname = post.author_nickname;
+              const storageKeys = getStorageKeys(authorNickname);
+              const characters: Character[] = await getData(storageKeys.CHARACTERS) || [];
+              const character = characters[0];
+              
+              if (character && character.id) {
+                // 백엔드에서 이미 경험치 지급 및 UserMission 완료 처리를 했으므로, 
+                // 여기서는 알림만 표시
+                Alert.alert('🎉 인증 완료!', '게시글이 좋아요 인증되었습니다!\n작성자에게 경험치가 지급되었습니다.');
               }
             } catch (verifyError) {
-              // 인증 확인 실패해도 좋아요 자체는 성공으로 처리
-              logError('좋아요 인증 확인 실패', verifyError as Error, { postId });
+              logError('인증 완료 알림 처리 실패', verifyError as Error, { postId });
             }
           }
         }

@@ -170,7 +170,7 @@ const PostCard: React.FC<PostCardProps> = ({
       )}
 
       <View style={styles.content}>
-        {post.mission_title && (
+        {post.mission_title && post.mission_title !== 'undefined' && (
           <View style={styles.missionInfo}>
             <Image
               source={require('../../assets/images/goal.png')}

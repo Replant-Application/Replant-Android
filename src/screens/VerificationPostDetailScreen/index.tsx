@@ -28,6 +28,8 @@ import {
   VerificationComment,
   VoteType,
 } from '../../api/missionApi';
+import { getActiveTodoLists, getTodoListDetail, completeTodoMission } from '../../api/todolistApi';
+import { getUserMission } from '../../api/missionApi';
 import { CommentCard } from '../../components/specialized';
 import { Loading, ErrorBoundary, EmptyState } from '../../components/ui';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
@@ -63,7 +65,26 @@ const VerificationPostDetailScreen: React.FC<VerificationPostDetailScreenProps> 
     try {
       const result = await getVerification(verificationId);
       if (result.success && result.data) {
-        setPost(result.data);
+        const verificationData = result.data;
+        
+        // 디버깅: 좋아요 수와 상태 확인
+        console.log('[VerificationPostDetailScreen] 인증글 조회:', {
+          verificationId,
+          likeCount: verificationData.approveCount,
+          status: verificationData.status,
+          shouldBeApproved: verificationData.approveCount >= 3,
+        });
+        
+        // 좋아요가 3개 이상인데도 PENDING인 경우 경고 (백엔드 동기화 문제 가능성)
+        if (verificationData.approveCount >= 3 && verificationData.status === 'PENDING') {
+          console.warn('[VerificationPostDetailScreen] 좋아요 3개 이상인데도 PENDING 상태:', {
+            verificationId,
+            likeCount: verificationData.approveCount,
+            status: verificationData.status,
+          });
+        }
+        
+        setPost(verificationData);
       } else {
         setError(result.error || '인증글을 불러올 수 없습니다.');
       }
@@ -93,10 +114,78 @@ const VerificationPostDetailScreen: React.FC<VerificationPostDetailScreenProps> 
     loadData();
   }, [loadData]);
 
+  // 화면 포커스 시 최신 상태 다시 조회 (다른 화면에서 좋아요를 눌렀을 수 있음)
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      // 화면이 포커스될 때마다 최신 상태 조회
+      loadPost();
+    });
+
+    return unsubscribe;
+  }, [navigation, loadPost]);
+
   const onRefresh = async () => {
     setRefreshing(true);
     await loadData();
     setRefreshing(false);
+  };
+
+  // 인증 완료 시 투두리스트 미션 완료 처리
+  const completeTodoMissionForVerification = async (userMissionId: number) => {
+    try {
+      console.log('[VerificationPostDetailScreen] 인증 완료 - userMissionId:', userMissionId);
+      
+      // userMissionId를 통해 실제 미션 ID 확인
+      const userMissionResult = await getUserMission(userMissionId);
+      if (!userMissionResult.success || !userMissionResult.data) {
+        console.warn('[VerificationPostDetailScreen] UserMission 조회 실패:', userMissionResult.error);
+        return;
+      }
+
+      const missionId = userMissionResult.data.mission?.id;
+      if (!missionId) {
+        console.warn('[VerificationPostDetailScreen] missionId를 찾을 수 없음');
+        return;
+      }
+
+      console.log('[VerificationPostDetailScreen] missionId:', missionId);
+
+      // 활성 투두리스트 목록 조회
+      const todoListsResult = await getActiveTodoLists();
+      if (!todoListsResult.success || !todoListsResult.data) {
+        console.warn('[VerificationPostDetailScreen] 활성 투두리스트 조회 실패');
+        return;
+      }
+
+      // 각 투두리스트에서 해당 미션 찾아서 완료 처리
+      for (const todoList of todoListsResult.data) {
+        const detailResult = await getTodoListDetail(todoList.id);
+        if (detailResult.success && detailResult.data?.missions) {
+          // 해당 missionId와 일치하는 미션 찾기
+          const targetMission = detailResult.data.missions.find(
+            (mission) => mission.missionId === missionId && !mission.isCompleted
+          );
+
+          if (targetMission) {
+            console.log('[VerificationPostDetailScreen] 투두리스트 미션 완료 처리:', {
+              todoListId: todoList.id,
+              missionId: targetMission.missionId,
+              missionTitle: targetMission.title,
+            });
+
+            // 투두리스트 미션 완료 처리
+            const completeResult = await completeTodoMission(todoList.id, targetMission.missionId);
+            if (completeResult.success) {
+              console.log('[VerificationPostDetailScreen] 투두리스트 미션 완료 처리 성공');
+            } else {
+              console.error('[VerificationPostDetailScreen] 투두리스트 미션 완료 처리 실패:', completeResult.error);
+            }
+          }
+        }
+      }
+    } catch (error) {
+      console.error('[VerificationPostDetailScreen] 투두리스트 미션 완료 처리 중 오류:', error);
+    }
   };
 
   const handleVote = async (voteType: VoteType) => {
@@ -111,13 +200,33 @@ const VerificationPostDetailScreen: React.FC<VerificationPostDetailScreenProps> 
     try {
       const result = await voteVerification(verificationId, { vote: voteType });
       if (result.success && result.data) {
+        const wasPending = post.status === 'PENDING';
+        const isNowApproved = result.data.status === 'APPROVED';
+        
+        // 상태 즉시 업데이트 (verified 필드 기반)
         setPost(prev => prev ? {
           ...prev,
           approveCount: result.data!.approveCount,
           rejectCount: result.data!.rejectCount,
           myVote: voteType,
-          status: result.data!.status,
+          status: result.data!.status, // verified 필드에 따라 'APPROVED' 또는 'PENDING'
         } : null);
+
+        // 인증 완료 알림 (PENDING -> APPROVED로 변경된 경우)
+        if (wasPending && isNowApproved) {
+          Alert.alert('🎉 인증 완료!', '이 인증글이 인증되었습니다!');
+          // 게시글 다시 조회하여 최신 상태 반영
+          await loadPost();
+          
+          // 인증 완료 시 투두리스트 미션도 완료 처리
+          if (post?.userMissionId) {
+            try {
+              await completeTodoMissionForVerification(post.userMissionId);
+            } catch (error) {
+              console.error('[VerificationPostDetailScreen] 투두리스트 미션 완료 처리 실패:', error);
+            }
+          }
+        }
       } else {
         Alert.alert('오류', result.error || '투표에 실패했습니다.');
       }
@@ -374,7 +483,7 @@ const VerificationPostDetailScreen: React.FC<VerificationPostDetailScreenProps> 
                       initialContent: post.content,
                       photoUrl: post.imageUrls?.[0],
                       missionId: post.mission?.id,
-                      missionTitle: post.missionTitle,
+                      missionTitle: getMissionTitle(),
                       missionEmoji: '🎯',
                     });
                   }}

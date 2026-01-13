@@ -18,3 +18,4 @@ export { FilterBar } from './FilterBar';
 export { default as CircularProgressBar } from './CircularProgressBar';
 export { default as MissionProgressCard } from './MissionProgressCard';
 export { SimpleTabBar } from './SimpleTabBar';
+export { HomeTodoListContainer } from './HomeTodoListContainer';

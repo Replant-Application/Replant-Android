@@ -56,7 +56,7 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     backgroundColor: '#FFF8E7', // 책 페이지와 같은 크림색 배경
-    borderRadius: borderRadius.lg,
+    borderRadius: borderRadius.base,
     padding: spacing[1],
     marginVertical: spacing[2],
     borderWidth: 2,
@@ -78,7 +78,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     position: 'relative',
-    borderRadius: borderRadius.md,
+    borderRadius: borderRadius.base,
     marginHorizontal: spacing[0.5],
   },
   tabActive: {

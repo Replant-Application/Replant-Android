@@ -131,10 +131,10 @@ const CommunityPostEditScreen: React.FC<CommunityPostEditScreenProps> = ({
       <ScrollView style={styles.content} keyboardShouldPersistTaps="handled">
         {/* 미션 정보 표시 (수정 불가) */}
         <View style={styles.missionInfo}>
-          <Text style={styles.missionEmoji}>{post.mission_emoji}</Text>
+          <Text style={styles.missionEmoji}>{post.mission_emoji || '🎯'}</Text>
           <View style={styles.missionTextContainer}>
             <Text style={styles.missionLabel}>완료한 미션</Text>
-            <Text style={styles.missionTitle}>{post.mission_title}</Text>
+            <Text style={styles.missionTitle}>{post.mission_title || '미션'}</Text>
           </View>
         </View>
 
@@ -145,7 +145,7 @@ const CommunityPostEditScreen: React.FC<CommunityPostEditScreenProps> = ({
             style={styles.titleInput}
             value={title}
             onChangeText={setTitle}
-            placeholder={post.mission_title}
+            placeholder={post.mission_title || '미션'}
             placeholderTextColor={colors.text.tertiary}
           />
         </View>

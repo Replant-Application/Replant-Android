@@ -17,12 +17,32 @@ export const createPost = async (
   nickname: string
 ): Promise<ServiceResult<CommunityPost>> => {
   try {
+    // title이 undefined이거나 빈 문자열인 경우 방지
+    const title = postData.title?.trim() || postData.mission_title?.trim() || '자유게시글';
+    
+    // title이 여전히 빈 문자열이면 기본값 사용
+    if (!title || title.length === 0) {
+      logError('createPost: title이 비어있음', new Error('Empty title'), { postData });
+      return {
+        success: false,
+        error: '제목을 입력해주세요.'
+      };
+    }
+
+    // 디버깅: API 호출 전 로그
+    console.log('[createPost] API 호출:', {
+      endpoint: API_CONFIG.endpoints.post.create,
+      title: title,
+      hasContent: !!postData.content,
+      missionId: postData.mission_id,
+    });
+
     // 백엔드 API로 게시글 생성
     // missionId가 빈 문자열이면 undefined로 처리 (GENERAL 게시글)
     const missionIdNum = postData.mission_id ? parseInt(postData.mission_id, 10) : undefined;
 
     const result = await apiClient.post<CommunityPost>(API_CONFIG.endpoints.post.create, {
-      title: postData.title || postData.mission_title || '자유게시글',
+      title: title,
       content: postData.content,
       missionId: !isNaN(missionIdNum as number) ? missionIdNum : undefined,
       imageUrls: postData.images || [],
@@ -489,10 +509,11 @@ export const getComments = async (
 export const toggleLike = async (
   postId: string,
   _nickname: string
-): Promise<ServiceResult<{ isLiked: boolean; likeCount: number }>> => {
+): Promise<ServiceResult<{ isLiked: boolean; likeCount: number; verified?: boolean; status?: string }>> => {
   try {
     // 백엔드 좋아요 토글 API 호출
-    const result = await apiClient.post<{ isLiked: boolean; likeCount: number }>(
+    // 백엔드에서 좋아요 3개 이상 시 자동으로 status = "APPROVED"로 변경하고 UserMission.status = COMPLETED로 변경
+    const result = await apiClient.post<{ isLiked: boolean; likeCount: number; verified?: boolean; status?: string }>(
       `/community/posts/${postId}/like`
     );
 
@@ -502,6 +523,8 @@ export const toggleLike = async (
         data: {
           isLiked: result.data.isLiked,
           likeCount: result.data.likeCount,
+          verified: result.data.verified,
+          status: result.data.status,
         }
       };
     }

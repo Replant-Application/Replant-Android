@@ -99,7 +99,10 @@ const TodoListScreen: React.FC<Props> = ({ navigation, route }) => {
   };
 
   const renderTodoListCard = (todoList: TodoList) => {
-    const progressPercent = Math.round(todoList.progressRate);
+    // completedCount와 totalCount를 기반으로 진행률 직접 계산
+    const progressPercent = todoList.totalCount > 0 
+      ? Math.round((todoList.completedCount / todoList.totalCount) * 100)
+      : 0;
 
     return (
       <TouchableOpacity
@@ -213,9 +216,9 @@ const TodoListScreen: React.FC<Props> = ({ navigation, route }) => {
           >
             <Text style={styles.createButtonIcon}>+</Text>
             <View style={styles.createButtonContent}>
-              <Text style={styles.createButtonTitle}>새 투두리스트 만들기</Text>
+              <Text style={styles.createButtonTitle}>나만의 To-Do 만들기</Text>
               <Text style={styles.createButtonSubtitle}>
-                5개의 미션으로 새로운 목표를 설정하세요
+                필수미션을 조합해서 새로운 목표를 설정하세요
               </Text>
             </View>
           </TouchableOpacity>
@@ -226,7 +229,7 @@ const TodoListScreen: React.FC<Props> = ({ navigation, route }) => {
           currentList.map(renderTodoListCard)
         ) : (
           <View style={styles.emptyContainer}>
-            <Text style={styles.emptyIcon}>📋</Text>
+            <Image source={require('../../assets/images/list.png')} style={styles.emptyIcon} resizeMode="contain" />
             <Text style={styles.emptyText}>
               {activeTab === 'active'
                 ? '진행 중인 투두리스트가 없습니다'
@@ -269,7 +272,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: 'rgba(255, 255, 255, 0.95)',
-    borderRadius: borderRadius.xl,
+    borderRadius: borderRadius.base,
     padding: spacing[4],
     marginBottom: spacing[4],
     borderWidth: 2,
@@ -290,14 +293,24 @@ const styles = StyleSheet.create({
     fontWeight: typography.fontWeight.medium,
     color: '#6B5344',
     marginBottom: spacing[1],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
   },
   createButtonSubtitle: {
     fontSize: typography.fontSize.sm,
     color: '#8B6F47',
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
   },
   todoListCard: {
     backgroundColor: 'rgba(255, 255, 255, 0.95)',
-    borderRadius: borderRadius.xl,
+    borderRadius: borderRadius.base,
     padding: spacing[4],
     marginBottom: spacing[3],
     borderWidth: 2,
@@ -315,12 +328,17 @@ const styles = StyleSheet.create({
     color: colors.text.primary,
     flex: 1,
     marginRight: spacing[2],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
   },
   statusBadge: {
     paddingVertical: spacing[1],
-    paddingHorizontal: spacing[2.5],
+    paddingHorizontal: spacing[4],
     borderRadius: borderRadius.full,
-    backgroundColor: '#E8DDD4',
+    backgroundColor: colors.primary[500],
   },
   statusBadgeCompleted: {
     backgroundColor: '#D4EDDA',
@@ -331,7 +349,12 @@ const styles = StyleSheet.create({
   statusBadgeText: {
     fontSize: typography.fontSize.xs,
     fontWeight: typography.fontWeight.medium,
-    color: '#6B5344',
+    color: colors.white,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
   },
   statusBadgeTextCompleted: {
     color: '#2E7D32',
@@ -344,6 +367,11 @@ const styles = StyleSheet.create({
     color: colors.text.secondary,
     marginBottom: spacing[3],
     lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
   },
   progressContainer: {
     flexDirection: 'row',
@@ -372,6 +400,11 @@ const styles = StyleSheet.create({
     fontWeight: typography.fontWeight.medium,
     minWidth: 40,
     textAlign: 'right',
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
   },
   cardFooter: {
     flexDirection: 'row',
@@ -381,11 +414,21 @@ const styles = StyleSheet.create({
   cardDate: {
     fontSize: typography.fontSize.xs,
     color: colors.text.tertiary,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
   },
   progressPercent: {
     fontSize: typography.fontSize.sm,
     fontWeight: typography.fontWeight.medium,
     color: '#6B5344',
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
   },
   emptyContainer: {
     flex: 1,
@@ -394,7 +437,8 @@ const styles = StyleSheet.create({
     paddingVertical: spacing[12],
   },
   emptyIcon: {
-    fontSize: 48,
+    width: 48,
+    height: 48,
     marginBottom: spacing[4],
   },
   emptyText: {
@@ -402,11 +446,21 @@ const styles = StyleSheet.create({
     color: colors.text.secondary,
     textAlign: 'center',
     marginBottom: spacing[2],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
   },
   emptySubtext: {
     fontSize: typography.fontSize.sm,
     color: colors.text.tertiary,
     textAlign: 'center',
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
   },
   infoContainer: {
     backgroundColor: 'rgba(255, 255, 255, 0.9)',
@@ -421,6 +475,11 @@ const styles = StyleSheet.create({
     color: colors.text.secondary,
     textAlign: 'center',
     lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
   },
 });
 

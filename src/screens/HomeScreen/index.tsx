@@ -2,14 +2,15 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions, ImageBackground, Animated, PanResponder, Platform, ActivityIndicator, Modal, Alert, Image } from 'react-native';
 import FastImage from 'react-native-fast-image';
 import { useCharacter } from '../../hooks/useCharacter';
-import { Loading, ErrorBoundary, AppHeader } from '../../components/ui';
+import { Loading, ErrorBoundary, AppHeader, AlertModal } from '../../components/ui';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
 import { getOptimizedLineHeight } from '../../utils/textStyles';
 import { getCharacterImage } from '../../utils/characterUtils';
 import { HomeScreenProps } from './HomeScreen.types';
 import { getBackgroundImage } from './HomeScreen.utils';
-import { getActiveTodoLists } from '../../api/todolistApi';
-import { TodoList } from '../../types/todolist';
+import { getActiveTodoLists, getTodoListDetail } from '../../api/todolistApi';
+import { TodoList, TodoMission } from '../../types/todolist';
+import { SCREEN_NAMES } from '../../utils/constants';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -22,12 +23,16 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
 
   // 투두리스트 상태
   const [activeTodoLists, setActiveTodoLists] = useState<TodoList[]>([]);
+  const [todoMissionsByTime, setTodoMissionsByTime] = useState<Map<string, { mission: TodoMission; todoListTitle: string }[]>>(new Map());
   const [dataLoading, setDataLoading] = useState(true);
   const [dataError, setDataError] = useState<string | null>(null);
 
   // 말풍선 표시 상태
   const [showSpeechBubble, setShowSpeechBubble] = useState(false);
   const speechBubbleAnim = useRef(new Animated.Value(0)).current;
+
+  // 투두리스트 완료 상태
+  const [completedTodoList, setCompletedTodoList] = useState<TodoList | null>(null);
 
 
   // 캐릭터 감정 상태
@@ -98,12 +103,89 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
         const todoListResult = await getActiveTodoLists();
         if (todoListResult?.success && Array.isArray(todoListResult.data)) {
           setActiveTodoLists(todoListResult.data);
+          
+          // 각 투두리스트의 상세 정보를 가져와서 미션 추출
+          const missionsByTime = new Map<string, { mission: TodoMission; todoListTitle: string }[]>();
+          
+          for (const todoList of todoListResult.data) {
+            try {
+              const detailResult = await getTodoListDetail(todoList.id);
+              if (detailResult?.success && detailResult.data?.missions) {
+                for (const mission of detailResult.data.missions) {
+                  // 완료되지 않은 미션이고 시간이 설정된 경우만
+                  if (!mission.isCompleted && mission.scheduledStartTime) {
+                    const timeKey = mission.scheduledStartTime; // "09:00" 형식
+                    if (!missionsByTime.has(timeKey)) {
+                      missionsByTime.set(timeKey, []);
+                    }
+                    missionsByTime.get(timeKey)!.push({
+                      mission,
+                      todoListTitle: detailResult.data.title,
+                    });
+                  }
+                }
+              } else {
+                // 에러가 발생해도 다른 투두리스트는 계속 로드
+                console.log(`[HomeScreen] 투두리스트 ${todoList.id} 상세 정보 로드 실패:`, detailResult?.error);
+              }
+            } catch (e) {
+              // 개별 투두리스트 로드 실패는 무시하고 계속 진행
+              console.log(`[HomeScreen] 투두리스트 ${todoList.id} 상세 정보 로드 실패:`, e);
+            }
+          }
+          
+          // 시간대로 정렬 (Map을 배열로 변환하고 정렬)
+          const sortedMissionsByTime = new Map(
+            Array.from(missionsByTime.entries()).sort((a, b) => a[0].localeCompare(b[0]))
+          );
+          
+          setTodoMissionsByTime(sortedMissionsByTime);
+
+          // 투두리스트 완료 확인
+          for (const todoList of todoListResult.data) {
+            try {
+              const detailResult = await getTodoListDetail(todoList.id);
+              if (detailResult?.success && detailResult.data) {
+                const todoListDetail = detailResult.data;
+                
+                // 모든 미션이 완료되었는지 확인
+                const allMissionsCompleted = todoListDetail.missions 
+                  ? todoListDetail.missions.every(mission => mission.isCompleted)
+                  : (todoListDetail.completedCount > 0 && todoListDetail.completedCount === todoListDetail.totalCount);
+
+                // 투두리스트가 오늘 생성되었는지 확인
+                const isTodayCreated = (() => {
+                  if (!todoListDetail.createdAt) return false;
+                  const createdDate = new Date(todoListDetail.createdAt);
+                  const today = new Date();
+                  return (
+                    createdDate.getFullYear() === today.getFullYear() &&
+                    createdDate.getMonth() === today.getMonth() &&
+                    createdDate.getDate() === today.getDate()
+                  );
+                })();
+
+                // 모든 미션이 완료되었고 오늘 생성된 투두리스트인 경우 완료 상태 저장
+                if (allMissionsCompleted && isTodayCreated) {
+                  setCompletedTodoList(todoListDetail);
+                  break; // 하나만 표시
+                } else {
+                  setCompletedTodoList(null);
+                }
+              }
+            } catch (e) {
+              // 개별 투두리스트 확인 실패는 무시
+              console.log(`[HomeScreen] 투두리스트 ${todoList.id} 완료 확인 실패:`, e);
+            }
+          }
         } else {
           setActiveTodoLists([]);
+          setTodoMissionsByTime(new Map());
         }
       } catch (e) {
         console.log('투두리스트 로드 실패:', e);
         setActiveTodoLists([]);
+        setTodoMissionsByTime(new Map());
       }
 
 
@@ -342,40 +424,89 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
             ) : (
               <>
                 {/* 나의 투두리스트 섹션 */}
-                <TouchableOpacity
-                  style={styles.todoListSection}
-                  onPress={() => navigation.navigate('TodoList' as any)}
-                  activeOpacity={0.7}
-                  accessibilityRole="button"
-                  accessibilityLabel="나의 투두리스트"
-                >
-                  <View style={styles.sectionHeader}>
-                    <View style={styles.sectionTitleRow}>
-                      <Text style={styles.sectionIcon}>📋</Text>
-                      <Text style={styles.sectionTitle}>나의 투두리스트</Text>
+                <View style={styles.todoListSection}>
+                  <TouchableOpacity
+                    style={styles.todoListHeader}
+                    onPress={() => navigation.navigate(SCREEN_NAMES.TODO_LIST as any)}
+                    activeOpacity={0.7}
+                    disabled={(activeTodoLists || []).length === 0}
+                  >
+                    <View style={styles.todoListHeaderLeft}>
+                      <Image
+                        source={require('../../assets/images/list.png')}
+                        style={styles.todoListIcon}
+                        resizeMode="contain"
+                      />
+                      <Text style={styles.todoListTitle}>나의 투두리스트</Text>
                     </View>
-                    <Text style={styles.sectionArrow}>›</Text>
-                  </View>
-                  <View style={styles.sectionContent}>
-                    <Text style={styles.sectionCount}>
-                      {(activeTodoLists || []).length}개 진행중
-                    </Text>
-                    {(activeTodoLists || []).length > 0 && (
-                      <View style={styles.todoListPreview}>
-                        {(activeTodoLists || []).slice(0, 2).map((todoList, index) => (
-                          <View key={todoList?.id || index} style={styles.todoListPreviewItem}>
-                            <Text style={styles.todoListPreviewTitle} numberOfLines={1}>
-                              {index + 1}. {todoList?.title || '투두리스트'}
-                            </Text>
-                            <Text style={styles.todoListPreviewProgress}>
-                              {todoList?.completedCount ?? 0}/{todoList?.totalCount ?? 0}
-                            </Text>
-                          </View>
-                        ))}
+                    <Text style={styles.todoListArrow}>›</Text>
+                  </TouchableOpacity>
+
+                  {(activeTodoLists || []).length === 0 ? (
+                    <View style={styles.emptyTodoListContainer}>
+                      <Text style={styles.emptyTodoListText}>
+                        아직 투두리스트가 없어요{'\n'}첫 투두리스트를 만들어볼까요?
+                      </Text>
+                      <TouchableOpacity
+                        style={styles.createTodoListButton}
+                        onPress={() => navigation.navigate(SCREEN_NAMES.TODO_LIST_CREATE as any)}
+                        activeOpacity={0.7}
+                      >
+                        <Text style={styles.createTodoListButtonText}>만들러 가기</Text>
+                      </TouchableOpacity>
+                    </View>
+                  ) : completedTodoList ? (
+                    <View style={styles.completedTodoListContainer}>
+                      <View style={styles.completedIconContainer}>
+                        <Text style={styles.completedIcon}>🎉</Text>
                       </View>
-                    )}
-                  </View>
-                </TouchableOpacity>
+                      <Text style={styles.completedTitle}>오늘의 투두 완료!</Text>
+                      <Text style={styles.completedMessage}>
+                        모든 미션을 완료했습니다.{'\n'}
+                        오늘의 투두는 끝났어요!
+                      </Text>
+                      <Text style={styles.completedSubMessage}>
+                        내일 다시 새로운 투두리스트를 작성해보세요.
+                      </Text>
+                    </View>
+                  ) : (
+                    <>
+                      <Text style={styles.todoListCount}>
+                        {(activeTodoLists || []).length}개 진행중
+                      </Text>
+                      {todoMissionsByTime.size > 0 && (
+                        <View style={styles.timeBasedMissions}>
+                          {Array.from(todoMissionsByTime.entries()).map(([time, missions]) => (
+                            <View key={time} style={styles.timeGroup}>
+                              <Text style={styles.timeLabel}>{time}</Text>
+                              {missions.map((item, idx) => (
+                                <TouchableOpacity
+                                  key={`${item.mission.id}-${idx}`}
+                                  style={styles.missionItem}
+                                  onPress={() => {
+                                    // 해당 투두리스트의 첫 번째 투두리스트 ID 찾기
+                                    const todoList = activeTodoLists.find(tl => tl.title === item.todoListTitle);
+                                    if (todoList) {
+                                      navigation.navigate(SCREEN_NAMES.TODO_LIST_DETAIL as any, { todoListId: todoList.id });
+                                    }
+                                  }}
+                                  activeOpacity={0.7}
+                                >
+                                  <Text style={styles.missionItemTitle} numberOfLines={1}>
+                                    {item.mission.title}
+                                  </Text>
+                                  <Text style={styles.missionItemList} numberOfLines={1}>
+                                    {item.todoListTitle}
+                                  </Text>
+                                </TouchableOpacity>
+                              ))}
+                            </View>
+                          ))}
+                        </View>
+                      )}
+                    </>
+                  )}
+                </View>
               </>
             )}
           </ScrollView>
@@ -540,78 +671,180 @@ const styles = StyleSheet.create({
     fontWeight: typography.fontWeight.medium,
   },
 
-  // 투두리스트 섹션 스타일
-  todoListSection: {
-    backgroundColor: '#E3F2FD',
-    borderRadius: borderRadius.lg,
-    paddingVertical: spacing[2.5],
-    paddingHorizontal: spacing[3],
+  timeBasedMissions: {
+    marginTop: spacing[2],
+  },
+  timeGroup: {
     marginBottom: spacing[3],
-    borderWidth: 2,
-    borderColor: '#42A5F5',
-    shadowColor: '#2196F3',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
   },
-  sectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: spacing[2],
-  },
-  sectionTitleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  sectionIcon: {
-    fontSize: 24,
-    marginRight: spacing[2],
-  },
-  sectionTitle: {
-    fontSize: typography.fontSize.lg,
-    fontWeight: typography.fontWeight.semibold,
-    color: '#1565C0',
+  timeLabel: {
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.medium,
+    color: colors.primary[600],
+    marginBottom: spacing[1],
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,
       android: typography.fontFamily.regular,
     }),
+    includeFontPadding: false,
   },
-  sectionArrow: {
-    fontSize: typography.fontSize['2xl'],
-    color: '#42A5F5',
-    fontWeight: typography.fontWeight.bold,
-  },
-  sectionContent: {
-    marginTop: spacing[2],
-  },
-  sectionCount: {
-    fontSize: typography.fontSize.sm,
-    color: '#1976D2',
-    fontWeight: typography.fontWeight.medium,
-    marginBottom: spacing[2],
-  },
-  todoListPreview: {
-    backgroundColor: 'rgba(255, 255, 255, 0.7)',
-    borderRadius: borderRadius.md,
+  missionItem: {
+    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+    borderRadius: borderRadius.base,
     padding: spacing[2],
+    marginBottom: spacing[1],
+    borderWidth: 1,
+    borderColor: colors.gray[200],
   },
-  todoListPreviewItem: {
+  missionItemTitle: {
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.medium,
+    color: colors.text.primary,
+    marginBottom: spacing[0.5],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+  },
+  missionItemList: {
+    fontSize: typography.fontSize.xs,
+    color: colors.text.secondary,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+  },
+  todoListSection: {
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    borderRadius: borderRadius.base,
+    padding: spacing[4],
+    marginBottom: spacing[4],
+    borderWidth: 2,
+    borderColor: '#D4A574',
+  },
+  todoListHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: spacing[1],
+    marginBottom: spacing[3],
   },
-  todoListPreviewTitle: {
-    fontSize: typography.fontSize.sm,
-    color: '#1565C0',
+  todoListHeaderLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
     flex: 1,
   },
-  todoListPreviewProgress: {
-    fontSize: typography.fontSize.sm,
-    color: '#42A5F5',
+  todoListIcon: {
+    width: 20,
+    height: 20,
+    marginRight: spacing[2],
+  },
+  todoListTitle: {
+    fontSize: typography.fontSize.lg,
     fontWeight: typography.fontWeight.medium,
+    color: colors.text.primary,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+  },
+  todoListArrow: {
+    fontSize: typography.fontSize.xl,
+    color: colors.text.secondary,
+    fontWeight: typography.fontWeight.medium,
+  },
+  todoListCount: {
+    fontSize: typography.fontSize.sm,
+    color: colors.primary[600],
+    fontWeight: typography.fontWeight.medium,
+    marginBottom: spacing[2],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+  },
+  emptyTodoListContainer: {
+    alignItems: 'center',
+    paddingVertical: spacing[6],
+  },
+  emptyTodoListText: {
+    fontSize: typography.fontSize.base,
+    color: colors.text.secondary,
+    textAlign: 'center',
+    marginBottom: spacing[4],
+    lineHeight: getOptimizedLineHeight(typography.fontSize.base) * 1.5,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+  },
+  createTodoListButton: {
+    backgroundColor: colors.primary[500],
+    paddingVertical: spacing[3],
+    paddingHorizontal: spacing[6],
+    borderRadius: borderRadius.base,
+    minWidth: 120,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  createTodoListButtonText: {
+    fontSize: typography.fontSize.base,
+    fontWeight: typography.fontWeight.medium,
+    color: colors.white,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+  },
+  completedTodoListContainer: {
+    alignItems: 'center',
+    paddingVertical: spacing[6],
+  },
+  completedIconContainer: {
+    marginBottom: spacing[3],
+  },
+  completedIcon: {
+    fontSize: 48,
+  },
+  completedTitle: {
+    fontSize: typography.fontSize.xl,
+    fontWeight: typography.fontWeight.medium,
+    color: colors.primary[600],
+    marginBottom: spacing[2],
+    textAlign: 'center',
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+  },
+  completedMessage: {
+    fontSize: typography.fontSize.base,
+    color: colors.text.primary,
+    textAlign: 'center',
+    marginBottom: spacing[2],
+    lineHeight: getOptimizedLineHeight(typography.fontSize.base) * 1.5,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+  },
+  completedSubMessage: {
+    fontSize: typography.fontSize.sm,
+    color: colors.text.secondary,
+    textAlign: 'center',
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm) * 1.4,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
   },
 
 });

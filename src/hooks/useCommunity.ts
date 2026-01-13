@@ -144,7 +144,6 @@ export const useCommunity = (): UseCommunityReturn => {
 
       // 내 게시글에는 좋아요를 누를 수 없음
       if (targetPost && targetPost.author_nickname === currentNickname) {
-        Alert.alert('알림', '내 게시글에는 좋아요를 누를 수 없습니다.');
         return { success: false, error: '내 게시글에는 좋아요를 누를 수 없습니다.' };
       }
 

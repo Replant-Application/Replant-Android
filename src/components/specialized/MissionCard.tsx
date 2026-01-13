@@ -225,8 +225,8 @@ const MissionCard: React.FC<MissionCardProps> = ({
                 <Text style={styles.reviewButtonText}>후기 쓰기</Text>
               </TouchableOpacity>
             )}
-            {/* 인증 버튼: 미완료 상태일 때 */}
-            {!mission.completed && (
+            {/* 인증 버튼: 미완료 상태일 때, 커스텀 미션이 아닌 경우만 */}
+            {!mission.completed && !(mission.missionType === 'CUSTOM' || mission.is_custom === true) && (
               <TouchableOpacity
                 style={[
                   styles.actionButton,

@@ -57,6 +57,9 @@ const VerificationPostCreateScreen: React.FC<VerificationPostCreateScreenProps> 
   const [loading, setLoading] = useState(false);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showAlreadyExistsModal, setShowAlreadyExistsModal] = useState(false);
+  const [showErrorModal, setShowErrorModal] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
   const [loadingData, setLoadingData] = useState(isEditMode);
 
   // 필수 파라미터 체크
@@ -253,21 +256,17 @@ const VerificationPostCreateScreen: React.FC<VerificationPostCreateScreenProps> 
         } else {
           // 이미 인증글이 존재하는 경우 처리
           if (result.error?.includes('이미 인증') || result.error?.includes('ALREADY_EXISTS') || result.error?.includes('V013')) {
-            Alert.alert(
-              '인증글이 이미 존재합니다',
-              '이미 작성한 인증글이 있습니다. 커뮤니티에서 다른 사용자들의 투표를 기다려주세요!',
-              [
-                { text: '확인', onPress: () => navigation.goBack() }
-              ]
-            );
+            setShowAlreadyExistsModal(true);
           } else {
-            Alert.alert('오류', result.error || '인증글 작성에 실패했습니다.');
+            setErrorMessage(result.error || '인증글 작성에 실패했습니다.');
+            setShowErrorModal(true);
           }
         }
       }
     } catch (error) {
       logError('인증글 작성/수정 오류', error as Error);
-      Alert.alert('오류', '인증글 작성 중 오류가 발생했습니다.');
+      setErrorMessage('인증글 작성 중 오류가 발생했습니다.');
+      setShowErrorModal(true);
     } finally {
       setLoading(false);
     }
@@ -428,6 +427,27 @@ const VerificationPostCreateScreen: React.FC<VerificationPostCreateScreenProps> 
           setShowSuccessModal(false);
           navigation.goBack();
         }}
+      />
+
+      {/* 이미 존재하는 인증글 모달 */}
+      <AlertModal
+        visible={showAlreadyExistsModal}
+        title="인증글이 이미 존재합니다"
+        message="이미 작성한 인증글이 있습니다. 커뮤니티에서 다른 사용자들의 투표를 기다려주세요!"
+        buttonText="확인"
+        onClose={() => {
+          setShowAlreadyExistsModal(false);
+          navigation.goBack();
+        }}
+      />
+
+      {/* 오류 모달 */}
+      <AlertModal
+        visible={showErrorModal}
+        title="오류"
+        message={errorMessage}
+        buttonText="확인"
+        onClose={() => setShowErrorModal(false)}
       />
     </KeyboardAvoidingView>
     </ImageBackground>

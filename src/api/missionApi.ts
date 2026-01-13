@@ -605,33 +605,57 @@ export const deleteVerification = async (
 };
 
 /**
- * 인증 투표 (좋아요 API 활용)
- * POST /api/community/posts/{verificationId}/like
+ * 인증 투표 (좋아요 API)
+ * POST /api/verifications/{verificationId}/votes
  * 본인 글 투표 불가
- *
- * 백엔드에서 투표 API가 좋아요로 대체되었으므로 좋아요 API를 호출하고
- * 결과를 VoteVerificationResponse 형태로 변환하여 반환합니다.
+ * 
+ * 응답의 verified 필드를 확인하여 인증 완료 상태를 즉시 반영
  */
 export const voteVerification = async (
   verificationId: number,
   data: { vote: VoteType }
 ): Promise<ServiceResult<VoteVerificationResponse>> => {
-  // 좋아요 API 호출 (인증글도 Post 테이블에 저장됨)
-  const result = await apiClient.post<{ isLiked: boolean; likeCount: number; verified?: boolean }>(
-    `/community/posts/${verificationId}/like`
+  // 인증글 좋아요 API 호출
+  // 백엔드에서 좋아요 3개 이상 시 자동으로 status = "APPROVED"로 변경
+  const endpoint = API_CONFIG.endpoints.verification.vote.replace(':verificationId', String(verificationId));
+  const result = await apiClient.post<{ isLiked: boolean; likeCount: number; verified: boolean }>(
+    endpoint
   );
 
   if (result.success && result.data) {
+    // verified 필드 확인하여 인증 완료 여부 판단
+    const isVerified = result.data.verified === true;
+    const likeCount = result.data.likeCount;
+    
+    // 디버깅: 좋아요 수와 verified 상태 확인
+    console.log('[voteVerification] 좋아요 응답:', {
+      verificationId,
+      likeCount,
+      verified: isVerified,
+      shouldBeApproved: likeCount >= 3,
+    });
+    
+    // 좋아요가 3개 이상인데 verified가 false인 경우 경고
+    if (likeCount >= 3 && !isVerified) {
+      console.warn('[voteVerification] 좋아요 3개 이상인데 verified=false:', {
+        verificationId,
+        likeCount,
+        verified: isVerified,
+      });
+    }
+    
     // 좋아요 결과를 VoteVerificationResponse 형태로 변환
     return {
       success: true,
       data: {
         verificationId,
         vote: result.data.isLiked ? 'APPROVE' : 'REJECT',
-        approveCount: result.data.likeCount,
+        approveCount: likeCount,
         rejectCount: 0, // 좋아요 시스템에서는 reject count가 없음
-        status: result.data.verified ? 'APPROVED' : 'PENDING',
-        message: result.data.isLiked ? '좋아요를 눌렀습니다.' : '좋아요를 취소했습니다.',
+        status: isVerified ? 'APPROVED' : 'PENDING',
+        message: result.data.isLiked 
+          ? (isVerified ? '좋아요를 눌렀습니다. 인증이 완료되었습니다!' : '좋아요를 눌렀습니다.')
+          : '좋아요를 취소했습니다.',
       },
     };
   }

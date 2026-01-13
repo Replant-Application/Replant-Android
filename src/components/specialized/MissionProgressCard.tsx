@@ -43,7 +43,7 @@ export const MissionProgressCard: React.FC<MissionProgressCardProps> = ({
         >
           <View style={styles.badgeIconContainer}>
             <Image
-              source={require('../../assets/images/check2.png')}
+              source={require('../../assets/images/badge.png')}
               style={styles.badgeIcon}
               resizeMode="contain"
             />
@@ -117,9 +117,11 @@ const styles = StyleSheet.create({
     fontWeight: typography.fontWeight.medium,
     color: colors.text.primary,
     fontFamily: Platform.select({
-      ios: typography.fontFamily.medium,
-      android: typography.fontFamily.medium,
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
     }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
     flex: 1,
   },
   badgeArrow: {

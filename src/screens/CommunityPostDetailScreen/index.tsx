@@ -20,7 +20,7 @@ import { useCommunityPost } from '../../hooks/useCommunityPost';
 import { useCommunity } from '../../hooks/useCommunity';
 import { CommentCard } from '../../components/specialized';
 import { getOptimizedLineHeight } from '../../utils/textStyles';
-import { Loading, ErrorBoundary, EmptyState, Header, Card } from '../../components/ui';
+import { Loading, ErrorBoundary, EmptyState, Header, Card, AlertModal } from '../../components/ui';
 import { colors, spacing, typography, borderRadius, shadows } from '../../utils/designTokens';
 import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types/navigation';
@@ -49,6 +49,10 @@ const CommunityPostDetailScreen: React.FC<CommunityPostDetailScreenProps> = ({
   
   // 숨긴 댓글 ID 목록
   const [hiddenCommentIds, setHiddenCommentIds] = useState<string[]>([]);
+  // AlertModal 상태
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertTitle, setAlertTitle] = useState('');
+  const [alertMessage, setAlertMessage] = useState('');
 
   const isAuthor = post?.author === currentNickname;
 
@@ -78,7 +82,13 @@ const CommunityPostDetailScreen: React.FC<CommunityPostDetailScreenProps> = ({
 
   const handleLike = async () => {
     if (post) {
-      await toggleLike();
+      const result = await toggleLike();
+      // 내 게시글에는 좋아요를 누를 수 없음 에러 처리
+      if (!result.success && result.error === '내 게시글에는 좋아요를 누를 수 없습니다.') {
+        setAlertTitle('알림');
+        setAlertMessage('내 게시글에는 좋아요를 누를 수 없습니다.');
+        setShowAlert(true);
+      }
       // toggleLike가 내부적으로 post 상태를 업데이트하므로 loadPost 불필요
     }
   };
@@ -441,6 +451,12 @@ const CommunityPostDetailScreen: React.FC<CommunityPostDetailScreenProps> = ({
           </View>
         </View>
       </KeyboardAvoidingView>
+      <AlertModal
+        visible={showAlert}
+        title={alertTitle}
+        message={alertMessage}
+        onClose={() => setShowAlert(false)}
+      />
     </ImageBackground>
   );
 };

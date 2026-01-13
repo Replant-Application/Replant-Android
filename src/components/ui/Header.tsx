@@ -79,7 +79,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: spacing[5],
-    paddingTop: spacing[20],
+    paddingTop: spacing[12],
     paddingBottom: spacing[5],
     backgroundColor: 'transparent',
   },

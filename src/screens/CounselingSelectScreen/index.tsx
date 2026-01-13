@@ -40,7 +40,7 @@ const CounselingSelectScreen: React.FC<CounselingSelectScreenProps> = ({ navigat
           showsVerticalScrollIndicator={false}
         >
           <View style={styles.content}>
-            <Text style={styles.title}>상담 서비스</Text>
+            <Text style={styles.title}>여러분의 쉼터가 되어줄게요</Text>
             <Text style={styles.subtitle}>어떤 도움이 필요하신가요?</Text>
 
             {/* 근처 상담센터 찾기 카드 */}

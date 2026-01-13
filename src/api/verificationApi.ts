@@ -99,6 +99,14 @@ export const getVerificationPost = async (verificationId: number): Promise<Servi
  * 인증 필요
  */
 export const createVerificationPost = async (data: CreateVerificationRequest): Promise<ServiceResult<VerificationPost>> => {
+  // 디버깅: API 호출 전 로그
+  console.log('[createVerificationPost] API 호출:', {
+    endpoint: API_CONFIG.endpoints.verification.create,
+    userMissionId: data.userMissionId,
+    hasContent: !!data.content,
+    imageUrlsCount: data.imageUrls?.length || 0,
+  });
+  
   return apiClient.post<VerificationPost>(API_CONFIG.endpoints.verification.create, data);
 };
 

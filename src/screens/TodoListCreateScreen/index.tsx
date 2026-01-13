@@ -48,6 +48,12 @@ const TodoListCreateScreen: React.FC<Props> = ({ navigation }) => {
   
   // 투두리스트 생성 성공 모달 상태
   const [showTodoListSuccessModal, setShowTodoListSuccessModal] = useState(false);
+  
+  // 시간대 설정 필요 모달 상태
+  const [showTimeRequiredModal, setShowTimeRequiredModal] = useState(false);
+  
+  // 오늘 이미 투두리스트 생성 모달 상태
+  const [showAlreadyCreatedModal, setShowAlreadyCreatedModal] = useState(false);
 
   // 미션별 시간 범위 설정 (미션 ID -> { start: "HH:mm", end: "HH:mm" })
   const [missionTimeRanges, setMissionTimeRanges] = useState<Record<number, { start: string; end: string }>>({});
@@ -166,6 +172,15 @@ const TodoListCreateScreen: React.FC<Props> = ({ navigation }) => {
       return;
     }
 
+    // 모든 미션이 시간대 설정되었는지 확인
+    const allMissionIds = [...randomMissions.map(m => m.id), ...selectedCustomMissions];
+    const missionsWithoutTime = allMissionIds.filter(missionId => !missionTimeRanges[missionId]);
+    
+    if (missionsWithoutTime.length > 0) {
+      setShowTimeRequiredModal(true);
+      return;
+    }
+
     setCreating(true);
     try {
       // missionSchedules 형식 변환: missionId를 문자열 키로 사용
@@ -192,7 +207,12 @@ const TodoListCreateScreen: React.FC<Props> = ({ navigation }) => {
         setShowTodoListSuccessModal(true);
       } else {
         console.error('[TodoListCreateScreen] 투두리스트 생성 실패:', result.error);
-        Alert.alert('오류', result.error || '투두리스트 생성에 실패했습니다.');
+        // 오늘 이미 투두리스트를 생성한 경우
+        if (result.error?.includes('이미') || result.error?.includes('오늘') || result.error?.includes('already') || result.error?.includes('canCreate')) {
+          setShowAlreadyCreatedModal(true);
+        } else {
+          Alert.alert('오류', result.error || '투두리스트 생성에 실패했습니다.');
+        }
       }
     } catch (error) {
       Alert.alert('오류', '투두리스트 생성에 실패했습니다.');
@@ -205,7 +225,7 @@ const TodoListCreateScreen: React.FC<Props> = ({ navigation }) => {
     <View style={styles.introContainer}>
       <View style={styles.introContent}>
         <View style={styles.introIconContainer}>
-          <Image source={require('../../assets/images/todo.png')} style={styles.introIcon} resizeMode="contain" />
+          <Image source={require('../../assets/images/list.png')} style={styles.introIcon} resizeMode="contain" />
         </View>
         <Text style={styles.introTitle}>나만의 투두리스트 만들기</Text>
         <View style={styles.introDescriptionContainer}>
@@ -914,6 +934,22 @@ const TodoListCreateScreen: React.FC<Props> = ({ navigation }) => {
           navigation.navigate(SCREEN_NAMES.TODO_LIST, { refresh: true });
         }}
       />
+
+      <AlertModal
+        visible={showTimeRequiredModal}
+        title="시간대 설정 필요"
+        message="모든 미션에 시간대를 설정해주세요.  시간대를 설정하지 않은 미션이 있습니다."
+        buttonText="확인"
+        onClose={() => setShowTimeRequiredModal(false)}
+      />
+
+      <AlertModal
+        visible={showAlreadyCreatedModal}
+        title="오류"
+        message="오늘 이미 투두리스트를 생성했습니다."
+        buttonText="확인"
+        onClose={() => setShowAlreadyCreatedModal(false)}
+      />
     </ImageBackground>
   );
 };
@@ -1103,9 +1139,10 @@ const styles = StyleSheet.create({
   emptyTodayText: {
     fontSize: typography.fontSize.sm,
     color: colors.text.secondary,
-    fontStyle: 'italic',
+    fontWeight: typography.fontWeight.medium,
     fontFamily: Platform.select({ ios: typography.fontFamily.regular, android: typography.fontFamily.regular }),
     includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
   },
 
   timeMissionItem: { flexDirection: 'column', backgroundColor: 'rgba(255, 255, 255, 0.95)', borderRadius: borderRadius.md, padding: spacing[3], marginBottom: spacing[2] },
