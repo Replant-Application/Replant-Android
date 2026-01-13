@@ -250,6 +250,16 @@ const MyProgressDetailScreen: React.FC<MyProgressDetailScreenProps> = ({ navigat
 
             {missionsLoading ? (
               <Loading text="미션을 불러오는 중..." />
+            ) : completedMissions.length === 0 ? (
+              <View style={styles.emptyContainer}>
+                <Image
+                  source={require('../../assets/images/goal.png')}
+                  style={styles.emptyIcon}
+                  resizeMode="contain"
+                />
+                <Text style={styles.emptyText}>완료한 미션이 없습니다</Text>
+                <Text style={styles.emptySubtext}>미션을 완료하면 여기에 표시됩니다!</Text>
+              </View>
             ) : (
               <>
                 <FlatList
@@ -378,6 +388,7 @@ const styles = StyleSheet.create({
   emptyContainer: {
     alignItems: 'center',
     paddingVertical: spacing[6],
+    width: '100%',
   },
   emptyIcon: {
     width: 48,
@@ -389,6 +400,7 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.base,
     color: colors.text.secondary,
     marginBottom: spacing[1],
+    textAlign: 'center',
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,
       android: typography.fontFamily.regular,
@@ -399,6 +411,7 @@ const styles = StyleSheet.create({
   emptySubtext: {
     fontSize: typography.fontSize.sm,
     color: colors.text.tertiary,
+    textAlign: 'center',
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,
       android: typography.fontFamily.regular,
@@ -457,9 +470,12 @@ const styles = StyleSheet.create({
   },
   pageContainer: {
     width: SCREEN_WIDTH - spacing[8],
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   missionList: {
     gap: spacing[2],
+    alignSelf: 'stretch',
   },
   missionItem: {
     flexDirection: 'row',
