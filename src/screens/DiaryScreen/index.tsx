@@ -105,10 +105,12 @@ const DiaryScreen: React.FC = () => {
         },
         onPanResponderGrant: (evt) => {
           if (!evt.nativeEvent || !sliderRef.current) return;
+          evt.persist(); // 이벤트 풀링 방지
           const pageX = evt.nativeEvent.pageX;
+          if (pageX == null || isNaN(pageX)) return;
           
           sliderRef.current.measure((_x, _y, width, _height, sliderPageX, _pageY) => {
-            if (!isMountedRef.current || width === 0) return;
+            if (!isMountedRef.current || width === 0 || sliderPageX == null || isNaN(sliderPageX)) return;
             const touchX = pageX - sliderPageX;
             const newValue = Math.max(0, Math.min(100, (touchX / width) * 100));
             setMoodValue(newValue);
@@ -116,10 +118,12 @@ const DiaryScreen: React.FC = () => {
         },
         onPanResponderMove: (evt) => {
           if (!evt.nativeEvent || !sliderRef.current) return;
+          evt.persist(); // 이벤트 풀링 방지
           const pageX = evt.nativeEvent.pageX;
+          if (pageX == null || isNaN(pageX)) return;
           
           sliderRef.current.measure((_x, _y, width, _height, sliderPageX, _pageY) => {
-            if (!isMountedRef.current || width === 0) return;
+            if (!isMountedRef.current || width === 0 || sliderPageX == null || isNaN(sliderPageX)) return;
             const touchX = pageX - sliderPageX;
             const newValue = Math.max(0, Math.min(100, (touchX / width) * 100));
             setMoodValue(newValue);
