@@ -130,7 +130,15 @@ const TodoListDetailScreen: React.FC<Props> = ({ navigation, route }) => {
     const isCompleting = completingMissionId === mission.missionId;
 
     return (
-      <View key={mission.id} style={styles.missionItem}>
+      <TouchableOpacity
+        style={[
+          styles.missionItem,
+          mission.isCompleted && styles.missionItemCompleted,
+        ]}
+        onPress={() => !mission.isCompleted && todoList?.status === 'ACTIVE' && handleCompleteMission(mission.missionId)}
+        disabled={mission.isCompleted || isCompleting || todoList?.status !== 'ACTIVE'}
+        activeOpacity={0.7}
+      >
         <TouchableOpacity
           style={[
             styles.missionCheckbox,
@@ -157,43 +165,17 @@ const TodoListDetailScreen: React.FC<Props> = ({ navigation, route }) => {
               styles.missionTitle,
               mission.isCompleted && styles.missionTitleCompleted,
             ]}
+            numberOfLines={1}
           >
             {mission.title}
           </Text>
-          <Text style={styles.missionDescription} numberOfLines={2}>
-            {mission.description}
-          </Text>
-          <View style={styles.missionMeta}>
-            <View style={[
-              styles.sourceTag,
-              mission.missionSource === 'RANDOM_OFFICIAL' && styles.sourceTagOfficial,
-            ]}>
-              <Text style={[
-                styles.sourceTagText,
-                mission.missionSource === 'RANDOM_OFFICIAL' && styles.sourceTagTextOfficial,
-              ]}>
-                {mission.missionSource === 'RANDOM_OFFICIAL' ? '공식' : '선택'}
-              </Text>
-            </View>
-            {mission.completedAt && (
-              <Text style={styles.completedDate}>
-                {new Date(mission.completedAt).toLocaleDateString('ko-KR')} 완료
-              </Text>
-            )}
-          </View>
+          {mission.description && (
+            <Text style={styles.missionDescription} numberOfLines={1}>
+              {mission.description}
+            </Text>
+          )}
         </View>
-
-        {!mission.isCompleted && todoList?.status === 'ACTIVE' && (
-          <TouchableOpacity
-            style={styles.completeButton}
-            onPress={() => handleCompleteMission(mission.missionId)}
-            disabled={isCompleting}
-            activeOpacity={0.7}
-          >
-            <Text style={styles.completeButtonText}>완료</Text>
-          </TouchableOpacity>
-        )}
-      </View>
+      </TouchableOpacity>
     );
   };
 
@@ -263,7 +245,9 @@ const TodoListDetailScreen: React.FC<Props> = ({ navigation, route }) => {
         {/* 상단 정보 카드 */}
         <View style={styles.infoCard}>
           <View style={styles.infoHeader}>
-            <Text style={styles.infoTitle}>{todoList.title}</Text>
+            <Text style={styles.infoTitle} numberOfLines={1}>
+              {todoList.title}
+            </Text>
             <View style={[
               styles.statusBadge,
               todoList.status === 'COMPLETED' && styles.statusBadgeCompleted,
@@ -279,10 +263,6 @@ const TodoListDetailScreen: React.FC<Props> = ({ navigation, route }) => {
               </Text>
             </View>
           </View>
-
-          {todoList.description && (
-            <Text style={styles.infoDescription}>{todoList.description}</Text>
-          )}
 
           {/* 진행률 */}
           <View style={styles.progressSection}>
@@ -300,30 +280,33 @@ const TodoListDetailScreen: React.FC<Props> = ({ navigation, route }) => {
               />
             </View>
             <Text style={styles.progressCount}>
-              {todoList.completedCount}/{todoList.totalCount} 미션 완료
+              {todoList.completedCount}/{todoList.totalCount} 완료
             </Text>
           </View>
 
-          {/* 새 투두리스트 생성 버튼 (항상 생성 가능) */}
+          {/* 새 투두리스트 생성 버튼 */}
           {canCreate && todoList.status === 'ACTIVE' && (
             <TouchableOpacity
               style={styles.createNewButton}
               onPress={handleCreateNew}
               activeOpacity={0.7}
             >
-              <Text style={styles.createNewButtonIcon}>+</Text>
-              <Text style={styles.createNewButtonText}>새 투두리스트 만들기</Text>
+              <Text style={styles.createNewButtonText}>+ 새 투두리스트</Text>
             </TouchableOpacity>
           )}
         </View>
 
         {/* 미션 목록 */}
         <View style={styles.missionSection}>
-          <Text style={styles.sectionTitle}>미션 목록</Text>
           {todoList.missions && todoList.missions.length > 0 ? (
             todoList.missions
               .sort((a, b) => a.displayOrder - b.displayOrder)
-              .map(renderMissionItem)
+              .map((mission, index, array) => (
+                <View key={mission.id}>
+                  {renderMissionItem(mission)}
+                  {index < array.length - 1 && <View style={styles.missionDivider} />}
+                </View>
+              ))
           ) : (
             <View style={styles.emptyMissions}>
               <Text style={styles.emptyMissionsText}>미션이 없습니다</Text>
@@ -380,11 +363,11 @@ const styles = StyleSheet.create({
   infoHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: spacing[2],
+    alignItems: 'center',
+    marginBottom: spacing[4],
   },
   infoTitle: {
-    fontSize: typography.fontSize.xl,
+    fontSize: typography.fontSize.lg,
     fontWeight: typography.fontWeight.bold,
     color: colors.text.primary,
     flex: 1,
@@ -455,30 +438,24 @@ const styles = StyleSheet.create({
   progressCount: {
     fontSize: typography.fontSize.xs,
     color: colors.text.tertiary,
-    marginTop: spacing[2],
+    marginTop: spacing[1.5],
     textAlign: 'center',
   },
   createNewButton: {
-    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#E3F2FD',
+    backgroundColor: colors.primary[50],
     borderRadius: borderRadius.md,
-    padding: spacing[3],
+    paddingVertical: spacing[3],
+    paddingHorizontal: spacing[4],
     marginTop: spacing[4],
     borderWidth: 1,
-    borderColor: '#42A5F5',
-  },
-  createNewButtonIcon: {
-    fontSize: 20,
-    color: '#1976D2',
-    marginRight: spacing[2],
-    fontWeight: typography.fontWeight.normal,
+    borderColor: colors.primary[300],
   },
   createNewButtonText: {
     fontSize: typography.fontSize.sm,
-    color: '#1565C0',
-    fontWeight: typography.fontWeight.semibold,
+    color: colors.primary[700],
+    fontWeight: typography.fontWeight.medium,
   },
   missionSection: {
     backgroundColor: colors.white,
@@ -490,29 +467,29 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 3,
   },
-  sectionTitle: {
-    fontSize: typography.fontSize.lg,
-    fontWeight: typography.fontWeight.bold,
-    color: colors.text.primary,
-    marginBottom: spacing[4],
-  },
   missionItem: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
+    alignItems: 'center',
     paddingVertical: spacing[3],
-    borderBottomWidth: 1,
-    borderBottomColor: colors.gray[100],
+    paddingHorizontal: spacing[2],
+  },
+  missionItemCompleted: {
+    opacity: 0.6,
+  },
+  missionDivider: {
+    height: 1,
+    backgroundColor: colors.gray[100],
+    marginLeft: spacing[11],
   },
   missionCheckbox: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
+    width: 24,
+    height: 24,
+    borderRadius: 12,
     borderWidth: 2,
     borderColor: colors.gray[300],
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: spacing[3],
-    marginTop: 2,
   },
   missionCheckboxCompleted: {
     borderColor: '#4CAF50',
@@ -530,7 +507,7 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.base,
     fontWeight: typography.fontWeight.medium,
     color: colors.text.primary,
-    marginBottom: spacing[1],
+    marginBottom: spacing[0.5],
   },
   missionTitleCompleted: {
     color: colors.text.secondary,
@@ -539,46 +516,7 @@ const styles = StyleSheet.create({
   missionDescription: {
     fontSize: typography.fontSize.sm,
     color: colors.text.secondary,
-    marginBottom: spacing[2],
     lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
-  },
-  missionMeta: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  sourceTag: {
-    paddingVertical: 2,
-    paddingHorizontal: spacing[2],
-    borderRadius: borderRadius.sm,
-    backgroundColor: colors.gray[200],
-    marginRight: spacing[2],
-  },
-  sourceTagOfficial: {
-    backgroundColor: colors.primary[100],
-  },
-  sourceTagText: {
-    fontSize: typography.fontSize.xs,
-    color: colors.text.secondary,
-    fontWeight: typography.fontWeight.medium,
-  },
-  sourceTagTextOfficial: {
-    color: colors.primary[700],
-  },
-  completedDate: {
-    fontSize: typography.fontSize.xs,
-    color: colors.text.tertiary,
-  },
-  completeButton: {
-    backgroundColor: colors.primary[500],
-    paddingVertical: spacing[1.5],
-    paddingHorizontal: spacing[3],
-    borderRadius: borderRadius.md,
-    marginLeft: spacing[2],
-  },
-  completeButtonText: {
-    fontSize: typography.fontSize.sm,
-    color: colors.white,
-    fontWeight: typography.fontWeight.medium,
   },
   emptyMissions: {
     alignItems: 'center',

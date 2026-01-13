@@ -26,6 +26,7 @@ import { colors, spacing, typography, borderRadius } from '../../utils/designTok
 import { getOptimizedLineHeight } from '../../utils/textStyles';
 import { SCREEN_NAMES } from '../../utils/constants';
 import { useSse } from '../../contexts/SseContext';
+import { useOverlay } from '../../contexts/OverlayContext';
 import { NotificationScreenProps } from './NotificationScreen.types';
 import SwipeableNotificationItem from './SwipeableNotificationItem';
 
@@ -35,6 +36,7 @@ const NotificationScreen: React.FC<NotificationScreenProps> = ({ navigation }) =
   const [refreshing, setRefreshing] = useState(false);
   const [filter, setFilter] = useState<'all' | 'unread'>('all');
   const { lastNotification } = useSse();
+  const { setUnreadNotificationCount } = useOverlay();
   const lastNotificationIdRef = useRef<any>(null);
 
   const fetchNotifications = useCallback(async (isRefresh: boolean = false) => {
@@ -49,6 +51,11 @@ const NotificationScreen: React.FC<NotificationScreenProps> = ({ navigation }) =
       const result = await getNotifications({ isRead: filter === 'unread' ? false : undefined });
       
       if (result.success && result.data) {
+        // 서버에서 받은 읽지 않은 알림 개수로 배지 카운트 업데이트
+        const unreadCount = result.data.unreadCount || 0;
+        setUnreadNotificationCount(unreadCount);
+        console.log('[NotificationScreen] 읽지 않은 알림 개수 업데이트:', unreadCount);
+        
         // ID 기준으로 중복 제거
         const notificationsList = result.data.content || [];
         console.log('[NotificationScreen] 받은 알림 개수:', notificationsList.length);
@@ -118,7 +125,7 @@ const NotificationScreen: React.FC<NotificationScreenProps> = ({ navigation }) =
       setLoading(false);
       setRefreshing(false);
     }
-  }, [filter]);
+  }, [filter, setUnreadNotificationCount]);
 
   useEffect(() => {
     fetchNotifications();
@@ -221,10 +228,18 @@ const NotificationScreen: React.FC<NotificationScreenProps> = ({ navigation }) =
 
   const handleMarkAsRead = async (notificationId: number) => {
     try {
+      const notification = notifications.find(n => n.id === notificationId);
+      const wasUnread = notification && !notification.isRead;
+      
       await markNotificationAsRead(notificationId);
       setNotifications(prev =>
         prev.map(n => n.id === notificationId ? { ...n, isRead: true } : n)
       );
+      
+      // 읽지 않은 알림이었으면 카운트 감소
+      if (wasUnread) {
+        setUnreadNotificationCount((prev: number) => Math.max(0, prev - 1));
+      }
     } catch (error) {
       console.error('읽음 처리 실패:', error);
     }
@@ -260,12 +275,48 @@ const NotificationScreen: React.FC<NotificationScreenProps> = ({ navigation }) =
   };
 
   const handleNotificationPress = async (notification: NotificationType) => {
+    console.log('[NotificationScreen] ========== 알림 클릭 ==========');
+    console.log('[NotificationScreen] 알림 전체:', JSON.stringify(notification, null, 2));
+    console.log('[NotificationScreen] referenceType:', notification.referenceType);
+    console.log('[NotificationScreen] type:', notification.type);
+    console.log('[NotificationScreen] title:', notification.title);
+    console.log('[NotificationScreen] content:', notification.content);
+    console.log('[NotificationScreen] =================================');
+    
     // 읽음 처리
     if (!notification.isRead) {
       await handleMarkAsRead(notification.id);
     }
 
-    const { referenceType, referenceId } = notification;
+    const { referenceType, referenceId, type, title, content } = notification;
+
+    // 투두리스트 작성 알림 체크
+    // 1. referenceType이 TODO_LIST인 경우
+    // 2. 타입이 SYSTEM이고 제목 또는 내용에 "투두리스트"가 포함된 경우
+    const titleLower = (title || '').toLowerCase();
+    const contentLower = (content || '').toLowerCase();
+    const isTodoNotification = 
+      referenceType === 'TODO_LIST' ||
+      referenceType === 'TODOLIST' ||
+      (type === 'SYSTEM' && (
+        titleLower.includes('투두리스트') || 
+        titleLower.includes('투두') || 
+        titleLower.includes('todo') ||
+        contentLower.includes('투두리스트') ||
+        contentLower.includes('투두') ||
+        contentLower.includes('todo')
+      ));
+
+    if (isTodoNotification) {
+      console.log('[NotificationScreen] ✅ 투두리스트 작성 알림 클릭, 투두리스트 작성 화면으로 이동');
+      try {
+        navigation.navigate(SCREEN_NAMES.TODO_LIST_CREATE as any);
+        console.log('[NotificationScreen] ✅ 네비게이션 성공');
+      } catch (error) {
+        console.error('[NotificationScreen] ❌ 네비게이션 실패:', error);
+      }
+      return;
+    }
 
     // 알림 타입에 따라 해당 화면으로 이동
     switch (referenceType) {
@@ -302,6 +353,17 @@ const NotificationScreen: React.FC<NotificationScreenProps> = ({ navigation }) =
       case 'USER_MISSION':
         // 유저 미션 관련 알림 (인증 승인 등) - 미션 화면으로 이동
         navigation.navigate(SCREEN_NAMES.MISSION as any);
+        break;
+      case 'TODO_LIST':
+      case 'TODOLIST':
+        // 투두리스트 관련 알림
+        if (referenceId) {
+          navigation.navigate(SCREEN_NAMES.TODO_LIST_DETAIL as any, {
+            todoListId: String(referenceId),
+          });
+        } else {
+          navigation.navigate(SCREEN_NAMES.TODO_LIST_CREATE as any);
+        }
         break;
       case 'RECOMMENDATION':
         navigation.navigate(SCREEN_NAMES.CONNECTIONS as any);

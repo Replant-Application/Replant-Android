@@ -76,16 +76,15 @@ const TodoListCreateScreen: React.FC<Props> = ({ navigation }) => {
     setSelectedCustomMissions((prev) => {
       if (prev.includes(missionId)) {
         return prev.filter((id) => id !== missionId);
-      } else if (prev.length < 2) {
+      } else {
         return [...prev, missionId];
       }
-      return prev;
     });
   };
 
   const handleCreate = async () => {
-    if (selectedCustomMissions.length !== 2) {
-      Alert.alert('알림', '커스텀 미션을 2개 선택해주세요.');
+    if (selectedCustomMissions.length === 0) {
+      Alert.alert('알림', '최소 1개 이상의 미션을 자유롭게 추가해주세요.');
       return;
     }
 
@@ -120,16 +119,18 @@ const TodoListCreateScreen: React.FC<Props> = ({ navigation }) => {
   };
 
   const renderIntroStep = () => (
-    <View style={styles.stepContainer}>
+    <View style={styles.introContainer}>
       <View style={styles.introContent}>
-        <Text style={styles.introIcon}>📋</Text>
+        <View style={styles.introIconContainer}>
+          <Text style={styles.introIcon}>📋</Text>
+        </View>
         <Text style={styles.introTitle}>새 투두리스트 만들기</Text>
-        <Text style={styles.introDescription}>
-          투두리스트는 총 5개의 미션으로 구성됩니다.{'\n\n'}
-          • 3개의 공식 미션이 랜덤으로 배정됩니다{'\n'}
-          • 2개의 미션은 직접 선택할 수 있습니다{'\n\n'}
-          80% 이상 완료하면 새로운 투두리스트를 만들 수 있습니다!
-        </Text>
+        <View style={styles.introDescriptionContainer}>
+          <Text style={styles.introDescription}>
+            3개의 공식 미션이 랜덤으로 배정되고{'\n'}
+            나머지는 자유롭게 작성할 수 있습니다
+          </Text>
+        </View>
       </View>
 
       <TouchableOpacity
@@ -145,9 +146,9 @@ const TodoListCreateScreen: React.FC<Props> = ({ navigation }) => {
   const renderRandomStep = () => (
     <View style={styles.stepContainer}>
       <View style={styles.stepHeader}>
-        <Text style={styles.stepTitle}>1단계: 랜덤 미션 확인</Text>
+        <Text style={styles.stepTitle}>공식 미션</Text>
         <Text style={styles.stepSubtitle}>
-          다음 3개의 공식 미션이 배정되었습니다
+          3개의 공식 미션이 배정되었습니다
         </Text>
       </View>
 
@@ -201,9 +202,9 @@ const TodoListCreateScreen: React.FC<Props> = ({ navigation }) => {
   const renderCustomStep = () => (
     <View style={styles.stepContainer}>
       <View style={styles.stepHeader}>
-        <Text style={styles.stepTitle}>2단계: 커스텀 미션 선택</Text>
+        <Text style={styles.stepTitle}>미션 추가</Text>
         <Text style={styles.stepSubtitle}>
-          2개의 미션을 선택해주세요 ({selectedCustomMissions.length}/2)
+          원하는 미션을 자유롭게 선택해주세요 ({selectedCustomMissions.length}개 선택됨)
         </Text>
       </View>
 
@@ -272,10 +273,10 @@ const TodoListCreateScreen: React.FC<Props> = ({ navigation }) => {
           style={[
             styles.primaryButton,
             styles.buttonFlex,
-            selectedCustomMissions.length !== 2 && styles.buttonDisabled,
+            selectedCustomMissions.length === 0 && styles.buttonDisabled,
           ]}
           onPress={() => setCurrentStep('confirm')}
-          disabled={selectedCustomMissions.length !== 2}
+          disabled={selectedCustomMissions.length === 0}
           activeOpacity={0.7}
         >
           <Text style={styles.primaryButtonText}>다음</Text>
@@ -292,9 +293,9 @@ const TodoListCreateScreen: React.FC<Props> = ({ navigation }) => {
     return (
       <View style={styles.stepContainer}>
         <View style={styles.stepHeader}>
-          <Text style={styles.stepTitle}>3단계: 투두리스트 생성</Text>
+          <Text style={styles.stepTitle}>투두리스트 생성</Text>
           <Text style={styles.stepSubtitle}>
-            투두리스트 정보를 입력하고 생성하세요
+            정보를 입력하고 생성하세요
           </Text>
         </View>
 
@@ -325,9 +326,11 @@ const TodoListCreateScreen: React.FC<Props> = ({ navigation }) => {
           </View>
 
           <View style={styles.summarySection}>
-            <Text style={styles.summaryTitle}>선택된 미션 (총 5개)</Text>
+            <Text style={styles.summaryTitle}>
+              선택된 미션 (총 {3 + selectedMissions.length}개)
+            </Text>
 
-            <Text style={styles.summarySubtitle}>랜덤 배정 미션 (3개)</Text>
+            <Text style={styles.summarySubtitle}>공식 미션 (3개)</Text>
             {randomMissions.map((mission, index) => (
               <View key={mission.id} style={styles.summaryMission}>
                 <Text style={styles.summaryMissionNumber}>{index + 1}.</Text>
@@ -335,13 +338,19 @@ const TodoListCreateScreen: React.FC<Props> = ({ navigation }) => {
               </View>
             ))}
 
-            <Text style={styles.summarySubtitle}>직접 선택 미션 (2개)</Text>
-            {selectedMissions.map((mission, index) => (
-              <View key={mission.id} style={styles.summaryMission}>
-                <Text style={styles.summaryMissionNumber}>{index + 4}.</Text>
-                <Text style={styles.summaryMissionTitle}>{mission.title}</Text>
-              </View>
-            ))}
+            {selectedMissions.length > 0 && (
+              <>
+                <Text style={styles.summarySubtitle}>
+                  추가 미션 ({selectedMissions.length}개)
+                </Text>
+                {selectedMissions.map((mission, index) => (
+                  <View key={mission.id} style={styles.summaryMission}>
+                    <Text style={styles.summaryMissionNumber}>{index + 4}.</Text>
+                    <Text style={styles.summaryMissionTitle}>{mission.title}</Text>
+                  </View>
+                ))}
+              </>
+            )}
           </View>
         </ScrollView>
 
@@ -419,59 +428,34 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  progressIndicator: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  introContainer: {
+    flex: 1,
+    padding: spacing[5],
     justifyContent: 'center',
-    paddingVertical: spacing[4],
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
-    marginHorizontal: spacing[4],
-    marginTop: spacing[2],
-    borderRadius: borderRadius.lg,
-    borderWidth: 1,
-    borderColor: '#D4A574',
   },
-  progressStep: {
-    flexDirection: 'row',
+  introContent: {
     alignItems: 'center',
+    marginBottom: spacing[8],
   },
-  progressDot: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: colors.gray[300],
+  introIconContainer: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    backgroundColor: colors.primary[50],
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  progressDotActive: {
-    backgroundColor: colors.primary[500],
-  },
-  progressDotCompleted: {
-    backgroundColor: '#4CAF50',
-  },
-  progressDotCheck: {
-    color: colors.white,
-    fontSize: 14,
-    fontWeight: typography.fontWeight.bold,
-  },
-  progressLine: {
-    width: 40,
-    height: 2,
-    backgroundColor: colors.gray[300],
-    marginHorizontal: spacing[1],
-  },
-  progressLineCompleted: {
-    backgroundColor: '#4CAF50',
+    marginBottom: spacing[6],
   },
   stepContainer: {
     flex: 1,
     padding: spacing[4],
   },
   stepHeader: {
-    marginBottom: spacing[4],
+    marginBottom: spacing[5],
+    paddingHorizontal: spacing[1],
   },
   stepTitle: {
-    fontSize: typography.fontSize.xl,
+    fontSize: typography.fontSize['2xl'],
     fontWeight: typography.fontWeight.bold,
     color: colors.text.primary,
     marginBottom: spacing[2],
@@ -481,28 +465,28 @@ const styles = StyleSheet.create({
     color: colors.text.secondary,
     lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
   },
-  introContent: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: spacing[4],
-  },
   introIcon: {
     fontSize: 64,
-    marginBottom: spacing[6],
   },
   introTitle: {
     fontSize: typography.fontSize['2xl'],
     fontWeight: typography.fontWeight.bold,
     color: colors.text.primary,
-    marginBottom: spacing[4],
+    marginBottom: spacing[6],
     textAlign: 'center',
   },
+  introDescriptionContainer: {
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    borderRadius: borderRadius.xl,
+    padding: spacing[5],
+    maxWidth: '100%',
+  },
   introDescription: {
-    fontSize: typography.fontSize.base,
-    color: colors.text.secondary,
+    fontSize: typography.fontSize.lg,
+    color: colors.text.primary,
     textAlign: 'center',
-    lineHeight: getOptimizedLineHeight(typography.fontSize.base) * 1.5,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.lg) * 1.4,
+    fontWeight: typography.fontWeight.medium,
   },
   loadingContainer: {
     flex: 1,
@@ -521,15 +505,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     backgroundColor: 'rgba(255, 255, 255, 0.95)',
     borderRadius: borderRadius.xl,
-    borderWidth: 2,
-    borderColor: '#D4A574',
     padding: spacing[4],
     marginBottom: spacing[3],
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 2,
   },
   missionNumber: {
     width: 28,
@@ -583,16 +565,22 @@ const styles = StyleSheet.create({
   },
   selectableMissionCard: {
     flexDirection: 'row',
-    backgroundColor: colors.white,
-    borderRadius: borderRadius.lg,
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    borderRadius: borderRadius.xl,
     padding: spacing[4],
     marginBottom: spacing[3],
-    borderWidth: 2,
-    borderColor: colors.gray[200],
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 2,
   },
   selectableMissionCardSelected: {
-    borderColor: colors.primary[500],
     backgroundColor: colors.primary[50],
+    shadowColor: colors.primary[500],
+    shadowOpacity: 0.2,
+    shadowRadius: 12,
+    elevation: 4,
   },
   checkbox: {
     width: 24,
@@ -626,23 +614,31 @@ const styles = StyleSheet.create({
     marginBottom: spacing[2],
   },
   textInput: {
-    backgroundColor: colors.white,
-    borderRadius: borderRadius.md,
-    padding: spacing[3],
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    borderRadius: borderRadius.lg,
+    padding: spacing[4],
     fontSize: typography.fontSize.base,
     color: colors.text.primary,
-    borderWidth: 1,
-    borderColor: colors.gray[300],
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 1,
   },
   textArea: {
     height: 100,
     textAlignVertical: 'top',
   },
   summarySection: {
-    backgroundColor: colors.white,
-    borderRadius: borderRadius.lg,
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    borderRadius: borderRadius.xl,
     padding: spacing[4],
     marginBottom: spacing[4],
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 2,
   },
   summaryTitle: {
     fontSize: typography.fontSize.base,
@@ -680,12 +676,17 @@ const styles = StyleSheet.create({
   },
   primaryButton: {
     backgroundColor: colors.primary[500],
-    borderRadius: borderRadius.md,
-    paddingVertical: spacing[3],
+    borderRadius: borderRadius.xl,
+    paddingVertical: spacing[4],
     paddingHorizontal: spacing[6],
     alignItems: 'center',
     justifyContent: 'center',
-    minHeight: 48,
+    minHeight: 56,
+    shadowColor: colors.primary[500],
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
   },
   primaryButtonText: {
     fontSize: typography.fontSize.base,

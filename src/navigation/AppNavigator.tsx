@@ -131,22 +131,46 @@ const AppNavigator = () => {
 
   // SSE 알림 수신 시 투두리스트 작성 화면으로 이동
   useEffect(() => {
+    console.log('[AppNavigator] 알림 체크:', { lastNotification: !!lastNotification, isLoggedIn });
+    
     if (!lastNotification || !isLoggedIn) {
       return;
     }
 
+    console.log('[AppNavigator] 알림 상세:', JSON.stringify(lastNotification, null, 2));
+
     // 이미 처리한 알림인지 확인
     const notificationId = lastNotification.id || lastNotification.notificationId;
     if (notificationId && notificationId === processedNotificationIdRef.current) {
+      console.log('[AppNavigator] 이미 처리한 알림:', notificationId);
       return;
     }
 
     // 투두리스트 작성 알림인지 확인
     const title = lastNotification.title || '';
-    if (title === '투두리스트 작성 알림' || title.includes('투두리스트')) {
-      console.log('[AppNavigator] 투두리스트 작성 알림 수신, 투두리스트 작성 화면으로 이동');
+    const content = lastNotification.content || '';
+    console.log('[AppNavigator] 알림 제목:', title);
+    console.log('[AppNavigator] 알림 내용:', content);
+    
+    // 제목에 "투두리스트" 또는 "todo"가 포함되어 있는지 확인 (대소문자 구분 없이)
+    const titleLower = title.toLowerCase();
+    const contentLower = content.toLowerCase();
+    const isTodoNotification = 
+      title === '투두리스트 작성 알림' || 
+      title.includes('투두리스트') ||
+      title.includes('투두') ||
+      titleLower.includes('todo') ||
+      contentLower.includes('투두리스트') ||
+      contentLower.includes('todo');
+    
+    console.log('[AppNavigator] 투두리스트 알림 여부:', isTodoNotification);
+    
+    if (isTodoNotification) {
+      console.log('[AppNavigator] ✅ 투두리스트 작성 알림 수신, 투두리스트 작성 화면으로 이동');
       processedNotificationIdRef.current = notificationId || null;
       setCurrentScreen(SCREEN_NAMES.TODO_LIST_CREATE);
+    } else {
+      console.log('[AppNavigator] ⚠️ 투두리스트 알림이 아님, 무시');
     }
   }, [lastNotification, isLoggedIn]);
 

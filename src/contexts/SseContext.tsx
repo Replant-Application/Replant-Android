@@ -9,6 +9,7 @@ import { AppState, AppStateStatus } from 'react-native';
 import { sseService } from '../services/sseService';
 import { useOverlay } from './OverlayContext';
 import { useUser } from './UserContext';
+import { getNotifications } from '../api/notificationApi';
 
 // ============================================
 // 타입 정의
@@ -99,20 +100,39 @@ export const SseProvider: React.FC<SseProviderProps> = ({ children }) => {
     setIsConnected(false);
   }, []);
 
-  // 로그인 상태 변경 시 SSE 연결/해제
+  // 초기 읽지 않은 알림 개수 로드
+  const loadInitialNotificationCount = useCallback(async () => {
+    try {
+      const result = await getNotifications({ size: 1 });
+      if (result.success && result.data) {
+        const unreadCount = result.data.unreadCount || 0;
+        console.log('[SseContext] 초기 읽지 않은 알림 개수:', unreadCount);
+        setUnreadNotificationCount(unreadCount);
+      }
+    } catch (error) {
+      console.warn('[SseContext] 초기 알림 개수 로드 실패:', error);
+    }
+  }, [setUnreadNotificationCount]);
+
+  // 로그인 상태 변경 시 SSE 연결/해제 및 초기 알림 개수 로드
   useEffect(() => {
     if (isLoggedIn) {
       console.log('[SseContext] 로그인 감지, SSE 연결 시작');
+      // 초기 알림 개수 로드
+      loadInitialNotificationCount();
+      // SSE 연결
       connect();
     } else {
       console.log('[SseContext] 로그아웃 감지, SSE 연결 해제');
       disconnect();
+      // 로그아웃 시 알림 개수 초기화
+      setUnreadNotificationCount(0);
     }
 
     return () => {
       disconnect();
     };
-  }, [isLoggedIn, connect, disconnect]);
+  }, [isLoggedIn, connect, disconnect, loadInitialNotificationCount, setUnreadNotificationCount]);
 
   // 앱 상태 변경 시 SSE 재연결
   useEffect(() => {
