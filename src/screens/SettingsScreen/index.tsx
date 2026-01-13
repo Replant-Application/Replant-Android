@@ -456,7 +456,6 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
               title="로그아웃"
               onPress={() => setShowLogoutModal(true)}
               showArrow={true}
-              danger={true}
             />
             <View style={styles.divider} />
             <SettingItem

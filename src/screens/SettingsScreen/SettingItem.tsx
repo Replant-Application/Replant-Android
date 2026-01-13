@@ -23,8 +23,7 @@ const SettingItem: React.FC<SettingItemProps> = ({
       <Image source={icon} style={styles.settingIcon} resizeMode="contain" accessibilityElementsHidden={true} />
       <Text style={[
         styles.settingItemText, 
-        danger && styles.settingItemTextDanger,
-        title === '로그아웃' && styles.settingItemTextLogout
+        danger && styles.settingItemTextDanger
       ]}>
         {title}
       </Text>
@@ -76,15 +75,6 @@ const styles = StyleSheet.create({
   },
   settingItemTextDanger: {
     color: colors.error,
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
-  },
-  settingItemTextLogout: {
-    color: colors.error[500],
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,
       android: typography.fontFamily.regular,
