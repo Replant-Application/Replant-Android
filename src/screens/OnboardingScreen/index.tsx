@@ -39,19 +39,19 @@ const ONBOARDING_SLIDES: OnboardingSlide[] = [
     id: 3,
     image: require('../../assets/images/onboarding_mission.png'),
     title: '간단한 미션으로 시작하는 변화',
-    description: '투두리스트에서 만든 미션을 수행하며 성장해요',
+    description: '계획에 맞게 미션을 수행해요',
   },
   {
     id: 4,
     image: require('../../assets/images/onboarding_community.png'),
     title: '함께 성장하는 커뮤니티',
-    description: '수행한 미션을 인증하고 공유하며 함께 성장해요',
+    description: '수행한 미션을 인증하고 공유해요',
   },
   {
     id: 5,
     image: require('../../assets/images/onboarding_diary.png'),
-    title: '하루하루를 기록하며 성장하기',
-    description: '수행한 미션을 돌아보며 감정과 생각을 정리해요',
+    title: '하루하루를 기록하며 정리하기',
+    description: '미션을 돌아보며 감정과 생각을 정리해요',
   },
 ];
 
@@ -212,7 +212,7 @@ const styles = StyleSheet.create({
   },
   skipButton: {
     position: 'absolute',
-    top: Platform.OS === 'ios' ? 50 : 40,
+    top: Platform.OS === 'ios' ? 40 : 30,
     right: spacing[6],
     zIndex: 10,
     paddingVertical: spacing[2],
@@ -235,7 +235,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     paddingHorizontal: spacing[6],
-    paddingTop: Platform.OS === 'ios' ? 110 : 100, // 건너뛰기 버튼과 제목 사이 여백 추가
+    paddingTop: Platform.OS === 'ios' ? 90 : 80, // 건너뛰기 버튼과 제목 사이 여백 추가
     paddingBottom: 0,
   },
   textContainer: {
