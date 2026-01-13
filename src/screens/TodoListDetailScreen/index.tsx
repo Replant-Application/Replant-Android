@@ -304,7 +304,7 @@ const TodoListDetailScreen: React.FC<Props> = ({ navigation, route }) => {
             </Text>
           </View>
 
-          {/* 80% 달성 시 새 투두리스트 생성 버튼 */}
+          {/* 새 투두리스트 생성 버튼 (항상 생성 가능) */}
           {canCreate && todoList.status === 'ACTIVE' && (
             <TouchableOpacity
               style={styles.createNewButton}

@@ -71,14 +71,7 @@ const TodoListScreen: React.FC<Props> = ({ navigation }) => {
   }, [loadData]);
 
   const handleCreateTodoList = () => {
-    if (canCreate && !canCreate.canCreate) {
-      Alert.alert(
-        "투두리스트 생성 불가",
-        "현재 진행 중인 투두리스트를 80% 이상 완료해야 새로운 투두리스트를 만들 수 있습니다.",
-        [{ text: "확인" }]
-      );
-      return;
-    }
+    // canCreate는 항상 true이므로 제한 없이 생성 가능
     navigation.navigate(SCREEN_NAMES.TODO_LIST_CREATE);
   };
 

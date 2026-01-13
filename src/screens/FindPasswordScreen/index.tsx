@@ -55,7 +55,7 @@ const FindPasswordScreen: React.FC<FindPasswordScreenProps> = ({ onNavigate }) =
       if (result.success && result.data) {
         // 인증번호 발송 성공 → 2단계로 이동
         setStep('verification');
-        Alert.alert('인증번호 발송', '이메일로 인증번호를 보냈습니다.','인증번호를 입력해주세요.');
+        Alert.alert('인증번호 발송', '이메일로 인증번호를 보냈습니다. 인증번호를 입력해주세요.');
       } else {
         // 에러 메시지 추출
         let errorMessage = '인증번호 발송에 실패했습니다.';
