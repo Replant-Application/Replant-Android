@@ -143,12 +143,14 @@ export const useCharacter = (): UseCharacterReturn => {
       setError((loadError as Error).message);
       setLoading(false);
     }
-  }, [selectedCharacter, currentNickname, convertReantToCharacter]);
+  }, [currentNickname, convertReantToCharacter]);
 
-  // 초기 로드
+  // 초기 로드 (currentNickname이 변경될 때만)
   useEffect(() => {
-    loadCharacters();
-  }, [loadCharacters]);
+    if (currentNickname) {
+      loadCharacters();
+    }
+  }, [currentNickname]);
 
   // 경험치 추가 (카테고리별) - 백엔드 연동
   // 주의: 미션 완료 시 백엔드에서 자동으로 경험치를 지급하므로,

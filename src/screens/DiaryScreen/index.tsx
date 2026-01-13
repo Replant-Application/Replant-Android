@@ -854,10 +854,6 @@ const DiaryScreen: React.FC = () => {
         }>
           {currentStep === 'mood' && (
             <View style={styles.moodContainer}>
-              {/* 숫자 표시 */}
-              <View style={styles.sliderValueContainer}>
-                <Text style={styles.sliderValue}>{Math.round(moodValue)}</Text>
-              </View>
               <View 
                 ref={sliderRef}
                 style={styles.sliderTrack}
@@ -1003,12 +999,12 @@ const styles = StyleSheet.create({
   modalQuestion: {
     paddingVertical: spacing[2],
     paddingHorizontal: spacing[4],
-    fontSize: typography.fontSize.base,
+    fontSize: typography.fontSize.xl,
     fontWeight: typography.fontWeight.medium,
     color: colors.white,
     textAlign: 'left',
     marginBottom: spacing[1],
-    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
+    lineHeight: getOptimizedLineHeight(typography.fontSize.xl),
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,
       android: typography.fontFamily.regular,
@@ -1045,7 +1041,7 @@ const styles = StyleSheet.create({
   },
   sliderTrack: {
     width: '100%',
-    height: 32,
+    height: 20,
     backgroundColor: 'rgba(0, 0, 0, 0.4)',
     borderRadius: borderRadius.md,
     borderWidth: 2,
@@ -1056,21 +1052,19 @@ const styles = StyleSheet.create({
   },
   sliderFill: {
     position: 'absolute',
-    height: 28,
+    height: 16,
     borderRadius: borderRadius.sm,
     left: 0,
     top: 0,
   },
   sliderThumb: {
     position: 'absolute',
-    width: 28,
-    height: 28,
+    width: 22,
+    height: 22,
     backgroundColor: colors.white,
     borderRadius: borderRadius.md,
-    marginLeft: -14,
-    top: 2,
-    borderWidth: 2,
-    borderColor: colors.primary[500],
+    marginLeft: -10,
+    top: -2,
     ...shadows.lg,
   },
   sliderLabels: {

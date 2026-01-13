@@ -104,51 +104,33 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
         if (todoListResult?.success && Array.isArray(todoListResult.data)) {
           setActiveTodoLists(todoListResult.data);
           
-          // 각 투두리스트의 상세 정보를 가져와서 미션 추출
+          // 각 투두리스트의 상세 정보를 가져와서 미션 추출 및 완료 확인 (한 번만 호출)
           const missionsByTime = new Map<string, { mission: TodoMission; todoListTitle: string }[]>();
           
-          for (const todoList of todoListResult.data) {
-            try {
-              const detailResult = await getTodoListDetail(todoList.id);
-              if (detailResult?.success && detailResult.data?.missions) {
-                for (const mission of detailResult.data.missions) {
-                  // 완료되지 않은 미션이고 시간이 설정된 경우만
-                  if (!mission.isCompleted && mission.scheduledStartTime) {
-                    const timeKey = mission.scheduledStartTime; // "09:00" 형식
-                    if (!missionsByTime.has(timeKey)) {
-                      missionsByTime.set(timeKey, []);
-                    }
-                    missionsByTime.get(timeKey)!.push({
-                      mission,
-                      todoListTitle: detailResult.data.title,
-                    });
-                  }
-                }
-              } else {
-                // 에러가 발생해도 다른 투두리스트는 계속 로드
-                console.log(`[HomeScreen] 투두리스트 ${todoList.id} 상세 정보 로드 실패:`, detailResult?.error);
-              }
-            } catch (e) {
-              // 개별 투두리스트 로드 실패는 무시하고 계속 진행
-              console.log(`[HomeScreen] 투두리스트 ${todoList.id} 상세 정보 로드 실패:`, e);
-            }
-          }
-          
-          // 시간대로 정렬 (Map을 배열로 변환하고 정렬)
-          const sortedMissionsByTime = new Map(
-            Array.from(missionsByTime.entries()).sort((a, b) => a[0].localeCompare(b[0]))
-          );
-          
-          setTodoMissionsByTime(sortedMissionsByTime);
-
-          // 투두리스트 완료 확인
           for (const todoList of todoListResult.data) {
             try {
               const detailResult = await getTodoListDetail(todoList.id);
               if (detailResult?.success && detailResult.data) {
                 const todoListDetail = detailResult.data;
                 
-                // 모든 미션이 완료되었는지 확인
+                // 미션 추출 (시간대별로 그룹화)
+                if (todoListDetail.missions) {
+                  for (const mission of todoListDetail.missions) {
+                    // 완료되지 않은 미션이고 시간이 설정된 경우만
+                    if (!mission.isCompleted && mission.scheduledStartTime) {
+                      const timeKey = mission.scheduledStartTime; // "09:00" 형식
+                      if (!missionsByTime.has(timeKey)) {
+                        missionsByTime.set(timeKey, []);
+                      }
+                      missionsByTime.get(timeKey)!.push({
+                        mission,
+                        todoListTitle: todoListDetail.title,
+                      });
+                    }
+                  }
+                }
+                
+                // 투두리스트 완료 확인
                 const allMissionsCompleted = todoListDetail.missions 
                   ? todoListDetail.missions.every(mission => mission.isCompleted)
                   : (todoListDetail.completedCount > 0 && todoListDetail.completedCount === todoListDetail.totalCount);
@@ -169,15 +151,23 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                 if (allMissionsCompleted && isTodayCreated) {
                   setCompletedTodoList(todoListDetail);
                   break; // 하나만 표시
-                } else {
-                  setCompletedTodoList(null);
                 }
+              } else {
+                // 에러가 발생해도 다른 투두리스트는 계속 로드
+                console.log(`[HomeScreen] 투두리스트 ${todoList.id} 상세 정보 로드 실패:`, detailResult?.error);
               }
             } catch (e) {
-              // 개별 투두리스트 확인 실패는 무시
-              console.log(`[HomeScreen] 투두리스트 ${todoList.id} 완료 확인 실패:`, e);
+              // 개별 투두리스트 로드 실패는 무시하고 계속 진행
+              console.log(`[HomeScreen] 투두리스트 ${todoList.id} 상세 정보 로드 실패:`, e);
             }
           }
+          
+          // 시간대로 정렬 (Map을 배열로 변환하고 정렬)
+          const sortedMissionsByTime = new Map(
+            Array.from(missionsByTime.entries()).sort((a, b) => a[0].localeCompare(b[0]))
+          );
+          
+          setTodoMissionsByTime(sortedMissionsByTime);
         } else {
           setActiveTodoLists([]);
           setTodoMissionsByTime(new Map());
