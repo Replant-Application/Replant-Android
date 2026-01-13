@@ -305,6 +305,8 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
                       accessibilityLabel="새 닉네임"
                       accessibilityHint="변경할 닉네임을 입력하세요"
                       allowFontScaling={true}
+                      multiline={false}
+                      maxLength={20}
                     />
                   </View>
                 </View>
@@ -588,6 +590,8 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.md,
     borderWidth: 1,
     borderColor: colors.border.light,
+    height: 48,
+    justifyContent: 'center',
   },
   textInput: {
     padding: spacing[3],
@@ -599,6 +603,8 @@ const styles = StyleSheet.create({
     }),
     includeFontPadding: false,
     textAlignVertical: 'center',
+    height: 48,
+    paddingVertical: 0,
   },
   nicknameActions: {
     flexDirection: 'row',
