@@ -20,6 +20,8 @@ export interface TodoMission {
   isCompleted: boolean;
   completedAt: string | null;
   missionSource: MissionSource;
+  scheduledStartTime?: string | null;
+  scheduledEndTime?: string | null;
 }
 
 export interface TodoList {
@@ -55,6 +57,7 @@ export interface TodoListCreateRequest {
   description?: string;
   randomMissionIds: number[];
   customMissionIds: number[];
+  missionSchedules?: Record<string, { startTime: string; endTime: string }>;
 }
 
 // ============================================

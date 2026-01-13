@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   View,
   Text,
@@ -21,9 +21,10 @@ import { TodoList, CanCreateResponse } from '../../types/todolist';
 
 interface Props {
   navigation: any;
+  route?: any;
 }
 
-const TodoListScreen: React.FC<Props> = ({ navigation }) => {
+const TodoListScreen: React.FC<Props> = ({ navigation, route }) => {
   const [activeTodoLists, setActiveTodoLists] = useState<TodoList[]>([]);
   const [completedTodoLists, setCompletedTodoLists] = useState<TodoList[]>([]);
   const [canCreate, setCanCreate] = useState<CanCreateResponse | null>(null);
@@ -39,8 +40,14 @@ const TodoListScreen: React.FC<Props> = ({ navigation }) => {
         canCreateNewTodoList(),
       ]);
 
+      console.log('[TodoListScreen] getActiveTodoLists 응답:', JSON.stringify(activeResult, null, 2));
+      
       if (activeResult.success && activeResult.data) {
-        setActiveTodoLists(activeResult.data);
+        console.log('[TodoListScreen] activeResult.data:', activeResult.data);
+        console.log('[TodoListScreen] activeResult.data 타입:', Array.isArray(activeResult.data) ? '배열' : typeof activeResult.data);
+        setActiveTodoLists(Array.isArray(activeResult.data) ? activeResult.data : []);
+      } else {
+        console.log('[TodoListScreen] activeResult 실패:', activeResult.error);
       }
 
       if (allResult.success && allResult.data) {
@@ -64,6 +71,18 @@ const TodoListScreen: React.FC<Props> = ({ navigation }) => {
   useEffect(() => {
     loadData();
   }, [loadData]);
+
+  // route.params.refresh가 있으면 데이터 새로고침 (약간의 딜레이를 주어 백엔드 트랜잭션 완료 대기)
+  useEffect(() => {
+    if (route?.params?.refresh) {
+      // 백엔드 트랜잭션이 완료될 시간을 주기 위해 약간의 딜레이 추가
+      const timer = setTimeout(() => {
+        console.log('[TodoListScreen] refresh 플래그 감지, 데이터 새로고침');
+        loadData();
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [route?.params?.refresh, loadData]);
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
@@ -268,7 +287,7 @@ const styles = StyleSheet.create({
   },
   createButtonTitle: {
     fontSize: typography.fontSize.base,
-    fontWeight: typography.fontWeight.semibold,
+    fontWeight: typography.fontWeight.medium,
     color: '#6B5344',
     marginBottom: spacing[1],
   },
@@ -292,7 +311,7 @@ const styles = StyleSheet.create({
   },
   cardTitle: {
     fontSize: typography.fontSize.base,
-    fontWeight: typography.fontWeight.semibold,
+    fontWeight: typography.fontWeight.medium,
     color: colors.text.primary,
     flex: 1,
     marginRight: spacing[2],
@@ -365,7 +384,7 @@ const styles = StyleSheet.create({
   },
   progressPercent: {
     fontSize: typography.fontSize.sm,
-    fontWeight: typography.fontWeight.bold,
+    fontWeight: typography.fontWeight.medium,
     color: '#6B5344',
   },
   emptyContainer: {

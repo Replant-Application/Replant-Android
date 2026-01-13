@@ -490,7 +490,7 @@ const AppNavigator = () => {
       case 'RoutineSetting':
         return <RoutineSettingScreen navigation={navigation} />;
       case SCREEN_NAMES.TODO_LIST:
-        return <TodoListScreen navigation={navigation} />;
+        return <TodoListScreen navigation={navigation} route={route} />;
       case SCREEN_NAMES.TODO_LIST_CREATE:
         return <TodoListCreateScreen navigation={navigation} />;
       case SCREEN_NAMES.TODO_LIST_DETAIL:

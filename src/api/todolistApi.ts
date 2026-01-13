@@ -113,7 +113,7 @@ export const initTodoList = async (): Promise<ServiceResult<TodoListInitResponse
 };
 
 /**
- * 선택 가능한 커스텀 미션 목록 조회
+ * 선택 가능한 미션 목록 조회 (공식 + 커스텀)
  * GET /api/todolists/selectable-missions
  */
 export const getSelectableMissions = async (): Promise<ServiceResult<MissionSimple[]>> => {
@@ -131,8 +131,8 @@ export const createTodoList = async (
 };
 
 /**
- * 내 투두리스트 목록 조회
- * GET /api/todolists
+ * 전체 투두리스트 목록 조회 (페이징)
+ * GET /api/todolists?page=0&size=20
  */
 export const getTodoLists = async (
   page: number = 0,
@@ -142,7 +142,7 @@ export const getTodoLists = async (
 };
 
 /**
- * 활성 투두리스트 목록 조회
+ * 진행중 투두리스트 목록 조회 (진행중 탭)
  * GET /api/todolists/active
  */
 export const getActiveTodoLists = async (): Promise<ServiceResult<TodoList[]>> => {
@@ -150,13 +150,36 @@ export const getActiveTodoLists = async (): Promise<ServiceResult<TodoList[]>> =
 };
 
 /**
- * 투두리스트 상세 조회
+ * 완료된 투두리스트 목록 조회 (완료 탭)
+ * GET /api/todolists/completed
+ */
+export const getCompletedTodoLists = async (
+  page: number = 0,
+  size: number = 20
+): Promise<ServiceResult<{ content: TodoList[]; totalPages: number; totalElements: number }>> => {
+  return apiClient.get(`/todolists/completed?page=${page}&size=${size}`);
+};
+
+/**
+ * 투두리스트 상세 조회 (시간대 포함)
  * GET /api/todolists/{todoListId}
  */
 export const getTodoListDetail = async (
   todoListId: number
 ): Promise<ServiceResult<TodoList>> => {
   return apiClient.get<TodoList>(`/todolists/${todoListId}`);
+};
+
+/**
+ * 미션 시간대 수정
+ * PATCH /api/todolists/{todoListId}/missions/{missionId}/schedule
+ */
+export const updateMissionSchedule = async (
+  todoListId: number,
+  missionId: number,
+  data: { startTime: string; endTime: string }
+): Promise<ServiceResult<TodoList>> => {
+  return apiClient.patch<TodoList>(`/todolists/${todoListId}/missions/${missionId}/schedule`, data);
 };
 
 /**

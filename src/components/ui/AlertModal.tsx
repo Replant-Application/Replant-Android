@@ -81,8 +81,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.gray[800],
     borderRadius: borderRadius.xl,
     padding: spacing[6],
-    width: '80%',
-    maxWidth: 400,
+    width: 350,
   },
   iconContainer: {
     alignItems: 'center',

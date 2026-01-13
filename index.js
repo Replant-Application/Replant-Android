@@ -1,12 +1,26 @@
 import { registerRootComponent } from 'expo';
 import React, { useEffect, useState } from 'react';
-import { View, ActivityIndicator } from 'react-native';
+import { View, ActivityIndicator, LogBox } from 'react-native';
 import { useFonts } from 'expo-font';
 import AppNavigator from './src/navigation/AppNavigator';
 import { UserProvider } from './src/contexts/UserContext';
 import { OverlayProvider } from './src/contexts/OverlayContext';
 import { SseProvider } from './src/contexts/SseContext';
 import { initializeAmplitude } from './src/services/amplitudeService';
+
+// ExoPlayer 스레드 에러는 무시 (앱 종료 시 발생하는 알려진 이슈)
+if (LogBox) {
+  LogBox.ignoreLogs([
+    /Player is accessed on the wrong thread/i,
+    /wrong thread/i,
+    /mqt_native_modules/i,
+    /onHostDestroy/i,
+    /ExoPlayerImpl/i,
+    /AVManager/i,
+    /SimpleExoPlayer/i,
+    /verifyApplicationThread/i,
+  ]);
+}
 
 function App() {
   // 폰트 로딩 (에러가 발생해도 계속 진행)

@@ -129,7 +129,14 @@ class BackgroundMusicService {
           }
         } catch (error: any) {
           // ExoPlayer 스레드 에러는 무시 (앱 종료 시 발생할 수 있는 알려진 이슈)
-          if (!error?.message?.includes('wrong thread')) {
+          const errorMessage = error?.message || error?.toString() || '';
+          const isThreadError = 
+            errorMessage.includes('wrong thread') ||
+            errorMessage.includes('mqt_native_modules') ||
+            errorMessage.includes('onHostDestroy') ||
+            errorMessage.includes('ExoPlayerImpl');
+          
+          if (!isThreadError) {
             console.error('[BackgroundMusic] 정지 실패:', error);
           }
         }

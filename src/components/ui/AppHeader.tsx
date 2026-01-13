@@ -313,6 +313,7 @@ const styles = StyleSheet.create({
     height: 52,
     justifyContent: 'center',
     alignItems: 'center',
+    position: 'relative',
   },
   iconText: {
     fontSize: typography.fontSize.base,
@@ -332,8 +333,8 @@ const styles = StyleSheet.create({
   },
   notificationBadge: {
     position: 'absolute',
-    top: -4,
-    right: -4,
+    top: 2,
+    right: 2,
     backgroundColor: colors.error,
     borderRadius: borderRadius.full,
     minWidth: 20,
@@ -343,7 +344,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 5,
     borderWidth: 2.5,
     borderColor: colors.background.primary,
-    ...shadows.sm,
+    zIndex: 10,
+    elevation: 10,
   },
   badgeText: {
     color: colors.white,
