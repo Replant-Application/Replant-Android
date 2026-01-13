@@ -30,6 +30,32 @@ import { playReadBookSound, playButtonSound } from '../../utils/soundUtils';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
+// 기분 값에 따른 그라데이션 색상 계산 (0: 연한 빨강 → 100: 진한 초록)
+const getMoodColor = (value: number): string => {
+  // 0-100 값을 0-1 범위로 정규화
+  const normalized = value / 100;
+  
+  // 빨강 (0) → 노랑 (50) → 초록 (100) 그라데이션
+  // 값이 낮을수록 연하게, 높을수록 진하게
+  if (normalized < 0.5) {
+    // 0-50: 연한 빨강 → 진한 노랑
+    const t = normalized * 2; // 0-1로 변환
+    // 연한 빨강 (255, 100, 100) → 진한 노랑 (255, 200, 0)
+    const r = Math.round(255);
+    const g = Math.round(100 + (200 - 100) * t);
+    const b = Math.round(100 - 100 * t);
+    return `rgb(${r}, ${g}, ${b})`;
+  } else {
+    // 50-100: 진한 노랑 → 진한 초록
+    const t = (normalized - 0.5) * 2; // 0-1로 변환
+    // 진한 노랑 (255, 200, 0) → 진한 초록 (34, 139, 34)
+    const r = Math.round(255 - (255 - 34) * t);
+    const g = Math.round(200 - (200 - 139) * t);
+    const b = Math.round(0 + (34 - 0) * t);
+    return `rgb(${r}, ${g}, ${b})`;
+  }
+};
+
 const DiaryScreen: React.FC = () => {
   const { diaries, loading, error, saveDiary, deleteDiary, loadDiaries, getDiaryByDate } = useDiary();
   const { characters } = useCharacter();
@@ -38,7 +64,7 @@ const DiaryScreen: React.FC = () => {
   const [selectedEmotions, setSelectedEmotions] = useState<string[]>([]);
   const [selectedFactors, setSelectedFactors] = useState<string[]>([]);
   const [factorText, setFactorText] = useState('');
-  const [showCustomFactorInput, setShowCustomFactorInput] = useState(false);
+  const [emotionText, setEmotionText] = useState('');
   const [expressionText, setExpressionText] = useState('');
   const [selectedDiary, setSelectedDiary] = useState<(SimpleDiaryData & { id: string }) | null>(null);
   const [viewingDiaryIndex, setViewingDiaryIndex] = useState(0);
@@ -58,22 +84,46 @@ const DiaryScreen: React.FC = () => {
   const speechBubbleAnim = React.useRef(new Animated.Value(0)).current;
   const currentCharacter = characters.length > 0 ? characters[0] : null;
   const sliderRef = React.useRef<View>(null);
+  const isMountedRef = React.useRef(true);
+
+  // 마운트 상태 관리
+  React.useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
 
   // 슬라이더 PanResponder
   const panResponder = React.useMemo(
     () =>
       PanResponder.create({
         onStartShouldSetPanResponder: () => true,
-        onMoveShouldSetPanResponder: () => true,
-        onPanResponderGrant: () => {},
+        onMoveShouldSetPanResponder: (_, gestureState) => {
+          // 수평 드래그만 허용 (수직 스크롤 무시)
+          return Math.abs(gestureState.dx) > Math.abs(gestureState.dy);
+        },
+        onPanResponderGrant: (evt) => {
+          if (!evt.nativeEvent || !sliderRef.current) return;
+          const pageX = evt.nativeEvent.pageX;
+          
+          sliderRef.current.measure((_x, _y, width, _height, sliderPageX, _pageY) => {
+            if (!isMountedRef.current || width === 0) return;
+            const touchX = pageX - sliderPageX;
+            const newValue = Math.max(0, Math.min(100, (touchX / width) * 100));
+            setMoodValue(newValue);
+          });
+        },
         onPanResponderMove: (evt) => {
-          if (sliderRef.current) {
-            sliderRef.current.measure((_x, _y, width, _height, pageX, _pageY) => {
-              const touchX = evt.nativeEvent.pageX - pageX;
-              const newValue = Math.max(0, Math.min(100, (touchX / width) * 100));
-              setMoodValue(newValue);
-            });
-          }
+          if (!evt.nativeEvent || !sliderRef.current) return;
+          const pageX = evt.nativeEvent.pageX;
+          
+          sliderRef.current.measure((_x, _y, width, _height, sliderPageX, _pageY) => {
+            if (!isMountedRef.current || width === 0) return;
+            const touchX = pageX - sliderPageX;
+            const newValue = Math.max(0, Math.min(100, (touchX / width) * 100));
+            setMoodValue(newValue);
+          });
         },
         onPanResponderRelease: () => {},
       }),
@@ -182,11 +232,11 @@ const DiaryScreen: React.FC = () => {
       case 'mood':
         return '현재 기분이 어떤가요?';
       case 'emotions':
-        return '지금 느끼는 감정을 자세히 말해줄래요?';
+        return '지금 느끼는 감정을 선택해주세요';
       case 'factors':
-        return '감정에 영향을 준 요인이 있을까요?';
+        return '감정에 영향을 준 요인을 선택해주세요';
       case 'expression':
-        return '오늘 하루를 되돌아보면서 느낀 점을 자세히 말해줄래요?';
+        return '오늘 하루를 되돌아보면서 느낀 점을 자세히 적어볼까요?';
       case 'confirm':
         return '오늘의 감정일기가 작성됐어요!';
       default:
@@ -206,7 +256,7 @@ const DiaryScreen: React.FC = () => {
     if (currentStep === 'mood') {
       setCurrentStep('emotions');
     } else if (currentStep === 'emotions') {
-      if (selectedEmotions.length === 0) {
+      if (selectedEmotions.length === 0 && !emotionText.trim()) {
         showAlertModal('알림', '감정을 하나 이상 선택해주세요.');
         return;
       }
@@ -247,14 +297,20 @@ const DiaryScreen: React.FC = () => {
 
       // emotionFactors에 커스텀 요인 추가
       const allFactors = [...selectedFactors];
-      if (factorText.trim() && showCustomFactorInput) {
+      if (factorText.trim()) {
         allFactors.push(factorText.trim());
+      }
+
+      // emotions에 커스텀 감정 추가
+      const allEmotions = [...selectedEmotions];
+      if (emotionText.trim()) {
+        allEmotions.push(emotionText.trim());
       }
 
       const diaryData: SimpleDiaryData = {
         date: dateString,
         mood: moodValue,
-        emotions: selectedEmotions,
+        emotions: allEmotions,
         emotionFactors: allFactors,
         content: expressionText.trim(),
       };
@@ -274,7 +330,7 @@ const DiaryScreen: React.FC = () => {
         setSelectedEmotions([]);
         setSelectedFactors([]);
         setFactorText('');
-        setShowCustomFactorInput(false);
+        setEmotionText('');
         setExpressionText('');
       }, 2000);
     } catch (saveError) {
@@ -798,12 +854,22 @@ const DiaryScreen: React.FC = () => {
         }>
           {currentStep === 'mood' && (
             <View style={styles.moodContainer}>
+              {/* 숫자 표시 */}
+              <View style={styles.sliderValueContainer}>
+                <Text style={styles.sliderValue}>{Math.round(moodValue)}</Text>
+              </View>
               <View 
                 ref={sliderRef}
                 style={styles.sliderTrack}
                 {...panResponder.panHandlers}
               >
-                <View style={[styles.sliderFill, { width: `${moodValue}%` }]} />
+                <View style={[
+                  styles.sliderFill, 
+                  { 
+                    width: `${moodValue}%`,
+                    backgroundColor: getMoodColor(moodValue)
+                  }
+                ]} />
                 <View style={[styles.sliderThumb, { left: `${moodValue}%` }]} />
               </View>
               <View style={styles.sliderLabels}>
@@ -816,7 +882,9 @@ const DiaryScreen: React.FC = () => {
           {currentStep === 'emotions' && (
             <EmotionSelectionStep
               selectedEmotions={selectedEmotions}
+              customEmotion={emotionText}
               onToggleEmotion={toggleEmotion}
+              onCustomEmotionChange={setEmotionText}
             />
           )}
 
@@ -826,8 +894,6 @@ const DiaryScreen: React.FC = () => {
               customFactor={factorText}
               onToggleFactor={toggleFactor}
               onCustomFactorChange={setFactorText}
-              onShowCustomInput={() => setShowCustomFactorInput(!showCustomFactorInput)}
-              showCustomInput={showCustomFactorInput}
             />
           )} 
 
@@ -837,7 +903,7 @@ const DiaryScreen: React.FC = () => {
                 style={styles.textInput}
                 value={expressionText}
                 onChangeText={setExpressionText}
-                placeholder="자세히 입력해주세요"
+                placeholder="직접 입력하기"
                 placeholderTextColor={colors.text.tertiary}
                 multiline={true}
                 textAlignVertical="top"
@@ -873,7 +939,7 @@ const DiaryScreen: React.FC = () => {
         ) : currentStep === 'expression' ? (
           <View style={[styles.modalButtons, styles.modalButtonsExpression]}>
             <TouchableOpacity style={styles.skipButton} onPress={handleBack}>
-              <Text style={styles.skipButtonText}>취소</Text>
+              <Text style={styles.skipButtonText}>이전</Text>
             </TouchableOpacity>
             <TouchableOpacity 
               style={[styles.confirmButton, !expressionText.trim() && styles.confirmButtonDisabled]}
@@ -886,7 +952,7 @@ const DiaryScreen: React.FC = () => {
         ) : (
           <View style={styles.modalButtons}>
             <TouchableOpacity style={styles.cancelButton} onPress={handleBack}>
-              <Text style={styles.cancelButtonText}>취소</Text>
+              <Text style={styles.cancelButtonText}>이전</Text>
             </TouchableOpacity>
             <TouchableOpacity 
               style={styles.confirmButton}
@@ -921,7 +987,7 @@ const styles = StyleSheet.create({
     padding: spacing[6],
     paddingVertical: spacing[8],
     marginHorizontal: spacing[4],
-    marginTop: spacing[12],
+    marginTop: spacing[20],
     minHeight: 180,
     ...shadows.lg,
   },
@@ -936,12 +1002,13 @@ const styles = StyleSheet.create({
   },
   modalQuestion: {
     paddingVertical: spacing[2],
-    fontSize: typography.fontSize['xl'],
+    paddingHorizontal: spacing[4],
+    fontSize: typography.fontSize.base,
     fontWeight: typography.fontWeight.medium,
     color: colors.white,
     textAlign: 'left',
     marginBottom: spacing[1],
-    lineHeight: getOptimizedLineHeight(typography.fontSize['2xl']),
+    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,
       android: typography.fontFamily.regular,
@@ -956,8 +1023,8 @@ const styles = StyleSheet.create({
     minHeight: 300,
   },
   modalContentExpression: {
-    marginBottom: spacing[1],
-    flex: 1,
+    marginTop: spacing[8],
+    marginBottom: spacing[4],
     minHeight: 260,
   },
   modalButtons: {
@@ -967,35 +1034,44 @@ const styles = StyleSheet.create({
     marginTop: spacing[2],
   },
   modalButtonsExpression: {
-    marginTop: spacing[0],
+    marginTop: spacing[3],
   },
   moodContainer: {
     paddingVertical: spacing[1],
   },
+  sliderValueContainer: {
+    alignItems: 'center',
+    marginBottom: spacing[2],
+  },
   sliderTrack: {
     width: '100%',
-    height: 29,
-    backgroundColor: colors.white,
-    borderRadius: borderRadius.full,
+    height: 32,
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+    borderRadius: borderRadius.md,
+    borderWidth: 2,
+    borderColor: 'rgba(255, 255, 255, 0.3)',
     position: 'relative',
-    marginVertical: spacing[4],
+    marginVertical: spacing[3],
     justifyContent: 'center',
   },
   sliderFill: {
     position: 'absolute',
-    height: 3,
-    backgroundColor: colors.blue[500],
-    borderRadius: borderRadius.full,
+    height: 28,
+    borderRadius: borderRadius.sm,
     left: 0,
+    top: 0,
   },
   sliderThumb: {
     position: 'absolute',
-    width: 20,
-    height: 20,
-    backgroundColor: colors.blue[500],
-    borderRadius: borderRadius.full,
-    marginLeft: -12,
-    ...shadows.base,
+    width: 28,
+    height: 28,
+    backgroundColor: colors.white,
+    borderRadius: borderRadius.md,
+    marginLeft: -14,
+    top: 2,
+    borderWidth: 2,
+    borderColor: colors.primary[500],
+    ...shadows.lg,
   },
   sliderLabels: {
     flexDirection: 'row',
@@ -1013,14 +1089,17 @@ const styles = StyleSheet.create({
     includeFontPadding: false,
   },
   sliderValue: {
-    fontSize: typography.fontSize.lg,
-    fontWeight: typography.fontWeight.medium,
-    color: colors.blue[400],
+    fontSize: typography.fontSize['2xl'],
+    fontWeight: typography.fontWeight.bold,
+    color: colors.white,
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,
       android: typography.fontFamily.regular,
     }),
     includeFontPadding: false,
+    textShadowColor: 'rgba(0, 0, 0, 0.5)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 4,
   },
   emotionsContainer: {
     maxHeight: 450,
@@ -1054,7 +1133,7 @@ const styles = StyleSheet.create({
     fontWeight: typography.fontWeight.medium,
   },
   inputContainer: {
-    flex: 1,
+    width: '100%',
   },
   textInput: {
     backgroundColor: colors.gray[900],
@@ -1211,15 +1290,15 @@ const styles = StyleSheet.create({
   },
   viewContainer: {
     flex: 1,
-    paddingTop: spacing[1],
+    paddingTop: spacing[8],
     paddingHorizontal: spacing[5],
   },
   viewHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: spacing[4],
-    marginBottom: spacing[3],
+    marginTop: spacing[8],
+    marginBottom: spacing[2],
   },
   viewModeButtons: {
     flexDirection: 'row',
@@ -1253,7 +1332,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginTop: spacing[4],
+    marginTop: spacing[2],
     marginBottom: spacing[3],
     gap: spacing[2],
   },
@@ -1540,7 +1619,7 @@ const styles = StyleSheet.create({
   },
   signboardContainer: {
     alignItems: 'center',
-    marginTop: spacing[6],
+    marginTop: spacing[4],
   },
   signboard: {
     backgroundColor: colors.orange[900],
@@ -1592,7 +1671,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   signboardScrollContent: {
-    paddingBottom: spacing[5],
+    paddingBottom: spacing[2],
   },
   emotionsList: {
     flexDirection: 'row',
@@ -1645,8 +1724,8 @@ const styles = StyleSheet.create({
   detailButtons: {
     flexDirection: 'row',
     gap: spacing[3],
-    marginTop: spacing[16],
-    marginBottom: spacing[6],
+    marginTop: spacing[8],
+    marginBottom: spacing[4],
     paddingHorizontal: spacing[2],
   },
   backToListButton: {
