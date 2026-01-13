@@ -440,7 +440,6 @@ export interface MissionGroup {
 
 // Screen Names 타입
 export enum ScreenNames {
-  START = 'Start',
   NICKNAME = 'Nickname',
   HOME = 'Home',
   MISSION = 'Mission',

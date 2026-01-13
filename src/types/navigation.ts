@@ -123,7 +123,6 @@ export type RootStackParamList = {
 
 // 네비게이션 파라미터 타입
 export interface NavigationParams {
-  [ScreenNames.START]: undefined;
   [ScreenNames.NICKNAME]: undefined;
   [ScreenNames.HOME]: undefined;
   [ScreenNames.DIARY]: undefined;

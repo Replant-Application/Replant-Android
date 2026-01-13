@@ -13,7 +13,6 @@ import { playButtonSound } from '../utils/soundUtils';
 
 // 화면 컴포넌트들
 import OnboardingScreen from '../screens/OnboardingScreen';
-import StartScreen from '../screens/StartScreen';
 import SignUpScreen from '../screens/SignUpScreen';
 import LoginScreen from '../screens/LoginScreen';
 import NicknameScreen from '../screens/NicknameScreen';
@@ -299,8 +298,6 @@ const AppNavigator = () => {
       switch (currentScreen) {
         case SCREEN_NAMES.ONBOARDING:
           return <OnboardingScreen onNavigate={handleAuthNavigate} />;
-        case SCREEN_NAMES.START:
-          return <StartScreen onNavigate={handleAuthNavigate} />;
         case SCREEN_NAMES.SIGNUP:
           return <SignUpScreen onNavigate={handleAuthNavigate} />;
         case SCREEN_NAMES.LOGIN:
