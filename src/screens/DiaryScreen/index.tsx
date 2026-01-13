@@ -921,7 +921,7 @@ const styles = StyleSheet.create({
     padding: spacing[6],
     paddingVertical: spacing[8],
     marginHorizontal: spacing[4],
-    marginTop: spacing[12],
+    marginTop: spacing[20],
     minHeight: 180,
     ...shadows.lg,
   },
@@ -1211,15 +1211,15 @@ const styles = StyleSheet.create({
   },
   viewContainer: {
     flex: 1,
-    paddingTop: spacing[1],
+    paddingTop: spacing[8],
     paddingHorizontal: spacing[5],
   },
   viewHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: spacing[4],
-    marginBottom: spacing[3],
+    marginTop: spacing[8],
+    marginBottom: spacing[2],
   },
   viewModeButtons: {
     flexDirection: 'row',
@@ -1253,7 +1253,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginTop: spacing[4],
+    marginTop: spacing[2],
     marginBottom: spacing[3],
     gap: spacing[2],
   },
@@ -1540,7 +1540,7 @@ const styles = StyleSheet.create({
   },
   signboardContainer: {
     alignItems: 'center',
-    marginTop: spacing[6],
+    marginTop: spacing[4],
   },
   signboard: {
     backgroundColor: colors.orange[900],
@@ -1592,7 +1592,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   signboardScrollContent: {
-    paddingBottom: spacing[5],
+    paddingBottom: spacing[2],
   },
   emotionsList: {
     flexDirection: 'row',
@@ -1645,8 +1645,8 @@ const styles = StyleSheet.create({
   detailButtons: {
     flexDirection: 'row',
     gap: spacing[3],
-    marginTop: spacing[16],
-    marginBottom: spacing[6],
+    marginTop: spacing[8],
+    marginBottom: spacing[4],
     paddingHorizontal: spacing[2],
   },
   backToListButton: {
