@@ -56,7 +56,7 @@ const CommunityPostDetailScreen: React.FC<CommunityPostDetailScreenProps> = ({
   const [alertMessage, setAlertMessage] = useState('');
   const [currentUserId, setCurrentUserId] = useState<number | null>(null);
 
-  const isAuthor = post?.author === currentNickname;
+  const isAuthor = post?.author_nickname === currentNickname;
 
   // 현재 사용자 ID 로드
   useEffect(() => {
@@ -230,6 +230,34 @@ const CommunityPostDetailScreen: React.FC<CommunityPostDetailScreenProps> = ({
         >
           {/* 게시글 내용 */}
           <Card style={styles.postContainer}>
+          {isAuthor && (
+            <View style={styles.postActionsContainer}>
+              <TouchableOpacity
+                style={styles.postActionButton}
+                onPress={() => navigation.navigate('CommunityPostEdit', { postId: post.post_id })}
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              >
+                <Image
+                  source={require('../../assets/images/pencil.png')}
+                  style={styles.postActionIcon}
+                  resizeMode="contain"
+                />
+                <Text style={styles.postActionText}>수정</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.postActionButton}
+                onPress={handleDeletePost}
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              >
+                <Image
+                  source={require('../../assets/images/trash.png')}
+                  style={styles.postActionIcon}
+                  resizeMode="contain"
+                />
+                <Text style={[styles.postActionText, styles.postActionTextDelete]}>삭제</Text>
+              </TouchableOpacity>
+            </View>
+          )}
           <View style={styles.postHeader}>
             <View style={styles.authorInfo}>
               <View style={styles.authorAvatar}>
@@ -301,21 +329,6 @@ const CommunityPostDetailScreen: React.FC<CommunityPostDetailScreenProps> = ({
               />
               <Text style={styles.actionText}>{post.comment_count}</Text>
             </View>
-
-            {isAuthor && (
-              <TouchableOpacity
-                style={styles.actionButton}
-                onPress={() => navigation.navigate('CommunityPostEdit', { postId: post.post_id })}
-              >
-                <Text style={styles.actionText}>✏️ 수정</Text>
-              </TouchableOpacity>
-            )}
-
-            {isAuthor && (
-              <TouchableOpacity style={styles.actionButton} onPress={handleDeletePost}>
-                <Text style={[styles.actionText, styles.deleteText]}>🗑️ 삭제</Text>
-              </TouchableOpacity>
-            )}
           </View>
           </Card>
 
@@ -370,7 +383,7 @@ const CommunityPostDetailScreen: React.FC<CommunityPostDetailScreenProps> = ({
                     ) : (
                       <CommentCard
                         comment={parentComment}
-                        isAuthor={currentUserId !== null && parseInt(parentComment.author) === currentUserId}
+                        isAuthor={parentComment.author_nickname === currentNickname}
                         onEdit={handleEditComment}
                         onDelete={handleDeleteComment}
                         onReply={handleReplyComment}
@@ -420,7 +433,7 @@ const CommunityPostDetailScreen: React.FC<CommunityPostDetailScreenProps> = ({
                           ) : (
                             <CommentCard
                               comment={reply}
-                              isAuthor={currentUserId !== null && parseInt(reply.author) === currentUserId}
+                              isAuthor={reply.author_nickname === currentNickname}
                               isReply={true}
                               onEdit={handleEditComment}
                               onDelete={handleDeleteComment}
@@ -505,6 +518,7 @@ const styles = StyleSheet.create({
   postContainer: {
     marginBottom: spacing[5],
     ...shadows.sm,
+    position: 'relative',
   },
   postHeader: {
     flexDirection: 'row',
@@ -566,6 +580,45 @@ const styles = StyleSheet.create({
     }),
     includeFontPadding: false,
     lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
+  },
+  postActionsContainer: {
+    position: 'absolute',
+    bottom: spacing[4],
+    right: spacing[3],
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing[2],
+    zIndex: 10,
+  },
+  postActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing[2],
+  },
+  postActionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing[0.5],
+    paddingHorizontal: spacing[1.5],
+    paddingVertical: spacing[0.5],
+  },
+  postActionIcon: {
+    width: 14,
+    height: 14,
+  },
+  postActionText: {
+    fontSize: typography.fontSize.xs,
+    color: colors.text.secondary,
+    fontWeight: typography.fontWeight.normal,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
+  },
+  postActionTextDelete: {
+    color: colors.error,
   },
   date: {
     fontSize: typography.fontSize.xs,
@@ -741,6 +794,36 @@ const styles = StyleSheet.create({
     lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
   },
   deleteText: {
+    color: colors.error,
+  },
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing[3],
+  },
+  headerActionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing[1],
+    paddingHorizontal: spacing[2],
+    paddingVertical: spacing[1],
+  },
+  headerActionIcon: {
+    width: 16,
+    height: 16,
+  },
+  headerActionText: {
+    fontSize: typography.fontSize.xs,
+    color: colors.text.secondary,
+    fontWeight: typography.fontWeight.normal,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
+  },
+  headerActionTextDelete: {
     color: colors.error,
   },
   commentsSection: {

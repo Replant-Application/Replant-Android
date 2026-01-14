@@ -321,14 +321,8 @@ const NotificationScreen: React.FC<NotificationScreenProps> = ({ navigation }) =
     // 알림 타입에 따라 해당 화면으로 이동
     switch (referenceType) {
       case 'VERIFICATION':
-        // 인증글 상세 화면으로 이동
-        if (referenceId) {
-          navigation.navigate(SCREEN_NAMES.VERIFICATION_POST_DETAIL as any, {
-            verificationId: referenceId,
-          });
-        } else {
-          navigation.navigate(SCREEN_NAMES.COMMUNITY as any);
-        }
+        // 인증글 페이지 제거됨 - 커뮤니티로 이동
+        navigation.navigate(SCREEN_NAMES.COMMUNITY as any);
         break;
       case 'POST':
         // 커뮤니티 게시글 상세 화면으로 이동

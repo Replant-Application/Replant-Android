@@ -90,7 +90,12 @@ const CommentCard: React.FC<CommentCardProps> = ({
               onPress={() => onEdit(comment)}
               activeOpacity={0.7}
             >
-              <Text style={styles.editText}>✏️ 수정</Text>
+              <Image
+                source={require('../../assets/images/pencil.png')}
+                style={styles.actionIcon}
+                resizeMode="contain"
+              />
+              <Text style={styles.editText}>수정</Text>
             </TouchableOpacity>
           )}
 
@@ -100,7 +105,12 @@ const CommentCard: React.FC<CommentCardProps> = ({
               onPress={() => onDelete(comment.comment_id)}
               activeOpacity={0.7}
             >
-              <Text style={styles.deleteText}>🗑️ 삭제</Text>
+              <Image
+                source={require('../../assets/images/trash.png')}
+                style={styles.actionIcon}
+                resizeMode="contain"
+              />
+              <Text style={styles.deleteText}>삭제</Text>
             </TouchableOpacity>
           )}
 
@@ -266,6 +276,11 @@ const styles = StyleSheet.create({
     width: 12,
     height: 12,
     marginRight: spacing[1],
+  },
+  actionIcon: {
+    width: 14,
+    height: 14,
+    marginRight: spacing[0.5],
   },
   replyText: {
     fontSize: typography.fontSize.xs,

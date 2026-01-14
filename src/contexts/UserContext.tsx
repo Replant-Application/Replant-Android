@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useMemo, useCallback, ReactNode } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import messaging from '@react-native-firebase/messaging';
 import { getStorageKeys, initializeUserData } from '../services';
 import { getDeviceId } from '../services/storage';
 import { logError, logUserAction } from '../utils/logger';
@@ -9,6 +10,7 @@ import { checkAutoLogin, getUserInfo, clearAuthData, saveUserInfo } from '../uti
 import { apiClient } from '../api/client';
 import { initializeGoogleSignIn } from '../services/googleSignIn';
 import { updateMyInfo } from '../api/userApi';
+import { registerFcmToken } from '../api/notificationApi';
 
 // UserContext 타입 정의
 interface UserContextType {
@@ -88,6 +90,12 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         setUser(userData);
         setCurrentNickname(nickname);
         setIsLoading(false);
+        
+        // 자동 로그인 성공 시 FCM 토큰 등록
+        registerFcmTokenToServer().catch(err => {
+          console.warn('[UserContext] FCM 토큰 등록 실패 (앱은 정상 작동):', err);
+        });
+        
         return;
       }
 
@@ -134,6 +142,70 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     }
   };
 
+  // FCM 토큰 등록 함수
+  const registerFcmTokenToServer = useCallback(async () => {
+    try {
+      // Firebase Messaging이 사용 가능한지 확인
+      const authStatus = await messaging().requestPermission();
+      const enabled =
+        authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+        authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+
+      if (!enabled) {
+        console.warn('[!] FCM 권한이 없습니다. 알림 권한을 확인해주세요.');
+        return;
+      }
+
+      const fcmToken = await messaging().getToken();
+      console.log('[+] FCM Token :: ', fcmToken);
+      
+      // 백엔드에 FCM 토큰 등록
+      if (fcmToken) {
+        const result = await registerFcmToken(fcmToken);
+        if (result.success) {
+          console.log('[+] FCM 토큰 등록 성공:', result.data);
+        } else {
+          console.warn('[!] FCM 토큰 등록 실패:', result.error);
+        }
+      }
+    } catch (error: any) {
+      // SERVICE_NOT_AVAILABLE 에러는 에뮬레이터에서 흔히 발생
+      if (error?.code === 'messaging/unknown' || error?.message?.includes('SERVICE_NOT_AVAILABLE')) {
+        console.log('[!] FCM 서비스 사용 불가 (에뮬레이터일 수 있음). 실제 기기에서 테스트해주세요.');
+      } else {
+        console.error('FCM Token 등록 실패:', error);
+      }
+    }
+  }, []);
+
+  // FCM 토큰 갱신 리스너 설정
+  useEffect(() => {
+    // 로그인 상태일 때만 토큰 갱신 리스너 등록
+    if (!currentNickname) {
+      return;
+    }
+
+    const unsubscribe = messaging().onTokenRefresh(async (fcmToken) => {
+      console.log('[+] FCM 토큰 갱신됨:', fcmToken);
+      
+      // 서버에 업데이트
+      try {
+        const result = await registerFcmToken(fcmToken);
+        if (result.success) {
+          console.log('[+] FCM 토큰 갱신 및 등록 성공:', result.data);
+        } else {
+          console.warn('[!] FCM 토큰 갱신 등록 실패:', result.error);
+        }
+      } catch (error) {
+        console.error('[!] FCM 토큰 갱신 등록 중 오류:', error);
+      }
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, [currentNickname]);
+
   // 사용자 로그인 (인증 없이 닉네임만으로)
   const login = useCallback(async (nickname: string) => {
     logUserAction('login_attempt', { nickname });
@@ -163,6 +235,12 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         setUser(existingUserData);
         setCurrentNickname(nickname);
         logUserAction('login_success', { nickname, userId: existingUserData.id, isExistingUser: true });
+        
+        // 로그인 성공 시 FCM 토큰 등록
+        registerFcmTokenToServer().catch(err => {
+          console.warn('[UserContext] FCM 토큰 등록 실패 (앱은 정상 작동):', err);
+        });
+        
         return true;
       }
 
@@ -195,6 +273,12 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
       await initializeUserData(userId, nickname);
 
       logUserAction('login_success', { nickname, userId, isExistingUser: false });
+      
+      // 로그인 성공 시 FCM 토큰 등록
+      registerFcmTokenToServer().catch(err => {
+        console.warn('[UserContext] FCM 토큰 등록 실패 (앱은 정상 작동):', err);
+      });
+      
       return true;
     }, '사용자 로그인');
 

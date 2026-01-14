@@ -40,7 +40,6 @@ import MissionGroupScreen from '../screens/MissionGroupScreen';
 import MissionDetailScreen from '../screens/MissionDetailScreen';
 import BadgeDetailScreen from '../screens/BadgeDetailScreen';
 import VerificationPostCreateScreen from '../screens/VerificationPostCreateScreen';
-import VerificationPostDetailScreen from '../screens/VerificationPostDetailScreen';
 import NotificationScreen from '../screens/NotificationScreen';
 import FindIdScreen from '../screens/FindIdScreen';
 import FindIdResultScreen from '../screens/FindIdResultScreen';
@@ -243,7 +242,6 @@ const AppNavigator = () => {
         currentScreen === SCREEN_NAMES.COMMUNITY_POST_DETAIL ||
         currentScreen === SCREEN_NAMES.COMMUNITY_POST_EDIT ||
         currentScreen === SCREEN_NAMES.MISSION_GROUP ||
-        currentScreen === SCREEN_NAMES.VERIFICATION_POST_DETAIL ||
         currentScreen === SCREEN_NAMES.MISSION_SET_LIST ||
         currentScreen === SCREEN_NAMES.MISSION_SET_CREATE ||
         currentScreen === SCREEN_NAMES.MISSION_SET_DETAIL ||
@@ -469,8 +467,6 @@ const AppNavigator = () => {
         return <BadgeDetailScreen navigation={navigation} route={route} />;
       case SCREEN_NAMES.VERIFICATION_POST_CREATE:
         return <VerificationPostCreateScreen navigation={navigation} route={route} />;
-      case SCREEN_NAMES.VERIFICATION_POST_DETAIL:
-        return <VerificationPostDetailScreen navigation={navigation} route={route} />;
       case SCREEN_NAMES.NOTIFICATION:
         return <NotificationScreen navigation={navigation} />;
       case SCREEN_NAMES.SOUND_SETTINGS:

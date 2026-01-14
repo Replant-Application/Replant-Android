@@ -146,12 +146,8 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
 
       switch (referenceType) {
         case 'VERIFICATION':
-          // 인증글 상세 화면으로 이동
-          if (referenceId) {
-            onNavigate('VerificationPostDetail', { verificationId: referenceId });
-          } else {
-            onNavigate('Community');
-          }
+          // 인증글 페이지 제거됨 - 커뮤니티로 이동
+          onNavigate('Community');
           break;
         case 'POST':
           // 커뮤니티 게시글 상세 화면으로 이동

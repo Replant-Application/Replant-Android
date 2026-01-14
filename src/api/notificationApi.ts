@@ -68,6 +68,14 @@ export interface ReadAllNotificationsResponse {
   message: string;
 }
 
+export interface RegisterFcmTokenRequest {
+  fcmToken: string;
+}
+
+export interface RegisterFcmTokenResponse {
+  message: string;
+}
+
 // ============================================
 // 알림 API
 // ============================================
@@ -124,4 +132,18 @@ export const deleteNotification = async (
     String(notificationId)
   );
   return apiClient.delete<{ message: string }>(endpoint);
+};
+
+/**
+ * FCM 토큰 등록
+ * POST /api/notifications/fcm/token
+ * 인증 필요
+ */
+export const registerFcmToken = async (
+  fcmToken: string
+): Promise<ServiceResult<RegisterFcmTokenResponse>> => {
+  return apiClient.post<RegisterFcmTokenResponse>(
+    API_CONFIG.endpoints.notification.registerFcmToken,
+    { fcmToken }
+  );
 };

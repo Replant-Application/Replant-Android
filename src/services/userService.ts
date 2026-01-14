@@ -130,7 +130,7 @@ export const getUserProfile = async (nickname: string): Promise<ServiceResult<Us
 
     // 커뮤니티 게시글 통계 (로컬에서)
     const posts: CommunityPost[] = await getData(storageKeys.COMMUNITY_POSTS) || [];
-    const userPosts = posts.filter(p => p.author === nickname);
+    const userPosts = posts.filter(p => p.author_nickname === nickname);
     const postCount = userPosts.length;
 
     // 뱃지 수 계산

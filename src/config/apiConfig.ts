@@ -154,6 +154,7 @@ export const API_CONFIG = {
       read: '/notifications/:notificationId/read',
       readAll: '/notifications/read-all',
       delete: '/notifications/:notificationId',
+      registerFcmToken: '/notifications/fcm/token',
     },
 
     // SSE (Server-Sent Events)

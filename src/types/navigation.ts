@@ -101,9 +101,6 @@ export type RootStackParamList = {
     verificationId?: number;
     initialContent?: string;
   };
-  VerificationPostDetail: {
-    verificationId: number;
-  };
   Login: undefined;
   SignUp: undefined;
   FindId: undefined;

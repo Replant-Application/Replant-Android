@@ -3,7 +3,7 @@
  * 미션 완료 후 커뮤니티에 공유하는 화면
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -15,6 +15,7 @@ import {
   Platform,
   Image,
   TouchableOpacity,
+  ImageBackground,
 } from 'react-native';
 import { Header, AlertModal } from '../../components/ui';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
@@ -42,13 +43,31 @@ const CommunityPostCreateScreen: React.FC<CommunityPostCreateScreenProps> = ({
   const missionTitle = isGeneralPost ? '자유게시판' : (params.missionTitle || '미션');
   const missionEmoji = isGeneralPost ? '📝' : (params.missionEmoji || '🎯');
   const photoUrl = params.photoUrl;
+  // 인증글일 때는 createPost를 사용하지 않음
   const { createPost } = useCommunity();
   const [title, setTitle] = useState(missionTitle);
   const [content, setContent] = useState('');
   const [loading, setLoading] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
 
+  // 컴포넌트 마운트 시 로그
+  React.useEffect(() => {
+    console.log('[CommunityPostCreateScreen] 마운트:', {
+      postType,
+      isGeneralPost,
+      userMissionId,
+      missionId,
+      missionTitle,
+    });
+  }, []);
+
   const handleCreatePost = async () => {
+    // 중복 호출 방지
+    if (loading) {
+      console.log('[CommunityPostCreateScreen] 이미 처리 중입니다.');
+      return;
+    }
+
     if (!content.trim()) {
       Alert.alert('오류', '내용을 입력해주세요.');
       return;
@@ -70,10 +89,11 @@ const CommunityPostCreateScreen: React.FC<CommunityPostCreateScreenProps> = ({
         // title이 비어있으면 missionTitle 사용, 그것도 없으면 기본값
         const postTitle = title.trim() || missionTitle || '자유게시글';
         
-        console.log('[CommunityPostCreateScreen] 일반 게시글 작성:', {
+        console.log('[CommunityPostCreateScreen] 일반 게시글 작성 시작:', {
           postTitle,
           missionTitle,
           hasContent: !!content.trim(),
+          postType,
         });
         
         const postData = {
@@ -86,19 +106,29 @@ const CommunityPostCreateScreen: React.FC<CommunityPostCreateScreenProps> = ({
           category: postType,
         };
         result = await createPost(postData);
+        console.log('[CommunityPostCreateScreen] 일반 게시글 작성 완료:', result.success);
       } else {
         // 인증 게시글: verificationApi 사용 (일반 게시글 API 호출하지 않음)
-        console.log('[CommunityPostCreateScreen] 인증글 작성:', {
+        console.log('[CommunityPostCreateScreen] 인증글 작성 시작:', {
           userMissionId: userMissionId!,
           hasContent: !!content.trim(),
           hasPhoto: !!photoUrl,
+          postType,
+          isGeneralPost: false,
         });
         
+        // 인증글은 createVerificationPost만 호출 (createPost 절대 호출 안 함)
         result = await createVerificationPost({
           userMissionId: userMissionId!,
           content: content.trim(),
           imageUrls: photoUrl ? [photoUrl] : undefined,
         });
+        console.log('[CommunityPostCreateScreen] 인증글 작성 완료:', result.success);
+        
+        // 인증글 작성 시 일반 게시글 API는 절대 호출하지 않음
+        if (result.success) {
+          console.log('[CommunityPostCreateScreen] 인증글만 생성됨 - 일반 게시글 API 호출 안 함');
+        }
       }
 
       if (result.success) {
@@ -114,23 +144,22 @@ const CommunityPostCreateScreen: React.FC<CommunityPostCreateScreenProps> = ({
   };
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+    <ImageBackground
+      source={require('../../assets/images/background.png')}
+      style={styles.backgroundImage}
+      resizeMode="cover"
     >
-      <Header
-        title="게시글 작성"
-        leftButton={
-          <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Image
-              source={require('../../assets/images/left.png')}
-              style={styles.backButtonIcon}
-              resizeMode="contain"
-            />
-          </TouchableOpacity>
-        }
-      />
+      <KeyboardAvoidingView
+        style={styles.container}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+      >
+        <Header
+          title="게시글 작성"
+          navigation={navigation}
+          showBorder={false}
+          titleStyle={styles.headerTitle}
+        />
 
       <ScrollView 
         style={styles.content} 
@@ -219,14 +248,27 @@ const CommunityPostCreateScreen: React.FC<CommunityPostCreateScreenProps> = ({
           navigation.navigate('Community');
         }}
       />
-    </KeyboardAvoidingView>
+      </KeyboardAvoidingView>
+    </ImageBackground>
   );
 };
 
 const styles = StyleSheet.create({
+  backgroundImage: {
+    flex: 1,
+    width: '100%',
+    height: '100%',
+  },
   container: {
     flex: 1,
-    backgroundColor: colors.background.secondary,
+  },
+  headerTitle: {
+    fontWeight: typography.fontWeight.medium as any,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
   },
   content: {
     flex: 1,
@@ -300,6 +342,7 @@ const styles = StyleSheet.create({
     padding: spacing[3],
     fontSize: typography.fontSize.base,
     color: colors.text.primary,
+    height: 48,
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,
       android: typography.fontFamily.regular,

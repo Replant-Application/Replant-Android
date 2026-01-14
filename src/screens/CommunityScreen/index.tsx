@@ -331,9 +331,15 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation }) => {
 
   // 검색 및 필터링 (디바운싱된 검색어 사용)
   const filteredPosts = useMemo(() => {
+    // 일반 게시글에서 인증글 제외 (인증글은 별도로 로드하므로)
+    const generalPosts = posts.filter(post => {
+      // category가 '인증'이거나 post_id가 'verification_'으로 시작하는 경우 제외
+      return post.category !== '인증' && !post.post_id.startsWith('verification_');
+    });
+
     // 일반 게시글과 인증글 통합
     let allPosts: (CommunityPost & { isVerificationPost?: boolean; verificationId?: number })[] = [
-      ...posts.map(p => ({ ...p, isVerificationPost: false as const })),
+      ...generalPosts.map(p => ({ ...p, isVerificationPost: false as const })),
       ...convertedVerificationPosts
     ];
 
@@ -390,10 +396,8 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation }) => {
   }, []);
 
   const handlePostPress = (postId: string) => {
-    // 인증글인 경우 인증글 상세 화면으로 이동
+    // 인증글인 경우 클릭 무시 (페이지 제거됨)
     if (postId.startsWith('verification_')) {
-      const verificationId = parseInt(postId.replace('verification_', ''), 10);
-      navigation.navigate('VerificationPostDetail' as any, { verificationId });
       return;
     }
     navigation.navigate('CommunityPostDetail', { postId });

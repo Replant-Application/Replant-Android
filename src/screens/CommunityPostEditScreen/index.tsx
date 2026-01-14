@@ -14,6 +14,7 @@ import {
   Platform,
   Image,
   TouchableOpacity,
+  ImageBackground,
 } from 'react-native';
 import { useCommunity } from '../../hooks/useCommunity';
 import { useCommunityPost } from '../../hooks/useCommunityPost';
@@ -87,48 +88,51 @@ const CommunityPostEditScreen: React.FC<CommunityPostEditScreenProps> = ({
 
   if (loading || !post) {
     return (
-      <View style={styles.container}>
-        <Header
-          title="게시글 수정"
-          leftButton={
-            <TouchableOpacity onPress={() => navigation.goBack()}>
-              <Image
-                source={require('../../assets/images/left.png')}
-                style={styles.backButtonIcon}
-                resizeMode="contain"
-              />
-            </TouchableOpacity>
-          }
-        />
-        <View style={styles.loadingContainer}>
-          <Text>로딩 중...</Text>
+      <ImageBackground
+        source={require('../../assets/images/background.png')}
+        style={styles.backgroundImage}
+        resizeMode="cover"
+      >
+        <View style={styles.container}>
+          <Header
+            title="게시글 수정"
+            navigation={navigation}
+            showBorder={false}
+            titleStyle={styles.headerTitle}
+          />
+          <View style={styles.loadingContainer}>
+            <Text>로딩 중...</Text>
+          </View>
         </View>
-      </View>
+      </ImageBackground>
     );
   }
 
-  if (post.author !== currentNickname) {
+  if (post.author_nickname !== currentNickname) {
     Alert.alert('오류', '본인의 게시글만 수정할 수 있습니다.');
     navigation.goBack();
     return null;
   }
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+    <ImageBackground
+      source={require('../../assets/images/background.png')}
+      style={styles.backgroundImage}
+      resizeMode="cover"
     >
-      <Header
-        title="게시글 수정"
-        leftButton={
-          <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Text style={styles.backButtonText}>← 취소</Text>
-          </TouchableOpacity>
-        }
-      />
+      <KeyboardAvoidingView
+        style={styles.container}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+      >
+        <Header
+          title="게시글 수정"
+          navigation={navigation}
+          showBorder={false}
+          titleStyle={styles.headerTitle}
+        />
 
-      <ScrollView style={styles.content} keyboardShouldPersistTaps="handled">
+        <ScrollView style={styles.content} keyboardShouldPersistTaps="handled">
         {/* 미션 정보 표시 (수정 불가) */}
         <View style={styles.missionInfo}>
           <Text style={styles.missionEmoji}>{post.mission_emoji || '🎯'}</Text>
@@ -147,6 +151,7 @@ const CommunityPostEditScreen: React.FC<CommunityPostEditScreenProps> = ({
             onChangeText={setTitle}
             placeholder={post.mission_title || '미션'}
             placeholderTextColor={colors.text.tertiary}
+            multiline={false}
           />
         </View>
 
@@ -184,18 +189,31 @@ const CommunityPostEditScreen: React.FC<CommunityPostEditScreenProps> = ({
           />
         </View>
       </ScrollView>
-    </KeyboardAvoidingView>
+      </KeyboardAvoidingView>
+    </ImageBackground>
   );
 };
 
 const styles = StyleSheet.create({
+  backgroundImage: {
+    flex: 1,
+    width: '100%',
+    height: '100%',
+  },
   container: {
     flex: 1,
-    backgroundColor: colors.background.secondary,
   },
   content: {
     flex: 1,
     padding: spacing[4],
+  },
+  headerTitle: {
+    fontWeight: typography.fontWeight.medium as any,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
   },
   loadingContainer: {
     flex: 1,
@@ -205,6 +223,15 @@ const styles = StyleSheet.create({
   backButtonIcon: {
     width: 24,
     height: 24,
+  },
+  backButtonText: {
+    fontSize: typography.fontSize.base,
+    color: colors.text.primary,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
   },
   missionInfo: {
     flexDirection: 'row',
@@ -271,6 +298,7 @@ const styles = StyleSheet.create({
     padding: spacing[3],
     fontSize: typography.fontSize.base,
     color: colors.text.primary,
+    height: 48,
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,
       android: typography.fontFamily.regular,
@@ -316,7 +344,8 @@ const styles = StyleSheet.create({
     lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
   },
   buttonContainer: {
-    marginTop: spacing[4],
+    marginTop: -spacing[1],
+    marginBottom: spacing[4],
   },
   submitButton: {
     backgroundColor: colors.primary[600],
