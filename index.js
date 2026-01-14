@@ -1,4 +1,5 @@
 import { registerRootComponent } from 'expo';
+import { AppRegistry } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { View, ActivityIndicator, LogBox } from 'react-native';
 import { useFonts } from 'expo-font';
@@ -20,6 +21,8 @@ if (LogBox) {
     /AVManager/i,
     /SimpleExoPlayer/i,
     /verifyApplicationThread/i,
+    /ExoPlayer/i,
+    /Player.*thread/i,
   ]);
 }
 
@@ -102,5 +105,7 @@ function App() {
   );
 }
 
+// Expo와 React Native 모두 지원
 registerRootComponent(App);
+AppRegistry.registerComponent('main', () => App);
 
