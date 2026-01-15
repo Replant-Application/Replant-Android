@@ -2,7 +2,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform, Image, ImageBackground } from 'react-native';
 import { useMission } from '../../hooks/useMission';
 import { Card, ErrorBoundary, Header } from '../../components/ui';
-import { colors, spacing, typography, borderRadius, shadows } from '../../utils/designTokens';
+import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
 import { getOptimizedLineHeight } from '../../utils/textStyles';
 import { Mission } from '../../types';
 import { formatDateKorean, formatDateYYYYMMDD } from '../../utils/dateUtils';
@@ -208,19 +208,8 @@ const CalendarScreen: React.FC<CalendarScreenProps> = ({ navigation }) => {
                         {day.date}
                       </Text>
                       {missionCount > 0 && (
-                        <View style={styles.missionIndicators}>
-                          {dayMissionsForDate.slice(0, 2).map((userMission, idx) => (
-                            <View
-                              key={userMission.id}
-                              style={[
-                                styles.missionIndicator,
-                                { backgroundColor: getMissionColor(userMission, idx) },
-                              ]}
-                            />
-                          ))}
-                          {showMoreIndicator && (
-                            <Text style={styles.moreIndicatorText}>+{missionCount - 2}</Text>
-                          )}
+                        <View style={styles.missionCountBadge}>
+                          <Text style={styles.missionCountText}>{missionCount}</Text>
                         </View>
                       )}
                     </TouchableOpacity>
@@ -238,7 +227,10 @@ const CalendarScreen: React.FC<CalendarScreenProps> = ({ navigation }) => {
                       resizeMode="contain"
                     />
                     <Text style={styles.missionsListTitle}>
-                      {formatDateKorean(selectedDate, true)} 미션
+                      {(() => {
+                        const date = new Date(selectedDate + 'T00:00:00');
+                        return `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일 미션`;
+                      })()}
                     </Text>
                   </View>
                   {selectedDayMissions.length > 0 && (
@@ -285,14 +277,6 @@ const CalendarScreen: React.FC<CalendarScreenProps> = ({ navigation }) => {
   );
 };
 
-// 미션 색상 생성 함수
-const getMissionColor = (userMission: UserMission, index: number): string => {
-  const missionColors: string[] = ['#FFE066', '#FF6B6B', '#4ECDC4', '#95E1D3', '#F38181', '#A8E6CF', '#FFD3A5'];
-  const hash = userMission.id.toString().split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-  const colorIndex = (hash + index) % missionColors.length;
-  const selectedColor = missionColors[colorIndex];
-  return selectedColor ?? missionColors[0] ?? '#FFE066';
-};
 
 const styles = StyleSheet.create({
   backgroundImage: {
@@ -320,14 +304,18 @@ const styles = StyleSheet.create({
   missionsListContainer: {
     marginTop: spacing[1],
     paddingTop: spacing[4],
+    paddingBottom: spacing[2],
+    paddingHorizontal: spacing[4],
     borderTopWidth: 1,
     borderTopColor: colors.border.light,
+    backgroundColor: colors.background.secondary,
+    marginHorizontal: -spacing[4],
   },
   missionsListHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing[2],
-    marginBottom: spacing[1],
+    marginBottom: spacing[2],
   },
   missionsListIcon: {
     width: 20,
@@ -449,38 +437,34 @@ const styles = StyleSheet.create({
     color: colors.primary[700],
     fontWeight: typography.fontWeight.medium,
   },
-  missionIndicators: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+  missionCountBadge: {
+    marginTop: 2,
+    backgroundColor: colors.primary[500],
+    minWidth: 12,
+    height: 12,
+    borderRadius: 6,
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 2,
-    gap: 2,
+    paddingHorizontal: 3,
   },
-  missionIndicator: {
-    width: 4,
-    height: 4,
-    borderRadius: 2,
-  },
-  moreIndicatorText: {
-    fontSize: typography.fontSize.xs,
-    color: colors.text.secondary,
-    fontWeight: typography.fontWeight.medium,
+  missionCountText: {
+    fontSize: 8,
+    color: colors.background.primary,
+    fontWeight: typography.fontWeight.bold as any,
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,
       android: typography.fontFamily.regular,
     }),
     includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
+    lineHeight: 12,
+    textAlign: 'center',
   },
   missionItem: {
     flexDirection: 'row',
     alignItems: 'center',
     padding: spacing[3],
     marginBottom: spacing[2],
-    backgroundColor: colors.background.secondary,
-    borderRadius: borderRadius.lg,
-    ...shadows.base,
+    backgroundColor: colors.background.primary,
   },
   missionIcon: {
     width: 24,
@@ -512,7 +496,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.green[100],
     paddingHorizontal: spacing[2],
     paddingVertical: spacing[1],
-    borderRadius: borderRadius.sm,
   },
   completedText: {
     fontSize: typography.fontSize.xs,
