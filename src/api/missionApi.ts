@@ -382,6 +382,7 @@ export interface UserMission {
   assignedAt: string;
   dueDate: string;
   status: UserMissionStatus;
+  completedAt?: string; // 완료 날짜 (ISO string)
   verification?: MissionVerification;
 }
 
