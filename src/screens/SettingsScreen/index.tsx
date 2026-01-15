@@ -16,6 +16,9 @@ import { getStorageKeys } from '../../services/storage';
 import { clearAuthData } from '../../utils/tokenStorage';
 import { apiClient } from '../../api/client';
 
+// 앱 버전 정보
+const APP_VERSION = '0.0.41';
+
 const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
   const { user, logout, updateNickname } = useUser();
   const { deleteAllUsers } = useAdmin();
@@ -130,7 +133,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
 
 
 ---
-앱 버전: 0.0.26
+앱 버전: ${APP_VERSION}
 기기: ${Platform.OS}
 사용자: ${user?.nickname || '익명'}`;
 
@@ -466,6 +469,10 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
               danger={true}
             />
           </View>
+          {/* 버전 정보 */}
+          <View style={styles.versionContainer}>
+            <Text style={styles.versionText}>v{APP_VERSION}</Text>
+          </View>
         </View>
       </ScrollView>
 
@@ -721,6 +728,21 @@ const styles = StyleSheet.create({
     height: 1,
     backgroundColor: colors.border.light,
     marginLeft: spacing[4] + 24 + spacing[3], // icon width + margin + text margin
+  },
+  versionContainer: {
+    paddingTop: spacing[3],
+    paddingHorizontal: spacing[4],
+    alignItems: 'flex-start',
+  },
+  versionText: {
+    fontSize: typography.fontSize.sm,
+    color: colors.text.tertiary,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
   },
 });
 
