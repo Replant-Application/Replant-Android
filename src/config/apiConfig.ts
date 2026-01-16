@@ -18,10 +18,10 @@ const getBaseURL = () => {
   // 기본값: Platform에 따라 자동 설정
   if (Platform.OS === 'android') {
     // Android 에뮬레이터에서는 10.0.2.2를 사용
-    return 'http://10.0.2.2:3000/api';
+    return 'http://10.0.2.2:8080/api';
   }
   // iOS 시뮬레이터나 실제 기기에서는 localhost 사용
-  return 'http://localhost:3000/api';
+  return 'http://localhost:8080/api';
 };
 
 export const API_CONFIG = {
