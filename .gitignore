@@ -47,7 +47,16 @@ logs
 # Temporary files
 *.tmp
 *.temp
+tmpclaude-*
+
+# Build artifacts
+*.apk
+*.aab
+*.zip
+
+# Keystore files
+*.keystore
 
 # Rules
-rules/
+.cursorrules
 
