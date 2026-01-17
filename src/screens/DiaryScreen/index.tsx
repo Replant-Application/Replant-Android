@@ -1003,7 +1003,7 @@ const styles = StyleSheet.create({
   modalQuestion: {
     paddingVertical: spacing[2],
     paddingHorizontal: spacing[4],
-    fontSize: typography.fontSize.xl,
+    fontSize: typography.fontSize['xl'],
     fontWeight: typography.fontWeight.medium,
     color: colors.white,
     textAlign: 'left',
@@ -1025,7 +1025,6 @@ const styles = StyleSheet.create({
   modalContentExpression: {
     marginTop: spacing[8],
     marginBottom: spacing[4],
-    minHeight: 260,
   },
   modalButtons: {
     flexDirection: 'row',
@@ -1132,12 +1131,14 @@ const styles = StyleSheet.create({
   },
   inputContainer: {
     width: '100%',
+    height: 260,
   },
   textInput: {
     backgroundColor: colors.gray[900],
     borderRadius: borderRadius.lg,
-    padding: spacing[4],
-    minHeight: 260,
+    paddingHorizontal: spacing[4],
+    paddingVertical: spacing[4],
+    height: 260,
     fontSize: typography.fontSize.base,
     color: colors.white,
     borderWidth: 1,
@@ -1502,11 +1503,11 @@ const styles = StyleSheet.create({
   },
   bookImage: {
     width: SCREEN_WIDTH * 0.8,
-    height: SCREEN_WIDTH * 0.8 * 1,
+    height: SCREEN_WIDTH * 0.7 * 1,
   },
   paperContainer: {
     position: 'absolute',
-    top: SCREEN_WIDTH * 0.4,
+    top: SCREEN_WIDTH * 0.3,
     left: SCREEN_WIDTH * 0.1,
     alignItems: 'center',
     justifyContent: 'center',

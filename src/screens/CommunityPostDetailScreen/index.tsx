@@ -20,7 +20,7 @@ import { useCommunityPost } from '../../hooks/useCommunityPost';
 import { useCommunity } from '../../hooks/useCommunity';
 import { CommentCard } from '../../components/specialized';
 import { getOptimizedLineHeight } from '../../utils/textStyles';
-import { Loading, ErrorBoundary, EmptyState, Header, Card, AlertModal } from '../../components/ui';
+import { Loading, ErrorBoundary, EmptyState, Header, Card, AlertModal, ConfirmModal } from '../../components/ui';
 import { colors, spacing, typography, borderRadius, shadows } from '../../utils/designTokens';
 import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types/navigation';
@@ -55,6 +55,8 @@ const CommunityPostDetailScreen: React.FC<CommunityPostDetailScreenProps> = ({
   const [alertTitle, setAlertTitle] = useState('');
   const [alertMessage, setAlertMessage] = useState('');
   const [currentUserId, setCurrentUserId] = useState<number | null>(null);
+  // 삭제 확인 모달 상태
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const isAuthor = post?.author_nickname === currentNickname;
 
@@ -113,26 +115,20 @@ const CommunityPostDetailScreen: React.FC<CommunityPostDetailScreenProps> = ({
 
   const handleDeletePost = () => {
     if (!post) return;
+    setShowDeleteModal(true);
+  };
 
-    Alert.alert(
-      '게시글 삭제',
-      '정말로 이 게시글을 삭제하시겠습니까?',
-      [
-        { text: '취소', style: 'cancel' },
-        {
-          text: '삭제',
-          style: 'destructive',
-          onPress: async () => {
-            const result = await deletePost(post.post_id);
-            if (result.success) {
-              navigation.goBack();
-            } else {
-              Alert.alert('오류', result.error || '게시글 삭제에 실패했습니다.');
-            }
-          },
-        },
-      ]
-    );
+  const handleConfirmDelete = async () => {
+    if (!post) return;
+    setShowDeleteModal(false);
+    const result = await deletePost(post.post_id);
+    if (result.success) {
+      navigation.goBack();
+    } else {
+      setAlertTitle('오류');
+      setAlertMessage(result.error || '게시글 삭제에 실패했습니다.');
+      setShowAlert(true);
+    }
   };
 
   const handleSubmitComment = async () => {
@@ -486,6 +482,16 @@ const CommunityPostDetailScreen: React.FC<CommunityPostDetailScreenProps> = ({
         title={alertTitle}
         message={alertMessage}
         onClose={() => setShowAlert(false)}
+      />
+      <ConfirmModal
+        visible={showDeleteModal}
+        title="게시글 삭제"
+        message="정말로 이 게시글을 삭제하시겠습니까?"
+        confirmText="삭제"
+        cancelText="취소"
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setShowDeleteModal(false)}
+        confirmButtonColor={colors.error}
       />
     </ImageBackground>
   );

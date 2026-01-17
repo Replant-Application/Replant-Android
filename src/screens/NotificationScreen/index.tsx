@@ -13,6 +13,7 @@ import {
   RefreshControl,
   Platform,
   ImageBackground,
+  Alert,
 } from 'react-native';
 import { 
   getNotifications, 
@@ -21,6 +22,7 @@ import {
   deleteNotification,
   type Notification as NotificationType
 } from '../../api/notificationApi';
+import { getUserMission } from '../../api/missionApi';
 import { Loading, EmptyState, Header } from '../../components/ui';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
 import { getOptimizedLineHeight } from '../../utils/textStyles';
@@ -31,12 +33,23 @@ import { NotificationScreenProps } from './NotificationScreen.types';
 import SwipeableNotificationItem from './SwipeableNotificationItem';
 
 const NotificationScreen: React.FC<NotificationScreenProps> = ({ navigation }) => {
+  // navigation 안전 처리
+  const safeNavigation = navigation || {
+    navigate: () => {},
+    goBack: () => {},
+  } as any;
+
   const [notifications, setNotifications] = useState<NotificationType[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [filter, setFilter] = useState<'all' | 'unread'>('all');
-  const { lastNotification } = useSse();
-  const { setUnreadNotificationCount } = useOverlay();
+  
+  // Context - Hook은 항상 호출되어야 함 (컨텍스트는 index.js에서 제공됨)
+  const sseContext = useSse();
+  const overlayContext = useOverlay();
+  
+  const lastNotification = sseContext?.lastNotification || null;
+  const setUnreadNotificationCount = overlayContext?.setUnreadNotificationCount || (() => {});
   const lastNotificationIdRef = useRef<any>(null);
 
   const fetchNotifications = useCallback(async (isRefresh: boolean = false) => {
@@ -53,22 +66,33 @@ const NotificationScreen: React.FC<NotificationScreenProps> = ({ navigation }) =
       if (result.success && result.data) {
         // 서버에서 받은 읽지 않은 알림 개수로 배지 카운트 업데이트
         const unreadCount = result.data.unreadCount || 0;
-        setUnreadNotificationCount(unreadCount);
-        console.log('[NotificationScreen] 읽지 않은 알림 개수 업데이트:', unreadCount);
+        if (overlayContext?.setUnreadNotificationCount && typeof overlayContext.setUnreadNotificationCount === 'function') {
+          try {
+            overlayContext.setUnreadNotificationCount(unreadCount);
+            console.log('[NotificationScreen] 읽지 않은 알림 개수 업데이트:', unreadCount);
+          } catch (error) {
+            console.warn('[NotificationScreen] 알림 개수 업데이트 실패:', error);
+          }
+        }
         
         // ID 기준으로 중복 제거
         const notificationsList = result.data.content || [];
         console.log('[NotificationScreen] 받은 알림 개수:', notificationsList.length);
         
-        // 각 알림의 날짜 로깅
+        // 각 알림의 날짜 로깅 (안전하게 처리)
         notificationsList.forEach((n, index) => {
-          console.log(`[NotificationScreen] 알림 ${index + 1}:`, {
-            id: n.id,
-            title: n.title,
-            createdAt: n.createdAt,
-            parsedDate: new Date(n.createdAt).toISOString(),
-            now: new Date().toISOString(),
-          });
+          try {
+            const parsedDate = n.createdAt ? new Date(n.createdAt).toISOString() : 'Invalid Date';
+            console.log(`[NotificationScreen] 알림 ${index + 1}:`, {
+              id: n.id,
+              title: n.title,
+              createdAt: n.createdAt,
+              parsedDate,
+              now: new Date().toISOString(),
+            });
+          } catch (error) {
+            console.warn(`[NotificationScreen] 알림 ${index + 1} 로깅 실패:`, error);
+          }
         });
         
         const uniqueNotifications = notificationsList.filter(
@@ -77,11 +101,19 @@ const NotificationScreen: React.FC<NotificationScreenProps> = ({ navigation }) =
         );
         console.log('[NotificationScreen] 중복 제거 후 알림 개수:', uniqueNotifications.length);
         
-        // ID 기준으로 정렬 (최신순)
+        // ID 기준으로 정렬 (최신순) - 안전하게 처리
         uniqueNotifications.sort((a, b) => {
-          const dateA = new Date(a.createdAt).getTime();
-          const dateB = new Date(b.createdAt).getTime();
-          return dateB - dateA; // 최신순
+          try {
+            const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+            const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+            if (isNaN(dateA) || isNaN(dateB)) {
+              return 0; // 날짜 파싱 실패 시 순서 유지
+            }
+            return dateB - dateA; // 최신순
+          } catch (error) {
+            console.warn('[NotificationScreen] 날짜 정렬 실패:', error);
+            return 0;
+          }
         });
         
         console.log('[NotificationScreen] 정렬 후 알림 목록 설정');
@@ -92,22 +124,59 @@ const NotificationScreen: React.FC<NotificationScreenProps> = ({ navigation }) =
           const backendIds = new Set(uniqueNotifications.map(n => n.id));
           
           // 임시 알림(백엔드에 없는 알림)은 유지
-          const tempNotifications = prev.filter(n => !backendIds.has(n.id));
+          // 단, 같은 title과 content를 가진 백엔드 알림이 있으면 제거
+          const tempNotifications = prev.filter(n => {
+            // 백엔드에 ID가 있으면 제거
+            if (backendIds.has(n.id)) {
+              return false;
+            }
+            // 같은 title과 content를 가진 백엔드 알림이 있으면 제거 (중복 방지)
+            const hasDuplicate = uniqueNotifications.some(backendNotif => 
+              backendNotif.title === n.title && 
+              backendNotif.content === n.content
+            );
+            return !hasDuplicate;
+          });
           
           // 백엔드 알림과 임시 알림 병합
           const merged = [...uniqueNotifications, ...tempNotifications];
           
-          // ID 기준으로 중복 제거 및 정렬
-          const final = merged.filter(
-            (notification, index, self) =>
-              index === self.findIndex(n => n.id === notification.id)
-          ).sort((a, b) => {
-            const dateA = new Date(a.createdAt).getTime();
-            const dateB = new Date(b.createdAt).getTime();
-            return dateB - dateA;
+          // ID 기준으로 중복 제거 (더 엄격하게)
+          const seenIds = new Set<number>();
+          const seenKeys = new Set<string>();
+          const final = merged.filter(notification => {
+            // ID가 있으면 ID로 중복 체크
+            if (notification.id) {
+              if (seenIds.has(notification.id)) {
+                console.warn('[NotificationScreen] 중복 ID 감지, 제거:', notification.id);
+                return false;
+              }
+              seenIds.add(notification.id);
+              return true;
+            }
+            // ID가 없으면 title+content로 중복 체크
+            const key = `${notification.title}_${notification.content}`;
+            if (seenKeys.has(key)) {
+              console.warn('[NotificationScreen] 중복 키 감지, 제거:', key);
+              return false;
+            }
+            seenKeys.add(key);
+            return true;
+          }).sort((a, b) => {
+            try {
+              const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+              const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+              if (isNaN(dateA) || isNaN(dateB)) {
+                return 0; // 날짜 파싱 실패 시 순서 유지
+              }
+              return dateB - dateA;
+            } catch (error) {
+              console.warn('[NotificationScreen] 날짜 정렬 실패:', error);
+              return 0;
+            }
           });
           
-          console.log('[NotificationScreen] 병합 후 알림 개수:', final.length, '(임시:', tempNotifications.length, ')');
+          console.log('[NotificationScreen] 병합 후 알림 개수:', final.length, '(임시:', tempNotifications.length, ', 백엔드:', uniqueNotifications.length, ')');
           return final;
         });
       } else {
@@ -125,7 +194,7 @@ const NotificationScreen: React.FC<NotificationScreenProps> = ({ navigation }) =
       setLoading(false);
       setRefreshing(false);
     }
-  }, [filter, setUnreadNotificationCount]);
+  }, [filter, overlayContext]);
 
   useEffect(() => {
     fetchNotifications();
@@ -226,35 +295,38 @@ const NotificationScreen: React.FC<NotificationScreenProps> = ({ navigation }) =
     fetchNotifications(true);
   };
 
-  const handleMarkAsRead = async (notificationId: number) => {
+  const handleMarkAsRead = useCallback(async (notificationId: number) => {
     try {
-      const notification = notifications.find(n => n.id === notificationId);
-      const wasUnread = notification && !notification.isRead;
+      let wasUnread = false;
+      
+      // 함수형 업데이트를 사용하여 notifications를 직접 참조하지 않음
+      setNotifications(prev => {
+        const notification = prev.find(n => n.id === notificationId);
+        wasUnread = notification ? !notification.isRead : false;
+        return prev.map(n => n.id === notificationId ? { ...n, isRead: true } : n);
+      });
       
       await markNotificationAsRead(notificationId);
-      setNotifications(prev =>
-        prev.map(n => n.id === notificationId ? { ...n, isRead: true } : n)
-      );
       
       // 읽지 않은 알림이었으면 카운트 감소
-      if (wasUnread) {
-        setUnreadNotificationCount((prev: number) => Math.max(0, prev - 1));
+      if (wasUnread && overlayContext?.setUnreadNotificationCount) {
+        overlayContext.setUnreadNotificationCount((prev: number) => Math.max(0, prev - 1));
       }
     } catch (error) {
       console.error('읽음 처리 실패:', error);
     }
-  };
+  }, [overlayContext]);
 
-  const handleMarkAllAsRead = async () => {
+  const handleMarkAllAsRead = useCallback(async () => {
     try {
       await markAllNotificationsAsRead();
       setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
     } catch (error) {
       console.error('전체 읽음 처리 실패:', error);
     }
-  };
+  }, []);
 
-  const handleDeleteNotification = async (notificationId: number) => {
+  const handleDeleteNotification = useCallback(async (notificationId: number) => {
     try {
       console.log('[NotificationScreen] 알림 삭제 시도:', notificationId);
       const result = await deleteNotification(notificationId);
@@ -272,9 +344,9 @@ const NotificationScreen: React.FC<NotificationScreenProps> = ({ navigation }) =
       // 예외 발생 시에도 로컬에서 제거
       setNotifications(prev => prev.filter(n => n.id !== notificationId));
     }
-  };
+  }, []);
 
-  const handleNotificationPress = async (notification: NotificationType) => {
+  const handleNotificationPress = useCallback(async (notification: NotificationType) => {
     console.log('[NotificationScreen] ========== 알림 클릭 ==========');
     console.log('[NotificationScreen] 알림 전체:', JSON.stringify(notification, null, 2));
     console.log('[NotificationScreen] referenceType:', notification.referenceType);
@@ -289,6 +361,78 @@ const NotificationScreen: React.FC<NotificationScreenProps> = ({ navigation }) =
     }
 
     const { referenceType, referenceId, type, title, content } = notification;
+
+    // 돌발 미션 알림 처리
+    if (type === 'SPONTANEOUS_WAKE_UP' || type === 'SPONTANEOUS_MEAL' || type === 'SPONTANEOUS_DIARY') {
+      console.log('[NotificationScreen] ✅ 돌발 미션 알림 클릭:', type);
+      
+      if (!referenceId) {
+        console.error('[NotificationScreen] ❌ referenceId가 없습니다.');
+        return;
+      }
+
+      try {
+        // userMissionId로 미션 정보 조회
+        const missionResult = await getUserMission(referenceId);
+        
+        if (!missionResult.success || !missionResult.data) {
+          console.error('[NotificationScreen] ❌ 미션 정보 조회 실패:', missionResult.error);
+          return;
+        }
+
+        const userMission = missionResult.data;
+        const mission = userMission.mission || userMission.customMission;
+        
+        if (!mission) {
+          console.error('[NotificationScreen] ❌ 미션 정보가 없습니다.');
+          return;
+        }
+
+        // 알림 타입에 따라 적절한 화면으로 이동
+        if (type === 'SPONTANEOUS_WAKE_UP') {
+          // 기상 미션 → 인증 화면으로 이동
+          console.log('[NotificationScreen] ✅ 기상 미션 인증 화면으로 이동');
+          console.log('[NotificationScreen] referenceId:', referenceId, 'type:', typeof referenceId);
+          
+          if (!referenceId) {
+            console.error('[NotificationScreen] ❌ referenceId가 없습니다.');
+            Alert.alert('오류', '미션 정보가 올바르지 않습니다.');
+            return;
+          }
+          
+          // referenceId를 number로 변환
+          const userMissionId = typeof referenceId === 'string' ? Number(referenceId) : referenceId;
+          
+          if (!userMissionId || isNaN(userMissionId)) {
+            console.error('[NotificationScreen] ❌ 유효하지 않은 userMissionId:', userMissionId);
+            Alert.alert('오류', '미션 정보가 올바르지 않습니다.');
+            return;
+          }
+          
+          console.log('[NotificationScreen] 네비게이션 파라미터:', { userMissionId });
+          safeNavigation.navigate(SCREEN_NAMES.WAKE_UP_VERIFICATION as any, {
+            userMissionId: userMissionId,
+          });
+        } else if (type === 'SPONTANEOUS_MEAL') {
+          // 식사 미션 → 게시글 작성 화면으로 이동
+          console.log('[NotificationScreen] ✅ 식사 미션 게시글 작성 화면으로 이동');
+          safeNavigation.navigate(SCREEN_NAMES.COMMUNITY_POST_CREATE as any, {
+            type: 'VERIFICATION',
+            userMissionId: referenceId,
+            missionId: String(mission.id),
+            missionTitle: mission.title || '식사 미션',
+            missionEmoji: '🍽️',
+          });
+        } else if (type === 'SPONTANEOUS_DIARY') {
+          // 감성일기 미션 → 감성일기 작성 화면으로 이동
+          console.log('[NotificationScreen] ✅ 감성일기 작성 화면으로 이동');
+          safeNavigation.navigate(SCREEN_NAMES.DIARY as any);
+        }
+      } catch (error) {
+        console.error('[NotificationScreen] ❌ 돌발 미션 알림 처리 실패:', error);
+      }
+      return;
+    }
 
     // 투두리스트 작성 알림 체크
     // 1. referenceType이 TODO_LIST인 경우
@@ -310,7 +454,7 @@ const NotificationScreen: React.FC<NotificationScreenProps> = ({ navigation }) =
     if (isTodoNotification) {
       console.log('[NotificationScreen] ✅ 투두리스트 작성 알림 클릭, 투두리스트 작성 화면으로 이동');
       try {
-        navigation.navigate(SCREEN_NAMES.TODO_LIST_CREATE as any);
+        safeNavigation.navigate(SCREEN_NAMES.TODO_LIST_CREATE as any);
         console.log('[NotificationScreen] ✅ 네비게이션 성공');
       } catch (error) {
         console.error('[NotificationScreen] ❌ 네비게이션 실패:', error);
@@ -322,66 +466,83 @@ const NotificationScreen: React.FC<NotificationScreenProps> = ({ navigation }) =
     switch (referenceType) {
       case 'VERIFICATION':
         // 인증글 페이지 제거됨 - 커뮤니티로 이동
-        navigation.navigate(SCREEN_NAMES.COMMUNITY as any);
+        safeNavigation.navigate(SCREEN_NAMES.COMMUNITY as any);
         break;
       case 'POST':
         // 커뮤니티 게시글 상세 화면으로 이동
         if (referenceId) {
-          navigation.navigate(SCREEN_NAMES.COMMUNITY_POST_DETAIL as any, {
+          safeNavigation.navigate(SCREEN_NAMES.COMMUNITY_POST_DETAIL as any, {
             postId: String(referenceId),
           });
         } else {
-          navigation.navigate(SCREEN_NAMES.COMMUNITY as any);
+          safeNavigation.navigate(SCREEN_NAMES.COMMUNITY as any);
         }
         break;
       case 'MISSION':
         // 미션 상세 화면으로 이동
         if (referenceId) {
-          navigation.navigate(SCREEN_NAMES.MISSION_DETAIL as any, {
+          safeNavigation.navigate(SCREEN_NAMES.MISSION_DETAIL as any, {
             missionId: String(referenceId),
           });
         } else {
-          navigation.navigate(SCREEN_NAMES.MISSION as any);
+          safeNavigation.navigate(SCREEN_NAMES.MISSION as any);
         }
         break;
       case 'USER_MISSION':
         // 유저 미션 관련 알림 (인증 승인 등) - 미션 화면으로 이동
-        navigation.navigate(SCREEN_NAMES.MISSION as any);
+        safeNavigation.navigate(SCREEN_NAMES.MISSION as any);
         break;
       case 'TODO_LIST':
       case 'TODOLIST':
         // 투두리스트 관련 알림
         if (referenceId) {
-          navigation.navigate(SCREEN_NAMES.TODO_LIST_DETAIL as any, {
+          safeNavigation.navigate(SCREEN_NAMES.TODO_LIST_DETAIL as any, {
             todoListId: String(referenceId),
           });
         } else {
-          navigation.navigate(SCREEN_NAMES.TODO_LIST_CREATE as any);
+          safeNavigation.navigate(SCREEN_NAMES.TODO_LIST_CREATE as any);
         }
         break;
       case 'RECOMMENDATION':
-        navigation.navigate(SCREEN_NAMES.CONNECTIONS as any);
+        safeNavigation.navigate(SCREEN_NAMES.CONNECTIONS as any);
         break;
       case 'CHAT':
-        navigation.navigate(SCREEN_NAMES.CONNECTIONS as any);
+        safeNavigation.navigate(SCREEN_NAMES.CONNECTIONS as any);
         break;
       case 'BADGE':
-        navigation.navigate(SCREEN_NAMES.MY_PAGE as any);
+        safeNavigation.navigate(SCREEN_NAMES.MY_PAGE as any);
         break;
       default:
         // 기본: 아무 동작 안함
         break;
     }
-  };
+  }, [safeNavigation, handleMarkAsRead]);
 
 
-  const renderNotification = ({ item }: { item: NotificationType }) => (
-    <SwipeableNotificationItem 
-      item={item}
-      onPress={handleNotificationPress}
-      onDelete={handleDeleteNotification}
-    />
-  );
+  const renderNotification = useCallback(({ item }: { item: NotificationType }) => {
+    try {
+      return (
+        <SwipeableNotificationItem 
+          item={item}
+          onPress={handleNotificationPress}
+          onDelete={handleDeleteNotification}
+        />
+      );
+    } catch (error) {
+      console.error('[NotificationScreen] 알림 아이템 렌더링 실패:', error);
+      return null;
+    }
+  }, [handleNotificationPress, handleDeleteNotification]);
+  
+  // 고유 키 생성: id와 createdAt을 조합하여 중복 방지
+  const keyExtractor = useCallback((item: NotificationType, index: number) => {
+    // id가 있으면 id 사용, 없으면 createdAt과 index 조합
+    if (item.id) {
+      return `notification_${item.id}`;
+    }
+    // 임시 알림의 경우 createdAt과 index로 고유 키 생성
+    return `temp_${item.createdAt || Date.now()}_${index}`;
+  }, []);
 
   const unreadCount = notifications.filter(n => !n.isRead).length;
 
@@ -438,7 +599,7 @@ const NotificationScreen: React.FC<NotificationScreenProps> = ({ navigation }) =
           <FlatList
             data={filter === 'unread' ? notifications.filter(n => !n.isRead) : notifications}
             renderItem={renderNotification}
-            keyExtractor={(item) => String(item.id)}
+            keyExtractor={keyExtractor}
             contentContainerStyle={styles.listContent}
             refreshControl={
               <RefreshControl 

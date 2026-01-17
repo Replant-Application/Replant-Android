@@ -107,8 +107,20 @@ class BackgroundMusicService {
           this.isPlaying = true;
         }
       }
-    } catch (error) {
-      console.error('[BackgroundMusic] 재생 실패:', error);
+    } catch (error: any) {
+      // 오디오 포커스 획득 실패 에러는 무시 (앱이 백그라운드에 있을 때 발생할 수 있음)
+      const errorMessage = error?.message || error?.toString() || '';
+      const isAudioFocusError = 
+        errorMessage.includes('AudioFocusNotAcquiredException') ||
+        errorMessage.includes('audio focus could not be acquired') ||
+        errorMessage.includes('currently in the background');
+      
+      if (!isAudioFocusError) {
+        console.error('[BackgroundMusic] 재생 실패:', error);
+      } else {
+        // 오디오 포커스 에러는 조용히 무시 (정상적인 상황일 수 있음)
+        console.log('[BackgroundMusic] 오디오 포커스 획득 실패 (백그라운드 상태)');
+      }
     }
   }
 
@@ -128,17 +140,24 @@ class BackgroundMusicService {
             this.currentSound = null;
           }
         } catch (error: any) {
-          // ExoPlayer 스레드 에러는 무시 (앱 종료 시 발생할 수 있는 알려진 이슈)
+          // ExoPlayer 스레드 에러 및 플레이어 존재하지 않음 에러는 무시
+          // (앱 종료 시 또는 플레이어가 이미 해제된 경우 발생할 수 있는 알려진 이슈)
           const errorMessage = error?.message || error?.toString() || '';
           const isThreadError = 
             errorMessage.includes('wrong thread') ||
             errorMessage.includes('mqt_native_modules') ||
             errorMessage.includes('onHostDestroy') ||
-            errorMessage.includes('ExoPlayerImpl');
+            errorMessage.includes('ExoPlayerImpl') ||
+            errorMessage.includes('Player does not exist') ||
+            errorMessage.includes('does not exist');
           
           if (!isThreadError) {
             console.error('[BackgroundMusic] 정지 실패:', error);
           }
+          
+          // 에러 발생 시에도 상태는 초기화
+          this.isPlaying = false;
+          this.currentSound = null;
         }
         resolve();
       }, 0);

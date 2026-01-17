@@ -12,7 +12,7 @@ import { colors, spacing, typography, borderRadius } from '../../utils/designTok
 import { getOptimizedLineHeight } from '../../utils/textStyles';
 import { NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types/navigation';
-import { getVerifications, voteVerification, VerificationPost, VerificationStatus } from '../../api/missionApi';
+// getVerifications는 제거됨 - GET /api/community/posts가 일반글과 인증글 모두 반환
 import { CommunityPost } from '../../types';
 import { logError } from '../../utils/logger';
 import { getHiddenPosts, hidePost } from '../../utils/hiddenContentStorage';
@@ -35,10 +35,7 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation }) => {
   const [refreshing, setRefreshing] = useState(false);
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
 
-  // 인증글 관련 상태
-  const [verificationPosts, setVerificationPosts] = useState<VerificationPost[]>([]);
-  const [verificationLoading, setVerificationLoading] = useState(false);
-
+  // 인증 필터 상태 (GET /api/community/posts에서 이미 일반글과 인증글 모두 반환)
   const [verificationFilter, setVerificationFilter] = useState<VerificationFilter>('all');
 
   // 숨긴 게시글 ID 목록
@@ -216,141 +213,48 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation }) => {
     return stars.join('');
   };
 
-  // 인증글 로딩
-  const loadVerificationPosts = useCallback(async () => {
-    setVerificationLoading(true);
-    try {
-      const statusParam = verificationFilter === 'all' ? undefined :
-        verificationFilter === 'pending' ? 'PENDING' : 'APPROVED';
+  // 인증글은 GET /api/community/posts에서 이미 포함되므로 별도 로딩 불필요
+  // loadVerificationPosts는 제거됨 - useCommunity의 posts에 이미 포함됨
 
-      const result = await getVerifications({
-        status: statusParam as VerificationStatus | undefined,
-        page: 0,
-        size: 50
-      });
+  // 인증글 투표는 GET /api/community/posts의 좋아요 API로 처리됨
 
-      if (result.success && result.data) {
-        setVerificationPosts(result.data.content);
-      }
-    } catch (err) {
-      logError('인증글 로딩 실패', err as Error);
-    } finally {
-      setVerificationLoading(false);
-    }
-  }, [verificationFilter]);
-
-  // 인증글 투표 처리
-  const handleVerificationVote = useCallback(async (verificationId: number) => {
-    try {
-      const result = await voteVerification(verificationId, { vote: 'APPROVE' });
-
-      if (result.success && result.data) {
-        // 로컬 상태 업데이트
-        setVerificationPosts(prev =>
-          prev.map(post => {
-            if (post.id === verificationId) {
-              return {
-                ...post,
-                approveCount: result.data!.approveCount,
-                myVote: 'APPROVE',
-                status: result.data!.status,
-              };
-            }
-            return post;
-          })
-        );
-
-        if (result.data.status === 'APPROVED') {
-          Alert.alert('인증 완료!', '투표 임계값에 도달하여 인증이 완료되었습니다.');
-        }
-      } else {
-        Alert.alert('투표 실패', result.error || '투표에 실패했습니다.');
-      }
-    } catch (err) {
-      logError('투표 실패', err as Error);
-      Alert.alert('오류', '투표 중 문제가 발생했습니다.');
-    }
-  }, []);
-
-  // 인증글 필터 변경 시 다시 로딩
-  useEffect(() => {
-    loadVerificationPosts();
-  }, [loadVerificationPosts]);
+  // 인증글은 GET /api/community/posts에서 이미 포함되므로 별도 로딩 불필요
 
   // Pull-to-Refresh 핸들러
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     try {
       if (activeTab === 'all') {
-        await Promise.all([loadPosts(), loadVerificationPosts()]);
+        await loadPosts(); // GET /api/community/posts가 일반글과 인증글 모두 반환
       } else {
         await loadMissionSets();
       }
     } finally {
       setRefreshing(false);
     }
-  }, [loadPosts, loadVerificationPosts, loadMissionSets, activeTab]);
+  }, [loadPosts, loadMissionSets, activeTab]);
 
   const filterOptions = [
     { value: 'all', label: '최신순' },
     { value: 'popular', label: '인기순' },
   ];
 
-  // VerificationPost를 CommunityPost 형태로 변환
-  const convertedVerificationPosts = useMemo((): (CommunityPost & { isVerificationPost: boolean; verificationId: number })[] => {
-    return verificationPosts.map(vPost => {
-      // missionTitle이 null이거나 undefined인 경우 기본값 사용
-      const missionTitle = vPost.missionTitle || vPost.mission?.title || vPost.customMission?.title || '미션';
-      
-      return {
-        id: `verification_${vPost.id}`,
-        post_id: `verification_${vPost.id}`,
-        author: vPost.userNickname,
-        author_id: String(vPost.userId),
-        author_nickname: vPost.userNickname,
-        title: `[인증] ${missionTitle}`,
-        content: vPost.content,
-        images: vPost.imageUrls,
-        tags: [],
-        category: '인증',
-        mission_id: vPost.mission?.id ? String(vPost.mission.id) : '',
-        mission_title: missionTitle,
-        mission_emoji: '✅',
-        created_at: vPost.createdAt,
-        like_count: vPost.approveCount,
-        comment_count: 0,
-        scrap_count: 0,
-        is_liked: vPost.myVote === 'APPROVE',
-        is_scrapped: false,
-        verified: vPost.status === 'APPROVED',
-        isVerificationPost: true,
-        verificationId: vPost.id,
-      };
-    });
-  }, [verificationPosts]);
+  // GET /api/community/posts에서 이미 일반글과 인증글을 모두 반환하므로 별도 변환 불필요
+  // convertedVerificationPosts는 제거됨
 
   // 검색 및 필터링 (디바운싱된 검색어 사용)
   const filteredPosts = useMemo(() => {
-    // 일반 게시글에서 인증글 제외 (인증글은 별도로 로드하므로)
-    const generalPosts = posts.filter(post => {
-      // category가 '인증'이거나 post_id가 'verification_'으로 시작하는 경우 제외
-      return post.category !== '인증' && !post.post_id.startsWith('verification_');
-    });
-
-    // 일반 게시글과 인증글 통합
-    let allPosts: (CommunityPost & { isVerificationPost?: boolean; verificationId?: number })[] = [
-      ...generalPosts.map(p => ({ ...p, isVerificationPost: false as const })),
-      ...convertedVerificationPosts
-    ];
+    // GET /api/community/posts에서 이미 일반글과 인증글을 모두 반환하므로 posts만 사용
+    let allPosts: CommunityPost[] = [...posts];
 
     // 숨긴 글 필터링
     allPosts = allPosts.filter(post => !hiddenPostIds.includes(post.post_id));
 
-    // 인증 필터 적용
+    // 인증 필터 적용 (category가 '인증'인 게시글만 필터링)
     if (verificationFilter === 'pending') {
-      allPosts = allPosts.filter(post => post.isVerificationPost && !post.verified);
+      allPosts = allPosts.filter(post => post.category === '인증' && post.verified === false);
     } else if (verificationFilter === 'approved') {
-      allPosts = allPosts.filter(post => post.isVerificationPost && post.verified);
+      allPosts = allPosts.filter(post => post.category === '인증' && post.verified === true);
     }
 
     // 검색 (디바운싱 적용)
@@ -382,7 +286,7 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation }) => {
     }
 
     return allPosts;
-  }, [posts, convertedVerificationPosts, debouncedSearchQuery, filter, verificationFilter, hiddenPostIds]);
+  }, [posts, debouncedSearchQuery, filter, verificationFilter, hiddenPostIds]);
 
   // 게시글 숨기기 처리
   const handleHidePost = useCallback(async (postId: string) => {
@@ -396,32 +300,22 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation }) => {
   }, []);
 
   const handlePostPress = (postId: string) => {
-    // 인증글인 경우 클릭 무시 (페이지 제거됨)
-    if (postId.startsWith('verification_')) {
-      return;
-    }
+    // 게시글 상세로 이동 (인증글도 CommunityPostDetail 사용)
     navigation.navigate('CommunityPostDetail', { postId });
   };
 
-  // 좋아요/투표 핸들러 (인증글: 투표, 일반글: 좋아요)
+  // 좋아요 핸들러 (GET /api/community/posts의 게시글은 모두 좋아요 API 사용)
   const handleLike = async (postId: string) => {
-    if (postId.startsWith('verification_')) {
-      // 인증글 투표
-      const verificationId = parseInt(postId.replace('verification_', ''), 10);
-      await handleVerificationVote(verificationId);
-    } else {
-      // 일반 게시글 좋아요
-      const result = await toggleLike(postId);
-      // 내 게시글에는 좋아요를 누를 수 없음 에러 처리
-      if (!result.success && result.error === '내 게시글에는 좋아요를 누를 수 없습니다.') {
-        setAlertTitle('알림');
-        setAlertMessage('내 게시글에는 좋아요를 누를 수 없습니다.');
-        setShowAlert(true);
-      }
+    const result = await toggleLike(postId);
+    // 내 게시글에는 좋아요를 누를 수 없음 에러 처리
+    if (!result.success && result.error === '내 게시글에는 좋아요를 누를 수 없습니다.') {
+      setAlertTitle('알림');
+      setAlertMessage('내 게시글에는 좋아요를 누를 수 없습니다.');
+      setShowAlert(true);
     }
   };
 
-  if (loading || verificationLoading) {
+  if (loading) {
     return <Loading text="게시글을 불러오는 중..." />;
   }
 
@@ -983,7 +877,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background.secondary,
     borderRadius: borderRadius.lg,
     paddingHorizontal: spacing[3],
-    paddingVertical: spacing[3],
+    paddingVertical: spacing[1],
     borderWidth: 1,
     borderColor: '#D4A574',
   },

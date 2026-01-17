@@ -386,7 +386,14 @@ const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
                   </Text>
                 </View>
                 {mission.missionType !== 'CUSTOM' && (
-                  <Text style={styles.missionExp}>+{mission.expReward} EXP</Text>
+                  <View style={styles.missionExpContainer}>
+                    <Image
+                      source={require('../../assets/images/sun.png')}
+                      style={styles.sunIcon}
+                      resizeMode="contain"
+                    />
+                    <Text style={styles.missionExp}>{mission.expReward} EXP</Text>
+                  </View>
                 )}
               </View>
             </View>
@@ -615,11 +622,22 @@ const styles = StyleSheet.create({
     includeFontPadding: false,
     lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
   },
-  missionExp: {
-    fontSize: typography.fontSize.sm,
-    color: colors.blue[600],
+  missionExpContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing[1],
     backgroundColor: colors.blue[100],
     paddingHorizontal: spacing[2],
+    paddingVertical: spacing[1],
+    borderRadius: borderRadius.base,
+  },
+  sunIcon: {
+    width: 16,
+    height: 16,
+  },
+  missionExp: {
+    fontSize: typography.fontSize.sm,
+    color: '#000000',
     paddingVertical: spacing[1],
     borderRadius: borderRadius.sm,
     overflow: 'hidden',

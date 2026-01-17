@@ -9,24 +9,33 @@ const getEmotionCategory = (emotion: string): 'positive' | 'neutral' | 'negative
   return 'neutral';
 };
 
-// 카테고리별 색상 매핑
-const getCategoryColor = (category: 'positive' | 'neutral' | 'negative'): string => {
-  switch (category) {
-    case 'positive':
-      return colors.green[500];
-    case 'neutral':
-      return colors.blue[400];
-    case 'negative':
-      return colors.orange[600];
-    default:
-      return colors.gray[500];
-  }
-};
-
-// 감정별 색상 매핑 (카테고리 기반)
+// 감정별 개별 색상 매핑
 export const getEmotionColor = (emotion: string): string => {
-  const category = getEmotionCategory(emotion);
-  return getCategoryColor(category);
+  const emotionColorMap: Record<string, string> = {
+    // 긍정적 감정
+    '행복': colors.orange[300],      // 밝은 노란색/주황색
+    '기쁨': colors.orange[200],       // 밝은 노란색
+    '사랑': colors.red[400],         // 분홍/빨간색
+    '만족': colors.purple[400],      // 보라색
+    '감사': colors.green[500],        // 초록색
+    '희망': colors.blue[400],         // 하늘색
+    '흥분': colors.red[500],          // 빨간색
+    '자신감': colors.green[400],      // 연한 초록색
+    '열정': colors.orange[500],       // 주황색
+    
+    // 부정적 감정
+    '슬픔': colors.blue[600],         // 파란색
+    '우울': colors.blue[800],         // 진한 파란색
+    '외로움': colors.purple[600],     // 보라색
+    '피곤': colors.gray[600],         // 회색
+    '화남': colors.red[600],          // 빨간색
+    '짜증': colors.orange[600],       // 주황색
+    '불안': colors.orange[400],       // 노란색/주황색
+    '걱정': colors.orange[300],       // 노란색
+    '스트레스': colors.red[500],      // 빨간색
+  };
+  
+  return emotionColorMap[emotion] || colors.gray[500];
 };
 
 // hex 색상에 투명도 추가

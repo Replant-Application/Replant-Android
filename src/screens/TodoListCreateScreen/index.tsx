@@ -268,7 +268,14 @@ const TodoListCreateScreen: React.FC<Props> = ({ navigation }) => {
                 </Text>
                 <View style={styles.missionMeta}>
                   <Text style={styles.missionCategory}>{mission.category}</Text>
-                  <Text style={styles.missionExp}>+{mission.expReward} EXP</Text>
+                  <View style={styles.missionExpContainer}>
+                    <Image
+                      source={require('../../assets/images/sun.png')}
+                      style={styles.sunIcon}
+                      resizeMode="contain"
+                    />
+                    <Text style={styles.missionExp}>{mission.expReward} EXP</Text>
+                  </View>
                 </View>
               </View>
             </View>
@@ -376,7 +383,14 @@ const TodoListCreateScreen: React.FC<Props> = ({ navigation }) => {
                   <View style={styles.missionMeta}>
                     <Text style={styles.missionCategory}>{mission.category}</Text>
                     {mission.missionType !== 'CUSTOM' && (
-                      <Text style={styles.missionExp}>+{mission.expReward} EXP</Text>
+                      <View style={styles.missionExpContainer}>
+                    <Image
+                      source={require('../../assets/images/sun.png')}
+                      style={styles.sunIcon}
+                      resizeMode="contain"
+                    />
+                    <Text style={styles.missionExp}>{mission.expReward} EXP</Text>
+                  </View>
                     )}
                   </View>
                 </View>
@@ -560,7 +574,14 @@ const TodoListCreateScreen: React.FC<Props> = ({ navigation }) => {
                     </Text>
                     <View style={styles.missionListItemMeta}>
                       <Text style={styles.missionListItemCategory}>{mission.category}</Text>
-                      <Text style={styles.missionListItemExp}>+{mission.expReward} EXP</Text>
+                      <View style={styles.missionListItemExpContainer}>
+                        <Image
+                          source={require('../../assets/images/sun.png')}
+                          style={styles.sunIcon}
+                          resizeMode="contain"
+                        />
+                        <Text style={styles.missionListItemExp}>{mission.expReward} EXP</Text>
+                      </View>
                     </View>
                     {missionRange && <Text style={styles.missionListItemTimeSlot}>{missionRange.start} ~ {missionRange.end}</Text>}
                   </View>
@@ -1039,6 +1060,15 @@ const styles = StyleSheet.create({
   },
   missionMeta: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   missionCategory: { fontSize: typography.fontSize.xs, color: colors.primary[600], backgroundColor: colors.primary[50], paddingVertical: 2, paddingHorizontal: spacing[2], borderRadius: borderRadius.base },
+  missionExpContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing[1],
+  },
+  sunIcon: {
+    width: 14,
+    height: 14,
+  },
   missionExp: {
     fontSize: typography.fontSize.xs,
     color: '#FF9800',
@@ -1206,9 +1236,14 @@ const styles = StyleSheet.create({
     fontFamily: Platform.select({ ios: typography.fontFamily.regular, android: typography.fontFamily.regular }),
     includeFontPadding: false,
   },
+  missionListItemExpContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing[1],
+  },
   missionListItemExp: {
     fontSize: typography.fontSize.xs,
-    color: '#FF9800',
+    color: '#000000',
     fontWeight: typography.fontWeight.medium,
     fontFamily: Platform.select({ ios: typography.fontFamily.regular, android: typography.fontFamily.regular }),
     includeFontPadding: false,

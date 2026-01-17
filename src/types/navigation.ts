@@ -101,6 +101,9 @@ export type RootStackParamList = {
     verificationId?: number;
     initialContent?: string;
   };
+  VerificationPostDetail: {
+    verificationId: number;
+  };
   Login: undefined;
   SignUp: undefined;
   FindId: undefined;
@@ -115,6 +118,12 @@ export type RootStackParamList = {
     email?: string;
     nickname?: string;
     provider?: string;
+  };
+  SpontaneousMissionSetup: {
+    mode?: 'create' | 'edit'; // create: 신규 설정, edit: 수정
+  };
+  WakeUpVerification: {
+    userMissionId: number;
   };
 };
 

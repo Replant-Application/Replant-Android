@@ -29,6 +29,7 @@ export interface VerificationPost {
   userNickname: string;
   userProfileImg?: string;
   missionTag?: MissionTag;
+  title?: string; // API 응답에 직접 포함된 제목 필드 (missionTag.title과 동일)
   content: string;
   imageUrls: string[];
   likeCount: number;

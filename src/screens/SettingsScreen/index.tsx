@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, Image, TextInput, Platform, ImageBackground, Linking, Clipboard } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image, TextInput, Platform, ImageBackground, Linking, Clipboard } from 'react-native';
 import { useUser } from '../../contexts/UserContext';
 import { useAdmin } from '../../hooks/useAdmin';
 import { useCharacter } from '../../hooks/useCharacter';
-import { Header, ConfirmModal } from '../../components/ui';
+import { Header, ConfirmModal, AlertModal } from '../../components/ui';
 import { colors, spacing, typography, borderRadius, shadows } from '../../utils/designTokens';
 import { getOptimizedLineHeight } from '../../utils/textStyles';
 import { getCharacterImage } from '../../utils/characterUtils';
@@ -15,6 +15,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getStorageKeys } from '../../services/storage';
 import { clearAuthData } from '../../utils/tokenStorage';
 import { apiClient } from '../../api/client';
+import { deleteMyAccount } from '../../api/userApi';
 
 const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
   const { user, logout, updateNickname } = useUser();
@@ -25,6 +26,11 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
   const [newNickname, setNewNickname] = useState('');
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [showWithdrawalModal, setShowWithdrawalModal] = useState(false);
+  const [showClearPostsModal, setShowClearPostsModal] = useState(false);
+  const [showDeleteUsersModal, setShowDeleteUsersModal] = useState(false);
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertTitle, setAlertTitle] = useState('');
+  const [alertMessage, setAlertMessage] = useState('');
 
   const handleLogout = () => {
     setShowLogoutModal(false);
@@ -33,26 +39,36 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
 
   const handleNicknameChange = async () => {
     if (!newNickname.trim()) {
-      Alert.alert('오류', '닉네임을 입력해주세요.');
+      setAlertTitle('오류');
+      setAlertMessage('닉네임을 입력해주세요.');
+      setShowAlert(true);
       return;
     }
 
     if (newNickname.trim() === user?.nickname) {
-      Alert.alert('알림', '현재 닉네임과 동일합니다.');
+      setAlertTitle('알림');
+      setAlertMessage('현재 닉네임과 동일합니다.');
+      setShowAlert(true);
       return;
     }
 
     try {
       const result = await updateNickname(newNickname.trim());
       if (result.success) {
-        Alert.alert('완료', '닉네임이 변경되었습니다.');
+        setAlertTitle('완료');
+        setAlertMessage('닉네임이 변경되었습니다.');
+        setShowAlert(true);
         setShowNicknameForm(false);
         setNewNickname('');
       } else {
-        Alert.alert('오류', result.error || '닉네임 변경에 실패했습니다.');
+        setAlertTitle('오류');
+        setAlertMessage(result.error || '닉네임 변경에 실패했습니다.');
+        setShowAlert(true);
       }
     } catch (error) {
-      Alert.alert('오류', '닉네임 변경 중 오류가 발생했습니다.');
+      setAlertTitle('오류');
+      setAlertMessage('닉네임 변경 중 오류가 발생했습니다.');
+      setShowAlert(true);
     }
   };
 
@@ -63,61 +79,51 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
   };
 
   const handleClearAllPosts = () => {
-    Alert.alert(
-      '⚠️ 경고',
-      '모든 커뮤니티 게시글과 댓글이 삭제됩니다.\n이 작업은 되돌릴 수 없습니다.\n정말 삭제하시겠습니까?',
-      [
-        { text: '취소', style: 'cancel' },
-        {
-          text: '삭제',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              const result = await clearAllCommunityPosts();
-              if (result.success) {
-                Alert.alert(
-                  '✅ 완료',
-                  `${result.deletedCount}개의 게시글이 삭제되었습니다.`
-                );
-              } else {
-                Alert.alert('오류', '게시글 삭제에 실패했습니다.');
-              }
-            } catch (error) {
-              Alert.alert('오류', '게시글 삭제 중 오류가 발생했습니다.');
-            }
-          }
-        }
-      ]
-    );
+    setShowClearPostsModal(true);
+  };
+
+  const confirmClearAllPosts = async () => {
+    setShowClearPostsModal(false);
+    try {
+      const result = await clearAllCommunityPosts();
+      if (result.success) {
+        setAlertTitle('✅ 완료');
+        setAlertMessage(`${result.deletedCount}개의 게시글이 삭제되었습니다.`);
+        setShowAlert(true);
+      } else {
+        setAlertTitle('오류');
+        setAlertMessage('게시글 삭제에 실패했습니다.');
+        setShowAlert(true);
+      }
+    } catch (error) {
+      setAlertTitle('오류');
+      setAlertMessage('게시글 삭제 중 오류가 발생했습니다.');
+      setShowAlert(true);
+    }
   };
 
   const handleDeleteAllUsers = () => {
-    Alert.alert(
-      '⚠️ 경고',
-      '모든 유저 데이터가 삭제됩니다.\n\n이 작업은 되돌릴 수 없습니다.\n정말로 모든 유저를 삭제하시겠습니까?',
-      [
-        { text: '취소', style: 'cancel' },
-        {
-          text: '삭제',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              const result = await deleteAllUsers();
-              if (result.success) {
-                Alert.alert(
-                  '✅ 완료',
-                  `${result.data?.deletedCount || 0}명의 유저가 삭제되었습니다.`
-                );
-              } else {
-                Alert.alert('오류', result.error || '유저 삭제에 실패했습니다.');
-              }
-            } catch (error) {
-              Alert.alert('오류', '유저 삭제 중 오류가 발생했습니다.');
-            }
-          }
-        }
-      ]
-    );
+    setShowDeleteUsersModal(true);
+  };
+
+  const confirmDeleteAllUsers = async () => {
+    setShowDeleteUsersModal(false);
+    try {
+      const result = await deleteAllUsers();
+      if (result.success) {
+        setAlertTitle('✅ 완료');
+        setAlertMessage(`${result.data?.deletedCount || 0}명의 유저가 삭제되었습니다.`);
+        setShowAlert(true);
+      } else {
+        setAlertTitle('오류');
+        setAlertMessage(result.error || '유저 삭제에 실패했습니다.');
+        setShowAlert(true);
+      }
+    } catch (error) {
+      setAlertTitle('오류');
+      setAlertMessage('유저 삭제 중 오류가 발생했습니다.');
+      setShowAlert(true);
+    }
   };
 
   const handleSendFeedback = async () => {
@@ -182,28 +188,37 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
       try {
         const emailInfo = `받는 사람: ${email}\n제목: ${subject}\n\n${body}`;
         await Clipboard.setString(emailInfo);
-        Alert.alert(
-          '이메일 정보 복사됨',
-          `메일 앱을 자동으로 열 수 없습니다.\n\n이메일 정보가 클립보드에 복사되었습니다.\n\nGmail 등 메일 앱을 열어서 붙여넣어 사용해주세요.`,
-          [{ text: '확인', style: 'default' }]
-        );
+        setAlertTitle('이메일 정보 복사됨');
+        setAlertMessage('메일 앱을 자동으로 열 수 없습니다.\n\n이메일 정보가 클립보드에 복사되었습니다.\n\nGmail 등 메일 앱을 열어서 붙여넣어 사용해주세요.');
+        setShowAlert(true);
       } catch (clipboardError) {
-        Alert.alert(
-          '이메일 주소',
-          `아래 이메일 주소로 문의해주세요:\n\n${email}\n\n제목: ${subject}`,
-          [{ text: '확인', style: 'default' }]
-        );
+        setAlertTitle('이메일 주소');
+        setAlertMessage(`아래 이메일 주소로 문의해주세요:\n\n${email}\n\n제목: ${subject}`);
+        setShowAlert(true);
       }
     }
   };
 
   const handleWithdrawal = async () => {
     if (!user?.nickname) {
-      Alert.alert('오류', '사용자 정보를 찾을 수 없습니다.');
+      setAlertTitle('오류');
+      setAlertMessage('사용자 정보를 찾을 수 없습니다.');
+      setShowAlert(true);
       return;
     }
 
     try {
+      // 1. API로 회원 탈퇴 요청
+      const result = await deleteMyAccount();
+      
+      if (!result.success) {
+        setAlertTitle('오류');
+        setAlertMessage(result.error || '회원탈퇴에 실패했습니다.');
+        setShowAlert(true);
+        return;
+      }
+
+      // 2. 로컬 스토리지 데이터 삭제
       const storageKeys = getStorageKeys(user.nickname);
       const allKeys = await AsyncStorage.getAllKeys();
 
@@ -237,16 +252,22 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
         await AsyncStorage.multiRemove(keysToDelete);
       }
 
-      // API 토큰 및 인증 데이터 삭제
+      // 3. API 토큰 및 인증 데이터 삭제
       await clearAuthData();
       apiClient.setAccessToken(null);
 
-      // 로그아웃 처리
+      // 4. 로그아웃 처리
       await logout();
 
-      Alert.alert('완료', '회원탈퇴가 완료되었습니다.');
+      setShowWithdrawalModal(false);
+      setAlertTitle('완료');
+      setAlertMessage('회원탈퇴가 완료되었습니다.\n탈퇴 후 30일 이내에 계정을 복구할 수 있습니다.');
+      setShowAlert(true);
     } catch (error) {
-      Alert.alert('오류', '회원탈퇴 중 오류가 발생했습니다.');
+      console.error('[SettingsScreen] 회원탈퇴 오류:', error);
+      setAlertTitle('오류');
+      setAlertMessage('회원탈퇴 중 오류가 발생했습니다.');
+      setShowAlert(true);
     }
   };
 
@@ -401,6 +422,12 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
               title="사운드"
               onPress={() => navigation?.navigate('SoundSettings' as any)}
             />
+            <View style={styles.divider} />
+            <SettingItem
+              icon={require('../../assets/images/alarm.png')}
+              title="돌발 미션 설정"
+              onPress={() => navigation?.navigate('SpontaneousMissionSetup' as any, { mode: 'edit' })}
+            />
           </View>
         </View>
 
@@ -493,6 +520,38 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
         onCancel={() => setShowWithdrawalModal(false)}
         confirmButtonColor={colors.error}
         image={require('../../assets/images/crying.png')}
+      />
+
+      {/* 게시글 삭제 확인 모달 */}
+      <ConfirmModal
+        visible={showClearPostsModal}
+        title="⚠️ 경고"
+        message="모든 커뮤니티 게시글과 댓글이 삭제됩니다.\n이 작업은 되돌릴 수 없습니다.\n정말 삭제하시겠습니까?"
+        confirmText="삭제"
+        cancelText="취소"
+        onConfirm={confirmClearAllPosts}
+        onCancel={() => setShowClearPostsModal(false)}
+        confirmButtonColor={colors.error}
+      />
+
+      {/* 유저 삭제 확인 모달 */}
+      <ConfirmModal
+        visible={showDeleteUsersModal}
+        title="⚠️ 경고"
+        message="모든 유저 데이터가 삭제됩니다.\n\n이 작업은 되돌릴 수 없습니다.\n정말로 모든 유저를 삭제하시겠습니까?"
+        confirmText="삭제"
+        cancelText="취소"
+        onConfirm={confirmDeleteAllUsers}
+        onCancel={() => setShowDeleteUsersModal(false)}
+        confirmButtonColor={colors.error}
+      />
+
+      {/* 알림 모달 */}
+      <AlertModal
+        visible={showAlert}
+        title={alertTitle}
+        message={alertMessage}
+        onClose={() => setShowAlert(false)}
       />
     </ImageBackground>
   );

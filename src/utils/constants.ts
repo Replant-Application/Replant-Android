@@ -49,4 +49,6 @@ export const SCREEN_NAMES: Record<string, string> = {
   TODO_LIST_CREATE: 'TodoListCreate',
   TODO_LIST_DETAIL: 'TodoListDetail',
   OAUTH_COMPLETE_SIGNUP: 'OAuthCompleteSignUp',
+  SPONTANEOUS_MISSION_SETUP: 'SpontaneousMissionSetup',
+  WAKE_UP_VERIFICATION: 'WakeUpVerification',
 } as const;

@@ -1,13 +1,14 @@
 import { registerRootComponent } from 'expo';
 import { AppRegistry } from 'react-native';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { View, ActivityIndicator, LogBox } from 'react-native';
 import { useFonts } from 'expo-font';
 import messaging from '@react-native-firebase/messaging';
 import AppNavigator from './src/navigation/AppNavigator';
 import { UserProvider } from './src/contexts/UserContext';
 import { OverlayProvider } from './src/contexts/OverlayContext';
-import { SseProvider } from './src/contexts/SseContext';
+import { SseProvider, useSse } from './src/contexts/SseContext';
+import { WakeUpMissionProvider } from './src/contexts/WakeUpMissionContext';
 import { initializeAmplitude } from './src/services/amplitudeService';
 
 // ExoPlayer 스레드 에러는 무시 (앱 종료 시 발생하는 알려진 이슈)
@@ -24,6 +25,108 @@ if (LogBox) {
     /ExoPlayer/i,
     /Player.*thread/i,
   ]);
+}
+
+// FCM 알림 처리 컴포넌트 (SseContext 내부에서 사용)
+function FcmNotificationHandler() {
+  const { handleFcmNotification } = useSse();
+
+  useEffect(() => {
+    // 포그라운드 메시지 핸들러
+    const unsubscribe = messaging().onMessage(async remoteMessage => {
+      console.log('[+] FCM 포그라운드 메시지:', remoteMessage);
+      console.log('[+] FCM data:', remoteMessage.data);
+      
+      // FCM data에서 userMissionId 또는 referenceId 추출
+      const data = remoteMessage.data || {};
+      const userMissionId = data.userMissionId || data.referenceId;
+      
+      console.log('[+] FCM userMissionId 추출:', {
+        'data.userMissionId': data.userMissionId,
+        'data.referenceId': data.referenceId,
+        '추출된 userMissionId': userMissionId,
+      });
+      
+      const notification = {
+        ...remoteMessage,
+        data: {
+          ...data,
+          // userMissionId 추출: data.userMissionId || data.referenceId
+          userMissionId: userMissionId,
+          referenceId: data.referenceId || data.userMissionId,
+        },
+      };
+      
+      handleFcmNotification(notification);
+    });
+
+    // 백그라운드/종료 상태에서 알림 클릭 핸들러
+    const unsubscribeOpened = messaging().onNotificationOpenedApp(remoteMessage => {
+      console.log('[+] FCM 알림 클릭 (백그라운드):', remoteMessage);
+      console.log('[+] FCM data:', remoteMessage.data);
+      
+      // FCM data에서 userMissionId 또는 referenceId 추출
+      const data = remoteMessage.data || {};
+      const userMissionId = data.userMissionId || data.referenceId;
+      
+      console.log('[+] FCM userMissionId 추출:', {
+        'data.userMissionId': data.userMissionId,
+        'data.referenceId': data.referenceId,
+        '추출된 userMissionId': userMissionId,
+      });
+      
+      const notification = {
+        ...remoteMessage,
+        data: {
+          ...data,
+          // userMissionId 추출: data.userMissionId || data.referenceId
+          userMissionId: userMissionId,
+          referenceId: data.referenceId || data.userMissionId,
+        },
+      };
+      
+      handleFcmNotification(notification);
+    });
+
+    // 앱이 종료된 상태에서 알림으로 앱 열기
+    messaging()
+      .getInitialNotification()
+      .then(remoteMessage => {
+        if (remoteMessage) {
+          console.log('[+] FCM 알림 클릭 (종료 상태):', remoteMessage);
+          console.log('[+] FCM data:', remoteMessage.data);
+          
+          // FCM data에서 userMissionId 또는 referenceId 추출
+          const data = remoteMessage.data || {};
+          const userMissionId = data.userMissionId || data.referenceId;
+          
+          console.log('[+] FCM userMissionId 추출:', {
+            'data.userMissionId': data.userMissionId,
+            'data.referenceId': data.referenceId,
+            '추출된 userMissionId': userMissionId,
+          });
+          
+          const notification = {
+            ...remoteMessage,
+            data: {
+              ...data,
+              // userMissionId 추출: data.userMissionId || data.referenceId
+              userMissionId: userMissionId,
+              referenceId: data.referenceId || data.userMissionId,
+            },
+          };
+          
+          handleFcmNotification(notification);
+        }
+      });
+
+    return () => {
+      unsubscribe();
+      unsubscribeOpened();
+    };
+  }, [handleFcmNotification]);
+
+  return null;
 }
 
 function App() {
@@ -62,32 +165,6 @@ function App() {
     }
   };
 
-  // 포그라운드 메시지 핸들러
-  useEffect(() => {
-    const unsubscribe = messaging().onMessage(async remoteMessage => {
-      console.log('[+] FCM 포그라운드 메시지:', remoteMessage);
-      // 포그라운드에서 알림 표시 로직 추가 가능
-    });
-
-    // 백그라운드/종료 상태에서 알림 클릭 핸들러
-    messaging().onNotificationOpenedApp(remoteMessage => {
-      console.log('[+] FCM 알림 클릭 (백그라운드):', remoteMessage);
-      // 알림 클릭 시 네비게이션 처리
-    });
-
-    // 앱이 종료된 상태에서 알림으로 앱 열기
-    messaging()
-      .getInitialNotification()
-      .then(remoteMessage => {
-        if (remoteMessage) {
-          console.log('[+] FCM 알림 클릭 (종료 상태):', remoteMessage);
-          // 알림 클릭 시 네비게이션 처리
-        }
-      });
-
-    return unsubscribe;
-  }, []);
-
   // 폰트 로딩 에러가 있어도 앱은 계속 진행
   if (fontError) {
     console.warn('Font loading error (continuing anyway):', fontError);
@@ -98,7 +175,10 @@ function App() {
     <UserProvider>
       <OverlayProvider>
         <SseProvider>
-          <AppNavigator />
+          <WakeUpMissionProvider>
+            <FcmNotificationHandler />
+            <AppNavigator />
+          </WakeUpMissionProvider>
         </SseProvider>
       </OverlayProvider>
     </UserProvider>
