@@ -316,12 +316,14 @@ const TodoListDetailScreen: React.FC<Props> = ({ navigation, route }) => {
               source={require('../../assets/images/check2.png')}
               style={styles.checkIcon}
               resizeMode="contain"
+              accessibilityLabel="완료 아이콘"
             />
           ) : isRequiredMission ? (
             <Image
               source={require('../../assets/images/badge.png')}
               style={styles.requiredIcon}
               resizeMode="contain"
+              accessibilityLabel="필수 미션 아이콘"
             />
           ) : null}
         </TouchableOpacity>

@@ -24,6 +24,7 @@ const ErrorBoundary: React.FC<ErrorBoundaryProps> = ({
         source={require('../../assets/images/warning.png')}
         style={styles.iconImage}
         resizeMode="contain"
+        accessibilityLabel="오류 경고 아이콘"
       />
       <Text style={styles.title}>오류가 발생했습니다</Text>
       <Text style={styles.message}>{errorMessage}</Text>

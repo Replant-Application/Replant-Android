@@ -53,6 +53,7 @@ const AlertModal: React.FC<AlertModalProps> = ({
                 source={icon}
                 style={styles.icon}
                 resizeMode="contain"
+                accessibilityLabel="알림 아이콘"
               />
             </View>
           )}

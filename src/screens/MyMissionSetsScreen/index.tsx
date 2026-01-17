@@ -126,6 +126,7 @@ const MyMissionSetsScreen: React.FC<MyMissionSetsScreenProps> = ({ navigation })
                 source={require('../../assets/images/left.png')}
                 style={styles.backButtonIcon}
                 resizeMode="contain"
+                accessibilityLabel="뒤로 가기"
               />
             </TouchableOpacity>
           }
@@ -138,6 +139,7 @@ const MyMissionSetsScreen: React.FC<MyMissionSetsScreenProps> = ({ navigation })
                 source={require('../../assets/images/pencil.png')}
                 style={styles.createButtonIcon}
                 resizeMode="contain"
+                accessibilityLabel="새 투두리스트 만들기"
               />
             </TouchableOpacity>
           }
@@ -160,6 +162,7 @@ const MyMissionSetsScreen: React.FC<MyMissionSetsScreenProps> = ({ navigation })
               source={require('../../assets/images/notes.png')}
               style={styles.infoIcon}
               resizeMode="contain"
+              accessibilityLabel="안내 아이콘"
             />
             <Text style={styles.infoText}>
               나만의 투두리스트를 만들고 관리해보세요
@@ -188,6 +191,7 @@ const MyMissionSetsScreen: React.FC<MyMissionSetsScreenProps> = ({ navigation })
                         source={require('../../assets/images/notes.png')}
                         style={styles.cardIcon}
                         resizeMode="contain"
+                        accessibilityLabel="투두리스트 아이콘"
                       />
                       <Text style={styles.missionSetTitle} numberOfLines={1}>
                         {missionSet.title}
@@ -214,6 +218,7 @@ const MyMissionSetsScreen: React.FC<MyMissionSetsScreenProps> = ({ navigation })
                         source={require('../../assets/images/trash.png')}
                         style={styles.deleteIcon}
                         resizeMode="contain"
+                        accessibilityLabel="삭제 아이콘"
                       />
                     </TouchableOpacity>
                   </View>
@@ -233,6 +238,7 @@ const MyMissionSetsScreen: React.FC<MyMissionSetsScreenProps> = ({ navigation })
                           source={require('../../assets/images/goal.png')}
                           style={styles.statIcon}
                           resizeMode="contain"
+                          accessibilityLabel="미션 아이콘"
                         />
                         <Text style={styles.statText}>{missionSet.missionCount}개 미션</Text>
                       </View>
@@ -242,6 +248,7 @@ const MyMissionSetsScreen: React.FC<MyMissionSetsScreenProps> = ({ navigation })
                             source={require('../../assets/images/high-five.png')}
                             style={styles.statIcon}
                             resizeMode="contain"
+                            accessibilityLabel="참여자 아이콘"
                           />
                           <Text style={styles.statText}>{missionSet.addedCount}명</Text>
                         </View>

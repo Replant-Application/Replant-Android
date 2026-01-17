@@ -190,6 +190,7 @@ const MissionCard: React.FC<MissionCardProps> = ({
                 source={require('../../assets/images/sun.png')}
                 style={styles.sunIcon}
                 resizeMode="contain"
+                accessibilityLabel="경험치 아이콘"
               />
               <Text style={styles.experienceText}>
                 {mission.experience || 50} EXP

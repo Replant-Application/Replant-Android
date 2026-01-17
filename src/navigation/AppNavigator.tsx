@@ -462,6 +462,7 @@ const AppNavigator = () => {
           source={require('../assets/images/Replant_Loading.png')}
           style={styles.loadingImage}
           resizeMode="contain"
+          accessibilityLabel="로딩 중"
         />
       </View>
     );

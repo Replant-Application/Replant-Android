@@ -36,6 +36,7 @@ const BadgeDetailScreen: React.FC<BadgeDetailScreenProps> = ({ navigation, route
                 source={require('../../assets/images/left.png')}
                 style={styles.backButtonIcon}
                 resizeMode="contain"
+                accessibilityLabel="뒤로 가기"
               />
             </TouchableOpacity>
           }
@@ -52,6 +53,7 @@ const BadgeDetailScreen: React.FC<BadgeDetailScreenProps> = ({ navigation, route
             <Image
               source={require('../../assets/images/check2.png')}
               style={styles.badgeImage}
+              accessibilityLabel="뱃지 아이콘"
               resizeMode="contain"
             />
           </View>

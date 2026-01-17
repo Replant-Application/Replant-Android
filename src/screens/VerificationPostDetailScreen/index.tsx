@@ -404,6 +404,7 @@ const VerificationPostDetailScreen: React.FC<VerificationPostDetailScreenProps> 
             source={require('../../assets/images/left.png')}
             style={styles.backButtonIcon}
             resizeMode="contain"
+            accessibilityLabel="뒤로 가기"
           />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>인증글</Text>
@@ -425,7 +426,11 @@ const VerificationPostDetailScreen: React.FC<VerificationPostDetailScreenProps> 
             <View style={styles.authorInfo}>
               <View style={styles.authorAvatar}>
                 {post.userProfileImg ? (
-                  <Image source={{ uri: post.userProfileImg }} style={styles.authorAvatarImage} />
+                  <Image 
+                    source={{ uri: post.userProfileImg }} 
+                    style={styles.authorAvatarImage} 
+                    accessibilityLabel={`${post.userNickname || '사용자'} 프로필 이미지`}
+                  />
                 ) : (
                   <Text style={styles.authorAvatarText}>
                     {post.userNickname?.charAt(0)?.toUpperCase() || '?'}
@@ -455,7 +460,13 @@ const VerificationPostDetailScreen: React.FC<VerificationPostDetailScreenProps> 
           {post.imageUrls && post.imageUrls.length > 0 && (
             <View style={styles.imageContainer}>
               {post.imageUrls.map((imageUrl, index) => (
-                <Image key={index} source={{ uri: imageUrl }} style={styles.image} resizeMode="cover" />
+                <Image 
+                  key={index} 
+                  source={{ uri: imageUrl }} 
+                  style={styles.image} 
+                  resizeMode="cover" 
+                  accessibilityLabel={`${post.title} 인증 이미지 ${index + 1}`}
+                />
               ))}
             </View>
           )}
@@ -473,6 +484,7 @@ const VerificationPostDetailScreen: React.FC<VerificationPostDetailScreenProps> 
                   source={require('../../assets/images/heart.png')}
                   style={styles.voteIconImage}
                   resizeMode="contain"
+                  accessibilityLabel="좋아요 아이콘"
                 />
               )}
               <Text style={[styles.voteText, post.myVote === 'APPROVE' && styles.voteTextActive, isAuthor && styles.voteTextDisabled]}>
@@ -485,6 +497,7 @@ const VerificationPostDetailScreen: React.FC<VerificationPostDetailScreenProps> 
                 source={require('../../assets/images/say.png')}
                 style={styles.actionIconImage}
                 resizeMode="contain"
+                accessibilityLabel="댓글 아이콘"
               />
               <Text style={styles.actionText}>{post.commentCount || comments.length}</Text>
             </View>

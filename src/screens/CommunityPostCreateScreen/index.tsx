@@ -175,6 +175,7 @@ const CommunityPostCreateScreen: React.FC<CommunityPostCreateScreenProps> = ({
             }
             style={styles.missionIcon}
             resizeMode="contain"
+            accessibilityLabel={isGeneralPost ? "일반 게시글 아이콘" : "인증 게시글 아이콘"}
           />
           <View style={styles.missionTextContainer}>
             <Text style={styles.missionLabel}>
@@ -218,7 +219,12 @@ const CommunityPostCreateScreen: React.FC<CommunityPostCreateScreenProps> = ({
         {photoUrl && (
           <View style={styles.imageSection}>
             <Text style={styles.label}>인증 사진</Text>
-            <Image source={{ uri: photoUrl }} style={styles.previewImage} resizeMode="cover" />
+            <Image 
+              source={{ uri: photoUrl }} 
+              style={styles.previewImage} 
+              resizeMode="cover" 
+              accessibilityLabel="인증 사진 미리보기"
+            />
           </View>
         )}
 

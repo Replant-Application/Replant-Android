@@ -54,6 +54,7 @@ const FindIdResultScreen: React.FC<FindIdResultScreenProps> = ({ onNavigate, rou
               source={require('../../assets/images/left.png')}
               style={styles.backButtonIcon}
               resizeMode="contain"
+              accessibilityLabel="뒤로 가기"
             />
           </TouchableOpacity>
         }
@@ -65,6 +66,7 @@ const FindIdResultScreen: React.FC<FindIdResultScreenProps> = ({ onNavigate, rou
               source={require('../../assets/images/RePlant_Logo.png')}
               style={styles.logoIcon}
               resizeMode="contain"
+              accessibilityLabel="RePlant 로고"
             />
             <Text style={styles.infoText} numberOfLines={2}>
               찾은 아이디입니다.

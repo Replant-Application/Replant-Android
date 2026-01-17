@@ -78,6 +78,7 @@ const CommentCard: React.FC<CommentCardProps> = ({
                 source={require('../../assets/images/say.png')}
                 style={styles.replyIcon}
                 resizeMode="contain"
+                accessibilityLabel="답글 아이콘"
               />
               <Text style={styles.replyText}>답글</Text>
             </TouchableOpacity>
@@ -94,6 +95,7 @@ const CommentCard: React.FC<CommentCardProps> = ({
                 source={require('../../assets/images/pencil.png')}
                 style={styles.actionIcon}
                 resizeMode="contain"
+                accessibilityLabel="수정 아이콘"
               />
               <Text style={styles.editText}>수정</Text>
             </TouchableOpacity>
@@ -109,6 +111,7 @@ const CommentCard: React.FC<CommentCardProps> = ({
                 source={require('../../assets/images/trash.png')}
                 style={styles.actionIcon}
                 resizeMode="contain"
+                accessibilityLabel="삭제 아이콘"
               />
               <Text style={styles.deleteText}>삭제</Text>
             </TouchableOpacity>

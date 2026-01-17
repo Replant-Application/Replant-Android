@@ -291,6 +291,7 @@ const VerificationPostCreateScreen: React.FC<VerificationPostCreateScreenProps> 
               source={require('../../assets/images/left.png')}
               style={styles.backButtonIcon}
               resizeMode="contain"
+              accessibilityLabel="뒤로 가기"
             />
           </TouchableOpacity>
         }
@@ -308,6 +309,7 @@ const VerificationPostCreateScreen: React.FC<VerificationPostCreateScreenProps> 
               source={require('../../assets/images/goal.png')}
               style={styles.missionEmojiImage}
               resizeMode="contain"
+              accessibilityLabel="미션 아이콘"
             />
           </View>
           <View style={styles.missionTextContainer}>
@@ -322,6 +324,7 @@ const VerificationPostCreateScreen: React.FC<VerificationPostCreateScreenProps> 
             source={require('../../assets/images/light.png')}
             style={styles.infoIconImage}
             resizeMode="contain"
+            accessibilityLabel="안내 아이콘"
           />
           <Text style={styles.infoText}>
             인증글을 작성하면 커뮤니티에 공개됩니다.{'\n'}
@@ -357,7 +360,12 @@ const VerificationPostCreateScreen: React.FC<VerificationPostCreateScreenProps> 
 
           {photoUrl ? (
             <View style={styles.photoPreviewContainer}>
-              <Image source={{ uri: photoUrl }} style={styles.previewImage} resizeMode="cover" />
+              <Image 
+                source={{ uri: photoUrl }} 
+                style={styles.previewImage} 
+                resizeMode="cover" 
+                accessibilityLabel="인증 사진 미리보기"
+              />
               <TouchableOpacity
                 style={styles.changePhotoButton}
                 onPress={showPhotoOptions}
@@ -379,6 +387,7 @@ const VerificationPostCreateScreen: React.FC<VerificationPostCreateScreenProps> 
                     source={require('../../assets/images/camera.png')}
                     style={styles.addPhotoIcon}
                     resizeMode="contain"
+                    accessibilityLabel="사진 첨부 아이콘"
                   />
                   <Text style={styles.addPhotoText}>사진 첨부</Text>
                 </>

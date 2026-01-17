@@ -828,6 +828,7 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
                       currentMissionPage === 0 && styles.pageArrowIconDisabled,
                     ]}
                     resizeMode="contain"
+                    accessibilityLabel="이전 페이지"
                   />
                 </TouchableOpacity>
 
@@ -856,6 +857,7 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
                       currentMissionPage === totalMissionPages - 1 && styles.pageArrowIconDisabled,
                     ]}
                     resizeMode="contain"
+                    accessibilityLabel="다음 페이지"
                   />
                 </TouchableOpacity>
               </View>
@@ -917,6 +919,7 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
                     source={require('../../assets/images/goal.png')}
                     style={styles.createMissionIcon}
                     resizeMode="contain"
+                    accessibilityLabel="미션 만들기 아이콘"
                   />
                   <Text style={styles.createMissionText}>미션 만들기</Text>
                 </TouchableOpacity>
@@ -936,6 +939,7 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
                       source={require('../../assets/images/RePlant_Logo.png')}
                       style={styles.groupLogoIcon}
                       resizeMode="contain"
+                      accessibilityLabel="RePlant 로고"
                     />
                     <Text style={styles.groupInfoText}>
                       미션을 선택하면 상세 정보를 볼 수 있어요
@@ -969,6 +973,7 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
                                       source={require('../../assets/images/goal.png')}
                                       style={styles.groupMissionIcon}
                                       resizeMode="contain"
+                                      accessibilityLabel={`${mission.title} 아이콘`}
                                     />
                                     <Text style={styles.groupMissionTitle}>{mission.title}</Text>
                                     {mission.category && (
@@ -992,6 +997,7 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
                                       source={getVerificationTypeIcon(mission.verificationType)!}
                                       style={styles.groupVerificationIcon}
                                       resizeMode="contain"
+                                      accessibilityLabel={`${getVerificationTypeLabel(mission.verificationType)} 아이콘`}
                                     />
                                   )}
                                   <Text style={styles.groupMissionVerificationText}>
@@ -1008,6 +1014,7 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
                                         source={require('../../assets/images/sun.png')}
                                         style={styles.groupStatIcon}
                                         resizeMode="contain"
+                                        accessibilityLabel="경험치 아이콘"
                                       />
                                       <Text style={styles.groupStatText}>{mission.expReward} EXP</Text>
                                     </View>
@@ -1017,6 +1024,7 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
                                       source={require('../../assets/images/high-five.png')}
                                       style={styles.groupStatIcon}
                                       resizeMode="contain"
+                                      accessibilityLabel="참여자 아이콘"
                                     />
                                     <Text style={styles.groupStatText}>
                                       참여 {mission.participantCount || 0}명
@@ -1099,6 +1107,7 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
                                           source={require('../../assets/images/edit.png')}
                                           style={styles.editMissionIcon}
                                           resizeMode="contain"
+                                          accessibilityLabel="미션 수정 아이콘"
                                         />
                                       </TouchableOpacity>
                                     )}
@@ -1139,6 +1148,7 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
                             currentGroupPage === 0 && styles.pageArrowIconDisabled,
                           ]}
                           resizeMode="contain"
+                          accessibilityLabel="이전 페이지"
                         />
                       </TouchableOpacity>
 
@@ -1167,6 +1177,7 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
                             currentGroupPage === totalGroupPages - 1 && styles.pageArrowIconDisabled,
                           ]}
                           resizeMode="contain"
+                          accessibilityLabel="다음 페이지"
                         />
                       </TouchableOpacity>
                     </View>

@@ -177,6 +177,7 @@ const ConnectionsScreen: React.FC<ConnectionsScreenProps> = ({ navigation }) => 
             <Image
               source={{ uri: item.recommendedUser.profileImg }}
               style={styles.avatar}
+              accessibilityLabel={`${item.recommendedUser.nickname || '사용자'} 프로필 이미지`}
             />
           ) : (
             <View style={[styles.avatar, styles.defaultAvatar]}>
@@ -231,6 +232,7 @@ const ConnectionsScreen: React.FC<ConnectionsScreenProps> = ({ navigation }) => 
           <Image
             source={{ uri: item.otherUser.profileImg }}
             style={styles.avatar}
+            accessibilityLabel={`${item.otherUser.nickname || '사용자'} 프로필 이미지`}
           />
         ) : (
           <View style={[styles.avatar, styles.defaultAvatar]}>

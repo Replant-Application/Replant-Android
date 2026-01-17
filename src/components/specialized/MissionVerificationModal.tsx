@@ -211,6 +211,7 @@ const MissionVerificationModal: React.FC<MissionVerificationModalProps> = ({
                     source={require('../../assets/images/like.png')}
                     style={styles.optionIconImage}
                     resizeMode="contain"
+                    accessibilityLabel="좋아요 인증 아이콘"
                   />
                 </View>
                 <View style={styles.optionContent}>
@@ -258,6 +259,7 @@ const MissionVerificationModal: React.FC<MissionVerificationModalProps> = ({
                         source={require('../../assets/images/location.png')}
                         style={styles.optionIconImage}
                         resizeMode="contain"
+                        accessibilityLabel="GPS 인증 아이콘"
                       />
                     )}
                   </View>
@@ -303,6 +305,7 @@ const MissionVerificationModal: React.FC<MissionVerificationModalProps> = ({
                       source={require('../../assets/images/alarm.png')}
                       style={styles.optionIconImage}
                       resizeMode="contain"
+                      accessibilityLabel="시간 인증 아이콘"
                     />
                   </View>
                   <View style={styles.optionContent}>

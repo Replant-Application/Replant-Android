@@ -73,6 +73,7 @@ const MyPageScreen: React.FC<MyPageScreenProps> = ({ navigation }) => {
                 source={require('../../assets/images/boy.png')}
                 style={styles.sectionIcon}
                 resizeMode="contain"
+                accessibilityLabel="프로필 아이콘"
               />
               <Text style={styles.sectionTitle}>프로필</Text>
             </View>
@@ -96,6 +97,7 @@ const MyPageScreen: React.FC<MyPageScreenProps> = ({ navigation }) => {
                   source={require('../../assets/images/clover.png')}
                   style={styles.sectionIcon}
                   resizeMode="contain"
+                  accessibilityLabel="캐릭터 아이콘"
                 />
                 <Text style={styles.sectionTitle}>나의 캐릭터</Text>
               </View>
@@ -114,6 +116,7 @@ const MyPageScreen: React.FC<MyPageScreenProps> = ({ navigation }) => {
                 source={require('../../assets/images/search.png')}
                 style={styles.sectionIcon}
                 resizeMode="contain"
+                accessibilityLabel="통계 아이콘"
               />
               <Text style={styles.sectionTitle}>통계</Text>
             </View>

@@ -200,6 +200,7 @@ const MissionSetListScreen: React.FC<MissionSetListScreenProps> = ({ navigation 
                 source={require('../../assets/images/left.png')}
                 style={styles.backButtonIcon}
                 resizeMode="contain"
+                accessibilityLabel="뒤로 가기"
               />
             </TouchableOpacity>
           }
@@ -209,6 +210,7 @@ const MissionSetListScreen: React.FC<MissionSetListScreenProps> = ({ navigation 
                 source={require('../../assets/images/pencil.png')}
                 style={styles.shareButtonIcon}
                 resizeMode="contain"
+                accessibilityLabel="공유"
               />
             </TouchableOpacity>
           }
@@ -218,6 +220,7 @@ const MissionSetListScreen: React.FC<MissionSetListScreenProps> = ({ navigation 
         <View style={styles.searchContainer}>
           <Image
             source={require('../../assets/images/search.png')}
+            accessibilityLabel="검색 아이콘"
             style={styles.searchIcon}
             resizeMode="contain"
           />
@@ -247,6 +250,7 @@ const MissionSetListScreen: React.FC<MissionSetListScreenProps> = ({ navigation 
               source={require('../../assets/images/notes.png')}
               style={styles.infoIcon}
               resizeMode="contain"
+              accessibilityLabel="안내 아이콘"
             />
             <Text style={styles.infoText}>
               다른 사용자의 투두리스트를 담아서 사용해보세요
@@ -275,6 +279,7 @@ const MissionSetListScreen: React.FC<MissionSetListScreenProps> = ({ navigation 
                         source={require('../../assets/images/notes.png')}
                         style={styles.cardIcon}
                         resizeMode="contain"
+                        accessibilityLabel="투두리스트 아이콘"
                       />
                       <Text style={styles.missionSetTitle} numberOfLines={1}>
                         {todoList.title}
@@ -314,6 +319,7 @@ const MissionSetListScreen: React.FC<MissionSetListScreenProps> = ({ navigation 
                           source={require('../../assets/images/goal.png')}
                           style={styles.statIcon}
                           resizeMode="contain"
+                          accessibilityLabel="미션 아이콘"
                         />
                         <Text style={styles.statText}>{todoList.missionCount}개</Text>
                       </View>
@@ -322,6 +328,7 @@ const MissionSetListScreen: React.FC<MissionSetListScreenProps> = ({ navigation 
                           source={require('../../assets/images/high-five.png')}
                           style={styles.statIcon}
                           resizeMode="contain"
+                          accessibilityLabel="참여자 아이콘"
                         />
                         <Text style={styles.statText}>{todoList.addedCount}명</Text>
                       </View>
@@ -383,6 +390,7 @@ const MissionSetListScreen: React.FC<MissionSetListScreenProps> = ({ navigation 
                           source={require('../../assets/images/notes.png')}
                           style={styles.modalItemIcon}
                           resizeMode="contain"
+                          accessibilityLabel="투두리스트 아이콘"
                         />
                         <View style={styles.modalItemTextContainer}>
                           <Text style={styles.modalItemTitle} numberOfLines={1}>
@@ -402,6 +410,7 @@ const MissionSetListScreen: React.FC<MissionSetListScreenProps> = ({ navigation 
                         source={require('../../assets/images/chevron.png')}
                         style={styles.modalItemArrow}
                         resizeMode="contain"
+                        accessibilityLabel="화살표 아이콘"
                       />
                     </TouchableOpacity>
                   )}

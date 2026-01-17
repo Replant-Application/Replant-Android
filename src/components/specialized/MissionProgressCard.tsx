@@ -46,6 +46,7 @@ export const MissionProgressCard: React.FC<MissionProgressCardProps> = ({
               source={require('../../assets/images/badge.png')}
               style={styles.badgeIcon}
               resizeMode="contain"
+              accessibilityLabel="뱃지 아이콘"
             />
           </View>
           <Text style={styles.badgeButtonText}>미션 뱃지 현황</Text>

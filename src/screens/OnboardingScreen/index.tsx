@@ -108,10 +108,20 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onNavigate }) => {
         <View style={styles.imageContainer}>
           {isScreenshot ? (
             <View style={styles.screenshotFrame}>
-              <Image source={item.image} style={styles.screenshotImage} resizeMode="cover" />
+              <Image 
+                source={item.image} 
+                style={styles.screenshotImage} 
+                resizeMode="cover" 
+                accessibilityLabel={`${item.title} 화면 예시`}
+              />
             </View>
           ) : (
-            <Image source={item.image} style={styles.slideImage} resizeMode="contain" />
+            <Image 
+              source={item.image} 
+              style={styles.slideImage} 
+              resizeMode="contain" 
+              accessibilityLabel={`${item.title} 이미지`}
+            />
           )}
         </View>
       </View>

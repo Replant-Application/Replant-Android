@@ -170,6 +170,7 @@ const StatisticsScreen: React.FC<StatisticsScreenProps> = ({ navigation }) => {
                     source={require('../../assets/images/left.png')}
                     style={styles.backButtonIcon}
                     resizeMode="contain"
+                    accessibilityLabel="뒤로 가기"
                   />
                 </TouchableOpacity>
               ) : undefined
@@ -245,6 +246,7 @@ const StatisticsScreen: React.FC<StatisticsScreenProps> = ({ navigation }) => {
                         source={filter.icon}
                         style={styles.categoryIcon}
                         resizeMode="contain"
+                        accessibilityLabel={`${filter.label} 카테고리 아이콘`}
                       />
                       <Text
                         style={[
@@ -266,6 +268,7 @@ const StatisticsScreen: React.FC<StatisticsScreenProps> = ({ navigation }) => {
                     source={require('../../assets/images/goal.png')}
                     style={styles.achievementIcon}
                     resizeMode="contain"
+                    accessibilityLabel="목표 달성 아이콘"
                   />
                   <Text style={styles.achievementTitle}>목표 달성률</Text>
                 </View>
@@ -303,6 +306,7 @@ const StatisticsScreen: React.FC<StatisticsScreenProps> = ({ navigation }) => {
                             source={require('../../assets/images/check2.png')}
                             style={styles.checkIcon}
                             resizeMode="contain"
+                            accessibilityLabel="완료 아이콘"
                           />
                           <Text style={styles.missionStatDays}>{stat.completedDays.length}</Text>
                         </View>

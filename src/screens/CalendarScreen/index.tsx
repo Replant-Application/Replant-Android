@@ -221,6 +221,7 @@ const CalendarScreen: React.FC<CalendarScreenProps> = ({ navigation }) => {
                     source={require('../../assets/images/left.png')}
                     style={styles.backButtonIcon}
                     resizeMode="contain"
+                    accessibilityLabel="뒤로 가기"
                   />
                 </TouchableOpacity>
               ) : undefined
@@ -300,6 +301,7 @@ const CalendarScreen: React.FC<CalendarScreenProps> = ({ navigation }) => {
                       source={require('../../assets/images/clip.png')}
                       style={styles.missionsListIcon}
                       resizeMode="contain"
+                      accessibilityLabel="미션 목록 아이콘"
                     />
                     <Text style={styles.missionsListTitle}>
                       {(() => {
@@ -319,6 +321,7 @@ const CalendarScreen: React.FC<CalendarScreenProps> = ({ navigation }) => {
                               source={require('../../assets/images/goal.png')}
                               style={styles.missionIcon}
                               resizeMode="contain"
+                              accessibilityLabel="미션 아이콘"
                             />
                             <View style={styles.missionContent}>
                               <View style={styles.missionTitleRow}>

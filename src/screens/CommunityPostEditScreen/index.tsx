@@ -191,7 +191,12 @@ const CommunityPostEditScreen: React.FC<CommunityPostEditScreenProps> = ({
         {post.images && post.images.length > 0 && (
           <View style={styles.imageSection}>
             <Text style={styles.label}>인증 사진</Text>
-            <Image source={{ uri: post.images[0] }} style={styles.previewImage} resizeMode="cover" />
+            <Image 
+              source={{ uri: post.images[0] }} 
+              style={styles.previewImage} 
+              resizeMode="cover" 
+              accessibilityLabel="인증 사진"
+            />
             <Text style={styles.imageNote}>인증 사진은 수정할 수 없습니다.</Text>
           </View>
         )}

@@ -225,7 +225,12 @@ const TodoListCreateScreen: React.FC<Props> = ({ navigation }) => {
     <View style={styles.introContainer}>
       <View style={styles.introContent}>
         <View style={styles.introIconContainer}>
-          <Image source={require('../../assets/images/list.png')} style={styles.introIcon} resizeMode="contain" />
+          <Image 
+            source={require('../../assets/images/list.png')} 
+            style={styles.introIcon} 
+            resizeMode="contain" 
+            accessibilityLabel="투두리스트 아이콘"
+          />
         </View>
         <Text style={styles.introTitle}>나만의 투두리스트 만들기</Text>
         <View style={styles.introDescriptionContainer}>
@@ -273,6 +278,7 @@ const TodoListCreateScreen: React.FC<Props> = ({ navigation }) => {
                       source={require('../../assets/images/sun.png')}
                       style={styles.sunIcon}
                       resizeMode="contain"
+                      accessibilityLabel="경험치 아이콘"
                     />
                     <Text style={styles.missionExp}>{mission.expReward} EXP</Text>
                   </View>
@@ -388,6 +394,7 @@ const TodoListCreateScreen: React.FC<Props> = ({ navigation }) => {
                       source={require('../../assets/images/sun.png')}
                       style={styles.sunIcon}
                       resizeMode="contain"
+                      accessibilityLabel="경험치 아이콘"
                     />
                     <Text style={styles.missionExp}>{mission.expReward} EXP</Text>
                   </View>
@@ -579,6 +586,7 @@ const TodoListCreateScreen: React.FC<Props> = ({ navigation }) => {
                           source={require('../../assets/images/sun.png')}
                           style={styles.sunIcon}
                           resizeMode="contain"
+                          accessibilityLabel="경험치 아이콘"
                         />
                         <Text style={styles.missionListItemExp}>{mission.expReward} EXP</Text>
                       </View>

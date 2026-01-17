@@ -313,6 +313,7 @@ const MissionGroupScreen: React.FC<MissionGroupScreenProps> = ({ navigation }) =
                 source={require('../../assets/images/left.png')}
                 style={styles.backButtonIcon}
                 resizeMode="contain"
+                accessibilityLabel="뒤로 가기"
               />
             </TouchableOpacity>
           }
@@ -326,6 +327,7 @@ const MissionGroupScreen: React.FC<MissionGroupScreenProps> = ({ navigation }) =
                   source={require('../../assets/images/pencil.png')}
                   style={styles.createButtonIcon}
                   resizeMode="contain"
+                  accessibilityLabel="미션 생성"
                 />
               </TouchableOpacity>
             ) : undefined
@@ -366,6 +368,7 @@ const MissionGroupScreen: React.FC<MissionGroupScreenProps> = ({ navigation }) =
                   source={require('../../assets/images/RePlant_Logo.png')}
                   style={styles.logoIcon}
                   resizeMode="contain"
+                  accessibilityLabel="RePlant 로고"
                 />
                 <Text style={styles.infoText}>
                   미션을 선택하면 상세 정보와 후기를 볼 수 있어요
@@ -393,6 +396,7 @@ const MissionGroupScreen: React.FC<MissionGroupScreenProps> = ({ navigation }) =
                             source={getMissionIcon(mission.title)}
                             style={styles.missionIcon}
                             resizeMode="contain"
+                            accessibilityLabel={`${mission.title} 아이콘`}
                           />
                           <Text style={styles.missionTitle}>{mission.title}</Text>
                           {mission.category && (
@@ -416,6 +420,7 @@ const MissionGroupScreen: React.FC<MissionGroupScreenProps> = ({ navigation }) =
                             source={getVerificationTypeIcon(mission.verificationType)!}
                             style={styles.verificationIcon}
                             resizeMode="contain"
+                            accessibilityLabel={`${getVerificationTypeLabel(mission.verificationType)} 아이콘`}
                           />
                         )}
                         <Text style={styles.missionVerificationText}>
@@ -432,6 +437,7 @@ const MissionGroupScreen: React.FC<MissionGroupScreenProps> = ({ navigation }) =
                               source={require('../../assets/images/sun.png')}
                               style={styles.statIcon}
                               resizeMode="contain"
+                              accessibilityLabel="경험치 아이콘"
                             />
                             <Text style={styles.statText}>{mission.expReward} EXP</Text>
                           </View>
@@ -441,6 +447,7 @@ const MissionGroupScreen: React.FC<MissionGroupScreenProps> = ({ navigation }) =
                             source={require('../../assets/images/high-five.png')}
                             style={styles.statIcon}
                             resizeMode="contain"
+                            accessibilityLabel="참여자 아이콘"
                           />
                           <Text style={styles.statText}>
                             참여 {mission.participantCount || 0}명

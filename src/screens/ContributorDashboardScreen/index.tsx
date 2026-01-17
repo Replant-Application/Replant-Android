@@ -335,6 +335,7 @@ const ContributorDashboardScreen: React.FC<ContributorDashboardScreenProps> = ({
                 source={require('../../assets/images/warning.png')}
                 style={styles.guideIconImage}
                 resizeMode="contain"
+                accessibilityLabel="경고 아이콘"
               />
               <View style={styles.guideContent}>
                 <Text style={styles.guideTitle}>위기 상황</Text>
@@ -373,6 +374,7 @@ const ContributorDashboardScreen: React.FC<ContributorDashboardScreenProps> = ({
                 source={require('../../assets/images/say.png')}
                 style={styles.actionIconImage}
                 resizeMode="contain"
+                accessibilityLabel="댓글 아이콘"
               />
               <Text style={styles.actionLabel}>Q&A 답변</Text>
             </TouchableOpacity>
@@ -446,6 +448,7 @@ const ContributorDashboardScreen: React.FC<ContributorDashboardScreenProps> = ({
                   source={require('../../assets/images/warning.png')}
                   style={styles.resourceIconImage}
                   resizeMode="contain"
+                  accessibilityLabel="경고 아이콘"
                 />
                 <View style={styles.resourceContent}>
                   <Text style={styles.resourceTitle}>위기 상황 대응 매뉴얼</Text>

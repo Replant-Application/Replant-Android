@@ -459,6 +459,7 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation }) => {
                   source={require('../../assets/images/search.png')}
                   style={styles.searchIcon}
                   resizeMode="contain"
+                  accessibilityLabel="검색 아이콘"
                 />
                 <TextInput
                   style={styles.searchInput}

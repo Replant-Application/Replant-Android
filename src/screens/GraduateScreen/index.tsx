@@ -183,6 +183,7 @@ const GraduateScreen: React.FC<GraduateScreenProps> = ({ navigation }) => {
                 source={require('../../assets/images/light.png')}
                 style={styles.roleIconImage}
                 resizeMode="contain"
+                accessibilityLabel="역할 아이콘"
               />
               <View style={styles.roleContent}>
                 <Text style={styles.roleTitle}>경험 공유</Text>
@@ -222,6 +223,7 @@ const GraduateScreen: React.FC<GraduateScreenProps> = ({ navigation }) => {
                     source={getActivityIcon(activity.type) as any}
                     style={styles.activityIconImage}
                     resizeMode="contain"
+                    accessibilityLabel="활동 아이콘"
                   />
                 )}
                 <View style={styles.activityContent}>
@@ -247,6 +249,7 @@ const GraduateScreen: React.FC<GraduateScreenProps> = ({ navigation }) => {
               source={require('../../assets/images/say.png')}
               style={styles.actionIconImage}
               resizeMode="contain"
+              accessibilityLabel="댓글 아이콘"
             />
             <View style={styles.actionContent}>
               <Text style={styles.actionTitle}>Q&A 답변하기</Text>

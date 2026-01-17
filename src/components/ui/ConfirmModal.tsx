@@ -54,6 +54,7 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
               source={image}
               style={styles.modalImage}
               resizeMode="contain"
+              accessibilityLabel="확인 모달 이미지"
             />
           )}
           <Text style={styles.title}>{title}</Text>

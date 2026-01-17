@@ -237,6 +237,7 @@ const CommunityPostDetailScreen: React.FC<CommunityPostDetailScreenProps> = ({
                   source={require('../../assets/images/pencil.png')}
                   style={styles.postActionIcon}
                   resizeMode="contain"
+                  accessibilityLabel="수정 아이콘"
                 />
                 <Text style={styles.postActionText}>수정</Text>
               </TouchableOpacity>
@@ -249,6 +250,7 @@ const CommunityPostDetailScreen: React.FC<CommunityPostDetailScreenProps> = ({
                   source={require('../../assets/images/trash.png')}
                   style={styles.postActionIcon}
                   resizeMode="contain"
+                  accessibilityLabel="삭제 아이콘"
                 />
                 <Text style={[styles.postActionText, styles.postActionTextDelete]}>삭제</Text>
               </TouchableOpacity>
@@ -298,7 +300,13 @@ const CommunityPostDetailScreen: React.FC<CommunityPostDetailScreenProps> = ({
           {post.images && post.images.length > 0 && (
             <View style={styles.imageContainer}>
               {post.images.map((image, index) => (
-                <Image key={index} source={{ uri: image }} style={styles.image} resizeMode="cover" />
+                <Image 
+                  key={index} 
+                  source={{ uri: image }} 
+                  style={styles.image} 
+                  resizeMode="cover" 
+                  accessibilityLabel={`${post.title} 이미지 ${index + 1}`}
+                />
               ))}
             </View>
           )}
@@ -312,6 +320,7 @@ const CommunityPostDetailScreen: React.FC<CommunityPostDetailScreenProps> = ({
                   source={require('../../assets/images/heart.png')}
                   style={styles.actionIconImage}
                   resizeMode="contain"
+                  accessibilityLabel="좋아요 아이콘"
                 />
               )}
               <Text style={styles.actionText}>{post.like_count}</Text>
@@ -322,6 +331,7 @@ const CommunityPostDetailScreen: React.FC<CommunityPostDetailScreenProps> = ({
                 source={require('../../assets/images/say.png')}
                 style={styles.actionIconImage}
                 resizeMode="contain"
+                accessibilityLabel="댓글 아이콘"
               />
               <Text style={styles.actionText}>{post.comment_count}</Text>
             </View>

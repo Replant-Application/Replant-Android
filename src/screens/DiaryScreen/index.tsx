@@ -442,6 +442,7 @@ const DiaryScreen: React.FC = () => {
               source={require('../../assets/images/left.png')}
               style={styles.backButtonIcon}
               resizeMode="contain"
+              accessibilityLabel="뒤로 가기"
             />
           </TouchableOpacity>
           
@@ -570,6 +571,7 @@ const DiaryScreen: React.FC = () => {
                 source={require('../../assets/images/left.png')}
                 style={styles.backButtonIcon}
                 resizeMode="contain"
+                accessibilityLabel="뒤로 가기"
               />
             </TouchableOpacity>
             
@@ -732,6 +734,7 @@ const DiaryScreen: React.FC = () => {
                           source={require('../../assets/images/paper.png')}
                           style={styles.paperImage}
                           resizeMode="contain"
+                          accessibilityLabel="종이 아이콘"
                         />
                         <View style={styles.paperTextOverlay}>
                           <Text style={styles.paperDate}>
@@ -743,6 +746,7 @@ const DiaryScreen: React.FC = () => {
                         source={require('../../assets/images/book.png')}
                         style={styles.bookImage}
                         resizeMode="contain"
+                        accessibilityLabel="책 아이콘"
                       />
                     </TouchableOpacity>
                   </View>
@@ -779,6 +783,7 @@ const DiaryScreen: React.FC = () => {
                     source={getCharacterImage(currentCharacter.level || 1, 'default')}
                     style={styles.characterImage}
                     resizeMode="contain"
+                    accessibilityLabel={`${currentCharacter.name || '캐릭터'} 이미지`}
                   />
                 </View>
               )}
@@ -824,6 +829,7 @@ const DiaryScreen: React.FC = () => {
             source={getCharacterImage(currentCharacter.level || 1, currentStep === 'confirm' ? 'happy' : 'default')}
             style={styles.characterImage}
             resizeMode="contain"
+            accessibilityLabel={`${currentCharacter.name || '캐릭터'} 이미지`}
           />
         </View>
       )}

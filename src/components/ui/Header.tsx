@@ -46,6 +46,7 @@ const Header: React.FC<HeaderProps> = ({
           source={require('../../assets/images/left.png')}
           style={styles.backButtonIcon}
           resizeMode="contain"
+          accessibilityLabel="뒤로 가기"
         />
       </TouchableOpacity>
     );

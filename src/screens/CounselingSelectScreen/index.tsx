@@ -55,6 +55,7 @@ const CounselingSelectScreen: React.FC<CounselingSelectScreenProps> = ({ navigat
                     source={require('../../assets/images/hospital.png')}
                     style={styles.cardIconImage}
                     resizeMode="contain"
+                    accessibilityLabel="병원 아이콘"
                   />
                 </View>
                 <View style={styles.cardContent}>
@@ -66,6 +67,7 @@ const CounselingSelectScreen: React.FC<CounselingSelectScreenProps> = ({ navigat
                     source={require('../../assets/images/chevron.png')}
                     style={styles.arrowIcon}
                     resizeMode="contain"
+                    accessibilityLabel="화살표 아이콘"
                   />
                 </View>
               </TouchableOpacity>

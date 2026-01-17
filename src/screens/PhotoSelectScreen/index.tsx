@@ -137,6 +137,7 @@ const PhotoSelectScreen: React.FC<PhotoSelectScreenProps> = ({ navigation, route
               source={require('../../assets/images/left.png')}
               style={styles.backButtonIcon}
               resizeMode="contain"
+              accessibilityLabel="뒤로 가기"
             />
           </TouchableOpacity>
         }
@@ -163,6 +164,7 @@ const PhotoSelectScreen: React.FC<PhotoSelectScreenProps> = ({ navigation, route
                     source={require('../../assets/images/camera.png')}
                     style={styles.optionIconImage}
                     resizeMode="contain"
+                    accessibilityLabel="카메라 아이콘"
                   />
                 </View>
                 <Text style={styles.optionTitle}>카메라로 촬영</Text>
@@ -182,6 +184,7 @@ const PhotoSelectScreen: React.FC<PhotoSelectScreenProps> = ({ navigation, route
                     source={require('../../assets/images/picture.png')}
                     style={styles.optionIconImage}
                     resizeMode="contain"
+                    accessibilityLabel="갤러리 아이콘"
                   />
                 </View>
                 <Text style={styles.optionTitle}>갤러리에서 선택</Text>
@@ -199,6 +202,7 @@ const PhotoSelectScreen: React.FC<PhotoSelectScreenProps> = ({ navigation, route
                 source={{ uri: selectedPhoto }}
                 style={styles.previewImage}
                 resizeMode="contain"
+                accessibilityLabel="선택한 사진 미리보기"
               />
             )}
             <View style={styles.previewButtons}>

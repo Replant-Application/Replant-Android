@@ -132,6 +132,7 @@ const CharacterDetailScreen: React.FC<CharacterDetailScreenProps> = ({ route, na
               source={require('../../assets/images/left.png')}
               style={styles.backButtonIcon}
               resizeMode="contain"
+              accessibilityLabel="뒤로 가기"
             />
           </TouchableOpacity>
         }
@@ -146,6 +147,7 @@ const CharacterDetailScreen: React.FC<CharacterDetailScreenProps> = ({ route, na
               source={getCharacterImage(character.level || 1, currentEmotion)}
               style={styles.characterImage}
               resizeMode="contain"
+              accessibilityLabel={`${character.name || '캐릭터'} 이미지`}
             />
           </View>
 
@@ -162,6 +164,7 @@ const CharacterDetailScreen: React.FC<CharacterDetailScreenProps> = ({ route, na
                 source={require('../../assets/images/download-icon.jpg')}
                 style={styles.downloadIconImage}
                 resizeMode="contain"
+                accessibilityLabel="다운로드 아이콘"
               />
             )}
             <Text style={styles.downloadButtonText}>

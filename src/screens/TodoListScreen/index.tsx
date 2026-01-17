@@ -229,7 +229,12 @@ const TodoListScreen: React.FC<Props> = ({ navigation, route }) => {
           currentList.map(renderTodoListCard)
         ) : (
           <View style={styles.emptyContainer}>
-            <Image source={require('../../assets/images/list.png')} style={styles.emptyIcon} resizeMode="contain" />
+            <Image 
+              source={require('../../assets/images/list.png')} 
+              style={styles.emptyIcon} 
+              resizeMode="contain" 
+              accessibilityLabel="투두리스트 아이콘"
+            />
             <Text style={styles.emptyText}>
               {activeTab === 'active'
                 ? '진행 중인 투두리스트가 없습니다'

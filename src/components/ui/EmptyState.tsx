@@ -33,7 +33,12 @@ const EmptyState: React.FC<EmptyStateProps> = ({
   return (
     <View style={[styles.container, style]}>
       {iconImage ? (
-        <Image source={iconImage} style={styles.iconImage} resizeMode="contain" />
+        <Image 
+          source={iconImage} 
+          style={styles.iconImage} 
+          resizeMode="contain" 
+          accessibilityLabel={title}
+        />
       ) : icon ? (
         <Text style={[styles.icon, iconStyle]}>{icon}</Text>
       ) : null}

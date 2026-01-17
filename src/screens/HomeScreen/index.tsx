@@ -426,6 +426,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                         source={require('../../assets/images/list.png')}
                         style={styles.todoListIcon}
                         resizeMode="contain"
+                        accessibilityLabel="투두리스트 아이콘"
                       />
                       <Text style={styles.todoListTitle}>나의 투두리스트</Text>
                     </View>

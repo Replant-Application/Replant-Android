@@ -213,6 +213,7 @@ const FindPasswordScreen: React.FC<FindPasswordScreenProps> = ({ onNavigate }) =
               source={require('../../assets/images/left.png')}
               style={styles.backButtonIcon}
               resizeMode="contain"
+              accessibilityLabel="뒤로 가기"
             />
           </TouchableOpacity>
         }
@@ -224,6 +225,7 @@ const FindPasswordScreen: React.FC<FindPasswordScreenProps> = ({ onNavigate }) =
               source={require('../../assets/images/RePlant_Logo.png')}
               style={styles.logoIcon}
               resizeMode="contain"
+              accessibilityLabel="RePlant 로고"
             />
             <Text style={styles.infoText} numberOfLines={3}>
               {step === 'email' && '이메일을 입력하시면 인증번호를 보내드립니다.'}

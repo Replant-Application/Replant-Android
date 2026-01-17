@@ -180,6 +180,7 @@ const MyProgressDetailScreen: React.FC<MyProgressDetailScreenProps> = ({ navigat
             source={require('../../assets/images/goal.png')}
             style={styles.emptyIcon}
             resizeMode="contain"
+            accessibilityLabel="미션 아이콘"
           />
           <Text style={styles.emptyText}>완료한 미션이 없습니다</Text>
           <Text style={styles.emptySubtext}>미션을 완료하면 여기에 표시됩니다!</Text>
@@ -211,6 +212,7 @@ const MyProgressDetailScreen: React.FC<MyProgressDetailScreenProps> = ({ navigat
                   source={require('../../assets/images/check2.png')}
                   style={styles.checkIcon}
                   resizeMode="contain"
+                  accessibilityLabel="완료 아이콘"
                 />
               </View>
             </TouchableOpacity>
@@ -235,6 +237,7 @@ const MyProgressDetailScreen: React.FC<MyProgressDetailScreenProps> = ({ navigat
                 source={require('../../assets/images/left.png')}
                 style={styles.backButtonIcon}
                 resizeMode="contain"
+                accessibilityLabel="뒤로 가기"
               />
             </TouchableOpacity>
           }
@@ -267,6 +270,7 @@ const MyProgressDetailScreen: React.FC<MyProgressDetailScreenProps> = ({ navigat
                   source={require('../../assets/images/check2.png')}
                   style={styles.emptyIcon}
                   resizeMode="contain"
+                  accessibilityLabel="뱃지 아이콘"
                 />
                 <Text style={styles.emptyText}>유효한 뱃지가 없습니다</Text>
                 <Text style={styles.emptySubtext}>미션을 완료하고 뱃지를 획득해보세요!</Text>
@@ -288,6 +292,7 @@ const MyProgressDetailScreen: React.FC<MyProgressDetailScreenProps> = ({ navigat
                           source={require('../../assets/images/check2.png')}
                           style={styles.badgeIconImage}
                           resizeMode="contain"
+                          accessibilityLabel="뱃지 아이콘"
                         />
                       </View>
                       <Text style={styles.badgeTitle} numberOfLines={2}>
@@ -318,6 +323,7 @@ const MyProgressDetailScreen: React.FC<MyProgressDetailScreenProps> = ({ navigat
                   source={require('../../assets/images/goal.png')}
                   style={styles.emptyIcon}
                   resizeMode="contain"
+                  accessibilityLabel="미션 아이콘"
                 />
                 <Text style={styles.emptyText}>완료한 미션이 없습니다</Text>
                 <Text style={styles.emptySubtext}>미션을 완료하면 여기에 표시됩니다!</Text>

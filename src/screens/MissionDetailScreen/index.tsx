@@ -95,6 +95,7 @@ const ReviewCard: React.FC<{
             <Image
               source={{ uri: review.userProfileImg }}
               style={styles.reviewAuthorImage}
+              accessibilityLabel={`${review.userNickname || '사용자'} 프로필 이미지`}
             />
           ) : (
             <View style={styles.reviewAuthorImagePlaceholder}>
@@ -391,6 +392,7 @@ const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
                       source={require('../../assets/images/sun.png')}
                       style={styles.sunIcon}
                       resizeMode="contain"
+                      accessibilityLabel="경험치 아이콘"
                     />
                     <Text style={styles.missionExp}>{mission.expReward} EXP</Text>
                   </View>
@@ -439,6 +441,7 @@ const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
               source={require('../../assets/images/badge.png')}
               style={styles.noBadgeIcon}
               resizeMode="contain"
+              accessibilityLabel="뱃지 아이콘"
             />
             <Text style={styles.noBadgeTitle}>후기 작성 안내</Text>
             <Text style={styles.noBadgeDescription}>

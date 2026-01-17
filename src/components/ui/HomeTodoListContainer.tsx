@@ -32,7 +32,12 @@ export const HomeTodoListContainer: React.FC<HomeTodoListContainerProps> = ({
     >
       <View style={styles.header}>
         <View style={styles.titleRow}>
-          <Image source={require('../../assets/images/list.png')} style={styles.icon} resizeMode="contain" />
+          <Image 
+            source={require('../../assets/images/list.png')} 
+            style={styles.icon} 
+            resizeMode="contain" 
+            accessibilityLabel="투두리스트 아이콘"
+          />
           <Text style={styles.title}>{title}</Text>
         </View>
         <Text style={styles.arrow}>›</Text>

@@ -109,6 +109,7 @@ const SwipeableNotificationItem: React.FC<SwipeableNotificationItemProps> = ({
             source={require('../../assets/images/trash.png')}
             style={styles.deleteButtonIcon}
             resizeMode="contain"
+            accessibilityLabel="삭제"
           />
         </TouchableOpacity>
       </View>
@@ -134,6 +135,7 @@ const SwipeableNotificationItem: React.FC<SwipeableNotificationItemProps> = ({
               source={require('../../assets/images/funny.png')}
               style={styles.characterImage}
               resizeMode="contain"
+              accessibilityLabel="캐릭터 이미지"
             />
             <View style={styles.textContainer}>
               <View style={styles.headerRow}>
