@@ -242,7 +242,7 @@ const AppHeader: React.FC<AppHeaderProps> = ({ navigation }) => {
               accessibilityLabel="돌발 미션 설정"
             >
               <Image
-                source={require('../../assets/images/alarm.png')}
+                source={require('../../assets/images/surprised_mission.png')}
                 style={styles.menuItemIcon}
                 resizeMode="contain"
                 accessibilityElementsHidden={true}

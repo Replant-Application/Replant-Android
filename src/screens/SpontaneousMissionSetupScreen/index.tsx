@@ -233,43 +233,88 @@ const SpontaneousMissionSetupScreen: React.FC<SpontaneousMissionSetupScreenProps
       const loadExistingSetup = async () => {
         try {
           setInitialLoading(true);
+          console.log('[SpontaneousMissionSetupScreen] 기존 설정 조회 시작');
           const result = await getSpontaneousMissionSetup();
+          
+          console.log('[SpontaneousMissionSetupScreen] API 응답:', {
+            success: result.success,
+            hasData: !!result.data,
+            error: result.error,
+          });
           
           if (result.success && result.data) {
             const data = result.data;
-            // 시간 데이터가 유효한지 확인
-            if (data.wakeTime && data.sleepTime && data.breakfastTime && data.lunchTime && data.dinnerTime) {
+            console.log('[SpontaneousMissionSetupScreen] 받은 설정 데이터:', data);
+            console.log('[SpontaneousMissionSetupScreen] 데이터 필드 확인:', {
+              wakeTime: data.wakeTime,
+              sleepTime: data.sleepTime,
+              breakfastTime: data.breakfastTime,
+              lunchTime: data.lunchTime,
+              dinnerTime: data.dinnerTime,
+            });
+            
+            // 시간 데이터가 유효한지 확인 (빈 문자열이나 null도 체크)
+            const hasAllTimeFields = 
+              data.wakeTime && 
+              data.sleepTime && 
+              data.breakfastTime && 
+              data.lunchTime && 
+              data.dinnerTime &&
+              typeof data.wakeTime === 'string' &&
+              typeof data.sleepTime === 'string' &&
+              typeof data.breakfastTime === 'string' &&
+              typeof data.lunchTime === 'string' &&
+              typeof data.dinnerTime === 'string' &&
+              data.wakeTime.trim() !== '' &&
+              data.sleepTime.trim() !== '' &&
+              data.breakfastTime.trim() !== '' &&
+              data.lunchTime.trim() !== '' &&
+              data.dinnerTime.trim() !== '';
+            
+            if (hasAllTimeFields) {
               setWakeTime(parse24Hour(data.wakeTime));
               setSleepTime(parse24Hour(data.sleepTime));
               setBreakfastTime(parse24Hour(data.breakfastTime));
               setLunchTime(parse24Hour(data.lunchTime));
               setDinnerTime(parse24Hour(data.dinnerTime));
+              console.log('[SpontaneousMissionSetupScreen] ✅ 설정 로드 완료');
             } else {
-              throw new Error('설정 데이터가 불완전합니다.');
+              console.warn('[SpontaneousMissionSetupScreen] ⚠️ 설정 데이터가 불완전함:', {
+                wakeTime: data.wakeTime || '(없음)',
+                sleepTime: data.sleepTime || '(없음)',
+                breakfastTime: data.breakfastTime || '(없음)',
+                lunchTime: data.lunchTime || '(없음)',
+                dinnerTime: data.dinnerTime || '(없음)',
+              });
+              // 설정 데이터가 불완전하면 자동으로 신규 설정 모드로 전환 (모달 없이)
+              console.log('[SpontaneousMissionSetupScreen] 설정 데이터 불완전 → 신규 설정 모드로 자동 전환');
+              setCurrentStep(0);
             }
           } else {
-            // 설정이 없으면 신규 설정 모드로 전환
-            if (result.error && (result.error.includes('404') || result.error.includes('Not Found'))) {
-              setAlertModal({
-                visible: true,
-                title: '알림',
-                message: '설정이 없습니다. 새로 설정해주세요.',
-                onClose: () => {
-                  setAlertModal({ visible: false, title: '', message: '' });
-                  try {
-                    if (safeNavigation && typeof safeNavigation.goBack === 'function') {
-                      safeNavigation.goBack();
-                    }
-                  } catch (error) {
-                    logError('뒤로가기 실패', error as Error);
-                  }
-                },
-              });
+            // 설정이 없거나 조회 실패
+            const errorMessage = result.error || '';
+            const isNotFound = 
+              errorMessage.includes('404') || 
+              errorMessage.includes('Not Found') ||
+              errorMessage.includes('찾을 수 없습니다') ||
+              errorMessage.toLowerCase().includes('not found');
+            
+            console.log('[SpontaneousMissionSetupScreen] 설정 조회 실패:', {
+              error: errorMessage,
+              isNotFound,
+            });
+            
+            if (isNotFound) {
+              // 설정이 없으면 자동으로 신규 설정 모드로 전환 (모달 없이)
+              // 탈퇴 후 복구된 사용자일 수 있으므로 자동으로 신규 설정 화면으로 전환
+              console.log('[SpontaneousMissionSetupScreen] 설정 없음(404) → 신규 설정 모드로 자동 전환');
+              setCurrentStep(0);
             } else {
+              // 다른 오류인 경우
               setAlertModal({
                 visible: true,
                 title: '오류',
-                message: result.error || '설정을 불러올 수 없습니다.',
+                message: errorMessage || '설정을 불러올 수 없습니다.',
                 onClose: () => {
                   setAlertModal({ visible: false, title: '', message: '' });
                   try {
@@ -284,11 +329,26 @@ const SpontaneousMissionSetupScreen: React.FC<SpontaneousMissionSetupScreenProps
             }
           }
         } catch (error) {
+          console.error('[SpontaneousMissionSetupScreen] 예외 발생:', error);
           logError('돌발 미션 설정 조회 실패', error as Error);
+          
+          // 예외가 발생한 경우에도 사용자에게 친절한 메시지 표시
+          const errorMessage = error instanceof Error 
+            ? error.message 
+            : String(error);
+          
+          const isNetworkError = 
+            errorMessage.includes('Network') ||
+            errorMessage.includes('network') ||
+            errorMessage.includes('네트워크') ||
+            errorMessage.includes('fetch');
+          
           setAlertModal({
             visible: true,
             title: '오류',
-            message: '설정을 불러오는 중 오류가 발생했습니다.',
+            message: isNetworkError 
+              ? '네트워크 연결을 확인해주세요.'
+              : '설정을 불러오는 중 오류가 발생했습니다.',
             onClose: () => {
               setAlertModal({ visible: false, title: '', message: '' });
               try {
