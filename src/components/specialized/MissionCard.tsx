@@ -650,9 +650,15 @@ const styles = StyleSheet.create({
     tintColor: colors.green[600],
   },
   reviewButtonText: {
-    fontSize: typography.fontSize.sm,
+    fontSize: typography.fontSize.xs,
     fontWeight: typography.fontWeight.medium,
     color: colors.green[600],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
   },
   disabledButton: {
     backgroundColor: colors.gray[200],

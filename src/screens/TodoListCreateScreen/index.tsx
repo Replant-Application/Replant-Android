@@ -1059,7 +1059,7 @@ const styles = StyleSheet.create({
     includeFontPadding: false,
   },
   missionMeta: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  missionCategory: { fontSize: typography.fontSize.xs, color: colors.primary[600], backgroundColor: colors.primary[50], paddingVertical: 2, paddingHorizontal: spacing[2], borderRadius: borderRadius.base },
+  missionCategory: { fontSize: typography.fontSize.xs, color: colors.blue[600], backgroundColor: colors.blue[50], paddingVertical: 2, paddingHorizontal: spacing[2], borderRadius: borderRadius.base },
   missionExpContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -1228,8 +1228,8 @@ const styles = StyleSheet.create({
   missionListItemMeta: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   missionListItemCategory: {
     fontSize: typography.fontSize.xs,
-    color: colors.primary[600],
-    backgroundColor: colors.primary[50],
+    color: colors.blue[600],
+    backgroundColor: colors.blue[50],
     paddingVertical: 2,
     paddingHorizontal: spacing[2],
     borderRadius: borderRadius.base,
