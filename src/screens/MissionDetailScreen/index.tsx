@@ -435,7 +435,11 @@ const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
         {/* 뱃지가 없는 경우 안내 메시지 */}
         {!hasBadge && (
           <View style={styles.noBadgeSection}>
-            <Text style={styles.noBadgeIcon}>🏅</Text>
+            <Image
+              source={require('../../assets/images/badge.png')}
+              style={styles.noBadgeIcon}
+              resizeMode="contain"
+            />
             <Text style={styles.noBadgeTitle}>후기 작성 안내</Text>
             <Text style={styles.noBadgeDescription}>
               이 미션을 완료하고 유효한 뱃지를 획득하면{'\n'}후기를 작성할 수 있습니다.
@@ -514,7 +518,7 @@ const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
 
           {reviews.length === 0 ? (
             <EmptyState
-              icon="📝"
+              iconImage={require('../../assets/images/notes.png')}
               title="아직 후기가 없어요"
               description="첫 후기를 남겨보세요!"
             />
@@ -849,7 +853,8 @@ const styles = StyleSheet.create({
     borderColor: '#D4A574',
   },
   noBadgeIcon: {
-    fontSize: 40,
+    width: 40,
+    height: 40,
     marginBottom: spacing[2],
   },
   noBadgeTitle: {
