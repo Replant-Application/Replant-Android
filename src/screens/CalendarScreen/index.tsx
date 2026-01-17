@@ -1,12 +1,10 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform, Image, ImageBackground } from 'react-native';
-import { useMission } from '../../hooks/useMission';
 import { Card, ErrorBoundary, Header } from '../../components/ui';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
 import { getOptimizedLineHeight } from '../../utils/textStyles';
-import { Mission } from '../../types';
 import { formatDateKorean, formatDateYYYYMMDD } from '../../utils/dateUtils';
-import { getUserMissions, UserMission } from '../../api/missionApi';
+import { getMissionsByRange, getMissionsByDate, UserMission } from '../../api/missionApi';
 import { logError } from '../../utils/logger';
 
 interface CalendarScreenProps {
@@ -16,33 +14,78 @@ interface CalendarScreenProps {
 }
 
 const CalendarScreen: React.FC<CalendarScreenProps> = ({ navigation }) => {
-  const { missions } = useMission();
   const today = new Date();
   const [currentMonth, setCurrentMonth] = useState(today.getMonth());
   const [currentYear, setCurrentYear] = useState(today.getFullYear());
   const [selectedDate, setSelectedDate] = useState<string>(formatDateYYYYMMDD(today));
   
-  // 백엔드에서 모든 미션 가져오기 (생성된 날짜 기준)
+  // 백엔드에서 해당 월의 미션 가져오기 (생성된 날짜 기준)
   const [allMissions, setAllMissions] = useState<UserMission[]>([]);
   const [loadingMissions, setLoadingMissions] = useState(false);
 
+  // 현재 월의 시작일과 종료일 계산
+  const getMonthRange = useMemo(() => {
+    const firstDay = new Date(currentYear, currentMonth, 1);
+    const lastDay = new Date(currentYear, currentMonth + 1, 0);
+    const startDate = formatDateYYYYMMDD(firstDay);
+    const endDate = formatDateYYYYMMDD(lastDay);
+    return { startDate, endDate };
+  }, [currentYear, currentMonth]);
+
+  // 월별 미션 로드
   useEffect(() => {
-    const loadAllMissions = async () => {
+    const loadMonthMissions = async () => {
       setLoadingMissions(true);
       try {
-        // 모든 상태의 미션 가져오기 (완료 여부와 관계없이)
-        const result = await getUserMissions({ page: 0, size: 1000 });
+        const { startDate, endDate } = getMonthRange;
+        console.log('[CalendarScreen] 월별 미션 로드 시작:', { startDate, endDate });
+        
+        const result = await getMissionsByRange(startDate, endDate);
+        
+        console.log('[CalendarScreen] 월별 미션 응답 전체:', JSON.stringify(result, null, 2));
+        console.log('[CalendarScreen] 월별 미션 응답 요약:', { 
+          success: result.success, 
+          hasData: !!result.data,
+          dataType: typeof result.data,
+          isArray: Array.isArray(result.data),
+          dataLength: Array.isArray(result.data) ? result.data.length : 'N/A',
+          error: result.error 
+        });
+        
         if (result.success && result.data) {
-          setAllMissions(result.data.content);
+          // 배열인지 확인
+          if (Array.isArray(result.data)) {
+            setAllMissions(result.data);
+            console.log('[CalendarScreen] ✅ 미션 로드 성공:', result.data.length, '개');
+          } else {
+            console.error('[CalendarScreen] ❌ 응답 데이터가 배열이 아님:', {
+              type: typeof result.data,
+              value: result.data
+            });
+            setAllMissions([]);
+          }
+        } else {
+          console.error('[CalendarScreen] ❌ 미션 로드 실패:', {
+            success: result.success,
+            error: result.error,
+            data: result.data
+          });
+          setAllMissions([]);
         }
       } catch (err) {
+        console.error('[CalendarScreen] ❌ 미션 로딩 예외 발생:', {
+          error: err,
+          message: err instanceof Error ? err.message : String(err),
+          stack: err instanceof Error ? err.stack : undefined
+        });
         logError('미션 로딩 실패', err as Error);
+        setAllMissions([]);
       } finally {
         setLoadingMissions(false);
       }
     };
-    loadAllMissions();
-  }, []);
+    loadMonthMissions();
+  }, [getMonthRange]);
 
   // 미션을 생성된 날짜(assignedAt) 기준으로 날짜별로 그룹화
   const missionsByDate = useMemo(() => {
@@ -116,10 +159,42 @@ const CalendarScreen: React.FC<CalendarScreenProps> = ({ navigation }) => {
     }
   };
 
-  // 날짜 클릭 처리
-  const handleDatePress = (dateString: string | undefined) => {
+  // 날짜 클릭 처리 - 특정 날짜의 미션을 새로 불러오기
+  const handleDatePress = async (dateString: string | undefined) => {
     if (!dateString) return;
     setSelectedDate(dateString);
+    
+    // 선택한 날짜가 현재 월 범위 밖이면 해당 날짜의 미션만 로드
+    const selectedDateObj = new Date(dateString + 'T00:00:00');
+    const isInCurrentMonth = 
+      selectedDateObj.getFullYear() === currentYear &&
+      selectedDateObj.getMonth() === currentMonth;
+    
+    if (!isInCurrentMonth) {
+      try {
+        console.log('[CalendarScreen] 날짜별 미션 로드 시작:', dateString);
+        const result = await getMissionsByDate(dateString);
+        console.log('[CalendarScreen] 날짜별 미션 응답:', { 
+          success: result.success, 
+          dataLength: result.data?.length,
+          error: result.error 
+        });
+        
+        if (result.success && result.data && Array.isArray(result.data)) {
+          // 해당 날짜의 미션만 추가/업데이트
+          setAllMissions(prev => {
+            const filtered = prev.filter(m => {
+              const missionDate = m.assignedAt.split('T')[0];
+              return missionDate !== dateString;
+            });
+            return [...filtered, ...result.data!];
+          });
+        }
+      } catch (err) {
+        console.error('[CalendarScreen] 날짜별 미션 로딩 에러:', err);
+        logError('날짜별 미션 로딩 실패', err as Error);
+      }
+    }
   };
 
   // 선택된 날짜의 미션

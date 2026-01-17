@@ -1213,6 +1213,41 @@ export const getMissionHistory = async (params?: {
 };
 
 // ============================================
+// 캘린더용 미션 조회
+// ============================================
+
+/**
+ * 특정 날짜의 미션 조회 (캘린더용)
+ * GET /api/missions/my/calendar/date?date=2026-01-17
+ * 인증 필요
+ * 특정 날짜에 할당된 모든 미션 조회 (완료 여부 무관)
+ * assignedAt이 해당 날짜인 미션 반환
+ * 상태: ASSIGNED, PENDING, COMPLETED 모두 포함
+ */
+export const getMissionsByDate = async (
+  date: string // YYYY-MM-DD 형식
+): Promise<ServiceResult<UserMission[]>> => {
+  return apiClient.get<UserMission[]>(API_CONFIG.endpoints.userMission.calendarDate, { date });
+};
+
+/**
+ * 날짜 범위의 미션 조회 (월별 캘린더용)
+ * GET /api/missions/my/calendar/range?startDate=2026-01-01&endDate=2026-01-31
+ * 인증 필요
+ * 기간 내 할당된 모든 미션 반환 (완료 여부 무관)
+ * assignedAt 기준으로 조회
+ */
+export const getMissionsByRange = async (
+  startDate: string, // YYYY-MM-DD 형식
+  endDate: string    // YYYY-MM-DD 형식
+): Promise<ServiceResult<UserMission[]>> => {
+  return apiClient.get<UserMission[]>(API_CONFIG.endpoints.userMission.calendarRange, {
+    startDate,
+    endDate,
+  });
+};
+
+// ============================================
 // 돌발 미션 설정
 // ============================================
 

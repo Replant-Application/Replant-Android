@@ -89,6 +89,7 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
 
 
   // 필터링된 미션 목록 (진행중/인증대기/완료)
+  // 백엔드 API 변경: 오늘 할당된 완료된 커스텀 미션도 포함됨
   const filteredMissions = useMemo(() => {
     switch (selectedFilter) {
       case 'completed':
@@ -99,11 +100,10 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
         return missions.filter(mission => mission.status === 'PENDING');
       case 'inProgress':
       default:
-        // 진행중 미션 (status가 없거나 'ASSIGNED')
+        // 진행중 미션 (status === 'ASSIGNED' 또는 status가 없는 경우)
         return missions.filter(mission =>
-          !mission.completed &&
-          mission.status !== 'COMPLETED' &&
-          mission.status !== 'PENDING'
+          mission.status === 'ASSIGNED' || 
+          (mission.status !== 'COMPLETED' && mission.status !== 'PENDING' && !mission.completed)
         );
     }
   }, [missions, selectedFilter]);
@@ -111,10 +111,12 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
   const displayedMissions = filteredMissions;
 
   // 진행률 계산
-  const completedMissions = useMemo(() =>
-    missions.filter(mission => mission.completed).length,
-    [missions]
-  );
+  // 백엔드 API 변경: 오늘 할당된 완료된 커스텀 미션도 포함되므로 totalMissions가 정확함
+  const completedMissions = useMemo(() => {
+    const count = missions.filter(mission => mission.status === 'COMPLETED' || mission.completed).length;
+    return count;
+  }, [missions]);
+  // totalMissions는 이제 완료된 미션도 포함하므로 정확한 총 미션 수
   const totalMissions = missions.length;
 
   // 미션 목록 페이지네이션 상태
@@ -414,15 +416,20 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
     }
   }, [selectedMissionForVerification, loadMissions]);
 
-  // 화면 포커스 시 인증 상태 확인
+  // 화면 포커스 시 인증 상태 확인 및 미션 목록 새로고침
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
+      // 미션 목록 새로고침 (투두리스트에서 미션 완료 후 돌아왔을 때 반영)
+      if (activeTab === 'myMission') {
+        loadMissions();
+      }
+      // 인증 상태 확인
       if (selectedMissionForVerification) {
         checkVerificationOnReturn();
       }
     });
     return unsubscribe;
-  }, [navigation, selectedMissionForVerification, checkVerificationOnReturn]);
+  }, [navigation, selectedMissionForVerification, checkVerificationOnReturn, activeTab, loadMissions]);
 
   // 사진 인증 업로드
   const handlePhotoUpload = (missionId: string) => {
@@ -739,11 +746,12 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
           />
         )}
 
-        {/* 진행중/인증대기 탭 */}
+        {/* 진행중/인증대기/완료 탭 */}
         <SimpleTabBar
           tabs={[
             { key: 'inProgress', label: '진행중' },
             { key: 'pendingVerification', label: '인증 대기' },
+            { key: 'completed', label: '완료' },
           ]}
           activeTab={selectedFilter}
           onTabChange={(key) => setSelectedFilter(key as MissionFilter)}
@@ -757,11 +765,15 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
             title={
               selectedFilter === 'inProgress'
                 ? '완료할 미션이 없어'
+                : selectedFilter === 'completed'
+                ? '완료한 미션이 없어요'
                 : '인증 대기 중인 미션이 없어요'
             }
             description={
               selectedFilter === 'inProgress'
                 ? '새로운 미션에 도전해보세요!'
+                : selectedFilter === 'completed'
+                ? '미션을 완료하면 여기에 표시됩니다.'
                 : '미션을 인증하면 여기에 표시됩니다.'
             }
           />

@@ -94,6 +94,9 @@ export const API_CONFIG = {
       addCustom: '/missions/my/custom',
       verify: '/missions/my/:userMissionId/verify',
       history: '/missions/my/history',
+      // 캘린더 조회
+      calendarDate: '/missions/my/calendar/date', // 특정 날짜 미션 조회
+      calendarRange: '/missions/my/calendar/range', // 날짜 범위 미션 조회
       // 기상 미션 설정
       wakeupSettings: '/missions/my/wakeup/settings',
       wakeupSettingDetail: '/missions/my/wakeup/settings/:settingId',

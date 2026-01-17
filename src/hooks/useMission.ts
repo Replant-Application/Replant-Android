@@ -116,7 +116,8 @@ export const useMission = (
   const [error, setError] = useState<string | null>(null);
 
   // 미션 데이터 로드 (백엔드 API 사용)
-  // 투두리스트에 추가된 미션들만 로드 (UserMission 기반)
+  // GET /api/missions/my: 오늘 할당된 미션만 조회 (투두리스트용)
+  // 캘린더용 과거 미션 조회는 /api/missions/my/calendar/date 또는 /range 사용
   const loadMissions = useCallback(async (): Promise<void> => {
     if (!currentNickname) return;
 
@@ -126,10 +127,13 @@ export const useMission = (
 
       const allMissions: Mission[] = [];
 
-      // 사용자 미션 목록만 불러오기 (투두리스트에 추가된 미션들)
+      // 오늘 할당된 미션만 불러오기 (투두리스트에 추가된 미션들)
+      // 백엔드 API: /api/missions/my는 assignedAt이 오늘인 미션만 반환
+      // 상태: ASSIGNED, PENDING, COMPLETED 모두 포함 (오늘 할당된 것만)
       const userMissionsResult = await getUserMissions({ size: 100 });
       if (userMissionsResult.success && userMissionsResult.data) {
         // UserMission을 Mission 형식으로 변환
+        // 완료된 미션(status === 'COMPLETED')도 포함하여 변환
         userMissionsResult.data.content.forEach(um => {
           try {
             const mission = transformUserMission(um);
@@ -138,6 +142,16 @@ export const useMission = (
             // 미션 데이터가 없는 경우 스킵
             logError('UserMission 변환 실패', e as Error, { userMissionId: um.id });
           }
+        });
+        
+        // 디버깅: 완료된 미션 수 확인
+        const completedCount = userMissionsResult.data.content.filter(
+          um => um.status === 'COMPLETED'
+        ).length;
+        console.log('[useMission] 로드된 미션:', {
+          total: userMissionsResult.data.content.length,
+          completed: completedCount,
+          assigned: userMissionsResult.data.content.filter(um => um.status === 'ASSIGNED').length,
         });
       }
 
