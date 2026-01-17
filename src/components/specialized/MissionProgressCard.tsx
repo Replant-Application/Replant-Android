@@ -48,7 +48,7 @@ export const MissionProgressCard: React.FC<MissionProgressCardProps> = ({
               resizeMode="contain"
             />
           </View>
-          <Text style={styles.badgeButtonText}>뱃지 보기</Text>
+          <Text style={styles.badgeButtonText}>미션 뱃지 현황</Text>
           <Text style={styles.badgeArrow}>›</Text>
         </TouchableOpacity>
       </View>
@@ -103,7 +103,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: colors.primary[100],
+    backgroundColor: 'transparent',
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: spacing[2],

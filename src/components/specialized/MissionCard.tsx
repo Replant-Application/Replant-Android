@@ -185,9 +185,16 @@ const MissionCard: React.FC<MissionCardProps> = ({
       <View style={styles.footer}>
         <View style={styles.experienceInfo}>
           {!(mission.missionType === 'CUSTOM' || mission.is_custom === true) && (
-            <Text style={styles.experienceText}>
-              +{mission.experience || 50} EXP
-            </Text>
+            <View style={styles.experienceContainer}>
+              <Image
+                source={require('../../assets/images/sun.png')}
+                style={styles.sunIcon}
+                resizeMode="contain"
+              />
+              <Text style={styles.experienceText}>
+                {mission.experience || 50} EXP
+              </Text>
+            </View>
           )}
         </View>
 
@@ -503,9 +510,20 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 
+  experienceContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing[1],
+  },
+
+  sunIcon: {
+    width: 16,
+    height: 16,
+  },
+
   experienceText: {
     fontSize: typography.fontSize.sm,
-    color: colors.primary[500],
+    color: '#000000',
     fontWeight: typography.fontWeight.medium,
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,

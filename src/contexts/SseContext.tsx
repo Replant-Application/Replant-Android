@@ -25,6 +25,9 @@ interface SseContextType {
 
   // 마지막 수신 알림
   lastNotification: any | null;
+
+  // FCM 알림 처리 (외부에서 호출 가능)
+  handleFcmNotification: (notification: any) => void;
 }
 
 // ============================================
@@ -47,9 +50,9 @@ export const SseProvider: React.FC<SseProviderProps> = ({ children }) => {
   const { setUnreadNotificationCount } = useOverlay();
   const { isLoggedIn } = useUser();
 
-  // 알림 수신 핸들러
+  // 알림 수신 핸들러 (SSE용)
   const handleNotification = useCallback((notification: any) => {
-    console.log('[SseContext] ========== 알림 수신 ==========');
+    console.log('[SseContext] ========== SSE 알림 수신 ==========');
     console.log('[SseContext] 알림 전체:', JSON.stringify(notification, null, 2));
     console.log('[SseContext] 알림 타입:', typeof notification);
     console.log('[SseContext] 알림 키:', notification ? Object.keys(notification) : 'null');
@@ -65,6 +68,49 @@ export const SseProvider: React.FC<SseProviderProps> = ({ children }) => {
 
     // TODO: 토스트 알림 표시 (선택 사항)
     // showToast(notification.title, notification.content);
+  }, [setUnreadNotificationCount]);
+
+  // FCM 알림 수신 핸들러 (외부에서 호출 가능)
+  const handleFcmNotification = useCallback((notification: any) => {
+    console.log('[SseContext] ========== FCM 알림 수신 ==========');
+    console.log('[SseContext] FCM 알림 전체:', JSON.stringify(notification, null, 2));
+    
+    // FCM 알림 데이터 구조 변환
+    // FCM data에서 userMissionId 또는 referenceId 추출
+    const data = notification.data || notification;
+    
+    // userMissionId 추출 (우선순위: data.userMissionId > data.referenceId)
+    // 백엔드에서 보내는 구조: { userMissionId: "177", referenceId: "177" }
+    const userMissionId = data.userMissionId || data.referenceId;
+    const referenceId = data.referenceId || data.userMissionId;
+    
+    console.log('[SseContext] FCM data 추출:', {
+      'data.userMissionId': data.userMissionId,
+      'data.referenceId': data.referenceId,
+      '추출된 userMissionId': userMissionId,
+      '추출된 referenceId': referenceId,
+    });
+    
+    const fcmNotification = {
+      id: data.id || data.notificationId || Date.now(),
+      title: data.title || notification.notification?.title || '',
+      content: data.content || notification.notification?.body || '',
+      type: data.type || '',
+      userMissionId: userMissionId, // 문자열일 수 있으므로 숫자로 변환 필요
+      referenceId: referenceId, // 문자열일 수 있으므로 숫자로 변환 필요
+      referenceType: data.referenceType || '',
+      createdAt: data.createdAt || new Date().toISOString(),
+      isRead: false,
+    };
+    
+    console.log('[SseContext] 변환된 FCM 알림:', JSON.stringify(fcmNotification, null, 2));
+    console.log('[SseContext] userMissionId 타입:', typeof fcmNotification.userMissionId);
+    console.log('[SseContext] =================================');
+    
+    setLastNotification(fcmNotification);
+
+    // 읽지 않은 알림 카운트 증가
+    setUnreadNotificationCount((prev: number) => prev + 1);
   }, [setUnreadNotificationCount]);
 
   // SSE 연결
@@ -158,6 +204,7 @@ export const SseProvider: React.FC<SseProviderProps> = ({ children }) => {
     connect,
     disconnect,
     lastNotification,
+    handleFcmNotification,
   };
 
   return (

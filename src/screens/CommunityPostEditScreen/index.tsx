@@ -60,8 +60,11 @@ const CommunityPostEditScreen: React.FC<CommunityPostEditScreenProps> = ({
     try {
       setSaving(true);
 
+      // 인증글인 경우 제목은 변경하지 않음 (기존 제목 유지)
+      const updateTitle = post.category === '인증' ? post.title : (title.trim() || post.mission_title);
+      
       const result = await updatePost(post.post_id, {
-        title: title.trim() || post.mission_title,
+        title: updateTitle,
         content: content.trim(),
       });
 
@@ -145,14 +148,28 @@ const CommunityPostEditScreen: React.FC<CommunityPostEditScreenProps> = ({
         {/* 제목 입력 */}
         <View style={styles.inputSection}>
           <Text style={styles.label}>제목</Text>
-          <TextInput
-            style={styles.titleInput}
-            value={title}
-            onChangeText={setTitle}
-            placeholder={post.mission_title || '미션'}
-            placeholderTextColor={colors.text.tertiary}
-            multiline={false}
-          />
+          {post.category === '인증' ? (
+            <>
+              <TextInput
+                style={[styles.titleInput, styles.titleInputDisabled]}
+                value={title}
+                editable={false}
+                placeholder={post.mission_title || '미션'}
+                placeholderTextColor={colors.text.tertiary}
+                multiline={false}
+              />
+              <Text style={styles.disabledNote}>인증글은 제목을 수정할 수 없습니다.</Text>
+            </>
+          ) : (
+            <TextInput
+              style={styles.titleInput}
+              value={title}
+              onChangeText={setTitle}
+              placeholder={post.mission_title || '미션'}
+              placeholderTextColor={colors.text.tertiary}
+              multiline={false}
+            />
+          )}
         </View>
 
         {/* 내용 입력 */}
@@ -305,6 +322,23 @@ const styles = StyleSheet.create({
     }),
     includeFontPadding: false,
     textAlignVertical: 'center',
+  },
+  titleInputDisabled: {
+    backgroundColor: colors.gray[100],
+    color: colors.text.secondary,
+    borderColor: colors.border.light,
+  },
+  disabledNote: {
+    fontSize: typography.fontSize.xs,
+    color: colors.text.tertiary,
+    marginTop: spacing[1],
+    fontStyle: 'italic',
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
   },
   contentInput: {
     backgroundColor: colors.background.primary,

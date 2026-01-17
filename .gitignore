@@ -12,6 +12,7 @@ yarn-error.log*
 android/app/build/
 android/build/
 android/.gradle/
+android/app/debug.keystore
 ios/build/
 ios/Pods/
 ios/*.xcworkspace

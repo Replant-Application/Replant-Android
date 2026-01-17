@@ -182,13 +182,24 @@ const transformBackendPost = (post: BackendPostResponse): CommunityPost => {
     verified = post.status === 'APPROVED';
   }
 
+  // 인증글의 경우 missionTag.title을 우선 사용 (DB에 title이 NULL이어도 missionTag.title은 있음)
+  // 일반 게시글의 경우 title 필드 사용
+  let postTitle: string;
+  if (post.postType === 'VERIFICATION') {
+    // 인증글: missionTag.title 우선, 없으면 title, 둘 다 없으면 fallback
+    postTitle = post.missionTag?.title || post.title?.trim() || '미션';
+  } else {
+    // 일반 게시글: title 필드 사용
+    postTitle = post.title?.trim() || '자유 게시글';
+  }
+  
   return {
     id: post.id.toString(),
     post_id: post.id.toString(),
     mission_id: post.missionTag?.id?.toString() || '',
-    mission_title: post.missionTag?.title || (post.postType === 'VERIFICATION' ? '미션 인증' : '자유 게시글'),
+    mission_title: post.missionTag?.title || postTitle,
     mission_emoji: post.postType === 'VERIFICATION' ? '✅' : '📝',
-    title: post.title || post.missionTag?.title || '제목 없음',
+    title: postTitle, // title 필드를 직접 사용
     content: post.content,
     author: post.userId?.toString() || '',
     author_id: post.userId?.toString() || '',
@@ -211,12 +222,19 @@ const transformBackendPost = (post: BackendPostResponse): CommunityPost => {
  */
 export const getPosts = async (nickname: string): Promise<CommunityPost[]> => {
   try {
-    // 백엔드는 Page 객체를 반환
-    const result = await apiClient.get<BackendPageResponse | BackendPostResponse[]>(API_CONFIG.endpoints.post.list);
+    // 백엔드는 Page 객체를 반환 (파라미터 추가)
+    const result = await apiClient.get<BackendPageResponse | BackendPostResponse[]>(
+      API_CONFIG.endpoints.post.list,
+      {
+        page: 0,
+        size: 100, // 충분히 큰 값으로 설정
+      }
+    );
 
     if (result.success && result.data) {
       let backendPosts: BackendPostResponse[] = [];
 
+      // apiClient.get이 이미 data 필드를 추출하므로, result.data는 { content: [...] } 형태
       // Page 객체인지 배열인지 확인
       if (result.data && typeof result.data === 'object' && 'content' in result.data) {
         // Page 객체
@@ -224,6 +242,16 @@ export const getPosts = async (nickname: string): Promise<CommunityPost[]> => {
       } else if (Array.isArray(result.data)) {
         // 배열
         backendPosts = result.data;
+      }
+      
+      // 디버깅: 첫 번째 인증글 확인
+      const firstVerification = backendPosts.find(p => p.postType === 'VERIFICATION');
+      if (firstVerification) {
+        console.log('[getPosts] 첫 번째 인증글:', {
+          id: firstVerification.id,
+          title: firstVerification.title,
+          missionTagTitle: firstVerification.missionTag?.title,
+        });
       }
 
       // 스크랩 정보 가져오기 (로컬 - 백엔드에 스크랩 기능 없음)

@@ -457,14 +457,12 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onNavigate }) => {
                   modalScaleAnim.setValue(0);
                   modalFadeAnim.setValue(0);
                 });
-                // 모달이 닫힌 후 로그인 처리 및 화면 전환
+                // 모달이 닫힌 후 로그인 처리
                 await login(userName);
                 // OAuth 로그인 후 사용자 정보 새로고침
                 await refreshUser();
-                // 약간의 지연을 주어 상태 업데이트가 완료되도록 함
-                setTimeout(() => {
-                  onNavigate((SCREEN_NAMES.HOME || 'Home') as string);
-                }, 100);
+                // AppNavigator의 useEffect가 돌발 미션 설정을 확인하고 적절한 화면으로 이동하도록 함
+                // 직접 HOME으로 이동하지 않음
               }}
               activeOpacity={0.8}
               accessibilityRole="button"

@@ -120,3 +120,21 @@ export const getUserProfile = async (
   return apiClient.get<UserProfileResponse>(endpoint);
 };
 
+/**
+ * 회원 탈퇴
+ * DELETE /api/users/me
+ * Soft Delete 방식으로 처리되며, 개인정보는 마스킹됩니다.
+ */
+export const deleteMyAccount = async (): Promise<ServiceResult<void>> => {
+  return apiClient.delete<void>(API_CONFIG.endpoints.user.deleteMe);
+};
+
+/**
+ * 계정 복구
+ * POST /api/users/me/restore
+ * 탈퇴한 계정을 복구합니다. 탈퇴 후 30일 이내에만 복구 가능합니다.
+ */
+export const restoreMyAccount = async (): Promise<ServiceResult<void>> => {
+  return apiClient.post<void>(API_CONFIG.endpoints.user.restoreMe);
+};
+

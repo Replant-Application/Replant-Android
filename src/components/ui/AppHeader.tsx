@@ -7,6 +7,7 @@ import { getOptimizedLineHeight } from '../../utils/textStyles';
 import { useOverlay } from '../../contexts/OverlayContext';
 import { loadSoundSettings, saveSoundSettings, SoundSettings } from '../../utils/soundSettings';
 import { backgroundMusicService } from '../../services/backgroundMusicService';
+import { SCREEN_NAMES } from '../../utils/constants';
 
 interface AppHeaderProps {
   navigation: NavigationProp<RootStackParamList>;
@@ -89,10 +90,10 @@ const AppHeader: React.FC<AppHeaderProps> = ({ navigation }) => {
     }
   };
 
-  const handleMenuPress = (screen: string) => {
+  const handleMenuPress = (screen: string, params?: any) => {
     toggleMenu();
     setTimeout(() => {
-      navigation.navigate(screen as any);
+      navigation.navigate(screen as any, params);
     }, 300);
   };
 
@@ -103,7 +104,19 @@ const AppHeader: React.FC<AppHeaderProps> = ({ navigation }) => {
         {/* 알림 버튼 */}
         <TouchableOpacity
           style={styles.iconButton}
-          onPress={() => navigation.navigate('Notification' as any)}
+          onPress={() => {
+            console.log('[AppHeader] 알림 아이콘 클릭:', SCREEN_NAMES.NOTIFICATION);
+            try {
+              if (navigation && typeof navigation.navigate === 'function') {
+                console.log('[AppHeader] navigation.navigate 호출');
+                navigation.navigate(SCREEN_NAMES.NOTIFICATION as any);
+              } else {
+                console.error('[AppHeader] navigation.navigate가 함수가 아님:', typeof navigation?.navigate);
+              }
+            } catch (error) {
+              console.error('[AppHeader] 알림 화면 이동 실패:', error);
+            }
+          }}
           activeOpacity={0.6}
           accessibilityRole="button"
           accessibilityLabel={unreadNotificationCount > 0 ? `알림, ${unreadNotificationCount}개의 읽지 않은 알림` : '알림'}
@@ -220,6 +233,21 @@ const AppHeader: React.FC<AppHeaderProps> = ({ navigation }) => {
                 accessibilityElementsHidden={true}
               />
               <Text style={styles.menuItemText}>사운드 설정</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => handleMenuPress('SpontaneousMissionSetup', { mode: 'edit' })}
+              activeOpacity={0.7}
+              accessibilityRole="button"
+              accessibilityLabel="돌발 미션 설정"
+            >
+              <Image
+                source={require('../../assets/images/surprised_mission.png')}
+                style={styles.menuItemIcon}
+                resizeMode="contain"
+                accessibilityElementsHidden={true}
+              />
+              <Text style={styles.menuItemText}>돌발 미션 설정</Text>
             </TouchableOpacity>
           </Animated.View>
         </TouchableOpacity>

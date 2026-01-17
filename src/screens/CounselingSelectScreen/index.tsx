@@ -118,11 +118,6 @@ const styles = StyleSheet.create({
     height: 24,
     tintColor: colors.text.primary,
   },
-  backButtonIcon: {
-    width: 24,
-    height: 24,
-    tintColor: colors.text.primary,
-  },
   content: {
     padding: spacing[5],
   },

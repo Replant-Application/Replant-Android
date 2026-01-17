@@ -46,7 +46,7 @@ class SSEService {
       this.disconnect();
 
       // SSE 엔드포인트 URL 생성
-      let baseUrl = API_BASE_URL || 'http://localhost:3000/api';
+      let baseUrl = API_BASE_URL || 'http://localhost:8080/api';
       // Android 에뮬레이터에서 localhost를 10.0.2.2로 변환
       if (Platform.OS === 'android' && baseUrl.includes('localhost')) {
         baseUrl = baseUrl.replace('localhost', '10.0.2.2');

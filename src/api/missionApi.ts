@@ -511,12 +511,19 @@ export interface VerificationPost {
     id: number;
     title: string;
   };
-  missionTitle: string;
+  missionTag?: {
+    id: number;
+    title: string;
+    type: 'OFFICIAL' | 'CUSTOM';
+  };
+  title?: string; // API 응답에 직접 포함된 제목 필드 (missionTag.title과 동일)
+  missionTitle?: string; // 하위 호환성을 위해 유지
   content: string;
   imageUrls: string[];
   status: VerificationStatus;
-  approveCount: number;
-  rejectCount: number;
+  approveCount?: number; // API 응답에는 likeCount로 올 수 있음
+  likeCount?: number; // API 응답 필드명
+  rejectCount?: number;
   commentCount: number;
   createdAt: string;
   myVote?: VoteType;
@@ -1106,7 +1113,26 @@ export interface WakeupVerificationResult {
   currentTimeSlot?: WakeupTimeSlot;
   settingTimeSlot?: WakeupTimeSlot;
   message: string;
+  userMissionId?: number; // 자동으로 찾은 userMissionId
+  assignedAt?: string; // 할당 시간
 }
+
+/**
+ * 현재 활성화된 기상 미션 조회
+ * GET /api/missions/my/wakeup/current
+ * 인증 필요
+ */
+export interface WakeupCurrentMissionResponse {
+  userMissionId: number;
+  assignedAt: string;
+  timeRemaining: number; // 초 단위
+  canVerify: boolean;
+  message?: string;
+}
+
+export const getCurrentWakeupMission = async (): Promise<ServiceResult<WakeupCurrentMissionResponse>> => {
+  return apiClient.get<WakeupCurrentMissionResponse>(API_CONFIG.endpoints.userMission.wakeupCurrent);
+};
 
 /**
  * 기상 미션 시간대 설정
@@ -1165,10 +1191,13 @@ export const getNextWeekSetupInfo = async (): Promise<ServiceResult<NextWeekSetu
 /**
  * 기상 미션 인증 시간 확인
  * GET /api/missions/my/wakeup/verify-time
+ * GET /api/missions/my/wakeup/verify-time?userMissionId=177
  * 인증 필요
+ * @param userMissionId - 선택적 파라미터. 제공되지 않으면 자동으로 찾음
  */
-export const verifyWakeupTime = async (): Promise<ServiceResult<WakeupVerificationResult>> => {
-  return apiClient.get<WakeupVerificationResult>(API_CONFIG.endpoints.userMission.wakeupVerifyTime);
+export const verifyWakeupTime = async (userMissionId?: number): Promise<ServiceResult<WakeupVerificationResult>> => {
+  const params = userMissionId ? { userMissionId } : undefined;
+  return apiClient.get<WakeupVerificationResult>(API_CONFIG.endpoints.userMission.wakeupVerifyTime, params);
 };
 
 /**
@@ -1181,4 +1210,56 @@ export const getMissionHistory = async (params?: {
   size?: number;
 }): Promise<ServiceResult<UserMissionListResponse>> => {
   return apiClient.get<UserMissionListResponse>(API_CONFIG.endpoints.userMission.history, params);
+};
+
+// ============================================
+// 돌발 미션 설정
+// ============================================
+
+export interface SpontaneousMissionSetupRequest {
+  sleepTime: string; // "HH:mm" 형식
+  wakeTime: string; // "HH:mm" 형식
+  breakfastTime: string; // "HH:mm" 형식
+  lunchTime: string; // "HH:mm" 형식
+  dinnerTime: string; // "HH:mm" 형식
+}
+
+export interface SpontaneousMissionSetupResponse {
+  isSpontaneousMissionSetupCompleted: boolean;
+  sleepTime: string;
+  wakeTime: string;
+  breakfastTime: string;
+  lunchTime: string;
+  dinnerTime: string;
+}
+
+/**
+ * 돌발 미션 설정 조회
+ * GET /api/spontaneous-missions/setup
+ * 인증 필요
+ */
+export const getSpontaneousMissionSetup = async (): Promise<ServiceResult<SpontaneousMissionSetupResponse>> => {
+  return apiClient.get<SpontaneousMissionSetupResponse>(API_CONFIG.endpoints.spontaneousMission.setup);
+};
+
+/**
+ * 돌발 미션 설정 제출
+ * POST /api/spontaneous-missions/setup
+ * 인증 필요
+ */
+export const setupSpontaneousMission = async (
+  data: SpontaneousMissionSetupRequest
+): Promise<ServiceResult<SpontaneousMissionSetupResponse>> => {
+  return apiClient.post<SpontaneousMissionSetupResponse>(API_CONFIG.endpoints.spontaneousMission.setup, data);
+};
+
+/**
+ * 돌발 미션 설정 수정
+ * PUT /api/spontaneous-missions/setup
+ * 인증 필요
+ */
+export const updateSpontaneousMissionSetup = async (
+  data: SpontaneousMissionSetupRequest
+): Promise<ServiceResult<SpontaneousMissionSetupResponse>> => {
+  return apiClient.put<SpontaneousMissionSetupResponse>(API_CONFIG.endpoints.spontaneousMission.setup, data);
 };

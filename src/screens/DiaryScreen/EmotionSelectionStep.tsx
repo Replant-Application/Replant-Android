@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Platfo
 import { colors, spacing, typography, borderRadius, shadows } from '../../utils/designTokens';
 import { getOptimizedLineHeight } from '../../utils/textStyles';
 import { EMOTION_TAGS } from './DiaryScreen.constants';
-import { getEmotionColor } from './DiaryScreen.utils';
+import { getEmotionColor, addOpacity } from './DiaryScreen.utils';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const COLUMNS = 3; // 그리드 열 수
@@ -45,11 +45,12 @@ const EmotionSelectionStep: React.FC<EmotionSelectionStepProps> = ({
                   styles.emotionTag,
                   {
                     backgroundColor: isSelected 
-                      ? emotionColor 
+                      ? addOpacity(emotionColor, 0.3) 
                       : 'rgba(255, 255, 255, 0.1)',
-                    borderColor: isSelected ? emotionColor : 'rgba(255, 255, 255, 0.3)',
+                    borderColor: isSelected 
+                      ? addOpacity(emotionColor, 0.5) 
+                      : 'rgba(255, 255, 255, 0.3)',
                   },
-                  isSelected && styles.emotionTagSelected
                 ]}
                 onPress={() => onToggleEmotion(emotion)}
                 activeOpacity={0.7}
@@ -125,13 +126,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing[1],
     paddingVertical: spacing[2],
     borderRadius: borderRadius.md,
-    borderWidth: 1,
+    borderWidth: 1, // 항상 동일한 borderWidth 유지
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  emotionTagSelected: {
-    borderWidth: 3,
-    ...shadows.base,
   },
   emotionTagEmpty: {
     width: BUTTON_WIDTH,
@@ -143,8 +140,8 @@ const styles = StyleSheet.create({
     backgroundColor: colors.gray[900],
     borderRadius: borderRadius.lg,
     padding: spacing[3],
-    height: 48,
-    fontSize: typography.fontSize.base,
+    height: 37,
+    fontSize: typography.fontSize.sm,
     color: colors.white,
     borderWidth: 1,
     borderColor: colors.gray[700],
@@ -167,7 +164,7 @@ const styles = StyleSheet.create({
   },
   emotionTagTextSelected: {
     color: colors.white,
-    fontWeight: typography.fontWeight.bold,
+    fontWeight: typography.fontWeight.medium,
   },
 });
 

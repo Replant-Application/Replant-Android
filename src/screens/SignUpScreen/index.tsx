@@ -763,15 +763,14 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onNavigate }) => {
         buttonText="시작하기"
         onClose={async () => {
           setShowSignUpCompleteModal(false);
-          // 모달이 닫힌 후 로그인 처리 및 홈으로 이동
+          // 모달이 닫힌 후 로그인 처리
           try {
             await login(nickname);
           } catch (error) {
             console.error('Login error after signup:', error);
           }
-          setTimeout(() => {
-            onNavigate(SCREEN_NAMES.HOME as string);
-          }, 100);
+          // AppNavigator의 useEffect가 돌발 미션 설정을 확인하고 적절한 화면으로 이동하도록 함
+          // 직접 HOME으로 이동하지 않음
         }}
       />
 

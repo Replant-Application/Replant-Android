@@ -26,6 +26,10 @@ export type NotificationType =
   | 'VERIFICATION_APPROVED'  // 인증 승인
   | 'VERIFICATION_REJECTED'  // 인증 거절
   | 'VOTE'                   // 투표
+  // 돌발 미션 관련
+  | 'SPONTANEOUS_WAKE_UP'    // 기상 미션
+  | 'SPONTANEOUS_MEAL'       // 식사 미션
+  | 'SPONTANEOUS_DIARY'      // 감성일기 미션
   // 기타
   | 'DIARY'                  // 다이어리
   | 'REPORT'                 // 신고

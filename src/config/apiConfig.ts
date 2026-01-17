@@ -50,6 +50,8 @@ export const API_CONFIG = {
     user: {
       me: '/users/me',
       updateMe: '/users/me',
+      deleteMe: '/users/me', // 회원 탈퇴
+      restoreMe: '/users/me/restore', // 계정 복구
       getUser: '/users/:userId',
     },
 
@@ -98,6 +100,7 @@ export const API_CONFIG = {
       wakeupCurrentWeek: '/missions/my/wakeup/settings/current',
       wakeupNextWeekInfo: '/missions/my/wakeup/settings/next-week-info',
       wakeupVerifyTime: '/missions/my/wakeup/verify-time',
+      wakeupCurrent: '/missions/my/wakeup/current', // 현재 활성화된 기상 미션 조회
     },
 
     // 인증 게시판 (Verification)
@@ -191,6 +194,11 @@ export const API_CONFIG = {
       sendCustomNotification: '/admin/send/custom',
       sendDiaryNotification: '/admin/send/diary',
       sendReportNotification: '/admin/send/report',
+    },
+
+    // 돌발 미션 (Spontaneous Mission)
+    spontaneousMission: {
+      setup: '/spontaneous-missions/setup',
     },
   },
 

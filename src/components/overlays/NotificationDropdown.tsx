@@ -21,12 +21,15 @@ import {
   Dimensions,
   Platform,
   Image,
+  Alert,
 } from 'react-native';
 import { useOverlay } from '../../contexts/OverlayContext';
 import { getNotifications, markNotificationAsRead } from '../../api/notificationApi';
+import { getUserMission } from '../../api/missionApi';
 import { colors, spacing, typography, borderRadius, shadows } from '../../utils/designTokens';
 import { getOptimizedLineHeight } from '../../utils/textStyles';
 import { formatTimeAgo } from '../../utils/dateUtils';
+import { SCREEN_NAMES } from '../../utils/constants';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const DROPDOWN_WIDTH = Math.min(SCREEN_WIDTH - 32, 340);
@@ -142,7 +145,66 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
 
     // 화면 이동 - referenceType에 따라 적절한 상세 화면으로 이동
     if (onNavigate) {
-      const { referenceType, referenceId } = notification;
+      const { referenceType, referenceId, type } = notification;
+
+      // 돌발 미션 알림 처리
+      if (type === 'SPONTANEOUS_WAKE_UP' || type === 'SPONTANEOUS_MEAL' || type === 'SPONTANEOUS_DIARY') {
+        console.log('[NotificationDropdown] ✅ 돌발 미션 알림 클릭:', type);
+        
+        if (!referenceId) {
+          console.error('[NotificationDropdown] ❌ referenceId가 없습니다.');
+          return;
+        }
+
+        try {
+          // userMissionId로 미션 정보 조회
+          const missionResult = await getUserMission(referenceId);
+          
+          if (!missionResult.success || !missionResult.data) {
+            console.error('[NotificationDropdown] ❌ 미션 정보 조회 실패:', missionResult.error);
+            return;
+          }
+
+          const userMission = missionResult.data;
+          const mission = userMission.mission || userMission.customMission;
+          
+          if (!mission) {
+            console.error('[NotificationDropdown] ❌ 미션 정보가 없습니다.');
+            return;
+          }
+
+          // 알림 타입에 따라 적절한 화면으로 이동
+          if (type === 'SPONTANEOUS_WAKE_UP') {
+            // 기상 미션 → 인증 화면으로 이동
+            console.log('[NotificationDropdown] ✅ 기상 미션 인증 화면으로 이동, userMissionId:', referenceId);
+            if (!referenceId) {
+              console.error('[NotificationDropdown] ❌ referenceId가 없습니다.');
+              Alert.alert('오류', '미션 정보가 올바르지 않습니다.');
+              return;
+            }
+            onNavigate(SCREEN_NAMES.WAKE_UP_VERIFICATION, {
+              userMissionId: referenceId,
+            });
+          } else if (type === 'SPONTANEOUS_MEAL') {
+            // 식사 미션 → 게시글 작성 화면으로 이동
+            console.log('[NotificationDropdown] ✅ 식사 미션 게시글 작성 화면으로 이동');
+            onNavigate(SCREEN_NAMES.COMMUNITY_POST_CREATE, {
+              type: 'VERIFICATION',
+              userMissionId: referenceId,
+              missionId: String(mission.id),
+              missionTitle: mission.title || '식사 미션',
+              missionEmoji: '🍽️',
+            });
+          } else if (type === 'SPONTANEOUS_DIARY') {
+            // 감성일기 미션 → 감성일기 작성 화면으로 이동
+            console.log('[NotificationDropdown] ✅ 감성일기 작성 화면으로 이동');
+            onNavigate(SCREEN_NAMES.DIARY);
+          }
+        } catch (error) {
+          console.error('[NotificationDropdown] ❌ 돌발 미션 알림 처리 실패:', error);
+        }
+        return;
+      }
 
       switch (referenceType) {
         case 'VERIFICATION':
