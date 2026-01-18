@@ -49,7 +49,7 @@ export const MissionProgressCard: React.FC<MissionProgressCardProps> = ({
               accessibilityLabel="뱃지 아이콘"
             />
           </View>
-          <Text style={styles.badgeButtonText}>미션 뱃지 현황</Text>
+          <Text style={styles.badgeButtonText}>미션 뱃지</Text>
           <Text style={styles.badgeArrow}>›</Text>
         </TouchableOpacity>
       </View>

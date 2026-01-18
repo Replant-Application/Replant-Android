@@ -921,7 +921,7 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
                     resizeMode="contain"
                     accessibilityLabel="미션 만들기 아이콘"
                   />
-                  <Text style={styles.createMissionText}>미션 만들기</Text>
+                  <Text style={styles.createMissionText}>커스텀 미션 만들기</Text>
                 </TouchableOpacity>
               )}
 
