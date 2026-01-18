@@ -8,7 +8,7 @@ import { useUser } from '../../contexts/UserContext';
 
 interface PostCardProps {
   post: CommunityPost;
-  currentUserId?: string;
+  currentUserId?: string | number; // string (레거시) 또는 number 지원
   onPress?: (postId: string) => void;
   onLike?: (postId: string) => void;
   onScrap?: (postId: string) => void;
@@ -30,10 +30,17 @@ const PostCard: React.FC<PostCardProps> = ({
   style
 }) => {
   const [showMenu, setShowMenu] = useState(false);
-  const { currentNickname } = useUser();
+  const { currentUserId: contextUserId } = useUser();
+  
+  // currentUserId는 prop이 있으면 prop 우선, 없으면 context에서 가져오기
+  const effectiveUserId = currentUserId !== undefined 
+    ? (typeof currentUserId === 'string' ? Number(currentUserId) : currentUserId)
+    : contextUserId;
 
-  // 본인 게시글인지 확인 (author_nickname으로 비교)
-  const isOwnPost = currentNickname && post.author_nickname === currentNickname;
+  // 본인 게시글인지 확인 (author_id로 비교, fallback으로 닉네임 비교)
+  const isOwnPost = effectiveUserId !== null && effectiveUserId !== undefined && 
+    post.author_id !== undefined && 
+    Number(post.author_id) === Number(effectiveUserId);
   // 인증되지 않은 게시글인지 확인 (verified가 false이거나 undefined인 경우)
   const canEditDelete = isOwnPost && !post.verified;
 

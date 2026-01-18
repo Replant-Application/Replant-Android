@@ -22,7 +22,7 @@ import {
 } from '../types';
 
 export const useCommunity = (): UseCommunityReturn => {
-  const { currentNickname } = useUser();
+  const { currentNickname, currentUserId } = useUser();
   const [posts, setPosts] = useState<CommunityPost[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -142,9 +142,15 @@ export const useCommunity = (): UseCommunityReturn => {
       // 해당 게시글 찾기
       const targetPost = posts.find(p => p.post_id === postId);
 
-      // 내 게시글에는 좋아요를 누를 수 없음
-      if (targetPost && targetPost.author_nickname === currentNickname) {
-        return { success: false, error: '내 게시글에는 좋아요를 누를 수 없습니다.' };
+      // 내 게시글에는 좋아요를 누를 수 없음 (user_id 비교, fallback으로 닉네임 비교)
+      if (targetPost) {
+        const isOwnPost = currentUserId !== null && 
+          targetPost.author_id !== undefined && 
+          Number(targetPost.author_id) === currentUserId;
+        
+        if (isOwnPost || (currentUserId === null && targetPost.author_nickname === currentNickname)) {
+          return { success: false, error: '내 게시글에는 좋아요를 누를 수 없습니다.' };
+        }
       }
 
       try {

@@ -16,6 +16,7 @@ import { registerFcmToken } from '../api/notificationApi';
 interface UserContextType {
   user: User | null;
   currentNickname: string | null;
+  currentUserId: number | null;
   isLoggedIn: boolean;
   isLoading: boolean;
   login: (nickname: string) => Promise<boolean>;
@@ -41,6 +42,7 @@ interface UserProviderProps {
 export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [currentNickname, setCurrentNickname] = useState<string | null>(null);
+  const [currentUserId, setCurrentUserId] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   // OAuth 초기화 및 사용자 정보 로드
@@ -89,6 +91,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
 
         setUser(userData);
         setCurrentNickname(nickname);
+        setCurrentUserId(storedUserInfo.id || null);
         setIsLoading(false);
         
         // 자동 로그인 성공 시 FCM 토큰 등록
@@ -234,6 +237,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         }
         setUser(existingUserData);
         setCurrentNickname(nickname);
+        setCurrentUserId(storedUserInfo?.id || null);
         logUserAction('login_success', { nickname, userId: existingUserData.id, isExistingUser: true });
         
         // 로그인 성공 시 FCM 토큰 등록
@@ -268,6 +272,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
 
       setUser(newUser);
       setCurrentNickname(nickname);
+      setCurrentUserId(storedUserInfo?.id || null);
 
       // 미션 데이터 초기화 (신규 사용자만)
       await initializeUserData(userId, nickname);
@@ -367,6 +372,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
 
       setUser(null);
       setCurrentNickname(null);
+      setCurrentUserId(null);
     } catch (error) {
       logError('로그아웃 실패', error as Error);
     }
@@ -409,6 +415,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
           }
           setUser(userData);
           setCurrentNickname(nickname);
+          setCurrentUserId(storedUserInfo?.id || null);
         }
       }
     } catch (error) {
@@ -488,13 +495,14 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   const value = useMemo(() => ({
     user,
     currentNickname,
+    currentUserId,
     isLoggedIn: !!user,
     login,
     logout,
     refreshUser,
     updateNickname,
     isLoading,
-  }), [user, currentNickname, login, logout, refreshUser, updateNickname, isLoading]);
+  }), [user, currentNickname, currentUserId, login, logout, refreshUser, updateNickname, isLoading]);
 
   return (
     <UserContext.Provider value={value}>

@@ -796,6 +796,7 @@ export const verifyByTime = async (
 export interface VerificationComment {
   comment_id: string;
   author: string;
+  author_id?: string; // 작성자 ID (user_id 비교용)
   author_nickname: string;
   content: string;
   created_at: string;
@@ -829,6 +830,7 @@ interface BackendCommentResponse {
 const transformComment = (comment: BackendCommentResponse): VerificationComment => ({
   comment_id: String(comment.id),
   author: String(comment.userId),
+  author_id: String(comment.userId), // 작성자 ID 추가 (user_id 비교용)
   author_nickname: comment.userNickname,
   content: comment.content,
   created_at: comment.createdAt,

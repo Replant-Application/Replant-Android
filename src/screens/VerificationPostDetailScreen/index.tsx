@@ -36,7 +36,6 @@ import { colors, spacing, typography, borderRadius } from '../../utils/designTok
 import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types/navigation';
 import { useUser } from '../../contexts/UserContext';
-import { getUserInfo } from '../../utils/tokenStorage';
 
 interface VerificationPostDetailScreenProps {
   navigation: NavigationProp<RootStackParamList>;
@@ -48,7 +47,7 @@ const VerificationPostDetailScreen: React.FC<VerificationPostDetailScreenProps> 
   route,
 }) => {
   const { verificationId } = route.params;
-  const { currentNickname } = useUser();
+  const { currentNickname, currentUserId } = useUser();
 
   const [post, setPost] = useState<VerificationPost | null>(null);
   const [comments, setComments] = useState<VerificationComment[]>([]);
@@ -59,9 +58,11 @@ const VerificationPostDetailScreen: React.FC<VerificationPostDetailScreenProps> 
   const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
   const [editingContent, setEditingContent] = useState('');
   const [replyingToComment, setReplyingToComment] = useState<{ id: string; nickname: string } | null>(null);
-  const [currentUserId, setCurrentUserId] = useState<number | null>(null);
 
-  const isAuthor = post?.userNickname === currentNickname;
+  // 본인 게시글인지 확인 (user_id 비교, fallback으로 닉네임 비교)
+  const isAuthor = currentUserId !== null && 
+    post?.userId !== undefined && 
+    post.userId === currentUserId;
 
   const loadPost = useCallback(async () => {
     try {
@@ -112,20 +113,6 @@ const VerificationPostDetailScreen: React.FC<VerificationPostDetailScreenProps> 
     setLoading(false);
   }, [loadPost, loadComments]);
 
-  // 현재 사용자 ID 로드
-  useEffect(() => {
-    const loadCurrentUserId = async () => {
-      try {
-        const userInfo = await getUserInfo();
-        if (userInfo?.id) {
-          setCurrentUserId(userInfo.id);
-        }
-      } catch (error) {
-        console.error('사용자 ID 로드 실패', error);
-      }
-    };
-    loadCurrentUserId();
-  }, []);
 
   useEffect(() => {
     loadData();
@@ -571,7 +558,10 @@ const VerificationPostDetailScreen: React.FC<VerificationPostDetailScreenProps> 
                     ) : (
                       <CommentCard
                         comment={parentComment}
-                        isAuthor={currentUserId !== null && parseInt(parentComment.author) === currentUserId}
+                        isAuthor={currentUserId !== null && 
+                          (parentComment.author_id !== undefined 
+                            ? Number(parentComment.author_id) === currentUserId
+                            : parseInt(parentComment.author) === currentUserId)}
                         onEdit={handleEditComment}
                         onDelete={handleDeleteComment}
                         onReply={handleReplyComment}
@@ -613,7 +603,10 @@ const VerificationPostDetailScreen: React.FC<VerificationPostDetailScreenProps> 
                           ) : (
                             <CommentCard
                               comment={reply}
-                              isAuthor={currentUserId !== null && parseInt(reply.author) === currentUserId}
+                              isAuthor={currentUserId !== null && 
+                                (reply.author_id !== undefined 
+                                  ? Number(reply.author_id) === currentUserId
+                                  : parseInt(reply.author) === currentUserId)}
                               isReply={true}
                               onEdit={handleEditComment}
                               onDelete={handleDeleteComment}

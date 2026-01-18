@@ -35,7 +35,7 @@ const CommunityPostEditScreen: React.FC<CommunityPostEditScreenProps> = ({
   route,
 }) => {
   const { postId } = route.params;
-  const { currentNickname } = useUser();
+  const { currentNickname, currentUserId } = useUser();
   const { post, loading } = useCommunityPost(postId);
   const { updatePost } = useCommunity();
   const [title, setTitle] = useState('');
@@ -111,7 +111,12 @@ const CommunityPostEditScreen: React.FC<CommunityPostEditScreenProps> = ({
     );
   }
 
-  if (post.author_nickname !== currentNickname) {
+  // 본인 게시글인지 확인 (user_id 비교, fallback으로 닉네임 비교)
+  const isAuthor = currentUserId !== null && 
+    post.author_id !== undefined && 
+    Number(post.author_id) === currentUserId;
+  
+  if (!isAuthor && (currentUserId === null || post.author_nickname !== currentNickname)) {
     Alert.alert('오류', '본인의 게시글만 수정할 수 있습니다.');
     navigation.goBack();
     return null;

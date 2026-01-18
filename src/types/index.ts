@@ -260,6 +260,7 @@ export interface CommunityPost {
   is_liked?: boolean; // 현재 사용자가 좋아요 했는지
   is_scrapped?: boolean; // 현재 사용자가 스크랩 했는지
   verified?: boolean; // 인증 완료 여부 (false일 때만 수정/삭제 가능)
+  status?: string; // 인증 상태 (PENDING, APPROVED) - VERIFICATION 타입일 때만
 }
 
 export interface CommunityComment {
@@ -268,6 +269,7 @@ export interface CommunityComment {
   post_id: string;
   content: string;
   author: string;
+  author_id?: string; // 작성자 ID (user_id 비교용)
   author_nickname: string;
   created_at: string;
   updated_at?: string;
@@ -343,7 +345,7 @@ export interface UseCommunityPostReturn {
   error: string | null;
   loadPost: () => Promise<void>;
   loadComments: () => Promise<void>;
-  toggleLike: () => Promise<ServiceResult<void>>;
+  toggleLike: () => Promise<ServiceResult<{ isLiked: boolean; likeCount: number; verified?: boolean; status?: string }>>;
   createComment: (content: string, parentCommentId?: string) => Promise<ServiceResult<CommunityComment>>;
   updateComment: (commentId: string, content: string) => Promise<ServiceResult<CommunityComment>>;
   deleteComment: (commentId: string) => Promise<ServiceResult<void>>;

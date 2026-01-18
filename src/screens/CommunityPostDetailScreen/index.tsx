@@ -27,7 +27,6 @@ import { RootStackParamList } from '../../types/navigation';
 import { useUser } from '../../contexts/UserContext';
 import { getHiddenComments, hideComment } from '../../utils/hiddenContentStorage';
 import { logError } from '../../utils/logger';
-import { getUserInfo } from '../../utils/tokenStorage';
 
 interface CommunityPostDetailScreenProps {
   navigation: NavigationProp<RootStackParamList>;
@@ -39,7 +38,7 @@ const CommunityPostDetailScreen: React.FC<CommunityPostDetailScreenProps> = ({
   route,
 }) => {
   const { postId } = route.params;
-  const { currentNickname } = useUser();
+  const { currentNickname, currentUserId } = useUser();
   const { post, comments, loading, error, createComment, updateComment, deleteComment, toggleLike } =
     useCommunityPost(postId);
   const { deletePost } = useCommunity();
@@ -54,26 +53,14 @@ const CommunityPostDetailScreen: React.FC<CommunityPostDetailScreenProps> = ({
   const [showAlert, setShowAlert] = useState(false);
   const [alertTitle, setAlertTitle] = useState('');
   const [alertMessage, setAlertMessage] = useState('');
-  const [currentUserId, setCurrentUserId] = useState<number | null>(null);
   // 삭제 확인 모달 상태
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
-  const isAuthor = post?.author_nickname === currentNickname;
+  // 본인 게시글인지 확인 (user_id 비교, fallback으로 닉네임 비교)
+  const isAuthor = currentUserId !== null && 
+    post?.author_id !== undefined && 
+    Number(post.author_id) === currentUserId;
 
-  // 현재 사용자 ID 로드
-  useEffect(() => {
-    const loadCurrentUserId = async () => {
-      try {
-        const userInfo = await getUserInfo();
-        if (userInfo?.id) {
-          setCurrentUserId(userInfo.id);
-        }
-      } catch (error) {
-        logError('사용자 ID 로드 실패', error as Error);
-      }
-    };
-    loadCurrentUserId();
-  }, []);
 
   // 숨긴 댓글 목록 로드
   useEffect(() => {
@@ -389,7 +376,9 @@ const CommunityPostDetailScreen: React.FC<CommunityPostDetailScreenProps> = ({
                     ) : (
                       <CommentCard
                         comment={parentComment}
-                        isAuthor={parentComment.author_nickname === currentNickname}
+                        isAuthor={currentUserId !== null && 
+                          parentComment.author_id !== undefined && 
+                          Number(parentComment.author_id) === currentUserId}
                         onEdit={handleEditComment}
                         onDelete={handleDeleteComment}
                         onReply={handleReplyComment}
@@ -439,7 +428,9 @@ const CommunityPostDetailScreen: React.FC<CommunityPostDetailScreenProps> = ({
                           ) : (
                             <CommentCard
                               comment={reply}
-                              isAuthor={reply.author_nickname === currentNickname}
+                              isAuthor={currentUserId !== null && 
+                                reply.author_id !== undefined && 
+                                Number(reply.author_id) === currentUserId}
                               isReply={true}
                               onEdit={handleEditComment}
                               onDelete={handleDeleteComment}

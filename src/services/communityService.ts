@@ -479,6 +479,7 @@ const transformBackendComment = (comment: BackendComment, postId: string): Commu
   post_id: postId,
   content: comment.content,
   author: comment.userId.toString(),
+  author_id: comment.userId.toString(), // 작성자 ID 추가 (user_id 비교용)
   author_nickname: comment.userNickname,
   created_at: comment.createdAt,
   updated_at: comment.updatedAt,
