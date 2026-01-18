@@ -520,7 +520,7 @@ const SpontaneousMissionSetupScreen: React.FC<SpontaneousMissionSetupScreenProps
     onToggle: () => void;
     width?: number;
   }) => (
-    <View style={[styles.dropdownContainer, width && { width }]} onStartShouldSetResponder={() => true}>
+    <View style={[styles.dropdownContainer, width && { width }]}>
       <TouchableOpacity
         style={styles.dropdownButton}
         onPress={(e) => {
@@ -536,6 +536,7 @@ const SpontaneousMissionSetupScreen: React.FC<SpontaneousMissionSetupScreenProps
         <View 
           style={styles.dropdownList}
           onStartShouldSetResponder={() => true}
+          onMoveShouldSetResponder={() => true}
         >
           <ScrollView
             style={styles.dropdownScrollView}
@@ -543,6 +544,8 @@ const SpontaneousMissionSetupScreen: React.FC<SpontaneousMissionSetupScreenProps
             nestedScrollEnabled={true}
             showsVerticalScrollIndicator={true}
             bounces={false}
+            scrollEnabled={true}
+            keyboardShouldPersistTaps="handled"
           >
             {options.map((option) => (
               <TouchableOpacity
@@ -613,7 +616,11 @@ const SpontaneousMissionSetupScreen: React.FC<SpontaneousMissionSetupScreenProps
 
         <TouchableOpacity
           activeOpacity={1}
-          onPress={() => setOpenDropdown(null)}
+          onPress={() => {
+            if (openDropdown) {
+              setOpenDropdown(null);
+            }
+          }}
           style={styles.contentTouchable}
         >
           <View style={styles.content}>
@@ -929,6 +936,7 @@ const styles = StyleSheet.create({
   },
   dropdownScrollView: {
     maxHeight: 200,
+    flexGrow: 0,
   },
   dropdownScrollContent: {
     paddingVertical: spacing[1],

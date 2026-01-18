@@ -12,7 +12,6 @@ import {
   updateComment as updateCommentService,
   deleteComment as deleteCommentService,
   toggleLike as toggleLikeService,
-  checkLikeVerification,
 } from '../services/communityService';
 import { autoLevelupCharacter } from '../services/characterService';
 import { getData, getStorageKeys } from '../services/storage';
