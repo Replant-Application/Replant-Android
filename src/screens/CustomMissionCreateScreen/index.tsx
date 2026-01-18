@@ -10,6 +10,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   Image,
+  Dimensions,
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Button, Header, SectionTitle, FormCard } from '../../components/ui';
@@ -77,6 +78,9 @@ const CustomMissionCreateScreen: React.FC<CustomMissionCreateScreenProps> = ({ n
   const { currentNickname } = useUser();
   const { createCustomMission } = useMission();
   const generatedMission = route?.params?.generatedMission;
+  const screenWidth = Dimensions.get('window').width;
+  // 화면 좌우 패딩(24*2=48) + Card 내부 패딩(spacing[4]*2=32) + 버튼 간 간격(spacing[2]*2=16)을 뺀 후 3등분
+  const buttonWidth = (screenWidth - 48 - spacing[4] * 2 - spacing[2] * 2) / 3;
 
   // 수정 모드 관련
   const isEditMode = route?.params?.mode === 'edit';
@@ -244,6 +248,7 @@ const CustomMissionCreateScreen: React.FC<CustomMissionCreateScreenProps> = ({ n
             value={title}
             onChangeText={setTitle}
             placeholder="미션 제목을 입력하세요"
+            placeholderTextColor={colors.text.secondary}
             maxLength={50}
           />
         </FormCard>
@@ -255,6 +260,7 @@ const CustomMissionCreateScreen: React.FC<CustomMissionCreateScreenProps> = ({ n
             value={description}
             onChangeText={setDescription}
             placeholder="미션에 대한 자세한 설명을 입력하세요"
+            placeholderTextColor={colors.text.secondary}
             multiline
             numberOfLines={4}
             maxLength={200}
@@ -529,9 +535,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: spacing[2],
+    justifyContent: 'flex-start',
   },
   worryTypeButton: {
-    paddingHorizontal: spacing[3],
+    paddingHorizontal: spacing[2],
     paddingVertical: spacing[2],
     borderRadius: borderRadius.full,
     backgroundColor: colors.background.primary,
@@ -539,7 +546,13 @@ const styles = StyleSheet.create({
     borderColor: colors.border.light,
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     gap: spacing[1],
+    flexBasis: '30%',
+    flexGrow: 0,
+    flexShrink: 0,
+    height: 40,
+    marginBottom: spacing[2],
   },
   selectedWorryType: {
     backgroundColor: colors.primary[100],
@@ -576,7 +589,10 @@ const styles = StyleSheet.create({
     borderColor: colors.border.light,
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     gap: spacing[1],
+    minWidth: 90,
+    height: 40,
   },
   selectedCategory: {
     backgroundColor: colors.primary[100],
@@ -595,14 +611,12 @@ const styles = StyleSheet.create({
   },
   // 인증방식 스타일
   verificationContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: 'column',
+    gap: spacing[2],
   },
   verificationButton: {
-    flex: 1,
     alignItems: 'center',
     padding: spacing[3],
-    marginHorizontal: spacing[1],
     borderRadius: borderRadius.md,
     backgroundColor: colors.background.primary,
     borderWidth: 1,
