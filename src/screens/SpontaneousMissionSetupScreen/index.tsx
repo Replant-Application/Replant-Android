@@ -4,7 +4,7 @@
  * 스텝별로 하나씩 입력하는 온보딩 형식
  */
 
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import {
   View,
   Text,
@@ -14,6 +14,7 @@ import {
   Platform,
   KeyboardAvoidingView,
   ImageBackground,
+  Dimensions,
 } from 'react-native';
 import { Header, AlertModal } from '../../components/ui';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
@@ -96,7 +97,6 @@ const SpontaneousMissionSetupScreen: React.FC<SpontaneousMissionSetupScreenProps
   const [breakfastTime, setBreakfastTime] = useState<TimeState>({ period: 'AM', hour: 8, minute: 0 });
   const [lunchTime, setLunchTime] = useState<TimeState>({ period: 'PM', hour: 12, minute: 30 });
   const [dinnerTime, setDinnerTime] = useState<TimeState>({ period: 'PM', hour: 7, minute: 0 });
-  const [openDropdown, setOpenDropdown] = useState<'period' | 'hour' | 'minute' | null>(null);
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(isEditMode);
   const [alertModal, setAlertModal] = useState<{
@@ -376,7 +376,6 @@ const SpontaneousMissionSetupScreen: React.FC<SpontaneousMissionSetupScreenProps
     try {
       if (safeCurrentStep < STEPS.length - 1) {
         setCurrentStep(safeCurrentStep + 1);
-        setOpenDropdown(null);
       } else {
         handleSubmit();
       }
@@ -389,7 +388,6 @@ const SpontaneousMissionSetupScreen: React.FC<SpontaneousMissionSetupScreenProps
     try {
       if (safeCurrentStep > 0) {
         setCurrentStep(safeCurrentStep - 1);
-        setOpenDropdown(null);
       }
     } catch (error) {
       logError('이전 스텝 이동 실패', error as Error);
@@ -502,9 +500,115 @@ const SpontaneousMissionSetupScreen: React.FC<SpontaneousMissionSetupScreenProps
     }
   }, [currentStepKey, wakeTime, sleepTime, breakfastTime, lunchTime, dinnerTime, getCurrentTime]);
   
-  const isOpen = (type: 'period' | 'hour' | 'minute') => openDropdown === type;
+  const ITEM_HEIGHT = 50;
+  const VISIBLE_ITEMS = 5;
 
-  // 드롭다운 컴포넌트
+  // 휠 피커 컴포넌트 (갤럭시 스타일)
+  const WheelPicker = ({
+    value,
+    options,
+    onSelect,
+    width,
+  }: {
+    value: string | number;
+    options: Array<{ label: string; value: string | number }>;
+    onSelect: (value: string | number) => void;
+    width?: number;
+  }) => {
+    const scrollViewRef = useRef<ScrollView>(null);
+    const [selectedIndex, setSelectedIndex] = useState(() => {
+      const index = options.findIndex(opt => opt.value === value);
+      return index >= 0 ? index : 0;
+    });
+
+    useEffect(() => {
+      const index = options.findIndex(opt => opt.value === value);
+      if (index >= 0 && index !== selectedIndex) {
+        setSelectedIndex(index);
+        scrollToIndex(index, false);
+      }
+    }, [value]);
+
+    const scrollToIndex = (index: number, animated: boolean = true) => {
+      if (scrollViewRef.current) {
+        const y = index * ITEM_HEIGHT;
+        scrollViewRef.current.scrollTo({ y, animated });
+      }
+    };
+
+    const handleScroll = (event: any) => {
+      const y = event.nativeEvent.contentOffset.y;
+      const index = Math.round(y / ITEM_HEIGHT);
+      const clampedIndex = Math.max(0, Math.min(index, options.length - 1));
+      
+      if (clampedIndex !== selectedIndex) {
+        setSelectedIndex(clampedIndex);
+        onSelect(options[clampedIndex].value);
+      }
+    };
+
+    const handleScrollEnd = (event: any) => {
+      const y = event.nativeEvent.contentOffset.y;
+      const index = Math.round(y / ITEM_HEIGHT);
+      const clampedIndex = Math.max(0, Math.min(index, options.length - 1));
+      scrollToIndex(clampedIndex, true);
+    };
+
+    useEffect(() => {
+      scrollToIndex(selectedIndex, false);
+    }, []);
+
+    return (
+      <View style={[styles.wheelPickerContainer, width && { width }]}>
+        {/* 선택 영역 표시 */}
+        <View style={styles.wheelPickerSelection} />
+        <ScrollView
+          ref={scrollViewRef}
+          style={styles.wheelPickerScrollView}
+          contentContainerStyle={styles.wheelPickerContent}
+          showsVerticalScrollIndicator={false}
+          snapToInterval={ITEM_HEIGHT}
+          decelerationRate="fast"
+          onScroll={handleScroll}
+          onMomentumScrollEnd={handleScrollEnd}
+          scrollEventThrottle={16}
+        >
+          {/* 상단 패딩 */}
+          <View style={{ height: ITEM_HEIGHT * 2 }} />
+          {options.map((option, index) => {
+            const distance = Math.abs(index - selectedIndex);
+            const opacity = distance === 0 ? 1 : distance === 1 ? 0.4 : 0.2;
+            const scale = distance === 0 ? 1 : 0.9;
+            const fontSize = distance === 0 ? typography.fontSize['2xl'] : typography.fontSize.lg;
+            
+            return (
+              <TouchableOpacity
+                key={option.value}
+                style={[
+                  styles.wheelPickerItem,
+                  { height: ITEM_HEIGHT, opacity, transform: [{ scale }] }
+                ]}
+                onPress={() => {
+                  scrollToIndex(index, true);
+                  setSelectedIndex(index);
+                  onSelect(option.value);
+                }}
+                activeOpacity={0.7}
+              >
+                <Text style={[styles.wheelPickerItemText, { fontSize }]}>
+                  {option.label}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+          {/* 하단 패딩 */}
+          <View style={{ height: ITEM_HEIGHT * 2 }} />
+        </ScrollView>
+      </View>
+    );
+  };
+
+  // 드롭다운 컴포넌트 (레거시 - 제거 예정)
   const Dropdown = ({
     value,
     options,
@@ -553,7 +657,6 @@ const SpontaneousMissionSetupScreen: React.FC<SpontaneousMissionSetupScreenProps
                 style={styles.dropdownItem}
                 onPress={() => {
                   onSelect(option.value);
-                  setOpenDropdown(null);
                 }}
                 activeOpacity={0.7}
               >
@@ -614,15 +717,7 @@ const SpontaneousMissionSetupScreen: React.FC<SpontaneousMissionSetupScreenProps
           titleStyle={styles.headerTitle}
         />
 
-        <TouchableOpacity
-          activeOpacity={1}
-          onPress={() => {
-            if (openDropdown) {
-              setOpenDropdown(null);
-            }
-          }}
-          style={styles.contentTouchable}
-        >
+        <View style={styles.contentTouchable}>
           <View style={styles.content}>
             {/* 진행 표시 */}
             <View style={styles.progressContainer}>
@@ -650,63 +745,56 @@ const SpontaneousMissionSetupScreen: React.FC<SpontaneousMissionSetupScreenProps
                 <View style={styles.timePickerWrapper}>
                   <View style={styles.timePickerRow}>
                     {/* AM/PM */}
-                    <View style={[styles.dropdownWrapper, isOpen('period') && styles.dropdownWrapperOpen]}>
-                      <Dropdown
-                        value={currentTime.period}
-                        options={[
-                          { label: 'AM', value: 'AM' },
-                          { label: 'PM', value: 'PM' },
-                        ]}
-                        onSelect={(value) => {
-                          if (value === 'AM' || value === 'PM') {
-                            setCurrentTime({ ...currentTime, period: value });
-                          }
-                        }}
-                        isOpen={isOpen('period')}
-                        onToggle={() => setOpenDropdown(isOpen('period') ? null : 'period')}
-                        width={80}
-                      />
-                    </View>
+                    <WheelPicker
+                      value={currentTime.period}
+                      options={[
+                        { label: '오전', value: 'AM' },
+                        { label: '오후', value: 'PM' },
+                      ]}
+                      onSelect={(value) => {
+                        if (value === 'AM' || value === 'PM') {
+                          setCurrentTime({ ...currentTime, period: value });
+                        }
+                      }}
+                      width={80}
+                    />
 
                     {/* 시 */}
-                    <View style={[styles.dropdownWrapper, isOpen('hour') && styles.dropdownWrapperOpen]}>
-                      <Dropdown
-                        value={`${currentTime.hour}시`}
-                        options={Array.from({ length: 12 }, (_, i) => i + 1).map((hour) => ({
-                          label: `${hour}시`,
-                          value: hour,
-                        }))}
-                        onSelect={(value) => {
-                          setCurrentTime({ ...currentTime, hour: value as number });
-                        }}
-                        isOpen={isOpen('hour')}
-                        onToggle={() => setOpenDropdown(isOpen('hour') ? null : 'hour')}
-                        width={90}
-                      />
+                    <WheelPicker
+                      value={currentTime.hour}
+                      options={Array.from({ length: 12 }, (_, i) => i + 1).map((hour) => ({
+                        label: `${hour}`,
+                        value: hour,
+                      }))}
+                      onSelect={(value) => {
+                        setCurrentTime({ ...currentTime, hour: value as number });
+                      }}
+                      width={60}
+                    />
+
+                    {/* 콜론 */}
+                    <View style={styles.timeSeparator}>
+                      <Text style={styles.timeSeparatorText}>:</Text>
                     </View>
 
                     {/* 분 */}
-                    <View style={[styles.dropdownWrapper, isOpen('minute') && styles.dropdownWrapperOpen]}>
-                      <Dropdown
-                        value={`${currentTime.minute}분`}
-                        options={Array.from({ length: 60 }, (_, i) => i).map((minute) => ({
-                          label: `${minute}분`,
-                          value: minute,
-                        }))}
-                        onSelect={(value) => {
-                          setCurrentTime({ ...currentTime, minute: value as number });
-                        }}
-                        isOpen={isOpen('minute')}
-                        onToggle={() => setOpenDropdown(isOpen('minute') ? null : 'minute')}
-                        width={90}
-                      />
-                    </View>
+                    <WheelPicker
+                      value={currentTime.minute}
+                      options={Array.from({ length: 60 }, (_, i) => i).map((minute) => ({
+                        label: minute < 10 ? `0${minute}` : `${minute}`,
+                        value: minute,
+                      }))}
+                      onSelect={(value) => {
+                        setCurrentTime({ ...currentTime, minute: value as number });
+                      }}
+                      width={60}
+                    />
                   </View>
                 </View>
               </View>
             </View>
           </View>
-        </TouchableOpacity>
+        </View>
 
         {/* 버튼 영역 */}
         <View style={styles.buttonContainer}>
@@ -874,8 +962,63 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: spacing[2],
     justifyContent: 'center',
-    alignItems: 'flex-start',
+    alignItems: 'center',
     width: '100%',
+  },
+  timeSeparator: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: 250,
+    paddingHorizontal: spacing[2],
+  },
+  timeSeparatorText: {
+    fontSize: typography.fontSize['3xl'],
+    fontWeight: typography.fontWeight.bold,
+    color: colors.text.primary,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+  },
+  wheelPickerContainer: {
+    height: 250,
+    position: 'relative',
+    overflow: 'hidden',
+  },
+  wheelPickerSelection: {
+    position: 'absolute',
+    top: '50%',
+    left: 0,
+    right: 0,
+    height: 50,
+    marginTop: -25,
+    backgroundColor: 'rgba(0, 0, 0, 0.05)',
+    borderRadius: borderRadius.sm,
+    zIndex: 1,
+    pointerEvents: 'none',
+  },
+  wheelPickerScrollView: {
+    flex: 1,
+  },
+  wheelPickerContent: {
+    paddingVertical: 0,
+  },
+  wheelPickerItem: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: 50,
+  },
+  wheelPickerItemText: {
+    fontSize: typography.fontSize['2xl'],
+    fontWeight: typography.fontWeight.medium,
+    color: colors.text.primary,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    textAlign: 'center',
   },
   timePickerWrapper: {
     width: '100%',
