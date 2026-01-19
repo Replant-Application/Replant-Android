@@ -443,8 +443,7 @@ const AppNavigator = () => {
       } else if (currentScreen === SCREEN_NAMES.WAKE_UP_VERIFICATION) {
         setCurrentScreen(SCREEN_NAMES.HOME);
       } else if (currentScreen === SCREEN_NAMES.SPONTANEOUS_MISSION_SETUP) {
-        // 돌발 미션 설정 화면에서는 뒤로가기 막기
-        return true;
+        setCurrentScreen(SCREEN_NAMES.HOME);
       } else {
         setCurrentScreen(SCREEN_NAMES.HOME);
       }
@@ -575,16 +574,6 @@ const AppNavigator = () => {
   };
 
   const goBack = () => {
-    // 돌발 미션 설정 화면에서는 뒤로가기 막기 (설정 완료 필수)
-    // 단, edit 모드일 때는 뒤로가기 허용
-    if (currentScreen === SCREEN_NAMES.SPONTANEOUS_MISSION_SETUP) {
-      const params = navigationParamsRef.current || {};
-      const isEditMode = params.mode === 'edit';
-      if (!isEditMode) {
-        return;
-      }
-    }
-    
     // 화면별 뒤로가기 목적지 정의
     if (currentScreen === SCREEN_NAMES.PLACES_SEARCH) {
       setCurrentScreen(SCREEN_NAMES.COUNSELING_SELECT);
@@ -616,6 +605,8 @@ const AppNavigator = () => {
     } else if (currentScreen === SCREEN_NAMES.TODO_LIST_DETAIL) {
       setCurrentScreen(SCREEN_NAMES.TODO_LIST);
     } else if (currentScreen === SCREEN_NAMES.WAKE_UP_VERIFICATION) {
+      setCurrentScreen(SCREEN_NAMES.HOME);
+    } else if (currentScreen === SCREEN_NAMES.SPONTANEOUS_MISSION_SETUP) {
       setCurrentScreen(SCREEN_NAMES.HOME);
     } else {
       setCurrentScreen(SCREEN_NAMES.HOME);
