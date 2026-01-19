@@ -78,18 +78,44 @@ export const updatePost = async (
 ): Promise<ServiceResult<CommunityPost>> => {
   try {
     const endpoint = API_CONFIG.endpoints.post.update.replace(':postId', postId);
-    const result = await apiClient.put<CommunityPost>(endpoint, {
+    // 백엔드 API 요청 형식에 맞게 변환
+    const requestData: {
+      missionId?: number;
+      title?: string;
+      content?: string;
+      imageUrls?: string[];
+    } = {
       title: updateDataParam.title,
       content: updateDataParam.content,
-      images: updateDataParam.images,
-      tags: updateDataParam.tags,
-      category: updateDataParam.category,
-    });
+      imageUrls: updateDataParam.images,
+    };
+    
+    // missionId가 있으면 추가 (미션 태그가 있는 경우)
+    if (updateDataParam.mission_id) {
+      const missionIdNum = parseInt(updateDataParam.mission_id, 10);
+      if (!isNaN(missionIdNum)) {
+        requestData.missionId = missionIdNum;
+      }
+    }
+    
+    const result = await apiClient.put<BackendPostResponse>(endpoint, requestData);
 
     if (result.success && result.data) {
+      // 백엔드 응답을 프론트엔드 형식으로 변환 (isAuthor 포함)
+      const transformed = transformBackendPost(result.data);
+      
+      // 사용자의 좋아요/스크랩 정보 가져오기 (로컬)
+      const storageKeys = getStorageKeys(nickname);
+      const userLikes: string[] = await getData(storageKeys.USER_LIKES) || [];
+      const userScraps: string[] = await getData(storageKeys.USER_SCRAPS) || [];
+      
       return {
         success: true,
-        data: result.data
+        data: {
+          ...transformed,
+          is_liked: userLikes.includes(transformed.post_id),
+          is_scrapped: userScraps.includes(transformed.post_id),
+        }
       };
     }
 
@@ -153,6 +179,7 @@ interface BackendPostResponse {
   commentCount: number;
   likeCount: number;
   isLiked: boolean;
+  isAuthor?: boolean; // 본인 게시글 여부 (백엔드에서 제공, userId 기반)
   createdAt: string;
   updatedAt?: string;
   // 인증글 전용 필드
@@ -203,6 +230,7 @@ const transformBackendPost = (post: BackendPostResponse): CommunityPost => {
     content: post.content,
     author: post.userId?.toString() || '',
     author_id: post.userId?.toString() || '',
+    userId: post.userId, // 백엔드 userId 직접 사용
     author_nickname: post.userNickname || '익명',
     created_at: post.createdAt,
     updated_at: post.updatedAt,
@@ -213,6 +241,7 @@ const transformBackendPost = (post: BackendPostResponse): CommunityPost => {
     tags: post.missionTag ? [post.missionTag.title] : [],
     category: post.postType === 'VERIFICATION' ? '인증' : '일반',
     is_liked: post.isLiked || false,
+    isAuthor: post.isAuthor, // 백엔드에서 제공하는 본인 게시글 여부 (userId 기반)
     verified,  // 인증 완료 여부
   };
 };
@@ -293,8 +322,9 @@ export const getPost = async (
       const userLikes: string[] = await getData(storageKeys.USER_LIKES) || [];
       const userScraps: string[] = await getData(storageKeys.USER_SCRAPS) || [];
 
-      // 백엔드 응답을 프론트엔드 형식으로 변환
+      // 백엔드 응답을 프론트엔드 형식으로 변환 (isAuthor 포함)
       const transformed = transformBackendPost(result.data);
+      
       return {
         ...transformed,
         is_liked: userLikes.includes(transformed.post_id),
@@ -317,6 +347,7 @@ interface CreateCommentResponse {
   userProfileImg?: string;
   content: string;
   parentId?: number;
+  isAuthor?: boolean; // 본인 댓글 여부 (백엔드에서 제공, userId 기반)
   createdAt: string;
 }
 
@@ -337,16 +368,19 @@ export const createComment = async (
     });
 
     if (result.success && result.data) {
-      // 백엔드 응답을 프론트엔드 형식으로 변환
+      // 백엔드 응답을 프론트엔드 형식으로 변환 (isAuthor 포함)
       const comment: CommunityComment = {
         id: result.data.id.toString(),
         comment_id: result.data.id.toString(),
         post_id: postId,
         content: result.data.content,
         author: result.data.userId.toString(),
+        author_id: result.data.userId.toString(),
+        userId: result.data.userId,
         author_nickname: result.data.userNickname,
         created_at: result.data.createdAt,
         parent_comment_id: result.data.parentId?.toString(),
+        isAuthor: result.data.isAuthor, // 백엔드에서 제공하는 본인 댓글 여부
       };
       return {
         success: true,
@@ -459,6 +493,7 @@ interface BackendComment {
   parentId?: number;
   replies?: BackendComment[];
   replyCount?: number;
+  isAuthor?: boolean; // 본인 댓글 여부 (백엔드에서 제공, userId 기반)
   createdAt: string;
   updatedAt?: string;
 }
@@ -479,11 +514,13 @@ const transformBackendComment = (comment: BackendComment, postId: string): Commu
   post_id: postId,
   content: comment.content,
   author: comment.userId.toString(),
-  author_id: comment.userId.toString(), // 작성자 ID 추가 (user_id 비교용)
+  author_id: comment.userId.toString(), // 작성자 ID (레거시 호환)
+  userId: comment.userId, // 백엔드 userId 직접 사용
   author_nickname: comment.userNickname,
   created_at: comment.createdAt,
   updated_at: comment.updatedAt,
   parent_comment_id: comment.parentId?.toString(),
+  isAuthor: comment.isAuthor, // 백엔드에서 제공하는 본인 댓글 여부 (userId 기반)
 });
 
 /**

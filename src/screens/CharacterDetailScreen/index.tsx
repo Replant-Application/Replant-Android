@@ -228,7 +228,7 @@ const CharacterDetailScreen: React.FC<CharacterDetailScreenProps> = ({ route, na
           {/* 4. 경험치 바 */}
           <View style={styles.experienceSection}>
             <ProgressBar
-              current={(character.experience || 0) % 100}
+              current={character.experience || 0}
               max={100}
               showPercentage={false}
               showRemaining={false}

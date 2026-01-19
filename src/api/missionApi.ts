@@ -118,6 +118,43 @@ export const getFilteredSystemMissions = async (params?: {
 };
 
 /**
+ * 미션 도감 조회 (사용자가 수행한 미션만)
+ * GET /api/missions/collection
+ * 인증 완료된 미션만 실제 정보 표시, 미완료 미션은 "?"로 마스킹
+ */
+export interface MissionCollectionItem {
+  id: number;
+  title: string;
+  description: string;
+  category?: MissionCategory;
+  verificationType: VerificationType;
+  requiredMinutes?: number;
+  expReward: number;
+  badgeDurationDays: number;
+  participantCount?: number;
+  isAttempted: boolean; // 사용자가 수행한 미션인지
+  isCompleted: boolean; // 인증 완료 여부
+  isPublic?: boolean; // 커스텀 미션의 경우
+  missionType?: MissionType; // OFFICIAL | CUSTOM
+  creatorId?: number; // 커스텀 미션의 경우
+  creatorNickname?: string; // 커스텀 미션의 경우
+}
+
+export interface MissionCollectionResponse {
+  content: MissionCollectionItem[];
+  totalElements: number;
+  totalPages: number;
+  number: number;
+}
+
+export const getMissionCollection = async (params?: {
+  page?: number;
+  size?: number;
+}): Promise<ServiceResult<MissionCollectionResponse>> => {
+  return apiClient.get<MissionCollectionResponse>(API_CONFIG.endpoints.mission.collection, params);
+};
+
+/**
  * 시스템 미션 상세 조회
  * GET /api/missions/{missionId}
  */

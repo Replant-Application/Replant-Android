@@ -42,14 +42,15 @@ const CharacterCard: React.FC<CharacterCardProps> = ({
     return characterImages[levelKey as keyof typeof characterImages] || characterImages.level1;
   };
 
-  const experienceProgress = (character.experience || 0) % 100;
+  // experience는 이미 현재 레벨의 경험치 (0-99)이므로 % 100 불필요
+  const experienceProgress = character.experience || 0;
   const nextLevelExp = 100 - experienceProgress;
 
   // 접근성 라벨 생성
   const getAccessibilityLabel = () => {
     const levelName = getLevelName(character.level || 1);
-    const experienceProgress = (character.experience || 0) % 100;
-    return `${character.name || '캐릭터'}, ${levelName}, 레벨 ${character.level || 1}, 경험치 ${experienceProgress}%`;
+    const experienceProgress = character.experience || 0;
+    return `${character.name || '캐릭터'}, ${levelName}, 레벨 ${character.level || 1}, 경험치 ${experienceProgress}/100`;
   };
 
   return (

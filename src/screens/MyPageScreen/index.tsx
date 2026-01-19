@@ -41,20 +41,33 @@ const MyPageScreen: React.FC<MyPageScreenProps> = ({ navigation }) => {
   }
 
 
-  // 통계 데이터 정규화 (그래프 표시용)
-  const maxValue = Math.max(
-    profile.stats.completedMissions,
-    profile.stats.totalExperience / 100, // 경험치는 100으로 나눠서 스케일 조정
-    profile.stats.diaryCount,
-    profile.stats.postCount,
-    1 // 0으로 나누기 방지
-  );
-
+  // 통계 데이터 - 각 항목별 목표치 설정
   const statsData = [
-    { label: '완료한 미션', value: profile.stats.completedMissions, color: colors.primary[500] },
-    { label: '총 경험치', value: profile.stats.totalExperience / 100, displayValue: profile.stats.totalExperience.toLocaleString(), color: colors.green[500] },
-    { label: '작성한 다이어리', value: profile.stats.diaryCount, color: colors.orange[500] },
-    { label: '커뮤니티 게시글', value: profile.stats.postCount, color: colors.blue[500] },
+    { 
+      label: '완료한 미션', 
+      value: profile.stats.completedMissions, 
+      max: 100, // 목표: 100개 미션 완료
+      color: colors.primary[500] 
+    },
+    { 
+      label: '총 경험치', 
+      value: profile.stats.totalExperience, 
+      max: 1000, // 목표: 1000 경험치 (레벨 10)
+      displayValue: profile.stats.totalExperience.toLocaleString(), 
+      color: colors.green[500] 
+    },
+    { 
+      label: '작성한 다이어리', 
+      value: profile.stats.diaryCount, 
+      max: 30, // 목표: 30개 다이어리 작성
+      color: colors.orange[500] 
+    },
+    { 
+      label: '커뮤니티 게시글', 
+      value: profile.stats.postCount, 
+      max: 50, // 목표: 50개 게시글 작성
+      color: colors.blue[500] 
+    },
   ];
 
   return (
@@ -122,7 +135,10 @@ const MyPageScreen: React.FC<MyPageScreenProps> = ({ navigation }) => {
             </View>
             <View style={styles.statsContainer}>
               {statsData.map((stat, index) => {
-                const percentage = maxValue > 0 ? (stat.value / maxValue) * 100 : 0;
+                // 각 항목별 목표치 대비 진행률 계산 (최대 100%)
+                const percentage = stat.max > 0 
+                  ? Math.min((stat.value / stat.max) * 100, 100) 
+                  : 0;
                 return (
                   <View key={index} style={styles.statItem}>
                     <View style={styles.statHeader}>

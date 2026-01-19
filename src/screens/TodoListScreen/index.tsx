@@ -27,10 +27,11 @@ interface Props {
 const TodoListScreen: React.FC<Props> = ({ navigation, route }) => {
   const [activeTodoLists, setActiveTodoLists] = useState<TodoList[]>([]);
   const [completedTodoLists, setCompletedTodoLists] = useState<TodoList[]>([]);
+  const [incompleteTodoLists, setIncompleteTodoLists] = useState<TodoList[]>([]);
   const [canCreate, setCanCreate] = useState<CanCreateResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [activeTab, setActiveTab] = useState<'active' | 'completed'>('active');
+  const [activeTab, setActiveTab] = useState<'active' | 'completed' | 'incomplete'>('active');
 
   const loadData = useCallback(async () => {
     try {
@@ -45,16 +46,53 @@ const TodoListScreen: React.FC<Props> = ({ navigation, route }) => {
       if (activeResult.success && activeResult.data) {
         console.log('[TodoListScreen] activeResult.data:', activeResult.data);
         console.log('[TodoListScreen] activeResult.data 타입:', Array.isArray(activeResult.data) ? '배열' : typeof activeResult.data);
-        setActiveTodoLists(Array.isArray(activeResult.data) ? activeResult.data : []);
+        const allActiveLists = Array.isArray(activeResult.data) ? activeResult.data : [];
+        
+        // 오늘 날짜인 투두리스트만 "진행중"에 표시
+        // 과거 날짜의 미완료 투두리스트는 제외
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        const todayActiveLists = allActiveLists.filter((todoList) => {
+          if (!todoList.createdAt) return false;
+          const createdDate = new Date(todoList.createdAt);
+          createdDate.setHours(0, 0, 0, 0);
+          
+          // 오늘 날짜이고 완료되지 않은 투두리스트만
+          const isToday = createdDate.getTime() === today.getTime();
+          const isNotCompleted = todoList.status === 'ACTIVE' && 
+                                 todoList.completedCount < todoList.totalCount;
+          
+          return isToday && isNotCompleted;
+        });
+        
+        setActiveTodoLists(todayActiveLists);
       } else {
         console.log('[TodoListScreen] activeResult 실패:', activeResult.error);
       }
 
       if (allResult.success && allResult.data) {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        // 완료된 투두리스트만 "완료" 탭에 표시
         const completed = allResult.data.content.filter(
           (todo) => todo.status === 'COMPLETED' || todo.status === 'ARCHIVED'
         );
         setCompletedTodoLists(completed);
+        
+        // 과거 날짜의 미완료 투두리스트는 별도로 분리
+        const incomplete = allResult.data.content.filter((todo) => {
+          if (!todo.createdAt) return false;
+          const createdDate = new Date(todo.createdAt);
+          createdDate.setHours(0, 0, 0, 0);
+          const isPastDate = createdDate.getTime() < today.getTime();
+          const isNotCompleted = todo.status === 'ACTIVE' && 
+                                 todo.completedCount < todo.totalCount;
+          
+          return isPastDate && isNotCompleted;
+        });
+        setIncompleteTodoLists(incomplete);
       }
 
       if (canCreateResult.success && canCreateResult.data) {
@@ -98,11 +136,17 @@ const TodoListScreen: React.FC<Props> = ({ navigation, route }) => {
     navigation.navigate(SCREEN_NAMES.TODO_LIST_DETAIL, { todoListId: todoList.id });
   };
 
-  const renderTodoListCard = (todoList: TodoList) => {
+  const renderTodoListCard = (todoList: TodoList, isIncomplete: boolean = false) => {
     // completedCount와 totalCount를 기반으로 진행률 직접 계산
     const progressPercent = todoList.totalCount > 0 
       ? Math.round((todoList.completedCount / todoList.totalCount) * 100)
       : 0;
+
+    // 과거 날짜의 미완료 투두리스트는 "미완료"로 표시
+    const statusText = isIncomplete 
+      ? '미완료'
+      : (todoList.status === 'ACTIVE' ? '진행중' :
+         todoList.status === 'COMPLETED' ? '완료' : '보관됨');
 
     return (
       <TouchableOpacity
@@ -119,14 +163,15 @@ const TodoListScreen: React.FC<Props> = ({ navigation, route }) => {
             styles.statusBadge,
             todoList.status === 'COMPLETED' && styles.statusBadgeCompleted,
             todoList.status === 'ARCHIVED' && styles.statusBadgeArchived,
+            isIncomplete && styles.statusBadgeIncomplete,
           ]}>
             <Text style={[
               styles.statusBadgeText,
               todoList.status === 'COMPLETED' && styles.statusBadgeTextCompleted,
               todoList.status === 'ARCHIVED' && styles.statusBadgeTextArchived,
+              isIncomplete && styles.statusBadgeTextIncomplete,
             ]}>
-              {todoList.status === 'ACTIVE' ? '진행중' :
-               todoList.status === 'COMPLETED' ? '완료' : '보관됨'}
+              {statusText}
             </Text>
           </View>
         </View>
@@ -177,7 +222,11 @@ const TodoListScreen: React.FC<Props> = ({ navigation, route }) => {
     );
   }
 
-  const currentList = activeTab === 'active' ? activeTodoLists : completedTodoLists;
+  const currentList = activeTab === 'active' 
+    ? activeTodoLists 
+    : activeTab === 'completed' 
+    ? completedTodoLists 
+    : incompleteTodoLists;
 
   return (
     <ImageBackground
@@ -193,9 +242,10 @@ const TodoListScreen: React.FC<Props> = ({ navigation, route }) => {
           tabs={[
             { key: 'active', label: `진행중 (${activeTodoLists.length})` },
             { key: 'completed', label: `완료 (${completedTodoLists.length})` },
+            { key: 'incomplete', label: `미완료 (${incompleteTodoLists.length})` },
           ]}
           activeTab={activeTab}
-          onTabChange={(key) => setActiveTab(key as 'active' | 'completed')}
+          onTabChange={(key) => setActiveTab(key as 'active' | 'completed' | 'incomplete')}
         />
       </View>
 
@@ -226,7 +276,7 @@ const TodoListScreen: React.FC<Props> = ({ navigation, route }) => {
 
         {/* 투두리스트 목록 */}
         {currentList.length > 0 ? (
-          currentList.map(renderTodoListCard)
+          currentList.map((todoList) => renderTodoListCard(todoList, activeTab === 'incomplete'))
         ) : (
           <View style={styles.emptyContainer}>
             <Image 
@@ -238,7 +288,9 @@ const TodoListScreen: React.FC<Props> = ({ navigation, route }) => {
             <Text style={styles.emptyText}>
               {activeTab === 'active'
                 ? '진행 중인 투두리스트가 없습니다'
-                : '완료된 투두리스트가 없습니다'}
+                : activeTab === 'completed'
+                ? '완료된 투두리스트가 없습니다'
+                : '미완료된 투두리스트가 없습니다'}
             </Text>
             {activeTab === 'active' && (
               <Text style={styles.emptySubtext}>
@@ -351,6 +403,9 @@ const styles = StyleSheet.create({
   statusBadgeArchived: {
     backgroundColor: colors.gray[200],
   },
+  statusBadgeIncomplete: {
+    backgroundColor: '#FFE082',
+  },
   statusBadgeText: {
     fontSize: typography.fontSize.xs,
     fontWeight: typography.fontWeight.medium,
@@ -366,6 +421,9 @@ const styles = StyleSheet.create({
   },
   statusBadgeTextArchived: {
     color: colors.text.secondary,
+  },
+  statusBadgeTextIncomplete: {
+    color: '#E65100',
   },
   cardDescription: {
     fontSize: typography.fontSize.sm,

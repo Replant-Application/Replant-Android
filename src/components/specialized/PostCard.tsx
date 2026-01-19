@@ -32,15 +32,10 @@ const PostCard: React.FC<PostCardProps> = ({
   const [showMenu, setShowMenu] = useState(false);
   const { currentUserId: contextUserId } = useUser();
   
-  // currentUserId는 prop이 있으면 prop 우선, 없으면 context에서 가져오기
-  const effectiveUserId = currentUserId !== undefined 
-    ? (typeof currentUserId === 'string' ? Number(currentUserId) : currentUserId)
-    : contextUserId;
-
-  // 본인 게시글인지 확인 (author_id로 비교, fallback으로 닉네임 비교)
-  const isOwnPost = effectiveUserId !== null && effectiveUserId !== undefined && 
-    post.author_id !== undefined && 
-    Number(post.author_id) === Number(effectiveUserId);
+  // 본인 게시글인지 확인 (백엔드에서 제공하는 isAuthor 필드 사용)
+  // 로그인한 경우에만 isAuthor가 올바르게 설정됨
+  const isOwnPost = post.isAuthor === true;
+  
   // 인증되지 않은 게시글인지 확인 (verified가 false이거나 undefined인 경우)
   const canEditDelete = isOwnPost && !post.verified;
 

@@ -2,7 +2,8 @@ import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react'
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Image, RefreshControl, Platform, ImageBackground, ActivityIndicator, Dimensions, FlatList } from 'react-native';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
-const ITEMS_PER_PAGE = 5;
+const ITEMS_PER_PAGE = 5; // 화면 표시용 페이지네이션 (한 화면에 5개)
+const MISSION_COLLECTION_PAGE_SIZE = 15; // 서버에서 가져올 미션 개수 (한 페이지당 15개)
 import { useMission } from '../../hooks/useMission';
 import { useCharacter } from '../../hooks/useCharacter';
 import { MissionCard, MissionVerificationModal, MissionProgressCard } from '../../components/specialized';
@@ -11,7 +12,7 @@ import { colors, spacing, typography, borderRadius } from '../../utils/designTok
 import { getOptimizedLineHeight } from '../../utils/textStyles';
 import { useUser } from '../../contexts/UserContext';
 import { Mission } from '../../types';
-import { checkVerificationStatus, MissionType, verifyByGps, verifyByTime, createVerification, addSystemMissionToMyMissions, getSystemMissions, getCustomMissions, MissionCategory } from '../../api/missionApi';
+import { checkVerificationStatus, MissionType, verifyByGps, verifyByTime, createVerification, addSystemMissionToMyMissions, getSystemMissions, getCustomMissions, getUserMissions, getMissionCollection, MissionCategory } from '../../api/missionApi';
 import * as Location from 'expo-location';
 import { formatDateYYYYMMDD } from '../../utils/dateUtils';
 import { logError } from '../../utils/logger';
@@ -37,6 +38,8 @@ interface UnifiedMission {
   deadlineDays?: number;
   isPublic?: boolean;
   worryType?: string;
+  isCompleted?: boolean;
+  isAttempted?: boolean;
 }
 
 type MissionGroupTab = 'official' | 'custom';
@@ -70,8 +73,8 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
   const [groupMissions, setGroupMissions] = useState<UnifiedMission[]>([]);
   const [groupLoading, setGroupLoading] = useState(false);
   const [selectedGroupMission, setSelectedGroupMission] = useState<UnifiedMission | null>(null);
-  const [currentGroupPage, setCurrentGroupPage] = useState(0);
-  const groupFlatListRef = useRef<FlatList>(null);
+  const [currentServerPage, setCurrentServerPage] = useState(0); // 서버 페이지 (0부터 시작)
+  const [totalServerPages, setTotalServerPages] = useState(0); // 전체 서버 페이지 수
 
   // 현재 사용자 ID (커스텀 미션 수정 권한 확인용)
   const [currentUserId, setCurrentUserId] = useState<number | null>(null);
@@ -157,40 +160,10 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
     }
   };
 
-  // 미션 도감 페이지네이션
-  const totalGroupPages = Math.ceil(groupMissions.length / ITEMS_PER_PAGE);
-
-  const groupMissionPages = useMemo(() => {
-    const pages: UnifiedMission[][] = [];
-    for (let i = 0; i < groupMissions.length; i += ITEMS_PER_PAGE) {
-      pages.push(groupMissions.slice(i, i + ITEMS_PER_PAGE));
-    }
-    return pages.length > 0 ? pages : [[]];
-  }, [groupMissions]);
-
-  // 미션 도감 탭 변경 시 페이지 초기화
+  // 미션 도감 탭 변경 시 서버 페이지 초기화
   useEffect(() => {
-    setCurrentGroupPage(0);
-    if (groupFlatListRef.current && groupMissionPages.length > 0) {
-      setTimeout(() => {
-        groupFlatListRef.current?.scrollToIndex({ index: 0, animated: false });
-      }, 100);
-    }
+    setCurrentServerPage(0);
   }, [missionGroupTab]);
-
-  // 미션 도감 페이지 변경 핸들러
-  const onGroupPageChange = (event: any) => {
-    const pageIndex = Math.round(event.nativeEvent.contentOffset.x / (SCREEN_WIDTH - spacing[8]));
-    setCurrentGroupPage(pageIndex);
-  };
-
-  // 미션 도감 페이지 이동
-  const goToGroupPage = (pageIndex: number) => {
-    if (pageIndex >= 0 && pageIndex < totalGroupPages) {
-      groupFlatListRef.current?.scrollToIndex({ index: pageIndex, animated: true });
-      setCurrentGroupPage(pageIndex);
-    }
-  };
 
   // 미션 완료 (사진이 있으면 그 사진으로, 없으면 null로)
   const handleMissionComplete = async (missionId: string) => {
@@ -400,36 +373,7 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
     }
   }, [selectedMissionForVerification, addExperienceByCategory, loadMissions]);
 
-  // 인증 상태 확인 (게시글 작성 후 복귀 시)
-  const checkVerificationOnReturn = useCallback(async () => {
-    if (!selectedMissionForVerification) return;
-    
-    try {
-      const result = await checkVerificationStatus(selectedMissionForVerification.mission_id);
-      if (result.success && result.data?.verified) {
-        // 인증 완료 시 미션 목록 새로고침
-        await loadMissions();
-        Alert.alert('✅ 인증 완료', '미션이 인증되었습니다!');
-      }
-    } catch (error) {
-      logError('인증 상태 확인 오류', error as Error);
-    }
-  }, [selectedMissionForVerification, loadMissions]);
-
-  // 화면 포커스 시 인증 상태 확인 및 미션 목록 새로고침
-  useEffect(() => {
-    const unsubscribe = navigation.addListener('focus', () => {
-      // 미션 목록 새로고침 (투두리스트에서 미션 완료 후 돌아왔을 때 반영)
-      if (activeTab === 'myMission') {
-        loadMissions();
-      }
-      // 인증 상태 확인
-      if (selectedMissionForVerification) {
-        checkVerificationOnReturn();
-      }
-    });
-    return unsubscribe;
-  }, [navigation, selectedMissionForVerification, checkVerificationOnReturn, activeTab, loadMissions]);
+  // 인증 상태 확인 (게시글 작성 후 복귀 시) - loadGroupMissions 정의 이후에 배치됨
 
   // 사진 인증 업로드
   const handlePhotoUpload = (missionId: string) => {
@@ -531,68 +475,137 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
     }
   };
 
-  // 미션 도감 목록 로드 (한 번에 50개씩 로드, 클라이언트 페이지네이션)
-  const loadGroupMissions = useCallback(async () => {
+  // 미션 도감 목록 로드 (서버 사이드 페이지네이션 - 한 페이지당 15개)
+  const loadGroupMissions = useCallback(async (page: number = 0) => {
     try {
       setGroupLoading(true);
+      console.log('[MissionScreen] 미션 도감 로딩 시작... (서버 페이지:', page, ')');
 
-      if (missionGroupTab === 'official') {
-        const result = await getSystemMissions({ page: 0, size: 50 });
-        if (result.success && result.data) {
-          const unifiedMissions: UnifiedMission[] = (result.data.content || []).map(m => ({
-            id: m.id,
-            title: m.title,
-            description: m.description,
-            category: m.category,
-            verificationType: m.verificationType,
-            requiredMinutes: m.requiredMinutes,
-            expReward: m.expReward,
-            badgeDurationDays: m.badgeDurationDays,
-            participantCount: m.participantCount,
-            isCustom: false,
-          }));
-          setGroupMissions(unifiedMissions);
-        }
-      } else {
-        const result = await getCustomMissions({ page: 0, size: 50 });
-        if (result.success && result.data) {
-          const unifiedMissions: UnifiedMission[] = (result.data.content || []).map(m => ({
-            id: m.id,
-            title: m.title,
-            description: m.description,
-            category: m.category,
-            verificationType: m.verificationType,
-            requiredMinutes: m.requiredMinutes,
-            expReward: 0, // 커스텀 미션은 경험치 지급 없음
-            badgeDurationDays: m.badgeDurationDays,
-            participantCount: m.participantCount,
-            isCustom: true,
-            creatorId: m.creatorId,
-            creatorNickname: m.creatorNickname,
-            isChallenge: m.isChallenge,
-            challengeDays: m.challengeDays,
-            deadlineDays: m.deadlineDays,
-            isPublic: m.isPublic,
-            worryType: m.worryType,
-          }));
-          setGroupMissions(unifiedMissions);
-        }
+      // 현재 서버 페이지의 미션만 조회 (한 페이지당 15개)
+      const collectionResult = await getMissionCollection({ 
+        page, 
+        size: MISSION_COLLECTION_PAGE_SIZE 
+      });
+
+      if (!collectionResult.success || !collectionResult.data) {
+        console.error('[MissionScreen] 미션 도감 API 실패:', collectionResult.error);
+        Alert.alert('오류', collectionResult.error || '미션 도감을 불러오는데 실패했습니다.');
+        setGroupMissions([]);
+        return;
       }
+
+      const totalPages = collectionResult.data.totalPages || 1;
+      const totalElements = collectionResult.data.totalElements || 0;
+      
+      console.log('[MissionScreen] 미션 도감 페이징 정보:', {
+        currentPage: page,
+        totalPages,
+        totalElements,
+        currentPageCount: collectionResult.data.content.length,
+      });
+
+      // 서버 페이지 정보 저장
+      setTotalServerPages(totalPages);
+
+      // MissionCollectionItem을 UnifiedMission으로 변환
+      const missions: UnifiedMission[] = collectionResult.data.content.map(m => ({
+        id: m.id,
+        title: m.isCompleted === false ? '?' : m.title,
+        description: m.isCompleted === false ? '?' : m.description,
+        category: m.category,
+        verificationType: m.verificationType,
+        requiredMinutes: m.requiredMinutes,
+        expReward: m.expReward,
+        badgeDurationDays: m.badgeDurationDays,
+        participantCount: m.participantCount,
+        isCustom: m.missionType === 'CUSTOM',
+        creatorId: m.creatorId,
+        creatorNickname: m.creatorNickname,
+        isCompleted: m.isCompleted ?? false, // API에서 받은 isCompleted 그대로 사용!
+        isAttempted: m.isAttempted ?? false,
+        isPublic: m.isPublic,
+      }));
+
+      console.log('[MissionScreen] 현재 페이지 미션 수:', missions.length);
+      console.log('[MissionScreen] 완료된 미션:', missions.filter(m => m.isCompleted).map(m => ({ id: m.id, title: m.title })));
+
+      // 탭에 따라 필터링 (공식 미션 또는 커스텀 미션)
+      const filteredMissions = missions.filter(m => {
+        if (missionGroupTab === 'official') {
+          return !m.isCustom; // 공식 미션
+        } else {
+          return m.isCustom; // 커스텀 미션
+        }
+      });
+
+      console.log('[MissionScreen] 필터링된 미션 수:', filteredMissions.length, `(탭: ${missionGroupTab})`);
+
+      setGroupMissions(filteredMissions);
+      console.log('[MissionScreen] 미션 도감 로딩 완료:', filteredMissions.length, '개');
     } catch (error) {
+      console.error('[MissionScreen] 미션 도감 로딩 예외 발생:', error);
       logError('미션 도감 로딩 오류', error as Error);
+      Alert.alert('오류', '미션 도감을 불러오는 중 문제가 발생했습니다.');
+      setGroupMissions([]);
     } finally {
       setGroupLoading(false);
     }
-  }, [missionGroupTab]);
+  }, [missionGroupTab, currentServerPage]);
+
+  // 인증 상태 확인 (게시글 작성 후 복귀 시)
+  const checkVerificationOnReturn = useCallback(async () => {
+    if (!selectedMissionForVerification) return;
+    
+    try {
+      const result = await checkVerificationStatus(selectedMissionForVerification.mission_id);
+      if (result.success && result.data?.verified) {
+        // 인증 완료 시 미션 목록 새로고침
+        await loadMissions();
+        // 미션 도감도 새로고침 (잠금 해제 반영)
+        if (activeTab === 'missionGroup') {
+          await loadGroupMissions(currentServerPage);
+        }
+        Alert.alert('✅ 인증 완료', '미션이 인증되었습니다!');
+      }
+    } catch (error) {
+      logError('인증 상태 확인 오류', error as Error);
+    }
+  }, [selectedMissionForVerification, loadMissions, activeTab, currentServerPage]);
 
   // 탭 변경 시 미션 도감 로드
   useEffect(() => {
     if (activeTab === 'missionGroup') {
-      setCurrentGroupPage(0);
+      setCurrentServerPage(0); // 서버 페이지 초기화
       setSelectedGroupMission(null);
-      loadGroupMissions();
+      loadGroupMissions(0);
     }
-  }, [activeTab, missionGroupTab, loadGroupMissions]);
+  }, [activeTab, missionGroupTab]);
+
+  // 서버 페이지 변경 시 미션 도감 로드
+  useEffect(() => {
+    if (activeTab === 'missionGroup' && currentServerPage >= 0) {
+      loadGroupMissions(currentServerPage);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentServerPage, activeTab]);
+
+  // 화면 포커스 시 인증 상태 확인 및 미션 목록 새로고침
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      // 미션 목록 새로고침 (투두리스트에서 미션 완료 후 돌아왔을 때 반영)
+      if (activeTab === 'myMission') {
+        loadMissions();
+      } else if (activeTab === 'missionGroup') {
+        // 미션 도감도 새로고침 (미션 완료 후 반영)
+        loadGroupMissions(currentServerPage);
+      }
+      // 인증 상태 확인
+      if (selectedMissionForVerification) {
+        checkVerificationOnReturn();
+      }
+    });
+    return unsubscribe;
+  }, [navigation, selectedMissionForVerification, checkVerificationOnReturn, activeTab, loadMissions, currentServerPage]);
 
   // 인증 타입 한글 변환
   const getVerificationTypeLabel = (type?: string) => {
@@ -946,96 +959,105 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
                     </Text>
                   </View>
 
-                  {/* 미션 목록 (페이지네이션) */}
-                  <FlatList
-                    ref={groupFlatListRef}
-                    data={groupMissionPages}
-                    renderItem={({ item: pageMissions }) => (
-                      <View style={styles.groupPageContainer}>
-                        {pageMissions.map((mission) => (
+                  {/* 미션 목록 */}
+                  <View style={styles.groupMissionList}>
+                    {groupMissions.map((mission) => (
                           <View key={mission.id}>
-                            <TouchableOpacity
-                              style={[
-                                styles.groupMissionCard,
-                                selectedGroupMission?.id === mission.id && styles.groupMissionCardSelected,
-                              ]}
-                              onPress={() => {
-                                setSelectedGroupMission(
-                                  selectedGroupMission?.id === mission.id ? null : mission
-                                );
-                              }}
-                              activeOpacity={0.7}
-                            >
-                              <View style={styles.groupMissionHeader}>
-                                <View style={styles.groupMissionInfo}>
-                                  <View style={styles.groupMissionTitleRow}>
-                                    <Image
-                                      source={require('../../assets/images/goal.png')}
-                                      style={styles.groupMissionIcon}
-                                      resizeMode="contain"
-                                      accessibilityLabel={`${mission.title} 아이콘`}
-                                    />
-                                    <Text style={styles.groupMissionTitle}>{mission.title}</Text>
-                                    {mission.category && (
-                                      <View style={styles.groupMissionTypeBadge}>
-                                        <Text style={styles.groupMissionTypeText}>
-                                          {getMissionCategoryLabel(mission.category)}
-                                        </Text>
-                                      </View>
-                                    )}
-                                  </View>
-                                  <Text style={styles.groupMissionDescription} numberOfLines={2}>
-                                    {mission.description}
-                                  </Text>
-                                </View>
+                            {mission.isCompleted === false ? (
+                              // 수행하지 않은 미션: 회색 배경에 가운데 잠금 아이콘만 표시
+                              <View style={styles.groupMissionCardLocked}>
+                                <Image
+                                  source={require('../../assets/images/lock.png')}
+                                  style={styles.groupMissionLockIconCenter}
+                                  resizeMode="contain"
+                                  accessibilityLabel="잠금"
+                                />
                               </View>
-
-                              <View style={styles.groupMissionContent}>
-                                <View style={styles.groupMissionVerificationInfo}>
-                                  {getVerificationTypeIcon(mission.verificationType) && (
-                                    <Image
-                                      source={getVerificationTypeIcon(mission.verificationType)!}
-                                      style={styles.groupVerificationIcon}
-                                      resizeMode="contain"
-                                      accessibilityLabel={`${getVerificationTypeLabel(mission.verificationType)} 아이콘`}
-                                    />
-                                  )}
-                                  <Text style={styles.groupMissionVerificationText}>
-                                    {getVerificationTypeLabel(mission.verificationType)}
-                                  </Text>
-                                </View>
-                              </View>
-
-                              <View style={styles.groupMissionFooter}>
-                                <View style={styles.groupMissionStats}>
-                                  {mission.expReward > 0 && (
-                                    <View style={styles.groupStatItem}>
+                            ) : (
+                              // 수행한 미션: 실제 정보 표시
+                              <TouchableOpacity
+                                style={[
+                                  styles.groupMissionCard,
+                                  selectedGroupMission?.id === mission.id && styles.groupMissionCardSelected,
+                                ]}
+                                onPress={() => {
+                                  setSelectedGroupMission(
+                                    selectedGroupMission?.id === mission.id ? null : mission
+                                  );
+                                }}
+                                activeOpacity={0.7}
+                              >
+                                <View style={styles.groupMissionHeader}>
+                                  <View style={styles.groupMissionInfo}>
+                                    <View style={styles.groupMissionTitleRow}>
                                       <Image
-                                        source={require('../../assets/images/sun.png')}
-                                        style={styles.groupStatIcon}
+                                        source={require('../../assets/images/goal.png')}
+                                        style={styles.groupMissionIcon}
                                         resizeMode="contain"
-                                        accessibilityLabel="경험치 아이콘"
+                                        accessibilityLabel={`${mission.title} 아이콘`}
                                       />
-                                      <Text style={styles.groupStatText}>{mission.expReward} EXP</Text>
+                                      <Text style={styles.groupMissionTitle}>{mission.title}</Text>
+                                      {mission.category && (
+                                        <View style={styles.groupMissionTypeBadge}>
+                                          <Text style={styles.groupMissionTypeText}>
+                                            {getMissionCategoryLabel(mission.category)}
+                                          </Text>
+                                        </View>
+                                      )}
                                     </View>
-                                  )}
-                                  <View style={styles.groupStatItem}>
-                                    <Image
-                                      source={require('../../assets/images/high-five.png')}
-                                      style={styles.groupStatIcon}
-                                      resizeMode="contain"
-                                      accessibilityLabel="참여자 아이콘"
-                                    />
-                                    <Text style={styles.groupStatText}>
-                                      참여 {mission.participantCount || 0}명
+                                    <Text style={styles.groupMissionDescription} numberOfLines={2}>
+                                      {mission.description}
                                     </Text>
                                   </View>
                                 </View>
-                              </View>
-                            </TouchableOpacity>
+
+                                <View style={styles.groupMissionContent}>
+                                  <View style={styles.groupMissionVerificationInfo}>
+                                    {getVerificationTypeIcon(mission.verificationType) && (
+                                      <Image
+                                        source={getVerificationTypeIcon(mission.verificationType)!}
+                                        style={styles.groupVerificationIcon}
+                                        resizeMode="contain"
+                                        accessibilityLabel={`${getVerificationTypeLabel(mission.verificationType)} 아이콘`}
+                                      />
+                                    )}
+                                    <Text style={styles.groupMissionVerificationText}>
+                                      {getVerificationTypeLabel(mission.verificationType)}
+                                    </Text>
+                                  </View>
+                                </View>
+
+                                <View style={styles.groupMissionFooter}>
+                                  <View style={styles.groupMissionStats}>
+                                    {mission.expReward > 0 && (
+                                      <View style={styles.groupStatItem}>
+                                        <Image
+                                          source={require('../../assets/images/sun.png')}
+                                          style={styles.groupStatIcon}
+                                          resizeMode="contain"
+                                          accessibilityLabel="경험치 아이콘"
+                                        />
+                                        <Text style={styles.groupStatText}>{mission.expReward} EXP</Text>
+                                      </View>
+                                    )}
+                                    <View style={styles.groupStatItem}>
+                                      <Image
+                                        source={require('../../assets/images/high-five.png')}
+                                        style={styles.groupStatIcon}
+                                        resizeMode="contain"
+                                        accessibilityLabel="참여자 아이콘"
+                                      />
+                                      <Text style={styles.groupStatText}>
+                                        참여 {mission.participantCount || 0}명
+                                      </Text>
+                                    </View>
+                                  </View>
+                                </View>
+                              </TouchableOpacity>
+                            )}
 
                             {/* 선택된 미션 상세 정보 */}
-                            {selectedGroupMission?.id === mission.id && (
+                            {selectedGroupMission?.id === mission.id && mission.isCompleted !== false && (
                               <View style={styles.groupInlineDetailContainer}>
                                 <View style={styles.groupInlineDetailCard}>
                                   <Text style={styles.groupDetailTitle}>미션 정보</Text>
@@ -1116,78 +1138,64 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
                               </View>
                             )}
                           </View>
-                        ))}
-                      </View>
-                    )}
-                    keyExtractor={(_, index) => `group-page-${index}`}
-                    horizontal
-                    pagingEnabled
-                    showsHorizontalScrollIndicator={false}
-                    onMomentumScrollEnd={onGroupPageChange}
-                    getItemLayout={(_, index) => ({
-                      length: SCREEN_WIDTH - spacing[8],
-                      offset: (SCREEN_WIDTH - spacing[8]) * index,
-                      index,
-                    })}
-                    scrollEnabled={totalGroupPages > 1}
-                  />
+                    ))}
+                  </View>
 
-                  {/* 페이지 인디케이터 및 네비게이션 */}
-                  {totalGroupPages > 1 && (
-                    <View style={styles.paginationContainer}>
+
+                  {/* 서버 페이지네이션 (서버에서 가져올 페이지) */}
+                  {totalServerPages > 1 && (
+                    <View style={styles.serverPaginationContainer}>
                       <TouchableOpacity
-                        style={[styles.pageArrow, currentGroupPage === 0 && styles.pageArrowDisabled]}
-                        onPress={() => goToGroupPage(currentGroupPage - 1)}
-                        disabled={currentGroupPage === 0}
+                        style={[styles.serverPageButton, currentServerPage === 0 && styles.serverPageButtonDisabled]}
+                        onPress={() => {
+                          if (currentServerPage > 0) {
+                            setCurrentServerPage(currentServerPage - 1);
+                          }
+                        }}
+                        disabled={currentServerPage === 0}
                       >
                         <Image
                           source={require('../../assets/images/chevron.png')}
                           style={[
-                            styles.pageArrowIcon,
-                            styles.pageArrowIconLeft,
-                            currentGroupPage === 0 && styles.pageArrowIconDisabled,
+                            styles.serverPageArrowIcon,
+                            styles.serverPageArrowIconLeft,
+                            currentServerPage === 0 && styles.serverPageArrowIconDisabled,
                           ]}
                           resizeMode="contain"
-                          accessibilityLabel="이전 페이지"
+                          accessibilityLabel="이전 서버 페이지"
                         />
+                        <Text style={[styles.serverPageButtonText, currentServerPage === 0 && styles.serverPageButtonTextDisabled]}>
+                          이전
+                        </Text>
                       </TouchableOpacity>
 
-                      <View style={styles.pageIndicators}>
-                        {groupMissionPages.map((_, index) => (
-                          <TouchableOpacity
-                            key={index}
-                            style={[
-                              styles.pageIndicator,
-                              currentGroupPage === index && styles.pageIndicatorActive,
-                            ]}
-                            onPress={() => goToGroupPage(index)}
-                          />
-                        ))}
-                      </View>
+                      <Text style={styles.serverPageInfo}>
+                        Page {currentServerPage + 1} / {totalServerPages}
+                      </Text>
 
                       <TouchableOpacity
-                        style={[styles.pageArrow, currentGroupPage === totalGroupPages - 1 && styles.pageArrowDisabled]}
-                        onPress={() => goToGroupPage(currentGroupPage + 1)}
-                        disabled={currentGroupPage === totalGroupPages - 1}
+                        style={[styles.serverPageButton, currentServerPage === totalServerPages - 1 && styles.serverPageButtonDisabled]}
+                        onPress={() => {
+                          if (currentServerPage < totalServerPages - 1) {
+                            setCurrentServerPage(currentServerPage + 1);
+                          }
+                        }}
+                        disabled={currentServerPage === totalServerPages - 1}
                       >
+                        <Text style={[styles.serverPageButtonText, currentServerPage === totalServerPages - 1 && styles.serverPageButtonTextDisabled]}>
+                          다음
+                        </Text>
                         <Image
                           source={require('../../assets/images/chevron.png')}
                           style={[
-                            styles.pageArrowIcon,
-                            currentGroupPage === totalGroupPages - 1 && styles.pageArrowIconDisabled,
+                            styles.serverPageArrowIcon,
+                            currentServerPage === totalServerPages - 1 && styles.serverPageArrowIconDisabled,
                           ]}
                           resizeMode="contain"
-                          accessibilityLabel="다음 페이지"
+                          accessibilityLabel="다음 서버 페이지"
                         />
                       </TouchableOpacity>
                     </View>
-                  )}
-
-                  {/* 페이지 정보 */}
-                  {totalGroupPages > 1 && (
-                    <Text style={styles.pageInfo}>
-                      {currentGroupPage + 1} / {totalGroupPages} 페이지
-                    </Text>
                   )}
                 </>
               )}
@@ -1369,6 +1377,22 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border.light,
   },
+  groupMissionCardLocked: {
+    backgroundColor: colors.gray[200],
+    borderRadius: borderRadius.base,
+    padding: spacing[8],
+    marginBottom: spacing[1],
+    borderWidth: 2.5,
+    borderColor: colors.gray[500],
+    minHeight: 120,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: colors.gray[800],
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 3,
+  },
   groupMissionCardSelected: {
     borderColor: colors.primary[500],
     borderWidth: 2,
@@ -1401,6 +1425,32 @@ const styles = StyleSheet.create({
     }),
     includeFontPadding: false,
     lineHeight: getOptimizedLineHeight(typography.fontSize.base),
+  },
+  groupMissionLockIcon: {
+    width: 16,
+    height: 16,
+    tintColor: colors.gray[500],
+  },
+  groupMissionLockIconCenter: {
+    width: 48,
+    height: 48,
+  },
+  groupMissionUnlockedBadge: {
+    backgroundColor: colors.green[100],
+    paddingHorizontal: spacing[2],
+    paddingVertical: spacing[1],
+    borderRadius: borderRadius.base,
+  },
+  groupMissionUnlockedText: {
+    fontSize: typography.fontSize.xs,
+    color: colors.green[700],
+    fontWeight: typography.fontWeight.medium,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
   },
   groupMissionTypeBadge: {
     backgroundColor: colors.primary[100],
@@ -1600,6 +1650,66 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.base,
     fontWeight: typography.fontWeight.medium,
     color: colors.white,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
+  },
+  // 서버 페이지네이션 스타일
+  serverPaginationContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: spacing[4],
+    marginBottom: spacing[2],
+    gap: spacing[3],
+    paddingVertical: spacing[3],
+    borderTopWidth: 1,
+    borderTopColor: colors.border.light,
+  },
+  serverPageButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing[2],
+    paddingVertical: spacing[2],
+    paddingHorizontal: spacing[4],
+    borderRadius: borderRadius.md,
+    backgroundColor: colors.primary[100],
+  },
+  serverPageButtonDisabled: {
+    backgroundColor: colors.gray[100],
+  },
+  serverPageButtonText: {
+    fontSize: typography.fontSize.base,
+    fontWeight: typography.fontWeight.medium,
+    color: colors.primary[700],
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
+  },
+  serverPageButtonTextDisabled: {
+    color: colors.gray[400],
+  },
+  serverPageArrowIcon: {
+    width: 16,
+    height: 16,
+    tintColor: colors.primary[600],
+  },
+  serverPageArrowIconLeft: {
+    transform: [{ rotate: '180deg' }],
+  },
+  serverPageArrowIconDisabled: {
+    tintColor: colors.gray[400],
+  },
+  serverPageInfo: {
+    fontSize: typography.fontSize.base,
+    fontWeight: typography.fontWeight.medium,
+    color: colors.text.primary,
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,
       android: typography.fontFamily.regular,

@@ -2,7 +2,7 @@
  * 커뮤니티 게시글 상세 화면
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -55,11 +55,12 @@ const CommunityPostDetailScreen: React.FC<CommunityPostDetailScreenProps> = ({
   const [alertMessage, setAlertMessage] = useState('');
   // 삭제 확인 모달 상태
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showDeleteCommentModal, setShowDeleteCommentModal] = useState(false);
+  const [deleteCommentId, setDeleteCommentId] = useState<string | null>(null);
 
-  // 본인 게시글인지 확인 (user_id 비교, fallback으로 닉네임 비교)
-  const isAuthor = currentUserId !== null && 
-    post?.author_id !== undefined && 
-    Number(post.author_id) === currentUserId;
+  // 본인 게시글인지 확인 (백엔드에서 제공하는 isAuthor 필드 사용)
+  // 로그인한 경우에만 isAuthor가 올바르게 설정됨
+  const isAuthor = post?.isAuthor === true;
 
 
   // 숨긴 댓글 목록 로드
@@ -163,20 +164,22 @@ const CommunityPostDetailScreen: React.FC<CommunityPostDetailScreenProps> = ({
   };
 
   const handleDeleteComment = (commentId: string) => {
-    Alert.alert(
-      '댓글 삭제',
-      '정말로 이 댓글을 삭제하시겠습니까?',
-      [
-        { text: '취소', style: 'cancel' },
-        {
-          text: '삭제',
-          style: 'destructive',
-          onPress: async () => {
-            await deleteComment(commentId);
-          },
-        },
-      ]
-    );
+    setDeleteCommentId(commentId);
+    setShowDeleteCommentModal(true);
+  };
+
+  const handleConfirmDeleteComment = async () => {
+    if (deleteCommentId) {
+      try {
+        await deleteComment(deleteCommentId);
+        setShowDeleteCommentModal(false);
+        setDeleteCommentId(null);
+      } catch (error) {
+        logError('댓글 삭제 실패', error as Error);
+        setShowDeleteCommentModal(false);
+        setDeleteCommentId(null);
+      }
+    }
   };
 
   if (loading) {
@@ -217,7 +220,11 @@ const CommunityPostDetailScreen: React.FC<CommunityPostDetailScreenProps> = ({
             <View style={styles.postActionsContainer}>
               <TouchableOpacity
                 style={styles.postActionButton}
-                onPress={() => navigation.navigate('CommunityPostEdit', { postId: post.post_id })}
+                onPress={() => {
+                  if (post) {
+                    navigation.navigate('CommunityPostEdit', { postId: post.post_id });
+                  }
+                }}
                 hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
               >
                 <Image
@@ -265,7 +272,12 @@ const CommunityPostDetailScreen: React.FC<CommunityPostDetailScreenProps> = ({
           </View>
 
           <View style={styles.missionInfo}>
-            <Text style={styles.missionEmoji}>{post.mission_emoji || '🎯'}</Text>
+            <Image
+              source={require('../../assets/images/goal.png')}
+              style={styles.missionEmojiImage}
+              resizeMode="contain"
+              accessibilityLabel="미션 아이콘"
+            />
             <Text style={styles.missionTitle}>{post.mission_title || '미션'}</Text>
             {/* 인증 상태 뱃지 */}
             {post.verified === true ? (
@@ -376,9 +388,6 @@ const CommunityPostDetailScreen: React.FC<CommunityPostDetailScreenProps> = ({
                     ) : (
                       <CommentCard
                         comment={parentComment}
-                        isAuthor={currentUserId !== null && 
-                          parentComment.author_id !== undefined && 
-                          Number(parentComment.author_id) === currentUserId}
                         onEdit={handleEditComment}
                         onDelete={handleDeleteComment}
                         onReply={handleReplyComment}
@@ -428,9 +437,6 @@ const CommunityPostDetailScreen: React.FC<CommunityPostDetailScreenProps> = ({
                           ) : (
                             <CommentCard
                               comment={reply}
-                              isAuthor={currentUserId !== null && 
-                                reply.author_id !== undefined && 
-                                Number(reply.author_id) === currentUserId}
                               isReply={true}
                               onEdit={handleEditComment}
                               onDelete={handleDeleteComment}
@@ -492,6 +498,19 @@ const CommunityPostDetailScreen: React.FC<CommunityPostDetailScreenProps> = ({
         cancelText="취소"
         onConfirm={handleConfirmDelete}
         onCancel={() => setShowDeleteModal(false)}
+        confirmButtonColor={colors.error}
+      />
+      <ConfirmModal
+        visible={showDeleteCommentModal}
+        title="댓글 삭제"
+        message="정말로 이 댓글을 삭제하시겠습니까?"
+        confirmText="삭제"
+        cancelText="취소"
+        onConfirm={handleConfirmDeleteComment}
+        onCancel={() => {
+          setShowDeleteCommentModal(false);
+          setDeleteCommentId(null);
+        }}
         confirmButtonColor={colors.error}
       />
     </ImageBackground>
@@ -649,13 +668,9 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: colors.primary[500],
   },
-  missionEmoji: {
-    fontSize: typography.fontSize.base,
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
+  missionEmojiImage: {
+    width: 16,
+    height: 16,
   },
   missionTitle: {
     flex: 1,
@@ -964,7 +979,7 @@ const styles = StyleSheet.create({
     padding: spacing[2],
     fontSize: typography.fontSize.sm,
     color: colors.text.primary,
-    maxHeight: 80,
+    maxHeight: 40,
     borderWidth: 1,
     borderColor: colors.border.light,
     fontFamily: Platform.select({
@@ -972,7 +987,7 @@ const styles = StyleSheet.create({
       android: typography.fontFamily.regular,
     }),
     includeFontPadding: false,
-    textAlignVertical: 'top',
+    textAlignVertical: 'center',
   },
   submitButton: {
     paddingHorizontal: spacing[3],

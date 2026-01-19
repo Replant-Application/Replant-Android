@@ -111,12 +111,11 @@ const CommunityPostEditScreen: React.FC<CommunityPostEditScreenProps> = ({
     );
   }
 
-  // 본인 게시글인지 확인 (user_id 비교, fallback으로 닉네임 비교)
-  const isAuthor = currentUserId !== null && 
-    post.author_id !== undefined && 
-    Number(post.author_id) === currentUserId;
+  // 본인 게시글인지 확인 (백엔드에서 제공하는 isAuthor 필드 사용)
+  // 로그인한 경우에만 isAuthor가 올바르게 설정됨
+  const isAuthor = post?.isAuthor === true;
   
-  if (!isAuthor && (currentUserId === null || post.author_nickname !== currentNickname)) {
+  if (!isAuthor) {
     Alert.alert('오류', '본인의 게시글만 수정할 수 있습니다.');
     navigation.goBack();
     return null;

@@ -16,6 +16,7 @@ import {
   Image,
   TouchableOpacity,
   ImageBackground,
+  ActivityIndicator,
 } from 'react-native';
 import { Header, AlertModal } from '../../components/ui';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
@@ -24,6 +25,9 @@ import { useCommunity } from '../../hooks/useCommunity';
 import { createVerificationPost } from '../../api/verificationApi';
 import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types/navigation';
+import { launchImageLibrary, launchCamera, ImagePickerResponse } from 'react-native-image-picker';
+import { uploadCommunityPhoto } from '../../api/fileApi';
+import { logError } from '../../utils/logger';
 
 interface CommunityPostCreateScreenProps {
   navigation: NavigationProp<RootStackParamList>;
@@ -47,6 +51,8 @@ const CommunityPostCreateScreen: React.FC<CommunityPostCreateScreenProps> = ({
   const { createPost } = useCommunity();
   const [title, setTitle] = useState(missionTitle);
   const [content, setContent] = useState('');
+  const [images, setImages] = useState<string[]>([]);
+  const [uploadingImage, setUploadingImage] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
 
@@ -60,6 +66,64 @@ const CommunityPostCreateScreen: React.FC<CommunityPostCreateScreenProps> = ({
       missionTitle,
     });
   }, []);
+
+  // 이미지 선택 (갤러리)
+  const handleSelectImage = async () => {
+    try {
+      const result = await launchImageLibrary({
+        mediaType: 'photo',
+        quality: 0.8,
+        selectionLimit: 5,
+      });
+
+      if (result.didCancel) {
+        return;
+      }
+
+      if (result.errorCode) {
+        logError('갤러리 오류', new Error(result.errorMessage || result.errorCode));
+        if (result.errorCode === 'permission') {
+          Alert.alert('권한 필요', '사진을 선택하려면 갤러리 접근 권한이 필요합니다.');
+        } else {
+          Alert.alert('오류', '사진을 불러오는 중 오류가 발생했습니다.');
+        }
+        return;
+      }
+
+      if (result.assets && result.assets.length > 0) {
+        setUploadingImage(true);
+        try {
+          const uploadPromises = result.assets.map(async (asset) => {
+            if (asset.uri) {
+              const uploadResult = await uploadCommunityPhoto({
+                uri: asset.uri,
+                type: asset.type || 'image/jpeg',
+                name: asset.fileName || `image_${Date.now()}.jpg`,
+              });
+              return uploadResult.success && uploadResult.data ? uploadResult.data.fileUrl : null;
+            }
+            return null;
+          });
+
+          const uploadedUrls = (await Promise.all(uploadPromises)).filter((url): url is string => url !== null);
+          setImages((prev) => [...prev, ...uploadedUrls]);
+        } catch (error) {
+          logError('이미지 업로드 오류', error as Error);
+          Alert.alert('오류', '이미지 업로드 중 오류가 발생했습니다.');
+        } finally {
+          setUploadingImage(false);
+        }
+      }
+    } catch (error) {
+      logError('이미지 선택 오류', error as Error);
+      Alert.alert('오류', '사진을 선택하는 중 오류가 발생했습니다.');
+    }
+  };
+
+  // 이미지 제거
+  const handleRemoveImage = (index: number) => {
+    setImages((prev) => prev.filter((_, i) => i !== index));
+  };
 
   const handleCreatePost = async () => {
     // 중복 호출 방지
@@ -102,7 +166,7 @@ const CommunityPostCreateScreen: React.FC<CommunityPostCreateScreenProps> = ({
           mission_emoji: missionEmoji,
           title: postTitle,
           content: content.trim(),
-          images: photoUrl ? [photoUrl] : [],
+          images: photoUrl ? [photoUrl, ...images] : images,
           category: postType,
         };
         result = await createPost(postData);
@@ -210,13 +274,58 @@ const CommunityPostCreateScreen: React.FC<CommunityPostCreateScreenProps> = ({
             }
             placeholderTextColor={colors.text.tertiary}
             multiline
-            numberOfLines={8}
             textAlignVertical="top"
           />
         </View>
 
-        {/* 미션 인증 사진 표시 */}
-        {photoUrl && (
+        {/* 이미지 섹션 (일반 게시글만) */}
+        {isGeneralPost && (
+          <View style={styles.inputSection}>
+            <Text style={styles.label}>사진 (선택)</Text>
+            <View style={styles.imageContainer}>
+              {images.map((imageUrl, index) => (
+                <View key={index} style={styles.imagePreviewWrapper}>
+                  <Image 
+                    source={{ uri: imageUrl }} 
+                    style={styles.previewImage} 
+                    resizeMode="cover" 
+                    accessibilityLabel="이미지 미리보기"
+                  />
+                  <TouchableOpacity
+                    style={styles.removeImageButton}
+                    onPress={() => handleRemoveImage(index)}
+                  >
+                    <Text style={styles.removeImageText}>×</Text>
+                  </TouchableOpacity>
+                </View>
+              ))}
+              {images.length < 5 && (
+                <TouchableOpacity
+                  style={styles.addImageButton}
+                  onPress={handleSelectImage}
+                  disabled={uploadingImage}
+                >
+                  {uploadingImage ? (
+                    <ActivityIndicator color={colors.primary[500]} />
+                  ) : (
+                    <>
+                      <Image
+                        source={require('../../assets/images/camera.png')}
+                        style={styles.addImageIcon}
+                        resizeMode="contain"
+                        accessibilityLabel="이미지 추가 아이콘"
+                      />
+                      <Text style={styles.addImageText}>사진 추가</Text>
+                    </>
+                  )}
+                </TouchableOpacity>
+              )}
+            </View>
+          </View>
+        )}
+
+        {/* 미션 인증 사진 표시 (인증글만) */}
+        {!isGeneralPost && photoUrl && (
           <View style={styles.imageSection}>
             <Text style={styles.label}>인증 사진</Text>
             <Image 
@@ -365,12 +474,68 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.base,
     color: colors.text.primary,
     minHeight: 150,
+    maxHeight: 300,
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,
       android: typography.fontFamily.regular,
     }),
     includeFontPadding: false,
     textAlignVertical: 'top',
+  },
+  imageContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing[2],
+  },
+  imagePreviewWrapper: {
+    position: 'relative',
+    width: 100,
+    height: 100,
+    borderRadius: borderRadius.md,
+    overflow: 'hidden',
+  },
+  addImageButton: {
+    width: 100,
+    height: 100,
+    backgroundColor: colors.background.secondary,
+    borderRadius: borderRadius.md,
+    borderWidth: 1,
+    borderColor: colors.border.light,
+    borderStyle: 'dashed',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: spacing[1],
+  },
+  addImageIcon: {
+    width: 24,
+    height: 24,
+    tintColor: colors.text.tertiary,
+  },
+  addImageText: {
+    fontSize: typography.fontSize.xs,
+    color: colors.text.tertiary,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+  },
+  removeImageButton: {
+    position: 'absolute',
+    top: 4,
+    right: 4,
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  removeImageText: {
+    color: colors.white,
+    fontSize: 18,
+    fontWeight: 'bold',
+    lineHeight: 20,
   },
   imageSection: {
     marginBottom: spacing[4],

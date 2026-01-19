@@ -75,12 +75,8 @@ export const useCommunityPost = (postId: string): UseCommunityPostReturn => {
         return { success: false, error: '사용자 정보가 없습니다.' };
       }
 
-      // 내 게시글에는 좋아요를 누를 수 없음 (user_id 비교, fallback으로 닉네임 비교)
-      const isOwnPost = currentUserId !== null && 
-        post.author_id !== undefined && 
-        Number(post.author_id) === currentUserId;
-      
-      if (isOwnPost || (currentUserId === null && post.author_nickname === currentNickname)) {
+      // 내 게시글에는 좋아요를 누를 수 없음 (백엔드에서 제공하는 isAuthor 필드 사용)
+      if (post.isAuthor === true) {
         return { success: false, error: '내 게시글에는 좋아요를 누를 수 없습니다.' };
       }
 

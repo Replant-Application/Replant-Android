@@ -18,18 +18,22 @@ export const autoLevelupCharacter = async (
     }
 
     // 경험치 추가
-    const newExperience: number = (character.experience || 0) + experienceGained;
+    // character.experience는 현재 레벨의 경험치 (0-99)
+    // character.total_experience는 전체 누적 경험치
+    const currentTotalExp = character.total_experience || character.experience || 0;
+    const newTotalExp: number = currentTotalExp + experienceGained;
 
     // 레벨업 계산 (100 경험치당 1레벨)
-    const newLevel: number = Math.floor(newExperience / 100) + 1;
+    const newLevel: number = Math.floor(newTotalExp / 100) + 1;
     const oldLevel: number = character.level || 1;
+    const newCurrentLevelExp = newTotalExp % 100; // 현재 레벨에서의 경험치 (0-99)
 
     // 캐릭터 업데이트
     const updatedCharacter: Character = {
       ...character,
-      experience: newExperience,
+      experience: newCurrentLevelExp, // 현재 레벨의 경험치
       level: newLevel,
-      total_experience: newExperience  // total_experience는 전체 누적 경험치
+      total_experience: newTotalExp  // total_experience는 전체 누적 경험치
     };
 
     // Character의 id는 string이므로 직접 배열을 업데이트
@@ -43,7 +47,7 @@ export const autoLevelupCharacter = async (
       oldLevel,
       newLevel,
       experienceGained,
-      experience: newExperience,
+      experience: newTotalExp,
       levelUp: newLevel > oldLevel,
       character: updatedCharacter
     };

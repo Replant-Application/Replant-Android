@@ -41,6 +41,11 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   // 히어로 섹션 접힘 상태
   const [_isHeroCollapsed, setIsHeroCollapsed] = useState(false);
 
+  // 진화 모달 상태
+  const [showEvolutionModal, setShowEvolutionModal] = useState(false);
+  const [previousLevel, setPreviousLevel] = useState<number | null>(null);
+  const evolutionFadeAnim = useRef(new Animated.Value(0)).current;
+
   // 캐릭터 영역 슬라이딩 상태
   const MIN_HERO_HEIGHT = SCREEN_HEIGHT * 0.1;
   const MAX_HERO_HEIGHT = SCREEN_HEIGHT * 0.45;
@@ -92,6 +97,31 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   // 단일 캐릭터 시스템이므로 첫 번째 캐릭터 사용
   const currentCharacter = characters.length > 0 ? characters[0] : null;
 
+  // 레벨업 감지 및 진화 모달 표시
+  useEffect(() => {
+    if (currentCharacter && currentCharacter.level) {
+      const currentLevel = currentCharacter.level;
+      
+      // 이전 레벨이 있고 현재 레벨이 더 높으면 레벨업 발생
+      if (previousLevel !== null && currentLevel > previousLevel) {
+        // 진화 모달 표시
+        setShowEvolutionModal(true);
+        Animated.timing(evolutionFadeAnim, {
+          toValue: 1,
+          duration: 300,
+          useNativeDriver: true,
+        }).start();
+      }
+      
+      // 현재 레벨을 이전 레벨로 저장
+      setPreviousLevel(currentLevel);
+    } else if (currentCharacter && !previousLevel) {
+      // 초기 로드 시 현재 레벨 저장
+      setPreviousLevel(currentCharacter.level || 1);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentCharacter?.level, previousLevel]);
+
   // 데이터 로딩 - 각 API 개별적으로 안전하게 처리
   const loadData = useCallback(async () => {
     try {
@@ -102,22 +132,39 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
       try {
         const todoListResult = await getActiveTodoLists();
         if (todoListResult?.success && Array.isArray(todoListResult.data)) {
-          setActiveTodoLists(todoListResult.data);
+          // 오늘 날짜의 투두리스트만 필터링
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          
+          const todayTodoLists = todoListResult.data.filter((todoList) => {
+            if (!todoList.createdAt) return false;
+            const createdDate = new Date(todoList.createdAt);
+            createdDate.setHours(0, 0, 0, 0);
+            
+            // 오늘 날짜이고 완료되지 않은 투두리스트만
+            const isToday = createdDate.getTime() === today.getTime();
+            const isNotCompleted = todoList.status === 'ACTIVE' && 
+                                   todoList.completedCount < todoList.totalCount;
+            
+            return isToday && isNotCompleted;
+          });
+          
+          setActiveTodoLists(todayTodoLists);
           
           // 각 투두리스트의 상세 정보를 가져와서 미션 추출 및 완료 확인 (한 번만 호출)
           const missionsByTime = new Map<string, { mission: TodoMission; todoListTitle: string }[]>();
           
-          for (const todoList of todoListResult.data) {
+          for (const todoList of todayTodoLists) {
             try {
               const detailResult = await getTodoListDetail(todoList.id);
               if (detailResult?.success && detailResult.data) {
                 const todoListDetail = detailResult.data;
                 
-                // 미션 추출 (시간대별로 그룹화)
+                // 미션 추출 (시간대별로 그룹화) - 완료된 미션도 포함
                 if (todoListDetail.missions) {
                   for (const mission of todoListDetail.missions) {
-                    // 완료되지 않은 미션이고 시간이 설정된 경우만
-                    if (!mission.isCompleted && mission.scheduledStartTime) {
+                    // 시간이 설정된 미션만 (완료 여부와 관계없이)
+                    if (mission.scheduledStartTime) {
                       const timeKey = mission.scheduledStartTime; // "09:00" 형식
                       if (!missionsByTime.has(timeKey)) {
                         missionsByTime.set(timeKey, []);
@@ -245,6 +292,17 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
     }
   };
 
+  // 진화 모달 닫기 핸들러
+  const handleEvolutionModalClose = (): void => {
+    Animated.timing(evolutionFadeAnim, {
+      toValue: 0,
+      duration: 300,
+      useNativeDriver: true,
+    }).start(() => {
+      setShowEvolutionModal(false);
+    });
+  };
+
   // 에러 처리
   if (characterError) {
     return (
@@ -349,6 +407,43 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
             </>
           )}
         </Animated.View>
+
+        {/* 진화 모달 */}
+        <Modal
+          visible={showEvolutionModal}
+          transparent={true}
+          animationType="none"
+          onRequestClose={handleEvolutionModalClose}
+        >
+          <Animated.View style={[styles.evolutionModalOverlay, { opacity: evolutionFadeAnim }]}>
+            <TouchableOpacity
+              style={styles.evolutionModalContent}
+              activeOpacity={1}
+              onPress={handleEvolutionModalClose}
+            >
+              <View style={styles.evolutionImageContainer}>
+                <FastImage
+                  source={require('../../assets/images/characters/transformation.gif')}
+                  style={styles.evolutionImage}
+                  resizeMode={FastImage.resizeMode.contain}
+                />
+              </View>
+              <View style={styles.evolutionSpeechBubble}>
+                <ImageBackground
+                  source={require('../../assets/images/conversation.png')}
+                  style={styles.evolutionSpeechBubbleImage}
+                  resizeMode="stretch"
+                >
+                  <View style={styles.evolutionSpeechTextContainer}>
+                    <Text style={styles.evolutionSpeechText}>
+                      어라? 내 몸이 이상해요!
+                    </Text>
+                  </View>
+                </ImageBackground>
+              </View>
+            </TouchableOpacity>
+          </Animated.View>
+        </Modal>
 
         {/* 하단: 바텀 시트 스타일 */}
         <View style={styles.bottomSheet}>
@@ -462,35 +557,50 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                     </View>
                   ) : (
                     <>
-                      <Text style={styles.todoListCount}>
-                        {(activeTodoLists || []).length}개 진행중
-                      </Text>
                       {todoMissionsByTime.size > 0 && (
                         <View style={styles.timeBasedMissions}>
                           {Array.from(todoMissionsByTime.entries()).map(([time, missions]) => (
                             <View key={time} style={styles.timeGroup}>
                               <Text style={styles.timeLabel}>{time}</Text>
-                              {missions.map((item, idx) => (
-                                <TouchableOpacity
-                                  key={`${item.mission.id}-${idx}`}
-                                  style={styles.missionItem}
-                                  onPress={() => {
-                                    // 해당 투두리스트의 첫 번째 투두리스트 ID 찾기
-                                    const todoList = activeTodoLists.find(tl => tl.title === item.todoListTitle);
-                                    if (todoList) {
-                                      navigation.navigate(SCREEN_NAMES.TODO_LIST_DETAIL as any, { todoListId: todoList.id });
-                                    }
-                                  }}
-                                  activeOpacity={0.7}
-                                >
-                                  <Text style={styles.missionItemTitle} numberOfLines={1}>
-                                    {item.mission.title}
-                                  </Text>
-                                  <Text style={styles.missionItemList} numberOfLines={1}>
-                                    {item.todoListTitle}
-                                  </Text>
-                                </TouchableOpacity>
-                              ))}
+                              {missions.map((item, idx) => {
+                                const isCompleted = item.mission.isCompleted;
+                                return (
+                                  <TouchableOpacity
+                                    key={`${item.mission.id}-${idx}`}
+                                    style={[
+                                      styles.missionItem,
+                                      isCompleted && styles.missionItemCompleted
+                                    ]}
+                                    onPress={() => {
+                                      // 해당 투두리스트의 첫 번째 투두리스트 ID 찾기
+                                      const todoList = activeTodoLists.find(tl => tl.title === item.todoListTitle);
+                                      if (todoList) {
+                                        navigation.navigate(SCREEN_NAMES.TODO_LIST_DETAIL as any, { todoListId: todoList.id });
+                                      }
+                                    }}
+                                    activeOpacity={0.7}
+                                  >
+                                    <Text 
+                                      style={[
+                                        styles.missionItemTitle,
+                                        isCompleted && styles.missionItemTitleCompleted
+                                      ]} 
+                                      numberOfLines={1}
+                                    >
+                                      {item.mission.title}
+                                    </Text>
+                                    <Text 
+                                      style={[
+                                        styles.missionItemList,
+                                        isCompleted && styles.missionItemListCompleted
+                                      ]} 
+                                      numberOfLines={1}
+                                    >
+                                      {item.todoListTitle}
+                                    </Text>
+                                  </TouchableOpacity>
+                                );
+                              })}
                             </View>
                           ))}
                         </View>
@@ -687,6 +797,10 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.gray[200],
   },
+  missionItemCompleted: {
+    opacity: 0.6,
+    backgroundColor: 'rgba(240, 240, 240, 0.8)',
+  },
   missionItemTitle: {
     fontSize: typography.fontSize.sm,
     fontWeight: typography.fontWeight.medium,
@@ -698,6 +812,10 @@ const styles = StyleSheet.create({
     }),
     includeFontPadding: false,
   },
+  missionItemTitleCompleted: {
+    textDecorationLine: 'line-through',
+    color: colors.text.secondary,
+  },
   missionItemList: {
     fontSize: typography.fontSize.xs,
     color: colors.text.secondary,
@@ -706,6 +824,10 @@ const styles = StyleSheet.create({
       android: typography.fontFamily.regular,
     }),
     includeFontPadding: false,
+  },
+  missionItemListCompleted: {
+    textDecorationLine: 'line-through',
+    color: colors.text.tertiary,
   },
   todoListSection: {
     backgroundColor: 'rgba(255, 255, 255, 0.95)',
@@ -831,6 +953,59 @@ const styles = StyleSheet.create({
     color: colors.text.secondary,
     textAlign: 'center',
     lineHeight: getOptimizedLineHeight(typography.fontSize.sm) * 1.4,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+  },
+  evolutionModalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  evolutionModalContent: {
+    width: '100%',
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  evolutionImageContainer: {
+    width: SCREEN_WIDTH * 0.8,
+    height: SCREEN_WIDTH * 0.8,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: spacing[6],
+  },
+  evolutionImage: {
+    width: '100%',
+    height: '100%',
+  },
+  evolutionSpeechBubble: {
+    width: SCREEN_WIDTH * 0.8,
+    alignItems: 'center',
+  },
+  evolutionSpeechBubbleImage: {
+    width: '100%',
+    minHeight: 120,
+    paddingHorizontal: spacing[6],
+    paddingVertical: spacing[5],
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  evolutionSpeechTextContainer: {
+    width: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  evolutionSpeechText: {
+    fontSize: typography.fontSize.xl,
+    fontWeight: typography.fontWeight.bold,
+    color: colors.text.primary,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.xl),
+    letterSpacing: 0,
+    textAlign: 'center',
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,
       android: typography.fontFamily.regular,

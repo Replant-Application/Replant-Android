@@ -59,6 +59,7 @@ export const API_CONFIG = {
     mission: {
       list: '/missions',
       filtered: '/missions/filtered',
+      collection: '/missions/collection', // 미션 도감 조회 (사용자가 수행한 미션만)
       detail: '/missions/:missionId',
       reviews: '/missions/:missionId/reviews',
       createReview: '/missions/:missionId/reviews',

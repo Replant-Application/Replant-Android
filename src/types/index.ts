@@ -247,7 +247,8 @@ export interface CommunityPost {
   title: string; // 게시글 제목 (미션 제목을 기본값으로 사용 가능)
   content: string; // 사용자가 작성한 내용
   author: string;
-  author_id: string; // 작성자 ID
+  author_id: string; // 작성자 ID (레거시 호환용)
+  userId?: number; // 작성자 ID (백엔드 userId 직접 사용)
   author_nickname: string;
   created_at: string;
   updated_at?: string;
@@ -259,6 +260,7 @@ export interface CommunityPost {
   category?: string;
   is_liked?: boolean; // 현재 사용자가 좋아요 했는지
   is_scrapped?: boolean; // 현재 사용자가 스크랩 했는지
+  isAuthor?: boolean; // 본인 게시글 여부 (백엔드에서 제공, userId 기반)
   verified?: boolean; // 인증 완료 여부 (false일 때만 수정/삭제 가능)
   status?: string; // 인증 상태 (PENDING, APPROVED) - VERIFICATION 타입일 때만
 }
@@ -269,11 +271,13 @@ export interface CommunityComment {
   post_id: string;
   content: string;
   author: string;
-  author_id?: string; // 작성자 ID (user_id 비교용)
+  author_id?: string; // 작성자 ID (user_id 비교용, 레거시 호환)
+  userId?: number; // 작성자 ID (백엔드 userId 직접 사용)
   author_nickname: string;
   created_at: string;
   updated_at?: string;
   parent_comment_id?: string; // 대댓글용
+  isAuthor?: boolean; // 본인 댓글 여부 (백엔드에서 제공, userId 기반)
 }
 
 export interface CommunityPostData {

@@ -11,7 +11,7 @@ interface CommentCardProps {
   onDelete?: (commentId: string) => void;
   onReply?: (comment: CommunityComment) => void;
   onHide?: (commentId: string) => void;
-  isAuthor?: boolean;
+  isAuthor?: boolean; // 레거시 호환용 (comment.isAuthor를 우선 사용)
   isReply?: boolean;
   style?: ViewStyle;
 }
@@ -22,11 +22,14 @@ const CommentCard: React.FC<CommentCardProps> = ({
   onDelete,
   onReply,
   onHide,
-  isAuthor = false,
+  isAuthor: propIsAuthor,
   isReply = false,
   style
 }) => {
   if (!comment) return null;
+
+  // 백엔드에서 제공하는 isAuthor 필드 우선 사용, 없으면 prop 사용 (레거시 호환)
+  const isAuthor = comment.isAuthor === true || propIsAuthor === true;
 
   const handleHide = () => {
     Alert.alert(
@@ -143,10 +146,8 @@ const styles = StyleSheet.create({
     borderColor: colors.border.light,
   },
   replyContainer: {
-    marginLeft: spacing[3],
-    backgroundColor: colors.gray[50],
-    borderLeftWidth: 2,
-    borderLeftColor: colors.primary[500],
+    marginLeft: spacing[4],
+    backgroundColor: colors.background.primary,
     borderWidth: 1,
     borderColor: colors.border.light,
     borderRadius: borderRadius.base,

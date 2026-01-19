@@ -38,6 +38,9 @@ export interface Post {
   imageUrls: string[];
   hasValidBadge: boolean; // 작성자가 미션 뱃지를 보유중인지
   commentCount: number;
+  likeCount?: number;
+  isLiked?: boolean;
+  isAuthor?: boolean; // 본인 게시글 여부 (백엔드에서 제공, userId 기반)
   createdAt: string;
   updatedAt?: string;
 }
@@ -58,6 +61,7 @@ export interface CreatePostRequest {
 }
 
 export interface UpdatePostRequest {
+  missionId?: number;
   title?: string;
   content?: string;
   imageUrls?: string[];
@@ -69,6 +73,7 @@ export interface Comment {
   userNickname: string;
   userProfileImg?: string;
   content: string;
+  isAuthor?: boolean; // 본인 댓글 여부 (백엔드에서 제공, userId 기반)
   createdAt: string;
   updatedAt?: string;
   // 일반화된 댓글 대상 (QnA, Diary 등에서 사용)

@@ -27,11 +27,13 @@ import { getOptimizedLineHeight } from '../../utils/textStyles';
 import {
   getSystemMissions,
   getCustomMissions,
+  getMissionCollection,
   getMissionReviews,
   createMissionReview,
   Mission,
   MissionReview,
   MissionCategory,
+  MissionCollectionItem,
 } from '../../api/missionApi';
 import { useUser } from '../../contexts/UserContext';
 
@@ -54,6 +56,9 @@ interface UnifiedMission {
   participantCount?: number;
   isCustom: boolean;
   creatorNickname?: string;
+  isAttempted?: boolean; // 사용자가 수행한 미션인지
+  isCompleted?: boolean; // 인증 완료 여부
+  isPublic?: boolean; // 커스텀 미션의 경우
 }
 
 const MissionGroupScreen: React.FC<MissionGroupScreenProps> = ({ navigation }) => {
@@ -78,7 +83,7 @@ const MissionGroupScreen: React.FC<MissionGroupScreenProps> = ({ navigation }) =
   const [reviewContent, setReviewContent] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
-  // 미션 목록 로드
+  // 미션 목록 로드 (미션 도감 API 사용)
   const loadMissions = useCallback(async (page: number = 0, append: boolean = false) => {
     try {
       if (!append) {
@@ -86,64 +91,63 @@ const MissionGroupScreen: React.FC<MissionGroupScreenProps> = ({ navigation }) =
       }
       setError(null);
 
-      if (activeTab === 'official') {
-        const result = await getSystemMissions({ page, size: PAGE_SIZE });
-        if (result.success && result.data) {
-          const unifiedMissions: UnifiedMission[] = (result.data.content || []).map(m => ({
-            id: m.id,
-            title: m.title,
-            description: m.description,
-            category: m.category,
-            verificationType: m.verificationType,
-            requiredMinutes: m.requiredMinutes,
-            expReward: m.expReward,
-            badgeDurationDays: m.badgeDurationDays,
-            participantCount: m.participantCount,
-            isCustom: false,
-          }));
+      // 미션 도감 API 사용 (사용자가 수행한 미션만 조회)
+      const result = await getMissionCollection({ page, size: PAGE_SIZE });
+      if (result.success && result.data) {
+        // isAttempted === true인 미션만 필터링 (엄격하게)
+        // 백엔드에서 이미 필터링되어야 하지만, 프론트엔드에서도 한 번 더 확인
+        const allMissions = result.data.content || [];
+        const attemptedMissions = allMissions.filter(m => m.isAttempted === true);
+        
+        console.log('[MissionGroupScreen] 미션 도감 조회:', {
+          total: allMissions.length,
+          attempted: attemptedMissions.length,
+          notAttempted: allMissions.filter(m => m.isAttempted !== true).length,
+          sample: allMissions.slice(0, 3).map(m => ({ 
+            id: m.id, 
+            title: m.title, 
+            isAttempted: m.isAttempted, 
+            isCompleted: m.isCompleted 
+          })),
+        });
+        
+        // isAttempted === true인 미션만 표시
+        // 백엔드 API가 전체 미션을 반환하는 경우를 대비해 프론트엔드에서 필터링
+        const unifiedMissions: UnifiedMission[] = attemptedMissions.map(m => ({
+          id: m.id,
+          // isCompleted === false인 경우 "?"로 마스킹
+          title: m.isCompleted === false ? '?' : m.title,
+          description: m.isCompleted === false ? '?' : m.description,
+          category: m.category, // 항상 표시
+          verificationType: m.verificationType, // 항상 표시
+          requiredMinutes: m.requiredMinutes,
+          expReward: m.expReward,
+          badgeDurationDays: m.badgeDurationDays,
+          participantCount: m.participantCount,
+          isCustom: m.missionType === 'CUSTOM',
+          creatorNickname: m.creatorNickname,
+          isAttempted: m.isAttempted,
+          isCompleted: m.isCompleted,
+          isPublic: m.isPublic, // 항상 표시
+        }));
 
-          if (append) {
-            setMissions(prev => [...prev, ...unifiedMissions]);
-          } else {
-            setMissions(unifiedMissions);
-          }
-          setTotalPages(result.data.totalPages);
-          setHasMore(page < result.data.totalPages - 1);
+        if (append) {
+          setMissions(prev => [...prev, ...unifiedMissions]);
         } else {
-          throw new Error(result.error || '미션 목록을 불러올 수 없습니다.');
+          setMissions(unifiedMissions);
         }
+        setTotalPages(result.data.totalPages);
+        setHasMore(page < result.data.totalPages - 1);
       } else {
-        const result = await getCustomMissions({ page, size: PAGE_SIZE });
-        if (result.success && result.data) {
-          const unifiedMissions: UnifiedMission[] = (result.data.content || []).map(m => ({
-            id: m.id,
-            title: m.title,
-            description: m.description,
-            category: m.category,
-            verificationType: m.verificationType,
-            requiredMinutes: m.requiredMinutes,
-            expReward: 0, // 커스텀 미션은 경험치 지급 없음
-            badgeDurationDays: m.badgeDurationDays,
-            participantCount: m.participantCount,
-            isCustom: true,
-            creatorNickname: m.creatorNickname,
-          }));
-
-          if (append) {
-            setMissions(prev => [...prev, ...unifiedMissions]);
-          } else {
-            setMissions(unifiedMissions);
-          }
-          setTotalPages(result.data.totalPages);
-          setHasMore(page < result.data.totalPages - 1);
-        } else {
-          throw new Error(result.error || '미션 목록을 불러올 수 없습니다.');
-        }
+        throw new Error(result.error || '미션 목록을 불러올 수 없습니다.');
       }
     } catch (err) {
-      setError((err as Error).message);
+      const errorMessage = err instanceof Error ? err.message : '미션 목록을 불러오는 중 오류가 발생했습니다.';
+      setError(errorMessage);
+      console.error('[MissionGroupScreen] 미션 목록 로드 실패:', err);
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   }, [activeTab]);
 
@@ -398,7 +402,9 @@ const MissionGroupScreen: React.FC<MissionGroupScreenProps> = ({ navigation }) =
                             resizeMode="contain"
                             accessibilityLabel={`${mission.title} 아이콘`}
                           />
-                          <Text style={styles.missionTitle}>{mission.title}</Text>
+                          <Text style={styles.missionTitle}>
+                            {mission.isCompleted === false ? '?' : mission.title}
+                          </Text>
                           {mission.category && (
                             <View style={styles.missionTypeBadge}>
                               <Text style={styles.missionTypeText}>
@@ -408,7 +414,7 @@ const MissionGroupScreen: React.FC<MissionGroupScreenProps> = ({ navigation }) =
                           )}
                         </View>
                         <Text style={styles.missionDescription} numberOfLines={2}>
-                          {mission.description}
+                          {mission.isCompleted === false ? '?' : mission.description}
                         </Text>
                       </View>
                     </View>

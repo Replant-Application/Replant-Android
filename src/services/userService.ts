@@ -128,18 +128,69 @@ export const getUserProfile = async (nickname: string): Promise<ServiceResult<Us
       totalExperience = character.total_experience || 0;
     }
 
-    // 커뮤니티 게시글 통계 (로컬에서)
-    const posts: CommunityPost[] = await getData(storageKeys.COMMUNITY_POSTS) || [];
-    const userPosts = posts.filter(p => p.author_nickname === nickname);
-    const postCount = userPosts.length;
+    // 프로필 닉네임 및 사용자 ID 가져오기
+    const profileNickname = userInfoResult.success && userInfoResult.data
+      ? userInfoResult.data.nickname
+      : nickname;
+    const profileUserId = userInfoResult.success && userInfoResult.data
+      ? userInfoResult.data.id
+      : null;
+
+    // 커뮤니티 게시글 통계 (백엔드 API에서 가져오기 - userId 기반)
+    let postCount = 0;
+    try {
+      // 백엔드 API에서 게시글 목록 가져오기
+      const { getPosts } = await import('../api/communityApi');
+      const postsResult = await getPosts({ page: 0, size: 1000 }); // 충분히 큰 사이즈로 모든 게시글 가져오기
+      
+      if (postsResult.success && postsResult.data) {
+        // 사용자 ID로 필터링 (닉네임이 변경되어도 정확하게 확인 가능)
+        if (profileUserId !== null && profileUserId !== undefined) {
+          const userPosts = postsResult.data.content.filter(
+            p => p.userId === profileUserId
+          );
+          postCount = userPosts.length;
+        } else {
+          // userId가 없는 경우에만 닉네임으로 fallback (레거시 지원)
+          const userPosts = postsResult.data.content.filter(
+            p => p.userNickname === profileNickname || p.userNickname === nickname
+          );
+          postCount = userPosts.length;
+        }
+      } else {
+        // 백엔드 실패 시 로컬 스토리지에서 가져오기 (폴백)
+        const posts: CommunityPost[] = await getData(storageKeys.COMMUNITY_POSTS) || [];
+        if (profileUserId !== null && profileUserId !== undefined) {
+          const userPosts = posts.filter(p => 
+            p.author_id !== undefined && Number(p.author_id) === profileUserId
+          );
+          postCount = userPosts.length;
+        } else {
+          // userId가 없는 경우에만 닉네임으로 fallback
+          const userPosts = posts.filter(p => p.author_nickname === nickname);
+          postCount = userPosts.length;
+        }
+      }
+    } catch (postError) {
+      // 에러 발생 시 로컬 스토리지에서 가져오기 (폴백)
+      console.log('백엔드 게시글 조회 실패, 로컬 스토리지 사용:', postError);
+      const posts: CommunityPost[] = await getData(storageKeys.COMMUNITY_POSTS) || [];
+      if (profileUserId !== null && profileUserId !== undefined) {
+        const userPosts = posts.filter(p => 
+          p.author_id !== undefined && Number(p.author_id) === profileUserId
+        );
+        postCount = userPosts.length;
+      } else {
+        // userId가 없는 경우에만 닉네임으로 fallback
+        const userPosts = posts.filter(p => p.author_nickname === nickname);
+        postCount = userPosts.length;
+      }
+    }
 
     // 뱃지 수 계산
     const badgeCount = badgesResult.success && badgesResult.data ? badgesResult.data.badges?.length || 0 : 0;
 
     // 프로필 생성
-    const profileNickname = userInfoResult.success && userInfoResult.data
-      ? userInfoResult.data.nickname
-      : nickname;
     const profileCreatedAt = userInfoResult.success && userInfoResult.data
       ? userInfoResult.data.createdAt
       : new Date().toISOString();
