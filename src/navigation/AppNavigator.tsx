@@ -576,8 +576,13 @@ const AppNavigator = () => {
 
   const goBack = () => {
     // 돌발 미션 설정 화면에서는 뒤로가기 막기 (설정 완료 필수)
+    // 단, edit 모드일 때는 뒤로가기 허용
     if (currentScreen === SCREEN_NAMES.SPONTANEOUS_MISSION_SETUP) {
-      return;
+      const params = navigationParamsRef.current || {};
+      const isEditMode = params.mode === 'edit';
+      if (!isEditMode) {
+        return;
+      }
     }
     
     // 화면별 뒤로가기 목적지 정의
