@@ -710,7 +710,7 @@ const SpontaneousMissionSetupScreen: React.FC<SpontaneousMissionSetupScreenProps
         keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
       >
         <Header
-          title={isEditMode ? "돌발 미션 설정 수정" : "돌발 미션 설정"}
+          title="돌발 미션 설정"
           navigation={safeNavigation}
           showBorder={false}
           showBackButton={isEditMode}
