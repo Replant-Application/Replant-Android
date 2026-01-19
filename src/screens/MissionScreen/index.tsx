@@ -551,11 +551,11 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
           currentPageCount: collectionResult.data.content.length,
         });
 
-        // MissionCollectionItem을 UnifiedMission으로 변환
+        // MissionCollectionItem을 UnifiedMission으로 변환 (모든 미션 정보 표시)
         const allMissions = collectionResult.data.content.map(m => ({
           id: m.id,
-          title: m.isCompleted === false ? '?' : m.title,
-          description: m.isCompleted === false ? '?' : m.description,
+          title: m.title, // 모든 미션 제목 표시
+          description: m.description, // 모든 미션 설명 표시
           category: m.category,
           verificationType: m.verificationType,
           requiredMinutes: m.requiredMinutes,
@@ -573,20 +573,17 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
         // 공식 미션만 필터링
         missions = allMissions.filter(m => !m.isCustom);
         
-        // 본인이 수행한 미션을 위에 정렬 (isAttempted === true 또는 isCompleted === true인 미션을 먼저)
+        // 완료한 미션을 가장 위에 정렬
         missions.sort((a, b) => {
+          // 1순위: 완료한 미션 (isCompleted === true)을 최우선으로
+          if (a.isCompleted && !b.isCompleted) return -1;
+          if (!a.isCompleted && b.isCompleted) return 1;
+          
+          // 2순위: 둘 다 완료했거나 둘 다 미완료인 경우, 수행한 미션을 위로
           const aAttempted = a.isAttempted || a.isCompleted;
           const bAttempted = b.isAttempted || b.isCompleted;
-          
-          // 수행한 미션을 위로
           if (aAttempted && !bAttempted) return -1;
           if (!aAttempted && bAttempted) return 1;
-          
-          // 둘 다 수행했거나 둘 다 안 했으면 완료된 미션을 위로
-          if (aAttempted && bAttempted) {
-            if (a.isCompleted && !b.isCompleted) return -1;
-            if (!a.isCompleted && b.isCompleted) return 1;
-          }
           
           return 0;
         });
@@ -1017,94 +1014,149 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
                     </Text>
                   </View>
 
+                  {/* 서버 페이지네이션 (서버에서 가져올 페이지) */}
+                  {totalServerPages > 1 && (
+                    <View style={styles.serverPaginationContainer}>
+                      <TouchableOpacity
+                        style={[styles.serverPageButton, currentServerPage === 0 && styles.serverPageButtonDisabled]}
+                        onPress={() => {
+                          if (currentServerPage > 0) {
+                            setCurrentServerPage(currentServerPage - 1);
+                          }
+                        }}
+                        disabled={currentServerPage === 0}
+                      >
+                        <Image
+                          source={require('../../assets/images/chevron.png')}
+                          style={[
+                            styles.serverPageArrowIcon,
+                            styles.serverPageArrowIconLeft,
+                            currentServerPage === 0 && styles.serverPageArrowIconDisabled,
+                          ]}
+                          resizeMode="contain"
+                          accessibilityLabel="이전 서버 페이지"
+                        />
+                        <Text style={[styles.serverPageButtonText, currentServerPage === 0 && styles.serverPageButtonTextDisabled]}>
+                          이전
+                        </Text>
+                      </TouchableOpacity>
+
+                      <Text style={styles.serverPageInfo}>
+                        Page {currentServerPage + 1} / {totalServerPages}
+                      </Text>
+
+                      <TouchableOpacity
+                        style={[styles.serverPageButton, currentServerPage === totalServerPages - 1 && styles.serverPageButtonDisabled]}
+                        onPress={() => {
+                          if (currentServerPage < totalServerPages - 1) {
+                            setCurrentServerPage(currentServerPage + 1);
+                          }
+                        }}
+                        disabled={currentServerPage === totalServerPages - 1}
+                      >
+                        <Text style={[styles.serverPageButtonText, currentServerPage === totalServerPages - 1 && styles.serverPageButtonTextDisabled]}>
+                          다음
+                        </Text>
+                        <Image
+                          source={require('../../assets/images/chevron.png')}
+                          style={[
+                            styles.serverPageArrowIcon,
+                            currentServerPage === totalServerPages - 1 && styles.serverPageArrowIconDisabled,
+                          ]}
+                          resizeMode="contain"
+                          accessibilityLabel="다음 서버 페이지"
+                        />
+                      </TouchableOpacity>
+                    </View>
+                  )}
+
                   {/* 미션 목록 */}
                   <View style={styles.groupMissionList}>
                     {groupMissions.map((mission) => (
                           <View key={mission.id}>
-                            {/* 커스텀 미션 탭: 모든 미션 정보 표시, 공식 미션 탭: 완료된 미션만 정보 표시, 미완료는 잠금 */}
-                            {missionGroupTab === 'custom' ? (
-                              // 커스텀 미션 탭: 모든 미션 정보 표시
+                            {/* 커스텀 미션 탭: 모든 미션 정상 카드, 공식 미션 탭: 수행한 미션(완료/미완료)은 정상 카드, 미수행만 자물쇠 */}
+                            {missionGroupTab === 'custom' || (missionGroupTab === 'official' && (mission.isCompleted === true || mission.isAttempted === true)) ? (
                               <TouchableOpacity
-                                style={[
-                                  styles.groupMissionCard,
-                                  selectedGroupMission?.id === mission.id && styles.groupMissionCardSelected,
-                                ]}
-                                onPress={() => {
-                                  setSelectedGroupMission(
-                                    selectedGroupMission?.id === mission.id ? null : mission
-                                  );
-                                }}
-                                activeOpacity={0.7}
-                              >
-                                <View style={styles.groupMissionHeader}>
-                                  <View style={styles.groupMissionInfo}>
-                                    <View style={styles.groupMissionTitleRow}>
-                                      <Image
-                                        source={require('../../assets/images/goal.png')}
-                                        style={styles.groupMissionIcon}
-                                        resizeMode="contain"
-                                        accessibilityLabel={`${mission.title} 아이콘`}
-                                      />
-                                      <Text style={styles.groupMissionTitle}>{mission.title}</Text>
-                                      {mission.category && (
-                                        <View style={styles.groupMissionTypeBadge}>
-                                          <Text style={styles.groupMissionTypeText}>
-                                            {getMissionCategoryLabel(mission.category)}
-                                          </Text>
-                                        </View>
-                                      )}
-                                    </View>
-                                    <Text style={styles.groupMissionDescription} numberOfLines={2}>
-                                      {mission.description}
-                                    </Text>
-                                  </View>
-                                </View>
-
-                                <View style={styles.groupMissionContent}>
-                                  <View style={styles.groupMissionVerificationInfo}>
-                                    {getVerificationTypeIcon(mission.verificationType) && (
-                                      <Image
-                                        source={getVerificationTypeIcon(mission.verificationType)!}
-                                        style={styles.groupVerificationIcon}
-                                        resizeMode="contain"
-                                        accessibilityLabel={`${getVerificationTypeLabel(mission.verificationType)} 아이콘`}
-                                      />
-                                    )}
-                                    <Text style={styles.groupMissionVerificationText}>
-                                      {getVerificationTypeLabel(mission.verificationType)}
-                                    </Text>
-                                  </View>
-                                </View>
-
-                                <View style={styles.groupMissionFooter}>
-                                  <View style={styles.groupMissionStats}>
-                                    {mission.expReward > 0 && (
-                                      <View style={styles.groupStatItem}>
-                                        <Image
-                                          source={require('../../assets/images/sun.png')}
-                                          style={styles.groupStatIcon}
-                                          resizeMode="contain"
-                                          accessibilityLabel="경험치 아이콘"
-                                        />
-                                        <Text style={styles.groupStatText}>{mission.expReward} EXP</Text>
+                              style={[
+                                styles.groupMissionCard,
+                                selectedGroupMission?.id === mission.id && styles.groupMissionCardSelected,
+                              ]}
+                              onPress={() => {
+                                setSelectedGroupMission(
+                                  selectedGroupMission?.id === mission.id ? null : mission
+                                );
+                              }}
+                              activeOpacity={0.7}
+                            >
+                              <View style={styles.groupMissionHeader}>
+                                <View style={styles.groupMissionInfo}>
+                                  <View style={styles.groupMissionTitleRow}>
+                                    <Image
+                                      source={require('../../assets/images/goal.png')}
+                                      style={styles.groupMissionIcon}
+                                      resizeMode="contain"
+                                      accessibilityLabel={`${mission.title} 아이콘`}
+                                    />
+                                    <Text style={styles.groupMissionTitle}>{mission.title}</Text>
+                                    {mission.category && (
+                                      <View style={styles.groupMissionTypeBadge}>
+                                        <Text style={styles.groupMissionTypeText}>
+                                          {getMissionCategoryLabel(mission.category)}
+                                        </Text>
                                       </View>
                                     )}
+                                  </View>
+                                  <Text style={styles.groupMissionDescription} numberOfLines={2}>
+                                    {mission.description}
+                                  </Text>
+                                </View>
+                              </View>
+
+                              <View style={styles.groupMissionContent}>
+                                <View style={styles.groupMissionVerificationInfo}>
+                                  {getVerificationTypeIcon(mission.verificationType) && (
+                                    <Image
+                                      source={getVerificationTypeIcon(mission.verificationType)!}
+                                      style={styles.groupVerificationIcon}
+                                      resizeMode="contain"
+                                      accessibilityLabel={`${getVerificationTypeLabel(mission.verificationType)} 아이콘`}
+                                    />
+                                  )}
+                                  <Text style={styles.groupMissionVerificationText}>
+                                    {getVerificationTypeLabel(mission.verificationType)}
+                                  </Text>
+                                </View>
+                              </View>
+
+                              <View style={styles.groupMissionFooter}>
+                                <View style={styles.groupMissionStats}>
+                                  {mission.expReward > 0 && (
                                     <View style={styles.groupStatItem}>
                                       <Image
-                                        source={require('../../assets/images/high-five.png')}
+                                        source={require('../../assets/images/sun.png')}
                                         style={styles.groupStatIcon}
                                         resizeMode="contain"
-                                        accessibilityLabel="참여자 아이콘"
+                                        accessibilityLabel="경험치 아이콘"
                                       />
-                                      <Text style={styles.groupStatText}>
-                                        참여 {mission.participantCount || 0}명
-                                      </Text>
+                                      <Text style={styles.groupStatText}>{mission.expReward} EXP</Text>
                                     </View>
+                                  )}
+                                  <View style={styles.groupStatItem}>
+                                    <Image
+                                      source={require('../../assets/images/high-five.png')}
+                                      style={styles.groupStatIcon}
+                                      resizeMode="contain"
+                                      accessibilityLabel="참여자 아이콘"
+                                    />
+                                    <Text style={styles.groupStatText}>
+                                      참여 {mission.participantCount || 0}명
+                                    </Text>
                                   </View>
                                 </View>
+                              </View>
                               </TouchableOpacity>
                             ) : (
-                              // 공식 미션 탭의 미완료 미션: 잠금 아이콘 표시
+                              // 공식 미션 탭의 미수행 미션: 잠금 아이콘 표시
                               <View style={styles.groupMissionCardLocked}>
                                 <Image
                                   source={require('../../assets/images/lock.png')}
@@ -1116,7 +1168,7 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
                             )}
 
                             {/* 선택된 미션 상세 정보 */}
-                            {selectedGroupMission?.id === mission.id && (missionGroupTab === 'custom' || mission.isCompleted !== false) && (
+                            {selectedGroupMission?.id === mission.id && (missionGroupTab === 'custom' || (missionGroupTab === 'official' && (mission.isCompleted === true || mission.isAttempted === true))) && (
                               <View style={styles.groupInlineDetailContainer}>
                                 <View style={styles.groupInlineDetailCard}>
                                   <Text style={styles.groupDetailTitle}>미션 정보</Text>
@@ -1199,63 +1251,6 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
                           </View>
                     ))}
                   </View>
-
-
-                  {/* 서버 페이지네이션 (서버에서 가져올 페이지) */}
-                  {totalServerPages > 1 && (
-                    <View style={styles.serverPaginationContainer}>
-                      <TouchableOpacity
-                        style={[styles.serverPageButton, currentServerPage === 0 && styles.serverPageButtonDisabled]}
-                        onPress={() => {
-                          if (currentServerPage > 0) {
-                            setCurrentServerPage(currentServerPage - 1);
-                          }
-                        }}
-                        disabled={currentServerPage === 0}
-                      >
-                        <Image
-                          source={require('../../assets/images/chevron.png')}
-                          style={[
-                            styles.serverPageArrowIcon,
-                            styles.serverPageArrowIconLeft,
-                            currentServerPage === 0 && styles.serverPageArrowIconDisabled,
-                          ]}
-                          resizeMode="contain"
-                          accessibilityLabel="이전 서버 페이지"
-                        />
-                        <Text style={[styles.serverPageButtonText, currentServerPage === 0 && styles.serverPageButtonTextDisabled]}>
-                          이전
-                        </Text>
-                      </TouchableOpacity>
-
-                      <Text style={styles.serverPageInfo}>
-                        Page {currentServerPage + 1} / {totalServerPages}
-                      </Text>
-
-                      <TouchableOpacity
-                        style={[styles.serverPageButton, currentServerPage === totalServerPages - 1 && styles.serverPageButtonDisabled]}
-                        onPress={() => {
-                          if (currentServerPage < totalServerPages - 1) {
-                            setCurrentServerPage(currentServerPage + 1);
-                          }
-                        }}
-                        disabled={currentServerPage === totalServerPages - 1}
-                      >
-                        <Text style={[styles.serverPageButtonText, currentServerPage === totalServerPages - 1 && styles.serverPageButtonTextDisabled]}>
-                          다음
-                        </Text>
-                        <Image
-                          source={require('../../assets/images/chevron.png')}
-                          style={[
-                            styles.serverPageArrowIcon,
-                            currentServerPage === totalServerPages - 1 && styles.serverPageArrowIconDisabled,
-                          ]}
-                          resizeMode="contain"
-                          accessibilityLabel="다음 서버 페이지"
-                        />
-                      </TouchableOpacity>
-                    </View>
-                  )}
                 </>
               )}
             </ScrollView>
@@ -1723,7 +1718,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: spacing[4],
     marginBottom: spacing[2],
-    gap: spacing[3],
+    gap: spacing[12],
     paddingVertical: spacing[3],
     borderTopWidth: 1,
     borderTopColor: colors.border.light,
