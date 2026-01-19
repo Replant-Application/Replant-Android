@@ -479,69 +479,127 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
   const loadGroupMissions = useCallback(async (page: number = 0) => {
     try {
       setGroupLoading(true);
-      console.log('[MissionScreen] 미션 도감 로딩 시작... (서버 페이지:', page, ')');
+      console.log('[MissionScreen] 미션 도감 로딩 시작... (서버 페이지:', page, ', 탭:', missionGroupTab, ')');
 
-      // 현재 서버 페이지의 미션만 조회 (한 페이지당 15개)
-      const collectionResult = await getMissionCollection({ 
-        page, 
-        size: MISSION_COLLECTION_PAGE_SIZE 
-      });
+      let missions: UnifiedMission[] = [];
+      let totalPages = 1;
+      let totalElements = 0;
 
-      if (!collectionResult.success || !collectionResult.data) {
-        console.error('[MissionScreen] 미션 도감 API 실패:', collectionResult.error);
-        Alert.alert('오류', collectionResult.error || '미션 도감을 불러오는데 실패했습니다.');
-        setGroupMissions([]);
-        return;
+      // 커스텀 미션 탭일 때: 모든 커스텀 미션 조회
+      if (missionGroupTab === 'custom') {
+        const customMissionsResult = await getCustomMissions({ 
+          page, 
+          size: MISSION_COLLECTION_PAGE_SIZE 
+        });
+
+        if (!customMissionsResult.success || !customMissionsResult.data) {
+          console.error('[MissionScreen] 커스텀 미션 API 실패:', customMissionsResult.error);
+          Alert.alert('오류', customMissionsResult.error || '커스텀 미션을 불러오는데 실패했습니다.');
+          setGroupMissions([]);
+          return;
+        }
+
+        totalPages = customMissionsResult.data.totalPages || 1;
+        totalElements = customMissionsResult.data.totalElements || 0;
+
+        console.log('[MissionScreen] 커스텀 미션 페이징 정보:', {
+          currentPage: page,
+          totalPages,
+          totalElements,
+          currentPageCount: customMissionsResult.data.content.length,
+        });
+
+        // 커스텀 미션을 UnifiedMission으로 변환 (모든 미션 표시, 잠금 없음)
+        missions = customMissionsResult.data.content.map(m => ({
+          id: m.id,
+          title: m.title, // 커스텀 미션은 항상 제목 표시
+          description: m.description, // 커스텀 미션은 항상 설명 표시
+          category: m.category,
+          verificationType: m.verificationType,
+          requiredMinutes: m.requiredMinutes,
+          expReward: m.expReward || 0,
+          badgeDurationDays: m.badgeDurationDays || 0,
+          participantCount: m.participantCount,
+          isCustom: true,
+          creatorId: m.creatorId,
+          creatorNickname: m.creatorNickname,
+          isCompleted: false, // 커스텀 미션은 완료 여부와 관계없이 모두 표시
+          isAttempted: false, // 커스텀 미션은 시도 여부와 관계없이 모두 표시
+          isPublic: m.isPublic,
+        }));
+      } else {
+        // 공식 미션 탭일 때: 기존 로직 (사용자가 수행한 미션만)
+        const collectionResult = await getMissionCollection({ 
+          page, 
+          size: MISSION_COLLECTION_PAGE_SIZE 
+        });
+
+        if (!collectionResult.success || !collectionResult.data) {
+          console.error('[MissionScreen] 미션 도감 API 실패:', collectionResult.error);
+          Alert.alert('오류', collectionResult.error || '미션 도감을 불러오는데 실패했습니다.');
+          setGroupMissions([]);
+          return;
+        }
+
+        totalPages = collectionResult.data.totalPages || 1;
+        totalElements = collectionResult.data.totalElements || 0;
+        
+        console.log('[MissionScreen] 미션 도감 페이징 정보:', {
+          currentPage: page,
+          totalPages,
+          totalElements,
+          currentPageCount: collectionResult.data.content.length,
+        });
+
+        // MissionCollectionItem을 UnifiedMission으로 변환
+        const allMissions = collectionResult.data.content.map(m => ({
+          id: m.id,
+          title: m.isCompleted === false ? '?' : m.title,
+          description: m.isCompleted === false ? '?' : m.description,
+          category: m.category,
+          verificationType: m.verificationType,
+          requiredMinutes: m.requiredMinutes,
+          expReward: m.expReward,
+          badgeDurationDays: m.badgeDurationDays,
+          participantCount: m.participantCount,
+          isCustom: m.missionType === 'CUSTOM',
+          creatorId: m.creatorId,
+          creatorNickname: m.creatorNickname,
+          isCompleted: m.isCompleted ?? false,
+          isAttempted: m.isAttempted ?? false,
+          isPublic: m.isPublic,
+        }));
+
+        // 공식 미션만 필터링
+        missions = allMissions.filter(m => !m.isCustom);
+        
+        // 본인이 수행한 미션을 위에 정렬 (isAttempted === true 또는 isCompleted === true인 미션을 먼저)
+        missions.sort((a, b) => {
+          const aAttempted = a.isAttempted || a.isCompleted;
+          const bAttempted = b.isAttempted || b.isCompleted;
+          
+          // 수행한 미션을 위로
+          if (aAttempted && !bAttempted) return -1;
+          if (!aAttempted && bAttempted) return 1;
+          
+          // 둘 다 수행했거나 둘 다 안 했으면 완료된 미션을 위로
+          if (aAttempted && bAttempted) {
+            if (a.isCompleted && !b.isCompleted) return -1;
+            if (!a.isCompleted && b.isCompleted) return 1;
+          }
+          
+          return 0;
+        });
       }
-
-      const totalPages = collectionResult.data.totalPages || 1;
-      const totalElements = collectionResult.data.totalElements || 0;
-      
-      console.log('[MissionScreen] 미션 도감 페이징 정보:', {
-        currentPage: page,
-        totalPages,
-        totalElements,
-        currentPageCount: collectionResult.data.content.length,
-      });
 
       // 서버 페이지 정보 저장
       setTotalServerPages(totalPages);
 
-      // MissionCollectionItem을 UnifiedMission으로 변환
-      const missions: UnifiedMission[] = collectionResult.data.content.map(m => ({
-        id: m.id,
-        title: m.isCompleted === false ? '?' : m.title,
-        description: m.isCompleted === false ? '?' : m.description,
-        category: m.category,
-        verificationType: m.verificationType,
-        requiredMinutes: m.requiredMinutes,
-        expReward: m.expReward,
-        badgeDurationDays: m.badgeDurationDays,
-        participantCount: m.participantCount,
-        isCustom: m.missionType === 'CUSTOM',
-        creatorId: m.creatorId,
-        creatorNickname: m.creatorNickname,
-        isCompleted: m.isCompleted ?? false, // API에서 받은 isCompleted 그대로 사용!
-        isAttempted: m.isAttempted ?? false,
-        isPublic: m.isPublic,
-      }));
-
       console.log('[MissionScreen] 현재 페이지 미션 수:', missions.length);
-      console.log('[MissionScreen] 완료된 미션:', missions.filter(m => m.isCompleted).map(m => ({ id: m.id, title: m.title })));
+      console.log('[MissionScreen] 탭:', missionGroupTab, ', 미션 수:', missions.length);
 
-      // 탭에 따라 필터링 (공식 미션 또는 커스텀 미션)
-      const filteredMissions = missions.filter(m => {
-        if (missionGroupTab === 'official') {
-          return !m.isCustom; // 공식 미션
-        } else {
-          return m.isCustom; // 커스텀 미션
-        }
-      });
-
-      console.log('[MissionScreen] 필터링된 미션 수:', filteredMissions.length, `(탭: ${missionGroupTab})`);
-
-      setGroupMissions(filteredMissions);
-      console.log('[MissionScreen] 미션 도감 로딩 완료:', filteredMissions.length, '개');
+      setGroupMissions(missions);
+      console.log('[MissionScreen] 미션 도감 로딩 완료:', missions.length, '개');
     } catch (error) {
       console.error('[MissionScreen] 미션 도감 로딩 예외 발생:', error);
       logError('미션 도감 로딩 오류', error as Error);
@@ -963,18 +1021,9 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
                   <View style={styles.groupMissionList}>
                     {groupMissions.map((mission) => (
                           <View key={mission.id}>
-                            {mission.isCompleted === false ? (
-                              // 수행하지 않은 미션: 회색 배경에 가운데 잠금 아이콘만 표시
-                              <View style={styles.groupMissionCardLocked}>
-                                <Image
-                                  source={require('../../assets/images/lock.png')}
-                                  style={styles.groupMissionLockIconCenter}
-                                  resizeMode="contain"
-                                  accessibilityLabel="잠금"
-                                />
-                              </View>
-                            ) : (
-                              // 수행한 미션: 실제 정보 표시
+                            {/* 커스텀 미션 탭: 모든 미션 정보 표시, 공식 미션 탭: 완료된 미션만 정보 표시, 미완료는 잠금 */}
+                            {missionGroupTab === 'custom' ? (
+                              // 커스텀 미션 탭: 모든 미션 정보 표시
                               <TouchableOpacity
                                 style={[
                                   styles.groupMissionCard,
@@ -1054,10 +1103,20 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
                                   </View>
                                 </View>
                               </TouchableOpacity>
+                            ) : (
+                              // 공식 미션 탭의 미완료 미션: 잠금 아이콘 표시
+                              <View style={styles.groupMissionCardLocked}>
+                                <Image
+                                  source={require('../../assets/images/lock.png')}
+                                  style={styles.groupMissionLockIconCenter}
+                                  resizeMode="contain"
+                                  accessibilityLabel="잠금"
+                                />
+                              </View>
                             )}
 
                             {/* 선택된 미션 상세 정보 */}
-                            {selectedGroupMission?.id === mission.id && mission.isCompleted !== false && (
+                            {selectedGroupMission?.id === mission.id && (missionGroupTab === 'custom' || mission.isCompleted !== false) && (
                               <View style={styles.groupInlineDetailContainer}>
                                 <View style={styles.groupInlineDetailCard}>
                                   <Text style={styles.groupDetailTitle}>미션 정보</Text>
