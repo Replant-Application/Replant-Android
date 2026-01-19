@@ -228,3 +228,10 @@ export interface NavigationContextType {
   goBack: () => void;
   reset: (screen: keyof NavigationParams) => void;
 }
+
+// 히스토리 엔트리 타입
+export interface HistoryEntry {
+  screen: string;           // 화면 이름
+  params: any;              // 화면 파라미터
+  timestamp: number;        // 전환 시각 (디버깅용)
+}

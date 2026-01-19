@@ -7,7 +7,7 @@ import { useWakeUpMission } from '../contexts/WakeUpMissionContext';
 import { SCREEN_NAMES } from '../utils/constants';
 import { colors, spacing, typography } from '../utils/designTokens';
 import { getOptimizedLineHeight } from '../utils/textStyles';
-import { RootStackParamList } from '../types/navigation';
+import { RootStackParamList, HistoryEntry } from '../types/navigation';
 import { apiClient } from '../api/client';
 import { logout } from '../services/authService';
 import { backgroundMusicService } from '../services/backgroundMusicService';
@@ -70,11 +70,16 @@ const AppNavigator = () => {
   const [currentScreen, setCurrentScreen] = useState<string | null>(null);
   const [navigationParams, setNavigationParams] = useState({});
   const navigationParamsRef = useRef<any>({}); // params를 즉시 저장하기 위한 ref
+  const [screenHistory, setScreenHistory] = useState<HistoryEntry[]>([]); // 화면 전환 히스토리
   const [backPressedOnce, setBackPressedOnce] = useState(false);
   const [isCheckingOnboarding, setIsCheckingOnboarding] = useState(true);
   const processedNotificationIdRef = useRef<number | null>(null);
+  const prevLoggedInRef = useRef<boolean>(isLoggedIn); // 로그인 상태 추적용
   const fadeAnim = useRef(new Animated.Value(1)).current;
   const slideAnim = useRef(new Animated.Value(0)).current;
+  
+  // 히스토리 최대 길이 제한
+  const MAX_HISTORY_LENGTH = 50;
 
   // 메인 탭 화면인지 확인
   const isMainTabScreen = useCallback((screen: string) => {
@@ -86,6 +91,129 @@ const AppNavigator = () => {
       SCREEN_NAMES.SETTINGS,
     ].includes(screen);
   }, []);
+
+  // 폴백 로직 (기존 하드코딩된 매핑)
+  const fallbackGoBack = useCallback(() => {
+    // 히스토리가 없을 때만 사용 (초기 진입, 특수 상황)
+    if (currentScreen === SCREEN_NAMES.PLACES_SEARCH) {
+      setCurrentScreen(SCREEN_NAMES.COUNSELING_SELECT);
+    } else if (currentScreen === SCREEN_NAMES.COUNSELING_SELECT || currentScreen === SCREEN_NAMES.INFO || currentScreen === SCREEN_NAMES.SOUND_SETTINGS || currentScreen === SCREEN_NAMES.CHANGE_PASSWORD) {
+      setCurrentScreen(SCREEN_NAMES.SETTINGS);
+    } else if (currentScreen === SCREEN_NAMES.PHOTO_SELECT || currentScreen === SCREEN_NAMES.MISSION_DETAIL || currentScreen === SCREEN_NAMES.BADGE_DETAIL || currentScreen === SCREEN_NAMES.VERIFICATION_POST_CREATE) {
+      setCurrentScreen(SCREEN_NAMES.MISSION);
+    } else if (
+      currentScreen === SCREEN_NAMES.COMMUNITY_POST_CREATE ||
+      currentScreen === SCREEN_NAMES.COMMUNITY_POST_DETAIL ||
+      currentScreen === SCREEN_NAMES.COMMUNITY_POST_EDIT ||
+      currentScreen === SCREEN_NAMES.MISSION_GROUP ||
+      currentScreen === SCREEN_NAMES.VERIFICATION_POST_DETAIL ||
+      currentScreen === SCREEN_NAMES.MISSION_SET_LIST ||
+        currentScreen === SCREEN_NAMES.MISSION_SET_CREATE ||
+        currentScreen === SCREEN_NAMES.MISSION_SET_DETAIL ||
+        currentScreen === SCREEN_NAMES.MY_MISSION_SETS
+    ) {
+      setCurrentScreen(SCREEN_NAMES.COMMUNITY);
+    } else if (
+      currentScreen === SCREEN_NAMES.MY_PAGE ||
+      currentScreen === SCREEN_NAMES.CALENDAR
+    ) {
+      setCurrentScreen(SCREEN_NAMES.SETTINGS);
+    } else if (currentScreen === SCREEN_NAMES.NOTIFICATION || currentScreen === SCREEN_NAMES.MY_PROGRESS_DETAIL || currentScreen === 'RoutineSetting') {
+      setCurrentScreen(SCREEN_NAMES.HOME);
+    } else if (currentScreen === SCREEN_NAMES.TODO_LIST || currentScreen === SCREEN_NAMES.TODO_LIST_CREATE) {
+      setCurrentScreen(SCREEN_NAMES.HOME);
+    } else if (currentScreen === SCREEN_NAMES.TODO_LIST_DETAIL) {
+      setCurrentScreen(SCREEN_NAMES.TODO_LIST);
+    } else if (currentScreen === SCREEN_NAMES.WAKE_UP_VERIFICATION) {
+      setCurrentScreen(SCREEN_NAMES.HOME);
+    } else if (currentScreen === SCREEN_NAMES.SPONTANEOUS_MISSION_SETUP) {
+      setCurrentScreen(SCREEN_NAMES.HOME);
+    } else {
+      setCurrentScreen(SCREEN_NAMES.HOME);
+    }
+    setNavigationParams({});
+    navigationParamsRef.current = {}; // ref도 초기화
+  }, [currentScreen]);
+
+  // 네비게이션 함수
+  const navigate = useCallback(async (screenName: keyof RootStackParamList | string, params: any = {}) => {
+    console.log('[AppNavigator] navigate 호출:', screenName, params);
+    console.log('[AppNavigator] params 타입:', typeof params, 'params 내용:', JSON.stringify(params));
+    try {
+      // 메인 탭 간 전환은 히스토리 추가 없이 바로 전환
+      if (currentScreen && isMainTabScreen(currentScreen) && isMainTabScreen(screenName as string)) {
+        navigationParamsRef.current = params || {};
+        setNavigationParams(params || {});
+        setCurrentScreen(screenName as string);
+        console.log('[AppNavigator] 메인 탭 간 전환 - 히스토리 추가 안 함');
+        return;
+      }
+      
+      // 현재 화면이 있으면 히스토리에 추가
+      if (currentScreen) {
+        const historyEntry: HistoryEntry = {
+          screen: currentScreen,
+          params: { ...navigationParams }, // 현재 params 저장 (깊은 복사)
+          timestamp: Date.now(),
+        };
+        
+        setScreenHistory(prev => {
+          const newHistory = [...prev, historyEntry];
+          // 최대 길이 초과 시 오래된 항목 제거
+          if (newHistory.length > MAX_HISTORY_LENGTH) {
+            return newHistory.slice(-MAX_HISTORY_LENGTH);
+          }
+          return newHistory;
+        });
+        
+        // 히스토리 길이는 함수형 업데이트 내에서 계산하지 않음 (클로저 문제 방지)
+      }
+      
+      // params 설정
+      navigationParamsRef.current = params || {};
+      // params를 먼저 설정한 후 화면을 변경하여 race condition 방지
+      setNavigationParams(params || {});
+      setCurrentScreen(screenName as string);
+      console.log('[AppNavigator] navigate 완료:', screenName, 'params 설정됨:', params);
+      console.log('[AppNavigator] navigationParamsRef.current:', navigationParamsRef.current);
+    } catch (error) {
+      console.error('[AppNavigator] navigate 실패:', error);
+    }
+  }, [currentScreen, navigationParams, isMainTabScreen]);
+
+  const goBack = useCallback(() => {
+    // 1. 히스토리가 있으면 마지막 항목으로 이동
+    if (screenHistory.length > 0) {
+      const lastEntry = screenHistory[screenHistory.length - 1];
+      
+      if (__DEV__) {
+        console.log('[AppNavigator] goBack - 히스토리 사용:', lastEntry.screen, '남은 히스토리:', screenHistory.length - 1);
+      }
+      
+      // 히스토리에서 제거
+      setScreenHistory(prev => prev.slice(0, -1));
+      
+      // 이전 화면으로 복원
+      setCurrentScreen(lastEntry.screen);
+      setNavigationParams(lastEntry.params);
+      navigationParamsRef.current = lastEntry.params;
+      
+      return;
+    }
+    
+    // 2. 히스토리가 없으면 폴백 로직 (기존 하드코딩된 매핑)
+    // 이는 초기 진입이나 특수 상황을 위한 안전장치
+    if (__DEV__) {
+      console.log('[AppNavigator] goBack - 히스토리 없음, fallback 사용');
+    }
+    fallbackGoBack();
+  }, [screenHistory, fallbackGoBack]);
+
+  // canGoBack 함수 추가
+  const canGoBack = useCallback((): boolean => {
+    // 히스토리가 있으면 뒤로가기 가능
+    return screenHistory.length > 0;
+  }, [screenHistory]);
 
   // 온보딩 체크 및 초기 화면 결정
   useEffect(() => {
@@ -220,12 +348,29 @@ const AppNavigator = () => {
     return () => clearInterval(interval);
   }, [isLoggedIn, isLoading, isCheckingOnboarding, currentScreen]);
 
+  // 로그인 상태 변경 감지 - 히스토리 초기화
+  useEffect(() => {
+    const prevLoggedIn = prevLoggedInRef.current;
+    
+    if (isLoggedIn && !prevLoggedIn) {
+      // 로그인 성공: 히스토리 초기화
+      setScreenHistory([]);
+    } else if (!isLoggedIn && prevLoggedIn) {
+      // 로그아웃: 히스토리 초기화
+      setScreenHistory([]);
+    }
+    
+    // 현재 상태를 ref에 저장
+    prevLoggedInRef.current = isLoggedIn;
+  }, [isLoggedIn]);
+
   // 토큰 만료 콜백 설정 - 바로 로그아웃 처리
   useEffect(() => {
     apiClient.setOnTokenExpiredCallback(async () => {
-    await logout();
-    await userLogout();
-    setCurrentScreen(SCREEN_NAMES.LOGIN);
+      await logout();
+      await userLogout();
+      setScreenHistory([]); // 히스토리 초기화
+      setCurrentScreen(SCREEN_NAMES.LOGIN);
     });
   }, [userLogout]);
 
@@ -410,49 +555,14 @@ const AppNavigator = () => {
         return true;
       }
 
-      // 상세 화면이면 goBack 호출
-      // 화면별 뒤로가기 목적지 정의
-      if (currentScreen === SCREEN_NAMES.PLACES_SEARCH) {
-        setCurrentScreen(SCREEN_NAMES.COUNSELING_SELECT);
-      } else if (currentScreen === SCREEN_NAMES.COUNSELING_SELECT || currentScreen === SCREEN_NAMES.INFO || currentScreen === SCREEN_NAMES.SOUND_SETTINGS) {
-        setCurrentScreen(SCREEN_NAMES.SETTINGS);
-      } else if (currentScreen === SCREEN_NAMES.PHOTO_SELECT || currentScreen === SCREEN_NAMES.MISSION_DETAIL || currentScreen === SCREEN_NAMES.BADGE_DETAIL || currentScreen === SCREEN_NAMES.VERIFICATION_POST_CREATE) {
-        setCurrentScreen(SCREEN_NAMES.MISSION);
-      } else if (
-        currentScreen === SCREEN_NAMES.COMMUNITY_POST_CREATE ||
-        currentScreen === SCREEN_NAMES.COMMUNITY_POST_DETAIL ||
-        currentScreen === SCREEN_NAMES.COMMUNITY_POST_EDIT ||
-        currentScreen === SCREEN_NAMES.MISSION_GROUP ||
-        currentScreen === SCREEN_NAMES.MISSION_SET_LIST ||
-        currentScreen === SCREEN_NAMES.MISSION_SET_CREATE ||
-        currentScreen === SCREEN_NAMES.MISSION_SET_DETAIL ||
-        currentScreen === SCREEN_NAMES.MY_MISSION_SETS
-      ) {
-        setCurrentScreen(SCREEN_NAMES.COMMUNITY);
-      } else if (
-        currentScreen === SCREEN_NAMES.MY_PAGE ||
-        currentScreen === SCREEN_NAMES.CALENDAR
-      ) {
-        setCurrentScreen(SCREEN_NAMES.SETTINGS);
-      } else if (currentScreen === SCREEN_NAMES.NOTIFICATION || currentScreen === SCREEN_NAMES.MY_PROGRESS_DETAIL || currentScreen === 'RoutineSetting') {
-        setCurrentScreen(SCREEN_NAMES.HOME);
-      } else if (currentScreen === SCREEN_NAMES.TODO_LIST || currentScreen === SCREEN_NAMES.TODO_LIST_CREATE) {
-        setCurrentScreen(SCREEN_NAMES.HOME);
-      } else if (currentScreen === SCREEN_NAMES.TODO_LIST_DETAIL) {
-        setCurrentScreen(SCREEN_NAMES.TODO_LIST);
-      } else if (currentScreen === SCREEN_NAMES.WAKE_UP_VERIFICATION) {
-        setCurrentScreen(SCREEN_NAMES.HOME);
-      } else if (currentScreen === SCREEN_NAMES.SPONTANEOUS_MISSION_SETUP) {
-        setCurrentScreen(SCREEN_NAMES.HOME);
-      } else {
-        setCurrentScreen(SCREEN_NAMES.HOME);
-      }
-      setNavigationParams({});
+      // 상세 화면이면 goBack 호출 (히스토리 사용)
+      // goBack 함수가 내부적으로 히스토리와 fallback 로직을 모두 처리
+      goBack();
       return true;
     });
 
     return () => backHandler.remove();
-  }, [currentScreen, isLoggedIn, backPressedOnce, isMainTabScreen]);
+  }, [currentScreen, isLoggedIn, backPressedOnce, isMainTabScreen, screenHistory, goBack]);
 
   if (isLoading || isCheckingOnboarding || currentScreen === null) {
     return (
@@ -556,70 +666,20 @@ const AppNavigator = () => {
     );
   }
 
-  // 네비게이션 함수
-  const navigate = async (screenName: keyof RootStackParamList | string, params: any = {}) => {
-    console.log('[AppNavigator] navigate 호출:', screenName, params);
-    console.log('[AppNavigator] params 타입:', typeof params, 'params 내용:', JSON.stringify(params));
-    try {
-      // ref에 즉시 저장 (상태 업데이트 전에 사용 가능)
-      navigationParamsRef.current = params || {};
-      // params를 먼저 설정한 후 화면을 변경하여 race condition 방지
-      setNavigationParams(params || {});
-      setCurrentScreen(screenName as string);
-      console.log('[AppNavigator] navigate 완료:', screenName, 'params 설정됨:', params);
-      console.log('[AppNavigator] navigationParamsRef.current:', navigationParamsRef.current);
-    } catch (error) {
-      console.error('[AppNavigator] navigate 실패:', error);
-    }
-  };
-
-  const goBack = () => {
-    // 화면별 뒤로가기 목적지 정의
-    if (currentScreen === SCREEN_NAMES.PLACES_SEARCH) {
-      setCurrentScreen(SCREEN_NAMES.COUNSELING_SELECT);
-    } else if (currentScreen === SCREEN_NAMES.COUNSELING_SELECT || currentScreen === SCREEN_NAMES.INFO || currentScreen === SCREEN_NAMES.SOUND_SETTINGS || currentScreen === SCREEN_NAMES.CHANGE_PASSWORD) {
-      setCurrentScreen(SCREEN_NAMES.SETTINGS);
-    } else if (currentScreen === SCREEN_NAMES.PHOTO_SELECT || currentScreen === SCREEN_NAMES.MISSION_DETAIL || currentScreen === SCREEN_NAMES.BADGE_DETAIL || currentScreen === SCREEN_NAMES.VERIFICATION_POST_CREATE) {
-      setCurrentScreen(SCREEN_NAMES.MISSION);
-    } else if (
-      currentScreen === SCREEN_NAMES.COMMUNITY_POST_CREATE ||
-      currentScreen === SCREEN_NAMES.COMMUNITY_POST_DETAIL ||
-      currentScreen === SCREEN_NAMES.COMMUNITY_POST_EDIT ||
-      currentScreen === SCREEN_NAMES.MISSION_GROUP ||
-      currentScreen === SCREEN_NAMES.VERIFICATION_POST_DETAIL ||
-      currentScreen === SCREEN_NAMES.MISSION_SET_LIST ||
-        currentScreen === SCREEN_NAMES.MISSION_SET_CREATE ||
-        currentScreen === SCREEN_NAMES.MISSION_SET_DETAIL ||
-        currentScreen === SCREEN_NAMES.MY_MISSION_SETS
-    ) {
-      setCurrentScreen(SCREEN_NAMES.COMMUNITY);
-    } else if (
-      currentScreen === SCREEN_NAMES.MY_PAGE ||
-      currentScreen === SCREEN_NAMES.CALENDAR
-    ) {
-      setCurrentScreen(SCREEN_NAMES.SETTINGS);
-    } else if (currentScreen === SCREEN_NAMES.NOTIFICATION || currentScreen === SCREEN_NAMES.MY_PROGRESS_DETAIL || currentScreen === 'RoutineSetting') {
-      setCurrentScreen(SCREEN_NAMES.HOME);
-    } else if (currentScreen === SCREEN_NAMES.TODO_LIST || currentScreen === SCREEN_NAMES.TODO_LIST_CREATE) {
-      setCurrentScreen(SCREEN_NAMES.HOME);
-    } else if (currentScreen === SCREEN_NAMES.TODO_LIST_DETAIL) {
-      setCurrentScreen(SCREEN_NAMES.TODO_LIST);
-    } else if (currentScreen === SCREEN_NAMES.WAKE_UP_VERIFICATION) {
-      setCurrentScreen(SCREEN_NAMES.HOME);
-    } else if (currentScreen === SCREEN_NAMES.SPONTANEOUS_MISSION_SETUP) {
-      setCurrentScreen(SCREEN_NAMES.HOME);
-    } else {
-      setCurrentScreen(SCREEN_NAMES.HOME);
-    }
-    setNavigationParams({});
-    navigationParamsRef.current = {}; // ref도 초기화
-  };
 
   // 로그인한 경우 - 간단한 탭 네비게이션
   const renderScreen = () => {
     const navigation = {
       navigate: navigate as any,
       goBack,
+      canGoBack,
+      reset: (screenName: string, params: any = {}) => {
+        // 히스토리 초기화 후 특정 화면으로 이동
+        setScreenHistory([]);
+        setCurrentScreen(screenName);
+        setNavigationParams(params);
+        navigationParamsRef.current = params;
+      },
       isFocused: () => true,
       dispatch: () => {},
       navigateDeprecated: () => {},
