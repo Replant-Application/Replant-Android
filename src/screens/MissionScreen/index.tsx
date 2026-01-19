@@ -573,20 +573,8 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
         // 공식 미션만 필터링
         missions = allMissions.filter(m => !m.isCustom);
         
-        // 완료한 미션을 가장 위에 정렬
-        missions.sort((a, b) => {
-          // 1순위: 완료한 미션 (isCompleted === true)을 최우선으로
-          if (a.isCompleted && !b.isCompleted) return -1;
-          if (!a.isCompleted && b.isCompleted) return 1;
-          
-          // 2순위: 둘 다 완료했거나 둘 다 미완료인 경우, 수행한 미션을 위로
-          const aAttempted = a.isAttempted || a.isCompleted;
-          const bAttempted = b.isAttempted || b.isCompleted;
-          if (aAttempted && !bAttempted) return -1;
-          if (!aAttempted && bAttempted) return 1;
-          
-          return 0;
-        });
+        // 백엔드에서 이미 수행한 미션을 먼저, 미수행 미션을 나중에 정렬해서 반환함
+        // 프론트엔드에서는 백엔드에서 받은 순서 그대로 사용 (추가 정렬 불필요)
       }
 
       // 서버 페이지 정보 저장
