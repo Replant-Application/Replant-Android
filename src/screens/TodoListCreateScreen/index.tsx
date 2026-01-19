@@ -20,14 +20,10 @@ import { SCREEN_NAMES } from '../../utils/constants';
 import { initTodoList, getSelectableMissions, createTodoList } from '../../api/todolistApi';
 import { MissionSimple, TodoListCreateRequest } from '../../types/todolist';
 import { createCustomMission, CreateMissionRequest } from '../../api/missionApi';
+import { Step, TodoListCreateScreenProps, TimePeriod, DropdownType } from './TodoListCreateScreen.types';
+import { DEFAULT_START_TIME, DEFAULT_END_TIME, TIME_PERIODS, HOURS, MINUTES } from './TodoListCreateScreen.constants';
 
-interface Props {
-  navigation: any;
-}
-
-type Step = 'intro' | 'random' | 'custom' | 'confirm';
-
-const TodoListCreateScreen: React.FC<Props> = ({ navigation }) => {
+const TodoListCreateScreen: React.FC<TodoListCreateScreenProps> = ({ navigation }) => {
   const [currentStep, setCurrentStep] = useState<Step>('intro');
   const [randomMissions, setRandomMissions] = useState<MissionSimple[]>([]);
   const [customMissions, setCustomMissions] = useState<MissionSimple[]>([]);
@@ -63,19 +59,17 @@ const TodoListCreateScreen: React.FC<Props> = ({ navigation }) => {
   const [selectedMissionForTime, setSelectedMissionForTime] = useState<number | null>(null);
 
   // 시작 시간 설정 상태
-  const [startPeriod, setStartPeriod] = useState<'AM' | 'PM'>('AM');
-  const [startHour, setStartHour] = useState(9);
-  const [startMinute, setStartMinute] = useState(0);
+  const [startPeriod, setStartPeriod] = useState<TimePeriod>(DEFAULT_START_TIME.period);
+  const [startHour, setStartHour] = useState(DEFAULT_START_TIME.hour);
+  const [startMinute, setStartMinute] = useState(DEFAULT_START_TIME.minute);
 
   // 종료 시간 설정 상태
-  const [endPeriod, setEndPeriod] = useState<'AM' | 'PM'>('PM');
-  const [endHour, setEndHour] = useState(6);
-  const [endMinute, setEndMinute] = useState(0);
+  const [endPeriod, setEndPeriod] = useState<TimePeriod>(DEFAULT_END_TIME.period);
+  const [endHour, setEndHour] = useState(DEFAULT_END_TIME.hour);
+  const [endMinute, setEndMinute] = useState(DEFAULT_END_TIME.minute);
 
   // 드롭다운 열림 상태
-  const [openDropdown, setOpenDropdown] = useState<{
-    type: 'startPeriod' | 'startHour' | 'startMinute' | 'endPeriod' | 'endHour' | 'endMinute' | null;
-  }>({ type: null });
+  const [openDropdown, setOpenDropdown] = useState<DropdownType>({ type: null });
 
   const loadRandomMissions = useCallback(async () => {
     setLoading(true);
@@ -455,27 +449,27 @@ const TodoListCreateScreen: React.FC<Props> = ({ navigation }) => {
         const [startHours, startMinutes] = existingRange.start.split(':').map(Number);
         const [endHours, endMinutes] = existingRange.end.split(':').map(Number);
 
-        setStartPeriod(startHours >= 12 ? 'PM' : 'AM');
+        setStartPeriod(startHours >= 12 ? DEFAULT_END_TIME.period : DEFAULT_START_TIME.period);
         setStartHour(startHours === 0 ? 12 : startHours > 12 ? startHours - 12 : startHours);
         setStartMinute(startMinutes);
 
-        setEndPeriod(endHours >= 12 ? 'PM' : 'AM');
+        setEndPeriod(endHours >= 12 ? DEFAULT_END_TIME.period : DEFAULT_START_TIME.period);
         setEndHour(endHours === 0 ? 12 : endHours > 12 ? endHours - 12 : endHours);
         setEndMinute(endMinutes);
       } else {
-        setStartPeriod('AM');
-        setStartHour(9);
-        setStartMinute(0);
-        setEndPeriod('PM');
-        setEndHour(6);
-        setEndMinute(0);
+        setStartPeriod(DEFAULT_START_TIME.period);
+        setStartHour(DEFAULT_START_TIME.hour);
+        setStartMinute(DEFAULT_START_TIME.minute);
+        setEndPeriod(DEFAULT_END_TIME.period);
+        setEndHour(DEFAULT_END_TIME.hour);
+        setEndMinute(DEFAULT_END_TIME.minute);
       }
 
       setSelectedMissionForTime(missionId);
       setShowTimePickerModal(true);
     };
 
-    const convertTo24Hour = (period: 'AM' | 'PM', hour: number, minute: number): string => {
+    const convertTo24Hour = (period: TimePeriod, hour: number, minute: number): string => {
       let hours24 = hour;
       if (period === 'PM' && hour !== 12) hours24 = hour + 12;
       else if (period === 'AM' && hour === 12) hours24 = 0;
@@ -664,12 +658,12 @@ const TodoListCreateScreen: React.FC<Props> = ({ navigation }) => {
                               bounces={false}
                               scrollEnabled={false}
                             >
-                              {['AM', 'PM'].map((period) => (
+                              {TIME_PERIODS.map((period) => (
                                 <TouchableOpacity
                                   key={period}
                                   style={styles.dropdownItem}
                                   onPress={() => {
-                                    setStartPeriod(period as 'AM' | 'PM');
+                                    setStartPeriod(period);
                                     setOpenDropdown({ type: null });
                                   }}
                                   activeOpacity={0.7}
@@ -710,7 +704,7 @@ const TodoListCreateScreen: React.FC<Props> = ({ navigation }) => {
                               onStartShouldSetResponder={() => true}
                               onMoveShouldSetResponder={() => true}
                             >
-                              {Array.from({ length: 12 }, (_, i) => i + 1).map((hour) => (
+                              {HOURS.map((hour) => (
                                 <TouchableOpacity
                                   key={hour}
                                   style={styles.dropdownItem}
@@ -756,7 +750,7 @@ const TodoListCreateScreen: React.FC<Props> = ({ navigation }) => {
                               onStartShouldSetResponder={() => true}
                               onMoveShouldSetResponder={() => true}
                             >
-                              {Array.from({ length: 60 }, (_, i) => i).map((minute) => (
+                              {MINUTES.map((minute) => (
                                 <TouchableOpacity
                                   key={minute}
                                   style={styles.dropdownItem}
@@ -800,12 +794,12 @@ const TodoListCreateScreen: React.FC<Props> = ({ navigation }) => {
                               bounces={false}
                               scrollEnabled={false}
                             >
-                              {['AM', 'PM'].map((period) => (
+                              {TIME_PERIODS.map((period) => (
                                 <TouchableOpacity
                                   key={period}
                                   style={styles.dropdownItem}
                                   onPress={() => {
-                                    setEndPeriod(period as 'AM' | 'PM');
+                                    setEndPeriod(period);
                                     setOpenDropdown({ type: null });
                                   }}
                                   activeOpacity={0.7}

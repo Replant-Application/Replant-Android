@@ -8,10 +8,11 @@ import { join, sendVerification, verifyEmail, RegionInfo } from '../../api/authA
 import { saveTokens, saveUserInfo } from '../../utils/tokenStorage';
 import { apiClient } from '../../api/client';
 import { useUser } from '../../contexts/UserContext';
-
-interface SignUpScreenProps {
-  onNavigate: (screen: string) => void;
-}
+import { SignUpScreenProps, Gender, SignUpErrors } from './SignUpScreen.types';
+import { getBirthYears } from './SignUpScreen.constants';
+import GenderSelector from './components/GenderSelector';
+import RegionSelector from './components/RegionSelector';
+import BirthYearSelector from './components/BirthYearSelector';
 
 const SignUpScreen: React.FC<SignUpScreenProps> = ({ onNavigate }) => {
   const { login } = useUser();
@@ -32,40 +33,18 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onNavigate }) => {
   const [showSignUpCompleteModal, setShowSignUpCompleteModal] = useState(false);
 
   // 성별, 지역, 출생연도 상태
-  const [gender, setGender] = useState<'MALE' | 'FEMALE' | null>(null);
+  const [gender, setGender] = useState<Gender | null>(null);
   const [region, setRegion] = useState<string | null>(null);
   const [regionName, setRegionName] = useState<string>('');
   const [showRegionModal, setShowRegionModal] = useState(false);
 
-  // 지역 목록 (백엔드 MetropolitanArea enum과 동일)
-  const regions: RegionInfo[] = [
-    { code: 'SEOUL', name: '서울특별시' },
-    { code: 'BUSAN', name: '부산광역시' },
-    { code: 'DAEGU', name: '대구광역시' },
-    { code: 'INCHEON', name: '인천광역시' },
-    { code: 'GWANGJU', name: '광주광역시' },
-    { code: 'DAEJEON', name: '대전광역시' },
-    { code: 'ULSAN', name: '울산광역시' },
-    { code: 'SEJONG', name: '세종특별자치시' },
-    { code: 'GYEONGGI', name: '경기도' },
-    { code: 'GANGWON', name: '강원특별자치도' },
-    { code: 'CHUNGBUK', name: '충청북도' },
-    { code: 'CHUNGNAM', name: '충청남도' },
-    { code: 'JEONBUK', name: '전북특별자치도' },
-    { code: 'JEONNAM', name: '전라남도' },
-    { code: 'GYEONGBUK', name: '경상북도' },
-    { code: 'GYEONGNAM', name: '경상남도' },
-    { code: 'JEJU', name: '제주특별자치도' },
-  ];
-
   const [birthYear, setBirthYear] = useState<number | null>(null);
   const [showBirthYearModal, setShowBirthYearModal] = useState(false);
 
-  // 출생연도 목록 생성 (1950년 ~ 현재년도 - 14세)
-  const currentYear = new Date().getFullYear();
-  const birthYears = Array.from({ length: currentYear - 14 - 1950 + 1 }, (_, i) => currentYear - 14 - i);
+  // 출생연도 목록
+  const birthYears = getBirthYears();
 
-  const [errors, setErrors] = useState({
+  const [errors, setErrors] = useState<SignUpErrors>({
     email: '',
     password: '',
     confirmPassword: '',
@@ -586,155 +565,49 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onNavigate }) => {
             {errors.phone ? <Text style={styles.errorText}>{errors.phone}</Text> : null}
           </View>
 
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>성별</Text>
-            <View style={styles.genderContainer}>
-              <TouchableOpacity
-                style={[
-                  styles.genderButton,
-                  gender === 'MALE' && styles.genderButtonSelected,
-                ]}
-                onPress={() => {
-                  setGender('MALE');
-                  if (errors.gender) {
-                    setErrors({ ...errors, gender: '' });
-                  }
-                }}
-              >
-                <Text style={[
-                  styles.genderButtonText,
-                  gender === 'MALE' && styles.genderButtonTextSelected,
-                ]}>남성</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[
-                  styles.genderButton,
-                  gender === 'FEMALE' && styles.genderButtonSelected,
-                ]}
-                onPress={() => {
-                  setGender('FEMALE');
-                  if (errors.gender) {
-                    setErrors({ ...errors, gender: '' });
-                  }
-                }}
-              >
-                <Text style={[
-                  styles.genderButtonText,
-                  gender === 'FEMALE' && styles.genderButtonTextSelected,
-                ]}>여성</Text>
-              </TouchableOpacity>
-            </View>
-            {errors.gender ? <Text style={styles.errorText}>{errors.gender}</Text> : null}
-          </View>
+          <GenderSelector
+            gender={gender}
+            onGenderChange={(g) => {
+              setGender(g);
+              if (errors.gender) {
+                setErrors({ ...errors, gender: '' });
+              }
+            }}
+            error={errors.gender}
+            onErrorClear={() => setErrors({ ...errors, gender: '' })}
+          />
 
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>지역</Text>
-            <TouchableOpacity
-              style={styles.dropdownButton}
-              onPress={() => {
-                setShowBirthYearModal(false);
-                setShowRegionModal(!showRegionModal);
-              }}
-            >
-              <Text style={[
-                styles.dropdownButtonText,
-                !regionName && styles.dropdownPlaceholder,
-              ]}>
-                {regionName || '지역을 선택해주세요'}
-              </Text>
-              <Text style={styles.dropdownArrow}>▼</Text>
-            </TouchableOpacity>
-            {showRegionModal && (
-              <View style={styles.dropdownList}>
-                <ScrollView
-                  nestedScrollEnabled={true}
-                  showsVerticalScrollIndicator={true}
-                  style={styles.dropdownScrollView}
-                >
-                  {regions.map((item, index) => (
-                    <TouchableOpacity
-                      key={item.code}
-                      style={[
-                        styles.dropdownListItem,
-                        index === 0 && styles.dropdownListItemFirst,
-                        region === item.code && styles.dropdownListItemSelected,
-                      ]}
-                      onPress={() => {
-                        setRegion(item.code);
-                        setRegionName(item.name);
-                        setShowRegionModal(false);
-                        if (errors.region) {
-                          setErrors({ ...errors, region: '' });
-                        }
-                      }}
-                    >
-                      <Text style={[
-                        styles.dropdownListItemText,
-                        region === item.code && styles.dropdownListItemTextSelected,
-                      ]}>
-                        {item.name}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </ScrollView>
-              </View>
-            )}
-            {errors.region ? <Text style={styles.errorText}>{errors.region}</Text> : null}
-          </View>
+          <RegionSelector
+            region={region}
+            regionName={regionName}
+            onRegionChange={(code, name) => {
+              setRegion(code);
+              setRegionName(name);
+              if (errors.region) {
+                setErrors({ ...errors, region: '' });
+              }
+            }}
+            showModal={showRegionModal}
+            onModalToggle={() => setShowRegionModal(!showRegionModal)}
+            onOtherModalClose={() => setShowBirthYearModal(false)}
+            error={errors.region}
+            onErrorClear={() => setErrors({ ...errors, region: '' })}
+          />
 
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>출생연도</Text>
-            <TouchableOpacity
-              style={styles.dropdownButton}
-              onPress={() => {
-                setShowRegionModal(false);
-                setShowBirthYearModal(!showBirthYearModal);
-              }}
-            >
-              <Text style={[
-                styles.dropdownButtonText,
-                !birthYear && styles.dropdownPlaceholder,
-              ]}>
-                {birthYear ? `${birthYear}년` : '출생연도를 선택해주세요'}
-              </Text>
-              <Text style={styles.dropdownArrow}>▼</Text>
-            </TouchableOpacity>
-            {showBirthYearModal && (
-              <View style={styles.dropdownList}>
-                <ScrollView
-                  nestedScrollEnabled={true}
-                  showsVerticalScrollIndicator={true}
-                  style={styles.dropdownScrollView}
-                >
-                  {birthYears.map((item, index) => (
-                    <TouchableOpacity
-                      key={item.toString()}
-                      style={[
-                        styles.dropdownListItem,
-                        index === 0 && styles.dropdownListItemFirst,
-                        birthYear === item && styles.dropdownListItemSelected,
-                      ]}
-                      onPress={() => {
-                        setBirthYear(item);
-                        setShowBirthYearModal(false);
-                        if (errors.birthYear) {
-                          setErrors({ ...errors, birthYear: '' });
-                        }
-                      }}
-                    >
-                      <Text style={[
-                        styles.dropdownListItemText,
-                        birthYear === item && styles.dropdownListItemTextSelected,
-                      ]}>
-                        {item}년
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </ScrollView>
-              </View>
-            )}
-            {errors.birthYear ? <Text style={styles.errorText}>{errors.birthYear}</Text> : null}
-          </View>
+          <BirthYearSelector
+            birthYear={birthYear}
+            onBirthYearChange={(year) => {
+              setBirthYear(year);
+              if (errors.birthYear) {
+                setErrors({ ...errors, birthYear: '' });
+              }
+            }}
+            showModal={showBirthYearModal}
+            onModalToggle={() => setShowBirthYearModal(!showBirthYearModal)}
+            onOtherModalClose={() => setShowRegionModal(false)}
+            error={errors.birthYear}
+            onErrorClear={() => setErrors({ ...errors, birthYear: '' })}
+          />
         </View>
       </ScrollView>
 

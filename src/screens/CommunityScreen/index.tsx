@@ -18,13 +18,9 @@ import { logError } from '../../utils/logger';
 import { getHiddenPosts, hidePost } from '../../utils/hiddenContentStorage';
 import { getMissionSets, searchMissionSets, copyMissionSet, getMyMissionSets, updateMissionSet, MissionSetSimple } from '../../api/todolistApi';
 import { SCREEN_NAMES } from '../../utils/constants';
-
-interface CommunityScreenProps {
-  navigation: NavigationProp<RootStackParamList>;
-}
-
-type CommunityTab = 'all' | 'todo-share';
-type VerificationFilter = 'all' | 'pending' | 'approved';
+import { CommunityScreenProps, CommunityTab, VerificationFilter, PostFilter } from './CommunityScreen.types';
+import { FILTER_OPTIONS } from './CommunityScreen.constants';
+import MissionSetList from './components/MissionSetList';
 
 const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation }) => {
   const { posts, loading, error, toggleLike, loadPosts } = useCommunity();
@@ -234,10 +230,6 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation }) => {
     }
   }, [loadPosts, loadMissionSets, activeTab]);
 
-  const filterOptions = [
-    { value: 'all', label: '최신순' },
-    { value: 'popular', label: '인기순' },
-  ];
 
   // GET /api/community/posts에서 이미 일반글과 인증글을 모두 반환하므로 별도 변환 불필요
   // convertedVerificationPosts는 제거됨
@@ -450,121 +442,18 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation }) => {
 
       {/* 투두 공유 탭 콘텐츠 */}
       {activeTab === 'todo-share' && (
-        <>
-          {/* 검색창과 필터 버튼 */}
-          <View style={styles.missionSetFilterContainer}>
-            <View style={styles.searchRow}>
-              <View style={styles.missionSetSearchContainer}>
-                <Image
-                  source={require('../../assets/images/search.png')}
-                  style={styles.searchIcon}
-                  resizeMode="contain"
-                  accessibilityLabel="검색 아이콘"
-                />
-                <TextInput
-                  style={styles.searchInput}
-                  value={missionSetSearchQuery}
-                  onChangeText={setMissionSetSearchQuery}
-                  placeholder="투두리스트 검색..."
-                  placeholderTextColor={colors.text.tertiary}
-                />
-              </View>
-              <TouchableOpacity
-                style={styles.filterButton}
-                onPress={() => setShowMissionSetFilterModal(true)}
-                activeOpacity={0.7}
-                accessibilityRole="button"
-                accessibilityLabel="필터"
-                accessibilityHint="투두 공유 필터 옵션 열기"
-              >
-                <Image
-                  source={require('../../assets/images/filter.png')}
-                  style={styles.filterIcon}
-                  resizeMode="contain"
-                  accessibilityElementsHidden={true}
-                />
-              </TouchableOpacity>
-            </View>
-          </View>
-
-          {missionSetLoading ? (
-            <Loading text="투두리스트를 불러오는 중..." />
-          ) : (
-            <ScrollView
-              style={styles.content}
-              refreshControl={
-                <RefreshControl
-                  refreshing={refreshing}
-                  onRefresh={onRefresh}
-                  colors={[colors.primary[500]]}
-                  tintColor={colors.primary[500]}
-                />
-              }
-            >
-              {missionSets.length === 0 ? (
-                <EmptyState
-                  iconImage={require('../../assets/images/notes.png')}
-                  title="공유된 투두리스트가 없어요"
-                  description="다른 사용자들의 투두리스트를 기다려주세요!"
-                />
-              ) : (
-                <View style={styles.missionSetList}>
-                  {missionSets.map(missionSet => (
-                    <TouchableOpacity
-                      key={missionSet.id}
-                      style={styles.missionSetCard}
-                      onPress={() => navigation.navigate(SCREEN_NAMES.MISSION_SET_DETAIL as any, { missionSetId: missionSet.id })}
-                      activeOpacity={0.7}
-                    >
-                      <View style={styles.missionSetCardHeader}>
-                        <Text style={styles.missionSetTitle} numberOfLines={1}>
-                          {missionSet.title}
-                        </Text>
-                        <TouchableOpacity
-                          style={styles.copyButton}
-                          onPress={() => handleCopyMissionSet(missionSet)}
-                          activeOpacity={0.7}
-                        >
-                          <Text style={styles.copyButtonText}>담기</Text>
-                        </TouchableOpacity>
-                      </View>
-
-                      {missionSet.description && (
-                        <Text style={styles.missionSetDescription} numberOfLines={2}>
-                          {missionSet.description}
-                        </Text>
-                      )}
-
-                      <View style={styles.missionSetMeta}>
-                        <Text style={styles.metaText}>
-                          by {missionSet.creatorNickname}
-                        </Text>
-                        <Text style={styles.metaDot}>·</Text>
-                        <Text style={styles.metaText}>
-                          {missionSet.missionCount}개 미션
-                        </Text>
-                      </View>
-
-                      <View style={styles.missionSetFooter}>
-                        <View style={styles.ratingContainer}>
-                          <Text style={styles.stars}>
-                            {renderStars(missionSet.averageRating)}
-                          </Text>
-                          <Text style={styles.ratingText}>
-                            {missionSet.averageRating.toFixed(1)}
-                          </Text>
-                        </View>
-                        <Text style={styles.addedCount}>
-                          {missionSet.addedCount}명이 담음
-                        </Text>
-                      </View>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              )}
-            </ScrollView>
-          )}
-        </>
+        <MissionSetList
+          missionSets={missionSets}
+          loading={missionSetLoading}
+          searchQuery={missionSetSearchQuery}
+          onSearchChange={setMissionSetSearchQuery}
+          onFilterPress={() => setShowMissionSetFilterModal(true)}
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+          onCopyMissionSet={handleCopyMissionSet}
+          renderStars={renderStars}
+          navigation={navigation}
+        />
       )}
 
       {/* GENERAL 글쓰기 FAB */}
@@ -619,7 +508,7 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation }) => {
             
             {/* 정렬 옵션 */}
             <Text style={styles.modalSectionTitle}>정렬</Text>
-            {filterOptions.map((option) => (
+            {FILTER_OPTIONS.map((option) => (
               <TouchableOpacity
                 key={option.value}
                 style={[
@@ -627,7 +516,7 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation }) => {
                   filter === option.value && styles.filterOptionActive,
                 ]}
                 onPress={() => {
-                  setFilter(option.value as 'all' | 'popular');
+                  setFilter(option.value);
                 }}
                 activeOpacity={0.7}
                 accessibilityRole="button"
