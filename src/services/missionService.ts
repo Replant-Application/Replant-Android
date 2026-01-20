@@ -157,14 +157,19 @@ export const deleteMissionPhoto = async (
       return { success: false, error: '미션을 찾을 수 없습니다.' };
     }
 
-    if (!mission.photo_url) {
+    // images 배열 또는 photo_url 확인
+    const hasImages = mission.images && mission.images.length > 0;
+    const hasPhotoUrl = mission.photo_url;
+
+    if (!hasImages && !hasPhotoUrl) {
       return { success: false, error: '삭제할 사진이 없습니다.' };
     }
 
-    // 사진 URL 제거
+    // 사진 URL 제거 (images 배열과 photo_url 모두 제거)
     const updatedMission: Mission = {
       ...mission,
       photo_url: undefined,
+      images: undefined,
       updated_at: new Date().toISOString()
     };
 

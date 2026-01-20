@@ -11,7 +11,8 @@ export type RootStackParamList = {
   Home: undefined;
   Diary: undefined;
   Mission: {
-    selectedPhotoUri?: string;
+    selectedPhotoUri?: string; // @deprecated - selectedPhotoUris 사용 권장 (하위 호환성 유지)
+    selectedPhotoUris?: string[]; // 다중 사진 URL 배열
     missionId?: string;
     timestamp?: number;
     analysisResult?: { verified: boolean } | null;

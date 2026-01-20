@@ -78,7 +78,8 @@ export interface Mission {
   due_date?: string; // 마감일
   completed: boolean;
   completed_at?: string | undefined;
-  photo_url?: string | undefined;
+  photo_url?: string | undefined; // @deprecated - images 사용 권장 (하위 호환성 유지)
+  images?: string[]; // 미션 인증 사진 배열 (다중 이미지 지원)
   // 인증 타입 (COMMUNITY, GPS, TIME)
   verification_type?: 'COMMUNITY' | 'GPS' | 'TIME';
   // 인증 관련 필드
@@ -297,7 +298,8 @@ export interface UseMissionReturn {
   loading: boolean;
   error: string | null;
   loadMissions: () => Promise<void>;
-  saveMissionPhoto: (missionId: string, photoUrl: string) => Promise<ServiceResult<void>>;
+  saveMissionPhoto: (missionId: string, photoUrl: string) => Promise<ServiceResult<void>>; // @deprecated - saveMissionPhotos 사용 권장
+  saveMissionPhotos: (missionId: string, photoUrls: string[]) => Promise<ServiceResult<void>>; // 다중 사진 저장
   deleteMissionPhoto: (missionId: string) => Promise<ServiceResult<void>>;
   completeMissionWithPhoto: (missionId: string, photoUrl: string | null) => Promise<MissionCompletionResult>;
   uncompleteMission: (missionId: string) => Promise<ServiceResult>;

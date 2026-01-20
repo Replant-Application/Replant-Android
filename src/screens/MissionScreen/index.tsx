@@ -48,7 +48,7 @@ type MissionGroupTab = 'official' | 'custom';
 
 const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
   const { addExperienceByCategory } = useCharacter();
-  const { missions, loading, error, saveMissionPhoto, deleteMissionPhoto, completeMissionWithPhoto, uncompleteMission, loadMissions } = useMission(addExperienceByCategory);
+  const { missions, loading, error, saveMissionPhoto, saveMissionPhotos, deleteMissionPhoto, completeMissionWithPhoto, uncompleteMission, loadMissions } = useMission(addExperienceByCategory);
 
   // route params에서 사진 정보 확인
   const routeParams = route?.params;
@@ -427,6 +427,7 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
 
 
   // 사진 선택 후 돌아왔을 때 처리 (사진만 저장, 미션 완료하지 않음)
+  // 단일 사진 저장 (하위 호환성 유지)
   const handlePhotoSelected = useCallback(async (missionId: string, photoUri: string) => {
     try {
       const result = await saveMissionPhoto(missionId, photoUri);
@@ -445,14 +446,47 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
     }
   }, [saveMissionPhoto]);
 
+  // 다중 사진 저장
+  const handlePhotosSelected = useCallback(async (missionId: string, photoUrls: string[]) => {
+    try {
+      const result = await saveMissionPhotos(missionId, photoUrls);
+
+      if (result && result.success) {
+        Alert.alert(
+          '사진 저장',
+          `${photoUrls.length}개의 사진이 저장되었습니다.`,
+          [{ text: '확인' }]
+        );
+      } else {
+        Alert.alert('오류', result?.error || '사진 저장에 실패했습니다.');
+      }
+    } catch (error) {
+      Alert.alert('오류', '사진 저장에 실패했습니다.');
+    }
+  }, [saveMissionPhotos]);
+
   // route params 변경 감지 (한 번만 처리)
   useEffect(() => {
-    const selectedPhotoUri = routeParams?.selectedPhotoUri;
+    const selectedPhotoUris = routeParams?.selectedPhotoUris;
+    const selectedPhotoUri = routeParams?.selectedPhotoUri; // 하위 호환성
     const missionId = routeParams?.missionId;
     const timestamp = routeParams?.timestamp;
     
-    if (selectedPhotoUri && missionId && timestamp) {
-      // 이미 처리한 사진인지 확인 (타임스탬프 포함)
+    // 다중 사진 처리 (우선)
+    if (selectedPhotoUris && selectedPhotoUris.length > 0 && missionId && timestamp) {
+      const photoKey = `${missionId}_${selectedPhotoUris.join(',')}_${timestamp}`;
+      if (processedPhotoRef.current !== photoKey) {
+        processedPhotoRef.current = photoKey;
+        handlePhotosSelected(missionId, selectedPhotoUris);
+        
+        // 처리 후 params 초기화를 위해 빈 params로 navigate
+        setTimeout(() => {
+          navigation.navigate('Mission', {});
+        }, 0);
+      }
+    }
+    // 단일 사진 처리 (하위 호환성)
+    else if (selectedPhotoUri && missionId && timestamp) {
       const photoKey = `${missionId}_${selectedPhotoUri}_${timestamp}`;
       if (processedPhotoRef.current !== photoKey) {
         processedPhotoRef.current = photoKey;

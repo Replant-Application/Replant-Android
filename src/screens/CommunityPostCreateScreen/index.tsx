@@ -73,7 +73,7 @@ const CommunityPostCreateScreen: React.FC<CommunityPostCreateScreenProps> = ({
       const result = await launchImageLibrary({
         mediaType: 'photo',
         quality: 0.8,
-        selectionLimit: 5,
+        selectionLimit: 3,
       });
 
       if (result.didCancel) {
@@ -299,7 +299,7 @@ const CommunityPostCreateScreen: React.FC<CommunityPostCreateScreenProps> = ({
                   </TouchableOpacity>
                 </View>
               ))}
-              {images.length < 5 && (
+              {images.length < 3 && (
                 <TouchableOpacity
                   style={styles.addImageButton}
                   onPress={handleSelectImage}

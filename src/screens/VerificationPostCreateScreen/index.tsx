@@ -53,7 +53,7 @@ const VerificationPostCreateScreen: React.FC<VerificationPostCreateScreenProps> 
 
   const isEditMode = mode === 'edit' && verificationId;
   const [content, setContent] = useState(initialContent || '');
-  const [photoUrl, setPhotoUrl] = useState<string | null>(initialPhotoUrl || null);
+  const [images, setImages] = useState<string[]>(initialPhotoUrl ? [initialPhotoUrl] : []); // 다중 이미지 지원
   const [loading, setLoading] = useState(false);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
@@ -87,7 +87,7 @@ const VerificationPostCreateScreen: React.FC<VerificationPostCreateScreenProps> 
       if (result.success && result.data) {
         setContent(result.data.content || '');
         if (result.data.imageUrls && result.data.imageUrls.length > 0) {
-          setPhotoUrl(result.data.imageUrls[0]);
+          setImages(result.data.imageUrls); // 다중 이미지 지원
         }
       }
     } catch (error) {
@@ -97,14 +97,13 @@ const VerificationPostCreateScreen: React.FC<VerificationPostCreateScreenProps> 
     }
   };
 
-  // 사진 선택 (갤러리)
+  // 사진 선택 (갤러리) - 자유게시판과 동일한 방식
   const handleSelectPhoto = async () => {
     try {
       const result = await launchImageLibrary({
         mediaType: 'photo',
         quality: 0.8,
-        maxWidth: 1024,
-        maxHeight: 1024,
+        selectionLimit: 3, // 최대 3장 제한
       });
 
       // 사용자가 취소했거나 에러가 있는 경우 무시
@@ -122,8 +121,32 @@ const VerificationPostCreateScreen: React.FC<VerificationPostCreateScreenProps> 
         return;
       }
 
-      if (result.assets && result.assets[0]?.uri) {
-        await uploadPhoto(result.assets[0]);
+      if (result.assets && result.assets.length > 0) {
+        setUploadingPhoto(true);
+        try {
+          // 자유게시판과 완전히 동일하게 즉시 업로드
+          const uploadPromises = result.assets.map(async (asset) => {
+            if (asset.uri) {
+              const uploadResult = await uploadCommunityPhoto({
+                uri: asset.uri,
+                type: asset.type || 'image/jpeg',
+                name: asset.fileName || `verification_${Date.now()}_${Math.random()}.jpg`,
+              });
+              return uploadResult.success && uploadResult.data ? uploadResult.data.fileUrl : null;
+            }
+            return null;
+          });
+
+          const uploadedUrls = (await Promise.all(uploadPromises)).filter((url): url is string => url !== null);
+          
+          // 자유게시판과 완전히 동일하게 기존 이미지에 추가 (단순 추가)
+          setImages((prev) => [...prev, ...uploadedUrls]);
+        } catch (error) {
+          logError('이미지 업로드 오류', error as Error);
+          Alert.alert('오류', '이미지 업로드 중 오류가 발생했습니다.');
+        } finally {
+          setUploadingPhoto(false);
+        }
       }
     } catch (error) {
       logError('사진 선택 오류', error as Error);
@@ -137,8 +160,6 @@ const VerificationPostCreateScreen: React.FC<VerificationPostCreateScreenProps> 
       const result = await launchCamera({
         mediaType: 'photo',
         quality: 0.8,
-        maxWidth: 1024,
-        maxHeight: 1024,
       });
 
       // 사용자가 취소했거나 에러가 있는 경우 무시
@@ -159,7 +180,30 @@ const VerificationPostCreateScreen: React.FC<VerificationPostCreateScreenProps> 
       }
 
       if (result.assets && result.assets[0]?.uri) {
-        await uploadPhoto(result.assets[0]);
+        if (images.length >= 3) {
+          Alert.alert('알림', '최대 3개의 사진만 선택할 수 있습니다.');
+          return;
+        }
+
+        setUploadingPhoto(true);
+        try {
+          const uploadResult = await uploadCommunityPhoto({
+            uri: result.assets[0].uri,
+            type: result.assets[0].type || 'image/jpeg',
+            name: result.assets[0].fileName || `verification_${Date.now()}.jpg`,
+          });
+
+          if (uploadResult.success && uploadResult.data) {
+            setImages((prev) => [...prev, uploadResult.data!.fileUrl]);
+          } else {
+            Alert.alert('오류', uploadResult.error || '사진 업로드에 실패했습니다.');
+          }
+        } catch (error) {
+          logError('사진 업로드 오류', error as Error);
+          Alert.alert('오류', '사진 업로드 중 오류가 발생했습니다.');
+        } finally {
+          setUploadingPhoto(false);
+        }
       }
     } catch (error) {
       logError('카메라 오류', error as Error);
@@ -167,33 +211,9 @@ const VerificationPostCreateScreen: React.FC<VerificationPostCreateScreenProps> 
     }
   };
 
-  // 사진 업로드 (S3)
-  const uploadPhoto = async (asset: { uri?: string; type?: string; fileName?: string }) => {
-    if (!asset.uri) return;
-
-    try {
-      setUploadingPhoto(true);
-
-      const file = {
-        uri: asset.uri,
-        type: asset.type || 'image/jpeg',
-        name: asset.fileName || `verification_${Date.now()}.jpg`,
-      };
-
-      const result = await uploadCommunityPhoto(file);
-
-      if (result.success && result.data) {
-        setPhotoUrl(result.data.fileUrl);
-        Alert.alert('성공', '사진이 업로드되었습니다.');
-      } else {
-        Alert.alert('오류', result.error || '사진 업로드에 실패했습니다.');
-      }
-    } catch (error) {
-      logError('사진 업로드 오류', error as Error);
-      Alert.alert('오류', '사진 업로드 중 오류가 발생했습니다.');
-    } finally {
-      setUploadingPhoto(false);
-    }
+  // 이미지 제거
+  const handleRemoveImage = (index: number) => {
+    setImages((prev) => prev.filter((_, i) => i !== index));
   };
 
   // 사진 선택 옵션 표시
@@ -228,7 +248,7 @@ const VerificationPostCreateScreen: React.FC<VerificationPostCreateScreenProps> 
         // 수정 모드
         const result = await updateVerification(verificationId, {
           content: content.trim(),
-          imageUrls: photoUrl ? [photoUrl] : [],
+          imageUrls: images, // 다중 이미지 배열
         });
 
         if (result.success) {
@@ -246,7 +266,7 @@ const VerificationPostCreateScreen: React.FC<VerificationPostCreateScreenProps> 
         const verificationData = {
           userMissionId: userMissionId,
           content: content.trim(),
-          imageUrls: photoUrl ? [photoUrl] : [],
+          imageUrls: images, // 다중 이미지 배열
         };
 
         const result = await createVerification(verificationData);
@@ -357,43 +377,45 @@ const VerificationPostCreateScreen: React.FC<VerificationPostCreateScreenProps> 
         {/* 사진 섹션 */}
         <View style={styles.photoSection}>
           <Text style={styles.label}>인증 사진 (선택)</Text>
-
-          {photoUrl ? (
-            <View style={styles.photoPreviewContainer}>
-              <Image 
-                source={{ uri: photoUrl }} 
-                style={styles.previewImage} 
-                resizeMode="cover" 
-                accessibilityLabel="인증 사진 미리보기"
-              />
+          <View style={styles.imageContainer}>
+            {images.map((imageUrl, index) => (
+              <View key={index} style={styles.imagePreviewWrapper}>
+                <Image 
+                  source={{ uri: imageUrl }} 
+                  style={styles.previewImage} 
+                  resizeMode="cover" 
+                  accessibilityLabel={`인증 사진 ${index + 1}`}
+                />
+                <TouchableOpacity
+                  style={styles.removeImageButton}
+                  onPress={() => handleRemoveImage(index)}
+                >
+                  <Text style={styles.removeImageText}>×</Text>
+                </TouchableOpacity>
+              </View>
+            ))}
+            {images.length < 3 && (
               <TouchableOpacity
-                style={styles.changePhotoButton}
+                style={styles.addPhotoButton}
                 onPress={showPhotoOptions}
+                disabled={uploadingPhoto}
               >
-                <Text style={styles.changePhotoText}>변경</Text>
+                {uploadingPhoto ? (
+                  <ActivityIndicator color={colors.primary[500]} />
+                ) : (
+                  <>
+                    <Image
+                      source={require('../../assets/images/camera.png')}
+                      style={styles.addPhotoIcon}
+                      resizeMode="contain"
+                      accessibilityLabel="사진 첨부 아이콘"
+                    />
+                    <Text style={styles.addPhotoText}>사진 추가</Text>
+                  </>
+                )}
               </TouchableOpacity>
-            </View>
-          ) : (
-            <TouchableOpacity
-              style={styles.addPhotoButton}
-              onPress={showPhotoOptions}
-              disabled={uploadingPhoto}
-            >
-              {uploadingPhoto ? (
-                <ActivityIndicator color={colors.primary[500]} />
-              ) : (
-                <>
-                  <Image
-                    source={require('../../assets/images/camera.png')}
-                    style={styles.addPhotoIcon}
-                    resizeMode="contain"
-                    accessibilityLabel="사진 첨부 아이콘"
-                  />
-                  <Text style={styles.addPhotoText}>사진 첨부</Text>
-                </>
-              )}
-            </TouchableOpacity>
-          )}
+            )}
+          </View>
         </View>
 
       </ScrollView>
@@ -621,45 +643,51 @@ const styles = StyleSheet.create({
   photoSection: {
     marginBottom: spacing[4],
   },
-  photoPreviewContainer: {
+  imageContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing[2],
+  },
+  imagePreviewWrapper: {
     position: 'relative',
+    width: 100,
+    height: 100,
+    borderRadius: borderRadius.md,
+    overflow: 'hidden',
   },
   previewImage: {
-    width: '100%',
-    height: 240,
-    borderRadius: borderRadius.base,
+    width: 100,
+    height: 100,
+    borderRadius: borderRadius.md,
   },
-  changePhotoButton: {
+  removeImageButton: {
     position: 'absolute',
-    bottom: spacing[2],
-    right: spacing[2],
-    backgroundColor: colors.white,
-    borderWidth: 1,
-    borderColor: colors.border.light,
-    paddingHorizontal: spacing[2],
-    paddingVertical: spacing[1],
-    borderRadius: borderRadius.base,
+    top: 4,
+    right: 4,
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  changePhotoText: {
-    color: colors.text.primary,
-    fontSize: typography.fontSize.xs,
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
+  removeImageText: {
+    color: colors.white,
+    fontSize: 18,
+    fontWeight: 'bold',
+    lineHeight: 20,
   },
   addPhotoButton: {
+    width: 100,
+    height: 100,
     backgroundColor: colors.white,
     borderWidth: 1,
     borderColor: colors.border.light,
     borderStyle: 'dashed',
-    borderRadius: borderRadius.base,
-    padding: spacing[6],
-    minHeight: 240,
+    borderRadius: borderRadius.md,
     alignItems: 'center',
     justifyContent: 'center',
+    gap: spacing[1],
   },
   addPhotoIcon: {
     width: 32,

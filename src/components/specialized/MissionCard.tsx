@@ -157,14 +157,35 @@ const MissionCard: React.FC<MissionCardProps> = ({
           <Text style={styles.description} numberOfLines={2}>{mission.description}</Text>
         )}
 
-        {mission.photo_url && (
+        {(mission.images && mission.images.length > 0) || mission.photo_url ? (
           <View style={styles.photoContainer}>
-            <Image
-              source={{ uri: mission.photo_url }}
-              style={styles.photo}
-              resizeMode="cover"
-              accessibilityLabel={`${mission.title} 인증 사진`}
-            />
+            {/* images 배열이 있으면 images 사용, 없으면 photo_url 사용 (하위 호환성) */}
+            {mission.images && mission.images.length > 0 ? (
+              <View style={styles.imagesGrid}>
+                {mission.images.slice(0, 4).map((imageUrl, index) => (
+                  <View key={index} style={styles.imageItem}>
+                    <Image
+                      source={{ uri: imageUrl }}
+                      style={styles.gridImage}
+                      resizeMode="cover"
+                      accessibilityLabel={`${mission.title} 인증 사진 ${index + 1}`}
+                    />
+                    {index === 3 && mission.images && mission.images.length > 4 && (
+                      <View style={styles.moreImagesOverlay}>
+                        <Text style={styles.moreImagesText}>+{mission.images.length - 4}</Text>
+                      </View>
+                    )}
+                  </View>
+                ))}
+              </View>
+            ) : mission.photo_url ? (
+              <Image
+                source={{ uri: mission.photo_url }}
+                style={styles.photo}
+                resizeMode="cover"
+                accessibilityLabel={`${mission.title} 인증 사진`}
+              />
+            ) : null}
             {onDeletePhoto && !readonly && (
               <TouchableOpacity
                 style={styles.deletePhotoButton}
@@ -179,7 +200,7 @@ const MissionCard: React.FC<MissionCardProps> = ({
               </TouchableOpacity>
             )}
           </View>
-        )}
+        ) : null}
       </View>
 
       <View style={styles.footer}>
@@ -471,6 +492,43 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 80,
     borderRadius: borderRadius.base,
+  },
+  imagesGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing[1],
+  },
+  imageItem: {
+    position: 'relative',
+    width: '48%',
+    height: 80,
+    borderRadius: borderRadius.base,
+    overflow: 'hidden',
+  },
+  gridImage: {
+    width: '100%',
+    height: '100%',
+    borderRadius: borderRadius.base,
+  },
+  moreImagesOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  moreImagesText: {
+    color: colors.white,
+    fontSize: typography.fontSize.base,
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
   },
   deletePhotoButton: {
     position: 'absolute',

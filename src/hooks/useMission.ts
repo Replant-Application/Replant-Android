@@ -172,7 +172,7 @@ export const useMission = (
     loadMissions();
   }, [loadMissions]);
 
-  // 미션에 사진 저장 (S3 업로드 후 URL 저장)
+  // 미션에 사진 저장 (S3 업로드 후 URL 저장) - 단일 사진 (하위 호환성 유지)
   const saveMissionPhoto = useCallback(async (
     missionId: string,
     photoUri: string
@@ -213,7 +213,8 @@ export const useMission = (
 
       const updatedMission: Mission = {
         ...mission,
-        photo_url: s3PhotoUrl,
+        photo_url: s3PhotoUrl, // 하위 호환성 유지
+        images: [s3PhotoUrl], // images 배열에도 저장
         updated_at: new Date().toISOString()
       };
 
@@ -237,6 +238,61 @@ export const useMission = (
     }
   }, [currentNickname]);
 
+  // 미션에 여러 사진 저장 (S3 업로드된 URL 배열 저장)
+  const saveMissionPhotos = useCallback(async (
+    missionId: string,
+    photoUrls: string[]
+  ): Promise<ServiceResult<void>> => {
+    if (!currentNickname) {
+      return { success: false, error: '사용자 정보가 없습니다.' };
+    }
+
+    if (!photoUrls || photoUrls.length === 0) {
+      return { success: false, error: '저장할 사진이 없습니다.' };
+    }
+
+    try {
+      // 로컬 스토리지에 S3 URL 배열 저장
+      const storageKeys = getStorageKeys(currentNickname);
+      const missionsData: Mission[] = await getData(storageKeys.MISSIONS) || [];
+      const mission: Mission | undefined = missionsData.find(m => m.mission_id === missionId);
+
+      if (!mission) {
+        logError('미션을 찾을 수 없음', new Error('Mission not found'), {
+          missionId,
+          availableMissionIds: missionsData.map(m => m.mission_id),
+          totalMissions: missionsData.length
+        });
+        return { success: false, error: '미션을 찾을 수 없습니다.' };
+      }
+
+      const updatedMission: Mission = {
+        ...mission,
+        images: photoUrls, // 다중 이미지 배열 저장
+        photo_url: photoUrls[0], // 첫 번째 이미지를 photo_url에도 저장 (하위 호환성)
+        updated_at: new Date().toISOString()
+      };
+
+      const updatedMissions = missionsData.map(m =>
+        m.mission_id === missionId ? updatedMission : m
+      );
+      await setData(storageKeys.MISSIONS, updatedMissions);
+
+      setMissions(prev =>
+        prev.map(m =>
+          m.mission_id === missionId
+            ? updatedMission
+            : m
+        )
+      );
+
+      return { success: true };
+    } catch (err) {
+      logError('사진 저장 실패', err as Error, { missionId, photoUrls });
+      return { success: false, error: (err as Error).message };
+    }
+  }, [currentNickname]);
+
   // 미션 사진 삭제
   const deleteMissionPhoto = useCallback(async (
     missionId: string
@@ -252,7 +308,7 @@ export const useMission = (
         setMissions(prev =>
           prev.map(m =>
             m.mission_id === missionId
-              ? { ...m, photo_url: undefined, updated_at: new Date().toISOString() }
+              ? { ...m, photo_url: undefined, images: undefined, updated_at: new Date().toISOString() }
               : m
           )
         );
@@ -347,7 +403,8 @@ export const useMission = (
         ...mission,
         completed: false,
         completed_at: undefined,
-        photo_url: undefined
+        photo_url: undefined,
+        images: undefined
       };
 
       const storageKeys = getStorageKeys(currentNickname);
@@ -486,6 +543,7 @@ export const useMission = (
     error,
     loadMissions,
     saveMissionPhoto,
+    saveMissionPhotos,
     deleteMissionPhoto,
     completeMissionWithPhoto,
     uncompleteMission,
@@ -498,6 +556,7 @@ export const useMission = (
     error,
     loadMissions,
     saveMissionPhoto,
+    saveMissionPhotos,
     deleteMissionPhoto,
     completeMissionWithPhoto,
     uncompleteMission,
