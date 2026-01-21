@@ -448,10 +448,6 @@ const styles = StyleSheet.create({
     includeFontPadding: false,
     lineHeight: getOptimizedLineHeight(typography.fontSize.xl),
   },
-  backButtonIcon: {
-    width: 24,
-    height: 24,
-  },
   filterSection: {
     marginBottom: spacing[5],
     paddingBottom: spacing[4],

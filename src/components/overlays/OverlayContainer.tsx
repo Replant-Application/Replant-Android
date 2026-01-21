@@ -11,7 +11,7 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import NotificationDropdown from './NotificationDropdown';
-import ChatDropdown from './ChatDropdown';
+// import ChatDropdown from './ChatDropdown'; // TODO: ChatDropdown 구현 필요
 
 interface OverlayContainerProps {
   onNavigate?: (screen: string, params?: any) => void;
@@ -30,10 +30,10 @@ const OverlayContainer: React.FC<OverlayContainerProps> = ({
         onNavigate={onNavigate}
         onViewAll={onViewAllNotifications}
       />
-      <ChatDropdown
+      {/* <ChatDropdown
         onNavigate={onNavigate}
         onViewAll={onViewAllChats}
-      />
+      /> */}
     </View>
   );
 };

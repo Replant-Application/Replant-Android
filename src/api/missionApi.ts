@@ -23,11 +23,13 @@ export type VerificationStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
 export type VoteType = 'APPROVE' | 'REJECT';
 
 // 사용자 맞춤 필터링 타입
-export type WorryType = 'RE_EMPLOYMENT' | 'JOB_PREPARATION' | 'ENTRANCE_EXAM' | 'ADVANCEMENT' | 'RETURN_TO_SCHOOL' | 'RELATIONSHIP' | 'SELF_MANAGEMENT';
+// WorryType과 PlaceType은 userApi에서 import
+import type { WorryType, PlaceType } from './userApi';
 export type AgeRange = 'LATE_TEENS' | 'EARLY_TWENTIES' | 'MID_TWENTIES' | 'LATE_TWENTIES' | 'EARLY_THIRTIES' | 'MID_THIRTIES' | 'LATE_THIRTIES' | 'FORTIES_PLUS';
 export type GenderType = 'MALE' | 'FEMALE' | 'ALL';
 export type DifficultyLevel = 'EASY' | 'MEDIUM' | 'HARD';
-export type PlaceType = 'HOME' | 'OUTDOOR' | 'INDOOR';
+// PlaceType은 userApi에서 재export
+export type { WorryType, PlaceType } from './userApi';
 
 // ============================================
 // 통합 미션 (Mission) - 공식/커스텀 미션 통합
@@ -1194,7 +1196,7 @@ export const updateWakeupTime = async (
   timeSlot: WakeupTimeSlot
 ): Promise<ServiceResult<WakeupMissionSetting>> => {
   const endpoint = API_CONFIG.endpoints.userMission.wakeupSettingDetail.replace(':settingId', String(settingId));
-  return apiClient.put<WakeupMissionSetting>(endpoint, null, { timeSlot });
+  return apiClient.put<WakeupMissionSetting>(endpoint, { timeSlot });
 };
 
 /**

@@ -17,7 +17,7 @@ import {
   Platform,
 } from 'react-native';
 import { getRecommendations, acceptRecommendation, rejectRecommendation } from '../../api/recommendationApi';
-import { getChatRooms } from '../../api/chatApi';
+// import { getChatRooms } from '../../api/chatApi'; // TODO: chatApi 구현 필요
 import { Loading, Header, EmptyState, TabBar } from '../../components/ui';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
 import { getOptimizedLineHeight } from '../../utils/textStyles';
@@ -87,10 +87,12 @@ const ConnectionsScreen: React.FC<ConnectionsScreenProps> = ({ navigation }) => 
         setLoading(true);
       }
 
-      const [recResult, chatResult] = await Promise.all([
+      const [recResult] = await Promise.all([
         getRecommendations({ status: 'PENDING' }),
-        getChatRooms(),
+        // getChatRooms(), // TODO: chatApi 구현 필요
+        Promise.resolve({ success: true, data: [] }), // 임시: 빈 배열 반환
       ]);
+      const chatResult = { success: true, data: [] }; // TODO: chatApi 구현 필요
 
       if (recResult.success && recResult.data) {
         setRecommendations(recResult.data as any);

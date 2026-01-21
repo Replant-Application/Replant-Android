@@ -440,7 +440,6 @@ const styles = StyleSheet.create({
   roleDescription: {
     fontSize: typography.fontSize.sm,
     color: colors.text.secondary,
-    lineHeight: 20,
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,
       android: typography.fontFamily.regular,
@@ -602,7 +601,6 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.sm,
     color: colors.primary[100],
     textAlign: 'center',
-    lineHeight: 20,
     marginBottom: spacing[4],
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,

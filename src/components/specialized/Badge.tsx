@@ -37,11 +37,11 @@ const Badge: React.FC<BadgeProps> = ({ tier: _tier, size = 'md', style }) => {
         styles.badgeImage,
         {
           width: sizeStyles.width,
-      accessibilityLabel="뱃지 아이콘"
           height: sizeStyles.height,
         },
         style,
       ]}
+      accessibilityLabel="뱃지 아이콘"
       resizeMode="contain"
     />
   );

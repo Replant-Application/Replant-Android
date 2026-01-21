@@ -15,7 +15,7 @@ export interface ApiRequestOptions {
   method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
   headers?: Record<string, string>;
   body?: any;
-  params?: Record<string, string | number>;
+  params?: Record<string, string | number | boolean>;
 }
 
 /**
@@ -384,7 +384,7 @@ export class ApiClient {
   /**
    * GET 요청
    */
-  async get<T>(endpoint: string, params?: Record<string, string | number>): Promise<ServiceResult<T>> {
+  async get<T>(endpoint: string, params?: Record<string, string | number | boolean>): Promise<ServiceResult<T>> {
     return this.request<T>(endpoint, { method: 'GET', params });
   }
 

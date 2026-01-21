@@ -128,7 +128,6 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.base,
     color: colors.text.secondary,
     textAlign: 'center',
-    lineHeight: typography.lineHeight.relaxed * typography.fontSize.base,
     marginBottom: spacing[10],
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,

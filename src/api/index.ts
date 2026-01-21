@@ -10,6 +10,7 @@ export * from './authApi';
 export * from './userApi';
 
 // 미션 API (시스템 미션, 커스텀 미션, 내 미션, 인증 게시판)
+// WorryType과 PlaceType은 userApi에서 이미 export되므로 missionApi에서는 제외
 export * from './missionApi';
 
 // 커뮤니티 API (자유 게시판)
@@ -22,7 +23,7 @@ export * from './badgeApi';
 export * from './recommendationApi';
 
 // 채팅 API
-export * from './chatApi';
+// export * from './chatApi'; // TODO: 채팅 API 구현 필요
 
 // 알림 API
 export * from './notificationApi';

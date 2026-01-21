@@ -4,6 +4,6 @@
  */
 
 export { default as NotificationDropdown } from './NotificationDropdown';
-export { default as ChatDropdown } from './ChatDropdown';
+// export { default as ChatDropdown } from './ChatDropdown'; // TODO: ChatDropdown 구현 필요
 export { default as HeaderActions } from './HeaderActions';
 export { default as OverlayContainer } from './OverlayContainer';
