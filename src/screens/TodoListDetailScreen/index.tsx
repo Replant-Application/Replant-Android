@@ -8,7 +8,6 @@ import {
   RefreshControl,
   Platform,
   ActivityIndicator,
-  Alert,
   Image,
   ImageBackground,
 } from 'react-native';
@@ -19,6 +18,7 @@ import { SCREEN_NAMES } from '../../utils/constants';
 import { getTodoListDetail, completeTodoMission, archiveTodoList, canCreateNewTodoList } from '../../api/todolistApi';
 import { TodoList, TodoMission } from '../../types/todolist';
 import { getVerifications } from '../../api/missionApi';
+import { useErrorHandler } from '../../hooks/useErrorHandler';
 
 interface Props {
   navigation: any;
@@ -39,6 +39,7 @@ const TodoListDetailScreen: React.FC<Props> = ({ navigation, route }) => {
   const [canCreate, setCanCreate] = useState(false);
   const [showCompleteModal, setShowCompleteModal] = useState(false);
   const [hasShownCompleteModal, setHasShownCompleteModal] = useState(false);
+  const { showError, showSuccess, showConfirm, handleApiError } = useErrorHandler();
 
   const loadData = useCallback(async () => {
     try {
@@ -154,7 +155,10 @@ const TodoListDetailScreen: React.FC<Props> = ({ navigation, route }) => {
         console.error('[TodoListDetailScreen] 투두리스트 상세 조회 실패:', detailResult.error);
         // 500 에러인 경우 사용자에게 알림
         if (detailResult.error?.includes('서버 오류') || detailResult.error?.includes('500')) {
-          Alert.alert('오류', '서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+          showError(
+            new Error('서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.'),
+            'TodoListDetailScreen.loadData'
+          );
         }
       }
 
@@ -163,7 +167,10 @@ const TodoListDetailScreen: React.FC<Props> = ({ navigation, route }) => {
       }
     } catch (error) {
       console.error('[TodoListDetailScreen] Failed to load todo list detail:', error);
-      Alert.alert('오류', '투두리스트를 불러오는 중 오류가 발생했습니다.');
+      showError(
+        error instanceof Error ? error : new Error('투두리스트를 불러오는 중 오류가 발생했습니다.'),
+        'TodoListDetailScreen.loadData'
+      );
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -237,46 +244,50 @@ const TodoListDetailScreen: React.FC<Props> = ({ navigation, route }) => {
           setCanCreate(canCreateResult.data.canCreate);
         }
       } else {
-        Alert.alert('오류', result.error || '미션 완료에 실패했습니다.');
+        handleApiError(result, 'TodoListDetailScreen.handleCompleteMission');
       }
     } catch (error) {
-      Alert.alert('오류', '미션 완료에 실패했습니다.');
+      showError(
+        error instanceof Error ? error : new Error('미션 완료에 실패했습니다.'),
+        'TodoListDetailScreen.handleCompleteMission'
+      );
     } finally {
       setCompletingMissionId(null);
     }
   };
 
   const handleArchive = async () => {
-    Alert.alert(
+    showConfirm(
       '투두리스트 보관',
       '이 투두리스트를 보관하시겠습니까?\n보관된 투두리스트는 더 이상 수정할 수 없습니다.',
       [
-        { text: '취소', style: 'cancel' },
         {
           text: '보관',
-          style: 'destructive',
           onPress: async () => {
             setArchiving(true);
             try {
               const result = await archiveTodoList(todoListId);
               if (result.success) {
-                Alert.alert('성공', '투두리스트가 보관되었습니다.', [
-                  {
-                    text: '확인',
-                    onPress: () => navigation.goBack(),
-                  },
-                ]);
+                showSuccess(
+                  '투두리스트가 보관되었습니다.',
+                  'TodoListDetailScreen.handleArchive',
+                  () => navigation.goBack()
+                );
               } else {
-                Alert.alert('오류', result.error || '보관에 실패했습니다.');
+                handleApiError(result, 'TodoListDetailScreen.handleArchive');
               }
             } catch (error) {
-              Alert.alert('오류', '보관에 실패했습니다.');
+              showError(
+                error instanceof Error ? error : new Error('보관에 실패했습니다.'),
+                'TodoListDetailScreen.handleArchive'
+              );
             } finally {
               setArchiving(false);
             }
           },
         },
-      ]
+      ],
+      '취소'
     );
   };
 
