@@ -1058,9 +1058,6 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
                           resizeMode="contain"
                           accessibilityLabel="이전 서버 페이지"
                         />
-                        <Text style={[styles.serverPageButtonText, currentServerPage === 0 && styles.serverPageButtonTextDisabled]}>
-                          이전
-                        </Text>
                       </TouchableOpacity>
 
                       <Text style={styles.serverPageInfo}>
@@ -1076,9 +1073,6 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
                         }}
                         disabled={currentServerPage === totalServerPages - 1}
                       >
-                        <Text style={[styles.serverPageButtonText, currentServerPage === totalServerPages - 1 && styles.serverPageButtonTextDisabled]}>
-                          다음
-                        </Text>
                         <Image
                           source={require('../../assets/images/chevron.png')}
                           style={[
@@ -1330,7 +1324,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginTop: spacing[4],
-    gap: spacing[3],
+    gap: spacing[1],
   },
   pageArrow: {
     width: 32,
@@ -1756,20 +1750,6 @@ const styles = StyleSheet.create({
   },
   serverPageButtonDisabled: {
     backgroundColor: colors.gray[100],
-  },
-  serverPageButtonText: {
-    fontSize: typography.fontSize.base,
-    fontWeight: typography.fontWeight.medium,
-    color: colors.primary[700],
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
-  },
-  serverPageButtonTextDisabled: {
-    color: colors.gray[400],
   },
   serverPageArrowIcon: {
     width: 16,
