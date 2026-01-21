@@ -16,6 +16,7 @@ export type RootStackParamList = {
     missionId?: string;
     timestamp?: number;
     analysisResult?: { verified: boolean } | null;
+    activeTab?: 'myMission' | 'missionGroup'; // 미션 도감에서 돌아올 때 탭 복원용
   };
   CustomMissionCreate: {
     generatedMission?: any;
@@ -79,6 +80,7 @@ export type RootStackParamList = {
   Notification: undefined;
   MissionDetail: {
     missionId: string;
+    returnTab?: 'myMission' | 'missionGroup'; // 뒤로가기 시 복원할 탭
   };
   BadgeDetail: {
     badge: {

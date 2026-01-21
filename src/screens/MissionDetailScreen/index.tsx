@@ -120,7 +120,7 @@ const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
   navigation,
   route,
 }) => {
-  const { missionId } = route.params;
+  const { missionId, returnTab } = route.params;
 
   const [mission, setMission] = useState<SystemMission | Mission | null>(null);
   const [reviews, setReviews] = useState<MissionReview[]>([]);
@@ -335,7 +335,17 @@ const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
         <Header
           title="미션 상세"
           showBackButton={true}
-          navigation={navigation}
+          navigation={{
+            ...navigation,
+            goBack: () => {
+              // returnTab이 있으면 해당 탭으로 복원
+              if (returnTab) {
+                navigation.navigate('Mission', { activeTab: returnTab });
+              } else {
+                navigation.goBack?.();
+              }
+            },
+          }}
         />
         <EmptyState
           icon="📭"
@@ -362,7 +372,17 @@ const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
         <Header
           title="미션 상세"
           showBackButton={true}
-          navigation={navigation}
+          navigation={{
+            ...navigation,
+            goBack: () => {
+              // returnTab이 있으면 해당 탭으로 복원
+              if (returnTab) {
+                navigation.navigate('Mission', { activeTab: returnTab });
+              } else {
+                navigation.goBack?.();
+              }
+            },
+          }}
         />
 
       <ScrollView

@@ -54,7 +54,7 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
   const routeParams = route?.params;
   const processedPhotoRef = useRef<string | null>(null);
   const [selectedFilter, setSelectedFilter] = useState<MissionFilter>('inProgress');
-  const [activeTab, setActiveTab] = useState<MissionTab>('myMission');
+  const [activeTab, setActiveTab] = useState<MissionTab>(routeParams?.activeTab || 'myMission');
   const [refreshing, setRefreshing] = useState(false);
 
   // 인증 모달 상태
@@ -501,6 +501,13 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [routeParams?.timestamp]);
 
+  // routeParams.activeTab이 변경되면 activeTab 상태 업데이트
+  useEffect(() => {
+    if (routeParams?.activeTab) {
+      setActiveTab(routeParams.activeTab);
+    }
+  }, [routeParams?.activeTab]);
+
   const handleMissionUncomplete = async (missionId: string) => {
     try {
       await uncompleteMission(missionId);
@@ -882,9 +889,15 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
                       onUncomplete={handleMissionUncomplete}
                       onUploadPhoto={handlePhotoUpload}
                       onDeletePhoto={handleDeletePhoto}
-                      onWriteReview={(missionId) => navigation.navigate('MissionDetail', { missionId })}
+                      onWriteReview={(missionId) => navigation.navigate('MissionDetail', { 
+                        missionId,
+                        returnTab: activeTab === 'missionGroup' ? 'missionGroup' : undefined
+                      })}
                       onVerify={handleVerify}
-                      onViewDetails={() => navigation.navigate('MissionDetail', { missionId: mission.mission_id || String(mission.id) || '' })}
+                      onViewDetails={() => navigation.navigate('MissionDetail', { 
+                        missionId: mission.mission_id || String(mission.id) || '',
+                        returnTab: activeTab === 'missionGroup' ? 'missionGroup' : undefined
+                      })}
                     />
                   ))}
                 </View>
@@ -1237,7 +1250,10 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
                     style={styles.modalDetailButton}
                     onPress={() => {
                       setSelectedGroupMission(null);
-                      navigation.navigate('MissionDetail', { missionId: String(selectedGroupMission.id) });
+                      navigation.navigate('MissionDetail', { 
+                        missionId: String(selectedGroupMission.id),
+                        returnTab: 'missionGroup' // 미션 도감에서 왔음을 표시
+                      });
                     }}
                     activeOpacity={0.7}
                   >
