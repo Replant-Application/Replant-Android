@@ -1042,13 +1042,6 @@ const styles = StyleSheet.create({
     width: SCREEN_WIDTH - spacing[8],
     gap: spacing[1],
   },
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
-  },
   // 미션 도감 관련 스타일
   groupTabContainer: {
     paddingHorizontal: spacing[3],
