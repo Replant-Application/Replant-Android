@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Image, RefreshControl, Platform, ImageBackground, ActivityIndicator, Dimensions, FlatList } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Image, RefreshControl, Platform, ImageBackground, ActivityIndicator, Dimensions, FlatList, Modal } from 'react-native';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const ITEMS_PER_PAGE = 5; // 화면 표시용 페이지네이션 (한 화면에 5개)
@@ -1023,19 +1023,6 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
                 />
               ) : (
                 <>
-                  {/* 안내 박스 */}
-                  <View style={styles.groupInfoBox}>
-                    <Image
-                      source={require('../../assets/images/RePlant_Logo.png')}
-                      style={styles.groupLogoIcon}
-                      resizeMode="contain"
-                      accessibilityLabel="RePlant 로고"
-                    />
-                    <Text style={styles.groupInfoText}>
-                      미션을 선택하면 상세 정보를 볼 수 있어요
-                    </Text>
-                  </View>
-
                   {/* 서버 페이지네이션 (서버에서 가져올 페이지) */}
                   {totalServerPages > 1 && (
                     <View style={styles.serverPaginationContainer}>
@@ -1183,87 +1170,6 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
                               </View>
                             )}
 
-                            {/* 선택된 미션 상세 정보 */}
-                            {selectedGroupMission?.id === mission.id && (missionGroupTab === 'custom' || (missionGroupTab === 'official' && (mission.isCompleted === true || mission.isAttempted === true))) && (
-                              <View style={styles.groupInlineDetailContainer}>
-                                <View style={styles.groupInlineDetailCard}>
-                                  <Text style={styles.groupDetailTitle}>미션 정보</Text>
-                                  <View style={styles.groupDetailRow}>
-                                    <Text style={styles.groupDetailLabel}>미션명</Text>
-                                    <Text style={styles.groupDetailValue}>{selectedGroupMission.title}</Text>
-                                  </View>
-                                  <View style={styles.groupDetailRow}>
-                                    <Text style={styles.groupDetailLabel}>설명</Text>
-                                    <Text style={styles.groupDetailValue}>{selectedGroupMission.description}</Text>
-                                  </View>
-                                  <View style={styles.groupDetailRow}>
-                                    <Text style={styles.groupDetailLabel}>인증 방식</Text>
-                                    <Text style={styles.groupDetailValue}>
-                                      {getVerificationTypeLabel(selectedGroupMission.verificationType)}
-                                    </Text>
-                                  </View>
-                                  <View style={styles.groupDetailRow}>
-                                    <Text style={styles.groupDetailLabel}>보상</Text>
-                                    <Text style={styles.groupDetailValue}>
-                                      {selectedGroupMission.isCustom
-                                        ? `뱃지 (${selectedGroupMission.badgeDurationDays}일)`
-                                        : `${selectedGroupMission.expReward} EXP + 뱃지 (${selectedGroupMission.badgeDurationDays}일)`
-                                      }
-                                    </Text>
-                                  </View>
-                                  {selectedGroupMission.requiredMinutes && (
-                                    <View style={styles.groupDetailRow}>
-                                      <Text style={styles.groupDetailLabel}>필요 시간</Text>
-                                      <Text style={styles.groupDetailValue}>{selectedGroupMission.requiredMinutes}분</Text>
-                                    </View>
-                                  )}
-
-                                  <View style={styles.groupDetailButtonRow}>
-                                    <TouchableOpacity
-                                      style={styles.groupDetailButton}
-                                      onPress={() => navigation.navigate('MissionDetail', { missionId: String(selectedGroupMission.id) })}
-                                      activeOpacity={0.7}
-                                    >
-                                      <Text style={styles.groupDetailButtonText}>미션 상세 보기</Text>
-                                    </TouchableOpacity>
-
-                                    {/* 생성자만 수정 버튼 표시 */}
-                                    {selectedGroupMission.isCustom &&
-                                     selectedGroupMission.creatorId === currentUserId && (
-                                      <TouchableOpacity
-                                        style={styles.editMissionButton}
-                                        onPress={() => {
-                                          navigation.navigate('CustomMissionCreate', {
-                                            mode: 'edit',
-                                            missionId: selectedGroupMission.id,
-                                            missionData: {
-                                              title: selectedGroupMission.title,
-                                              description: selectedGroupMission.description,
-                                              category: selectedGroupMission.category,
-                                              verificationType: selectedGroupMission.verificationType,
-                                              isChallenge: selectedGroupMission.isChallenge,
-                                              challengeDays: selectedGroupMission.challengeDays,
-                                              deadlineDays: selectedGroupMission.deadlineDays,
-                                              expReward: selectedGroupMission.expReward,
-                                              isPublic: selectedGroupMission.isPublic,
-                                              worryType: selectedGroupMission.worryType,
-                                            },
-                                          });
-                                        }}
-                                        activeOpacity={0.7}
-                                      >
-                                        <Image
-                                          source={require('../../assets/images/edit.png')}
-                                          style={styles.editMissionIcon}
-                                          resizeMode="contain"
-                                          accessibilityLabel="미션 수정 아이콘"
-                                        />
-                                      </TouchableOpacity>
-                                    )}
-                                  </View>
-                                </View>
-                              </View>
-                            )}
                           </View>
                     ))}
                   </View>
@@ -1273,6 +1179,111 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
           )}
         </>
       )}
+
+      {/* 미션 상세 정보 모달 */}
+      <Modal
+        visible={selectedGroupMission !== null && (missionGroupTab === 'custom' || (missionGroupTab === 'official' && selectedGroupMission !== null && (selectedGroupMission.isCompleted === true || selectedGroupMission.isAttempted === true)))}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setSelectedGroupMission(null)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContainer}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>미션 정보</Text>
+              <TouchableOpacity
+                style={styles.modalCloseButton}
+                onPress={() => setSelectedGroupMission(null)}
+                activeOpacity={0.7}
+              >
+                <Text style={styles.modalCloseButtonText}>✕</Text>
+              </TouchableOpacity>
+            </View>
+
+            {selectedGroupMission && (
+              <ScrollView style={styles.modalContent} showsVerticalScrollIndicator={false}>
+                <View style={styles.modalDetailRow}>
+                  <Text style={styles.modalDetailLabel}>미션명</Text>
+                  <Text style={styles.modalDetailValue}>{selectedGroupMission.title}</Text>
+                </View>
+                <View style={styles.modalDetailRow}>
+                  <Text style={styles.modalDetailLabel}>설명</Text>
+                  <Text style={styles.modalDetailValue}>{selectedGroupMission.description}</Text>
+                </View>
+                <View style={styles.modalDetailRow}>
+                  <Text style={styles.modalDetailLabel}>인증 방식</Text>
+                  <Text style={styles.modalDetailValue}>
+                    {getVerificationTypeLabel(selectedGroupMission.verificationType)}
+                  </Text>
+                </View>
+                <View style={styles.modalDetailRow}>
+                  <Text style={styles.modalDetailLabel}>보상</Text>
+                  <Text style={styles.modalDetailValue}>
+                    {selectedGroupMission.isCustom
+                      ? `뱃지 (${selectedGroupMission.badgeDurationDays}일)`
+                      : `${selectedGroupMission.expReward} EXP + 뱃지 (${selectedGroupMission.badgeDurationDays}일)`
+                    }
+                  </Text>
+                </View>
+                {selectedGroupMission.requiredMinutes && (
+                  <View style={styles.modalDetailRow}>
+                    <Text style={styles.modalDetailLabel}>필요 시간</Text>
+                    <Text style={styles.modalDetailValue}>{selectedGroupMission.requiredMinutes}분</Text>
+                  </View>
+                )}
+
+                <View style={styles.modalButtonRow}>
+                  <TouchableOpacity
+                    style={styles.modalDetailButton}
+                    onPress={() => {
+                      setSelectedGroupMission(null);
+                      navigation.navigate('MissionDetail', { missionId: String(selectedGroupMission.id) });
+                    }}
+                    activeOpacity={0.7}
+                  >
+                    <Text style={styles.modalDetailButtonText}>미션 상세 보기</Text>
+                  </TouchableOpacity>
+
+                  {/* 생성자만 수정 버튼 표시 */}
+                  {selectedGroupMission.isCustom &&
+                   selectedGroupMission.creatorId === currentUserId && (
+                    <TouchableOpacity
+                      style={styles.modalEditButton}
+                      onPress={() => {
+                        setSelectedGroupMission(null);
+                        navigation.navigate('CustomMissionCreate', {
+                          mode: 'edit',
+                          missionId: selectedGroupMission.id,
+                          missionData: {
+                            title: selectedGroupMission.title,
+                            description: selectedGroupMission.description,
+                            category: selectedGroupMission.category,
+                            verificationType: selectedGroupMission.verificationType,
+                            isChallenge: selectedGroupMission.isChallenge,
+                            challengeDays: selectedGroupMission.challengeDays,
+                            deadlineDays: selectedGroupMission.deadlineDays,
+                            expReward: selectedGroupMission.expReward,
+                            isPublic: selectedGroupMission.isPublic,
+                            worryType: selectedGroupMission.worryType,
+                          },
+                        });
+                      }}
+                      activeOpacity={0.7}
+                    >
+                      <Image
+                        source={require('../../assets/images/edit.png')}
+                        style={styles.modalEditIcon}
+                        resizeMode="contain"
+                        accessibilityLabel="미션 수정 아이콘"
+                      />
+                    </TouchableOpacity>
+                  )}
+                </View>
+              </ScrollView>
+            )}
+          </View>
+        </View>
+      </Modal>
     </ImageBackground>
   );
 };
@@ -1772,6 +1783,105 @@ const styles = StyleSheet.create({
     }),
     includeFontPadding: false,
     lineHeight: getOptimizedLineHeight(typography.fontSize.base),
+  },
+  // 모달 스타일
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContainer: {
+    width: '90%',
+    maxWidth: 400,
+    maxHeight: '80%',
+    backgroundColor: colors.background.primary,
+    borderRadius: borderRadius.xl,
+    padding: spacing[5],
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: spacing[4],
+    paddingBottom: spacing[3],
+    borderBottomWidth: 1,
+    borderBottomColor: colors.gray[200],
+  },
+  modalTitle: {
+    fontSize: typography.fontSize.xl,
+    fontWeight: typography.fontWeight.medium,
+    color: colors.text.primary,
+    fontFamily: Platform.select({ ios: typography.fontFamily.regular, android: typography.fontFamily.regular }),
+    includeFontPadding: false,
+  },
+  modalCloseButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: colors.gray[100],
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalCloseButtonText: {
+    fontSize: 20,
+    color: colors.text.secondary,
+    fontWeight: typography.fontWeight.medium,
+  },
+  modalContent: {
+    maxHeight: 400,
+  },
+  modalDetailRow: {
+    marginBottom: spacing[4],
+  },
+  modalDetailLabel: {
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.medium,
+    color: colors.text.secondary,
+    marginBottom: spacing[1],
+    fontFamily: Platform.select({ ios: typography.fontFamily.regular, android: typography.fontFamily.regular }),
+    includeFontPadding: false,
+  },
+  modalDetailValue: {
+    fontSize: typography.fontSize.base,
+    color: colors.text.primary,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
+    fontFamily: Platform.select({ ios: typography.fontFamily.regular, android: typography.fontFamily.regular }),
+    includeFontPadding: false,
+  },
+  modalButtonRow: {
+    flexDirection: 'row',
+    gap: spacing[2],
+    marginTop: spacing[4],
+    alignItems: 'center',
+  },
+  modalDetailButton: {
+    flex: 1,
+    backgroundColor: colors.primary[500],
+    borderRadius: borderRadius.md,
+    paddingVertical: spacing[3],
+    paddingHorizontal: spacing[4],
+    alignItems: 'center',
+  },
+  modalDetailButtonText: {
+    fontSize: typography.fontSize.base,
+    fontWeight: typography.fontWeight.medium,
+    color: colors.white,
+    fontFamily: Platform.select({ ios: typography.fontFamily.regular, android: typography.fontFamily.regular }),
+    includeFontPadding: false,
+  },
+  modalEditButton: {
+    width: 44,
+    height: 44,
+    borderRadius: borderRadius.md,
+    backgroundColor: colors.gray[100],
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalEditIcon: {
+    width: 20,
+    height: 20,
+    tintColor: colors.primary[600],
   },
 });
 
