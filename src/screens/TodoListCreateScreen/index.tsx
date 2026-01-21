@@ -8,7 +8,6 @@ import {
   TextInput,
   Platform,
   ActivityIndicator,
-  Alert,
   ImageBackground,
   Image,
   Modal,
@@ -16,6 +15,7 @@ import {
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
 import { Header, AlertModal } from '../../components/ui';
 import { getOptimizedLineHeight } from '../../utils/textStyles';
+import { useErrorHandler } from '../../hooks/useErrorHandler';
 import { SCREEN_NAMES } from '../../utils/constants';
 import { initTodoList, getSelectableMissions, createTodoList, rerollRandomMission } from '../../api/todolistApi';
 import { MissionSimple, TodoListCreateRequest } from '../../types/todolist';
@@ -24,6 +24,7 @@ import { Step, TodoListCreateScreenProps, TimePeriod, DropdownType } from './Tod
 import { DEFAULT_START_TIME, DEFAULT_END_TIME, TIME_PERIODS, HOURS, MINUTES } from './TodoListCreateScreen.constants';
 
 const TodoListCreateScreen: React.FC<TodoListCreateScreenProps> = ({ navigation }) => {
+  const { showError, showSuccess, showInfo, handleApiError } = useErrorHandler();
   const [currentStep, setCurrentStep] = useState<Step>('intro');
   const [randomMissions, setRandomMissions] = useState<MissionSimple[]>([]);
   const [customMissions, setCustomMissions] = useState<MissionSimple[]>([]);
@@ -81,10 +82,13 @@ const TodoListCreateScreen: React.FC<TodoListCreateScreenProps> = ({ navigation 
       if (result.success && result.data) {
         setRandomMissions(result.data.randomMissions);
       } else {
-        Alert.alert('오류', '미션을 불러오는데 실패했습니다.');
+        handleApiError(result, 'TodoListCreateScreen.loadRandomMissions');
       }
     } catch (error) {
-      Alert.alert('오류', '미션을 불러오는데 실패했습니다.');
+      showError(
+        error instanceof Error ? error : new Error('미션을 불러오는데 실패했습니다.'),
+        'TodoListCreateScreen.loadRandomMissions'
+      );
     } finally {
       setLoading(false);
     }
@@ -143,11 +147,13 @@ const TodoListCreateScreen: React.FC<TodoListCreateScreenProps> = ({ navigation 
           return updated;
         });
       } else {
-        Alert.alert('오류', result.error || '미션을 교체하는데 실패했습니다.');
+        handleApiError(result, 'TodoListCreateScreen.handleRerollMission');
       }
     } catch (error) {
-      console.error('Failed to reroll mission:', error);
-      Alert.alert('오류', '미션을 교체하는데 실패했습니다.');
+      showError(
+        error instanceof Error ? error : new Error('미션을 교체하는데 실패했습니다.'),
+        'TodoListCreateScreen.handleRerollMission'
+      );
     } finally {
       setRerollingMissionIndex(null);
     }
@@ -155,11 +161,11 @@ const TodoListCreateScreen: React.FC<TodoListCreateScreenProps> = ({ navigation 
 
   const handleCreateMission = async () => {
     if (!newMissionTitle.trim()) {
-      Alert.alert('오류', '미션 제목을 입력해주세요.');
+      showError('미션 제목을 입력해주세요.', 'TodoListCreateScreen.handleCreateMission');
       return;
     }
     if (!newMissionDescription.trim()) {
-      Alert.alert('오류', '미션 설명을 입력해주세요.');
+      showError('미션 설명을 입력해주세요.', 'TodoListCreateScreen.handleCreateMission');
       return;
     }
 
@@ -188,10 +194,13 @@ const TodoListCreateScreen: React.FC<TodoListCreateScreenProps> = ({ navigation 
           setSelectedCustomMissions((prev) => [...prev, result.data!.id]);
         }
       } else {
-        Alert.alert('오류', result.error || '미션 생성에 실패했습니다.');
+        handleApiError(result, 'TodoListCreateScreen.handleCreateMission');
       }
     } catch (error) {
-      Alert.alert('오류', '미션 생성에 실패했습니다.');
+      showError(
+        error instanceof Error ? error : new Error('미션 생성에 실패했습니다.'),
+        'TodoListCreateScreen.handleCreateMission'
+      );
     } finally {
       setCreatingMission(false);
     }
@@ -199,7 +208,7 @@ const TodoListCreateScreen: React.FC<TodoListCreateScreenProps> = ({ navigation 
 
   const handleCreate = async () => {
     if (selectedCustomMissions.length === 0) {
-      Alert.alert('알림', '최소 1개 이상의 미션을 자유롭게 추가해주세요.');
+      showInfo('최소 1개 이상의 미션을 자유롭게 추가해주세요.', '알림');
       return;
     }
 
@@ -242,11 +251,14 @@ const TodoListCreateScreen: React.FC<TodoListCreateScreenProps> = ({ navigation 
         if (result.error?.includes('이미') || result.error?.includes('오늘') || result.error?.includes('already') || result.error?.includes('canCreate')) {
           setShowAlreadyCreatedModal(true);
         } else {
-          Alert.alert('오류', result.error || '투두리스트 생성에 실패했습니다.');
+          handleApiError(result, 'TodoListCreateScreen.handleCreate');
         }
       }
     } catch (error) {
-      Alert.alert('오류', '투두리스트 생성에 실패했습니다.');
+      showError(
+        error instanceof Error ? error : new Error('투두리스트 생성에 실패했습니다.'),
+        'TodoListCreateScreen.handleCreate'
+      );
     } finally {
       setCreating(false);
     }
