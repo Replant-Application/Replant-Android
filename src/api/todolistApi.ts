@@ -121,6 +121,18 @@ export const getSelectableMissions = async (): Promise<ServiceResult<MissionSimp
 };
 
 /**
+ * 랜덤 미션 리롤 - 기존 미션을 제외하고 새로운 랜덤 미션 1개 조회
+ * POST /api/todolists/reroll-mission
+ */
+export const rerollRandomMission = async (
+  excludeMissionIds: number[]
+): Promise<ServiceResult<MissionSimple>> => {
+  return apiClient.post<MissionSimple>('/todolists/reroll-mission', {
+    excludeMissionIds,
+  });
+};
+
+/**
  * 투두리스트 생성
  * POST /api/todolists
  */

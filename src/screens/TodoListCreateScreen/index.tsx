@@ -17,7 +17,7 @@ import { colors, spacing, typography, borderRadius } from '../../utils/designTok
 import { Header, AlertModal } from '../../components/ui';
 import { getOptimizedLineHeight } from '../../utils/textStyles';
 import { SCREEN_NAMES } from '../../utils/constants';
-import { initTodoList, getSelectableMissions, createTodoList } from '../../api/todolistApi';
+import { initTodoList, getSelectableMissions, createTodoList, rerollRandomMission } from '../../api/todolistApi';
 import { MissionSimple, TodoListCreateRequest } from '../../types/todolist';
 import { createCustomMission, CreateMissionRequest } from '../../api/missionApi';
 import { Step, TodoListCreateScreenProps, TimePeriod, DropdownType } from './TodoListCreateScreen.types';
@@ -71,6 +71,9 @@ const TodoListCreateScreen: React.FC<TodoListCreateScreenProps> = ({ navigation 
   // 드롭다운 열림 상태
   const [openDropdown, setOpenDropdown] = useState<DropdownType>({ type: null });
 
+  // 리롤 중인 미션 인덱스 (로딩 상태 추적)
+  const [rerollingMissionIndex, setRerollingMissionIndex] = useState<number | null>(null);
+
   const loadRandomMissions = useCallback(async () => {
     setLoading(true);
     try {
@@ -114,6 +117,40 @@ const TodoListCreateScreen: React.FC<TodoListCreateScreenProps> = ({ navigation 
       if (prev.includes(missionId)) return prev.filter((id) => id !== missionId);
       return [...prev, missionId];
     });
+  };
+
+  const handleRerollMission = async (missionIndex: number) => {
+    const currentMission = randomMissions[missionIndex];
+    if (!currentMission) return;
+
+    setRerollingMissionIndex(missionIndex);
+    try {
+      // 현재 선택된 모든 미션 ID를 제외 (중복 방지)
+      const excludeMissionIds = randomMissions.map((m) => m.id);
+      
+      const result = await rerollRandomMission(excludeMissionIds);
+      if (result.success && result.data) {
+        // 해당 인덱스의 미션만 교체
+        const newMissions = [...randomMissions];
+        newMissions[missionIndex] = result.data;
+        setRandomMissions(newMissions);
+        
+        // 교체된 미션의 시간대 설정이 있다면 제거 (새 미션이므로)
+        const oldMissionId = currentMission.id;
+        setMissionTimeRanges((prev) => {
+          const updated = { ...prev };
+          delete updated[oldMissionId];
+          return updated;
+        });
+      } else {
+        Alert.alert('오류', result.error || '미션을 교체하는데 실패했습니다.');
+      }
+    } catch (error) {
+      console.error('Failed to reroll mission:', error);
+      Alert.alert('오류', '미션을 교체하는데 실패했습니다.');
+    } finally {
+      setRerollingMissionIndex(null);
+    }
   };
 
   const handleCreateMission = async () => {
@@ -278,6 +315,22 @@ const TodoListCreateScreen: React.FC<TodoListCreateScreenProps> = ({ navigation 
                   </View>
                 </View>
               </View>
+              <TouchableOpacity
+                style={styles.rerollButton}
+                onPress={() => handleRerollMission(index)}
+                disabled={rerollingMissionIndex === index}
+                activeOpacity={0.7}
+              >
+                {rerollingMissionIndex === index ? (
+                  <ActivityIndicator size="small" color={colors.primary[500]} />
+                ) : (
+                  <Image
+                    source={require('../../assets/images/reroll.png')}
+                    style={styles.rerollButtonIcon}
+                    resizeMode="contain"
+                  />
+                )}
+              </TouchableOpacity>
             </View>
           ))}
         </ScrollView>
@@ -1033,7 +1086,7 @@ const styles = StyleSheet.create({
   },
 
   missionList: { flex: 1 },
-  missionCard: { flexDirection: 'row', backgroundColor: 'rgba(255, 255, 255, 0.95)', borderRadius: borderRadius.md, padding: spacing[4], marginBottom: spacing[3] },
+  missionCard: { flexDirection: 'row', backgroundColor: 'rgba(255, 255, 255, 0.95)', borderRadius: borderRadius.md, padding: spacing[4], marginBottom: spacing[3], alignItems: 'center' },
   missionNumber: { width: 28, height: 28, borderRadius: 14, backgroundColor: colors.primary[500], justifyContent: 'center', alignItems: 'center', marginRight: spacing[3] },
   missionNumberText: {
     fontSize: typography.fontSize.sm,
@@ -1060,7 +1113,7 @@ const styles = StyleSheet.create({
     fontFamily: Platform.select({ ios: typography.fontFamily.regular, android: typography.fontFamily.regular }),
     includeFontPadding: false,
   },
-  missionMeta: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  missionMeta: { flexDirection: 'row', alignItems: 'center', gap: spacing[2] },
   missionCategory: { fontSize: typography.fontSize.xs, color: colors.blue[600], backgroundColor: colors.blue[50], paddingVertical: 2, paddingHorizontal: spacing[2], borderRadius: borderRadius.base },
   missionExpContainer: {
     flexDirection: 'row',
@@ -1077,6 +1130,19 @@ const styles = StyleSheet.create({
     fontWeight: typography.fontWeight.medium,
     fontFamily: Platform.select({ ios: typography.fontFamily.regular, android: typography.fontFamily.regular }),
     includeFontPadding: false,
+  },
+  rerollButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: colors.gray[100],
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: spacing[2],
+  },
+  rerollButtonIcon: {
+    width: 20,
+    height: 20,
   },
 
   selectableMissionCard: { flexDirection: 'row', backgroundColor: 'rgba(255, 255, 255, 0.95)', borderRadius: borderRadius.md, padding: spacing[4], marginBottom: spacing[3] },
