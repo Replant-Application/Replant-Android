@@ -9,21 +9,28 @@ import { getAccessToken, saveTokens } from '../utils/tokenStorage';
 import { refreshToken as refreshTokenApi } from './authApi';
 
 /**
- * JSON 직렬화 가능한 값 타입
+ * JSON 직렬화 가능한 기본 값 타입
+ */
+type SerializablePrimitive = string | number | boolean | null | undefined;
+
+/**
+ * JSON 직렬화 가능한 값 타입 (재귀적 구조 지원)
  */
 type SerializableValue =
-  | string
-  | number
-  | boolean
-  | null
+  | SerializablePrimitive
   | SerializableValue[]
   | { [key: string]: SerializableValue };
 
 /**
  * API 요청 body 타입
  * JSON 직렬화 가능한 값 또는 FormData (파일 업로드용)
+ * 객체 타입도 허용하여 인터페이스 타입과 호환되도록 함
  */
-export type ApiRequestBody = SerializableValue | FormData;
+export type ApiRequestBody = 
+  | SerializableValue 
+  | FormData 
+  | Record<string, unknown> 
+  | object;
 
 /**
  * API 요청 옵션
