@@ -29,6 +29,7 @@ import { getOptimizedLineHeight } from '../../utils/textStyles';
 import { SCREEN_NAMES } from '../../utils/constants';
 import { useSse } from '../../contexts/SseContext';
 import { removeDuplicates } from '../../utils/arrayUtils';
+import { sortByDate } from '../../utils/dateUtils';
 import { useOverlay } from '../../contexts/OverlayContext';
 import { NotificationScreenProps } from './NotificationScreen.types';
 import SwipeableNotificationItem from './SwipeableNotificationItem';
@@ -99,27 +100,15 @@ const NotificationScreen: React.FC<NotificationScreenProps> = ({ navigation }) =
         const uniqueNotifications = removeDuplicates(notificationsList, notification => notification.id);
         console.log('[NotificationScreen] 중복 제거 후 알림 개수:', uniqueNotifications.length);
         
-        // ID 기준으로 정렬 (최신순) - 안전하게 처리
-        uniqueNotifications.sort((a, b) => {
-          try {
-            const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
-            const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
-            if (isNaN(dateA) || isNaN(dateB)) {
-              return 0; // 날짜 파싱 실패 시 순서 유지
-            }
-            return dateB - dateA; // 최신순
-          } catch (error) {
-            console.warn('[NotificationScreen] 날짜 정렬 실패:', error);
-            return 0;
-          }
-        });
+        // ID 기준으로 정렬 (최신순)
+        const sortedNotifications = sortByDate(uniqueNotifications, notification => notification.createdAt, 'desc');
         
         console.log('[NotificationScreen] 정렬 후 알림 목록 설정');
         
         // 백엔드에서 가져온 알림과 기존 알림 병합 (임시 알림 유지)
         setNotifications(prev => {
           // 백엔드에서 가져온 알림의 ID 목록
-          const backendIds = new Set(uniqueNotifications.map(n => n.id));
+          const backendIds = new Set(sortedNotifications.map(n => n.id));
           
           // 임시 알림(백엔드에 없는 알림)은 유지
           // 단, 같은 title과 content를 가진 백엔드 알림이 있으면 제거
@@ -129,7 +118,7 @@ const NotificationScreen: React.FC<NotificationScreenProps> = ({ navigation }) =
               return false;
             }
             // 같은 title과 content를 가진 백엔드 알림이 있으면 제거 (중복 방지)
-            const hasDuplicate = uniqueNotifications.some(backendNotif => 
+            const hasDuplicate = sortedNotifications.some(backendNotif => 
               backendNotif.title === n.title && 
               backendNotif.content === n.content
             );
@@ -137,7 +126,7 @@ const NotificationScreen: React.FC<NotificationScreenProps> = ({ navigation }) =
           });
           
           // 백엔드 알림과 임시 알림 병합
-          const merged = [...uniqueNotifications, ...tempNotifications];
+          const merged = [...sortedNotifications, ...tempNotifications];
           
           // ID 기준으로 중복 제거 (더 엄격하게)
           const seenIds = new Set<number>();
@@ -160,22 +149,13 @@ const NotificationScreen: React.FC<NotificationScreenProps> = ({ navigation }) =
             }
             seenKeys.add(key);
             return true;
-          }).sort((a, b) => {
-            try {
-              const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
-              const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
-              if (isNaN(dateA) || isNaN(dateB)) {
-                return 0; // 날짜 파싱 실패 시 순서 유지
-              }
-              return dateB - dateA;
-            } catch (error) {
-              console.warn('[NotificationScreen] 날짜 정렬 실패:', error);
-              return 0;
-            }
           });
           
-          console.log('[NotificationScreen] 병합 후 알림 개수:', final.length, '(임시:', tempNotifications.length, ', 백엔드:', uniqueNotifications.length, ')');
-          return final;
+          // 날짜 기준 정렬 (최신순)
+          const finalSorted = sortByDate(final, notification => notification.createdAt, 'desc');
+          
+          console.log('[NotificationScreen] 병합 후 알림 개수:', finalSorted.length, '(임시:', tempNotifications.length, ', 백엔드:', sortedNotifications.length, ')');
+          return finalSorted;
         });
       } else {
         console.warn('[NotificationScreen] 알림 조회 실패:', result.error);
@@ -259,13 +239,9 @@ const NotificationScreen: React.FC<NotificationScreenProps> = ({ navigation }) =
         const unique = removeDuplicates(updated, notification => notification.id);
         
         // 날짜 기준 정렬 (최신순)
-        unique.sort((a, b) => {
-          const dateA = new Date(a.createdAt).getTime();
-          const dateB = new Date(b.createdAt).getTime();
-          return dateB - dateA;
-        });
+        const uniqueSorted = sortByDate(unique, notification => notification.createdAt, 'desc');
         
-        return unique;
+        return uniqueSorted;
       });
       
       // 백엔드에서 저장된 알림과 동기화하기 위해 나중에 새로고침
