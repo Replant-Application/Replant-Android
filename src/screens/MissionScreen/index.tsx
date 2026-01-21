@@ -1,11 +1,12 @@
 import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Image, RefreshControl, Platform, ImageBackground, ActivityIndicator, Dimensions, FlatList, Modal } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, RefreshControl, Platform, ImageBackground, ActivityIndicator, Dimensions, FlatList, Modal } from 'react-native';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const ITEMS_PER_PAGE = 5; // 화면 표시용 페이지네이션 (한 화면에 5개)
 const MISSION_COLLECTION_PAGE_SIZE = 15; // 서버에서 가져올 미션 개수 (한 페이지당 15개)
 import { useMission } from '../../hooks/useMission';
 import { useCharacter } from '../../hooks/useCharacter';
+import { useErrorHandler } from '../../hooks/useErrorHandler';
 import { MissionCard, MissionVerificationModal, MissionProgressCard } from '../../components/specialized';
 import { Loading, ErrorBoundary, Header, EmptyState, ConfirmModal, SimpleTabBar } from '../../components/ui';
 import MissionInfoModal from './MissionInfoModal';
@@ -52,6 +53,7 @@ type MissionGroupTab = 'official' | 'custom';
 const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
   const { addExperienceByCategory } = useCharacter();
   const { missions, loading, error, saveMissionPhoto, saveMissionPhotos, deleteMissionPhoto, completeMissionWithPhoto, uncompleteMission, loadMissions } = useMission(addExperienceByCategory);
+  const { showError, showSuccess, showInfo, handleApiError, showConfirm } = useErrorHandler();
 
   // route params에서 사진 정보 확인
   const routeParams = route?.params;
@@ -194,7 +196,7 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
         setShowCompleteModal(true);
       }
     } catch (completeError) {
-      Alert.alert('오류', '미션 완료에 실패했습니다.');
+      showError('미션 완료에 실패했습니다.', 'MissionScreen.handleMissionComplete');
     }
   };
 
@@ -208,7 +210,7 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
         // 시스템 미션인 경우 미션 할당 API 호출
         const missionId = parseInt(mission.mission_id, 10);
         if (isNaN(missionId)) {
-          Alert.alert('오류', '미션 정보가 올바르지 않습니다.');
+          showError('미션 정보가 올바르지 않습니다.', 'MissionScreen.handleVerify');
           return;
         }
 
@@ -218,12 +220,14 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
           // 미션 목록 새로고침하여 user_mission_id 업데이트
           await loadMissions();
         } else {
-          Alert.alert('오류', assignResult.error || '미션 할당에 실패했습니다.');
+          handleApiError(assignResult, 'MissionScreen.handleVerify');
           return;
         }
       } catch (error) {
-        logError('미션 할당 오류', error as Error);
-        Alert.alert('오류', '미션을 시작하는 중 문제가 발생했습니다.');
+        showError(
+          error instanceof Error ? error : new Error('미션을 시작하는 중 문제가 발생했습니다.'),
+          'MissionScreen.handleVerify'
+        );
         return;
       }
     }
@@ -232,7 +236,7 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
       case 'COMMUNITY':
         // 인증글 작성 화면으로 이동 (VerificationPostCreate)
         if (!userMissionId) {
-          Alert.alert('오류', '미션 정보가 올바르지 않습니다.');
+          showError('미션 정보가 올바르지 않습니다.', 'MissionScreen.handleVerify.COMMUNITY');
           return;
         }
         try {
@@ -245,8 +249,10 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
           };
           navigation.navigate('VerificationPostCreate' as any, navParams);
         } catch (navError) {
-          logError('네비게이션 오류', navError as Error);
-          Alert.alert('오류', '화면 이동 중 문제가 발생했습니다.');
+          showError(
+            navError instanceof Error ? navError : new Error('화면 이동 중 문제가 발생했습니다.'),
+            'MissionScreen.handleVerify.COMMUNITY'
+          );
         }
         break;
 
@@ -254,13 +260,13 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
         // GPS 인증
         try {
           if (!userMissionId) {
-            Alert.alert('오류', '미션 정보가 올바르지 않습니다.');
+            showError('미션 정보가 올바르지 않습니다.', 'MissionScreen.handleVerify.GPS');
             return;
           }
 
           const { status } = await Location.requestForegroundPermissionsAsync();
           if (status !== 'granted') {
-            Alert.alert('권한 필요', '위치 권한이 필요합니다.');
+            showInfo('위치 권한이 필요합니다.', '권한 필요');
             return;
           }
 
@@ -272,14 +278,16 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
           );
 
           if (result.success) {
-            Alert.alert('GPS 인증 완료', `+${result.data?.expReward || 50} EXP를 획득했습니다!`);
+            showSuccess(`+${result.data?.expReward || 50} EXP를 획득했습니다!`, 'GPS 인증 완료');
             await loadMissions();
           } else {
-            Alert.alert('인증 실패', result.error || 'GPS 인증에 실패했습니다.');
+            handleApiError(result, 'MissionScreen.handleVerify.GPS');
           }
         } catch (error) {
-          logError('GPS 인증 오류', error as Error);
-          Alert.alert('오류', 'GPS 인증 중 문제가 발생했습니다.');
+          showError(
+            error instanceof Error ? error : new Error('GPS 인증 중 문제가 발생했습니다.'),
+            'MissionScreen.handleVerify.GPS'
+          );
         }
         break;
 
@@ -287,21 +295,23 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
         // 시간 인증
         try {
           if (!userMissionId) {
-            Alert.alert('오류', '미션 정보가 올바르지 않습니다.');
+            showError('미션 정보가 올바르지 않습니다.', 'MissionScreen.handleVerify.TIME');
             return;
           }
 
           const result = await verifyByTime(userMissionId);
 
           if (result.success) {
-            Alert.alert('시간 인증 완료', `+${result.data?.expReward || 50} EXP를 획득했습니다!`);
+            showSuccess(`+${result.data?.expReward || 50} EXP를 획득했습니다!`, '시간 인증 완료');
             await loadMissions();
           } else {
-            Alert.alert('인증 실패', result.error || '시간 인증에 실패했습니다.');
+            handleApiError(result, 'MissionScreen.handleVerify.TIME');
           }
         } catch (error) {
-          logError('시간 인증 오류', error as Error);
-          Alert.alert('오류', '시간 인증 중 문제가 발생했습니다.');
+          showError(
+            error instanceof Error ? error : new Error('시간 인증 중 문제가 발생했습니다.'),
+            'MissionScreen.handleVerify.TIME'
+          );
         }
         break;
     }
@@ -331,9 +341,9 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
       if (addExperienceByCategory && selectedMissionForVerification.category_id) {
         const expResult = await addExperienceByCategory(selectedMissionForVerification.category_id, experienceToGrant);
         if (expResult.levelUp) {
-          Alert.alert('🎉 레벨업!', `레벨 ${expResult.newLevel}이 되었습니다!\n+${experienceToGrant} EXP 획득!`);
+          showSuccess(`레벨 ${expResult.newLevel}이 되었습니다!\n+${experienceToGrant} EXP 획득!`, '🎉 레벨업!');
         } else {
-          Alert.alert('✅ GPS 인증 완료', `+${experienceToGrant} EXP를 획득했습니다!`);
+          showSuccess(`+${experienceToGrant} EXP를 획득했습니다!`, '✅ GPS 인증 완료');
         }
       }
 
@@ -341,8 +351,10 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
       setSelectedMissionForVerification(null);
       await loadMissions();
     } catch (error) {
-      logError('GPS 인증 처리 오류', error as Error);
-      Alert.alert('오류', 'GPS 인증 처리 중 문제가 발생했습니다.');
+      showError(
+        error instanceof Error ? error : new Error('GPS 인증 처리 중 문제가 발생했습니다.'),
+        'MissionScreen.handleGPSVerification'
+      );
     }
   }, [selectedMissionForVerification, addExperienceByCategory, loadMissions]);
 
@@ -359,20 +371,22 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
       if (!isCustomMission && addExperienceByCategory && selectedMissionForVerification.category_id) {
         const expResult = await addExperienceByCategory(selectedMissionForVerification.category_id, experienceToGrant);
         if (expResult.levelUp) {
-          Alert.alert('🎉 레벨업!', `레벨 ${expResult.newLevel}이 되었습니다!\n+${experienceToGrant} EXP 획득!`);
+          showSuccess(`레벨 ${expResult.newLevel}이 되었습니다!\n+${experienceToGrant} EXP 획득!`, '🎉 레벨업!');
         } else {
-          Alert.alert('✅ 시간 인증 완료', `+${experienceToGrant} EXP를 획득했습니다!`);
+          showSuccess(`+${experienceToGrant} EXP를 획득했습니다!`, '✅ 시간 인증 완료');
         }
       } else if (isCustomMission) {
-        Alert.alert('✅ 시간 인증 완료', '미션이 완료되었습니다!');
+        showSuccess('미션이 완료되었습니다!', '✅ 시간 인증 완료');
       }
 
       setVerificationModalVisible(false);
       setSelectedMissionForVerification(null);
       await loadMissions();
     } catch (error) {
-      logError('시간 인증 처리 오류', error as Error);
-      Alert.alert('오류', '시간 인증 처리 중 문제가 발생했습니다.');
+      showError(
+        error instanceof Error ? error : new Error('시간 인증 처리 중 문제가 발생했습니다.'),
+        'MissionScreen.handleTimeVerification'
+      );
     }
   }, [selectedMissionForVerification, addExperienceByCategory, loadMissions]);
 
@@ -403,28 +417,24 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
 
   // 미션 사진 삭제
   const handleDeletePhoto = async (missionId: string) => {
-    Alert.alert(
-      '사진 삭제',
+    showConfirm(
       '첨부한 사진을 삭제하시겠습니까?',
-      [
-        { text: '취소', style: 'cancel' },
-        {
-          text: '삭제',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              const result = await deleteMissionPhoto(missionId);
-              if (result.success) {
-                Alert.alert('완료', '사진이 삭제되었습니다.');
-              } else {
-                Alert.alert('오류', result.error || '사진 삭제에 실패했습니다.');
-              }
-            } catch (error) {
-              Alert.alert('오류', '사진 삭제 중 오류가 발생했습니다.');
-            }
+      async () => {
+        try {
+          const result = await deleteMissionPhoto(missionId);
+          if (result.success) {
+            showSuccess('사진이 삭제되었습니다.', '완료');
+          } else {
+            handleApiError(result, 'MissionScreen.handleDeletePhoto');
           }
+        } catch (error) {
+          showError(
+            error instanceof Error ? error : new Error('사진 삭제 중 오류가 발생했습니다.'),
+            'MissionScreen.handleDeletePhoto'
+          );
         }
-      ]
+      },
+      '사진 삭제'
     );
   };
 
@@ -436,18 +446,17 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
       const result = await saveMissionPhoto(missionId, photoUri);
 
       if (result && result.success) {
-        Alert.alert(
-          '사진 저장',
-          '사진이 저장되었습니다.',
-          [{ text: '확인' }]
-        );
+        showSuccess('사진이 저장되었습니다.', '사진 저장');
       } else {
-        Alert.alert('오류', result?.error || '사진 저장에 실패했습니다.');
+        handleApiError(result || { success: false, error: '사진 저장에 실패했습니다.' }, 'MissionScreen.handlePhotoSelected');
       }
     } catch (error) {
-      Alert.alert('오류', '사진 저장에 실패했습니다.');
+      showError(
+        error instanceof Error ? error : new Error('사진 저장에 실패했습니다.'),
+        'MissionScreen.handlePhotoSelected'
+      );
     }
-  }, [saveMissionPhoto]);
+  }, [saveMissionPhoto, showSuccess, handleApiError, showError]);
 
   // 다중 사진 저장
   const handlePhotosSelected = useCallback(async (missionId: string, photoUrls: string[]) => {
@@ -455,18 +464,17 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
       const result = await saveMissionPhotos(missionId, photoUrls);
 
       if (result && result.success) {
-        Alert.alert(
-          '사진 저장',
-          `${photoUrls.length}개의 사진이 저장되었습니다.`,
-          [{ text: '확인' }]
-        );
+        showSuccess(`${photoUrls.length}개의 사진이 저장되었습니다.`, '사진 저장');
       } else {
-        Alert.alert('오류', result?.error || '사진 저장에 실패했습니다.');
+        handleApiError(result || { success: false, error: '사진 저장에 실패했습니다.' }, 'MissionScreen.handlePhotosSelected');
       }
     } catch (error) {
-      Alert.alert('오류', '사진 저장에 실패했습니다.');
+      showError(
+        error instanceof Error ? error : new Error('사진 저장에 실패했습니다.'),
+        'MissionScreen.handlePhotosSelected'
+      );
     }
-  }, [saveMissionPhotos]);
+  }, [saveMissionPhotos, showSuccess, handleApiError, showError]);
 
   // route params 변경 감지 (한 번만 처리)
   useEffect(() => {
@@ -515,7 +523,10 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
     try {
       await uncompleteMission(missionId);
     } catch (uncompleteError) {
-      Alert.alert('오류', '미션 완료 취소에 실패했습니다.');
+      showError(
+        uncompleteError instanceof Error ? uncompleteError : new Error('미션 완료 취소에 실패했습니다.'),
+        'MissionScreen.handleMissionUncomplete'
+      );
     }
   };
 
@@ -538,7 +549,7 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
 
         if (!customMissionsResult.success || !customMissionsResult.data) {
           console.error('[MissionScreen] 커스텀 미션 API 실패:', customMissionsResult.error);
-          Alert.alert('오류', customMissionsResult.error || '커스텀 미션을 불러오는데 실패했습니다.');
+          handleApiError(customMissionsResult, 'MissionScreen.loadGroupMissions.custom');
           setGroupMissions([]);
           return;
         }
@@ -580,7 +591,7 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
 
         if (!collectionResult.success || !collectionResult.data) {
           console.error('[MissionScreen] 미션 도감 API 실패:', collectionResult.error);
-          Alert.alert('오류', collectionResult.error || '미션 도감을 불러오는데 실패했습니다.');
+          handleApiError(collectionResult, 'MissionScreen.loadGroupMissions.official');
           setGroupMissions([]);
           return;
         }
@@ -631,8 +642,10 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
       console.log('[MissionScreen] 미션 도감 로딩 완료:', missions.length, '개');
     } catch (error) {
       console.error('[MissionScreen] 미션 도감 로딩 예외 발생:', error);
-      logError('미션 도감 로딩 오류', error as Error);
-      Alert.alert('오류', '미션 도감을 불러오는 중 문제가 발생했습니다.');
+      showError(
+        error instanceof Error ? error : new Error('미션 도감을 불러오는 중 문제가 발생했습니다.'),
+        'MissionScreen.loadGroupMissions'
+      );
       setGroupMissions([]);
     } finally {
       setGroupLoading(false);
@@ -652,7 +665,7 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
         if (activeTab === 'missionGroup') {
           await loadGroupMissions(currentServerPage);
         }
-        Alert.alert('✅ 인증 완료', '미션이 인증되었습니다!');
+        showSuccess('미션이 인증되었습니다!', '✅ 인증 완료');
       }
     } catch (error) {
       logError('인증 상태 확인 오류', error as Error);
