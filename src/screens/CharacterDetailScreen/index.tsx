@@ -203,7 +203,6 @@ const styles = StyleSheet.create({
   description: {
     fontSize: typography.fontSize.base,
     color: colors.text.secondary,
-    lineHeight: typography.lineHeight.relaxed * typography.fontSize.base,
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,
       android: typography.fontFamily.regular,
