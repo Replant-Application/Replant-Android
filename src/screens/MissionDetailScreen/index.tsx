@@ -10,7 +10,6 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  Alert,
   Image,
   KeyboardAvoidingView,
   Platform,
@@ -36,6 +35,7 @@ import {
 } from '../../api/missionApi';
 import { getMyBadges, Badge } from '../../api/badgeApi';
 import { getCurrentUser } from '../../services/authService';
+import { useErrorHandler } from '../../hooks/useErrorHandler';
 
 interface MissionDetailScreenProps {
   navigation: NavigationProp<RootStackParamList>;
@@ -137,6 +137,7 @@ const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
   const [reviewRating, setReviewRating] = useState(5);
   const [submittingReview, setSubmittingReview] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<number | null>(null);
+  const { showError, showSuccess, handleApiError } = useErrorHandler();
 
   // 미션 데이터 로드
   const loadMission = useCallback(async () => {
@@ -150,7 +151,10 @@ const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
         // 커스텀 미션: custom_368 -> 368 추출
         const numericId = parseInt(missionId.replace('custom_', ''), 10);
         if (isNaN(numericId)) {
-          Alert.alert('오류', '잘못된 미션 ID입니다.');
+          showError(
+            new Error('잘못된 미션 ID입니다.'),
+            'MissionDetailScreen.loadMission'
+          );
           return;
         }
         
@@ -158,13 +162,16 @@ const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
         if (result.success && result.data) {
           setMission(result.data);
         } else {
-          Alert.alert('오류', result.error || '미션 정보를 불러올 수 없습니다.');
+          handleApiError(result, 'MissionDetailScreen.loadMission');
         }
       } else {
         // 공식 미션: 숫자 ID 직접 사용
         const numericMissionId = parseInt(missionId, 10);
         if (isNaN(numericMissionId)) {
-          Alert.alert('오류', '잘못된 미션 ID입니다.');
+          showError(
+            new Error('잘못된 미션 ID입니다.'),
+            'MissionDetailScreen.loadMission'
+          );
           return;
         }
 
@@ -172,11 +179,14 @@ const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
         if (result.success && result.data) {
           setMission(result.data);
         } else {
-          Alert.alert('오류', result.error || '미션 정보를 불러올 수 없습니다.');
+          handleApiError(result, 'MissionDetailScreen.loadMission');
         }
       }
     } catch (error) {
-      Alert.alert('오류', '미션 정보를 불러오는데 실패했습니다.');
+      showError(
+        error instanceof Error ? error : new Error('미션 정보를 불러오는데 실패했습니다.'),
+        'MissionDetailScreen.loadMission'
+      );
     }
   }, [missionId]);
 
@@ -258,7 +268,10 @@ const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
         ? parseInt(missionId.replace('custom_', ''), 10)
         : parseInt(missionId, 10);
       if (isNaN(numericMissionId)) {
-        Alert.alert('오류', '잘못된 미션 ID입니다.');
+        showError(
+          new Error('잘못된 미션 ID입니다.'),
+          'MissionDetailScreen.handleSubmitReview'
+        );
         return;
       }
 
@@ -268,7 +281,7 @@ const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
       });
 
       if (result.success) {
-        Alert.alert('성공', '후기가 등록되었습니다.');
+        showSuccess('후기가 등록되었습니다.');
         setReviewContent('');
         setReviewRating(5);
         setHasWrittenReview(true);
@@ -276,16 +289,19 @@ const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
         await loadReviews(0, currentUserId);
       } else {
         if (result.error?.includes('뱃지') || result.error?.includes('badge')) {
-          Alert.alert(
-            '후기 작성 불가',
-            '이 미션을 완료하고 뱃지를 획득해야 후기를 작성할 수 있습니다.'
+          showError(
+            new Error('이 미션을 완료하고 뱃지를 획득해야 후기를 작성할 수 있습니다.'),
+            'MissionDetailScreen.handleSubmitReview'
           );
         } else {
-          Alert.alert('오류', result.error || '후기 등록에 실패했습니다.');
+          handleApiError(result, 'MissionDetailScreen.handleSubmitReview');
         }
       }
     } catch (error) {
-      Alert.alert('오류', '후기 등록 중 오류가 발생했습니다.');
+      showError(
+        error instanceof Error ? error : new Error('후기 등록 중 오류가 발생했습니다.'),
+        'MissionDetailScreen.handleSubmitReview'
+      );
     } finally {
       setSubmittingReview(false);
     }
