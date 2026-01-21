@@ -1,11 +1,12 @@
 import React, { useState, useMemo, useRef } from 'react';
-import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, Modal, TextInput, Alert, Platform } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, Modal, TextInput, Platform } from 'react-native';
 import { colors, spacing, typography, borderRadius, shadows } from '../../utils/designTokens';
 import { getOptimizedLineHeight } from '../../utils/textStyles';
 import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types/navigation';
 import { ProgressBar, Header, SectionTitle, Button } from '../../components/ui';
 import { useCharacter } from '../../hooks/useCharacter';
+import { useErrorHandler } from '../../hooks/useErrorHandler';
 import { downloadPetImage } from '../../services/petService';
 import { getCharacterImage } from '../../utils/characterUtils';
 
@@ -17,6 +18,7 @@ interface CharacterDetailScreenProps {
 const CharacterDetailScreen: React.FC<CharacterDetailScreenProps> = ({ route, navigation }) => {
   const { character: initialCharacter } = route.params || {};
   const { characters, updateCharacterName, loadCharacters } = useCharacter();
+  const { showError, showSuccess, showInfo, handleApiError } = useErrorHandler();
   const [currentEmotion, setCurrentEmotion] = useState<string>('default');
   const [showNameEditModal, setShowNameEditModal] = useState(false);
   const [newName, setNewName] = useState('');
@@ -42,12 +44,12 @@ const CharacterDetailScreen: React.FC<CharacterDetailScreenProps> = ({ route, na
   // 이름 변경 핸들러
   const handleNameChange = async () => {
     if (!newName.trim()) {
-      Alert.alert('오류', '캐릭터 이름을 입력해주세요.');
+      showError('캐릭터 이름을 입력해주세요.', 'CharacterDetailScreen.handleNameChange');
       return;
     }
 
     if (newName.trim() === character.name) {
-      Alert.alert('알림', '현재 이름과 동일합니다.');
+      showInfo('현재 이름과 동일합니다.');
       setShowNameEditModal(false);
       return;
     }
@@ -59,14 +61,17 @@ const CharacterDetailScreen: React.FC<CharacterDetailScreenProps> = ({ route, na
       if (result.success && result.data) {
         // loadCharacters를 호출하여 최신 캐릭터 정보 로드
         await loadCharacters();
-        Alert.alert('완료', '캐릭터 이름이 변경되었습니다.');
+        showSuccess('캐릭터 이름이 변경되었습니다.');
         setShowNameEditModal(false);
         setNewName('');
       } else {
-        Alert.alert('오류', result.error || '이름 변경에 실패했습니다.');
+        handleApiError(result, 'CharacterDetailScreen.handleNameChange');
       }
     } catch (error) {
-      Alert.alert('오류', '이름 변경 중 오류가 발생했습니다.');
+      showError(
+        error instanceof Error ? error : new Error('이름 변경 중 오류가 발생했습니다.'),
+        'CharacterDetailScreen.handleNameChange'
+      );
     }
   };
 
@@ -79,16 +84,15 @@ const CharacterDetailScreen: React.FC<CharacterDetailScreenProps> = ({ route, na
       const result = await downloadPetImage(imageRef, character.name, character.level || 1);
 
       if (result.success) {
-        Alert.alert(
-          '다운로드 완료',
-          '캐릭터 이미지가 갤러리에 저장되었습니다.',
-          [{ text: '확인' }]
-        );
+        showSuccess('캐릭터 이미지가 갤러리에 저장되었습니다.', '다운로드 완료');
       } else {
-        Alert.alert('오류', result.error || '이미지 다운로드에 실패했습니다.');
+        handleApiError(result, 'CharacterDetailScreen.handleDownloadImage');
       }
     } catch (error) {
-      Alert.alert('오류', '이미지 다운로드 중 오류가 발생했습니다.');
+      showError(
+        error instanceof Error ? error : new Error('이미지 다운로드 중 오류가 발생했습니다.'),
+        'CharacterDetailScreen.handleDownloadImage'
+      );
     } finally {
       setDownloading(false);
     }
