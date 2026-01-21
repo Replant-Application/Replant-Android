@@ -142,6 +142,58 @@ export class ApiClient {
   }
 
   /**
+   * 401 에러 처리 (토큰 만료/갱신)
+   * 
+   * @param response - HTTP 응답 객체
+   * @param data - 응답 데이터
+   * @param url - 요청 URL
+   * @param retryFunction - 재시도 함수 (토큰 갱신 성공 시 호출)
+   * @returns ServiceResult 또는 null (401이 아니거나 처리 완료 시)
+   */
+  private async handle401Error<T>(
+    response: Response,
+    data: any,
+    url: string,
+    retryFunction: () => Promise<ServiceResult<T>>
+  ): Promise<ServiceResult<T> | null> {
+    // 401이 아니거나 refresh 엔드포인트면 처리하지 않음
+    if (response.status !== 401 || url.includes('/auth/refresh')) {
+      return null;
+    }
+
+    // COMMON-002 에러 코드 확인 (토큰 만료)
+    const isTokenExpired = data?.error?.code === 'COMMON-002' || 
+                           data?.error?.message?.includes('토큰값이 만료') ||
+                           data?.message?.includes('토큰값이 만료');
+    
+    if (isTokenExpired) {
+      // 토큰 만료 시 바로 콜백 호출 (갱신 시도하지 않음)
+      if (this.onTokenExpiredCallback) {
+        this.onTokenExpiredCallback();
+      }
+      // 토큰 데이터 정리
+      const { clearAuthData } = await import('../utils/tokenStorage');
+      await clearAuthData();
+      this.setAccessToken(null);
+      
+      return {
+        success: false,
+        error: '토큰이 만료되었습니다. 다시 로그인해주세요.',
+      };
+    }
+    
+    // 일반 401 에러는 토큰 갱신 시도
+    const newToken = await this.handleTokenRefresh();
+    if (newToken) {
+      // 새 토큰으로 재시도
+      return retryFunction();
+    }
+
+    // 토큰 갱신 실패 시 null 반환 (에러는 이미 handleTokenRefresh에서 처리됨)
+    return null;
+  }
+
+  /**
    * API 요청 실행
    */
   async request<T>(
@@ -239,34 +291,14 @@ export class ApiClient {
       clearTimeout(timeoutId);
 
       // 401 Unauthorized - 토큰 만료 확인
-      if (response.status === 401 && !url.includes('/auth/refresh')) {
-        // COMMON-002 에러 코드 확인 (토큰 만료)
-        const isTokenExpired = data?.error?.code === 'COMMON-002' || 
-                               data?.error?.message?.includes('토큰값이 만료') ||
-                               data?.message?.includes('토큰값이 만료');
-        
-        if (isTokenExpired) {
-          // 토큰 만료 시 바로 콜백 호출 (갱신 시도하지 않음)
-          if (this.onTokenExpiredCallback) {
-            this.onTokenExpiredCallback();
-          }
-          // 토큰 데이터 정리
-          const { clearAuthData } = await import('../utils/tokenStorage');
-          await clearAuthData();
-          this.setAccessToken(null);
-          
-          return {
-            success: false,
-            error: '토큰이 만료되었습니다. 다시 로그인해주세요.',
-          };
-        }
-        
-        // 일반 401 에러는 토큰 갱신 시도
-        const newToken = await this.handleTokenRefresh();
-        if (newToken) {
-          // 새 토큰으로 재시도
-          return this.request<T>(endpoint, options);
-        }
+      const handle401Result = await this.handle401Error(
+        response,
+        data,
+        url,
+        () => this.request<T>(endpoint, options)
+      );
+      if (handle401Result !== null) {
+        return handle401Result;
       }
 
       // 에러 응답
@@ -447,33 +479,14 @@ export class ApiClient {
       }
 
       // 401 Unauthorized - 토큰 만료 확인
-      if (response.status === 401) {
-        // COMMON-002 에러 코드 확인 (토큰 만료)
-        const isTokenExpired = data?.error?.code === 'COMMON-002' || 
-                               data?.error?.message?.includes('토큰값이 만료') ||
-                               data?.message?.includes('토큰값이 만료');
-        
-        if (isTokenExpired) {
-          // 토큰 만료 시 바로 콜백 호출 (갱신 시도하지 않음)
-          if (this.onTokenExpiredCallback) {
-            this.onTokenExpiredCallback();
-          }
-          // 토큰 데이터 정리
-          const { clearAuthData } = await import('../utils/tokenStorage');
-          await clearAuthData();
-          this.setAccessToken(null);
-          
-          return {
-            success: false,
-            error: '토큰이 만료되었습니다. 다시 로그인해주세요.',
-          };
-        }
-        
-        // 일반 401 에러는 토큰 갱신 시도
-        const newToken = await this.handleTokenRefresh();
-        if (newToken) {
-          return this.upload<T>(endpoint, formData);
-        }
+      const handle401Result = await this.handle401Error(
+        response,
+        data,
+        url,
+        () => this.upload<T>(endpoint, formData)
+      );
+      if (handle401Result !== null) {
+        return handle401Result;
       }
 
       // 타임아웃 클리어
