@@ -557,7 +557,7 @@ const VerificationPostDetailScreen: React.FC<VerificationPostDetailScreenProps> 
                       </View>
                     ) : (
                       <CommentCard
-                        comment={parentComment}
+                        comment={parentComment as any}
                         isAuthor={currentUserId !== null && 
                           (parentComment.author_id !== undefined 
                             ? Number(parentComment.author_id) === currentUserId

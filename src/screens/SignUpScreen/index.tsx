@@ -381,7 +381,7 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onNavigate }) => {
                   autoCorrect={false}
                   returnKeyType="next"
                   blurOnSubmit={false}
-                  inputStyle={[styles.inputText, styles.emailInputHeight]}
+                  inputStyle={[styles.inputText, styles.emailInputHeight] as any}
                   style={styles.emailInputContainer}
                   editable={!isEmailVerified}
                 />
@@ -432,7 +432,7 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onNavigate }) => {
                           maxLength={6}
                           returnKeyType="done"
                           blurOnSubmit={true}
-                          inputStyle={[styles.inputText, styles.emailInputHeight, styles.verificationCodeInputWithTimer]}
+                          inputStyle={[styles.inputText, styles.emailInputHeight, styles.verificationCodeInputWithTimer] as any}
                           style={styles.emailInputContainer}
                         />
                         {timer > 0 && !isEmailVerified && (
@@ -657,7 +657,7 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onNavigate }) => {
           style={[
             styles.button,
             !isEmailVerified && styles.buttonDisabled,
-          ]}
+          ] as any}
           textStyle={styles.buttonText}
         />
         <TouchableOpacity
