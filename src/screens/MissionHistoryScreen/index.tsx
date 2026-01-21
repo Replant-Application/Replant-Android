@@ -109,7 +109,7 @@ const MissionHistoryScreen: React.FC<MissionHistoryScreenProps> = ({ navigation 
             <Text style={styles.statusText}>{getStatusText(item.status)}</Text>
           </View>
           <Text style={styles.missionType}>
-            {item.missionType === 'SYSTEM' ? '시스템' : '커스텀'}
+            {item.missionType === 'OFFICIAL' ? '시스템' : '커스텀'}
           </Text>
         </View>
 

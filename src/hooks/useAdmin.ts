@@ -19,6 +19,7 @@ export interface MemberInfo {
   id: number;
   email: string;
   nickname: string;
+  username?: string;  // 사용자명 (optional)
   phone?: string;
   birthDate?: string;
   gender?: 'MALE' | 'FEMALE';

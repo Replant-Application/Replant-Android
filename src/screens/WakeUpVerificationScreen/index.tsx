@@ -55,7 +55,7 @@ const WakeUpVerificationScreen: React.FC<WakeUpVerificationScreenProps> = ({
   // userMissionId 추출 (우선순위: route.params > Context > AsyncStorage)
   useEffect(() => {
     const extractUserMissionId = async () => {
-      const params = route?.params || {};
+      const params = route?.params;
       console.log('[WakeUpVerificationScreen] userMissionId 추출 시작');
       console.log('[WakeUpVerificationScreen] route.params:', params);
       console.log('[WakeUpVerificationScreen] Context currentWakeUpMissionId:', currentWakeUpMissionId);
@@ -63,7 +63,7 @@ const WakeUpVerificationScreen: React.FC<WakeUpVerificationScreenProps> = ({
       let extractedId: number | undefined = undefined;
       
       // 1순위: route.params에서 추출
-      if (params?.userMissionId !== undefined && params?.userMissionId !== null) {
+      if (params && 'userMissionId' in params && params.userMissionId !== undefined && params.userMissionId !== null) {
         if (typeof params.userMissionId === 'string') {
           extractedId = Number(params.userMissionId);
         } else if (typeof params.userMissionId === 'number') {
@@ -94,7 +94,7 @@ const WakeUpVerificationScreen: React.FC<WakeUpVerificationScreenProps> = ({
       } else {
         console.error('[WakeUpVerificationScreen] ❌ userMissionId 추출 실패:', {
           extractedId,
-          routeParams: params?.userMissionId,
+          routeParams: params && 'userMissionId' in params ? params.userMissionId : undefined,
           contextId: currentWakeUpMissionId,
         });
         setUserMissionId(undefined);

@@ -427,7 +427,7 @@ const VerificationPostDetailScreen: React.FC<VerificationPostDetailScreenProps> 
               <View style={styles.authorNameContainer}>
                 <Text style={styles.authorName}>{post.userNickname || '알 수 없음'}</Text>
                 <Text style={styles.missionTypeBadge}>
-                  {post.missionType === 'SYSTEM' ? '시스템 미션' : '커스텀 미션'}
+                  {post.missionType === 'OFFICIAL' ? '시스템 미션' : '커스텀 미션'}
                 </Text>
               </View>
             </View>

@@ -907,12 +907,12 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
                       onDeletePhoto={handleDeletePhoto}
                       onWriteReview={(missionId) => navigation.navigate('MissionDetail', { 
                         missionId,
-                        returnTab: activeTab === 'missionGroup' ? 'missionGroup' : undefined
+                        returnTab: (activeTab as MissionTab) === 'missionGroup' ? 'missionGroup' : undefined
                       })}
                       onVerify={handleVerify}
                       onViewDetails={() => navigation.navigate('MissionDetail', { 
                         missionId: mission.mission_id || String(mission.id) || '',
-                        returnTab: activeTab === 'missionGroup' ? 'missionGroup' : undefined
+                        returnTab: (activeTab as MissionTab) === 'missionGroup' ? 'missionGroup' : undefined
                       })}
                     />
                   ))}

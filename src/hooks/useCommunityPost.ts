@@ -70,7 +70,7 @@ export const useCommunityPost = (postId: string): UseCommunityPostReturn => {
 
   // 좋아요 토글
   const toggleLike = useCallback(
-    async (): Promise<ServiceResult<void>> => {
+    async (): Promise<ServiceResult<{ isLiked: boolean; likeCount: number; verified?: boolean; status?: string }>> => {
       if (!currentNickname || !post) {
         return { success: false, error: '사용자 정보가 없습니다.' };
       }

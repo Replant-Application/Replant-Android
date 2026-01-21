@@ -212,6 +212,10 @@ export interface Diary {
   created_at?: string;
   updated_at?: string;
   diary_id?: string;
+  weather?: string;
+  location?: string;
+  photos?: string[];
+  is_private?: boolean;
 }
 
 export interface DiaryData {
@@ -472,4 +476,8 @@ export enum ScreenNames {
   ADMIN_USER_DETAIL = 'AdminUserDetail',
   ADMIN_USER_EDIT = 'AdminUserEdit',
   CHANGE_PASSWORD = 'ChangePassword',
+  NOTIFICATION = 'Notification',
+  FIND_ID = 'FindId',
+  FIND_ID_RESULT = 'FindIdResult',
+  FIND_PASSWORD = 'FindPassword',
 }
