@@ -25,7 +25,6 @@ import MissionScreen from '../screens/MissionScreen';
 import CustomMissionCreateScreen from '../screens/CustomMissionCreateScreen';
 import CounselingSelectScreen from '../screens/CounselingSelectScreen';
 import PlacesSearchScreen from '../screens/PlacesSearchScreen';
-import CharacterDetailScreen from '../screens/CharacterDetailScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 import InfoScreen from '../screens/InfoScreen';
 import PhotoSelectScreen from '../screens/PhotoSelectScreen';
@@ -730,8 +729,6 @@ const AppNavigator = () => {
         return <CounselingSelectScreen navigation={navigation} />;
       case SCREEN_NAMES.PLACES_SEARCH:
         return <PlacesSearchScreen navigation={navigation} />;
-      case SCREEN_NAMES.CHARACTER_DETAIL:
-        return <CharacterDetailScreen navigation={navigation} route={route} />;
       case SCREEN_NAMES.SETTINGS:
         return <SettingsScreen navigation={navigation} />;
       case SCREEN_NAMES.INFO:

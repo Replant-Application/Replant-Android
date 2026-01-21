@@ -37,9 +37,6 @@ export type RootStackParamList = {
   };
   CounselingSelect: undefined;
   PlacesSearch: undefined;
-  CharacterDetail: {
-    character: Character;
-  };
   Settings: undefined;
   Info: {
     title: string;
@@ -141,9 +138,6 @@ export interface NavigationParams {
   };
   [ScreenNames.COUNSELING_SELECT]: undefined;
   [ScreenNames.PLACES_SEARCH]: undefined;
-  [ScreenNames.CHARACTER_DETAIL]: {
-    character: Character;
-  };
   [ScreenNames.SETTINGS]: undefined;
   [ScreenNames.INFO]: {
     title: string;

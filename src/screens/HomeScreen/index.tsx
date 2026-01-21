@@ -285,12 +285,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
     }, 3000);
   };
 
-  // 말풍선 더블 탭으로 상세 페이지 이동
-  const handleCharacterDoublePress = (): void => {
-    if (currentCharacter) {
-      navigation.navigate('CharacterDetail', { character: currentCharacter });
-    }
-  };
 
   // 진화 모달 닫기 핸들러
   const handleEvolutionModalClose = (): void => {
@@ -375,11 +369,10 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
               <TouchableOpacity
                 style={styles.characterImageContainer}
                 onPress={handleCharacterPress}
-                onLongPress={handleCharacterDoublePress}
                 activeOpacity={0.9}
                 accessibilityRole="button"
                 accessibilityLabel={`${currentCharacter.name || '캐릭터'}, 레벨 ${currentCharacter.level || 1}`}
-                accessibilityHint="탭하여 말풍선 보기, 길게 눌러서 상세 페이지로 이동"
+                accessibilityHint="탭하여 말풍선 보기"
               >
                 <Animated.View
                   style={[
