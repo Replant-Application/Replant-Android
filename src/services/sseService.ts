@@ -7,14 +7,61 @@ import { Platform } from 'react-native';
 import EventSource, { EventSourceListener } from 'react-native-sse';
 import { API_BASE_URL } from '@env';
 import { getAccessToken } from '../utils/tokenStorage';
+import { Notification } from '../api/notificationApi';
 
-type SSEEventHandler = (data: any) => void;
+/**
+ * SSE로 받는 알림 데이터 타입
+ */
+export type SSENotificationData = Notification;
 
+/**
+ * SSE 이벤트 데이터 (파싱 전/후 모두 포함)
+ */
+export type SSEEventData = SSENotificationData | string;
+
+/**
+ * SSE 메시지 이벤트 타입
+ */
+export interface SSEMessageEvent {
+  type: 'message';
+  data?: string | SSENotificationData;
+}
+
+/**
+ * SSE 에러 이벤트 타입
+ */
+export interface SSEErrorEvent {
+  type: 'error';
+  message?: string;
+  error?: Error | unknown;
+}
+
+/**
+ * SSE 커스텀 이벤트 타입
+ */
+export interface SSECustomEvent {
+  type: string;
+  data?: string | SSENotificationData;
+}
+
+/**
+ * SSE 알림 핸들러 타입
+ */
+export type SSENotificationHandler = (data: SSENotificationData | string) => void;
+
+/**
+ * SSE 에러 핸들러 타입
+ */
+export type SSEErrorHandler = (error: Error) => void;
+
+/**
+ * SSE 이벤트 핸들러들
+ */
 interface SSEHandlers {
-  onNotification?: SSEEventHandler;
+  onNotification?: SSENotificationHandler;
   onConnect?: () => void;
   onDisconnect?: () => void;
-  onError?: (error: any) => void;
+  onError?: SSEErrorHandler;
 }
 
 class SSEService {
@@ -76,14 +123,37 @@ class SSEService {
         console.log('[SSE] ✅ 연결 열림 (open 이벤트)');
       });
 
+      /**
+       * 알림 데이터 파싱 헬퍼 함수
+       */
+      const parseNotificationData = (data: unknown): SSENotificationData | string => {
+        if (typeof data === 'string') {
+          try {
+            return JSON.parse(data) as SSENotificationData;
+          } catch {
+            return data;
+          }
+        }
+        return data as SSENotificationData | string;
+      };
+
+      /**
+       * 알림 데이터 처리 헬퍼 함수
+       */
+      const handleNotificationData = (data: unknown): void => {
+        const parsedData = parseNotificationData(data);
+        this.handlers.onNotification?.(parsedData);
+      };
+
       // 이벤트 리스너 설정
       const listener: EventSourceListener = (event) => {
-        const eventAny = event as any;
+        // react-native-sse의 이벤트 타입이 정확하지 않으므로 타입 단언 필요
+        const eventWithData = event as { type: string; data?: unknown; message?: string; error?: unknown };
+        
         console.log('[SSE] ========== 이벤트 수신 ==========');
         console.log('[SSE] 이벤트 타입:', event.type);
-        console.log('[SSE] 이벤트 데이터:', eventAny.data);
+        console.log('[SSE] 이벤트 데이터:', eventWithData.data);
         console.log('[SSE] 전체 이벤트:', event);
-        console.log('[SSE] 이벤트 키:', Object.keys(event));
         console.log('[SSE] =================================');
 
         if (event.type === 'open') {
@@ -92,67 +162,35 @@ class SSEService {
           this.reconnectAttempts = 0;
           this.handlers.onConnect?.();
         } else if (event.type === 'message') {
-          const messageEvent = event as any;
+          const messageEvent = eventWithData as SSEMessageEvent;
           console.log('[SSE] message 이벤트 처리 시작');
           console.log('[SSE] messageEvent.data:', messageEvent.data);
           console.log('[SSE] messageEvent.data 타입:', typeof messageEvent.data);
-          try {
-            let data = messageEvent.data;
-            if (typeof data === 'string') {
-              console.log('[SSE] 문자열 데이터 파싱 시도:', data);
-              data = JSON.parse(data);
-              console.log('[SSE] 파싱된 데이터:', data);
-            }
-            console.log('[SSE] 최종 알림 데이터:', data);
-            console.log('[SSE] onNotification 핸들러 호출');
-            this.handlers.onNotification?.(data);
-            console.log('[SSE] onNotification 핸들러 호출 완료');
-          } catch (error) {
-            console.error('[SSE] 메시지 파싱 실패:', messageEvent.data, error);
-            // 파싱 실패해도 문자열로 전달
-            console.log('[SSE] 원본 데이터로 알림 전달');
-            this.handlers.onNotification?.(messageEvent.data);
+          
+          if (messageEvent.data !== undefined) {
+            handleNotificationData(messageEvent.data);
           }
         } else if (event.type === 'error') {
-          // error 이벤트는 ErrorEvent, TimeoutEvent, ExceptionEvent를 포함할 수 있음
-          const errorEvent = event as any;
-          if (errorEvent.error) {
-            // ExceptionEvent인 경우
-            console.error('[SSE] 예외 발생:', errorEvent.message, errorEvent.error);
-            this.handlers.onError?.(errorEvent.error || new Error(errorEvent.message || 'SSE 예외'));
-          } else {
-            // ErrorEvent 또는 TimeoutEvent인 경우
-            console.error('[SSE] 연결 에러:', errorEvent.message);
-            this.handlers.onError?.(new Error(errorEvent.message || 'SSE 연결 에러'));
-          }
+          const errorEvent = eventWithData as SSEErrorEvent;
+          const error = errorEvent.error instanceof Error 
+            ? errorEvent.error 
+            : new Error(errorEvent.message || 'SSE 연결 에러');
+          
+          console.error('[SSE] 연결 에러:', errorEvent.message, errorEvent.error);
+          this.handlers.onError?.(error);
           this.isConnecting = false;
           // 에러 발생 시 재연결 시도
           this.scheduleReconnect();
         } else {
           // 커스텀 이벤트 타입 처리 (예: 'notification', 'diary', 'mission' 등)
-          const customEvent = event as any;
+          const customEvent = eventWithData as SSECustomEvent;
           console.log('[SSE] ========== 커스텀 이벤트 수신 ==========');
           console.log('[SSE] 커스텀 이벤트 타입:', event.type);
           console.log('[SSE] 커스텀 이벤트 데이터:', customEvent.data);
-          console.log('[SSE] 커스텀 이벤트 전체:', customEvent);
-          console.log('[SSE] 커스텀 이벤트 키:', Object.keys(customEvent));
           console.log('[SSE] =======================================');
           
-          try {
-            let data = customEvent.data;
-            if (data && typeof data === 'string') {
-              console.log('[SSE] 커스텀 이벤트 문자열 파싱 시도:', data);
-              data = JSON.parse(data);
-              console.log('[SSE] 파싱된 커스텀 이벤트 데이터:', data);
-            }
-            console.log('[SSE] 커스텀 이벤트 최종 데이터:', data);
-            console.log('[SSE] 커스텀 이벤트 onNotification 핸들러 호출');
-            this.handlers.onNotification?.(data);
-            console.log('[SSE] 커스텀 이벤트 onNotification 핸들러 호출 완료');
-          } catch (error) {
-            console.error('[SSE] 커스텀 이벤트 파싱 실패:', customEvent.data, error);
-            console.log('[SSE] 커스텀 이벤트 원본 데이터로 알림 전달');
-            this.handlers.onNotification?.(customEvent.data);
+          if (customEvent.data !== undefined) {
+            handleNotificationData(customEvent.data);
           }
         }
       };
@@ -168,7 +206,9 @@ class SSEService {
       const customEventTypes = ['diary', 'notification', 'mission', 'MISSION', 'DIARY', 'NOTIFICATION'];
       customEventTypes.forEach(eventType => {
         try {
-          (eventSource as any).addEventListener(eventType, listener);
+          // react-native-sse의 타입 정의가 불완전하여 타입 단언 필요
+          (eventSource as unknown as { addEventListener: (type: string, listener: EventSourceListener) => void })
+            .addEventListener(eventType, listener);
           console.log(`[SSE] ✅ 커스텀 이벤트 타입 등록 성공: ${eventType}`);
         } catch (error) {
           console.warn(`[SSE] ⚠️ 커스텀 이벤트 타입 등록 실패 (${eventType}):`, error);
@@ -251,7 +291,7 @@ class SSEService {
   /**
    * 알림 핸들러만 설정
    */
-  onNotification(handler: SSEEventHandler): void {
+  onNotification(handler: SSENotificationHandler): void {
     this.handlers.onNotification = handler;
   }
 
