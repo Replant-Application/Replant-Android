@@ -13,7 +13,6 @@ import {
   ActivityIndicator,
   TextInput,
   Modal,
-  Alert,
   RefreshControl,
   Image,
   Platform,
@@ -23,6 +22,7 @@ import { NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types/navigation';
 import { Header, Loading, ErrorBoundary, EmptyState, SimpleTabBar } from '../../components/ui';
 import { colors, spacing, typography, borderRadius, shadows } from '../../utils/designTokens';
+import { useErrorHandler } from '../../hooks/useErrorHandler';
 import { getOptimizedLineHeight } from '../../utils/textStyles';
 import {
   getSystemMissions,
@@ -63,6 +63,7 @@ interface UnifiedMission {
 
 const MissionGroupScreen: React.FC<MissionGroupScreenProps> = ({ navigation }) => {
   const { user } = useUser();
+  const { showError, showSuccess, showInfo, handleApiError } = useErrorHandler();
   const [activeTab, setActiveTab] = useState<MissionGroupTab>('official');
   const [missions, setMissions] = useState<UnifiedMission[]>([]);
   const [selectedMission, setSelectedMission] = useState<UnifiedMission | null>(null);
@@ -221,23 +222,23 @@ const MissionGroupScreen: React.FC<MissionGroupScreenProps> = ({ navigation }) =
       });
 
       if (result.success) {
-        Alert.alert('성공', '후기가 등록되었습니다.');
+        showSuccess('후기가 등록되었습니다.', '성공');
         setReviewContent('');
         setShowReviewModal(false);
         // 리뷰 목록 새로고침
         await loadReviews(selectedMission.id);
       } else {
         if (result.error?.includes('뱃지') || result.error?.includes('badge')) {
-          Alert.alert(
-            '후기 작성 불가',
-            '이 미션을 완료하고 뱃지를 획득해야 후기를 작성할 수 있습니다.'
-          );
+          showInfo('이 미션을 완료하고 뱃지를 획득해야 후기를 작성할 수 있습니다.', '후기 작성 불가');
         } else {
-          Alert.alert('오류', result.error || '후기 등록에 실패했습니다.');
+          handleApiError(result, 'MissionGroupScreen.handleSubmitReview');
         }
       }
     } catch (err) {
-      Alert.alert('오류', '후기 등록 중 오류가 발생했습니다.');
+      showError(
+        err instanceof Error ? err : new Error('후기 등록 중 오류가 발생했습니다.'),
+        'MissionGroupScreen.handleSubmitReview'
+      );
     } finally {
       setSubmitting(false);
     }
