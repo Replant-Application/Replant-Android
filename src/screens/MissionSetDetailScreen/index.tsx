@@ -38,7 +38,7 @@ interface MissionSetDetailScreenProps {
 
 const MissionSetDetailScreen: React.FC<MissionSetDetailScreenProps> = ({ navigation, route }) => {
   const { missionSetId } = route.params as { missionSetId: number };
-  const { user } = useUser();
+  const { user, currentUserId } = useUser();
   const [missionSet, setMissionSet] = useState<MissionSetDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [copying, setCopying] = useState(false);
@@ -178,7 +178,7 @@ const MissionSetDetailScreen: React.FC<MissionSetDetailScreenProps> = ({ navigat
   };
 
   // 본인 미션세트인지 확인
-  const isOwner = missionSet && user && missionSet.creatorId === user.id;
+  const isOwner = missionSet && user && currentUserId && missionSet.creatorId === currentUserId;
 
   if (loading) {
     return <Loading text="투두리스트를 불러오는 중..." />;

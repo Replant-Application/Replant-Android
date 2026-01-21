@@ -10,6 +10,7 @@ import {
   ActivityIndicator,
   Image,
   ImageBackground,
+  Alert,
 } from 'react-native';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
 import { Header, AlertModal } from '../../components/ui';
@@ -257,10 +258,11 @@ const TodoListDetailScreen: React.FC<Props> = ({ navigation, route }) => {
   };
 
   const handleArchive = async () => {
-    showConfirm(
+    Alert.alert(
       '투두리스트 보관',
       '이 투두리스트를 보관하시겠습니까?\n보관된 투두리스트는 더 이상 수정할 수 없습니다.',
       [
+        { text: '취소', style: 'cancel' },
         {
           text: '보관',
           onPress: async () => {
@@ -268,11 +270,8 @@ const TodoListDetailScreen: React.FC<Props> = ({ navigation, route }) => {
             try {
               const result = await archiveTodoList(todoListId);
               if (result.success) {
-                showSuccess(
-                  '투두리스트가 보관되었습니다.',
-                  'TodoListDetailScreen.handleArchive',
-                  () => navigation.goBack()
-                );
+                showSuccess('투두리스트가 보관되었습니다.');
+                navigation.goBack();
               } else {
                 handleApiError(result, 'TodoListDetailScreen.handleArchive');
               }
@@ -286,8 +285,7 @@ const TodoListDetailScreen: React.FC<Props> = ({ navigation, route }) => {
             }
           },
         },
-      ],
-      '취소'
+      ]
     );
   };
 

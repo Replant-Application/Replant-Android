@@ -16,6 +16,7 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   ImageBackground,
+  Alert,
 } from 'react-native';
 import { Header, AlertModal } from '../../components/ui';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
@@ -69,9 +70,9 @@ const VerificationPostCreateScreen: React.FC<VerificationPostCreateScreenProps> 
       logError('VerificationPostCreate: userMissionId 누락', new Error('Missing userMissionId'), { params });
       showError(
         new Error('미션 정보가 올바르지 않습니다.'),
-        'VerificationPostCreateScreen.useEffect',
-        () => navigation.goBack()
+        'VerificationPostCreateScreen.useEffect'
       );
+      navigation.goBack();
       return;
     }
   }, [userMissionId, isEditMode, navigation, params, showError]);
@@ -251,14 +252,14 @@ const VerificationPostCreateScreen: React.FC<VerificationPostCreateScreenProps> 
 
   // 사진 선택 옵션 표시
   const showPhotoOptions = () => {
-    showConfirm(
+    Alert.alert(
       '사진 추가',
       '사진을 추가할 방법을 선택해주세요.',
       [
+        { text: '취소', style: 'cancel' },
         { text: '카메라', onPress: handleTakePhoto },
         { text: '갤러리', onPress: handleSelectPhoto },
-      ],
-      '취소'
+      ]
     );
   };
 

@@ -103,7 +103,9 @@ export const setUserId = (
     amplitudeSetUserId(userId);
     if (userProperties) {
       const identifyObj = new Identify();
-      identifyObj.set(userProperties);
+      Object.entries(userProperties).forEach(([key, value]) => {
+        identifyObj.set(key, value);
+      });
       identify(identifyObj);
     }
   } catch (error) {
@@ -123,7 +125,9 @@ export const setUserProperties = (userProperties: Record<string, any>): void => 
 
   try {
     const identifyObj = new Identify();
-    identifyObj.set(userProperties);
+    Object.entries(userProperties).forEach(([key, value]) => {
+      identifyObj.set(key, value);
+    });
     identify(identifyObj);
   } catch (error) {
     console.error('Failed to set user properties:', error);

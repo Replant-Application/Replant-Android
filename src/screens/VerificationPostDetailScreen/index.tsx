@@ -14,6 +14,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   RefreshControl,
+  Alert,
 } from 'react-native';
 import {
   getVerification,
@@ -246,10 +247,11 @@ const VerificationPostDetailScreen: React.FC<VerificationPostDetailScreenProps> 
   const handleDeletePost = () => {
     if (!post) return;
 
-    showConfirm(
+    Alert.alert(
       '인증글 삭제',
       '정말로 이 인증글을 삭제하시겠습니까?',
       [
+        { text: '취소', style: 'cancel' },
         {
           text: '삭제',
           onPress: async () => {
@@ -261,8 +263,7 @@ const VerificationPostDetailScreen: React.FC<VerificationPostDetailScreenProps> 
             }
           },
         },
-      ],
-      '취소'
+      ]
     );
   };
 
@@ -322,10 +323,11 @@ const VerificationPostDetailScreen: React.FC<VerificationPostDetailScreenProps> 
   };
 
   const handleDeleteComment = (commentId: string) => {
-    showConfirm(
+    Alert.alert(
       '댓글 삭제',
       '정말로 이 댓글을 삭제하시겠습니까?',
       [
+        { text: '취소', style: 'cancel' },
         {
           text: '삭제',
           onPress: async () => {
@@ -337,8 +339,7 @@ const VerificationPostDetailScreen: React.FC<VerificationPostDetailScreenProps> 
             }
           },
         },
-      ],
-      '취소'
+      ]
     );
   };
 

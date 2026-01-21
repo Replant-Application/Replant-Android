@@ -5,12 +5,12 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Platform, KeyboardAvoidingView, Image } from 'react-native';
 import { NavigationProp, RouteProp } from '@react-navigation/native';
-import { useAdmin } from '../../hooks/useAdmin';
+import { useAdmin, MemberDetail } from '../../hooks/useAdmin';
 import { Header, Loading, ErrorBoundary, Button, Input } from '../../components/ui';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
 import { getOptimizedLineHeight } from '../../utils/textStyles';
 import { RootStackParamList } from '../../types/navigation';
-import { UserInfo } from '../../api/manageApi';
+import { UserInfo, updateUser } from '../../api/manageApi';
 
 interface AdminUserEditScreenProps {
   navigation: NavigationProp<RootStackParamList>;
@@ -19,7 +19,7 @@ interface AdminUserEditScreenProps {
 
 const AdminUserEditScreen: React.FC<AdminUserEditScreenProps> = ({ navigation, route }) => {
   const { userId } = route.params;
-  const { getUserDetail, updateUser, loading, error } = useAdmin();
+  const { getUserDetail, loading, error } = useAdmin();
   const [user, setUser] = useState<UserInfo | null>(null);
   const [nickname, setNickname] = useState('');
   const [email, setEmail] = useState('');
@@ -29,7 +29,17 @@ const AdminUserEditScreen: React.FC<AdminUserEditScreenProps> = ({ navigation, r
     const result = await getUserDetail(userId);
     if (result.success && result.data) {
       const userData = result.data;
-      setUser(userData);
+      // MemberDetail을 UserInfo로 변환
+      const userInfo: UserInfo = {
+        id: userData.id,
+        username: userData.username || userData.nickname || '',
+        nickname: userData.nickname,
+        role: userData.role,
+        email: userData.email,
+        isActive: userData.status === 'ACTIVE' || userData.isActive,
+        createdAt: userData.createdAt,
+      };
+      setUser(userInfo);
       setNickname(userData.nickname || '');
       setEmail(userData.email || '');
       setRole(userData.role || 'user');

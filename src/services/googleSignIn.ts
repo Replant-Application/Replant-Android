@@ -78,5 +78,11 @@ export const signOutFromGoogle = async (): Promise<void> => {
  * 현재 Google 로그인 상태 확인
  */
 export const isGoogleSignedIn = async (): Promise<boolean> => {
-  return await GoogleSignin.isSignedIn();
+  try {
+    const user = await GoogleSignin.getCurrentUser();
+    return user !== null;
+  } catch (error) {
+    console.error('Google Sign-In status check error:', error);
+    return false;
+  }
 };
