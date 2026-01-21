@@ -9,12 +9,29 @@ import { getAccessToken, saveTokens } from '../utils/tokenStorage';
 import { refreshToken as refreshTokenApi } from './authApi';
 
 /**
+ * JSON 직렬화 가능한 값 타입
+ */
+type SerializableValue =
+  | string
+  | number
+  | boolean
+  | null
+  | SerializableValue[]
+  | { [key: string]: SerializableValue };
+
+/**
+ * API 요청 body 타입
+ * JSON 직렬화 가능한 값 또는 FormData (파일 업로드용)
+ */
+export type ApiRequestBody = SerializableValue | FormData;
+
+/**
  * API 요청 옵션
  */
 export interface ApiRequestOptions {
   method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
   headers?: Record<string, string>;
-  body?: any;
+  body?: ApiRequestBody;
   params?: Record<string, string | number | boolean>;
 }
 
@@ -245,11 +262,33 @@ export class ApiClient {
         headers['Authorization'] = `Bearer ${this.accessToken}`;
       }
 
+      // body 직렬화 처리
+      let requestBody: string | FormData | undefined = undefined;
+      if (options.body) {
+        if (options.body instanceof FormData) {
+          // FormData는 그대로 사용 (파일 업로드)
+          requestBody = options.body;
+          // FormData 사용 시 Content-Type 헤더 제거 (브라우저가 자동 설정)
+          delete headers['Content-Type'];
+        } else {
+          // JSON 직렬화
+          try {
+            requestBody = JSON.stringify(options.body);
+          } catch (error) {
+            console.error('[API Client] Body 직렬화 실패:', error);
+            return {
+              success: false,
+              error: '요청 데이터를 직렬화하는 중 오류가 발생했습니다.',
+            };
+          }
+        }
+      }
+
       // fetch 요청 (타임아웃을 위한 signal 추가)
       const response = await fetch(url, {
         method: options.method || 'GET',
         headers,
-        body: options.body ? JSON.stringify(options.body) : undefined,
+        body: requestBody,
         signal: controller.signal,
       });
 
@@ -391,21 +430,21 @@ export class ApiClient {
   /**
    * POST 요청
    */
-  async post<T>(endpoint: string, body?: any): Promise<ServiceResult<T>> {
+  async post<T>(endpoint: string, body?: ApiRequestBody): Promise<ServiceResult<T>> {
     return this.request<T>(endpoint, { method: 'POST', body });
   }
 
   /**
    * PUT 요청
    */
-  async put<T>(endpoint: string, body?: any): Promise<ServiceResult<T>> {
+  async put<T>(endpoint: string, body?: ApiRequestBody): Promise<ServiceResult<T>> {
     return this.request<T>(endpoint, { method: 'PUT', body });
   }
 
   /**
    * PATCH 요청
    */
-  async patch<T>(endpoint: string, body?: any): Promise<ServiceResult<T>> {
+  async patch<T>(endpoint: string, body?: ApiRequestBody): Promise<ServiceResult<T>> {
     return this.request<T>(endpoint, { method: 'PATCH', body });
   }
 
