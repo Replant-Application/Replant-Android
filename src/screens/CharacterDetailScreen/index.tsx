@@ -7,6 +7,7 @@ import { RootStackParamList } from '../../types/navigation';
 import { ProgressBar, Header, SectionTitle, Button } from '../../components/ui';
 import { useCharacter } from '../../hooks/useCharacter';
 import { useErrorHandler } from '../../hooks/useErrorHandler';
+import { useAsyncOperation } from '../../hooks/useAsyncOperation';
 import { downloadPetImage } from '../../services/petService';
 import { getCharacterImage } from '../../utils/characterUtils';
 
@@ -22,7 +23,6 @@ const CharacterDetailScreen: React.FC<CharacterDetailScreenProps> = ({ route, na
   const [currentEmotion, setCurrentEmotion] = useState<string>('default');
   const [showNameEditModal, setShowNameEditModal] = useState(false);
   const [newName, setNewName] = useState('');
-  const [downloading, setDownloading] = useState(false);
   const imageRef = useRef<Image>(null);
 
   // characters에서 현재 캐릭터 찾기 (이름 변경 후 최신 정보 반영)
@@ -75,27 +75,26 @@ const CharacterDetailScreen: React.FC<CharacterDetailScreenProps> = ({ route, na
     }
   };
 
+  // 이미지 다운로드 비동기 작업
+  const { execute: executeDownload, loading: downloading } = useAsyncOperation(
+    async () => {
+      if (!character || !imageRef.current) {
+        throw new Error('캐릭터 정보 또는 이미지를 찾을 수 없습니다.');
+      }
+      return downloadPetImage(imageRef, character.name, character.level || 1);
+    },
+    {
+      onSuccess: () => {
+        showSuccess('캐릭터 이미지가 갤러리에 저장되었습니다.', '다운로드 완료');
+      },
+      context: 'CharacterDetailScreen.handleDownloadImage',
+    }
+  );
+
   // 이미지 다운로드 핸들러
   const handleDownloadImage = async () => {
     if (!character || !imageRef.current) return;
-
-    try {
-      setDownloading(true);
-      const result = await downloadPetImage(imageRef, character.name, character.level || 1);
-
-      if (result.success) {
-        showSuccess('캐릭터 이미지가 갤러리에 저장되었습니다.', '다운로드 완료');
-      } else {
-        handleApiError(result, 'CharacterDetailScreen.handleDownloadImage');
-      }
-    } catch (error) {
-      showError(
-        error instanceof Error ? error : new Error('이미지 다운로드 중 오류가 발생했습니다.'),
-        'CharacterDetailScreen.handleDownloadImage'
-      );
-    } finally {
-      setDownloading(false);
-    }
+    await executeDownload();
   };
 
 
