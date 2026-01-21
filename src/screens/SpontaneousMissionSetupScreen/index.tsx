@@ -43,31 +43,26 @@ interface TimeState {
   minute: number;
 }
 
-const STEP_CONFIG: Record<Step, { title: string; description: string; label: string }> = {
+const STEP_CONFIG: Record<Step, { title: string; description: string }> = {
   wake: {
     title: '기상 시간을 알려주세요',
     description: '평소에 일어나는 시간을 설정해주세요.',
-    label: '기상 시간',
   },
   sleep: {
     title: '취침 시간을 알려주세요',
     description: '평소에 잠드는 시간을 설정해주세요.',
-    label: '취침 시간',
   },
   breakfast: {
     title: '아침 식사 시간을 알려주세요',
     description: '평소에 아침 식사를 하는 시간을 설정해주세요.',
-    label: '아침 식사 시간',
   },
   lunch: {
     title: '점심 식사 시간을 알려주세요',
     description: '평소에 점심 식사를 하는 시간을 설정해주세요.',
-    label: '점심 식사 시간',
   },
   dinner: {
     title: '저녁 식사 시간을 알려주세요',
     description: '평소에 저녁 식사를 하는 시간을 설정해주세요.',
-    label: '저녁 식사 시간',
   },
 };
 
@@ -740,8 +735,6 @@ const SpontaneousMissionSetupScreen: React.FC<SpontaneousMissionSetupScreenProps
               <Text style={styles.stepDescription}>{stepConfig.description}</Text>
 
               <View style={styles.timeInputContainer}>
-                <Text style={styles.timeLabel}>{stepConfig.label}</Text>
-                
                 <View style={styles.timePickerWrapper}>
                   <View style={styles.timePickerRow}>
                     {/* AM/PM */}
@@ -945,18 +938,6 @@ const styles = StyleSheet.create({
   timeInputContainer: {
     width: '100%',
     alignItems: 'center',
-  },
-  timeLabel: {
-    fontSize: typography.fontSize.sm,
-    fontWeight: typography.fontWeight.medium,
-    color: colors.text.primary,
-    marginBottom: spacing[4],
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
   },
   timePickerRow: {
     flexDirection: 'row',
