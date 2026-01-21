@@ -14,7 +14,6 @@ export const SCREEN_NAMES: Record<string, string> = {
   CUSTOM_MISSION_CREATE: 'CustomMissionCreate',
   COUNSELING_SELECT: 'CounselingSelect',
   PLACES_SEARCH: 'PlacesSearch',
-  CHARACTER_DETAIL: 'CharacterDetail',
   SETTINGS: 'Settings',
   INFO: 'Info',
   PHOTO_SELECT: 'PhotoSelect',
