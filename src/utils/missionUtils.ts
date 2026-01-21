@@ -3,6 +3,7 @@
  */
 
 import { Mission } from '../types';
+import { removeDuplicates } from './arrayUtils';
 
 /**
  * 미션을 제목 기준으로 정렬
@@ -36,7 +37,5 @@ export const getSortedIncompleteMissions = (missions: Mission[]): Mission[] => {
  * 미션 배열에서 중복 제거 (mission_id 기준)
  */
 export const removeDuplicateMissions = (missions: Mission[]): Mission[] => {
-  return missions.filter((mission, index, self) =>
-    index === self.findIndex(m => m.mission_id === mission.mission_id)
-  );
+  return removeDuplicates(missions, mission => mission.mission_id);
 };

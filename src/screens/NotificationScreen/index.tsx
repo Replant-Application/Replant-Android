@@ -28,6 +28,7 @@ import { colors, spacing, typography, borderRadius } from '../../utils/designTok
 import { getOptimizedLineHeight } from '../../utils/textStyles';
 import { SCREEN_NAMES } from '../../utils/constants';
 import { useSse } from '../../contexts/SseContext';
+import { removeDuplicates } from '../../utils/arrayUtils';
 import { useOverlay } from '../../contexts/OverlayContext';
 import { NotificationScreenProps } from './NotificationScreen.types';
 import SwipeableNotificationItem from './SwipeableNotificationItem';
@@ -95,10 +96,7 @@ const NotificationScreen: React.FC<NotificationScreenProps> = ({ navigation }) =
           }
         });
         
-        const uniqueNotifications = notificationsList.filter(
-          (notification, index, self) =>
-            index === self.findIndex(n => n.id === notification.id)
-        );
+        const uniqueNotifications = removeDuplicates(notificationsList, notification => notification.id);
         console.log('[NotificationScreen] 중복 제거 후 알림 개수:', uniqueNotifications.length);
         
         // ID 기준으로 정렬 (최신순) - 안전하게 처리
@@ -258,10 +256,7 @@ const NotificationScreen: React.FC<NotificationScreenProps> = ({ navigation }) =
         
         // 최상단에 추가하고 중복 제거
         const updated = [newNotification, ...prev];
-        const unique = updated.filter(
-          (notification, index, self) =>
-            index === self.findIndex(n => n.id === notification.id)
-        );
+        const unique = removeDuplicates(updated, notification => notification.id);
         
         // 날짜 기준 정렬 (최신순)
         unique.sort((a, b) => {

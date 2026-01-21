@@ -1,4 +1,5 @@
 import { KAKAO_MAP_API_KEY, HAS_KAKAO_API_KEY } from '../config/api';
+import { removeDuplicates } from '../utils/arrayUtils';
 
 const HAS_API_KEY = HAS_KAKAO_API_KEY;
 
@@ -171,14 +172,7 @@ class PlacesService {
   }
 
   private removeDuplicates(places: Place[]): Place[] {
-    const seen = new Set();
-    return places.filter(place => {
-      if (seen.has(place.place_id)) {
-        return false;
-      }
-      seen.add(place.place_id);
-      return true;
-    });
+    return removeDuplicates(places, place => place.place_id);
   }
 
   private sortByDistance(places: Place[], userLat: number, userLng: number): Place[] {
