@@ -10,7 +10,6 @@ import {
   ScrollView,
   TouchableOpacity,
   TextInput,
-  Alert,
   Image,
   KeyboardAvoidingView,
   Platform,
@@ -36,6 +35,7 @@ import { colors, spacing, typography, borderRadius } from '../../utils/designTok
 import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types/navigation';
 import { useUser } from '../../contexts/UserContext';
+import { useErrorHandler } from '../../hooks/useErrorHandler';
 
 interface VerificationPostDetailScreenProps {
   navigation: NavigationProp<RootStackParamList>;
@@ -48,6 +48,7 @@ const VerificationPostDetailScreen: React.FC<VerificationPostDetailScreenProps> 
 }) => {
   const { verificationId } = route.params;
   const { currentNickname, currentUserId } = useUser();
+  const { showError, showSuccess, showInfo, showConfirm, handleApiError } = useErrorHandler();
 
   const [post, setPost] = useState<VerificationPost | null>(null);
   const [comments, setComments] = useState<VerificationComment[]>([]);
@@ -197,7 +198,7 @@ const VerificationPostDetailScreen: React.FC<VerificationPostDetailScreenProps> 
 
     // 내 게시글에는 투표할 수 없음 - 크래시 방지
     if (isAuthor) {
-      Alert.alert('알림', '자신의 인증글에는 투표할 수 없습니다.');
+      showInfo('자신의 인증글에는 투표할 수 없습니다.');
       return;
     }
 
@@ -218,7 +219,7 @@ const VerificationPostDetailScreen: React.FC<VerificationPostDetailScreenProps> 
 
         // 인증 완료 알림 (PENDING -> APPROVED로 변경된 경우)
         if (wasPending && isNowApproved) {
-          Alert.alert('🎉 인증 완료!', '이 인증글이 인증되었습니다!');
+          showSuccess('🎉 인증 완료!', '이 인증글이 인증되었습니다!');
           // 게시글 다시 조회하여 최신 상태 반영
           await loadPost();
           
@@ -232,40 +233,45 @@ const VerificationPostDetailScreen: React.FC<VerificationPostDetailScreenProps> 
           }
         }
       } else {
-        Alert.alert('오류', result.error || '투표에 실패했습니다.');
+        handleApiError(result, 'VerificationPostDetailScreen.handleVote');
       }
     } catch (err) {
-      Alert.alert('오류', '투표 중 오류가 발생했습니다.');
+      showError(
+        err instanceof Error ? err : new Error('투표 중 오류가 발생했습니다.'),
+        'VerificationPostDetailScreen.handleVote'
+      );
     }
   };
 
   const handleDeletePost = () => {
     if (!post) return;
 
-    Alert.alert(
+    showConfirm(
       '인증글 삭제',
       '정말로 이 인증글을 삭제하시겠습니까?',
       [
-        { text: '취소', style: 'cancel' },
         {
           text: '삭제',
-          style: 'destructive',
           onPress: async () => {
             const result = await deleteVerification(verificationId);
             if (result.success) {
               navigation.goBack();
             } else {
-              Alert.alert('오류', result.error || '인증글 삭제에 실패했습니다.');
+              handleApiError(result, 'VerificationPostDetailScreen.handleDeletePost');
             }
           },
         },
-      ]
+      ],
+      '취소'
     );
   };
 
   const handleSubmitComment = async () => {
     if (!commentContent.trim()) {
-      Alert.alert('오류', '댓글을 입력해주세요.');
+      showError(
+        new Error('댓글을 입력해주세요.'),
+        'VerificationPostDetailScreen.handleSubmitComment'
+      );
       return;
     }
 
@@ -280,7 +286,7 @@ const VerificationPostDetailScreen: React.FC<VerificationPostDetailScreenProps> 
       setReplyingToComment(null);
       await loadComments();
     } else {
-      Alert.alert('오류', result.error || '댓글 작성에 실패했습니다.');
+      handleApiError(result, 'VerificationPostDetailScreen.handleSubmitComment');
     }
   };
 
@@ -311,29 +317,28 @@ const VerificationPostDetailScreen: React.FC<VerificationPostDetailScreenProps> 
       setEditingContent('');
       await loadComments();
     } else {
-      Alert.alert('오류', result.error || '댓글 수정에 실패했습니다.');
+      handleApiError(result, 'VerificationPostDetailScreen.handleUpdateComment');
     }
   };
 
   const handleDeleteComment = (commentId: string) => {
-    Alert.alert(
+    showConfirm(
       '댓글 삭제',
       '정말로 이 댓글을 삭제하시겠습니까?',
       [
-        { text: '취소', style: 'cancel' },
         {
           text: '삭제',
-          style: 'destructive',
           onPress: async () => {
             const result = await deleteVerificationComment(verificationId, commentId);
             if (result.success) {
               await loadComments();
             } else {
-              Alert.alert('오류', result.error || '댓글 삭제에 실패했습니다.');
+              handleApiError(result, 'VerificationPostDetailScreen.handleDeleteComment');
             }
           },
         },
-      ]
+      ],
+      '취소'
     );
   };
 
