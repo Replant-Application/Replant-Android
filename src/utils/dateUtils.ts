@@ -148,3 +148,53 @@ export const formatDateDivider = (dateString: string): string => {
   return `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일`;
 };
 
+/**
+ * 날짜 기준으로 배열 정렬
+ * 
+ * @param array - 정렬할 배열
+ * @param dateExtractor - 각 항목에서 날짜를 추출하는 함수 (날짜 문자열 또는 Date 객체 반환)
+ * @param order - 정렬 순서 ('asc' = 오름차순, 'desc' = 내림차순, 기본: 'desc')
+ * @returns 정렬된 배열 (원본 배열을 변경하지 않음)
+ * 
+ * @example
+ * // 최신순 정렬 (내림차순)
+ * const sorted = sortByDate(notifications, n => n.createdAt);
+ * 
+ * // 오래된 순 정렬 (오름차순)
+ * const sorted = sortByDate(events, e => e.date, 'asc');
+ */
+export function sortByDate<T>(
+  array: T[],
+  dateExtractor: (item: T) => string | Date | null | undefined,
+  order: 'asc' | 'desc' = 'desc'
+): T[] {
+  return [...array].sort((a, b) => {
+    try {
+      const dateAValue = dateExtractor(a);
+      const dateBValue = dateExtractor(b);
+
+      // null/undefined 처리
+      if (!dateAValue && !dateBValue) return 0;
+      if (!dateAValue) return 1; // dateA가 없으면 뒤로
+      if (!dateBValue) return -1; // dateB가 없으면 뒤로
+
+      // Date 객체 또는 문자열을 Date로 변환
+      const dateA = dateAValue instanceof Date ? dateAValue : new Date(dateAValue);
+      const dateB = dateBValue instanceof Date ? dateBValue : new Date(dateBValue);
+
+      // 유효하지 않은 날짜 처리
+      const timeA = isNaN(dateA.getTime()) ? 0 : dateA.getTime();
+      const timeB = isNaN(dateB.getTime()) ? 0 : dateB.getTime();
+
+      // 날짜 파싱 실패 시 순서 유지
+      if (timeA === 0 && timeB === 0) return 0;
+
+      // 정렬 순서에 따라 반환
+      return order === 'desc' ? timeB - timeA : timeA - timeB;
+    } catch (error) {
+      console.warn('[sortByDate] 날짜 정렬 실패:', error);
+      return 0; // 에러 발생 시 순서 유지
+    }
+  });
+}
+
