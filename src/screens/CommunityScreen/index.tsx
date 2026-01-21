@@ -4,8 +4,9 @@
  */
 
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Image, Modal, RefreshControl, Alert, Platform, ImageBackground, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Image, Modal, RefreshControl, Platform, ImageBackground, ActivityIndicator } from 'react-native';
 import { useCommunity } from '../../hooks/useCommunity';
+import { useErrorHandler } from '../../hooks/useErrorHandler';
 import { PostCard } from '../../components/specialized';
 import { Loading, ErrorBoundary, EmptyState, SimpleTabBar, Header, AlertModal } from '../../components/ui';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
@@ -24,6 +25,7 @@ import MissionSetList from './components/MissionSetList';
 
 const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation }) => {
   const { posts, loading, error, toggleLike, loadPosts } = useCommunity();
+  const { showError, showSuccess, showInfo, handleApiError } = useErrorHandler();
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState<'all' | 'popular'>('all');
   const [activeTab, setActiveTab] = useState<CommunityTab>('all');
@@ -122,10 +124,7 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation }) => {
     try {
       const result = await copyMissionSet(missionSet.id);
       if (result.success) {
-        Alert.alert(
-          '담기 완료',
-          `"${missionSet.title}" 미션세트를 내 목록에 추가했습니다.`
-        );
+        showSuccess(`"${missionSet.title}" 미션세트를 내 목록에 추가했습니다.`, '담기 완료');
         setMissionSets(prev =>
           prev.map(ms =>
             ms.id === missionSet.id
@@ -134,11 +133,13 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation }) => {
           )
         );
       } else {
-        Alert.alert('담기 실패', result.error || '미션세트를 담는데 실패했습니다.');
+        handleApiError(result, 'CommunityScreen.handleCopyMissionSet');
       }
     } catch (error) {
-      logError('미션세트 담기 실패', error as Error);
-      Alert.alert('오류', '미션세트를 담는 중 문제가 발생했습니다.');
+      showError(
+        error instanceof Error ? error : new Error('미션세트를 담는 중 문제가 발생했습니다.'),
+        'CommunityScreen.handleCopyMissionSet'
+      );
     }
   };
 
@@ -151,11 +152,13 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation }) => {
         setMyMissionSets(result.data.content);
         setShowShareModal(true);
       } else {
-        Alert.alert('오류', '투두리스트를 불러오는데 실패했습니다.');
+        handleApiError(result, 'CommunityScreen.loadMissionSets');
       }
     } catch (error) {
-      logError('내 미션세트 로드 실패', error as Error);
-      Alert.alert('오류', '투두리스트를 불러오는데 실패했습니다.');
+      showError(
+        error instanceof Error ? error : new Error('투두리스트를 불러오는데 실패했습니다.'),
+        'CommunityScreen.loadMissionSets'
+      );
     } finally {
       setMyMissionSetsLoading(false);
     }
@@ -164,7 +167,7 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation }) => {
   // 투두리스트 공유하기 (공개로 변경)
   const handleShareMissionSet = async (missionSet: MissionSetSimple) => {
     if (missionSet.isPublic) {
-      Alert.alert('알림', '이미 공개된 투두리스트입니다.');
+      showInfo('이미 공개된 투두리스트입니다.', '알림');
       return;
     }
 
@@ -172,7 +175,7 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation }) => {
       setSharingId(missionSet.id);
       const result = await updateMissionSet(missionSet.id, { isPublic: true });
       if (result.success) {
-        Alert.alert('공유 완료', `"${missionSet.title}" 투두리스트가 커뮤니티에 공유되었습니다.`);
+        showSuccess(`"${missionSet.title}" 투두리스트가 커뮤니티에 공유되었습니다.`, '공유 완료');
         setMyMissionSets(prev =>
           prev.map(ms => ms.id === missionSet.id ? { ...ms, isPublic: true } : ms)
         );
@@ -180,11 +183,13 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation }) => {
         // 공유 후 미션세트 목록 새로고침
         loadMissionSets();
       } else {
-        Alert.alert('오류', result.error || '공유에 실패했습니다.');
+        handleApiError(result, 'CommunityScreen.handleShareMissionSet');
       }
     } catch (error) {
-      logError('미션세트 공유 실패', error as Error);
-      Alert.alert('오류', '공유 중 문제가 발생했습니다.');
+      showError(
+        error instanceof Error ? error : new Error('공유 중 문제가 발생했습니다.'),
+        'CommunityScreen.handleShareMissionSet'
+      );
     } finally {
       setSharingId(null);
     }
@@ -286,8 +291,10 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation }) => {
       await hidePost(postId);
       setHiddenPostIds(prev => [...prev, postId]);
     } catch (error) {
-      logError('게시글 숨기기 실패', error as Error);
-      Alert.alert('오류', '게시글을 숨기는 중 문제가 발생했습니다.');
+      showError(
+        error instanceof Error ? error : new Error('게시글을 숨기는 중 문제가 발생했습니다.'),
+        'CommunityScreen.handleHidePost'
+      );
     }
   }, []);
 
