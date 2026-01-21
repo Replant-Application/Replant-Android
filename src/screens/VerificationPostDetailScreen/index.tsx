@@ -602,7 +602,7 @@ const VerificationPostDetailScreen: React.FC<VerificationPostDetailScreenProps> 
                             </View>
                           ) : (
                             <CommentCard
-                              comment={reply}
+                              comment={reply as any}
                               isAuthor={currentUserId !== null && 
                                 (reply.author_id !== undefined 
                                   ? Number(reply.author_id) === currentUserId
