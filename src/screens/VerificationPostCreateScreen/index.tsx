@@ -10,7 +10,6 @@ import {
   StyleSheet,
   ScrollView,
   TextInput,
-  Alert,
   KeyboardAvoidingView,
   Platform,
   Image,
@@ -27,6 +26,7 @@ import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types/navigation';
 import { launchImageLibrary, launchCamera } from 'react-native-image-picker';
 import { logError } from '../../utils/logger';
+import { useErrorHandler } from '../../hooks/useErrorHandler';
 
 interface VerificationPostCreateScreenProps {
   navigation: NavigationProp<RootStackParamList>;
@@ -61,17 +61,20 @@ const VerificationPostCreateScreen: React.FC<VerificationPostCreateScreenProps> 
   const [showErrorModal, setShowErrorModal] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [loadingData, setLoadingData] = useState(isEditMode);
+  const { showError, showInfo, showConfirm, handleApiError } = useErrorHandler();
 
   // 필수 파라미터 체크
   useEffect(() => {
     if (!isEditMode && (!userMissionId || userMissionId === 0)) {
       logError('VerificationPostCreate: userMissionId 누락', new Error('Missing userMissionId'), { params });
-      Alert.alert('오류', '미션 정보가 올바르지 않습니다.', [
-        { text: '확인', onPress: () => navigation.goBack() }
-      ]);
+      showError(
+        new Error('미션 정보가 올바르지 않습니다.'),
+        'VerificationPostCreateScreen.useEffect',
+        () => navigation.goBack()
+      );
       return;
     }
-  }, [userMissionId, isEditMode, navigation, params]);
+  }, [userMissionId, isEditMode, navigation, params, showError]);
 
   // 수정 모드일 때 기존 데이터 로드
   useEffect(() => {
@@ -114,9 +117,15 @@ const VerificationPostCreateScreen: React.FC<VerificationPostCreateScreenProps> 
       if (result.errorCode) {
         logError('갤러리 오류', new Error(result.errorMessage || result.errorCode));
         if (result.errorCode === 'permission') {
-          Alert.alert('권한 필요', '사진을 선택하려면 갤러리 접근 권한이 필요합니다. 설정에서 권한을 허용해주세요.');
+          showError(
+            new Error('사진을 선택하려면 갤러리 접근 권한이 필요합니다. 설정에서 권한을 허용해주세요.'),
+            'VerificationPostCreateScreen.handleSelectPhoto'
+          );
         } else {
-          Alert.alert('오류', '사진을 불러오는 중 오류가 발생했습니다.');
+          showError(
+            new Error('사진을 불러오는 중 오류가 발생했습니다.'),
+            'VerificationPostCreateScreen.handleSelectPhoto'
+          );
         }
         return;
       }
@@ -143,14 +152,20 @@ const VerificationPostCreateScreen: React.FC<VerificationPostCreateScreenProps> 
           setImages((prev) => [...prev, ...uploadedUrls]);
         } catch (error) {
           logError('이미지 업로드 오류', error as Error);
-          Alert.alert('오류', '이미지 업로드 중 오류가 발생했습니다.');
+          showError(
+            error instanceof Error ? error : new Error('이미지 업로드 중 오류가 발생했습니다.'),
+            'VerificationPostCreateScreen.handleSelectPhoto'
+          );
         } finally {
           setUploadingPhoto(false);
         }
       }
     } catch (error) {
       logError('사진 선택 오류', error as Error);
-      Alert.alert('오류', '사진을 선택하는 중 오류가 발생했습니다.');
+      showError(
+        error instanceof Error ? error : new Error('사진을 선택하는 중 오류가 발생했습니다.'),
+        'VerificationPostCreateScreen.handleSelectPhoto'
+      );
     }
   };
 
@@ -170,18 +185,27 @@ const VerificationPostCreateScreen: React.FC<VerificationPostCreateScreenProps> 
       if (result.errorCode) {
         logError('카메라 오류', new Error(result.errorMessage || result.errorCode));
         if (result.errorCode === 'permission') {
-          Alert.alert('권한 필요', '사진을 촬영하려면 카메라 권한이 필요합니다. 설정에서 권한을 허용해주세요.');
+          showError(
+            new Error('사진을 촬영하려면 카메라 권한이 필요합니다. 설정에서 권한을 허용해주세요.'),
+            'VerificationPostCreateScreen.handleTakePhoto'
+          );
         } else if (result.errorCode === 'camera_unavailable') {
-          Alert.alert('오류', '카메라를 사용할 수 없습니다.');
+          showError(
+            new Error('카메라를 사용할 수 없습니다.'),
+            'VerificationPostCreateScreen.handleTakePhoto'
+          );
         } else {
-          Alert.alert('오류', '카메라를 사용하는 중 오류가 발생했습니다.');
+          showError(
+            new Error('카메라를 사용하는 중 오류가 발생했습니다.'),
+            'VerificationPostCreateScreen.handleTakePhoto'
+          );
         }
         return;
       }
 
       if (result.assets && result.assets[0]?.uri) {
         if (images.length >= 3) {
-          Alert.alert('알림', '최대 3개의 사진만 선택할 수 있습니다.');
+          showInfo('최대 3개의 사진만 선택할 수 있습니다.');
           return;
         }
 
@@ -196,18 +220,27 @@ const VerificationPostCreateScreen: React.FC<VerificationPostCreateScreenProps> 
           if (uploadResult.success && uploadResult.data) {
             setImages((prev) => [...prev, uploadResult.data!.fileUrl]);
           } else {
-            Alert.alert('오류', uploadResult.error || '사진 업로드에 실패했습니다.');
+            showError(
+              new Error(uploadResult.error || '사진 업로드에 실패했습니다.'),
+              'VerificationPostCreateScreen.handleTakePhoto'
+            );
           }
         } catch (error) {
           logError('사진 업로드 오류', error as Error);
-          Alert.alert('오류', '사진 업로드 중 오류가 발생했습니다.');
+          showError(
+            error instanceof Error ? error : new Error('사진 업로드 중 오류가 발생했습니다.'),
+            'VerificationPostCreateScreen.handleTakePhoto'
+          );
         } finally {
           setUploadingPhoto(false);
         }
       }
     } catch (error) {
       logError('카메라 오류', error as Error);
-      Alert.alert('오류', '카메라를 사용하는 중 오류가 발생했습니다.');
+      showError(
+        error instanceof Error ? error : new Error('카메라를 사용하는 중 오류가 발생했습니다.'),
+        'VerificationPostCreateScreen.handleTakePhoto'
+      );
     }
   };
 
@@ -218,26 +251,32 @@ const VerificationPostCreateScreen: React.FC<VerificationPostCreateScreenProps> 
 
   // 사진 선택 옵션 표시
   const showPhotoOptions = () => {
-    Alert.alert(
+    showConfirm(
       '사진 추가',
       '사진을 추가할 방법을 선택해주세요.',
       [
         { text: '카메라', onPress: handleTakePhoto },
         { text: '갤러리', onPress: handleSelectPhoto },
-        { text: '취소', style: 'cancel' },
-      ]
+      ],
+      '취소'
     );
   };
 
   // 인증글 작성 또는 수정
   const handleSubmitVerification = async () => {
     if (!content.trim()) {
-      Alert.alert('오류', '인증 내용을 입력해주세요.');
+      showError(
+        new Error('인증 내용을 입력해주세요.'),
+        'VerificationPostCreateScreen.handleSubmitVerification'
+      );
       return;
     }
 
     if (!isEditMode && (!userMissionId || userMissionId === 0)) {
-      Alert.alert('오류', '미션 정보가 올바르지 않습니다.');
+      showError(
+        new Error('미션 정보가 올바르지 않습니다.'),
+        'VerificationPostCreateScreen.handleSubmitVerification'
+      );
       return;
     }
 
@@ -256,9 +295,12 @@ const VerificationPostCreateScreen: React.FC<VerificationPostCreateScreenProps> 
         } else {
           // 인증 통과 후 수정 불가 에러 처리
           if (result.error?.includes('수정') || result.error?.includes('MODIFICATION')) {
-            Alert.alert('수정 불가', '인증이 완료된 게시글은 수정할 수 없습니다.');
+            showError(
+              new Error('인증이 완료된 게시글은 수정할 수 없습니다.'),
+              'VerificationPostCreateScreen.handleSubmitVerification'
+            );
           } else {
-            Alert.alert('오류', result.error || '인증글 수정에 실패했습니다.');
+            handleApiError(result, 'VerificationPostCreateScreen.handleSubmitVerification');
           }
         }
       } else {
