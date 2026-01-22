@@ -83,11 +83,12 @@ export const styles = StyleSheet.create({
     borderRadius: borderRadius.base,
     paddingHorizontal: RESPONSIVE_INPUT_PADDING_H,
     paddingVertical: RESPONSIVE_INPUT_PADDING_V,
-    fontSize: typography.fontSize.sm,
-    height: RESPONSIVE_INPUT_HEIGHT,
-    lineHeight: 22,
-    letterSpacing: 1,
-    textAlignVertical: 'center',
+    ...createTextStyle('sm', {
+      height: RESPONSIVE_INPUT_HEIGHT,
+      lineHeight: 22,
+      letterSpacing: 1,
+      textAlignVertical: 'center',
+    }),
   },
   optionsRow: {
     flexDirection: 'row',

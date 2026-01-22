@@ -22,10 +22,12 @@ export const styles = StyleSheet.create({
 
   input: {
     ...inputStyles.base(),
-    textAlign: 'left', // 한글 입력을 위해 명시적으로 설정
-    lineHeight: 22,
-    letterSpacing: 0,
-    textAlignVertical: 'center', // Android 수직 정렬
+    ...createTextStyle('base', {
+      textAlign: 'left', // 한글 입력을 위해 명시적으로 설정
+      lineHeight: 22,
+      letterSpacing: 0,
+      textAlignVertical: 'center', // Android 수직 정렬
+    }),
   },
 
   // Sizes
