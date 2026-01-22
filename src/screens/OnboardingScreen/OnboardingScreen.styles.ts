@@ -34,8 +34,8 @@ export const styles = StyleSheet.create({
   },
   skipButtonText: {
     ...createTextStyle('2xl', {
-      color: colors.white,
-      fontWeight: typography.fontWeight.medium,
+      color: colors.gray[900] || '#1a1a1a', // 진한 색상으로 변경
+      fontWeight: typography.fontWeight.bold,
     }),
   },
   startButtonText: {
