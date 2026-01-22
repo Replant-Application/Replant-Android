@@ -204,6 +204,11 @@ export const API_CONFIG = {
     spontaneousMission: {
       setup: '/spontaneous-missions/setup',
     },
+
+    // 버전 체크 (Version)
+    version: {
+      check: '/v1/version/check',
+    },
   },
 
   // 요청 타임아웃 (ms) (환경변수에서 읽어옴)

@@ -13,6 +13,7 @@ export { default as ProgressBar } from './ProgressBar';
 export { default as SectionTitle } from './SectionTitle';
 export { default as ConfirmModal } from './ConfirmModal';
 export { default as AlertModal } from './AlertModal';
+export { default as UpdateModal } from './UpdateModal';
 export { TabBar } from './TabBar';
 export { FilterBar } from './FilterBar';
 export { default as CircularProgressBar } from './CircularProgressBar';

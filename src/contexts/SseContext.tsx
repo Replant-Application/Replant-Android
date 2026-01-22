@@ -76,11 +76,27 @@ export const SseProvider: React.FC<SseProviderProps> = ({ children }) => {
     console.log('[SseContext] FCM 알림 전체:', JSON.stringify(notification, null, 2));
     
     // FCM 알림 데이터 구조 변환
-    // FCM data에서 userMissionId 또는 referenceId 추출
     const data = notification.data || notification;
+    const notificationType = data.type || '';
     
-    // userMissionId 추출 (우선순위: data.userMissionId > data.referenceId)
-    // 백엔드에서 보내는 구조: { userMissionId: "177", referenceId: "177" }
+    // 업데이트 알림인 경우 별도 처리 (일반 알림 카운트에 포함하지 않음)
+    if (notificationType === 'APP_UPDATE') {
+      console.log('[SseContext] 업데이트 알림 수신 - AppNavigator에서 처리');
+      const updateNotification = {
+        id: data.id || Date.now(),
+        title: data.title || notification.notification?.title || '업데이트 알림',
+        content: data.content || notification.notification?.body || data.message || '',
+        type: 'APP_UPDATE',
+        isRequired: data.isRequired === 'true' || data.isRequired === true,
+        message: data.message || '',
+        storeUrl: data.storeUrl || '',
+      };
+      setLastNotification(updateNotification);
+      return; // 업데이트 알림은 일반 알림 카운트에 포함하지 않음
+    }
+    
+    // 일반 알림 처리
+    // FCM data에서 userMissionId 또는 referenceId 추출
     const userMissionId = data.userMissionId || data.referenceId;
     const referenceId = data.referenceId || data.userMissionId;
     
@@ -95,16 +111,15 @@ export const SseProvider: React.FC<SseProviderProps> = ({ children }) => {
       id: data.id || data.notificationId || Date.now(),
       title: data.title || notification.notification?.title || '',
       content: data.content || notification.notification?.body || '',
-      type: data.type || '',
-      userMissionId: userMissionId, // 문자열일 수 있으므로 숫자로 변환 필요
-      referenceId: referenceId, // 문자열일 수 있으므로 숫자로 변환 필요
+      type: notificationType,
+      userMissionId: userMissionId,
+      referenceId: referenceId,
       referenceType: data.referenceType || '',
       createdAt: data.createdAt || new Date().toISOString(),
       isRead: false,
     };
     
     console.log('[SseContext] 변환된 FCM 알림:', JSON.stringify(fcmNotification, null, 2));
-    console.log('[SseContext] userMissionId 타입:', typeof fcmNotification.userMissionId);
     console.log('[SseContext] =================================');
     
     setLastNotification(fcmNotification);

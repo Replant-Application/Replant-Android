@@ -481,3 +481,18 @@ export enum ScreenNames {
   FIND_ID_RESULT = 'FindIdResult',
   FIND_PASSWORD = 'FindPassword',
 }
+
+// 앱 업데이트 관련 타입
+export interface VersionConfig {
+  minVersion: string;
+  latestVersion: string;
+  storeUrl: string;
+  message: string;
+}
+
+export interface UpdateCheckResult {
+  isRequired: boolean; // 강제 업데이트
+  isRecommended: boolean; // 선택 업데이트
+  message: string;
+  storeUrl: string;
+}

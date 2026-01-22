@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Image, Platform, BackHandler, ToastAndroid, Animated, Easing } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Image, Platform, BackHandler, ToastAndroid, Animated, Easing, Linking } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useUser } from '../contexts/UserContext';
 import { useSse } from '../contexts/SseContext';
@@ -13,6 +13,9 @@ import { logout } from '../services/authService';
 import { backgroundMusicService } from '../services/backgroundMusicService';
 import { playButtonSound } from '../utils/soundUtils';
 import { getSpontaneousMissionSetup } from '../api/missionApi';
+import { checkUpdateRequired } from '../services/versionService';
+import { UpdateCheckResult } from '../types';
+import { UpdateModal } from '../components/ui';
 
 // 화면 컴포넌트들
 import OnboardingScreen from '../screens/OnboardingScreen';
@@ -76,6 +79,10 @@ const AppNavigator = () => {
   const prevLoggedInRef = useRef<boolean>(isLoggedIn); // 로그인 상태 추적용
   const fadeAnim = useRef(new Animated.Value(1)).current;
   const slideAnim = useRef(new Animated.Value(0)).current;
+  
+  // 업데이트 모달 상태
+  const [updateModalVisible, setUpdateModalVisible] = useState(false);
+  const [updateInfo, setUpdateInfo] = useState<UpdateCheckResult | null>(null);
   
   // 히스토리 최대 길이 제한
   const MAX_HISTORY_LENGTH = 50;
@@ -390,6 +397,118 @@ const AppNavigator = () => {
     };
   }, []);
 
+  // 앱 버전 체크 (앱 시작 시 한 번만)
+  useEffect(() => {
+    const checkAppVersion = async () => {
+      try {
+        console.log('[AppNavigator] 버전 체크 시작');
+        const result = await checkUpdateRequired();
+        console.log('[AppNavigator] 버전 체크 결과:', result);
+        
+        if (result) {
+          // 강제 업데이트는 항상 표시
+          if (result.isRequired) {
+            console.log('[AppNavigator] 강제 업데이트 모달 표시');
+            setUpdateInfo(result);
+            setUpdateModalVisible(true);
+            return;
+          }
+          
+          // 선택 업데이트는 "나중에"를 누른 경우 일정 기간 동안 표시하지 않음
+          if (result.isRecommended) {
+            try {
+              const dismissedKey = `@replant:updateDismissed_${result.storeUrl}`;
+              const dismissedAt = await AsyncStorage.getItem(dismissedKey);
+              
+              if (dismissedAt) {
+                const dismissedTime = parseInt(dismissedAt, 10);
+                const now = Date.now();
+                const hoursSinceDismissed = (now - dismissedTime) / (1000 * 60 * 60);
+                
+                // 24시간이 지나지 않았으면 표시하지 않음
+                if (hoursSinceDismissed < 24) {
+                  console.log('[AppNavigator] 선택 업데이트 모달 - 24시간 내에 "나중에"를 눌러서 표시 안 함');
+                  return;
+                }
+                
+                // 24시간이 지났으면 저장된 값 삭제하고 다시 표시
+                await AsyncStorage.removeItem(dismissedKey);
+                console.log('[AppNavigator] 선택 업데이트 모달 - 24시간 경과, 다시 표시');
+              }
+              
+              console.log('[AppNavigator] 선택 업데이트 모달 표시:', {
+                isRequired: result.isRequired,
+                isRecommended: result.isRecommended,
+              });
+              setUpdateInfo(result);
+              setUpdateModalVisible(true);
+            } catch (storageError) {
+              console.error('[AppNavigator] AsyncStorage 체크 실패:', storageError);
+              // 에러 발생 시에도 모달 표시 (안전장치)
+              setUpdateInfo(result);
+              setUpdateModalVisible(true);
+            }
+          }
+        } else {
+          console.log('[AppNavigator] 업데이트 불필요 - 모달 표시 안 함');
+        }
+      } catch (error) {
+        console.error('[AppNavigator] 버전 체크 실패:', error);
+        // 에러 발생해도 앱은 정상 동작
+      }
+    };
+
+    // 앱 시작 시 버전 체크
+    checkAppVersion();
+  }, []);
+
+  // 플레이스토어 링크 열기
+  const handleUpdate = useCallback(async () => {
+    if (!updateInfo) return;
+
+    try {
+      const url = updateInfo.storeUrl;
+      // market:// 스키마로 먼저 시도 (앱에서 열기)
+      const marketUrl = url.replace(
+        'https://play.google.com/store/apps/details',
+        'market://details'
+      );
+      
+      const canOpen = await Linking.canOpenURL(marketUrl);
+      if (canOpen) {
+        await Linking.openURL(marketUrl);
+      } else {
+        // market://을 열 수 없으면 https:// 사용
+        await Linking.openURL(url);
+      }
+    } catch (error) {
+      console.error('[AppNavigator] 플레이스토어 열기 실패:', error);
+      // 에러 발생 시 https:// 링크로 재시도
+      try {
+        await Linking.openURL(updateInfo.storeUrl);
+      } catch (retryError) {
+        console.error('[AppNavigator] 플레이스토어 링크 재시도 실패:', retryError);
+      }
+    }
+  }, [updateInfo]);
+
+  // "나중에" 버튼 클릭 핸들러 (선택 업데이트만)
+  const handleUpdateLater = useCallback(async () => {
+    if (!updateInfo || updateInfo.isRequired) return;
+    
+    try {
+      // "나중에"를 누른 시간을 AsyncStorage에 저장 (24시간 동안 다시 표시하지 않음)
+      const dismissedKey = `@replant:updateDismissed_${updateInfo.storeUrl}`;
+      await AsyncStorage.setItem(dismissedKey, Date.now().toString());
+      console.log('[AppNavigator] 선택 업데이트 모달 - "나중에" 선택, 24시간 동안 표시 안 함');
+      setUpdateModalVisible(false);
+    } catch (error) {
+      console.error('[AppNavigator] "나중에" 저장 실패:', error);
+      // 에러 발생해도 모달은 닫음
+      setUpdateModalVisible(false);
+    }
+  }, [updateInfo]);
+
   // SSE 알림 수신 시 화면 라우팅 처리
   useEffect(() => {
     console.log('[AppNavigator] 알림 체크:', { lastNotification: !!lastNotification, isLoggedIn });
@@ -413,6 +532,22 @@ const AppNavigator = () => {
     console.log('[AppNavigator] 알림 타입:', type);
     console.log('[AppNavigator] 알림 제목:', title);
     console.log('[AppNavigator] 알림 내용:', content);
+
+    // 업데이트 알림 처리 (APP_UPDATE)
+    if (type === 'APP_UPDATE') {
+      console.log('[AppNavigator] ✅ 업데이트 알림 수신 (FCM)');
+      const data = lastNotification;
+      const updateResult = {
+        isRequired: data.isRequired === true || data.isRequired === 'true',
+        isRecommended: !(data.isRequired === true || data.isRequired === 'true'),
+        message: data.message || data.content || '더 나은 서비스 이용을 위해 업데이트가 필요합니다.',
+        storeUrl: data.storeUrl || 'https://play.google.com/store/apps/details?id=com.anonymous.replantmobileapp',
+      };
+      setUpdateInfo(updateResult);
+      setUpdateModalVisible(true);
+      processedNotificationIdRef.current = notificationId || null;
+      return;
+    }
 
     // 기상 미션 알림 처리 (SPONTANEOUS_WAKE_UP)
     if (type === 'SPONTANEOUS_WAKE_UP') {
@@ -661,6 +796,17 @@ const AppNavigator = () => {
         >
           {renderAuthScreen()}
         </Animated.View>
+
+        {/* 업데이트 모달 (로그인 전에도 표시) */}
+        {updateInfo && (
+          <UpdateModal
+            visible={updateModalVisible}
+            isRequired={updateInfo.isRequired}
+            message={updateInfo.message}
+            onUpdate={handleUpdate}
+            onClose={updateInfo.isRequired ? undefined : handleUpdateLater}
+          />
+        )}
       </View>
     );
   }
@@ -809,6 +955,17 @@ const AppNavigator = () => {
       <View style={styles.screenContainer}>
         {renderScreen()}
       </View>
+
+      {/* 업데이트 모달 */}
+      {updateInfo && (
+        <UpdateModal
+          visible={updateModalVisible}
+          isRequired={updateInfo.isRequired}
+          message={updateInfo.message}
+          onUpdate={handleUpdate}
+          onClose={updateInfo.isRequired ? undefined : () => setUpdateModalVisible(false)}
+        />
+      )}
 
       {/* 하단 탭 네비게이션 */}
       <View style={styles.tabBar}>
