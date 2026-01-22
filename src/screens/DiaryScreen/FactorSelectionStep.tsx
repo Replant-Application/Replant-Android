@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Platform, Dimensions } from 'react-native';
 import { colors, spacing, typography, borderRadius, shadows } from '../../utils/designTokens';
 import { getOptimizedLineHeight } from '../../utils/textStyles';
-import { FACTOR_OPTIONS } from './DiaryScreen.constants';
+import { FACTOR_OPTIONS } from '../../constants/screens/diary';
 import { addOpacity } from './DiaryScreen.utils';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');

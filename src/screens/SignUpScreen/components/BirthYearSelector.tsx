@@ -6,7 +6,7 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { colors, spacing, typography, borderRadius } from '../../../utils/designTokens';
 import { getOptimizedLineHeight } from '../../../utils/textStyles';
-import { getBirthYears } from '../SignUpScreen.constants';
+import { getBirthYears } from '../../../constants/screens/auth';
 
 interface BirthYearSelectorProps {
   birthYear: number | null;

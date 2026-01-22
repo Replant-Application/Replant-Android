@@ -6,7 +6,7 @@ import { Loading, ErrorBoundary, AppHeader, AlertModal } from '../../components/
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
 import { getOptimizedLineHeight } from '../../utils/textStyles';
 import { getCharacterImage } from '../../utils/characterUtils';
-import { HomeScreenProps } from './HomeScreen.types';
+import { HomeScreenProps } from '../../types/screens/home';
 import { getBackgroundImage } from './HomeScreen.utils';
 import { getActiveTodoLists, getTodoListDetail } from '../../api/todolistApi';
 import { TodoList, TodoMission } from '../../types/todolist';

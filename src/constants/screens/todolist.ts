@@ -2,7 +2,7 @@
  * TodoListCreateScreen 상수 정의
  */
 
-import { TimeState, TimePeriod } from './TodoListCreateScreen.types';
+import { TimeState, TimePeriod } from '../../types/screens/todolist';
 
 // 시간 선택 기본값
 export const DEFAULT_START_TIME: TimeState = {

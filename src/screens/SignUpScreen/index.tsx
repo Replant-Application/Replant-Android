@@ -8,8 +8,8 @@ import { join, sendVerification, verifyEmail, RegionInfo } from '../../api/authA
 import { saveTokens, saveUserInfo } from '../../utils/tokenStorage';
 import { apiClient } from '../../api/client';
 import { useUser } from '../../contexts/UserContext';
-import { SignUpScreenProps, Gender, SignUpErrors } from './SignUpScreen.types';
-import { getBirthYears } from './SignUpScreen.constants';
+import { SignUpScreenProps, Gender, SignUpErrors } from '../../types/screens/auth';
+import { getBirthYears } from '../../constants/screens/auth';
 import GenderSelector from './components/GenderSelector';
 import RegionSelector from './components/RegionSelector';
 import BirthYearSelector from './components/BirthYearSelector';

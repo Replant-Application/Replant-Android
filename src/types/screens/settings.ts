@@ -1,5 +1,13 @@
+/**
+ * Settings 관련 화면 타입 정의
+ */
+
 import { NavigationProp } from '@react-navigation/native';
-import { RootStackParamList } from '../../types/navigation';
+import { RootStackParamList } from '../navigation';
+
+export interface SoundSettingsScreenProps {
+  navigation?: NavigationProp<RootStackParamList>;
+}
 
 export interface SettingsScreenProps {
   navigation?: NavigationProp<RootStackParamList>;
@@ -12,4 +20,3 @@ export interface SettingItemProps {
   showArrow?: boolean;
   danger?: boolean;
 }
-

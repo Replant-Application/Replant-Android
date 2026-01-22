@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Platform, Dimensions } from 'react-native';
 import { colors, spacing, typography, borderRadius, shadows } from '../../utils/designTokens';
 import { getOptimizedLineHeight } from '../../utils/textStyles';
-import { EMOTION_TAGS } from './DiaryScreen.constants';
+import { EMOTION_TAGS } from '../../constants/screens/diary';
 import { getEmotionColor, addOpacity } from './DiaryScreen.utils';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');

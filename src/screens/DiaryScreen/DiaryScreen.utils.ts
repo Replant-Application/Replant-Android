@@ -1,5 +1,5 @@
 import { colors } from '../../utils/designTokens';
-import { EMOTION_CATEGORIES } from './DiaryScreen.constants';
+import { EMOTION_CATEGORIES } from '../../constants/screens/diary';
 
 // 감정 카테고리 확인
 const getEmotionCategory = (emotion: string): 'positive' | 'neutral' | 'negative' => {

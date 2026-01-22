@@ -1,5 +1,6 @@
 /**
- * SignUpScreen 타입 정의
+ * 인증 관련 화면 타입 정의
+ * SignUpScreen 등
  */
 
 export interface SignUpScreenProps {

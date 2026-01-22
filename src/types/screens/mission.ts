@@ -1,5 +1,9 @@
+/**
+ * MissionScreen 타입 정의
+ */
+
 import { NavigationProp, RouteProp } from '@react-navigation/native';
-import { RootStackParamList } from '../../types/navigation';
+import { RootStackParamList } from '../navigation';
 
 export interface MissionScreenProps {
   navigation: NavigationProp<RootStackParamList>;
@@ -10,4 +14,3 @@ export type MissionFilter = 'inProgress' | 'pendingVerification' | 'completed';
 export type MissionPeriodFilter = 'DAILY' | 'WEEKLY' | 'MONTHLY';
 export type MissionSourceFilter = 'REGULAR' | 'CUSTOM';
 export type MissionTab = 'myMission' | 'missionGroup';
-

@@ -20,7 +20,7 @@ import { checkVerificationStatus, MissionType, verifyByGps, verifyByTime, create
 import * as Location from 'expo-location';
 import { formatDateYYYYMMDD } from '../../utils/dateUtils';
 import { logError } from '../../utils/logger';
-import { MissionScreenProps, MissionFilter, MissionTab } from './MissionScreen.types';
+import { MissionScreenProps, MissionFilter, MissionTab } from '../../types/screens/mission';
 import { getCurrentUser } from '../../services/authService';
 
 // 미션 도감용 통합 미션 타입

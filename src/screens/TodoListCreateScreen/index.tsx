@@ -20,8 +20,8 @@ import { SCREEN_NAMES } from '../../utils/constants';
 import { initTodoList, getSelectableMissions, createTodoList, rerollRandomMission } from '../../api/todolistApi';
 import { MissionSimple, TodoListCreateRequest } from '../../types/todolist';
 import { createCustomMission, CreateMissionRequest } from '../../api/missionApi';
-import { Step, TodoListCreateScreenProps, TimePeriod, DropdownType } from './TodoListCreateScreen.types';
-import { DEFAULT_START_TIME, DEFAULT_END_TIME, TIME_PERIODS, HOURS, MINUTES } from './TodoListCreateScreen.constants';
+import { Step, TodoListCreateScreenProps, TimePeriod, DropdownType } from '../../types/screens/todolist';
+import { DEFAULT_START_TIME, DEFAULT_END_TIME, TIME_PERIODS, HOURS, MINUTES } from '../../constants/screens/todolist';
 
 const TodoListCreateScreen: React.FC<TodoListCreateScreenProps> = ({ navigation }) => {
   const { showError, showSuccess, showInfo, handleApiError } = useErrorHandler();

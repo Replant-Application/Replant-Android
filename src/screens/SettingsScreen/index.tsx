@@ -8,8 +8,8 @@ import { colors, spacing, typography, borderRadius, shadows } from '../../utils/
 import { getOptimizedLineHeight } from '../../utils/textStyles';
 import { getCharacterImage } from '../../utils/characterUtils';
 import { clearAllCommunityPosts } from '../../services/storage';
-import { SettingsScreenProps } from './SettingsScreen.types';
-import { TERMS_OF_SERVICE, PRIVACY_POLICY, OPEN_SOURCE_LICENSE } from './SettingsScreen.constants';
+import { SettingsScreenProps } from '../../types/screens/settings';
+import { TERMS_OF_SERVICE, PRIVACY_POLICY, OPEN_SOURCE_LICENSE } from '../../constants/screens/settings';
 import SettingItem from './SettingItem';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getStorageKeys } from '../../services/storage';

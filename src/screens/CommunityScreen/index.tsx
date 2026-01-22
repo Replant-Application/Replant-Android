@@ -19,8 +19,8 @@ import { logError } from '../../utils/logger';
 import { getHiddenPosts, hidePost } from '../../utils/hiddenContentStorage';
 import { getMissionSets, searchMissionSets, copyMissionSet, getMyMissionSets, updateMissionSet, MissionSetSimple } from '../../api/todolistApi';
 import { SCREEN_NAMES } from '../../utils/constants';
-import { CommunityScreenProps, CommunityTab, VerificationFilter, PostFilter } from './CommunityScreen.types';
-import { FILTER_OPTIONS } from './CommunityScreen.constants';
+import { CommunityScreenProps, CommunityTab, VerificationFilter, PostFilter } from '../../types/screens/community';
+import { FILTER_OPTIONS } from '../../constants/screens/community';
 import MissionSetList from './components/MissionSetList';
 
 const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation }) => {

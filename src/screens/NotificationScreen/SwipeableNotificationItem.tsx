@@ -10,7 +10,7 @@ import {
   Platform,
   Image,
 } from 'react-native';
-import { SwipeableNotificationItemProps } from './NotificationScreen.types';
+import { SwipeableNotificationItemProps } from '../../types/screens/notification';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
 import { getOptimizedLineHeight } from '../../utils/textStyles';
 import { formatTimeAgo } from '../../utils/dateUtils';

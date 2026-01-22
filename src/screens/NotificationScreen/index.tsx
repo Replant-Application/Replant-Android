@@ -31,7 +31,7 @@ import { useSse } from '../../contexts/SseContext';
 import { removeDuplicates } from '../../utils/arrayUtils';
 import { sortByDate } from '../../utils/dateUtils';
 import { useOverlay } from '../../contexts/OverlayContext';
-import { NotificationScreenProps } from './NotificationScreen.types';
+import { NotificationScreenProps } from '../../types/screens/notification';
 import SwipeableNotificationItem from './SwipeableNotificationItem';
 
 const NotificationScreen: React.FC<NotificationScreenProps> = ({ navigation }) => {

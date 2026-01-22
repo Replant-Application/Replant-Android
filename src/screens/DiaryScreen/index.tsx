@@ -21,7 +21,7 @@ import { Loading, ErrorBoundary, ConfirmModal, AlertModal } from '../../componen
 import { colors, spacing, typography, borderRadius, shadows } from '../../utils/designTokens';
 import { SimpleDiaryData, Diary } from '../../types';
 import { formatDateYYYYMMDD, formatDateKorean, formatDateDivider } from '../../utils/dateUtils';
-import { DiaryStep } from './DiaryScreen.types';
+import { DiaryStep } from '../../types/screens/diary';
 import { getCharacterImage } from '../../utils/characterUtils';
 import { getOptimizedLineHeight } from '../../utils/textStyles';
 import EmotionSelectionStep from './EmotionSelectionStep';

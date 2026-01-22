@@ -6,7 +6,7 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { colors, spacing, typography, borderRadius } from '../../../utils/designTokens';
 import { getOptimizedLineHeight } from '../../../utils/textStyles';
-import { Gender, SignUpErrors } from '../SignUpScreen.types';
+import { Gender, SignUpErrors } from '../../../types/screens/auth';
 
 interface GenderSelectorProps {
   gender: Gender | null;

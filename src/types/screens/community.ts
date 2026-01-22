@@ -3,7 +3,7 @@
  */
 
 import { NavigationProp } from '@react-navigation/native';
-import { RootStackParamList } from '../../types/navigation';
+import { RootStackParamList } from '../navigation';
 
 export interface CommunityScreenProps {
   navigation: NavigationProp<RootStackParamList>;

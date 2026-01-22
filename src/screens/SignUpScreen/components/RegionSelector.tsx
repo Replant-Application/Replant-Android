@@ -7,7 +7,7 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-nati
 import { colors, spacing, typography, borderRadius } from '../../../utils/designTokens';
 import { getOptimizedLineHeight } from '../../../utils/textStyles';
 import { RegionInfo } from '../../../api/authApi';
-import { REGIONS } from '../SignUpScreen.constants';
+import { REGIONS } from '../../../constants/screens/auth';
 
 interface RegionSelectorProps {
   region: string | null;

@@ -1,5 +1,9 @@
+/**
+ * NotificationScreen 타입 정의
+ */
+
 import { NavigationProp } from '@react-navigation/native';
-import { RootStackParamList } from '../../types/navigation';
+import { RootStackParamList } from '../navigation';
 import { Notification as NotificationType } from '../../api/notificationApi';
 
 export interface NotificationScreenProps {
@@ -11,4 +15,3 @@ export interface SwipeableNotificationItemProps {
   onPress: (notification: NotificationType) => void;
   onDelete: (notificationId: number) => void;
 }
-

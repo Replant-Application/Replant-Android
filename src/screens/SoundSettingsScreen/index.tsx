@@ -4,7 +4,7 @@ import Slider from '@react-native-community/slider';
 import { Header } from '../../components/ui';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
 import { getOptimizedLineHeight } from '../../utils/textStyles';
-import { SoundSettingsScreenProps } from './SoundSettingsScreen.types';
+import { SoundSettingsScreenProps } from '../../types/screens/settings';
 import { saveSoundSettings, loadSoundSettings, getDefaultSoundSettings, SoundSettings } from '../../utils/soundSettings';
 import { backgroundMusicService } from '../../services/backgroundMusicService';
 import { playButtonSound } from '../../utils/soundUtils';
