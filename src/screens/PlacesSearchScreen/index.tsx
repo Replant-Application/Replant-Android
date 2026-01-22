@@ -2,22 +2,20 @@ import React from 'react';
 import {
   View,
   Text,
-  StyleSheet,
   TouchableOpacity,
   ScrollView,
   TextInput,
   ActivityIndicator,
-  Platform,
   Image,
   ImageBackground,
 } from 'react-native';
 import { NavigationProp } from '@react-navigation/native';
 import { Header, EmptyState } from '../../components/ui';
 import { PlaceCard } from '../../components/specialized/PlaceCard';
-import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
-import { getOptimizedLineHeight } from '../../utils/textStyles';
+import { colors } from '../../utils/designTokens';
 import { RootStackParamList } from '../../types/navigation';
 import { usePlacesSearchScreenContainer } from './PlacesSearchScreen.container';
+import { styles } from './PlacesSearchScreen.styles';
 
 interface PlacesSearchScreenProps {
   navigation: NavigationProp<RootStackParamList>;
@@ -163,146 +161,5 @@ const PlacesSearchScreen: React.FC<PlacesSearchScreenProps> = ({ navigation }) =
     </ImageBackground>
   );
 };
-
-const styles = StyleSheet.create({
-  backgroundImage: {
-    flex: 1,
-    width: '100%',
-    height: '100%',
-  },
-  container: {
-    flex: 1,
-  },
-  backButtonIcon: {
-    width: 24,
-    height: 24,
-  },
-  content: {
-    flex: 1,
-    padding: spacing[4],
-  },
-  searchContainer: {
-    marginBottom: spacing[3],
-  },
-  searchInput: {
-    backgroundColor: colors.background.primary,
-    borderRadius: borderRadius.base,
-    padding: spacing[2],
-    fontSize: typography.fontSize.base,
-    color: colors.text.primary,
-    borderWidth: 1,
-    borderColor: colors.border.light,
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    textAlignVertical: 'center',
-    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
-  },
-  filterContainer: {
-    marginBottom: spacing[3],
-    maxHeight: 40,
-  },
-  filterChip: {
-    paddingHorizontal: spacing[4],
-    paddingVertical: spacing[2],
-    borderRadius: borderRadius.full,
-    backgroundColor: colors.background.primary,
-    marginRight: spacing[2],
-  },
-  filterChipActive: {
-    backgroundColor: colors.primary[500],
-  },
-  filterChipText: {
-    fontSize: typography.fontSize.sm,
-    color: colors.text.secondary,
-    fontWeight: typography.fontWeight.medium,
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
-  },
-  filterChipTextActive: {
-    color: colors.text.inverse,
-    fontWeight: typography.fontWeight.medium,
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
-  },
-  regionContainer: {
-    marginBottom: spacing[4],
-    maxHeight: 40,
-  },
-  regionChip: {
-    paddingHorizontal: spacing[3],
-    paddingVertical: spacing[2],
-    borderRadius: borderRadius.base,
-    backgroundColor: colors.background.primary,
-    marginRight: spacing[2],
-    borderWidth: 1,
-    borderColor: colors.border.light,
-  },
-  regionChipActive: {
-    backgroundColor: colors.primary[100],
-    borderColor: colors.primary[500],
-  },
-  regionChipText: {
-    fontSize: typography.fontSize.sm,
-    color: colors.text.secondary,
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
-  },
-  regionChipTextActive: {
-    color: colors.primary[700],
-    fontWeight: typography.fontWeight.medium,
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  loadingText: {
-    marginTop: spacing[3],
-    fontSize: typography.fontSize.base,
-    color: colors.text.secondary,
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
-  },
-  placesList: {
-    flex: 1,
-  },
-  resultsCount: {
-    fontSize: typography.fontSize.sm,
-    color: colors.text.secondary,
-    marginBottom: spacing[3],
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
-    fontWeight: typography.fontWeight.medium,
-  },
-});
 
 export default PlacesSearchScreen;

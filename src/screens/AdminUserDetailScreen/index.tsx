@@ -3,13 +3,13 @@
  */
 
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, Platform } from 'react-native';
+import { View, Text, ScrollView } from 'react-native';
 import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { Card, Header, Loading, ErrorBoundary, SectionTitle, Button } from '../../components/ui';
-import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
-import { getOptimizedLineHeight } from '../../utils/textStyles';
+import { spacing } from '../../utils/designTokens';
 import { RootStackParamList } from '../../types/navigation';
 import { useAdminUserDetailScreenContainer } from './AdminUserDetailScreen.container';
+import { styles } from './AdminUserDetailScreen.styles';
 
 interface AdminUserDetailScreenProps {
   navigation: NavigationProp<RootStackParamList>;
@@ -130,106 +130,5 @@ const AdminUserDetailScreen: React.FC<AdminUserDetailScreenProps> = ({ navigatio
     </ScrollView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background.secondary,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: spacing[5],
-  },
-  content: {
-    padding: spacing[5],
-  },
-  infoCard: {
-    marginBottom: spacing[6],
-  },
-  infoRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: spacing[3],
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border.light,
-  },
-  infoLabel: {
-    fontSize: typography.fontSize.base,
-    color: colors.text.secondary,
-    fontWeight: typography.fontWeight.medium,
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
-  },
-  infoValue: {
-    fontSize: typography.fontSize.base,
-    color: colors.text.primary,
-    fontWeight: typography.fontWeight.medium,
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
-  },
-  roleBadge: {
-    paddingHorizontal: spacing[3],
-    paddingVertical: spacing[1],
-    borderRadius: borderRadius.sm,
-    backgroundColor: colors.gray[100],
-  },
-  roleBadgeAdmin: {
-    backgroundColor: colors.primary[100],
-  },
-  roleText: {
-    fontSize: typography.fontSize.sm,
-    color: colors.text.primary,
-    fontWeight: typography.fontWeight.medium,
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
-  },
-  statusBadge: {
-    paddingHorizontal: spacing[3],
-    paddingVertical: spacing[1],
-    borderRadius: borderRadius.sm,
-    backgroundColor: colors.primary[100],
-  },
-  statusBadgeInactive: {
-    backgroundColor: colors.gray[200],
-  },
-  statusText: {
-    fontSize: typography.fontSize.sm,
-    color: colors.text.primary,
-    fontWeight: typography.fontWeight.medium,
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
-  },
-  actionsContainer: {
-    gap: spacing[3],
-  },
-  editButton: {
-    marginBottom: spacing[2],
-  },
-  toggleButton: {
-    marginBottom: spacing[2],
-  },
-  activateButton: {
-    backgroundColor: colors.primary[500],
-  },
-});
 
 export default AdminUserDetailScreen;

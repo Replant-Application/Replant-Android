@@ -7,20 +7,18 @@ import React, { useCallback } from 'react';
 import {
   View,
   Text,
-  StyleSheet,
   FlatList,
   TouchableOpacity,
   RefreshControl,
-  Platform,
   ImageBackground,
 } from 'react-native';
 import { type Notification as NotificationType } from '../../api/notificationApi';
 import { Loading, EmptyState, Header } from '../../components/ui';
-import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
-import { getOptimizedLineHeight } from '../../utils/textStyles';
+import { colors, spacing } from '../../utils/designTokens';
 import { NotificationScreenProps } from '../../types/screens/notification';
 import SwipeableNotificationItem from './SwipeableNotificationItem';
 import { useNotificationScreenContainer } from './NotificationScreen.container';
+import { styles } from './NotificationScreen.styles';
 
 const NotificationScreen: React.FC<NotificationScreenProps> = ({ navigation }) => {
   // 비즈니스 로직은 Container에서 처리
@@ -136,96 +134,5 @@ const NotificationScreen: React.FC<NotificationScreenProps> = ({ navigation }) =
     </ImageBackground>
   );
 };
-
-const styles = StyleSheet.create({
-  backgroundImage: {
-    flex: 1,
-  },
-  container: {
-    flex: 1,
-  },
-  headerTitle: {
-    fontSize: typography.fontSize.lg,
-    fontWeight: typography.fontWeight.medium,
-    color: colors.text.primary,
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.lg),
-  },
-  markAllButton: {
-    paddingHorizontal: spacing[3],
-    paddingVertical: spacing[2],
-  },
-  markAllReadText: {
-    fontSize: typography.fontSize.sm,
-    color: colors.text.secondary,
-    fontWeight: typography.fontWeight.medium as any,
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
-  },
-  filterContainer: {
-    flexDirection: 'row',
-    marginHorizontal: spacing[5],
-    paddingVertical: spacing[2],
-    backgroundColor: '#FFF8E7',
-    borderRadius: borderRadius.lg,
-    borderWidth: 1,
-    borderColor: '#D4A574',
-    padding: 1,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 2,
-  },
-  filterTab: {
-    flex: 1,
-    paddingVertical: spacing[2],
-    alignItems: 'center',
-    borderRadius: borderRadius.md,
-    backgroundColor: 'transparent',
-  },
-  filterTabActive: {
-    backgroundColor: '#8B6F47',
-  },
-  filterText: {
-    fontSize: typography.fontSize.sm,
-    color: '#8B6F47',
-    fontWeight: typography.fontWeight.medium as any,
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
-  },
-  filterTextActive: {
-    color: colors.white,
-    fontWeight: typography.fontWeight.medium as any,
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
-  },
-  listWrapper: {
-    flex: 1,
-    position: 'relative',
-  },
-  listContent: {
-    padding: spacing[4],
-  },
-});
 
 export default NotificationScreen;

@@ -3,13 +3,13 @@
  */
 
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform, KeyboardAvoidingView } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Platform, KeyboardAvoidingView } from 'react-native';
 import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { Header, Loading, ErrorBoundary, Button, Input } from '../../components/ui';
-import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
-import { getOptimizedLineHeight } from '../../utils/textStyles';
+import { spacing } from '../../utils/designTokens';
 import { RootStackParamList } from '../../types/navigation';
 import { useAdminUserEditScreenContainer } from './AdminUserEditScreen.container';
+import { styles } from './AdminUserEditScreen.styles';
 
 interface AdminUserEditScreenProps {
   navigation: NavigationProp<RootStackParamList>;
@@ -118,93 +118,5 @@ const AdminUserEditScreen: React.FC<AdminUserEditScreenProps> = ({ navigation, r
     </KeyboardAvoidingView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background.secondary,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: spacing[5],
-  },
-  content: {
-    flex: 1,
-  },
-  formContainer: {
-    padding: spacing[5],
-  },
-  inputSection: {
-    marginBottom: spacing[5],
-  },
-  label: {
-    fontSize: typography.fontSize.sm,
-    fontWeight: typography.fontWeight.medium,
-    color: colors.text.secondary,
-    marginBottom: spacing[2],
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
-  },
-  input: {
-    backgroundColor: colors.background.primary,
-  },
-  roleContainer: {
-    flexDirection: 'row',
-    gap: spacing[3],
-  },
-  roleButton: {
-    flex: 1,
-    padding: spacing[3],
-    borderRadius: borderRadius.md,
-    backgroundColor: colors.background.primary,
-    borderWidth: 1,
-    borderColor: colors.border.light,
-    alignItems: 'center',
-  },
-  roleButtonActive: {
-    backgroundColor: colors.primary[500],
-    borderColor: colors.primary[500],
-  },
-  roleButtonText: {
-    fontSize: typography.fontSize.base,
-    color: colors.text.secondary,
-    fontWeight: typography.fontWeight.medium,
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
-  },
-  roleButtonTextActive: {
-    color: colors.text.inverse,
-    fontWeight: typography.fontWeight.medium,
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
-  },
-  buttonContainer: {
-    padding: spacing[5],
-    paddingTop: spacing[3],
-    borderTopWidth: 1,
-    borderTopColor: colors.border.light,
-  },
-  saveButton: {
-    width: '100%',
-  },
-  backButtonIcon: {
-    width: 24,
-    height: 24,
-  },
-});
 
 export default AdminUserEditScreen;

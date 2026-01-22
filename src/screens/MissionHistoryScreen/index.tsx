@@ -4,15 +4,15 @@
  */
 
 import React from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, RefreshControl, Platform } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, RefreshControl } from 'react-native';
 import { UserMission } from '../../api/missionApi';
 import { Loading, Header, EmptyState, FilterBar } from '../../components/ui';
-import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
-import { getOptimizedLineHeight } from '../../utils/textStyles';
+import { colors, spacing } from '../../utils/designTokens';
 import { formatDateDot } from '../../utils/dateUtils';
 import { NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types/navigation';
 import { useMissionHistoryScreenContainer } from './MissionHistoryScreen.container';
+import { styles } from './MissionHistoryScreen.styles';
 
 interface MissionHistoryScreenProps {
   navigation: NavigationProp<RootStackParamList>;
@@ -145,151 +145,5 @@ const MissionHistoryScreen: React.FC<MissionHistoryScreenProps> = ({ navigation 
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background.primary,
-  },
-  statsContainer: {
-    flexDirection: 'row',
-    backgroundColor: colors.background.secondary,
-    marginHorizontal: spacing[4],
-    marginVertical: spacing[3],
-    padding: spacing[4],
-    borderRadius: borderRadius.lg,
-  },
-  statItem: {
-    flex: 1,
-    alignItems: 'center',
-  },
-  statValue: {
-    fontSize: typography.fontSize['2xl'],
-    fontWeight: typography.fontWeight.medium as any,
-    color: colors.primary[600],
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize['2xl']),
-  },
-  statLabel: {
-    fontSize: typography.fontSize.xs,
-    color: colors.text.secondary,
-    marginTop: spacing[1],
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
-  },
-  statDivider: {
-    width: 1,
-    backgroundColor: colors.border.light,
-    marginVertical: spacing[1],
-  },
-  listContent: {
-    padding: spacing[4],
-  },
-  missionCard: {
-    backgroundColor: colors.background.primary,
-    borderRadius: borderRadius.lg,
-    padding: spacing[4],
-    marginBottom: spacing[3],
-    borderWidth: 1,
-    borderColor: colors.border.light,
-  },
-  missionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: spacing[2],
-  },
-  statusBadge: {
-    paddingHorizontal: spacing[2],
-    paddingVertical: spacing[1],
-    borderRadius: borderRadius.full,
-  },
-  statusText: {
-    fontSize: typography.fontSize.xs,
-    color: colors.text.inverse,
-    fontWeight: typography.fontWeight.medium as any,
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
-  },
-  missionType: {
-    fontSize: typography.fontSize.xs,
-    color: colors.text.tertiary,
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
-  },
-  missionTitle: {
-    fontSize: typography.fontSize.lg,
-    fontWeight: typography.fontWeight.medium as any,
-    color: colors.text.primary,
-    marginBottom: spacing[1],
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.lg),
-  },
-  missionDescription: {
-    fontSize: typography.fontSize.sm,
-    color: colors.text.secondary,
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
-  },
-  missionFooter: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: spacing[3],
-    paddingTop: spacing[2],
-    borderTopWidth: 1,
-    borderTopColor: colors.border.light,
-  },
-  dateText: {
-    fontSize: typography.fontSize.xs,
-    color: colors.text.tertiary,
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
-  },
-  rewardInfo: {
-    marginTop: spacing[2],
-    paddingTop: spacing[2],
-    borderTopWidth: 1,
-    borderTopColor: colors.border.light,
-  },
-  rewardText: {
-    fontSize: typography.fontSize.sm,
-    color: colors.success,
-    fontWeight: typography.fontWeight.medium as any,
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
-  },
-});
 
 export default MissionHistoryScreen;

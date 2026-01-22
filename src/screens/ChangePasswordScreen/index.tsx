@@ -1,11 +1,10 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, KeyboardAvoidingView, Platform, ImageBackground } from 'react-native';
+import { View, ScrollView, KeyboardAvoidingView, Platform, ImageBackground } from 'react-native';
 import { NavigationProp } from '@react-navigation/native';
 import { Button, Input, Header } from '../../components/ui';
-import { colors, spacing, typography, borderRadius, shadows } from '../../utils/designTokens';
-import { getOptimizedLineHeight } from '../../utils/textStyles';
 import { RootStackParamList } from '../../types/navigation';
 import { useChangePasswordScreenContainer } from './ChangePasswordScreen.container';
+import { styles } from './ChangePasswordScreen.styles';
 
 interface ChangePasswordScreenProps {
   navigation: NavigationProp<RootStackParamList>;
@@ -114,67 +113,5 @@ const ChangePasswordScreen: React.FC<ChangePasswordScreenProps> = ({ navigation 
     </ImageBackground>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  keyboardView: {
-    flex: 1,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingBottom: spacing[10],
-  },
-  content: {
-    padding: spacing[5],
-  },
-  infoBox: {
-    backgroundColor: colors.background.primary,
-    borderRadius: borderRadius.xl,
-    padding: spacing[4],
-    marginBottom: spacing[6],
-    borderWidth: 1,
-    borderColor: colors.border.light,
-    ...shadows.sm,
-  },
-  infoText: {
-    fontSize: typography.fontSize.base,
-    color: colors.text.secondary,
-    textAlign: 'center',
-    lineHeight: getOptimizedLineHeight(typography.fontSize.base) * 1.5,
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-  },
-  form: {
-    backgroundColor: colors.background.primary,
-    borderRadius: borderRadius.xl,
-    paddingHorizontal: spacing[5],
-    paddingVertical: spacing[12],
-    ...shadows.lg,
-  },
-  inputContainer: {
-    marginBottom: spacing[4],
-  },
-  inputText: {
-    fontSize: typography.fontSize.base,
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-  },
-  buttonContainer: {
-    marginTop: spacing[6],
-  },
-  changeButton: {
-    width: '100%',
-  },
-});
 
 export default ChangePasswordScreen;

@@ -7,20 +7,18 @@ import React from 'react';
 import {
   View,
   Text,
-  StyleSheet,
   ScrollView,
   TouchableOpacity,
   RefreshControl,
   Image,
-  Platform,
   ImageBackground,
 } from 'react-native';
 import { NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types/navigation';
 import { Header, Loading, EmptyState } from '../../components/ui';
-import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
-import { getOptimizedLineHeight } from '../../utils/textStyles';
+import { colors, spacing } from '../../utils/designTokens';
 import { useMyMissionSetsScreenContainer } from './MyMissionSetsScreen.container';
+import { styles } from './MyMissionSetsScreen.styles';
 
 interface MyMissionSetsScreenProps {
   navigation: NavigationProp<RootStackParamList>;
@@ -209,204 +207,5 @@ const MyMissionSetsScreen: React.FC<MyMissionSetsScreenProps> = ({ navigation })
     </ImageBackground>
   );
 };
-
-const styles = StyleSheet.create({
-  backgroundImage: {
-    flex: 1,
-    width: '100%',
-    height: '100%',
-  },
-  container: {
-    flex: 1,
-  },
-  backButtonIcon: {
-    width: 24,
-    height: 24,
-    tintColor: colors.text.primary,
-  },
-  createButton: {
-    padding: spacing[2],
-  },
-  createButtonIcon: {
-    width: 24,
-    height: 24,
-  },
-  content: {
-    flex: 1,
-    padding: spacing[4],
-  },
-  infoBox: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.primary[50],
-    borderRadius: borderRadius.base,
-    padding: spacing[3],
-    marginBottom: spacing[3],
-    borderWidth: 1,
-    borderColor: colors.primary[200],
-    gap: spacing[3],
-  },
-  infoIcon: {
-    width: 24,
-    height: 24,
-  },
-  infoText: {
-    flex: 1,
-    fontSize: typography.fontSize.sm,
-    color: colors.primary[700],
-    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-  },
-  missionSetList: {
-    gap: spacing[2],
-  },
-  missionSetCard: {
-    backgroundColor: colors.background.primary,
-    borderRadius: borderRadius.base,
-    padding: spacing[3],
-    borderWidth: 1,
-    borderColor: colors.border.light,
-  },
-  cardHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: spacing[2],
-  },
-  titleRow: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing[2],
-    marginRight: spacing[2],
-  },
-  cardIcon: {
-    width: 20,
-    height: 20,
-  },
-  missionSetTitle: {
-    flex: 1,
-    fontSize: typography.fontSize.base,
-    fontWeight: typography.fontWeight.normal,
-    color: colors.text.primary,
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
-  },
-  publicBadge: {
-    backgroundColor: colors.primary[100],
-    paddingHorizontal: spacing[2],
-    paddingVertical: spacing[0.5],
-    borderRadius: borderRadius.base,
-  },
-  publicBadgeText: {
-    fontSize: typography.fontSize.xs,
-    color: colors.primary[600],
-    fontWeight: typography.fontWeight.medium,
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-  },
-  privateBadge: {
-    backgroundColor: colors.gray[100],
-    paddingHorizontal: spacing[2],
-    paddingVertical: spacing[0.5],
-    borderRadius: borderRadius.base,
-  },
-  privateBadgeText: {
-    fontSize: typography.fontSize.xs,
-    color: colors.gray[600],
-    fontWeight: typography.fontWeight.medium,
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-  },
-  deleteButton: {
-    padding: spacing[1],
-  },
-  deleteIcon: {
-    width: 18,
-    height: 18,
-    tintColor: colors.error,
-  },
-  missionSetDescription: {
-    fontSize: typography.fontSize.sm,
-    color: colors.text.secondary,
-    marginBottom: spacing[2],
-    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-  },
-  cardFooter: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingTop: spacing[2],
-    borderTopWidth: 1,
-    borderTopColor: colors.border.light,
-  },
-  statsRow: {
-    flexDirection: 'row',
-    gap: spacing[4],
-  },
-  statItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing[1],
-  },
-  statIcon: {
-    width: 16,
-    height: 16,
-  },
-  statText: {
-    fontSize: typography.fontSize.sm,
-    color: colors.text.secondary,
-    fontWeight: typography.fontWeight.medium,
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
-  },
-  ratingContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing[1],
-  },
-  stars: {
-    fontSize: typography.fontSize.sm,
-    color: colors.warning,
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-  },
-  ratingText: {
-    fontSize: typography.fontSize.xs,
-    color: colors.text.secondary,
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
-  },
-});
 
 export default MyMissionSetsScreen;
