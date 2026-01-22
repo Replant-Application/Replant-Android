@@ -5,7 +5,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   FlatList,
-  Image,
+  ImageBackground,
   Platform,
   Dimensions,
   Animated,
@@ -57,6 +57,7 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onNavigate }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const flatListRef = useRef<FlatList>(null);
   const scrollX = useRef(new Animated.Value(0)).current;
+  const previousScrollOffset = useRef(0);
 
   const handleSkip = async () => {
     await setOnboardingCompleted();
@@ -82,6 +83,24 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onNavigate }) => {
   const viewabilityConfig = useRef({
     itemVisiblePercentThreshold: 50,
   }).current;
+
+  /**
+   * 스크롤이 끝났을 때 마지막 화면에서 오른쪽 스와이프를 했는지 확인하고 자동으로 넘어가기
+   */
+  const handleScrollEnd = (event: any) => {
+    const offsetX = event.nativeEvent.contentOffset.x;
+    const newIndex = Math.round(offsetX / SCREEN_WIDTH);
+    const scrollDirection = offsetX > previousScrollOffset.current ? 'right' : 'left';
+    
+    previousScrollOffset.current = offsetX;
+    
+    // 마지막 화면에서 오른쪽으로 스와이프한 경우에만 자동으로 넘어가기
+    if (newIndex === ONBOARDING_SLIDES.length - 1 && scrollDirection === 'right') {
+      setTimeout(() => {
+        handleStart();
+      }, 500); // 스와이프 애니메이션이 완료될 시간을 주기
+    }
+  };
 
   const renderSlide = ({ item }: { item: OnboardingSlide }) => {
     // 투명한 슬라이드 - 배경은 상단에서 처리
@@ -141,25 +160,30 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onNavigate }) => {
   };
 
   return (
-    <View style={styles.container}>
-      {/* 배경 이미지 - 각 슬라이드의 배경 */}
-      <Image 
-        source={ONBOARDING_SLIDES[currentIndex].image} 
-        style={styles.fullScreenImage} 
-        resizeMode="cover" 
-        accessibilityLabel="온보딩 배경 이미지"
-      />
-      
+    <ImageBackground
+      source={ONBOARDING_SLIDES[currentIndex].image}
+      style={styles.container}
+      resizeMode="cover"
+      accessibilityLabel="온보딩 배경 이미지"
+    >
       {/* Skip/Start 버튼 */}
-      <TouchableOpacity 
-        style={styles.skipButton} 
-        onPress={currentIndex < ONBOARDING_SLIDES.length - 1 ? handleSkip : handleStart} 
-        activeOpacity={0.8}
-      >
-        <Text style={styles.skipButtonText}>
-          {currentIndex < ONBOARDING_SLIDES.length - 1 ? '건너뛰기' : '시작하기'}
-        </Text>
-      </TouchableOpacity>
+      {currentIndex < ONBOARDING_SLIDES.length - 1 ? (
+        <TouchableOpacity 
+          style={styles.skipButton} 
+          onPress={handleSkip} 
+          activeOpacity={0.8}
+        >
+          <Text style={styles.skipButtonText}>✕</Text>
+        </TouchableOpacity>
+      ) : (
+        <TouchableOpacity 
+          style={styles.skipButton} 
+          onPress={handleStart} 
+          activeOpacity={0.8}
+        >
+          <Text style={styles.startButtonText}>시작하기</Text>
+        </TouchableOpacity>
+      )}
 
       {/* 슬라이드 - 투명하게 처리하여 스와이프만 가능하게 */}
       <FlatList
@@ -172,6 +196,7 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onNavigate }) => {
         showsHorizontalScrollIndicator={false}
         onScroll={handleScroll}
         scrollEventThrottle={16}
+        onMomentumScrollEnd={handleScrollEnd}
         onViewableItemsChanged={onViewableItemsChanged}
         viewabilityConfig={viewabilityConfig}
         getItemLayout={(_, index) => ({
@@ -186,27 +211,20 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onNavigate }) => {
       <View style={styles.paginationWrapper}>
         {renderPagination()}
       </View>
-    </View>
+    </ImageBackground>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.white,
-  },
-  fullScreenImage: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
     width: SCREEN_WIDTH,
     height: SCREEN_HEIGHT,
-    zIndex: 0,
+    backgroundColor: colors.white,
   },
   transparentFlatList: {
     flex: 1,
     backgroundColor: 'transparent',
-    zIndex: 1,
   },
   skipButton: {
     position: 'absolute',
@@ -216,18 +234,31 @@ const styles = StyleSheet.create({
     paddingVertical: spacing[3],
     paddingHorizontal: spacing[4],
     minHeight: 44, // 최소 터치 영역 확보 (iOS 가이드라인: 44x44)
-    minWidth: 80, // 최소 너비 확보
+    minWidth: 44, // 최소 너비 확보 (X 기호용)
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   skipButtonText: {
-    fontSize: typography.fontSize.xs,
-    color: colors.gray[700],
+    fontSize: typography.fontSize['2xl'],
+    color: colors.white,
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,
       android: typography.fontFamily.regular,
     }),
     includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
-    letterSpacing: 0.2,
+    lineHeight: getOptimizedLineHeight(typography.fontSize['2xl']),
+    fontWeight: typography.fontWeight.medium,
+  },
+  startButtonText: {
+    fontSize: typography.fontSize.sm,
+    color: colors.white,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
+    fontWeight: typography.fontWeight.medium,
   },
   slideContainer: {
     width: SCREEN_WIDTH,
