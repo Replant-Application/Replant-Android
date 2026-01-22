@@ -7,6 +7,7 @@ import { View, Text, ScrollView, TouchableOpacity, TextInput } from 'react-nativ
 import { NavigationProp } from '@react-navigation/native';
 import { Header, Loading, ErrorBoundary } from '../../components/ui';
 import { colors } from '../../utils/designTokens';
+import { formatDateKorean } from '../../utils/dateUtils';
 import { RootStackParamList } from '../../types/navigation';
 import { useAdminUserListScreenContainer } from './AdminUserListScreen.container';
 import { styles } from './AdminUserListScreen.styles';
@@ -107,7 +108,7 @@ const AdminUserListScreen: React.FC<AdminUserListScreenProps> = ({ navigation })
                     <Text style={styles.userCardRole}>역할: {user.role || 'USER'}</Text>
                     {user.createdAt && (
                       <Text style={styles.userCardDate}>
-                        가입: {new Date(user.createdAt).toLocaleDateString('ko-KR')}
+                        가입: {formatDateKorean(user.createdAt)}
                       </Text>
                     )}
                   </View>

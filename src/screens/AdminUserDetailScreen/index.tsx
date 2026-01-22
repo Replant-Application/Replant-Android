@@ -7,6 +7,7 @@ import { View, Text, ScrollView } from 'react-native';
 import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { Card, Header, Loading, ErrorBoundary, SectionTitle, Button } from '../../components/ui';
 import { spacing } from '../../utils/designTokens';
+import { formatDateKorean } from '../../utils/dateUtils';
 import { RootStackParamList } from '../../types/navigation';
 import { useAdminUserDetailScreenContainer } from './AdminUserDetailScreen.container';
 import { styles } from './AdminUserDetailScreen.styles';
@@ -97,11 +98,7 @@ const AdminUserDetailScreen: React.FC<AdminUserDetailScreenProps> = ({ navigatio
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>가입일</Text>
               <Text style={styles.infoValue}>
-                {new Date(user.createdAt).toLocaleDateString('ko-KR', {
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric',
-                })}
+                {formatDateKorean(user.createdAt)}
               </Text>
             </View>
           )}

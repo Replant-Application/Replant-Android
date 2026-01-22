@@ -20,6 +20,7 @@ import { NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types/navigation';
 import { Header, Loading, ErrorBoundary, EmptyState, SimpleTabBar } from '../../components/ui';
 import { colors } from '../../utils/designTokens';
+import { formatDateKorean } from '../../utils/dateUtils';
 import {
   useMissionGroupScreenContainer,
   UnifiedMission,
@@ -314,7 +315,7 @@ const MissionGroupScreen: React.FC<MissionGroupScreenProps> = ({ navigation }) =
                                     <View style={styles.reviewAuthorInfo}>
                                       <Text style={styles.reviewAuthor}>{review.userNickname}</Text>
                                       <Text style={styles.reviewDate}>
-                                        {new Date(review.createdAt).toLocaleDateString('ko-KR')}
+                                        {formatDateKorean(review.createdAt)}
                                       </Text>
                                     </View>
                                   </View>

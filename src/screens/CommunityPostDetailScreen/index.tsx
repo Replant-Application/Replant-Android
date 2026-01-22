@@ -17,6 +17,7 @@ import {
 import { CommentCard } from '../../components/specialized';
 import { Loading, ErrorBoundary, EmptyState, Header, Card, AlertModal, ConfirmModal } from '../../components/ui';
 import { colors } from '../../utils/designTokens';
+import { formatDateKorean } from '../../utils/dateUtils';
 import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types/navigation';
 import { useCommunityPostDetailScreenContainer } from './CommunityPostDetailScreen.container';
@@ -144,7 +145,7 @@ const CommunityPostDetailScreen: React.FC<CommunityPostDetailScreenProps> = ({ n
                   </View>
                 )}
                 <Text style={styles.date}>
-                  {post.created_at ? new Date(post.created_at).toLocaleDateString('ko-KR') : ''}
+                  {post.created_at ? formatDateKorean(post.created_at) : ''}
                 </Text>
               </View>
             </View>

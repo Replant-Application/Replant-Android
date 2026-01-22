@@ -162,12 +162,23 @@ export const formatDateKorean = (
 /**
  * YYYY.MM.DD 형식으로 날짜 포맷팅
  * 
- * @param dateString - ISO 8601 형식의 날짜 문자열
+ * @param dateString - ISO 8601 형식의 날짜 문자열 또는 배열 형태
  * @returns YYYY.MM.DD 형식의 문자열
  */
-export const formatDateDot = (dateString: string): string => {
-  const date = new Date(dateString);
-  return `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, '0')}.${String(date.getDate()).padStart(2, '0')}`;
+export const formatDateDot = (dateString: string | number[] | null | undefined): string => {
+  try {
+    // 날짜 정규화 (배열 형태 처리)
+    const normalizedDate = normalizeDate(dateString);
+    if (!normalizedDate) return '알 수 없음';
+    
+    const date = new Date(normalizedDate);
+    if (isNaN(date.getTime())) {
+      return '알 수 없음';
+    }
+    return `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, '0')}.${String(date.getDate()).padStart(2, '0')}`;
+  } catch {
+    return '알 수 없음';
+  }
 };
 
 /**

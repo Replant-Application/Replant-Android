@@ -3,7 +3,7 @@ import { View, Text, ScrollView, Image, TouchableOpacity, ImageBackground } from
 import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types/navigation';
 import { Header } from '../../components/ui';
-import { formatDateKorean } from '../../utils/dateUtils';
+import { formatDateKorean, normalizeDate } from '../../utils/dateUtils';
 import { styles } from './BadgeDetailScreen.styles';
 
 interface BadgeDetailScreenProps {
@@ -16,7 +16,9 @@ const BadgeDetailScreen: React.FC<BadgeDetailScreenProps> = ({ navigation, route
 
   const missionTitle = badge.mission?.title || badge.customMission?.title || '미션';
   const missionType = badge.missionType === 'CUSTOM' ? '커스텀 미션' : '일반 미션';
-  const isExpired = badge.isExpired || new Date(badge.expiresAt) < new Date();
+  // 만료일 비교 (배열 형식 날짜 처리)
+  const expiresAtDate = badge.expiresAt ? new Date(normalizeDate(badge.expiresAt)) : null;
+  const isExpired = badge.isExpired || (expiresAtDate && !isNaN(expiresAtDate.getTime()) && expiresAtDate < new Date());
 
   // 날짜 포맷팅 (formatDateKorean 사용)
 

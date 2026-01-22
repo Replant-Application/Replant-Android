@@ -17,6 +17,7 @@ import {
 import { CommentCard } from '../../components/specialized';
 import { Loading, ErrorBoundary, EmptyState } from '../../components/ui';
 import { colors } from '../../utils/designTokens';
+import { formatDateKorean } from '../../utils/dateUtils';
 import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types/navigation';
 import { useVerificationPostDetailScreenContainer } from './VerificationPostDetailScreen.container';
@@ -122,7 +123,7 @@ const VerificationPostDetailScreen: React.FC<VerificationPostDetailScreenProps> 
               </View>
             </View>
             <Text style={styles.date}>
-              {post.createdAt ? new Date(post.createdAt).toLocaleDateString('ko-KR') : ''}
+              {post.createdAt ? formatDateKorean(post.createdAt) : ''}
             </Text>
           </View>
 

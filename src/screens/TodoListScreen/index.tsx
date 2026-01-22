@@ -10,6 +10,7 @@ import {
   Image,
 } from 'react-native';
 import { colors } from '../../utils/designTokens';
+import { formatDateKorean } from '../../utils/dateUtils';
 import { Header, SimpleTabBar } from '../../components/ui';
 import { TodoList } from '../../types/todolist';
 import { useTodoListScreenContainer } from './TodoListScreen.container';
@@ -99,7 +100,7 @@ const TodoListScreen: React.FC<Props> = ({ navigation, route }) => {
 
         <View style={styles.cardFooter}>
           <Text style={styles.cardDate}>
-            {new Date(todoList.createdAt).toLocaleDateString('ko-KR')}
+            {formatDateKorean(todoList.createdAt)}
           </Text>
           <Text style={styles.progressPercent}>{progressPercent}%</Text>
         </View>
