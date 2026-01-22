@@ -27,7 +27,7 @@ export const styles = StyleSheet.create({
   headerTitle: {
     fontWeight: typography.fontWeight.medium as any,
     fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
+      ios: undefined, // iOS는 기본 시스템 폰트 사용
       android: typography.fontFamily.regular,
     }),
     includeFontPadding: false,
@@ -63,10 +63,15 @@ export const styles = StyleSheet.create({
       color: colors.white,
     }),
   },
+  authorNameContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing[1.5],
+    flex: 1,
+  },
   authorName: {
     ...createTextStyle('sm', {
       fontWeight: typography.fontWeight.normal,
-      marginBottom: 2,
     }),
   },
   categoryBadge: {
@@ -74,7 +79,6 @@ export const styles = StyleSheet.create({
     paddingHorizontal: spacing[2],
     paddingVertical: 2,
     borderRadius: borderRadius.base,
-    alignSelf: 'flex-start',
   },
   categoryText: {
     ...createTextStyle('xs', {
@@ -120,6 +124,7 @@ export const styles = StyleSheet.create({
     ...createTextStyle('xs', {
       color: colors.text.tertiary,
     }),
+    marginLeft: 'auto',
   },
   missionInfo: {
     flexDirection: 'row',
@@ -179,7 +184,7 @@ export const styles = StyleSheet.create({
   pendingIcon: {
     fontSize: typography.fontSize.xs,
     fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
+      ios: undefined, // iOS는 기본 시스템 폰트 사용
       android: typography.fontFamily.regular,
     }),
     includeFontPadding: false,
@@ -228,7 +233,7 @@ export const styles = StyleSheet.create({
   actionIcon: {
     fontSize: typography.fontSize.base,
     fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
+      ios: undefined, // iOS는 기본 시스템 폰트 사용
       android: typography.fontFamily.regular,
     }),
     includeFontPadding: false,

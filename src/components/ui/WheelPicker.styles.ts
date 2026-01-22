@@ -2,7 +2,7 @@
  * WheelPicker 스타일
  */
 
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Platform } from 'react-native';
 import { colors, spacing, typography } from '../../utils/designTokens';
 import { getOptimizedLineHeight } from '../../utils/styles/textStyles';
 
@@ -39,7 +39,10 @@ export const styles = StyleSheet.create({
     paddingHorizontal: spacing[2],
   },
   itemText: {
-    fontFamily: typography.fontFamily.regular,
+    fontFamily: Platform.select({
+      ios: undefined, // iOS는 기본 시스템 폰트 사용
+      android: typography.fontFamily.regular, // Android는 커스텀 폰트 사용
+    }),
     color: colors.text.primary,
     includeFontPadding: false,
     textAlign: 'center',

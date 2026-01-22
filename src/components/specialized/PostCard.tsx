@@ -116,7 +116,9 @@ const PostCard: React.FC<PostCardProps> = ({
           </View>
         </View>
         <View style={styles.headerRight}>
-          <Text style={styles.date}>{formatTimeAgo(post.created_at, { longFormat: true })}</Text>
+          <Text style={styles.date}>
+            {formatTimeAgo(post.created_at, { longFormat: true })}
+          </Text>
           {!isOwnPost && onHide && (
             <TouchableOpacity
               style={styles.menuButton}

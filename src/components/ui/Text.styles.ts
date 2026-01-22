@@ -9,8 +9,8 @@ import { typography } from '../../utils/designTokens';
 export const styles = StyleSheet.create({
   default: {
     fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
+      ios: undefined, // iOS는 기본 시스템 폰트 사용
+      android: typography.fontFamily.regular, // Android는 커스텀 폰트 사용
     }),
     includeFontPadding: false,
     textAlignVertical: 'center',

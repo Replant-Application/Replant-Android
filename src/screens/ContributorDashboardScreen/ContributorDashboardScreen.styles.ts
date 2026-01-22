@@ -29,7 +29,7 @@ export const styles = StyleSheet.create({
   welcomeEmoji: {
     fontSize: 40,
     fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
+      ios: undefined, // iOS는 기본 시스템 폰트 사용
       android: typography.fontFamily.regular,
     }),
     includeFontPadding: false,
@@ -225,7 +225,7 @@ export const styles = StyleSheet.create({
     width: 32,
     textAlign: 'center',
     fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
+      ios: undefined, // iOS는 기본 시스템 폰트 사용
       android: typography.fontFamily.regular,
     }),
     includeFontPadding: false,
@@ -281,7 +281,7 @@ export const styles = StyleSheet.create({
     fontSize: 24,
     marginBottom: spacing[2],
     fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
+      ios: undefined, // iOS는 기본 시스템 폰트 사용
       android: typography.fontFamily.regular,
     }),
     includeFontPadding: false,
@@ -337,7 +337,7 @@ export const styles = StyleSheet.create({
   resourceIcon: {
     fontSize: 24,
     fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
+      ios: undefined, // iOS는 기본 시스템 폰트 사용
       android: typography.fontFamily.regular,
     }),
   },

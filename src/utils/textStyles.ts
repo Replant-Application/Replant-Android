@@ -12,8 +12,8 @@ import { typography } from './designTokens';
  */
 export const getDefaultTextStyle = (): TextStyle => ({
   fontFamily: Platform.select({
-    ios: typography.fontFamily.regular,
-    android: typography.fontFamily.regular,
+    ios: undefined, // iOS는 기본 시스템 폰트 사용
+    android: typography.fontFamily.regular, // Android는 커스텀 폰트 사용
   }),
   includeFontPadding: false, // Android 여백 문제 해결
   textAlignVertical: 'center', // Android 수직 정렬
@@ -57,8 +57,8 @@ export const getOptimizedPaddingVertical = (fontSize: number): number => {
 export const applyTextStyle = (style: any, fontSize?: number): TextStyle => {
   const baseStyle: TextStyle = {
     fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
+      ios: undefined, // iOS는 기본 시스템 폰트 사용
+      android: typography.fontFamily.regular, // Android는 커스텀 폰트 사용
     }),
     includeFontPadding: false,
   };

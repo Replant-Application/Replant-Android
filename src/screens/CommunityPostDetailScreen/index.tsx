@@ -136,18 +136,18 @@ const CommunityPostDetailScreen: React.FC<CommunityPostDetailScreenProps> = ({ n
                   {post.author_nickname?.charAt(0)?.toUpperCase() || '?'}
                 </Text>
               </View>
-              <View>
+              <View style={styles.authorNameContainer}>
                 <Text style={styles.authorName}>{post.author_nickname || '알 수 없음'}</Text>
                 {post.category && (
                   <View style={styles.categoryBadge}>
                     <Text style={styles.categoryText}>{post.category}</Text>
                   </View>
                 )}
+                <Text style={styles.date}>
+                  {post.created_at ? new Date(post.created_at).toLocaleDateString('ko-KR') : ''}
+                </Text>
               </View>
             </View>
-            <Text style={styles.date}>
-              {post.created_at ? new Date(post.created_at).toLocaleDateString('ko-KR') : ''}
-            </Text>
           </View>
 
           <View style={styles.missionInfo}>

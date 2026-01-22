@@ -94,18 +94,53 @@ export const formatDateYYYYMMDD = (date: Date | string): string => {
 };
 
 /**
+ * 날짜를 ISO 8601 문자열로 변환
+ * 배열 형태 [year, month, day, hour, minute, second, nanosecond]를 처리
+ */
+export const normalizeDate = (date: string | number[] | null | undefined): string => {
+  if (!date) return '';
+  
+  // 배열 형태인 경우 (Java LocalDateTime/LocalDate 직렬화)
+  if (Array.isArray(date)) {
+    if (date.length < 3) return '';
+    
+    const [year, month, day, hour = 0, minute = 0, second = 0] = date;
+    
+    // ISO 8601 형식으로 변환: YYYY-MM-DDTHH:mm:ss
+    const monthStr = String(month).padStart(2, '0');
+    const dayStr = String(day).padStart(2, '0');
+    const hourStr = String(hour).padStart(2, '0');
+    const minuteStr = String(minute).padStart(2, '0');
+    const secondStr = String(second).padStart(2, '0');
+    
+    return `${year}-${monthStr}-${dayStr}T${hourStr}:${minuteStr}:${secondStr}`;
+  }
+  
+  // 이미 문자열인 경우 그대로 반환
+  return String(date);
+};
+
+/**
  * 한국어 형식으로 날짜 포맷팅 (예: "2024년 1월 1일")
  * 
- * @param dateString - ISO 8601 형식의 날짜 문자열
+ * @param dateString - ISO 8601 형식의 날짜 문자열 또는 배열 형태
  * @param includeWeekday - 요일 포함 여부 (기본: false)
  * @returns 포맷팅된 날짜 문자열
  */
 export const formatDateKorean = (
-  dateString: string,
+  dateString: string | number[] | null | undefined,
   includeWeekday: boolean = false
 ): string => {
   try {
-    const date = new Date(dateString);
+    // 날짜 정규화 (배열 형태 처리)
+    const normalizedDate = normalizeDate(dateString);
+    if (!normalizedDate) return '알 수 없음';
+    
+    const date = new Date(normalizedDate);
+    if (isNaN(date.getTime())) {
+      return '알 수 없음';
+    }
+    
     return date.toLocaleDateString('ko-KR', {
       year: 'numeric',
       month: 'long',
@@ -113,7 +148,7 @@ export const formatDateKorean = (
       ...(includeWeekday && { weekday: 'long' }),
     });
   } catch {
-    return dateString;
+    return '알 수 없음';
   }
 };
 
@@ -131,21 +166,33 @@ export const formatDateDot = (dateString: string): string => {
 /**
  * 채팅방 날짜 구분선 포맷팅 (오늘/어제/날짜)
  * 
- * @param dateString - ISO 8601 형식의 날짜 문자열
+ * @param dateString - ISO 8601 형식의 날짜 문자열 또는 배열 형태
  * @returns "오늘", "어제", 또는 "YYYY년 M월 D일" 형식의 문자열
  */
-export const formatDateDivider = (dateString: string): string => {
-  const date = new Date(dateString);
-  const today = new Date();
-  const yesterday = new Date(today);
-  yesterday.setDate(yesterday.getDate() - 1);
+export const formatDateDivider = (dateString: string | number[] | null | undefined): string => {
+  try {
+    // 날짜 정규화 (배열 형태 처리)
+    const normalizedDate = normalizeDate(dateString);
+    if (!normalizedDate) return '알 수 없음';
+    
+    const date = new Date(normalizedDate);
+    if (isNaN(date.getTime())) {
+      return '알 수 없음';
+    }
+    
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
 
-  if (date.toDateString() === today.toDateString()) {
-    return '오늘';
-  } else if (date.toDateString() === yesterday.toDateString()) {
-    return '어제';
+    if (date.toDateString() === today.toDateString()) {
+      return '오늘';
+    } else if (date.toDateString() === yesterday.toDateString()) {
+      return '어제';
+    }
+    return `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일`;
+  } catch {
+    return '알 수 없음';
   }
-  return `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일`;
 };
 
 /**

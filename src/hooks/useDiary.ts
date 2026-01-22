@@ -6,6 +6,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useUser } from '../contexts/UserContext';
 import { logError } from '../utils/logger';
+import { normalizeDate } from '../utils/dateUtils';
 import { Diary, UseDiaryReturn, ServiceResult, SimpleDiaryData, Emotion } from '../types';
 import {
   getDiaries,
@@ -63,10 +64,13 @@ const transformDiaryResponse = (response: DiaryResponse): Diary => {
     emotion = mapKoreanEmotionToEnglish(response.emotions[0]);
   }
 
+  // 날짜 정규화 (배열 형태 처리)
+  const normalizedDate = normalizeDate(response.date as any);
+
   return {
     id: String(response.id),
     diary_id: String(response.id),
-    date: response.date,
+    date: normalizedDate,
     emotion,
     content: response.content,
     mood: response.mood,

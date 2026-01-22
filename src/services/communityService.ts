@@ -197,6 +197,33 @@ interface BackendPageResponse {
 }
 
 /**
+ * 날짜를 ISO 8601 문자열로 변환
+ * 배열 형태 [year, month, day, hour, minute, second, nanosecond]를 처리
+ */
+const normalizeDate = (date: string | number[] | null | undefined): string => {
+  if (!date) return '';
+  
+  // 배열 형태인 경우 (Java LocalDateTime 직렬화)
+  if (Array.isArray(date)) {
+    if (date.length < 3) return '';
+    
+    const [year, month, day, hour = 0, minute = 0, second = 0] = date;
+    
+    // ISO 8601 형식으로 변환: YYYY-MM-DDTHH:mm:ss
+    const monthStr = String(month).padStart(2, '0');
+    const dayStr = String(day).padStart(2, '0');
+    const hourStr = String(hour).padStart(2, '0');
+    const minuteStr = String(minute).padStart(2, '0');
+    const secondStr = String(second).padStart(2, '0');
+    
+    return `${year}-${monthStr}-${dayStr}T${hourStr}:${minuteStr}:${secondStr}`;
+  }
+  
+  // 이미 문자열인 경우 그대로 반환
+  return String(date);
+};
+
+/**
  * 백엔드 응답을 프론트엔드 형식으로 변환
  */
 const transformBackendPost = (post: BackendPostResponse): CommunityPost => {
@@ -220,6 +247,9 @@ const transformBackendPost = (post: BackendPostResponse): CommunityPost => {
     postTitle = post.title?.trim() || '자유 게시글';
   }
   
+  // createdAt을 정규화 (배열 형태 처리)
+  const normalizedCreatedAt = normalizeDate(post.createdAt);
+
   return {
     id: post.id.toString(),
     post_id: post.id.toString(),
@@ -232,8 +262,8 @@ const transformBackendPost = (post: BackendPostResponse): CommunityPost => {
     author_id: post.userId?.toString() || '',
     userId: post.userId, // 백엔드 userId 직접 사용
     author_nickname: post.userNickname || '익명',
-    created_at: post.createdAt,
-    updated_at: post.updatedAt,
+    created_at: normalizedCreatedAt, // 정규화된 날짜 문자열 (배열 형태 처리됨)
+    updated_at: post.updatedAt ? normalizeDate(post.updatedAt) : undefined,
     like_count: post.likeCount || 0,
     comment_count: post.commentCount || 0,
     scrap_count: 0, // 백엔드에서 제공하지 않음 - 로컬 관리
@@ -378,7 +408,7 @@ export const createComment = async (
         author_id: result.data.userId.toString(),
         userId: result.data.userId,
         author_nickname: result.data.userNickname,
-        created_at: result.data.createdAt,
+        created_at: normalizeDate(result.data.createdAt), // 정규화된 날짜 문자열 (배열 형태 처리됨)
         parent_comment_id: result.data.parentId?.toString(),
         isAuthor: result.data.isAuthor, // 백엔드에서 제공하는 본인 댓글 여부
       };
@@ -429,7 +459,7 @@ export const updateComment = async (
         content: result.data.content,
         author: result.data.userId.toString(),
         author_nickname: result.data.userNickname,
-        created_at: result.data.createdAt,
+        created_at: normalizeDate(result.data.createdAt), // 정규화된 날짜 문자열 (배열 형태 처리됨)
         parent_comment_id: result.data.parentId?.toString(),
       };
       return {
@@ -517,8 +547,8 @@ const transformBackendComment = (comment: BackendComment, postId: string): Commu
   author_id: comment.userId.toString(), // 작성자 ID (레거시 호환)
   userId: comment.userId, // 백엔드 userId 직접 사용
   author_nickname: comment.userNickname,
-  created_at: comment.createdAt,
-  updated_at: comment.updatedAt,
+  created_at: normalizeDate(comment.createdAt), // 정규화된 날짜 문자열 (배열 형태 처리됨)
+  updated_at: comment.updatedAt ? normalizeDate(comment.updatedAt) : undefined,
   parent_comment_id: comment.parentId?.toString(),
   isAuthor: comment.isAuthor, // 백엔드에서 제공하는 본인 댓글 여부 (userId 기반)
 });

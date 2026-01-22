@@ -119,7 +119,7 @@ export const styles = StyleSheet.create({
     fontWeight: typography.fontWeight.medium as any,
     color: colors.green[500],
     fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
+      ios: undefined, // iOS는 기본 시스템 폰트 사용
       android: typography.fontFamily.regular,
     }),
     includeFontPadding: false,
@@ -140,7 +140,7 @@ export const styles = StyleSheet.create({
     color: colors.green[500],
     marginHorizontal: spacing[2],
     fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
+      ios: undefined, // iOS는 기본 시스템 폰트 사용
       android: typography.fontFamily.regular,
     }),
     includeFontPadding: false,

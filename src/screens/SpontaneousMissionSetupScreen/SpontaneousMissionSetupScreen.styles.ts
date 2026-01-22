@@ -31,7 +31,7 @@ export const styles = StyleSheet.create({
   headerTitle: {
     fontWeight: typography.fontWeight.medium as any,
     fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
+      ios: undefined, // iOS는 기본 시스템 폰트 사용
       android: typography.fontFamily.regular,
     }),
     includeFontPadding: false,
@@ -77,7 +77,7 @@ export const styles = StyleSheet.create({
     marginBottom: spacing[2],
     textAlign: 'center',
     fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
+      ios: undefined, // iOS는 기본 시스템 폰트 사용
       android: typography.fontFamily.regular,
     }),
     includeFontPadding: false,
@@ -113,7 +113,7 @@ export const styles = StyleSheet.create({
     fontWeight: typography.fontWeight.bold,
     color: colors.text.primary,
     fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
+      ios: undefined, // iOS는 기본 시스템 폰트 사용
       android: typography.fontFamily.regular,
     }),
     includeFontPadding: false,
@@ -151,7 +151,7 @@ export const styles = StyleSheet.create({
     fontWeight: typography.fontWeight.medium,
     color: colors.text.primary,
     fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
+      ios: undefined, // iOS는 기본 시스템 폰트 사용
       android: typography.fontFamily.regular,
     }),
     includeFontPadding: false,

@@ -66,8 +66,8 @@ export const styles = StyleSheet.create({
     color: colors.text.primary,
     textAlign: 'center',
     fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
+      ios: undefined, // iOS는 기본 시스템 폰트 사용
+      android: typography.fontFamily.regular, // Android는 커스텀 폰트 사용
     }),
     includeFontPadding: false,
     lineHeight: getOptimizedLineHeight(typography.fontSize['2xl']),

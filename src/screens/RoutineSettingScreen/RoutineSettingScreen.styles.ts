@@ -113,7 +113,7 @@ export const styles = StyleSheet.create({
     fontWeight: typography.fontWeight.bold,
     color: '#6B5344',
     fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
+      ios: undefined, // iOS는 기본 시스템 폰트 사용
       android: typography.fontFamily.regular,
     }),
     includeFontPadding: false,
@@ -160,7 +160,7 @@ export const styles = StyleSheet.create({
     fontWeight: typography.fontWeight.bold,
     color: colors.primary[600],
     fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
+      ios: undefined, // iOS는 기본 시스템 폰트 사용
       android: typography.fontFamily.regular,
     }),
     includeFontPadding: false,

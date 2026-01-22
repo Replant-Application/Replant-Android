@@ -72,7 +72,7 @@ export const styles = StyleSheet.create({
     fontSize: 32,
     marginBottom: spacing[2],
     fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
+      ios: undefined, // iOS는 기본 시스템 폰트 사용
       android: typography.fontFamily.regular,
     }),
     includeFontPadding: false,
