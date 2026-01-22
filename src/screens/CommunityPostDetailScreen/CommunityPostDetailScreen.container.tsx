@@ -12,7 +12,7 @@ import { useCommunity } from '../../hooks/useCommunity';
 import { useUser } from '../../contexts/UserContext';
 import { getHiddenComments, hideComment } from '../../utils/hiddenContentStorage';
 import { logError } from '../../utils/logger';
-import { SCREEN_NAMES } from '../../constants/screens';
+import { SCREEN_NAMES } from '../../utils/constants';
 
 interface CommunityPostDetailScreenContainerProps {
   navigation: NavigationProp<RootStackParamList>;

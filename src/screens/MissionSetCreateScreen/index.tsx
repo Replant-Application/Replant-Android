@@ -7,7 +7,6 @@ import React from 'react';
 import {
   View,
   Text,
-  StyleSheet,
   ScrollView,
   TouchableOpacity,
   TextInput,
@@ -19,10 +18,10 @@ import {
 import { NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types/navigation';
 import { Header, Loading } from '../../components/ui';
-import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
-import { getOptimizedLineHeight } from '../../utils/textStyles';
+import { colors } from '../../utils/designTokens';
 import { UserMission } from '../../api/missionApi';
 import { useMissionSetCreateScreenContainer } from './MissionSetCreateScreen.container';
+import { styles } from './MissionSetCreateScreen.styles';
 
 interface MissionSetCreateScreenProps {
   navigation: NavigationProp<RootStackParamList>;
@@ -190,177 +189,5 @@ const MissionSetCreateScreen: React.FC<MissionSetCreateScreenProps> = ({ navigat
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  keyboardView: {
-    flex: 1,
-  },
-  content: {
-    flex: 1,
-    padding: spacing[4],
-  },
-  section: {
-    marginBottom: spacing[5],
-  },
-  sectionTitle: {
-    fontSize: typography.fontSize.base,
-    fontWeight: typography.fontWeight.medium,
-    color: colors.text.primary,
-    marginBottom: spacing[2],
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
-  },
-  sectionHint: {
-    fontSize: typography.fontSize.sm,
-    color: colors.text.tertiary,
-    marginBottom: spacing[3],
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
-  },
-  textInput: {
-    backgroundColor: colors.background.primary,
-    borderRadius: borderRadius.lg,
-    paddingHorizontal: spacing[4],
-    paddingVertical: spacing[3],
-    fontSize: typography.fontSize.base,
-    color: colors.text.primary,
-    borderWidth: 1,
-    borderColor: colors.border.light,
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-  },
-  textArea: {
-    height: 100,
-    paddingTop: spacing[3],
-  },
-  switchRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: colors.background.primary,
-    borderRadius: borderRadius.lg,
-    padding: spacing[4],
-    borderWidth: 1,
-    borderColor: colors.border.light,
-  },
-  switchDescription: {
-    fontSize: typography.fontSize.sm,
-    color: colors.text.tertiary,
-    marginTop: spacing[1],
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
-  },
-  missionList: {
-    gap: spacing[2],
-  },
-  missionItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.background.primary,
-    borderRadius: borderRadius.lg,
-    padding: spacing[4],
-    borderWidth: 1,
-    borderColor: colors.border.light,
-  },
-  missionItemSelected: {
-    borderColor: colors.primary[500],
-    backgroundColor: colors.primary[50],
-  },
-  checkbox: {
-    width: 24,
-    height: 24,
-    borderRadius: borderRadius.base,
-    borderWidth: 2,
-    borderColor: colors.gray[300],
-    marginRight: spacing[3],
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  checkboxSelected: {
-    borderColor: colors.primary[500],
-    backgroundColor: colors.primary[500],
-  },
-  checkmark: {
-    color: colors.white,
-    fontSize: typography.fontSize.sm,
-    fontWeight: typography.fontWeight.bold,
-  },
-  missionTitle: {
-    flex: 1,
-    fontSize: typography.fontSize.base,
-    color: colors.text.primary,
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
-  },
-  missionTitleSelected: {
-    color: colors.primary[700],
-    fontWeight: typography.fontWeight.medium,
-  },
-  emptyMissions: {
-    backgroundColor: colors.background.primary,
-    borderRadius: borderRadius.lg,
-    padding: spacing[6],
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: colors.border.light,
-  },
-  emptyText: {
-    fontSize: typography.fontSize.sm,
-    color: colors.text.tertiary,
-    textAlign: 'center',
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.sm) * 1.5,
-  },
-  buttonContainer: {
-    padding: spacing[4],
-    paddingBottom: spacing[6],
-    backgroundColor: 'transparent',
-  },
-  createButton: {
-    backgroundColor: colors.primary[500],
-    borderRadius: borderRadius.lg,
-    paddingVertical: spacing[4],
-    alignItems: 'center',
-  },
-  createButtonDisabled: {
-    backgroundColor: colors.gray[300],
-  },
-  createButtonText: {
-    fontSize: typography.fontSize.lg,
-    fontWeight: typography.fontWeight.medium,
-    color: colors.white,
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.lg),
-  },
-});
 
 export default MissionSetCreateScreen;

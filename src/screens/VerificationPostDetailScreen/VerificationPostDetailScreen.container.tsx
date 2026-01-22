@@ -23,7 +23,7 @@ import { getActiveTodoLists, getTodoListDetail, completeTodoMission } from '../.
 import { getUserMission } from '../../api/missionApi';
 import { useUser } from '../../contexts/UserContext';
 import { useErrorHandler } from '../../hooks/useErrorHandler';
-import { SCREEN_NAMES } from '../../constants/screens';
+import { SCREEN_NAMES } from '../../utils/constants';
 
 interface VerificationPostDetailScreenContainerProps {
   navigation: NavigationProp<RootStackParamList>;

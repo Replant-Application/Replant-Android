@@ -13,7 +13,7 @@ import {
 } from '../../api/missionApi';
 import { logError } from '../../utils/logger';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { SCREEN_NAMES } from '../../constants/screens';
+import { SCREEN_NAMES } from '../../utils/constants';
 
 interface SpontaneousMissionSetupScreenContainerProps {
   navigation: NavigationProp<RootStackParamList>;

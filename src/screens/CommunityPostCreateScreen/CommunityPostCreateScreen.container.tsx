@@ -12,7 +12,7 @@ import { createVerificationPost } from '../../api/verificationApi';
 import { launchImageLibrary, ImagePickerResponse } from 'react-native-image-picker';
 import { uploadCommunityPhoto } from '../../api/fileApi';
 import { logError } from '../../utils/logger';
-import { SCREEN_NAMES } from '../../constants/screens';
+import { SCREEN_NAMES } from '../../utils/constants';
 
 interface CommunityPostCreateScreenContainerProps {
   navigation: NavigationProp<RootStackParamList>;

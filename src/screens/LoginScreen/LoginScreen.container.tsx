@@ -12,7 +12,7 @@ import { useUser } from '../../contexts/UserContext';
 import { signInWithKakao } from '../../services/kakaoSignIn';
 import { signInWithGoogle } from '../../services/googleSignIn';
 import { loginWithOAuth } from '../../services/authService';
-import { SCREEN_NAMES } from '../../constants/screens';
+import { SCREEN_NAMES } from '../../utils/constants';
 
 interface LoginScreenContainerProps {
   onNavigate: (screen: string) => void;

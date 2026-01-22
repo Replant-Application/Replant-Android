@@ -33,7 +33,7 @@ interface AdminMissionManageScreenProps {
 const AdminMissionManageScreen: React.FC<AdminMissionManageScreenProps> = ({ navigation }) => {
   // 비즈니스 로직은 Container에서 처리
   const {
-    missions,
+    missions: filteredMissions,
     loading,
     showModal,
     editingMission,

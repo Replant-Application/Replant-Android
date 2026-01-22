@@ -6,7 +6,6 @@ import React from 'react';
 import {
   View,
   Text,
-  StyleSheet,
   ScrollView,
   TextInput,
   KeyboardAvoidingView,
@@ -15,11 +14,11 @@ import {
   ImageBackground,
 } from 'react-native';
 import { Button, Header } from '../../components/ui';
-import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
-import { getOptimizedLineHeight } from '../../utils/textStyles';
+import { colors } from '../../utils/designTokens';
 import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types/navigation';
 import { useCommunityPostEditScreenContainer } from './CommunityPostEditScreen.container';
+import { styles } from './CommunityPostEditScreen.styles';
 
 interface CommunityPostEditScreenProps {
   navigation: NavigationProp<RootStackParamList>;
@@ -166,180 +165,6 @@ const CommunityPostEditScreen: React.FC<CommunityPostEditScreenProps> = ({ navig
   );
 };
 
-const styles = StyleSheet.create({
-  backgroundImage: {
-    flex: 1,
-    width: '100%',
-    height: '100%',
-  },
-  container: {
-    flex: 1,
-  },
-  content: {
-    flex: 1,
-    padding: spacing[4],
-  },
-  headerTitle: {
-    fontWeight: typography.fontWeight.medium as any,
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  backButtonIcon: {
-    width: 24,
-    height: 24,
-  },
-  backButtonText: {
-    fontSize: typography.fontSize.base,
-    color: colors.text.primary,
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-  },
-  missionInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: spacing[4],
-    backgroundColor: colors.primary[50],
-    borderRadius: borderRadius.md,
-    marginBottom: spacing[4],
-  },
-  missionEmoji: {
-    fontSize: typography.fontSize['2xl'],
-    marginRight: spacing[3],
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-  },
-  missionTextContainer: {
-    flex: 1,
-  },
-  missionLabel: {
-    fontSize: typography.fontSize.xs,
-    color: colors.text.tertiary,
-    marginBottom: spacing[1],
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
-  },
-  missionTitle: {
-    fontSize: typography.fontSize.base,
-    fontWeight: typography.fontWeight.medium,
-    color: colors.text.primary,
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
-  },
-  inputSection: {
-    marginBottom: spacing[4],
-  },
-  label: {
-    fontSize: typography.fontSize.sm,
-    fontWeight: typography.fontWeight.medium,
-    color: colors.text.secondary,
-    marginBottom: spacing[2],
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
-  },
-  titleInput: {
-    backgroundColor: colors.background.primary,
-    borderWidth: 1,
-    borderColor: colors.border.light,
-    borderRadius: borderRadius.md,
-    padding: spacing[3],
-    fontSize: typography.fontSize.base,
-    color: colors.text.primary,
-    height: 48,
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    textAlignVertical: 'center',
-  },
-  titleInputDisabled: {
-    backgroundColor: colors.gray[100],
-    color: colors.text.secondary,
-    borderColor: colors.border.light,
-  },
-  disabledNote: {
-    fontSize: typography.fontSize.xs,
-    color: colors.text.tertiary,
-    marginTop: spacing[1],
-    fontStyle: 'italic',
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
-  },
-  contentInput: {
-    backgroundColor: colors.background.primary,
-    borderWidth: 1,
-    borderColor: colors.border.light,
-    borderRadius: borderRadius.md,
-    padding: spacing[3],
-    fontSize: typography.fontSize.base,
-    color: colors.text.primary,
-    minHeight: 150,
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    textAlignVertical: 'top',
-  },
-  imageSection: {
-    marginBottom: spacing[4],
-  },
-  previewImage: {
-    width: '100%',
-    height: 200,
-    borderRadius: borderRadius.md,
-    backgroundColor: colors.background.secondary,
-    marginBottom: spacing[2],
-  },
-  imageNote: {
-    fontSize: typography.fontSize.xs,
-    color: colors.text.tertiary,
-    fontStyle: 'italic',
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
-  },
-  buttonContainer: {
-    marginTop: -spacing[1],
-    marginBottom: spacing[4],
-  },
-  submitButton: {
-    backgroundColor: colors.primary[600],
-  },
-});
 
 export default CommunityPostEditScreen;
 

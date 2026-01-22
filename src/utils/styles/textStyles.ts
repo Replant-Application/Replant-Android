@@ -1,0 +1,116 @@
+/**
+ * 텍스트 스타일 유틸리티
+ * 공통 텍스트 스타일 패턴을 추상화하여 재사용 가능하게 만듦
+ */
+
+import { Platform, TextStyle } from 'react-native';
+import { typography, colors } from '../designTokens';
+import { getOptimizedLineHeight } from '../textStyles';
+
+/**
+ * 텍스트 스타일 생성 함수
+ * Platform.select + fontFamily + includeFontPadding + lineHeight 패턴을 자동화
+ * 
+ * @param fontSize - typography.fontSize의 키 (예: 'sm', 'base', 'lg')
+ * @param options - 추가 스타일 옵션
+ * @returns TextStyle 객체
+ */
+export const createTextStyle = (
+  fontSize: keyof typeof typography.fontSize,
+  options?: Partial<TextStyle>
+): TextStyle => {
+  const fontSizeValue = typography.fontSize[fontSize];
+  
+  return {
+    fontSize: fontSizeValue,
+    fontFamily: Platform.select({
+      ios: typography.fontFamily.regular,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(fontSizeValue),
+    ...options,
+  };
+};
+
+/**
+ * 제목 텍스트 스타일
+ */
+export const createTitleStyle = (
+  fontSize: keyof typeof typography.fontSize = 'lg',
+  options?: Partial<TextStyle>
+): TextStyle => {
+  return createTextStyle(fontSize, {
+    fontWeight: typography.fontWeight.medium,
+    color: colors.text.primary,
+    ...options,
+  });
+};
+
+/**
+ * 본문 텍스트 스타일
+ */
+export const createBodyStyle = (
+  fontSize: keyof typeof typography.fontSize = 'base',
+  options?: Partial<TextStyle>
+): TextStyle => {
+  return createTextStyle(fontSize, {
+    color: colors.text.primary,
+    ...options,
+  });
+};
+
+/**
+ * 보조 텍스트 스타일 (secondary, tertiary)
+ */
+export const createSecondaryTextStyle = (
+  fontSize: keyof typeof typography.fontSize = 'sm',
+  options?: Partial<TextStyle>
+): TextStyle => {
+  return createTextStyle(fontSize, {
+    color: colors.text.secondary,
+    ...options,
+  });
+};
+
+/**
+ * 에러 텍스트 스타일
+ */
+export const createErrorTextStyle = (
+  fontSize: keyof typeof typography.fontSize = 'sm',
+  options?: Partial<TextStyle>
+): TextStyle => {
+  return createTextStyle(fontSize, {
+    color: '#ef4444', // red[500]
+    ...options,
+  });
+};
+
+/**
+ * 링크 텍스트 스타일
+ */
+export const createLinkTextStyle = (
+  fontSize: keyof typeof typography.fontSize = 'sm',
+  options?: Partial<TextStyle>
+): TextStyle => {
+  return createTextStyle(fontSize, {
+    color: '#89C17E', // primary[500]
+    textDecorationLine: 'underline',
+    ...options,
+  });
+};
+
+/**
+ * 버튼 텍스트 스타일
+ */
+export const createButtonTextStyle = (
+  fontSize: keyof typeof typography.fontSize = 'base',
+  options?: Partial<TextStyle>
+): TextStyle => {
+  return createTextStyle(fontSize, {
+    fontWeight: typography.fontWeight.medium,
+    color: '#ffffff',
+    textAlign: 'center',
+    ...options,
+  });
+};

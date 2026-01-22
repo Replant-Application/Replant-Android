@@ -15,7 +15,7 @@ import { getStorageKeys } from '../../services/storage';
 import { clearAuthData } from '../../utils/tokenStorage';
 import { apiClient } from '../../api/client';
 import { deleteMyAccount } from '../../api/userApi';
-import { SCREEN_NAMES } from '../../constants/screens';
+import { SCREEN_NAMES } from '../../utils/constants';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // 앱 버전 정보 (런타임에서 가져오기)
