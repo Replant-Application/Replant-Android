@@ -1,7 +1,7 @@
 import React from 'react';
-import { Text, StyleSheet, TextStyle, Platform } from 'react-native';
-import { colors, spacing, typography } from '../../utils/designTokens';
-import { getOptimizedLineHeight } from '../../utils/textStyles';
+import { Text, TextStyle } from 'react-native';
+import { colors, spacing } from '../../utils/designTokens';
+import { styles } from './SectionTitle.styles';
 
 interface SectionTitleProps {
   title: string;
@@ -40,52 +40,5 @@ const SectionTitle: React.FC<SectionTitleProps> = ({
     </Text>
   );
 };
-
-const styles = StyleSheet.create({
-  title: {
-    fontWeight: typography.fontWeight.medium as any,
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-  },
-  sm: {
-    fontSize: typography.fontSize.sm,
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
-  },
-  base: {
-    fontSize: typography.fontSize.base,
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
-  },
-  lg: {
-    fontSize: typography.fontSize.lg,
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.lg),
-  },
-  xl: {
-    fontSize: typography.fontSize.xl,
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.xl),
-  },
-});
 
 export default SectionTitle;

@@ -4,8 +4,9 @@
  */
 
 import React from 'react';
-import { Text as RNText, TextProps as RNTextProps, Platform, StyleSheet } from 'react-native';
+import { Text as RNText, TextProps as RNTextProps } from 'react-native';
 import { typography } from '../../utils/designTokens';
+import { styles } from './Text.styles';
 
 export interface TextProps extends RNTextProps {
   /**
@@ -53,17 +54,6 @@ export const Text: React.FC<TextProps> = ({
     </RNText>
   );
 };
-
-const styles = StyleSheet.create({
-  default: {
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    textAlignVertical: 'center',
-  },
-});
 
 export default Text;
 

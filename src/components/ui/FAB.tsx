@@ -1,7 +1,7 @@
 import React from 'react';
-import { TouchableOpacity, Text, StyleSheet, ViewStyle, TextStyle, Platform } from 'react-native';
-import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
-import { getOptimizedLineHeight } from '../../utils/textStyles';
+import { TouchableOpacity, Text, ViewStyle, TextStyle } from 'react-native';
+import { colors } from '../../utils/designTokens';
+import { styles } from './FAB.styles';
 
 interface FABProps {
   onPress: () => void;
@@ -69,67 +69,5 @@ const FAB: React.FC<FABProps> = ({
     </TouchableOpacity>
   );
 };
-
-const styles = StyleSheet.create({
-  fab: {
-    position: 'absolute',
-    bottom: spacing[6],
-    right: spacing[5],
-    borderRadius: borderRadius.full,
-    justifyContent: 'center',
-    alignItems: 'center',
-    elevation: 8,
-    shadowColor: colors.primary[500],
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-  },
-  base: {
-    width: 56,
-    height: 56,
-  },
-  sm: {
-    width: 48,
-    height: 48,
-  },
-  lg: {
-    width: 64,
-    height: 64,
-  },
-  icon: {
-    color: colors.text.inverse,
-    fontWeight: typography.fontWeight.medium,
-  },
-  baseIcon: {
-    fontSize: typography.fontSize['2xl'],
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize['2xl']),
-  },
-  smIcon: {
-    fontSize: typography.fontSize.xl,
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.xl),
-  },
-  lgIcon: {
-    fontSize: typography.fontSize['3xl'],
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize['3xl']),
-  },
-});
 
 export default FAB;

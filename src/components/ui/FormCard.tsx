@@ -1,7 +1,7 @@
 import React from 'react';
-import { StyleSheet, ViewStyle } from 'react-native';
-import { spacing } from '../../utils/designTokens';
+import { ViewStyle } from 'react-native';
 import Card from './Card';
+import { styles } from './FormCard.styles';
 
 interface FormCardProps {
   children: React.ReactNode;
@@ -27,11 +27,5 @@ const FormCard: React.FC<FormCardProps> = ({
     </Card>
   );
 };
-
-const styles = StyleSheet.create({
-  formCard: {
-    marginBottom: spacing[4],
-  },
-});
 
 export default FormCard;

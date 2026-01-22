@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, Platform, Modal, Animated } from 'react-native';
+import { View, Text, TouchableOpacity, Image, Modal, Animated } from 'react-native';
 import { NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types/navigation';
-import { colors, spacing, typography, borderRadius, shadows } from '../../utils/designTokens';
-import { getOptimizedLineHeight } from '../../utils/textStyles';
 import { useOverlay } from '../../contexts/OverlayContext';
 import { loadSoundSettings, saveSoundSettings, SoundSettings } from '../../utils/soundSettings';
 import { backgroundMusicService } from '../../services/backgroundMusicService';
 import { SCREEN_NAMES } from '../../utils/constants';
+import { styles } from './AppHeader.styles';
 
 interface AppHeaderProps {
   navigation: NavigationProp<RootStackParamList>;
@@ -255,138 +254,6 @@ const AppHeader: React.FC<AppHeaderProps> = ({ navigation }) => {
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'flex-end',
-    backgroundColor: 'transparent',
-    paddingTop: spacing[6],
-    paddingBottom: spacing[3],
-    paddingLeft: spacing[4],
-    paddingRight: spacing[4],
-    width: '100%',
-  },
-  rightSection: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing[1],
-  },
-  menuButton: {
-    width: 52,
-    height: 52,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  menuIcon: {
-    width: 36,
-    height: 36,
-  },
-  menuOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'flex-end',
-    alignItems: 'flex-end',
-  },
-  menuBar: {
-    position: 'absolute',
-    top: spacing[16],
-    right: 0,
-    width: 280,
-    backgroundColor: colors.background.primary,
-    borderTopLeftRadius: borderRadius.xl,
-    borderBottomLeftRadius: borderRadius.xl,
-    borderLeftWidth: 3,
-    borderTopWidth: 3,
-    borderBottomWidth: 3,
-    borderColor: '#D4A574',
-    paddingTop: spacing[4],
-    paddingBottom: spacing[3],
-    paddingHorizontal: spacing[4],
-    ...shadows.lg,
-  },
-  menuItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: spacing[2],
-    paddingHorizontal: spacing[3],
-    borderRadius: borderRadius.md,
-    marginBottom: spacing[1],
-    backgroundColor: '#FFF8E7',
-    borderWidth: 1,
-    borderColor: '#D4A574',
-  },
-  menuItemIcon: {
-    width: 24,
-    height: 24,
-    marginRight: spacing[3],
-  },
-  menuItemText: {
-    fontSize: typography.fontSize.base,
-    fontWeight: typography.fontWeight.medium as any,
-    color: colors.text.primary,
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
-  },
-  iconButton: {
-    position: 'relative',
-  },
-  iconWrapper: {
-    width: 52,
-    height: 52,
-    justifyContent: 'center',
-    alignItems: 'center',
-    position: 'relative',
-  },
-  iconText: {
-    fontSize: typography.fontSize.base,
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
-  },
-  iconImage: {
-    width: 36,
-    height: 36,
-  },
-  soundIcon: {
-    fontSize: 28,
-  },
-  notificationBadge: {
-    position: 'absolute',
-    top: 2,
-    right: 2,
-    backgroundColor: colors.error,
-    borderRadius: borderRadius.full,
-    minWidth: 20,
-    height: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 5,
-    borderWidth: 2.5,
-    borderColor: colors.background.primary,
-    zIndex: 10,
-    elevation: 10,
-  },
-  badgeText: {
-    color: colors.white,
-    fontSize: typography.fontSize.xs,
-    fontWeight: typography.fontWeight.medium,
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
-  },
-});
 
 export default AppHeader;
 

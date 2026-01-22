@@ -1,6 +1,7 @@
 import React from 'react';
-import { TouchableOpacity, View, StyleSheet, ViewStyle } from 'react-native';
+import { TouchableOpacity, View, ViewStyle } from 'react-native';
 import { colors, borderRadius } from '../../utils/designTokens';
+import { styles } from './PlusButton.styles';
 
 interface PlusButtonProps {
   onPress: () => void;
@@ -76,28 +77,6 @@ const PlusButton: React.FC<PlusButtonProps> = ({
     </TouchableOpacity>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  button: {
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  plusContainer: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    position: 'relative',
-  },
-  plusBar: {
-    position: 'absolute',
-  },
-  plusBarVertical: {
-    position: 'absolute',
-  },
-});
 
 export default PlusButton;
 

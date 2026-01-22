@@ -14,9 +14,9 @@
  */
 
 import React from 'react';
-import { TouchableOpacity, Text, StyleSheet, ActivityIndicator, ViewStyle, TextStyle, TouchableOpacityProps, Platform } from 'react-native';
-import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
-import { getOptimizedLineHeight } from '../../utils/textStyles';
+import { TouchableOpacity, Text, ActivityIndicator, ViewStyle, TextStyle, TouchableOpacityProps } from 'react-native';
+import { colors } from '../../utils/designTokens';
+import { styles } from './Button.styles';
 
 interface ButtonProps extends Omit<TouchableOpacityProps, 'onPress' | 'style'> {
   title: string;
@@ -86,105 +86,5 @@ const Button: React.FC<ButtonProps> = ({
     </TouchableOpacity>
   );
 };
-
-const styles = StyleSheet.create({
-  base: {
-    borderRadius: borderRadius.base,
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexDirection: 'row',
-  },
-
-  // Variants
-  primary: {
-    backgroundColor: colors.primary[700], // WCAG AA 대비율 개선: primary[500] → primary[700]
-  },
-  secondary: {
-    backgroundColor: colors.gray[200],
-  },
-  outline: {
-    backgroundColor: 'transparent',
-    borderWidth: 1,
-    borderColor: colors.primary[500],
-  },
-  ghost: {
-    backgroundColor: 'transparent',
-  },
-
-  // Sizes
-  sm: {
-    height: 32,
-    paddingHorizontal: spacing[3],
-  },
-  baseSize: {
-    height: 40,
-    paddingHorizontal: spacing[4],
-  },
-  lg: {
-    height: 48,
-    paddingHorizontal: spacing[5],
-  },
-
-  // States
-  disabled: {
-    backgroundColor: colors.gray[300],
-    borderColor: colors.gray[300],
-  },
-
-  // Text styles
-  text: {
-    fontWeight: typography.fontWeight.medium,
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-  },
-  primaryText: {
-    color: colors.text.inverse,
-  },
-  secondaryText: {
-    color: colors.text.primary,
-  },
-  outlineText: {
-    color: colors.primary[500],
-  },
-  ghostText: {
-    color: colors.primary[500],
-  },
-
-  // Text sizes
-  smText: {
-    fontSize: typography.fontSize.sm,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-  },
-  baseText: {
-    fontSize: typography.fontSize.base,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-  },
-  lgText: {
-    fontSize: typography.fontSize.lg,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.lg),
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-  },
-
-  disabledText: {
-    color: colors.text.tertiary,
-  },
-});
 
 export default Button;

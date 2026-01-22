@@ -1,9 +1,8 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Platform } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
 import Card from './Card';
 import CircularProgressBar from './CircularProgressBar';
-import { colors, spacing, typography, borderRadius, shadows } from '../../utils/designTokens';
-import { getOptimizedLineHeight } from '../../utils/textStyles';
+import { styles } from './MissionProgressCard.styles';
 
 interface MissionProgressCardProps {
   completedMissions: number;
@@ -57,43 +56,6 @@ const MissionProgressCard: React.FC<MissionProgressCardProps> = ({
     </Card>
   );
 };
-
-const styles = StyleSheet.create({
-  card: {
-    backgroundColor: '#F8F9FA', // 연한 베이지색 배경
-    marginBottom: spacing[5],
-    borderRadius: borderRadius.base, // 둥근 모서리 줄이기
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: spacing[4],
-  },
-  title: {
-    fontSize: typography.fontSize.sm,
-    fontWeight: typography.fontWeight.normal,
-    color: colors.text.primary,
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
-  },
-  homeIcon: {
-    fontSize: typography.fontSize.base,
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
-  },
-  progressContainer: {
-    alignItems: 'center',
-  },
-});
 
 export default MissionProgressCard;
 

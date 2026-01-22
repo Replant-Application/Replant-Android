@@ -7,15 +7,13 @@ import React from 'react';
 import {
   View,
   Text,
-  StyleSheet,
   Modal,
   TouchableOpacity,
   Image,
   ImageSourcePropType,
-  Platform,
 } from 'react-native';
-import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
-import { getOptimizedLineHeight } from '../../utils/textStyles';
+import { colors } from '../../utils/designTokens';
+import { styles } from './ConfirmModal.styles';
 
 interface ConfirmModalProps {
   visible: boolean;
@@ -78,88 +76,6 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
     </Modal>
   );
 };
-
-const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalContainer: {
-    backgroundColor: colors.gray[800],
-    borderRadius: borderRadius.xl,
-    padding: spacing[6],
-    width: '80%',
-    maxWidth: 400,
-  },
-  modalImage: {
-    width: 64,
-    height: 64,
-    alignSelf: 'center',
-    marginBottom: spacing[3],
-  },
-  title: {
-    fontSize: typography.fontSize.xl,
-    fontWeight: typography.fontWeight.medium,
-    color: colors.white,
-    marginBottom: spacing[3],
-    textAlign: 'center',
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.xl),
-  },
-  message: {
-    fontSize: typography.fontSize.base,
-    color: colors.gray[300],
-    marginBottom: spacing[6],
-    textAlign: 'center',
-    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-  },
-  buttonContainer: {
-    flexDirection: 'row',
-    gap: spacing[3],
-  },
-  button: {
-    flex: 1,
-    paddingVertical: spacing[2],
-    borderRadius: borderRadius.xl,
-    alignItems: 'center',
-  },
-  cancelButton: {
-    backgroundColor: colors.gray[700],
-  },
-  cancelButtonText: {
-    fontSize: typography.fontSize.base,
-    color: colors.white,
-    fontWeight: typography.fontWeight.medium,
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
-  },
-  confirmButtonText: {
-    fontSize: typography.fontSize.base,
-    color: colors.white,
-    fontWeight: typography.fontWeight.medium,
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
-  },
-});
 
 export default ConfirmModal;
 

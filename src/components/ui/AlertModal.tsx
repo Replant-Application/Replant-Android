@@ -7,15 +7,12 @@ import React from 'react';
 import {
   View,
   Text,
-  StyleSheet,
   Modal,
   TouchableOpacity,
-  Platform,
   Image,
   ImageSourcePropType,
 } from 'react-native';
-import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
-import { getOptimizedLineHeight } from '../../utils/textStyles';
+import { styles } from './AlertModal.styles';
 
 interface AlertModalProps {
   visible: boolean;
@@ -70,71 +67,6 @@ const AlertModal: React.FC<AlertModalProps> = ({
     </Modal>
   );
 };
-
-const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalContainer: {
-    backgroundColor: colors.gray[800],
-    borderRadius: borderRadius.xl,
-    padding: spacing[6],
-    width: 350,
-  },
-  iconContainer: {
-    alignItems: 'center',
-    marginBottom: spacing[4],
-  },
-  icon: {
-    width: 70,
-    height: 70,
-  },
-  title: {
-    fontSize: typography.fontSize.xl,
-    fontWeight: typography.fontWeight.medium,
-    color: colors.white,
-    marginBottom: spacing[3],
-    textAlign: 'center',
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.xl),
-  },
-  message: {
-    fontSize: typography.fontSize.base,
-    color: colors.gray[300],
-    marginBottom: spacing[6],
-    textAlign: 'center',
-    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-  },
-  button: {
-    paddingVertical: spacing[2],
-    borderRadius: borderRadius.xl,
-    backgroundColor: colors.green[600],
-    alignItems: 'center',
-  },
-  buttonText: {
-    fontSize: typography.fontSize.base,
-    color: colors.white,
-    fontWeight: typography.fontWeight.medium,
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
-  },
-});
 
 export default AlertModal;
 

@@ -4,9 +4,8 @@
  */
 
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ViewStyle, Platform } from 'react-native';
-import { colors, spacing, typography, borderRadius, shadows } from '../../utils/designTokens';
-import { getOptimizedLineHeight } from '../../utils/textStyles';
+import { View, Text, TouchableOpacity, ViewStyle } from 'react-native';
+import { styles } from './FilterBar.styles';
 
 export interface FilterItem {
   key: string;
@@ -97,80 +96,4 @@ export const FilterBar: React.FC<FilterBarProps> = ({
       return renderPillVariant();
   }
 };
-
-const styles = StyleSheet.create({
-  // Pill variant (MissionScreen 필터 탭 스타일)
-  pillContainer: {
-    marginBottom: spacing[5],
-  },
-  pillWrapper: {
-    flexDirection: 'row',
-    backgroundColor: colors.gray[100],
-    borderRadius: borderRadius.xl,
-    padding: spacing[1],
-  },
-  pillFilter: {
-    flex: 1,
-    paddingVertical: spacing[2],
-    paddingHorizontal: spacing[3],
-    borderRadius: borderRadius.lg,
-    alignItems: 'center',
-    justifyContent: 'center',
-    minHeight: 40,
-  },
-  pillFilterActive: {
-    backgroundColor: colors.primary[500],
-    ...shadows.sm,
-  },
-  pillFilterText: {
-    fontSize: typography.fontSize.base,
-    fontWeight: typography.fontWeight.medium,
-    color: colors.text.secondary,
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
-  },
-  pillFilterTextActive: {
-    color: colors.white,
-    fontWeight: typography.fontWeight.medium,
-  },
-
-  // Button variant (MissionHistoryScreen, CommunityScreen verificationFilter 스타일)
-  buttonContainer: {
-    flexDirection: 'row',
-    marginBottom: spacing[3],
-    backgroundColor: colors.gray[100],
-    borderRadius: borderRadius.lg,
-    padding: spacing[1],
-  },
-  buttonFilter: {
-    flex: 1,
-    paddingVertical: spacing[2],
-    paddingHorizontal: spacing[2],
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: borderRadius.md,
-  },
-  buttonFilterActive: {
-    backgroundColor: colors.primary[500],
-  },
-  buttonFilterText: {
-    fontSize: typography.fontSize.sm,
-    fontWeight: typography.fontWeight.medium,
-    color: colors.text.secondary,
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
-  },
-  buttonFilterTextActive: {
-    color: colors.white,
-    fontWeight: typography.fontWeight.medium,
-  },
-});
 

@@ -4,9 +4,9 @@
  */
 
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Platform, Image } from 'react-native';
-import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
-import { getOptimizedLineHeight } from '../../utils/textStyles';
+import { View, Text, TouchableOpacity, Image } from 'react-native';
+import { typography } from '../../utils/designTokens';
+import { styles } from './HomeTodoListContainer.styles';
 
 export interface HomeTodoListContainerProps {
   title: string;
@@ -51,65 +51,3 @@ export const HomeTodoListContainer: React.FC<HomeTodoListContainerProps> = ({
     </TouchableOpacity>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    backgroundColor: '#E3F2FD',
-    borderRadius: borderRadius.base,
-    paddingVertical: spacing[2],
-    paddingHorizontal: spacing[3],
-    marginHorizontal: spacing[4],
-    marginBottom: spacing[3],
-    borderWidth: 2,
-    borderColor: '#42A5F5',
-    shadowColor: '#2196F3',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: spacing[2],
-  },
-  titleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  icon: {
-    width: 24,
-    height: 24,
-    marginRight: spacing[2],
-  },
-  title: {
-    fontSize: typography.fontSize.lg,
-    fontWeight: typography.fontWeight.medium,
-    color: '#1565C0',
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-  },
-  arrow: {
-    fontSize: typography.fontSize['2xl'],
-    color: '#42A5F5',
-    fontWeight: typography.fontWeight.medium,
-  },
-  content: {
-    marginTop: spacing[2],
-  },
-  count: {
-    fontSize: typography.fontSize.sm,
-    color: '#1976D2',
-    fontWeight: typography.fontWeight.medium,
-    marginBottom: spacing[2],
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-  },
-});

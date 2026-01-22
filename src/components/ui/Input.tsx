@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { TextInput, View, Text, StyleSheet, ViewStyle, TextStyle, Platform } from 'react-native';
-import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
-import { getOptimizedLineHeight } from '../../utils/textStyles';
+import { TextInput, View, Text, ViewStyle, TextStyle, Platform } from 'react-native';
+import { colors } from '../../utils/designTokens';
+import { styles } from './Input.styles';
 
 interface InputProps {
   label?: string;
@@ -82,84 +82,5 @@ const Input: React.FC<InputProps> = ({
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    marginBottom: spacing[4],
-  },
-
-  label: {
-    fontSize: typography.fontSize.sm,
-    fontWeight: typography.fontWeight.medium,
-    color: colors.text.primary,
-    marginBottom: spacing[1],
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    lineHeight: 22,
-  },
-
-  input: {
-    borderWidth: 1,
-    borderColor: colors.border.medium,
-    borderRadius: borderRadius.base,
-    backgroundColor: colors.background.primary,
-    paddingHorizontal: spacing[3],
-    color: colors.text.primary,
-    fontSize: typography.fontSize.base,
-    textAlign: 'left', // 한글 입력을 위해 명시적으로 설정
-    lineHeight: 22,
-    letterSpacing: 0,
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false, // Android 여백 문제 해결
-    textAlignVertical: 'center', // Android 수직 정렬
-  },
-
-  // Sizes
-  sm: {
-    height: 32,
-    paddingVertical: spacing[1],
-  },
-  base: {
-    height: 40,
-    paddingVertical: spacing[2],
-  },
-  lg: {
-    height: 48,
-    paddingVertical: spacing[3],
-  },
-
-  // States
-  focused: {
-    borderColor: colors.primary[500],
-  },
-
-  error: {
-    borderColor: colors.error,
-  },
-
-  multiline: {
-    height: 'auto',
-    minHeight: 40,
-    textAlignVertical: 'top',
-  },
-
-  errorText: {
-    fontSize: typography.fontSize.sm,
-    color: colors.error,
-    marginTop: spacing[1],
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    lineHeight: 22,
-  },
-});
 
 export default Input;

@@ -1,7 +1,7 @@
 import React from 'react';
-import { View, Text, ActivityIndicator, StyleSheet, ViewStyle, TextStyle, Platform } from 'react-native';
-import { colors, spacing, typography } from '../../utils/designTokens';
-import { getOptimizedLineHeight } from '../../utils/textStyles';
+import { View, Text, ActivityIndicator, ViewStyle, TextStyle } from 'react-native';
+import { colors } from '../../utils/designTokens';
+import { styles } from './Loading.styles';
 
 interface LoadingProps {
   text?: string;
@@ -25,27 +25,5 @@ const Loading: React.FC<LoadingProps> = ({
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: spacing[6],
-  },
-
-  text: {
-    marginTop: spacing[3],
-    fontSize: typography.fontSize.base,
-    color: colors.text.secondary,
-    textAlign: 'center',
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
-  },
-});
 
 export default Loading;

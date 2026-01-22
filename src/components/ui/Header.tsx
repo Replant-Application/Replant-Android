@@ -1,7 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet, ViewStyle, TextStyle, TouchableOpacity, Image, Platform } from 'react-native';
-import { spacing, colors, typography, borderRadius } from '../../utils/designTokens';
-import { getOptimizedLineHeight } from '../../utils/textStyles';
+import { View, Text, ViewStyle, TextStyle, TouchableOpacity, Image } from 'react-native';
+import { styles } from './Header.styles';
 
 interface HeaderProps {
   title?: string;
@@ -74,46 +73,5 @@ const Header: React.FC<HeaderProps> = ({
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: spacing[5],
-    paddingTop: spacing[12],
-    paddingBottom: spacing[5],
-    backgroundColor: 'transparent',
-  },
-  headerWithBorder: {
-    // 테두리 스타일 제거
-  },
-  leftSection: {
-    flex: 1,
-    alignItems: 'flex-start',
-  },
-  centerSection: {
-    flex: 2,
-    alignItems: 'center',
-  },
-  rightSection: {
-    flex: 1,
-    alignItems: 'flex-end',
-  },
-  title: {
-    fontSize: typography.fontSize.lg,
-    fontWeight: typography.fontWeight.normal,
-    color: colors.text.primary,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.lg),
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-  },
-  backButtonIcon: {
-    width: 24,
-    height: 24,
-  },
-});
 
 export default Header;

@@ -1,7 +1,7 @@
 import React from 'react';
-import { View, Text, StyleSheet, Platform } from 'react-native';
-import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
-import { getOptimizedLineHeight } from '../../utils/textStyles';
+import { View, Text } from 'react-native';
+import { colors } from '../../utils/designTokens';
+import { styles } from './CircularProgressBar.styles';
 
 interface CircularProgressBarProps {
   current: number;
@@ -101,82 +101,6 @@ const CircularProgressBar: React.FC<CircularProgressBarProps> = ({
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    position: 'relative',
-  },
-  circle: {
-    position: 'absolute',
-  },
-  content: {
-    backgroundColor: colors.background.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-    zIndex: 1,
-  },
-  textContainer: {
-    alignItems: 'center',
-    marginBottom: spacing[2],
-  },
-  countText: {
-    fontSize: typography.fontSize.lg,
-    fontWeight: typography.fontWeight.normal,
-    color: colors.text.primary,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.lg),
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-  },
-  totalText: {
-    fontSize: typography.fontSize.base,
-    fontWeight: typography.fontWeight.normal,
-    color: colors.text.secondary,
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
-  },
-  labelText: {
-    fontSize: typography.fontSize.xs,
-    color: colors.text.secondary,
-    marginTop: spacing[1],
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
-  },
-  percentageContainer: {
-    marginTop: spacing[1],
-  },
-  percentageContainerSquare: {
-    backgroundColor: colors.white,
-    borderRadius: borderRadius.base,
-    borderWidth: 1,
-    borderColor: colors.primary[500],
-    paddingHorizontal: spacing[2],
-    paddingVertical: spacing[1],
-  },
-  percentage: {
-    fontSize: typography.fontSize.xs,
-    fontWeight: typography.fontWeight.normal,
-    color: colors.primary[500],
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
-  },
-});
 
 export default CircularProgressBar;
 
