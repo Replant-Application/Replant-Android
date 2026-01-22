@@ -1,9 +1,9 @@
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View } from 'react-native';
 import { Mission } from '../../types';
 import MissionCard from './MissionCard';
 import { EmptyState } from '../ui';
-import { spacing } from '../../utils/designTokens';
+import { styles } from './MissionList.styles';
 
 interface MissionListProps {
   missions: Mission[];
@@ -51,9 +51,3 @@ export const MissionList: React.FC<MissionListProps> = ({
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    gap: spacing[3],
-  },
-});

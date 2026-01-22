@@ -1,7 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Platform } from 'react-native';
-import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
-import { getOptimizedLineHeight } from '../../utils/textStyles';
+import { View, Text, TouchableOpacity } from 'react-native';
+import { styles } from './MissionFilterBar.styles';
 
 export type MissionFilter = 'all' | 'daily' | 'completed';
 
@@ -44,35 +43,3 @@ export const MissionFilterBar: React.FC<MissionFilterBarProps> = ({
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    gap: spacing[2],
-    marginBottom: spacing[4],
-  },
-  filterButton: {
-    paddingHorizontal: spacing[4],
-    paddingVertical: spacing[2],
-    borderRadius: borderRadius.full,
-    backgroundColor: colors.background.secondary,
-  },
-  filterButtonActive: {
-    backgroundColor: colors.primary[500],
-  },
-  filterText: {
-    fontSize: typography.fontSize.sm,
-    color: colors.text.secondary,
-    fontWeight: typography.fontWeight.medium,
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
-  },
-  filterTextActive: {
-    color: colors.text.inverse,
-    fontWeight: typography.fontWeight.bold,
-  },
-});

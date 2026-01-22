@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, ViewStyle, Platform } from 'react-native';
-import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
-import { getOptimizedLineHeight } from '../../utils/textStyles';
+import { View, Text, TouchableOpacity, ScrollView, ViewStyle } from 'react-native';
+import { colors } from '../../utils/designTokens';
+import { styles } from './EmotionSelector.styles';
 
 interface Emotion {
   id: string;
@@ -89,73 +89,5 @@ const EmotionSelector: React.FC<EmotionSelectorProps> = ({
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    marginVertical: spacing[4],
-  },
-
-  title: {
-    fontSize: typography.fontSize.lg,
-    fontWeight: typography.fontWeight.medium,
-    color: colors.text.primary,
-    marginBottom: spacing[3],
-    textAlign: 'center',
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.lg),
-  },
-
-  scrollContent: {
-    paddingHorizontal: spacing[2],
-  },
-
-  emotionButton: {
-    alignItems: 'center',
-    padding: spacing[3],
-    marginHorizontal: spacing[1],
-    borderRadius: borderRadius.lg,
-    backgroundColor: colors.background.primary,
-    borderWidth: 1,
-    borderColor: colors.border.light,
-    minWidth: 80,
-  },
-
-  selectedButton: {
-    borderColor: colors.primary[500],
-    borderWidth: 2,
-  },
-
-  emoji: {
-    fontSize: typography.fontSize['2xl'],
-    marginBottom: spacing[1],
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-  },
-
-  label: {
-    fontSize: typography.fontSize.sm,
-    fontWeight: typography.fontWeight.medium,
-    color: colors.text.secondary,
-    textAlign: 'center',
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
-  },
-
-  selectedLabel: {
-    color: colors.primary[500],
-    fontWeight: typography.fontWeight.medium,
-  },
-});
 
 export default EmotionSelector;

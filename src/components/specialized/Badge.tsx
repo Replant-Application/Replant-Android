@@ -1,5 +1,6 @@
 import React from 'react';
-import { StyleSheet, Image, ImageStyle } from 'react-native';
+import { Image, ImageStyle } from 'react-native';
+import { styles } from './Badge.styles';
 
 interface BadgeProps {
   tier?: 'bronze' | 'silver' | 'gold' | 'platinum' | 'diamond'; // 나중에 다른 등급 뱃지 이미지로 확장 가능
@@ -46,11 +47,5 @@ const Badge: React.FC<BadgeProps> = ({ tier: _tier, size = 'md', style }) => {
     />
   );
 };
-
-const styles = StyleSheet.create({
-  badgeImage: {
-    // 이미지 스타일
-  },
-});
 
 export default Badge;
