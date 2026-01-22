@@ -29,14 +29,6 @@ export const createPost = async (
       };
     }
 
-    // 디버깅: API 호출 전 로그
-    console.log('[createPost] API 호출:', {
-      endpoint: API_CONFIG.endpoints.post.create,
-      title: title,
-      hasContent: !!postData.content,
-      missionId: postData.mission_id,
-    });
-
     // 백엔드 API로 게시글 생성
     // missionId가 빈 문자열이면 undefined로 처리 (GENERAL 게시글)
     const missionIdNum = postData.mission_id ? parseInt(postData.mission_id, 10) : undefined;
@@ -303,16 +295,6 @@ export const getPosts = async (nickname: string): Promise<CommunityPost[]> => {
         backendPosts = result.data;
       }
       
-      // 디버깅: 첫 번째 인증글 확인
-      const firstVerification = backendPosts.find(p => p.postType === 'VERIFICATION');
-      if (firstVerification) {
-        console.log('[getPosts] 첫 번째 인증글:', {
-          id: firstVerification.id,
-          title: firstVerification.title,
-          missionTagTitle: firstVerification.missionTag?.title,
-        });
-      }
-
       // 스크랩 정보 가져오기 (로컬 - 백엔드에 스크랩 기능 없음)
       const storageKeys = getStorageKeys(nickname);
       const userScraps: string[] = await getData(storageKeys.USER_SCRAPS) || [];

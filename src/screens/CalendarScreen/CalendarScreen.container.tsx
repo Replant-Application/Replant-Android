@@ -5,7 +5,7 @@
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { getMissionsByRange, getMissionsByDate, UserMission } from '../../api/missionApi';
-import { formatDateYYYYMMDD } from '../../utils/dateUtils';
+import { formatDateYYYYMMDD, normalizeDate } from '../../utils/dateUtils';
 import { logError } from '../../utils/logger';
 
 interface CalendarScreenContainerProps {
@@ -44,46 +44,19 @@ export const useCalendarScreenContainer = ({ navigation }: CalendarScreenContain
       setLoadingMissions(true);
       try {
         const { startDate, endDate } = getMonthRange;
-        console.log('[CalendarScreen] 월별 미션 로드 시작:', { startDate, endDate });
-        
         const result = await getMissionsByRange(startDate, endDate);
-        
-        console.log('[CalendarScreen] 월별 미션 응답 전체:', JSON.stringify(result, null, 2));
-        console.log('[CalendarScreen] 월별 미션 응답 요약:', { 
-          success: result.success, 
-          hasData: !!result.data,
-          dataType: typeof result.data,
-          isArray: Array.isArray(result.data),
-          dataLength: Array.isArray(result.data) ? result.data.length : 'N/A',
-          error: result.error 
-        });
         
         if (result.success && result.data) {
           // 배열인지 확인
           if (Array.isArray(result.data)) {
             setAllMissions(result.data);
-            console.log('[CalendarScreen] ✅ 미션 로드 성공:', result.data.length, '개');
           } else {
-            console.error('[CalendarScreen] ❌ 응답 데이터가 배열이 아님:', {
-              type: typeof result.data,
-              value: result.data
-            });
             setAllMissions([]);
           }
         } else {
-          console.error('[CalendarScreen] ❌ 미션 로드 실패:', {
-            success: result.success,
-            error: result.error,
-            data: result.data
-          });
           setAllMissions([]);
         }
       } catch (err) {
-        console.error('[CalendarScreen] ❌ 미션 로딩 예외 발생:', {
-          error: err,
-          message: err instanceof Error ? err.message : String(err),
-          stack: err instanceof Error ? err.stack : undefined
-        });
         logError('미션 로딩 실패', err as Error);
         setAllMissions([]);
       } finally {
@@ -102,12 +75,16 @@ export const useCalendarScreenContainer = ({ navigation }: CalendarScreenContain
     // 백엔드에서 가져온 모든 미션들을 assignedAt 기준으로 그룹화
     allMissions.forEach(userMission => {
       if (userMission.assignedAt) {
-        const date = userMission.assignedAt.split('T')[0];
-        if (date) {
-          if (!grouped[date]) {
-            grouped[date] = [];
+        // 배열 형태 날짜 처리 (normalizeDate 사용)
+        const normalizedDate = normalizeDate(userMission.assignedAt as any);
+        if (normalizedDate) {
+          const date = normalizedDate.split('T')[0];
+          if (date) {
+            if (!grouped[date]) {
+              grouped[date] = [];
+            }
+            grouped[date].push(userMission);
           }
-          grouped[date].push(userMission);
         }
       }
     });
@@ -188,27 +165,23 @@ export const useCalendarScreenContainer = ({ navigation }: CalendarScreenContain
     
     if (!isInCurrentMonth) {
       try {
-        console.log('[CalendarScreen] 날짜별 미션 로드 시작:', dateString);
         const result = await getMissionsByDate(dateString);
-        console.log('[CalendarScreen] 날짜별 미션 응답:', { 
-          success: result.success, 
-          dataLength: result.data?.length,
-          error: result.error 
-        });
         
         if (result.success && result.data && Array.isArray(result.data)) {
           // 해당 날짜의 미션만 추가/업데이트
           setAllMissions(prev => {
             const filtered = prev.filter(m => {
               if (!m.assignedAt) return true; // assignedAt이 없으면 유지
-              const missionDate = m.assignedAt.split('T')[0];
+              // 배열 형태 날짜 처리 (normalizeDate 사용)
+              const normalizedDate = normalizeDate(m.assignedAt as any);
+              if (!normalizedDate) return true;
+              const missionDate = normalizedDate.split('T')[0];
               return missionDate !== dateString;
             });
             return [...filtered, ...result.data!];
           });
         }
       } catch (err) {
-        console.error('[CalendarScreen] 날짜별 미션 로딩 에러:', err);
         logError('날짜별 미션 로딩 실패', err as Error);
       }
     }
