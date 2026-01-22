@@ -10,7 +10,7 @@ import {
   Dimensions,
   Animated,
 } from 'react-native';
-import { spacing, typography, colors, borderRadius, shadows } from '../../utils/designTokens';
+import { spacing, typography, colors, borderRadius } from '../../utils/designTokens';
 import { getOptimizedLineHeight } from '../../utils/textStyles';
 import { SCREEN_NAMES } from '../../utils/constants';
 import { setOnboardingCompleted } from '../../services/onboardingService';
@@ -22,36 +22,34 @@ interface OnboardingScreenProps {
 interface OnboardingSlide {
   id: number;
   image: any;
-  title: string;
-  description: string;
 }
 
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 const ONBOARDING_SLIDES: OnboardingSlide[] = [
   {
+    id: 1,
+    image: require('../../assets/images/onboarding_1.jpeg'),
+  },
+  {
     id: 2,
-    image: require('../../assets/images/onboarding_first.png'),
-    title: '투두리스트로 하루를 계획하기',
-    description: '나만의 일일 계획을 만들어요',
+    image: require('../../assets/images/onboarding_2.jpeg'),
   },
   {
     id: 3,
-    image: require('../../assets/images/onboarding_mission.png'),
-    title: '간단한 미션으로 시작하는 변화',
-    description: '계획에 맞게 미션을 수행해요',
+    image: require('../../assets/images/onboarding_3.jpeg'),
   },
   {
     id: 4,
-    image: require('../../assets/images/onboarding_community.png'),
-    title: '함께 성장하는 커뮤니티',
-    description: '수행한 미션을 인증하고 공유해요',
+    image: require('../../assets/images/onboarding_4.jpeg'),
   },
   {
     id: 5,
-    image: require('../../assets/images/onboarding_diary.png'),
-    title: '하루하루를 기록하며 정리하기',
-    description: '미션을 돌아보며 감정과 생각을 정리해요',
+    image: require('../../assets/images/onboarding_5.jpeg'),
+  },
+  {
+    id: 6,
+    image: require('../../assets/images/onboarding_6.jpeg'),
   },
 ];
 
@@ -63,16 +61,6 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onNavigate }) => {
   const handleSkip = async () => {
     await setOnboardingCompleted();
     onNavigate(SCREEN_NAMES.LOGIN as string);
-  };
-
-  const handleNext = () => {
-    if (currentIndex < ONBOARDING_SLIDES.length - 1) {
-      const nextIndex = currentIndex + 1;
-      flatListRef.current?.scrollToIndex({ index: nextIndex, animated: true });
-      setCurrentIndex(nextIndex);
-    } else {
-      handleStart();
-    }
   };
 
   const handleStart = async () => {
@@ -95,36 +83,10 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onNavigate }) => {
     itemVisiblePercentThreshold: 50,
   }).current;
 
-  const renderSlide = ({ item, index }: { item: OnboardingSlide; index: number }) => {
-    // 모든 슬라이드가 스크린샷 이미지
-    const isScreenshot = true;
-    
+  const renderSlide = ({ item }: { item: OnboardingSlide }) => {
+    // 투명한 슬라이드 - 배경은 상단에서 처리
     return (
-      <View style={styles.slideContainer}>
-        <View style={styles.textContainer}>
-          <Text style={styles.title}>{item.title}</Text>
-          <Text style={styles.description}>{item.description}</Text>
-        </View>
-        <View style={styles.imageContainer}>
-          {isScreenshot ? (
-            <View style={styles.screenshotFrame}>
-              <Image 
-                source={item.image} 
-                style={styles.screenshotImage} 
-                resizeMode="cover" 
-                accessibilityLabel={`${item.title} 화면 예시`}
-              />
-            </View>
-          ) : (
-            <Image 
-              source={item.image} 
-              style={styles.slideImage} 
-              resizeMode="contain" 
-              accessibilityLabel={`${item.title} 이미지`}
-            />
-          )}
-        </View>
-      </View>
+      <View style={styles.slideContainer} />
     );
   };
 
@@ -146,7 +108,17 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onNavigate }) => {
 
           const opacity = scrollX.interpolate({
             inputRange,
-            outputRange: [0.3, 1, 0.3],
+            outputRange: [0.4, 1, 0.4],
+            extrapolate: 'clamp',
+          });
+
+          const backgroundColor = scrollX.interpolate({
+            inputRange,
+            outputRange: [
+              colors.primary[300],
+              colors.primary[600],
+              colors.primary[300],
+            ],
             extrapolate: 'clamp',
           });
 
@@ -158,6 +130,7 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onNavigate }) => {
                 {
                   width: dotWidth,
                   opacity,
+                  backgroundColor,
                 },
               ]}
             />
@@ -169,14 +142,26 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onNavigate }) => {
 
   return (
     <View style={styles.container}>
-      {/* Skip 버튼 */}
-      {currentIndex < ONBOARDING_SLIDES.length - 1 && (
-        <TouchableOpacity style={styles.skipButton} onPress={handleSkip} activeOpacity={0.8}>
-          <Text style={styles.skipButtonText}>건너뛰기</Text>
-        </TouchableOpacity>
-      )}
+      {/* 배경 이미지 - 각 슬라이드의 배경 */}
+      <Image 
+        source={ONBOARDING_SLIDES[currentIndex].image} 
+        style={styles.fullScreenImage} 
+        resizeMode="cover" 
+        accessibilityLabel="온보딩 배경 이미지"
+      />
+      
+      {/* Skip/Start 버튼 */}
+      <TouchableOpacity 
+        style={styles.skipButton} 
+        onPress={currentIndex < ONBOARDING_SLIDES.length - 1 ? handleSkip : handleStart} 
+        activeOpacity={0.8}
+      >
+        <Text style={styles.skipButtonText}>
+          {currentIndex < ONBOARDING_SLIDES.length - 1 ? '건너뛰기' : '시작하기'}
+        </Text>
+      </TouchableOpacity>
 
-      {/* 슬라이드 */}
+      {/* 슬라이드 - 투명하게 처리하여 스와이프만 가능하게 */}
       <FlatList
         ref={flatListRef}
         data={ONBOARDING_SLIDES}
@@ -194,22 +179,12 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onNavigate }) => {
           offset: SCREEN_WIDTH * index,
           index,
         })}
+        style={styles.transparentFlatList}
       />
 
       {/* 페이지 인디케이터 */}
-      {renderPagination()}
-
-      {/* 버튼 영역 */}
-      <View style={styles.buttonContainer}>
-        {currentIndex < ONBOARDING_SLIDES.length - 1 ? (
-          <TouchableOpacity style={styles.nextButton} onPress={handleNext} activeOpacity={0.8}>
-            <Text style={styles.nextButtonText}>다음</Text>
-          </TouchableOpacity>
-        ) : (
-          <TouchableOpacity style={styles.startButton} onPress={handleStart} activeOpacity={0.8}>
-            <Text style={styles.startButtonText}>시작하기</Text>
-          </TouchableOpacity>
-        )}
+      <View style={styles.paginationWrapper}>
+        {renderPagination()}
       </View>
     </View>
   );
@@ -220,18 +195,32 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.white,
   },
+  fullScreenImage: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: SCREEN_WIDTH,
+    height: SCREEN_HEIGHT,
+    zIndex: 0,
+  },
+  transparentFlatList: {
+    flex: 1,
+    backgroundColor: 'transparent',
+    zIndex: 1,
+  },
   skipButton: {
     position: 'absolute',
     top: Platform.OS === 'ios' ? 40 : 30,
     right: spacing[6],
     zIndex: 10,
-    paddingVertical: spacing[2],
+    paddingVertical: spacing[3],
     paddingHorizontal: spacing[4],
-    minHeight: 40,
+    minHeight: 44, // 최소 터치 영역 확보 (iOS 가이드라인: 44x44)
+    minWidth: 80, // 최소 너비 확보
   },
   skipButtonText: {
     fontSize: typography.fontSize.xs,
-    color: colors.gray[500],
+    color: colors.gray[700],
     fontFamily: Platform.select({
       ios: typography.fontFamily.regular,
       android: typography.fontFamily.regular,
@@ -243,79 +232,17 @@ const styles = StyleSheet.create({
   slideContainer: {
     width: SCREEN_WIDTH,
     flex: 1,
-    alignItems: 'center',
-    paddingHorizontal: spacing[6],
-    paddingTop: Platform.OS === 'ios' ? 90 : 80, // 건너뛰기 버튼과 제목 사이 여백 추가
-    paddingBottom: 0,
-  },
-  textContainer: {
-    width: '100%',
-    alignItems: 'center',
-    justifyContent: 'flex-start',
-    paddingHorizontal: spacing[2], // 가로 여백 줄여서 텍스트 범위 넓힘
+    paddingHorizontal: 0,
     paddingTop: 0,
     paddingBottom: 0,
-    marginTop: 0,
-    marginBottom: -spacing[2], // 설명과 스크린샷 사이 여백 줄임
+    backgroundColor: 'transparent',
   },
-  imageContainer: {
-    width: '100%',
-    alignItems: 'center',
-    justifyContent: 'center',
-    flex: 1,
-    minHeight: 0,
-    paddingTop: 0,
-    paddingBottom: 0,
-    marginTop: 0,
-    marginBottom: 0,
-  },
-  slideImage: {
-    width: SCREEN_WIDTH * 0.85,
-    height: (SCREEN_WIDTH * 0.85) * (2400 / 1080) * 0.65,
-    borderRadius: 0,
-  },
-  screenshotFrame: {
-    width: SCREEN_WIDTH * 0.62, // 너비를 62%로 살짝 줄임
-    height: (SCREEN_WIDTH * 0.62) * (2400 / 1080), // 비율 유지하면서 전체 크기 조정
-    borderRadius: borderRadius.lg,
-    borderWidth: 4, // 8에서 4로 줄임
-    borderColor: colors.gray[800],
-    overflow: 'hidden',
-    backgroundColor: colors.gray[800],
-    ...shadows.lg,
-  },
-  screenshotImage: {
-    width: '100%',
-    height: '100%',
-    resizeMode: 'cover', // cover로 변경하여 프레임을 채우도록
-  },
-  title: {
-    fontSize: typography.fontSize.lg, // xl에서 lg로 줄임
-    color: colors.text.primary,
-    textAlign: 'center',
-    marginBottom: spacing[3],
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.lg),
-    letterSpacing: 0.3,
-    fontWeight: typography.fontWeight.medium,
-    paddingHorizontal: spacing[2], // 가로 범위 넓힘
-  },
-  description: {
-    fontSize: typography.fontSize.xs, // sm에서 xs로 줄임
-    color: colors.text.secondary,
-    textAlign: 'center',
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
-    letterSpacing: 0.2,
-    paddingHorizontal: spacing[4], // 가로 범위 넓힘
+  paginationWrapper: {
+    position: 'absolute',
+    bottom: Platform.OS === 'android' ? spacing[12] + 8 : spacing[8],
+    left: 0,
+    right: 0,
+    zIndex: 10,
   },
   paginationContainer: {
     flexDirection: 'row',
@@ -328,51 +255,11 @@ const styles = StyleSheet.create({
     height: 8,
     borderRadius: 4,
     backgroundColor: colors.primary[600],
-  },
-  buttonContainer: {
-    paddingHorizontal: spacing[6],
-    paddingBottom: Platform.OS === 'android' ? spacing[12] + 8 : spacing[8], // Android 하단 내비게이션 바 고려하여 여백 추가 (48px + 8px = 56px)
-    paddingTop: 0, // 스크린샷과 버튼 사이 여백 제거
-  },
-  nextButton: {
-    width: '100%',
-    height: 40, // 48에서 40으로 줄임
-    backgroundColor: colors.primary[600],
-    borderRadius: borderRadius.base,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  nextButtonText: {
-    fontSize: typography.fontSize.base, // lg에서 base로 줄임
-    color: colors.white,
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
-    letterSpacing: 0.5,
-    fontWeight: typography.fontWeight.medium,
-  },
-  startButton: {
-    width: '100%',
-    height: 40, // 48에서 40으로 줄임
-    backgroundColor: colors.primary[600],
-    borderRadius: borderRadius.base,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  startButtonText: {
-    fontSize: typography.fontSize.base, // lg에서 base로 줄임
-    color: colors.white,
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
-    letterSpacing: 0.5,
-    fontWeight: typography.fontWeight.medium,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 2,
+    elevation: 3,
   },
 });
 
