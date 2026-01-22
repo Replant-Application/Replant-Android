@@ -1,0 +1,23 @@
+# Android SDK 및 개발 환경 설정
+# 이 파일을 복사하여 local.properties를 생성하세요
+# local.properties는 Git에 추적되지 않습니다
+
+# Android SDK 경로 (macOS)
+sdk.dir=/Users/YOUR_USERNAME/Library/Android/sdk
+# Windows의 경우: sdk.dir=C\:\\Users\\YOUR_USERNAME\\AppData\\Local\\Android\\Sdk
+# Linux의 경우: sdk.dir=/home/YOUR_USERNAME/Android/Sdk
+
+# Java Home 경로 (선택사항, Android Studio가 자동으로 설정)
+# org.gradle.java.home=/Applications/Android Studio.app/Contents/jbr/Contents/Home
+
+# Node.js 경로 (선택사항)
+# node.executable=/usr/local/bin/node
+
+# ===========================================
+# Keystore 설정 (릴리즈 빌드용)
+# 실제 값은 팀 리더에게 문의하세요
+# ===========================================
+RELEASE_STORE_FILE=replant-release-key.keystore
+RELEASE_STORE_PASSWORD=your_keystore_password_here
+RELEASE_KEY_ALIAS=replant-key
+RELEASE_KEY_PASSWORD=your_key_password_here

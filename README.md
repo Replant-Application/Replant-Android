@@ -138,15 +138,39 @@ cd ios && pod install && cd ..
 
 ### 환경 설정
 
-`.env` 파일을 생성하고 다음 내용을 추가하세요:
+#### 1. `.env` 파일 생성
+
+프로젝트 루트에 `.env` 파일을 생성하고 `.env.example`을 참고하여 다음 내용을 추가하세요:
 
 ```env
-API_BASE_URL=http://your-api-url/api
+# 백엔드 API URL
+API_BASE_URL=http://localhost:8080/api
 API_TIMEOUT=10000
-KAKAO_APP_KEY=your-kakao-app-key
-GOOGLE_CLIENT_ID=your-google-client-id
-GOOGLE_WEB_CLIENT_ID=your-google-web-client-id
+
+# OAuth 설정
+KAKAO_APP_KEY=your_kakao_app_key
+GOOGLE_CLIENT_ID=your_google_client_id
+GOOGLE_WEB_CLIENT_ID=your_google_web_client_id
+
+# Amplitude Analytics
+AMPLITUDE_API_KEY=your_amplitude_api_key_here
 ```
+
+> **⚠️ 중요**: 실제 API 키 값은 팀 리더에게 문의하거나 보안 채널을 통해 받으세요.
+
+#### 2. Android 키스토어 설정 (릴리즈 빌드용)
+
+`android/local.properties.example` 파일을 복사하여 `android/local.properties`를 생성하세요:
+
+```bash
+cp android/local.properties.example android/local.properties
+```
+
+그 후 `android/local.properties` 파일을 열어 다음을 설정하세요:
+- Android SDK 경로 (자동 감지되거나 Android Studio가 설정)
+- 키스토어 비밀번호 (팀 리더에게 문의)
+
+> **⚠️ 중요**: `local.properties` 파일은 Git에 추적되지 않습니다. 각 개발자가 로컬에 생성해야 합니다.
 
 ### 실행
 
