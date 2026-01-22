@@ -4,7 +4,7 @@
  * - 미션 활성화/비활성화
  */
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import {
   View,
   Text,
@@ -12,260 +12,44 @@ import {
   ScrollView,
   TouchableOpacity,
   TextInput,
-  Alert,
   Modal,
   Platform,
 } from 'react-native';
 import { NavigationProp } from '@react-navigation/native';
 import { Card, Header, Loading, SectionTitle } from '../../components/ui';
-import { colors, spacing, typography, borderRadius, shadows } from '../../utils/designTokens';
+import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
 import { getOptimizedLineHeight } from '../../utils/textStyles';
 import { RootStackParamList } from '../../types/navigation';
-
-interface Mission {
-  id: string;
-  title: string;
-  description: string;
-  type: 'DAILY' | 'WEEKLY' | 'MONTHLY';
-  verificationType: 'COMMUNITY' | 'GPS' | 'TIME';
-  expReward: number;
-  badgeDurationDays: number;
-  isActive: boolean;
-  requiredMinutes?: number;
-  gpsLatitude?: number;
-  gpsLongitude?: number;
-  gpsRadiusMeters?: number;
-}
+import {
+  useAdminMissionManageScreenContainer,
+  MISSION_TYPES,
+  VERIFICATION_TYPES,
+} from './AdminMissionManageScreen.container';
 
 interface AdminMissionManageScreenProps {
   navigation: NavigationProp<RootStackParamList>;
 }
 
-const MISSION_TYPES = [
-  { value: 'DAILY', label: '일일 미션' },
-  { value: 'WEEKLY', label: '주간 미션' },
-  { value: 'MONTHLY', label: '월간 미션' },
-];
-
-const VERIFICATION_TYPES = [
-  { value: 'COMMUNITY', label: '커뮤니티 인증' },
-  { value: 'GPS', label: 'GPS 인증' },
-  { value: 'TIME', label: '시간 인증' },
-];
-
 const AdminMissionManageScreen: React.FC<AdminMissionManageScreenProps> = ({ navigation }) => {
-  const [missions, setMissions] = useState<Mission[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [showModal, setShowModal] = useState(false);
-  const [editingMission, setEditingMission] = useState<Mission | null>(null);
-  const [filter, setFilter] = useState<'all' | 'active' | 'inactive'>('all');
-
-  // 폼 상태
-  const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    type: 'DAILY' as 'DAILY' | 'WEEKLY' | 'MONTHLY',
-    verificationType: 'COMMUNITY' as 'COMMUNITY' | 'GPS' | 'TIME',
-    expReward: '10',
-    badgeDurationDays: '3',
-    requiredMinutes: '',
-    gpsLatitude: '',
-    gpsLongitude: '',
-    gpsRadiusMeters: '100',
-    isActive: true,
-  });
-
-  useEffect(() => {
-    loadMissions();
-  }, []);
-
-  const loadMissions = async () => {
-    setLoading(true);
-    try {
-      // 임시 데이터 - 실제로는 API 호출
-      const mockMissions: Mission[] = [
-        {
-          id: '1',
-          title: '아침 산책하기',
-          description: '30분 이상 야외에서 산책하며 아침 공기 마시기',
-          type: 'DAILY',
-          verificationType: 'TIME',
-          expReward: 15,
-          badgeDurationDays: 3,
-          isActive: true,
-          requiredMinutes: 30,
-        },
-        {
-          id: '2',
-          title: '도서관 방문하기',
-          description: '지역 도서관을 방문하여 책 읽기',
-          type: 'WEEKLY',
-          verificationType: 'GPS',
-          expReward: 25,
-          badgeDurationDays: 7,
-          isActive: true,
-          gpsLatitude: 37.5665,
-          gpsLongitude: 126.9780,
-          gpsRadiusMeters: 100,
-        },
-        {
-          id: '3',
-          title: '자기소개 글 작성',
-          description: '커뮤니티에 자기소개 글을 작성하고 다른 사람들의 피드백 받기',
-          type: 'MONTHLY',
-          verificationType: 'COMMUNITY',
-          expReward: 50,
-          badgeDurationDays: 30,
-          isActive: false,
-        },
-      ];
-      setMissions(mockMissions);
-    } catch (error) {
-      Alert.alert('오류', '미션 목록을 불러오는데 실패했습니다.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const filteredMissions = missions.filter(mission => {
-    if (filter === 'active') return mission.isActive;
-    if (filter === 'inactive') return !mission.isActive;
-    return true;
-  });
-
-  const resetForm = () => {
-    setFormData({
-      title: '',
-      description: '',
-      type: 'DAILY',
-      verificationType: 'COMMUNITY',
-      expReward: '10',
-      badgeDurationDays: '3',
-      requiredMinutes: '',
-      gpsLatitude: '',
-      gpsLongitude: '',
-      gpsRadiusMeters: '100',
-      isActive: true,
-    });
-  };
-
-  const openAddModal = () => {
-    setEditingMission(null);
-    resetForm();
-    setShowModal(true);
-  };
-
-  const openEditModal = (mission: Mission) => {
-    setEditingMission(mission);
-    setFormData({
-      title: mission.title,
-      description: mission.description,
-      type: mission.type,
-      verificationType: mission.verificationType,
-      expReward: mission.expReward.toString(),
-      badgeDurationDays: mission.badgeDurationDays.toString(),
-      requiredMinutes: mission.requiredMinutes?.toString() || '',
-      gpsLatitude: mission.gpsLatitude?.toString() || '',
-      gpsLongitude: mission.gpsLongitude?.toString() || '',
-      gpsRadiusMeters: mission.gpsRadiusMeters?.toString() || '100',
-      isActive: mission.isActive,
-    });
-    setShowModal(true);
-  };
-
-  const handleSaveMission = async () => {
-    if (!formData.title.trim()) {
-      Alert.alert('오류', '미션 제목을 입력해주세요.');
-      return;
-    }
-
-    if (!formData.description.trim()) {
-      Alert.alert('오류', '미션 설명을 입력해주세요.');
-      return;
-    }
-
-    try {
-      if (editingMission) {
-        // 수정
-        setMissions(prev =>
-          prev.map(m =>
-            m.id === editingMission.id
-              ? {
-                  ...m,
-                  title: formData.title,
-                  description: formData.description,
-                  type: formData.type,
-                  verificationType: formData.verificationType,
-                  expReward: parseInt(formData.expReward) || 10,
-                  badgeDurationDays: parseInt(formData.badgeDurationDays) || 3,
-                  isActive: formData.isActive,
-                  requiredMinutes: formData.requiredMinutes ? parseInt(formData.requiredMinutes) : undefined,
-                  gpsLatitude: formData.gpsLatitude ? parseFloat(formData.gpsLatitude) : undefined,
-                  gpsLongitude: formData.gpsLongitude ? parseFloat(formData.gpsLongitude) : undefined,
-                  gpsRadiusMeters: formData.gpsRadiusMeters ? parseInt(formData.gpsRadiusMeters) : undefined,
-                }
-              : m
-          )
-        );
-        Alert.alert('완료', '미션이 수정되었습니다.');
-      } else {
-        // 추가
-        const newMission: Mission = {
-          id: Date.now().toString(),
-          title: formData.title,
-          description: formData.description,
-          type: formData.type,
-          verificationType: formData.verificationType,
-          expReward: parseInt(formData.expReward) || 10,
-          badgeDurationDays: parseInt(formData.badgeDurationDays) || 3,
-          isActive: formData.isActive,
-          requiredMinutes: formData.requiredMinutes ? parseInt(formData.requiredMinutes) : undefined,
-          gpsLatitude: formData.gpsLatitude ? parseFloat(formData.gpsLatitude) : undefined,
-          gpsLongitude: formData.gpsLongitude ? parseFloat(formData.gpsLongitude) : undefined,
-          gpsRadiusMeters: formData.gpsRadiusMeters ? parseInt(formData.gpsRadiusMeters) : undefined,
-        };
-        setMissions(prev => [...prev, newMission]);
-        Alert.alert('완료', '새 미션이 추가되었습니다.');
-      }
-      setShowModal(false);
-    } catch (error) {
-      Alert.alert('오류', '미션 저장에 실패했습니다.');
-    }
-  };
-
-  const handleDeleteMission = (missionId: string) => {
-    Alert.alert(
-      '미션 삭제',
-      '정말로 이 미션을 삭제하시겠습니까?',
-      [
-        { text: '취소', style: 'cancel' },
-        {
-          text: '삭제',
-          style: 'destructive',
-          onPress: () => {
-            setMissions(prev => prev.filter(m => m.id !== missionId));
-            Alert.alert('완료', '미션이 삭제되었습니다.');
-          },
-        },
-      ]
-    );
-  };
-
-  const handleToggleActive = (missionId: string) => {
-    setMissions(prev =>
-      prev.map(m =>
-        m.id === missionId ? { ...m, isActive: !m.isActive } : m
-      )
-    );
-  };
-
-  const getMissionTypeLabel = (type: string) => {
-    return MISSION_TYPES.find(t => t.value === type)?.label || type;
-  };
-
-  const getVerificationTypeLabel = (type: string) => {
-    return VERIFICATION_TYPES.find(t => t.value === type)?.label || type;
-  };
+  // 비즈니스 로직은 Container에서 처리
+  const {
+    missions,
+    loading,
+    showModal,
+    editingMission,
+    filter,
+    formData,
+    handleFilterChange,
+    openAddModal,
+    openEditModal,
+    closeModal,
+    updateFormData,
+    handleSaveMission,
+    handleDeleteMission,
+    handleToggleActive,
+    getMissionTypeLabel,
+    getVerificationTypeLabel,
+  } = useAdminMissionManageScreenContainer({ navigation });
 
   if (loading) {
     return (
@@ -291,7 +75,7 @@ const AdminMissionManageScreen: React.FC<AdminMissionManageScreenProps> = ({ nav
                   styles.filterButton,
                   filter === filterOption && styles.filterButtonActive,
                 ]}
-                onPress={() => setFilter(filterOption)}
+                onPress={() => handleFilterChange(filterOption)}
               >
                 <Text
                   style={[
@@ -399,7 +183,7 @@ const AdminMissionManageScreen: React.FC<AdminMissionManageScreenProps> = ({ nav
               <TextInput
                 style={styles.input}
                 value={formData.title}
-                onChangeText={text => setFormData(prev => ({ ...prev, title: text }))}
+                onChangeText={text => updateFormData({ title: text })}
                 placeholder="미션 제목을 입력하세요"
                 placeholderTextColor={colors.text.tertiary}
               />
@@ -409,7 +193,7 @@ const AdminMissionManageScreen: React.FC<AdminMissionManageScreenProps> = ({ nav
               <TextInput
                 style={[styles.input, styles.textArea]}
                 value={formData.description}
-                onChangeText={text => setFormData(prev => ({ ...prev, description: text }))}
+                onChangeText={text => updateFormData({ description: text })}
                 placeholder="미션 설명을 입력하세요"
                 placeholderTextColor={colors.text.tertiary}
                 multiline
@@ -426,7 +210,7 @@ const AdminMissionManageScreen: React.FC<AdminMissionManageScreenProps> = ({ nav
                       styles.optionButton,
                       formData.type === type.value && styles.optionButtonActive,
                     ]}
-                    onPress={() => setFormData(prev => ({ ...prev, type: type.value as any }))}
+                    onPress={() => updateFormData({ type: type.value as any })}
                   >
                     <Text
                       style={[
@@ -450,7 +234,7 @@ const AdminMissionManageScreen: React.FC<AdminMissionManageScreenProps> = ({ nav
                       styles.optionButton,
                       formData.verificationType === type.value && styles.optionButtonActive,
                     ]}
-                    onPress={() => setFormData(prev => ({ ...prev, verificationType: type.value as any }))}
+                    onPress={() => updateFormData({ verificationType: type.value as any })}
                   >
                     <Text
                       style={[
@@ -471,7 +255,7 @@ const AdminMissionManageScreen: React.FC<AdminMissionManageScreenProps> = ({ nav
                   <TextInput
                     style={styles.input}
                     value={formData.requiredMinutes}
-                    onChangeText={text => setFormData(prev => ({ ...prev, requiredMinutes: text }))}
+                    onChangeText={text => updateFormData({ requiredMinutes: text })}
                     placeholder="30"
                     placeholderTextColor={colors.text.tertiary}
                     keyboardType="numeric"
@@ -486,7 +270,7 @@ const AdminMissionManageScreen: React.FC<AdminMissionManageScreenProps> = ({ nav
                   <TextInput
                     style={styles.input}
                     value={formData.gpsLatitude}
-                    onChangeText={text => setFormData(prev => ({ ...prev, gpsLatitude: text }))}
+                    onChangeText={text => updateFormData({ gpsLatitude: text })}
                     placeholder="37.5665"
                     placeholderTextColor={colors.text.tertiary}
                     keyboardType="decimal-pad"
@@ -495,7 +279,7 @@ const AdminMissionManageScreen: React.FC<AdminMissionManageScreenProps> = ({ nav
                   <TextInput
                     style={styles.input}
                     value={formData.gpsLongitude}
-                    onChangeText={text => setFormData(prev => ({ ...prev, gpsLongitude: text }))}
+                    onChangeText={text => updateFormData({ gpsLongitude: text })}
                     placeholder="126.9780"
                     placeholderTextColor={colors.text.tertiary}
                     keyboardType="decimal-pad"
@@ -504,7 +288,7 @@ const AdminMissionManageScreen: React.FC<AdminMissionManageScreenProps> = ({ nav
                   <TextInput
                     style={styles.input}
                     value={formData.gpsRadiusMeters}
-                    onChangeText={text => setFormData(prev => ({ ...prev, gpsRadiusMeters: text }))}
+                    onChangeText={text => updateFormData({ gpsRadiusMeters: text })}
                     placeholder="100"
                     placeholderTextColor={colors.text.tertiary}
                     keyboardType="numeric"
@@ -517,7 +301,7 @@ const AdminMissionManageScreen: React.FC<AdminMissionManageScreenProps> = ({ nav
               <TextInput
                 style={styles.input}
                 value={formData.expReward}
-                onChangeText={text => setFormData(prev => ({ ...prev, expReward: text }))}
+                onChangeText={text => updateFormData({ expReward: text })}
                 placeholder="10"
                 placeholderTextColor={colors.text.tertiary}
                 keyboardType="numeric"
@@ -528,7 +312,7 @@ const AdminMissionManageScreen: React.FC<AdminMissionManageScreenProps> = ({ nav
               <TextInput
                 style={styles.input}
                 value={formData.badgeDurationDays}
-                onChangeText={text => setFormData(prev => ({ ...prev, badgeDurationDays: text }))}
+                onChangeText={text => updateFormData({ badgeDurationDays: text })}
                 placeholder="3"
                 placeholderTextColor={colors.text.tertiary}
                 keyboardType="numeric"
@@ -537,7 +321,7 @@ const AdminMissionManageScreen: React.FC<AdminMissionManageScreenProps> = ({ nav
               {/* 활성화 상태 */}
               <TouchableOpacity
                 style={styles.checkboxRow}
-                onPress={() => setFormData(prev => ({ ...prev, isActive: !prev.isActive }))}
+                onPress={() => updateFormData({ isActive: !formData.isActive })}
               >
                 <View
                   style={[
@@ -554,7 +338,7 @@ const AdminMissionManageScreen: React.FC<AdminMissionManageScreenProps> = ({ nav
               <View style={styles.modalActions}>
                 <TouchableOpacity
                   style={styles.cancelButton}
-                  onPress={() => setShowModal(false)}
+                  onPress={closeModal}
                 >
                   <Text style={styles.cancelButtonText}>취소</Text>
                 </TouchableOpacity>

@@ -2,86 +2,23 @@
  * 관리자 대시보드 화면
  */
 
-import React, { useEffect, useState, useCallback } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Platform } from 'react-native';
+import React from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform } from 'react-native';
 import { NavigationProp } from '@react-navigation/native';
-import { useAdmin, MemberInfo } from '../../hooks/useAdmin';
 import { Card, Header, Loading, ErrorBoundary, SectionTitle } from '../../components/ui';
 import { colors, spacing, typography, borderRadius, shadows } from '../../utils/designTokens';
 import { getOptimizedLineHeight } from '../../utils/textStyles';
 import { RootStackParamList } from '../../types/navigation';
+import { useAdminDashboardScreenContainer } from './AdminDashboardScreen.container';
 
 interface AdminDashboardScreenProps {
   navigation: NavigationProp<RootStackParamList>;
 }
 
 const AdminDashboardScreen: React.FC<AdminDashboardScreenProps> = ({ navigation }) => {
-  const { getAllUsers, deleteAllUsers, loading, error } = useAdmin();
-  const [stats, setStats] = useState({
-    totalUsers: 0,
-    activeUsers: 0,
-    inactiveUsers: 0,
-  });
-  const [recentUsers, setRecentUsers] = useState<MemberInfo[]>([]);
-
-  const loadDashboardData = useCallback(async () => {
-    const result = await getAllUsers({ page: 1, limit: 100 });
-    if (result.success && result.data) {
-      const users = result.data;
-      const activeUsers = users.filter(u => u.status === 'ACTIVE').length;
-      const inactiveUsers = users.filter(u => u.status === 'INACTIVE').length;
-
-      setStats({
-        totalUsers: users.length,
-        activeUsers,
-        inactiveUsers,
-      });
-
-      // 최근 가입 유저 (최근 5명)
-      const sorted = [...users].sort((a, b) => {
-        const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
-        const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
-        return dateB - dateA;
-      });
-      setRecentUsers(sorted.slice(0, 5));
-    }
-  }, [getAllUsers]);
-
-  useEffect(() => {
-    loadDashboardData();
-  }, [loadDashboardData]);
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const _handleDeleteAllUsers = () => {
-    Alert.alert(
-      '⚠️ 경고',
-      `모든 유저 데이터가 삭제됩니다.\n\n이 작업은 되돌릴 수 없습니다.\n정말로 모든 유저를 삭제하시겠습니까?`,
-      [
-        { text: '취소', style: 'cancel' },
-        {
-          text: '삭제',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              const result = await deleteAllUsers();
-              if (result.success) {
-                Alert.alert(
-                  '✅ 완료',
-                  `${result.data?.deletedCount || 0}명의 유저가 삭제되었습니다.`
-                );
-                // 데이터 새로고침
-                loadDashboardData();
-              } else {
-                Alert.alert('오류', result.error || '유저 삭제에 실패했습니다.');
-              }
-            } catch (err) {
-              Alert.alert('오류', '유저 삭제 중 오류가 발생했습니다.');
-            }
-          }
-        }
-      ]
-    );
-  };
+  // 비즈니스 로직은 Container에서 처리
+  const { stats, recentUsers, loading, error, handleUserPress } =
+    useAdminDashboardScreenContainer({ navigation });
 
   if (error) {
     return <ErrorBoundary error={new Error(error)} />;
@@ -127,7 +64,7 @@ const AdminDashboardScreen: React.FC<AdminDashboardScreenProps> = ({ navigation 
                   <TouchableOpacity
                     key={user.id}
                     style={styles.userItem}
-                    onPress={() => navigation.navigate('AdminUserDetail', { userId: user.id })}
+                    onPress={() => handleUserPress(user.id)}
                   >
                     <View style={styles.userInfo}>
                       <Text style={styles.userNickname}>{user.nickname}</Text>

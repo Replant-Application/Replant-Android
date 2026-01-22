@@ -4,7 +4,7 @@
  * - 멘토링 활동, 커뮤니티 기여 현황, 졸업 뱃지 표시
  */
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import {
   View,
   Text,
@@ -12,29 +12,15 @@ import {
   ScrollView,
   TouchableOpacity,
   Image,
+  Platform,
 } from 'react-native';
 import { NavigationProp } from '@react-navigation/native';
 import { Card, Header, Loading, SectionTitle } from '../../components/ui';
 import { colors, spacing, typography, borderRadius, shadows } from '../../utils/designTokens';
 import { getOptimizedLineHeight } from '../../utils/textStyles';
-import { Platform } from 'react-native';
 import { RootStackParamList } from '../../types/navigation';
 import { useUser } from '../../contexts/UserContext';
-
-interface MentoringStats {
-  totalHelpedUsers: number;
-  answersGiven: number;
-  postsCreated: number;
-  likesReceived: number;
-}
-
-interface RecentActivity {
-  id: string;
-  type: 'answer' | 'post' | 'comment';
-  title: string;
-  date: string;
-  targetUser?: string;
-}
+import { useGraduateScreenContainer } from './GraduateScreen.container';
 
 interface GraduateScreenProps {
   navigation: NavigationProp<RootStackParamList>;
@@ -42,74 +28,17 @@ interface GraduateScreenProps {
 
 const GraduateScreen: React.FC<GraduateScreenProps> = ({ navigation }) => {
   const { user } = useUser();
-  const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState<MentoringStats>({
-    totalHelpedUsers: 0,
-    answersGiven: 0,
-    postsCreated: 0,
-    likesReceived: 0,
-  });
-  const [recentActivities, setRecentActivities] = useState<RecentActivity[]>([]);
-  const [graduationDate, setGraduationDate] = useState<string>('');
 
-  useEffect(() => {
-    loadGraduateData();
-  }, []);
-
-  const loadGraduateData = async () => {
-    setLoading(true);
-    try {
-      // 임시 데이터 - 실제로는 API 호출
-      setStats({
-        totalHelpedUsers: 23,
-        answersGiven: 47,
-        postsCreated: 12,
-        likesReceived: 156,
-      });
-
-      setRecentActivities([
-        {
-          id: '1',
-          type: 'answer',
-          title: '"아침 산책 미션 어떻게 시작하나요?"에 답변',
-          date: '2024-12-20',
-          targetUser: '새싹유저',
-        },
-        {
-          id: '2',
-          type: 'post',
-          title: '미션 완료 팁: 꾸준함이 답이다',
-          date: '2024-12-19',
-        },
-        {
-          id: '3',
-          type: 'comment',
-          title: '"처음 시작하는 분들께" 글에 응원 댓글',
-          date: '2024-12-18',
-          targetUser: '희망찬하루',
-        },
-      ]);
-
-      setGraduationDate('2024-11-15');
-    } catch (error) {
-      console.error('Failed to load graduate data:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const getActivityIcon = (type: string) => {
-    switch (type) {
-      case 'answer':
-        return require('../../assets/images/say.png');
-      case 'post':
-        return '📝';
-      case 'comment':
-        return '💭';
-      default:
-        return '✨';
-    }
-  };
+  // 비즈니스 로직은 Container에서 처리
+  const {
+    loading,
+    stats,
+    recentActivities,
+    graduationDate,
+    getActivityIcon,
+    handleGoToQnA,
+    handleGoToShareExperience,
+  } = useGraduateScreenContainer({ navigation });
 
   if (loading) {
     return (
@@ -243,7 +172,7 @@ const GraduateScreen: React.FC<GraduateScreenProps> = ({ navigation }) => {
           <SectionTitle title="멘토링 시작하기" size="lg" marginBottom={spacing[4]} />
           <TouchableOpacity
             style={styles.actionButton}
-            onPress={() => navigation.navigate('Community')}
+            onPress={handleGoToQnA}
           >
             <Image
               source={require('../../assets/images/say.png')}
@@ -260,11 +189,7 @@ const GraduateScreen: React.FC<GraduateScreenProps> = ({ navigation }) => {
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.actionButton}
-            onPress={() => navigation.navigate('CommunityPostCreate', {
-              type: 'GENERAL', // 일반 게시글 타입
-              missionTitle: '경험담 공유',
-              missionEmoji: '📝',
-            })}
+            onPress={handleGoToShareExperience}
           >
             <Text style={styles.actionIcon}>📝</Text>
             <View style={styles.actionContent}>

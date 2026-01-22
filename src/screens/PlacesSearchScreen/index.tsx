@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import {
   View,
   Text,
@@ -14,11 +14,10 @@ import {
 import { NavigationProp } from '@react-navigation/native';
 import { Header, EmptyState } from '../../components/ui';
 import { PlaceCard } from '../../components/specialized/PlaceCard';
-import { useLocation } from '../../hooks/useLocation';
-import { usePlacesSearch } from '../../hooks/usePlacesSearch';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
 import { getOptimizedLineHeight } from '../../utils/textStyles';
 import { RootStackParamList } from '../../types/navigation';
+import { usePlacesSearchScreenContainer } from './PlacesSearchScreen.container';
 
 interface PlacesSearchScreenProps {
   navigation: NavigationProp<RootStackParamList>;
@@ -42,32 +41,18 @@ const FILTERS = [
 ];
 
 const PlacesSearchScreen: React.FC<PlacesSearchScreenProps> = ({ navigation }) => {
-  const { userLocation, requestLocationPermission } = useLocation();
+  // 비즈니스 로직은 Container에서 처리
   const {
     places,
     searchText,
-    setSearchText,
     isLoading,
     selectedFilter,
-    setSelectedFilter,
     selectedRegion,
-    setSelectedRegion,
-    searchPlaces,
-  } = usePlacesSearch();
-
-  const handleGoBack = () => {
-    navigation.goBack();
-  };
-
-  useEffect(() => {
-    requestLocationPermission();
-  }, [requestLocationPermission]);
-
-  useEffect(() => {
-    if (userLocation) {
-      searchPlaces(userLocation.lat, userLocation.lng, selectedFilter);
-    }
-  }, [userLocation, selectedFilter, searchPlaces]);
+    handleSearchChange,
+    handleFilterChange,
+    handleRegionChange,
+    handleGoBack,
+  } = usePlacesSearchScreenContainer({ navigation });
 
   return (
     <ImageBackground
@@ -97,7 +82,7 @@ const PlacesSearchScreen: React.FC<PlacesSearchScreenProps> = ({ navigation }) =
             style={styles.searchInput}
             placeholder="장소 이름 또는 주소로 검색"
             value={searchText}
-            onChangeText={setSearchText}
+            onChangeText={handleSearchChange}
             placeholderTextColor={colors.text.secondary}
           />
         </View>
@@ -114,7 +99,7 @@ const PlacesSearchScreen: React.FC<PlacesSearchScreenProps> = ({ navigation }) =
                 styles.filterChip,
                 selectedFilter === filter.key && styles.filterChipActive,
               ]}
-              onPress={() => setSelectedFilter(filter.key)}
+              onPress={() => handleFilterChange(filter.key)}
             >
               <Text
                 style={[
@@ -140,7 +125,7 @@ const PlacesSearchScreen: React.FC<PlacesSearchScreenProps> = ({ navigation }) =
                 styles.regionChip,
                 selectedRegion === region.id && styles.regionChipActive,
               ]}
-              onPress={() => setSelectedRegion(region.id)}
+              onPress={() => handleRegionChange(region.id)}
             >
               <Text
                 style={[

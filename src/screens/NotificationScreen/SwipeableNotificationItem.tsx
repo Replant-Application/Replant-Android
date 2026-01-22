@@ -1,12 +1,10 @@
-import React, { useState, useRef } from 'react';
+import React from 'react';
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
   Animated,
-  PanResponder,
-  Dimensions,
   Platform,
   Image,
 } from 'react-native';
@@ -15,82 +13,23 @@ import { colors, spacing, typography, borderRadius } from '../../utils/designTok
 import { getOptimizedLineHeight } from '../../utils/textStyles';
 import { formatTimeAgo } from '../../utils/dateUtils';
 import ConfirmModal from '../../components/ui/ConfirmModal';
-
-const SCREEN_WIDTH = Dimensions.get('window').width;
-const SWIPE_THRESHOLD = -70; // 삭제 버튼이 나타나는 슬라이드 거리
-const MAX_SWIPE_DISTANCE = -80; // 최대 슬라이드 거리 제한
+import { useSwipeableNotificationItemContainer } from './SwipeableNotificationItem.container';
 
 const SwipeableNotificationItem: React.FC<SwipeableNotificationItemProps> = ({ 
   item, 
   onPress, 
   onDelete 
 }) => {
-  const translateX = useRef(new Animated.Value(0)).current;
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-
-  const panResponder = useRef(
-    PanResponder.create({
-      onStartShouldSetPanResponder: () => true,
-      onMoveShouldSetPanResponder: (_, gestureState) => {
-        return Math.abs(gestureState.dx) > Math.abs(gestureState.dy);
-      },
-      onPanResponderMove: (_, gestureState) => {
-        // 오른쪽으로 스와이프만 허용 (음수 = 왼쪽)
-        if (gestureState.dx < 0) {
-          // 최대 슬라이드 거리 제한
-          const limitedDx = Math.max(gestureState.dx, MAX_SWIPE_DISTANCE);
-          translateX.setValue(limitedDx);
-        }
-      },
-      onPanResponderRelease: (_, gestureState) => {
-        if (gestureState.dx < SWIPE_THRESHOLD) {
-          // 삭제 버튼 표시
-          Animated.spring(translateX, {
-            toValue: SWIPE_THRESHOLD,
-            useNativeDriver: true,
-            tension: 50,
-            friction: 7,
-          }).start();
-        } else {
-          // 원래 위치로 복귀
-          Animated.spring(translateX, {
-            toValue: 0,
-            useNativeDriver: true,
-            tension: 50,
-            friction: 7,
-          }).start();
-        }
-      },
-    })
-  ).current;
-
-  const handleDelete = () => {
-    setShowDeleteModal(true);
-  };
-
-  const handleConfirmDelete = () => {
-    setShowDeleteModal(false);
-    setIsDeleting(true);
-    Animated.timing(translateX, {
-      toValue: -SCREEN_WIDTH,
-      duration: 300,
-      useNativeDriver: true,
-    }).start(() => {
-      onDelete(item.id);
-    });
-  };
-
-  const handleCancelDelete = () => {
-    setShowDeleteModal(false);
-    // 원래 위치로 복귀
-    Animated.spring(translateX, {
-      toValue: 0,
-      useNativeDriver: true,
-      tension: 50,
-      friction: 7,
-    }).start();
-  };
+  // 비즈니스 로직은 Container에서 처리
+  const {
+    translateX,
+    isDeleting,
+    showDeleteModal,
+    panResponder,
+    handleDelete,
+    handleConfirmDelete,
+    handleCancelDelete,
+  } = useSwipeableNotificationItemContainer({ item, onDelete });
 
   if (isDeleting) {
     return null;

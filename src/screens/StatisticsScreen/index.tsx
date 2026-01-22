@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React from 'react';
 import {
   View,
   Text,
@@ -14,101 +14,34 @@ import { Header, Card } from '../../components/ui';
 import { colors, spacing, typography, borderRadius, shadows } from '../../utils/designTokens';
 import { getOptimizedLineHeight } from '../../utils/textStyles';
 import { RootStackParamList } from '../../types/navigation';
-import { useMission } from '../../hooks/useMission';
+import { useStatisticsScreenContainer } from './StatisticsScreen.container';
 
 interface StatisticsScreenProps {
   navigation: NavigationProp<RootStackParamList>;
 }
 
-type TabType = 'monthly' | 'weekly';
 type CategoryFilter = 'all' | 'health' | 'selfcare' | 'daily' | 'regular';
 
 const StatisticsScreen: React.FC<StatisticsScreenProps> = ({ navigation }) => {
-  const { missions } = useMission();
-  const [activeTab, setActiveTab] = useState<TabType>('monthly');
-  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
-  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
-  const [selectedCategory, setSelectedCategory] = useState<CategoryFilter>('all');
+  // 비즈니스 로직은 Container에서 처리
+  const {
+    activeTab,
+    selectedYear,
+    selectedMonth,
+    selectedCategory,
+    monthlyStats,
+    changeMonth,
+    handleTabChange,
+    handleCategoryChange,
+    generateCalendarGridData,
+  } = useStatisticsScreenContainer({ navigation });
 
-  // 날짜 변경
-  const changeMonth = (direction: 'prev' | 'next') => {
-    if (direction === 'prev') {
-      if (selectedMonth === 1) {
-        setSelectedMonth(12);
-        setSelectedYear(selectedYear - 1);
-      } else {
-        setSelectedMonth(selectedMonth - 1);
-      }
-    } else {
-      if (selectedMonth === 12) {
-        setSelectedMonth(1);
-        setSelectedYear(selectedYear + 1);
-      } else {
-        setSelectedMonth(selectedMonth + 1);
-      }
-    }
-  };
-
-  // 선택된 월의 미션 완료 데이터 계산
-  const monthlyStats = useMemo(() => {
-    const year = selectedYear;
-    const month = selectedMonth;
-    const daysInMonth = new Date(year, month, 0).getDate();
-    
-    // 선택된 월의 시작일과 종료일
-    const startDate = new Date(year, month - 1, 1);
-    const endDate = new Date(year, month, 0, 23, 59, 59);
-
-    // 카테고리 필터링
-    let filteredMissions = missions;
-    if (selectedCategory !== 'all') {
-      // 카테고리 매핑 (실제 카테고리 ID에 맞게 조정 필요)
-      filteredMissions = missions; // 일단 전체 미션 사용
-    }
-
-    // 각 미션별로 해당 월의 완료 일자 계산
-    const missionStats = filteredMissions.map(mission => {
-      const completedDays: number[] = [];
-      
-      if (mission.completed_at) {
-        const completedDate = new Date(mission.completed_at);
-        if (completedDate >= startDate && completedDate <= endDate) {
-          completedDays.push(completedDate.getDate());
-        }
-      }
-
-      // 반복 미션의 경우 (매일 완료 가능한 미션)
-      // 실제로는 미션 히스토리 데이터가 필요하지만, 여기서는 예시로 처리
-      const completionRate = daysInMonth > 0 
-        ? Math.round((completedDays.length / daysInMonth) * 100) 
-        : 0;
-
-      return {
-        mission,
-        completedDays,
-        completionRate,
-        totalDays: daysInMonth,
-      };
-    });
-
-    // 전체 목표 달성률 계산
-    const totalCompletionRate = missionStats.length > 0
-      ? Math.round(
-          missionStats.reduce((sum, stat) => sum + stat.completionRate, 0) / 
-          missionStats.length
-        )
-      : 0;
-
-    return {
-      missionStats,
-      totalCompletionRate,
-      daysInMonth,
-    };
-  }, [missions, selectedYear, selectedMonth, selectedCategory]);
-
-  // 캘린더 그리드 렌더링
+  /**
+   * 캘린더 그리드 렌더링
+   */
   const renderCalendarGrid = (completedDays: number[], daysInMonth: number) => {
     const dayColors = ['#FFE066', '#FF6B6B', '#4ECDC4', '#95E1D3', '#F38181'];
+    const gridData = generateCalendarGridData(completedDays, daysInMonth);
     const rows = [];
     const daysPerRow = 7;
     const totalRows = Math.ceil(daysInMonth / daysPerRow);
@@ -116,23 +49,22 @@ const StatisticsScreen: React.FC<StatisticsScreenProps> = ({ navigation }) => {
     for (let row = 0; row < totalRows; row++) {
       const rowDays = [];
       for (let col = 0; col < daysPerRow; col++) {
-        const day = row * daysPerRow + col + 1;
-        if (day <= daysInMonth) {
-          const isCompleted = completedDays.includes(day);
-          const colorIndex = completedDays.indexOf(day) % dayColors.length;
+        const dayIndex = row * daysPerRow + col;
+        const dayData = gridData[dayIndex];
+        if (dayData) {
           rowDays.push(
             <View
-              key={day}
+              key={dayData.day}
               style={[
                 styles.calendarDay,
-                isCompleted && {
-                  backgroundColor: dayColors[colorIndex],
+                dayData.isCompleted && {
+                  backgroundColor: dayData.color,
                 },
               ]}
             />
           );
         } else {
-          rowDays.push(<View key={`empty-${day}`} style={styles.calendarDay} />);
+          rowDays.push(<View key={`empty-${dayIndex}`} style={styles.calendarDay} />);
         }
       }
       rows.push(
@@ -206,7 +138,7 @@ const StatisticsScreen: React.FC<StatisticsScreenProps> = ({ navigation }) => {
               <View style={styles.tabContainer}>
                 <TouchableOpacity
                   style={[styles.tab, activeTab === 'monthly' && styles.tabActive]}
-                  onPress={() => setActiveTab('monthly')}
+                  onPress={() => handleTabChange('monthly')}
                   activeOpacity={0.7}
                 >
                   <Text style={[styles.tabText, activeTab === 'monthly' && styles.tabTextActive]}>
@@ -215,7 +147,7 @@ const StatisticsScreen: React.FC<StatisticsScreenProps> = ({ navigation }) => {
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={[styles.tab, activeTab === 'weekly' && styles.tabActive]}
-                  onPress={() => setActiveTab('weekly')}
+                  onPress={() => handleTabChange('weekly')}
                   activeOpacity={0.7}
                 >
                   <Text style={[styles.tabText, activeTab === 'weekly' && styles.tabTextActive]}>
@@ -239,7 +171,7 @@ const StatisticsScreen: React.FC<StatisticsScreenProps> = ({ navigation }) => {
                         styles.categoryFilter,
                         selectedCategory === filter.id && styles.categoryFilterActive,
                       ]}
-                      onPress={() => setSelectedCategory(filter.id)}
+                      onPress={() => handleCategoryChange(filter.id)}
                       activeOpacity={0.7}
                     >
                       <Image

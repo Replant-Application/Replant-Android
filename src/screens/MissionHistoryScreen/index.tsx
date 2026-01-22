@@ -3,99 +3,35 @@
  * 완료/실패/만료된 미션들의 기록을 볼 수 있는 화면
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, RefreshControl } from 'react-native';
-import { getUserMissions, UserMission, UserMissionStatus } from '../../api/missionApi';
+import React from 'react';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, RefreshControl, Platform } from 'react-native';
+import { UserMission } from '../../api/missionApi';
 import { Loading, Header, EmptyState, FilterBar } from '../../components/ui';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
 import { getOptimizedLineHeight } from '../../utils/textStyles';
-import { Platform } from 'react-native';
 import { formatDateDot } from '../../utils/dateUtils';
 import { NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types/navigation';
+import { useMissionHistoryScreenContainer } from './MissionHistoryScreen.container';
 
 interface MissionHistoryScreenProps {
   navigation: NavigationProp<RootStackParamList>;
 }
 
-type FilterType = 'all' | 'completed' | 'expired';
-
 const MissionHistoryScreen: React.FC<MissionHistoryScreenProps> = ({ navigation }) => {
-  const [missions, setMissions] = useState<UserMission[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
-  const [filter, setFilter] = useState<FilterType>('all');
-  const [page, setPage] = useState(0);
-  const [hasMore, setHasMore] = useState(true);
-
-  const fetchHistory = useCallback(async (pageNum: number = 0, isRefresh: boolean = false) => {
-    try {
-      if (isRefresh) {
-        setRefreshing(true);
-      } else if (pageNum === 0) {
-        setLoading(true);
-      }
-
-      const result = await getUserMissions({ page: pageNum, size: 20 });
-
-      if (result.success && result.data) {
-        const newMissions = result.data.content;
-        if (isRefresh || pageNum === 0) {
-          setMissions(newMissions);
-        } else {
-          setMissions(prev => [...prev, ...newMissions]);
-        }
-        setHasMore(result.data.number < result.data.totalPages - 1);
-        setPage(pageNum);
-      }
-    } catch (error) {
-      console.error('미션 이력 조회 실패:', error);
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchHistory(0);
-  }, [fetchHistory]);
-
-  const handleRefresh = () => {
-    fetchHistory(0, true);
-  };
-
-  const handleLoadMore = () => {
-    if (hasMore && !loading) {
-      fetchHistory(page + 1);
-    }
-  };
-
-  const getFilteredMissions = () => {
-    if (filter === 'all') return missions;
-    if (filter === 'completed') return missions.filter(m => m.status === 'COMPLETED');
-    if (filter === 'expired') return missions.filter(m => m.status === 'EXPIRED');
-    return missions;
-  };
-
-  const getStatusColor = (status: UserMissionStatus) => {
-    switch (status) {
-      case 'COMPLETED': return colors.success;
-      case 'EXPIRED': return colors.error;
-      case 'ASSIGNED': return colors.info;
-      case 'PENDING': return colors.warning;
-      default: return colors.text.secondary;
-    }
-  };
-
-  const getStatusText = (status: UserMissionStatus) => {
-    switch (status) {
-      case 'COMPLETED': return '완료';
-      case 'EXPIRED': return '만료';
-      case 'ASSIGNED': return '진행중';
-      case 'PENDING': return '인증대기';
-      default: return status;
-    }
-  };
+  // 비즈니스 로직은 Container에서 처리
+  const {
+    missions,
+    loading,
+    refreshing,
+    filter,
+    stats,
+    handleRefresh,
+    handleLoadMore,
+    handleFilterChange,
+    getStatusColor,
+    getStatusText,
+  } = useMissionHistoryScreenContainer({ navigation });
 
 
   const renderMissionItem = ({ item }: { item: UserMission }) => {
@@ -140,8 +76,6 @@ const MissionHistoryScreen: React.FC<MissionHistoryScreenProps> = ({ navigation 
     return <Loading text="미션 이력을 불러오는 중..." />;
   }
 
-  const filteredMissions = getFilteredMissions();
-
   return (
     <View style={styles.container}>
       <Header
@@ -161,7 +95,7 @@ const MissionHistoryScreen: React.FC<MissionHistoryScreenProps> = ({ navigation 
           { key: 'expired', label: '만료' },
         ]}
         selectedFilter={filter}
-        onFilterChange={(key) => setFilter(key as FilterType)}
+        onFilterChange={(key) => handleFilterChange(key as 'all' | 'completed' | 'expired')}
         variant="button"
         containerStyle={{
           paddingHorizontal: spacing[4],
@@ -174,32 +108,24 @@ const MissionHistoryScreen: React.FC<MissionHistoryScreenProps> = ({ navigation 
       {/* 통계 요약 */}
       <View style={styles.statsContainer}>
         <View style={styles.statItem}>
-          <Text style={styles.statValue}>
-            {missions.filter(m => m.status === 'COMPLETED').length}
-          </Text>
+          <Text style={styles.statValue}>{stats.completed}</Text>
           <Text style={styles.statLabel}>완료</Text>
         </View>
         <View style={styles.statDivider} />
         <View style={styles.statItem}>
-          <Text style={styles.statValue}>
-            {missions.filter(m => m.status === 'EXPIRED').length}
-          </Text>
+          <Text style={styles.statValue}>{stats.expired}</Text>
           <Text style={styles.statLabel}>만료</Text>
         </View>
         <View style={styles.statDivider} />
         <View style={styles.statItem}>
-          <Text style={styles.statValue}>
-            {missions.length > 0
-              ? Math.round((missions.filter(m => m.status === 'COMPLETED').length / missions.length) * 100)
-              : 0}%
-          </Text>
+          <Text style={styles.statValue}>{stats.successRate}%</Text>
           <Text style={styles.statLabel}>성공률</Text>
         </View>
       </View>
 
       {/* 미션 목록 */}
       <FlatList
-        data={filteredMissions}
+        data={missions}
         renderItem={renderMissionItem}
         keyExtractor={(item) => String(item.id)}
         contentContainerStyle={styles.listContent}

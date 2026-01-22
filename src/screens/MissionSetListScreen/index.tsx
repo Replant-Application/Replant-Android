@@ -3,7 +3,7 @@
  * 공개된 미션세트 목록 표시 및 담기 기능
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React from 'react';
 import {
   View,
   Text,
@@ -12,7 +12,6 @@ import {
   TouchableOpacity,
   TextInput,
   RefreshControl,
-  Alert,
   Image,
   Platform,
   ImageBackground,
@@ -24,162 +23,31 @@ import { RootStackParamList } from '../../types/navigation';
 import { Header, Loading, EmptyState } from '../../components/ui';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
 import { getOptimizedLineHeight } from '../../utils/textStyles';
-import {
-  getPublicTodoLists,
-  searchPublicTodoLists,
-  copyTodoList,
-  getShareableTodoLists,
-  shareTodoList
-} from '../../api/todolistApi';
-import { PublicTodoList, TodoList } from '../../types/todolist';
-import { logError } from '../../utils/logger';
 import { SCREEN_NAMES } from '../../utils/constants';
+import { useMissionSetListScreenContainer } from './MissionSetListScreen.container';
 
 interface MissionSetListScreenProps {
   navigation: NavigationProp<RootStackParamList>;
 }
 
 const MissionSetListScreen: React.FC<MissionSetListScreenProps> = ({ navigation }) => {
-  const [publicTodoLists, setPublicTodoLists] = useState<PublicTodoList[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
-
-  // 공유 모달 관련 상태
-  const [shareModalVisible, setShareModalVisible] = useState(false);
-  const [myTodoLists, setMyTodoLists] = useState<TodoList[]>([]);
-  const [loadingMyTodoLists, setLoadingMyTodoLists] = useState(false);
-
-  // 검색어 디바운싱 (300ms)
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearchQuery(searchQuery);
-    }, 300);
-    return () => clearTimeout(timer);
-  }, [searchQuery]);
-
-  // 공개 투두리스트 목록 로딩
-  const loadPublicTodoLists = useCallback(async () => {
-    try {
-      let result;
-      if (debouncedSearchQuery.trim()) {
-        result = await searchPublicTodoLists(debouncedSearchQuery, 0, 50);
-      } else {
-        result = await getPublicTodoLists(0, 50);
-      }
-
-      if (result.success && result.data) {
-        setPublicTodoLists(result.data.content);
-      }
-    } catch (error) {
-      logError('공개 투두리스트 로딩 실패', error as Error);
-    } finally {
-      setLoading(false);
-    }
-  }, [debouncedSearchQuery]);
-
-  useEffect(() => {
-    loadPublicTodoLists();
-  }, [loadPublicTodoLists]);
-
-  // Pull-to-Refresh
-  const onRefresh = useCallback(async () => {
-    setRefreshing(true);
-    await loadPublicTodoLists();
-    setRefreshing(false);
-  }, [loadPublicTodoLists]);
-
-  // 공유 모달 열기 - 내 투두리스트 로드
-  const openShareModal = async () => {
-    setShareModalVisible(true);
-    setLoadingMyTodoLists(true);
-    try {
-      const result = await getShareableTodoLists();
-      if (result.success && result.data) {
-        setMyTodoLists(result.data);
-      }
-    } catch (error) {
-      logError('내 투두리스트 로딩 실패', error as Error);
-    } finally {
-      setLoadingMyTodoLists(false);
-    }
-  };
-
-  // 투두리스트 공유하기 (공개로 변경)
-  const handleShare = async (todoList: TodoList) => {
-    Alert.alert(
-      '공유 확인',
-      `"${todoList.title}" 투두리스트를 공유하시겠습니까?\n공유하면 다른 사용자들이 담을 수 있습니다.`,
-      [
-        { text: '취소', style: 'cancel' },
-        {
-          text: '공유',
-          onPress: async () => {
-            try {
-              const result = await shareTodoList(todoList.id);
-              if (result.success) {
-                Alert.alert('공유 완료', `"${todoList.title}" 투두리스트가 공유되었습니다.`);
-                setShareModalVisible(false);
-                // 목록 새로고침
-                loadPublicTodoLists();
-              } else {
-                Alert.alert('공유 실패', result.error || '공유에 실패했습니다.');
-              }
-            } catch (error) {
-              logError('투두리스트 공유 실패', error as Error);
-              Alert.alert('오류', '공유 중 문제가 발생했습니다.');
-            }
-          },
-        },
-      ]
-    );
-  };
-
-  // 투두리스트 담기
-  const handleCopy = async (todoList: PublicTodoList) => {
-    try {
-      const result = await copyTodoList(todoList.id);
-      if (result.success) {
-        Alert.alert(
-          '담기 완료',
-          `"${todoList.title}" 투두리스트를 내 목록에 추가했습니다.`
-        );
-        // 담은 수 증가 반영
-        setPublicTodoLists(prev =>
-          prev.map(tl =>
-            tl.id === todoList.id
-              ? { ...tl, addedCount: tl.addedCount + 1 }
-              : tl
-          )
-        );
-      } else {
-        Alert.alert('담기 실패', result.error || '투두리스트를 담는데 실패했습니다.');
-      }
-    } catch (error) {
-      logError('투두리스트 담기 실패', error as Error);
-      Alert.alert('오류', '투두리스트를 담는 중 문제가 발생했습니다.');
-    }
-  };
-
-  // 별점 렌더링
-  const renderStars = (rating: number) => {
-    const fullStars = Math.floor(rating);
-    const hasHalfStar = rating - fullStars >= 0.5;
-    const stars = [];
-
-    for (let i = 0; i < 5; i++) {
-      if (i < fullStars) {
-        stars.push('★');
-      } else if (i === fullStars && hasHalfStar) {
-        stars.push('☆');
-      } else {
-        stars.push('☆');
-      }
-    }
-
-    return stars.join('');
-  };
+  // 비즈니스 로직은 Container에서 처리
+  const {
+    publicTodoLists,
+    loading,
+    refreshing,
+    searchQuery,
+    shareModalVisible,
+    myTodoLists,
+    loadingMyTodoLists,
+    handleSearchChange,
+    onRefresh,
+    openShareModal,
+    closeShareModal,
+    handleShare,
+    handleCopy,
+    renderStars,
+  } = useMissionSetListScreenContainer({ navigation });
 
   if (loading) {
     return <Loading text="투두리스트를 불러오는 중..." />;
@@ -227,7 +95,7 @@ const MissionSetListScreen: React.FC<MissionSetListScreenProps> = ({ navigation 
           <TextInput
             style={styles.searchInput}
             value={searchQuery}
-            onChangeText={setSearchQuery}
+            onChangeText={handleSearchChange}
             placeholder="투두리스트 검색..."
             placeholderTextColor={colors.text.tertiary}
           />
@@ -356,13 +224,13 @@ const MissionSetListScreen: React.FC<MissionSetListScreenProps> = ({ navigation 
           visible={shareModalVisible}
           animationType="slide"
           transparent={true}
-          onRequestClose={() => setShareModalVisible(false)}
+          onRequestClose={closeShareModal}
         >
           <View style={styles.modalOverlay}>
             <View style={styles.modalContent}>
               <View style={styles.modalHeader}>
                 <Text style={styles.modalTitle}>내 투두리스트 공유하기</Text>
-                <TouchableOpacity onPress={() => setShareModalVisible(false)}>
+                <TouchableOpacity onPress={closeShareModal}>
                   <Text style={styles.modalCloseText}>닫기</Text>
                 </TouchableOpacity>
               </View>

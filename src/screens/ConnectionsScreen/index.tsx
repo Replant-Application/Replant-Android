@@ -4,7 +4,7 @@
  * 쉬었음 청년들이 서로 연결되어 함께 성장할 수 있도록 도와줍니다.
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React from 'react';
 import {
   View,
   Text,
@@ -13,24 +13,19 @@ import {
   TouchableOpacity,
   RefreshControl,
   Image,
-  Alert,
   Platform,
 } from 'react-native';
-import { getRecommendations, acceptRecommendation, rejectRecommendation } from '../../api/recommendationApi';
-// import { getChatRooms } from '../../api/chatApi'; // TODO: chatApi 구현 필요
 import { Loading, Header, EmptyState, TabBar } from '../../components/ui';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
 import { getOptimizedLineHeight } from '../../utils/textStyles';
 import { NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types/navigation';
-import { SCREEN_NAMES } from '../../utils/constants';
 import { formatTimeAgo } from '../../utils/dateUtils';
+import { useConnectionsScreenContainer } from './ConnectionsScreen.container';
 
 interface ConnectionsScreenProps {
   navigation: NavigationProp<RootStackParamList>;
 }
-
-type TabType = 'recommendations' | 'chats';
 
 interface Recommendation {
   id: number;
@@ -73,102 +68,21 @@ interface ChatRoom {
 }
 
 const ConnectionsScreen: React.FC<ConnectionsScreenProps> = ({ navigation }) => {
-  const [activeTab, setActiveTab] = useState<TabType>('recommendations');
-  const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
-  const [chatRooms, setChatRooms] = useState<ChatRoom[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
-
-  const fetchData = useCallback(async (isRefresh: boolean = false) => {
-    try {
-      if (isRefresh) {
-        setRefreshing(true);
-      } else {
-        setLoading(true);
-      }
-
-      const [recResult] = await Promise.all([
-        getRecommendations({ status: 'PENDING' }),
-        // getChatRooms(), // TODO: chatApi 구현 필요
-        Promise.resolve({ success: true, data: [] }), // 임시: 빈 배열 반환
-      ]);
-      const chatResult = { success: true, data: [] }; // TODO: chatApi 구현 필요
-
-      if (recResult.success && recResult.data) {
-        setRecommendations(recResult.data as any);
-      }
-
-      if (chatResult.success && chatResult.data) {
-        setChatRooms(chatResult.data as any);
-      }
-    } catch (error) {
-      console.error('데이터 조회 실패:', error);
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
-
-  const handleRefresh = () => {
-    fetchData(true);
-  };
-
-  const handleAcceptRecommendation = async (recommendationId: number) => {
-    try {
-      const result = await acceptRecommendation(recommendationId);
-      if (result.success) {
-        Alert.alert(
-          '인연 수락!',
-          '채팅방이 생성되었습니다. 이제 대화를 시작해보세요!',
-          [
-            {
-              text: '채팅하기',
-              onPress: () => {
-                fetchData(true);
-                setActiveTab('chats');
-              },
-            },
-          ]
-        );
-      }
-    } catch (error) {
-      Alert.alert('오류', '인연 수락에 실패했습니다.');
-    }
-  };
-
-  const handleRejectRecommendation = async (recommendationId: number) => {
-    Alert.alert(
-      '정말 거절하시겠어요?',
-      '거절하면 이 추천은 사라집니다.',
-      [
-        { text: '취소', style: 'cancel' },
-        {
-          text: '거절',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              const result = await rejectRecommendation(recommendationId);
-              if (result.success) {
-                setRecommendations(prev =>
-                  prev.filter(r => r.id !== recommendationId)
-                );
-              }
-            } catch (error) {
-              Alert.alert('오류', '거절에 실패했습니다.');
-            }
-          },
-        },
-      ]
-    );
-  };
-
-  const handleOpenChat = (roomId: number) => {
-    navigation.navigate(SCREEN_NAMES.CHAT_ROOM as any, { roomId });
-  };
+  // 비즈니스 로직은 Container에서 처리
+  const {
+    activeTab,
+    recommendations,
+    chatRooms,
+    loading,
+    refreshing,
+    recommendationBadge,
+    chatBadge,
+    handleRefresh,
+    handleTabChange,
+    handleAcceptRecommendation,
+    handleRejectRecommendation,
+    handleOpenChat,
+  } = useConnectionsScreenContainer({ navigation });
 
 
   const renderRecommendationItem = ({ item }: { item: Recommendation }) => (
@@ -291,11 +205,11 @@ const ConnectionsScreen: React.FC<ConnectionsScreenProps> = ({ navigation }) => 
       {/* 탭 */}
       <TabBar
         tabs={[
-          { key: 'recommendations', label: '새로운 인연', badge: recommendations.length > 0 ? recommendations.length : undefined },
-          { key: 'chats', label: '대화', badge: chatRooms.reduce((sum, r) => sum + r.unreadCount, 0) > 0 ? chatRooms.reduce((sum, r) => sum + r.unreadCount, 0) : undefined },
+          { key: 'recommendations', label: '새로운 인연', badge: recommendationBadge },
+          { key: 'chats', label: '대화', badge: chatBadge },
         ]}
         activeTab={activeTab}
-        onTabChange={(key) => setActiveTab(key as TabType)}
+        onTabChange={(key) => handleTabChange(key as 'recommendations' | 'chats')}
         variant="simple"
       />
 

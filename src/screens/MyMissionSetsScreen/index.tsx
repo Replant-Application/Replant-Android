@@ -3,7 +3,7 @@
  * 내가 만든/담은 미션세트 목록 관리
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React from 'react';
 import {
   View,
   Text,
@@ -11,7 +11,6 @@ import {
   ScrollView,
   TouchableOpacity,
   RefreshControl,
-  Alert,
   Image,
   Platform,
   ImageBackground,
@@ -21,91 +20,24 @@ import { RootStackParamList } from '../../types/navigation';
 import { Header, Loading, EmptyState } from '../../components/ui';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
 import { getOptimizedLineHeight } from '../../utils/textStyles';
-import { getMyMissionSets, deleteMissionSet, MissionSetSimple } from '../../api/todolistApi';
-import { logError } from '../../utils/logger';
-import { SCREEN_NAMES } from '../../utils/constants';
+import { useMyMissionSetsScreenContainer } from './MyMissionSetsScreen.container';
 
 interface MyMissionSetsScreenProps {
   navigation: NavigationProp<RootStackParamList>;
 }
 
 const MyMissionSetsScreen: React.FC<MyMissionSetsScreenProps> = ({ navigation }) => {
-  const [missionSets, setMissionSets] = useState<MissionSetSimple[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
-
-  // 내 미션세트 목록 로딩
-  const loadMyMissionSets = useCallback(async () => {
-    try {
-      const result = await getMyMissionSets({ page: 0, size: 100 });
-      if (result.success && result.data) {
-        setMissionSets(result.data.content);
-      }
-    } catch (error) {
-      logError('내 미션세트 로딩 실패', error as Error);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    loadMyMissionSets();
-  }, [loadMyMissionSets]);
-
-  // Pull-to-Refresh
-  const onRefresh = useCallback(async () => {
-    setRefreshing(true);
-    await loadMyMissionSets();
-    setRefreshing(false);
-  }, [loadMyMissionSets]);
-
-  // 미션세트 삭제
-  const handleDelete = (missionSet: MissionSetSimple) => {
-    Alert.alert(
-      '삭제 확인',
-      `"${missionSet.title}" 투두리스트를 삭제하시겠습니까?`,
-      [
-        { text: '취소', style: 'cancel' },
-        {
-          text: '삭제',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              const result = await deleteMissionSet(missionSet.id);
-              if (result.success) {
-                setMissionSets(prev => prev.filter(ms => ms.id !== missionSet.id));
-                Alert.alert('완료', '투두리스트가 삭제되었습니다.');
-              } else {
-                Alert.alert('오류', result.error || '삭제에 실패했습니다.');
-              }
-            } catch (error) {
-              logError('미션세트 삭제 실패', error as Error);
-              Alert.alert('오류', '삭제 중 문제가 발생했습니다.');
-            }
-          },
-        },
-      ]
-    );
-  };
-
-  // 미션세트 상세 보기
-  const handleDetail = (missionSet: MissionSetSimple) => {
-    navigation.navigate(SCREEN_NAMES.MISSION_SET_DETAIL as any, {
-      missionSetId: missionSet.id,
-    });
-  };
-
-  // 별점 렌더링
-  const renderStars = (rating: number) => {
-    const fullStars = Math.floor(rating);
-    const stars = [];
-
-    for (let i = 0; i < 5; i++) {
-      stars.push(i < fullStars ? '★' : '☆');
-    }
-
-    return stars.join('');
-  };
+  // 비즈니스 로직은 Container에서 처리
+  const {
+    missionSets,
+    loading,
+    refreshing,
+    onRefresh,
+    handleDelete,
+    handleDetail,
+    handleCreate,
+    renderStars,
+  } = useMyMissionSetsScreenContainer({ navigation });
 
   if (loading) {
     return <Loading text="내 투두리스트를 불러오는 중..." />;
@@ -132,7 +64,7 @@ const MyMissionSetsScreen: React.FC<MyMissionSetsScreenProps> = ({ navigation })
           }
           rightButton={
             <TouchableOpacity
-              onPress={() => navigation.navigate(SCREEN_NAMES.MISSION_SET_CREATE as any)}
+              onPress={handleCreate}
               style={styles.createButton}
             >
               <Image

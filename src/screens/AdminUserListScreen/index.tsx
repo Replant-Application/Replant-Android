@@ -2,65 +2,31 @@
  * 전체 유저 목록 화면
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Platform } from 'react-native';
 import { NavigationProp } from '@react-navigation/native';
-import { useAdmin, MemberInfo } from '../../hooks/useAdmin';
 import { Header, Loading, ErrorBoundary } from '../../components/ui';
 import { colors, spacing, typography, borderRadius, shadows } from '../../utils/designTokens';
 import { getOptimizedLineHeight } from '../../utils/textStyles';
 import { RootStackParamList } from '../../types/navigation';
+import { useAdminUserListScreenContainer } from './AdminUserListScreen.container';
 
 interface AdminUserListScreenProps {
   navigation: NavigationProp<RootStackParamList>;
 }
 
-type FilterType = 'all' | 'active' | 'inactive';
-
 const AdminUserListScreen: React.FC<AdminUserListScreenProps> = ({ navigation }) => {
-  const { getAllUsers, loading, error } = useAdmin();
-  const [users, setUsers] = useState<MemberInfo[]>([]);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [filter, setFilter] = useState<FilterType>('all');
-  const [page] = useState(1);
-  const limit = 20;
-
-  const loadUsers = useCallback(async () => {
-    const result = await getAllUsers({ page, limit });
-    if (result.success && result.data) {
-      setUsers(result.data);
-    }
-  }, [page, limit, getAllUsers]);
-
-  useEffect(() => {
-    loadUsers();
-  }, [loadUsers]);
-
-  // 필터링된 유저 목록
-  const filteredUsers = users.filter(user => {
-    // 검색 필터
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      const matchesSearch =
-        user.nickname.toLowerCase().includes(query) ||
-        (user.email && user.email.toLowerCase().includes(query));
-      if (!matchesSearch) return false;
-    }
-
-    // 상태 필터 (status 필드 사용)
-    if (filter === 'active') {
-      return user.status === 'ACTIVE';
-    }
-    if (filter === 'inactive') {
-      return user.status === 'INACTIVE';
-    }
-
-    return true;
-  });
-
-  const handleUserPress = (userId: number) => {
-    navigation.navigate('AdminUserDetail', { userId });
-  };
+  // 비즈니스 로직은 Container에서 처리
+  const {
+    filteredUsers,
+    searchQuery,
+    filter,
+    loading,
+    error,
+    handleSearchChange,
+    handleFilterChange,
+    handleUserPress,
+  } = useAdminUserListScreenContainer({ navigation });
 
   if (error) {
     return <ErrorBoundary error={new Error(error)} />;
@@ -77,7 +43,7 @@ const AdminUserListScreen: React.FC<AdminUserListScreenProps> = ({ navigation })
             style={styles.searchInput}
             placeholder="닉네임, 이메일로 검색..."
             value={searchQuery}
-            onChangeText={setSearchQuery}
+            onChangeText={handleSearchChange}
             placeholderTextColor={colors.text.tertiary}
           />
         </View>
@@ -85,7 +51,7 @@ const AdminUserListScreen: React.FC<AdminUserListScreenProps> = ({ navigation })
         <View style={styles.filterContainer}>
           <TouchableOpacity
             style={[styles.filterButton, filter === 'all' && styles.filterButtonActive]}
-            onPress={() => setFilter('all')}
+            onPress={() => handleFilterChange('all')}
           >
             <Text style={[styles.filterText, filter === 'all' && styles.filterTextActive]}>
               전체
@@ -93,7 +59,7 @@ const AdminUserListScreen: React.FC<AdminUserListScreenProps> = ({ navigation })
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.filterButton, filter === 'active' && styles.filterButtonActive]}
-            onPress={() => setFilter('active')}
+            onPress={() => handleFilterChange('active')}
           >
             <Text style={[styles.filterText, filter === 'active' && styles.filterTextActive]}>
               활성
@@ -101,7 +67,7 @@ const AdminUserListScreen: React.FC<AdminUserListScreenProps> = ({ navigation })
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.filterButton, filter === 'inactive' && styles.filterButtonActive]}
-            onPress={() => setFilter('inactive')}
+            onPress={() => handleFilterChange('inactive')}
           >
             <Text style={[styles.filterText, filter === 'inactive' && styles.filterTextActive]}>
               비활성

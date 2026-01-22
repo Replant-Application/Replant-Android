@@ -2,14 +2,14 @@
  * 유저 상세 조회 화면
  */
 
-import React, { useEffect, useState, useCallback } from 'react';
-import { View, Text, StyleSheet, ScrollView, Alert, Platform } from 'react-native';
+import React from 'react';
+import { View, Text, StyleSheet, ScrollView, Platform } from 'react-native';
 import { NavigationProp, RouteProp } from '@react-navigation/native';
-import { useAdmin, MemberInfo } from '../../hooks/useAdmin';
 import { Card, Header, Loading, ErrorBoundary, SectionTitle, Button } from '../../components/ui';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
 import { getOptimizedLineHeight } from '../../utils/textStyles';
 import { RootStackParamList } from '../../types/navigation';
+import { useAdminUserDetailScreenContainer } from './AdminUserDetailScreen.container';
 
 interface AdminUserDetailScreenProps {
   navigation: NavigationProp<RootStackParamList>;
@@ -18,55 +18,10 @@ interface AdminUserDetailScreenProps {
 
 const AdminUserDetailScreen: React.FC<AdminUserDetailScreenProps> = ({ navigation, route }) => {
   const { userId } = route.params;
-  const { getUserDetail, deactivateUser, activateUser, loading, error } = useAdmin();
-  const [user, setUser] = useState<MemberInfo | null>(null);
 
-  const loadUserDetail = useCallback(async () => {
-    const result = await getUserDetail(userId);
-    if (result.success && result.data) {
-      setUser(result.data);
-    }
-  }, [userId, getUserDetail]);
-
-  useEffect(() => {
-    loadUserDetail();
-  }, [loadUserDetail]);
-
-  const handleEdit = () => {
-    if (user) {
-      navigation.navigate('AdminUserEdit', { userId: user.id });
-    }
-  };
-
-  const handleToggleActive = async () => {
-    if (!user) return;
-
-    const isInactive = user.status === 'INACTIVE';
-    const action = isInactive ? '활성화' : '비활성화';
-    Alert.alert(
-      `유저 ${action}`,
-      `이 유저를 ${action}하시겠습니까?`,
-      [
-        { text: '취소', style: 'cancel' },
-        {
-          text: action,
-          style: isInactive ? 'default' : 'destructive',
-          onPress: async () => {
-            const result = isInactive
-              ? await activateUser(user.id)
-              : await deactivateUser(user.id);
-
-            if (result.success) {
-              Alert.alert('성공', `유저가 ${action}되었습니다.`);
-              loadUserDetail();
-            } else {
-              Alert.alert('오류', result.error || `${action}에 실패했습니다.`);
-            }
-          },
-        },
-      ]
-    );
-  };
+  // 비즈니스 로직은 Container에서 처리
+  const { user, loading, error, handleEdit, handleToggleActive } =
+    useAdminUserDetailScreenContainer({ userId, navigation });
 
   if (error) {
     return <ErrorBoundary error={new Error(error)} />;

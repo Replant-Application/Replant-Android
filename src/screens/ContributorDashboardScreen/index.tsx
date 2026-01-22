@@ -5,14 +5,13 @@
  * - 상담 요청 관리, 활동 통계, 전문 자료 제공
  */
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import {
   View,
   Text,
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  Alert,
   Modal,
   Platform,
   Image,
@@ -23,32 +22,7 @@ import { colors, spacing, typography, borderRadius, shadows } from '../../utils/
 import { getOptimizedLineHeight } from '../../utils/textStyles';
 import { RootStackParamList } from '../../types/navigation';
 import { useUser } from '../../contexts/UserContext';
-
-interface ContributorStats {
-  totalSupportedUsers: number;
-  activeChatRooms: number;
-  answeredQuestions: number;
-  averageRating: number;
-  totalHelpHours: number;
-}
-
-interface SupportRequest {
-  id: string;
-  userId: string;
-  userNickname: string;
-  topic: string;
-  status: 'pending' | 'in_progress' | 'completed';
-  createdAt: string;
-  urgency: 'low' | 'medium' | 'high';
-}
-
-interface ChatSession {
-  id: string;
-  userName: string;
-  lastMessage: string;
-  lastMessageTime: string;
-  unreadCount: number;
-}
+import { useContributorDashboardScreenContainer } from './ContributorDashboardScreen.container';
 
 interface ContributorDashboardScreenProps {
   navigation: NavigationProp<RootStackParamList>;
@@ -56,129 +30,25 @@ interface ContributorDashboardScreenProps {
 
 const ContributorDashboardScreen: React.FC<ContributorDashboardScreenProps> = ({ navigation }) => {
   const { user } = useUser();
-  const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState<ContributorStats>({
-    totalSupportedUsers: 0,
-    activeChatRooms: 0,
-    answeredQuestions: 0,
-    averageRating: 0,
-    totalHelpHours: 0,
-  });
-  const [pendingRequests, setPendingRequests] = useState<SupportRequest[]>([]);
-  const [activeSessions, setActiveSessions] = useState<ChatSession[]>([]);
-  const [showResourceModal, setShowResourceModal] = useState(false);
 
-  useEffect(() => {
-    loadDashboardData();
-  }, []);
-
-  const loadDashboardData = async () => {
-    setLoading(true);
-    try {
-      // 임시 데이터 - 실제로는 API 호출
-      setStats({
-        totalSupportedUsers: 45,
-        activeChatRooms: 3,
-        answeredQuestions: 128,
-        averageRating: 4.8,
-        totalHelpHours: 67,
-      });
-
-      setPendingRequests([
-        {
-          id: '1',
-          userId: 'user1',
-          userNickname: '희망찬새벽',
-          topic: '미션 동기부여가 어려워요',
-          status: 'pending',
-          createdAt: '2024-12-21 10:30',
-          urgency: 'medium',
-        },
-        {
-          id: '2',
-          userId: 'user2',
-          userNickname: '새로운시작',
-          topic: '사회활동 시작이 두려워요',
-          status: 'pending',
-          createdAt: '2024-12-21 09:15',
-          urgency: 'high',
-        },
-        {
-          id: '3',
-          userId: 'user3',
-          userNickname: '조용한관찰자',
-          topic: '미션 선택에 대한 조언',
-          status: 'pending',
-          createdAt: '2024-12-20 18:45',
-          urgency: 'low',
-        },
-      ]);
-
-      setActiveSessions([
-        {
-          id: 'chat1',
-          userName: '용기있는발걸음',
-          lastMessage: '네, 오늘은 산책 미션 도전해볼게요!',
-          lastMessageTime: '10분 전',
-          unreadCount: 0,
-        },
-        {
-          id: 'chat2',
-          userName: '밝은미래',
-          lastMessage: '상담사님 조언 덕분에 용기가 났어요',
-          lastMessageTime: '1시간 전',
-          unreadCount: 2,
-        },
-      ]);
-    } catch (error) {
-      console.error('Failed to load contributor data:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleAcceptRequest = (requestId: string) => {
-    Alert.alert(
-      '상담 수락',
-      '이 상담 요청을 수락하시겠습니까?',
-      [
-        { text: '취소', style: 'cancel' },
-        {
-          text: '수락',
-          onPress: () => {
-            setPendingRequests(prev =>
-              prev.map(r =>
-                r.id === requestId ? { ...r, status: 'in_progress' as const } : r
-              )
-            );
-            Alert.alert('완료', '상담이 시작되었습니다. 채팅방이 생성됩니다.');
-          },
-        },
-      ]
-    );
-  };
-
-  const getUrgencyColor = (urgency: string) => {
-    switch (urgency) {
-      case 'high':
-        return colors.error[500];
-      case 'medium':
-        return colors.warning[500];
-      default:
-        return colors.gray[500];
-    }
-  };
-
-  const getUrgencyLabel = (urgency: string) => {
-    switch (urgency) {
-      case 'high':
-        return '긴급';
-      case 'medium':
-        return '보통';
-      default:
-        return '낮음';
-    }
-  };
+  // 비즈니스 로직은 Container에서 처리
+  const {
+    loading,
+    stats,
+    pendingRequests,
+    activeSessions,
+    showResourceModal,
+    handleAcceptRequest,
+    openResourceModal,
+    closeResourceModal,
+    handleSessionPress,
+    handleGoToQnA,
+    handleGoToShareInfo,
+    handleOpenCounselingJournal,
+    handleOpenActivityReport,
+    getUrgencyColor,
+    getUrgencyLabel,
+  } = useContributorDashboardScreenContainer({ navigation });
 
   if (loading) {
     return (
@@ -238,12 +108,10 @@ const ContributorDashboardScreen: React.FC<ContributorDashboardScreenProps> = ({
         {/* 대기 중인 상담 요청 */}
         <Card style={styles.requestsCard}>
           <SectionTitle title="대기 중인 상담 요청" size="lg" marginBottom={spacing[4]} />
-          {pendingRequests.filter(r => r.status === 'pending').length === 0 ? (
+          {pendingRequests.length === 0 ? (
             <Text style={styles.emptyText}>현재 대기 중인 요청이 없습니다.</Text>
           ) : (
-            pendingRequests
-              .filter(r => r.status === 'pending')
-              .map(request => (
+            pendingRequests.map(request => (
                 <View key={request.id} style={styles.requestItem}>
                   <View style={styles.requestHeader}>
                     <View style={styles.requestUser}>
@@ -288,10 +156,7 @@ const ContributorDashboardScreen: React.FC<ContributorDashboardScreenProps> = ({
               <TouchableOpacity
                 key={session.id}
                 style={styles.sessionItem}
-                onPress={() => {
-                  // 채팅 화면으로 이동
-                  Alert.alert('채팅', `${session.userName}님과의 채팅으로 이동합니다.`);
-                }}
+                onPress={() => handleSessionPress(session)}
               >
                 <View style={styles.sessionAvatar}>
                   <Text style={styles.sessionAvatarText}>
@@ -356,7 +221,7 @@ const ContributorDashboardScreen: React.FC<ContributorDashboardScreenProps> = ({
           </View>
           <TouchableOpacity
             style={styles.resourceButton}
-            onPress={() => setShowResourceModal(true)}
+            onPress={openResourceModal}
           >
             <Text style={styles.resourceButtonText}>상담 자료실 열기</Text>
           </TouchableOpacity>
@@ -368,7 +233,7 @@ const ContributorDashboardScreen: React.FC<ContributorDashboardScreenProps> = ({
           <View style={styles.actionsGrid}>
             <TouchableOpacity
               style={styles.actionItem}
-              onPress={() => navigation.navigate('Community')}
+              onPress={handleGoToQnA}
             >
               <Image
                 source={require('../../assets/images/say.png')}
@@ -380,30 +245,21 @@ const ContributorDashboardScreen: React.FC<ContributorDashboardScreenProps> = ({
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.actionItem}
-              onPress={() => navigation.navigate('CommunityPostCreate' as any, {
-                type: 'GENERAL', // 일반 게시글 타입
-                missionId: '',
-                missionTitle: '정보 공유',
-                missionEmoji: '📝',
-              })}
+              onPress={handleGoToShareInfo}
             >
               <Text style={styles.actionIcon}>📝</Text>
               <Text style={styles.actionLabel}>정보 공유</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.actionItem}
-              onPress={() => {
-                Alert.alert('알림', '상담 일지 기능은 준비 중입니다.');
-              }}
+              onPress={handleOpenCounselingJournal}
             >
               <Text style={styles.actionIcon}>📓</Text>
               <Text style={styles.actionLabel}>상담 일지</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.actionItem}
-              onPress={() => {
-                Alert.alert('알림', '활동 보고서 기능은 준비 중입니다.');
-              }}
+              onPress={handleOpenActivityReport}
             >
               <Text style={styles.actionIcon}>📊</Text>
               <Text style={styles.actionLabel}>활동 보고</Text>
@@ -466,7 +322,7 @@ const ContributorDashboardScreen: React.FC<ContributorDashboardScreenProps> = ({
 
             <TouchableOpacity
               style={styles.closeButton}
-              onPress={() => setShowResourceModal(false)}
+              onPress={closeResourceModal}
             >
               <Text style={styles.closeButtonText}>닫기</Text>
             </TouchableOpacity>

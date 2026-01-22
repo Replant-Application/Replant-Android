@@ -2,15 +2,14 @@
  * 유저 수정 화면
  */
 
-import React, { useEffect, useState, useCallback } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Platform, KeyboardAvoidingView, Image } from 'react-native';
+import React from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform, KeyboardAvoidingView } from 'react-native';
 import { NavigationProp, RouteProp } from '@react-navigation/native';
-import { useAdmin, MemberDetail } from '../../hooks/useAdmin';
 import { Header, Loading, ErrorBoundary, Button, Input } from '../../components/ui';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
 import { getOptimizedLineHeight } from '../../utils/textStyles';
 import { RootStackParamList } from '../../types/navigation';
-import { UserInfo, updateUser } from '../../api/manageApi';
+import { useAdminUserEditScreenContainer } from './AdminUserEditScreen.container';
 
 interface AdminUserEditScreenProps {
   navigation: NavigationProp<RootStackParamList>;
@@ -19,57 +18,20 @@ interface AdminUserEditScreenProps {
 
 const AdminUserEditScreen: React.FC<AdminUserEditScreenProps> = ({ navigation, route }) => {
   const { userId } = route.params;
-  const { getUserDetail, loading, error } = useAdmin();
-  const [user, setUser] = useState<UserInfo | null>(null);
-  const [nickname, setNickname] = useState('');
-  const [email, setEmail] = useState('');
-  const [role, setRole] = useState('user');
 
-  const loadUserDetail = useCallback(async () => {
-    const result = await getUserDetail(userId);
-    if (result.success && result.data) {
-      const userData = result.data;
-      // MemberDetail을 UserInfo로 변환
-      const userInfo: UserInfo = {
-        id: userData.id,
-        username: userData.username || userData.nickname || '',
-        nickname: userData.nickname,
-        role: userData.role,
-        email: userData.email,
-        isActive: userData.status === 'ACTIVE' || userData.isActive,
-        createdAt: userData.createdAt,
-      };
-      setUser(userInfo);
-      setNickname(userData.nickname || '');
-      setEmail(userData.email || '');
-      setRole(userData.role || 'user');
-    }
-  }, [userId, getUserDetail]);
-
-  useEffect(() => {
-    loadUserDetail();
-  }, [loadUserDetail]);
-
-  const handleSave = async () => {
-    if (!nickname.trim()) {
-      Alert.alert('오류', '닉네임을 입력해주세요.');
-      return;
-    }
-
-    const result = await updateUser(userId, {
-      nickname: nickname.trim(),
-      email: email.trim() || undefined,
-      role: role as any,
-    });
-
-    if (result.success) {
-      Alert.alert('성공', '유저 정보가 수정되었습니다.', [
-        { text: '확인', onPress: () => navigation.goBack() },
-      ]);
-    } else {
-      Alert.alert('오류', result.error || '유저 정보 수정에 실패했습니다.');
-    }
-  };
+  // 비즈니스 로직은 Container에서 처리
+  const {
+    user,
+    nickname,
+    email,
+    role,
+    loading,
+    error,
+    handleNicknameChange,
+    handleEmailChange,
+    handleRoleChange,
+    handleSave,
+  } = useAdminUserEditScreenContainer({ userId, navigation });
 
   if (error) {
     return <ErrorBoundary error={new Error(error)} />;
@@ -101,7 +63,7 @@ const AdminUserEditScreen: React.FC<AdminUserEditScreenProps> = ({ navigation, r
             <Text style={styles.label}>닉네임 *</Text>
             <Input
               value={nickname}
-              onChangeText={setNickname}
+              onChangeText={handleNicknameChange}
               placeholder="닉네임을 입력하세요"
               style={styles.input}
             />
@@ -112,7 +74,7 @@ const AdminUserEditScreen: React.FC<AdminUserEditScreenProps> = ({ navigation, r
             <Text style={styles.label}>이메일</Text>
             <Input
               value={email}
-              onChangeText={setEmail}
+              onChangeText={handleEmailChange}
               placeholder="이메일을 입력하세요"
               keyboardType="email-address"
               autoCapitalize="none"
@@ -126,7 +88,7 @@ const AdminUserEditScreen: React.FC<AdminUserEditScreenProps> = ({ navigation, r
             <View style={styles.roleContainer}>
               <TouchableOpacity
                 style={[styles.roleButton, role === 'user' && styles.roleButtonActive]}
-                onPress={() => setRole('user')}
+                onPress={() => handleRoleChange('user')}
               >
                 <Text style={[styles.roleButtonText, role === 'user' && styles.roleButtonTextActive]}>
                   사용자
@@ -134,7 +96,7 @@ const AdminUserEditScreen: React.FC<AdminUserEditScreenProps> = ({ navigation, r
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.roleButton, role === 'admin' && styles.roleButtonActive]}
-                onPress={() => setRole('admin')}
+                onPress={() => handleRoleChange('admin')}
               >
                 <Text style={[styles.roleButtonText, role === 'admin' && styles.roleButtonTextActive]}>
                   관리자
