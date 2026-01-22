@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useMemo, useCallback, ReactNode } from 'react';
+import { Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import messaging from '@react-native-firebase/messaging';
 import { getStorageKeys, initializeUserData } from '../services';
@@ -157,6 +158,11 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
       if (!enabled) {
         console.warn('[!] FCM 권한이 없습니다. 알림 권한을 확인해주세요.');
         return;
+      }
+
+      // iOS에서는 원격 메시지 등록이 필요함
+      if (Platform.OS === 'ios') {
+        await messaging().registerDeviceForRemoteMessages();
       }
 
       const fcmToken = await messaging().getToken();
