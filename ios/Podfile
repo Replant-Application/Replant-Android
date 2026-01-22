@@ -22,6 +22,7 @@ prepare_react_native_project!
 
 target 'ReplantMobileApp' do
   use_expo_modules!
+  use_modular_headers!
 
   if ENV['EXPO_USE_COMMUNITY_AUTOLINKING'] == '1'
     config_command = ['node', '-e', "process.argv=['', '', 'config'];require('@react-native-community/cli').run()"];
@@ -56,5 +57,19 @@ target 'ReplantMobileApp' do
       :mac_catalyst_enabled => false,
       :ccache_enabled => ccache_enabled?(podfile_properties),
     )
+    
+    # Fix for Folly compilation errors with newer Xcode versions
+    installer.pods_project.targets.each do |target|
+      target.build_configurations.each do |config|
+        config.build_settings['CLANG_CXX_LANGUAGE_STANDARD'] = 'c++20'
+        config.build_settings['CLANG_CXX_LIBRARY'] = 'libc++'
+        config.build_settings['GCC_WARN_INHIBIT_ALL_WARNINGS'] = 'YES'
+        # Disable warnings as errors for Folly
+        if target.name.include?('ReactNativeDependencies') || target.name.include?('RCT-Folly')
+          config.build_settings['GCC_TREAT_WARNINGS_AS_ERRORS'] = 'NO'
+          config.build_settings['WARNING_CFLAGS'] = '-Wno-error'
+        end
+      end
+    end
   end
 end
