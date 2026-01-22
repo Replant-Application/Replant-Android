@@ -12,14 +12,41 @@ export interface FormatTimeAgoOptions {
 }
 
 /**
+ * 날짜를 ISO 8601 문자열로 변환
+ * 배열 형태 [year, month, day, hour, minute, second, nanosecond]를 처리
+ */
+export const normalizeDate = (date: string | number[] | null | undefined): string => {
+  if (!date) return '';
+  
+  // 배열 형태인 경우 (Java LocalDateTime/LocalDate 직렬화)
+  if (Array.isArray(date)) {
+    if (date.length < 3) return '';
+    
+    const [year, month, day, hour = 0, minute = 0, second = 0] = date;
+    
+    // ISO 8601 형식으로 변환: YYYY-MM-DDTHH:mm:ss
+    const monthStr = String(month).padStart(2, '0');
+    const dayStr = String(day).padStart(2, '0');
+    const hourStr = String(hour).padStart(2, '0');
+    const minuteStr = String(minute).padStart(2, '0');
+    const secondStr = String(second).padStart(2, '0');
+    
+    return `${year}-${monthStr}-${dayStr}T${hourStr}:${minuteStr}:${secondStr}`;
+  }
+  
+  // 이미 문자열인 경우 그대로 반환
+  return String(date);
+};
+
+/**
  * 상대 시간 포맷팅 (예: "방금 전", "5분 전", "2시간 전")
  * 
- * @param dateString - ISO 8601 형식의 날짜 문자열
+ * @param dateString - ISO 8601 형식의 날짜 문자열 또는 배열 형태
  * @param options - 포맷팅 옵션
  * @returns 포맷팅된 시간 문자열
  */
 export const formatTimeAgo = (
-  dateString: string | null | undefined,
+  dateString: string | number[] | null | undefined,
   options: FormatTimeAgoOptions = {}
 ): string => {
   const { shortFormat = false, omitAgo = false, longFormat = false } = options;
@@ -30,12 +57,19 @@ export const formatTimeAgo = (
   let date: Date;
 
   try {
+    // 날짜 정규화 (배열 형태 처리)
+    const normalizedDate = normalizeDate(dateString);
+    if (!normalizedDate) {
+      console.warn('[formatTimeAgo] 날짜 정규화 실패:', dateString);
+      return '알 수 없음';
+    }
+
     // ISO 8601 형식 또는 다른 형식 처리
-    date = new Date(dateString);
+    date = new Date(normalizedDate);
 
     // 유효하지 않은 날짜인지 확인
     if (isNaN(date.getTime())) {
-      console.warn('[formatTimeAgo] 잘못된 날짜 형식:', dateString);
+      console.warn('[formatTimeAgo] 잘못된 날짜 형식:', dateString, '정규화 후:', normalizedDate);
       return '알 수 없음';
     }
 
@@ -91,33 +125,6 @@ export const formatDateYYYYMMDD = (date: Date | string): string => {
   const month = String(dateObj.getMonth() + 1).padStart(2, '0');
   const day = String(dateObj.getDate()).padStart(2, '0');
   return `${year}-${month}-${day}`;
-};
-
-/**
- * 날짜를 ISO 8601 문자열로 변환
- * 배열 형태 [year, month, day, hour, minute, second, nanosecond]를 처리
- */
-export const normalizeDate = (date: string | number[] | null | undefined): string => {
-  if (!date) return '';
-  
-  // 배열 형태인 경우 (Java LocalDateTime/LocalDate 직렬화)
-  if (Array.isArray(date)) {
-    if (date.length < 3) return '';
-    
-    const [year, month, day, hour = 0, minute = 0, second = 0] = date;
-    
-    // ISO 8601 형식으로 변환: YYYY-MM-DDTHH:mm:ss
-    const monthStr = String(month).padStart(2, '0');
-    const dayStr = String(day).padStart(2, '0');
-    const hourStr = String(hour).padStart(2, '0');
-    const minuteStr = String(minute).padStart(2, '0');
-    const secondStr = String(second).padStart(2, '0');
-    
-    return `${year}-${monthStr}-${dayStr}T${hourStr}:${minuteStr}:${secondStr}`;
-  }
-  
-  // 이미 문자열인 경우 그대로 반환
-  return String(date);
 };
 
 /**

@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, ScrollView, Image, TextInput, ImageBackgr
 import { Header, ConfirmModal, AlertModal } from '../../components/ui';
 import { colors } from '../../utils/designTokens';
 import { getCharacterImage } from '../../utils/characterUtils';
+import { formatDateKorean } from '../../utils/dateUtils';
 import { SettingsScreenProps } from '../../types/screens/settings';
 import { TERMS_OF_SERVICE, PRIVACY_POLICY, OPEN_SOURCE_LICENSE } from '../../constants/screens/settings';
 import SettingItem from './SettingItem';
@@ -73,7 +74,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
               <View style={styles.userDetails}>
                 <Text style={styles.userName}>{user?.nickname || '사용자'}</Text>
                 <Text style={styles.userSubtext}>
-                  가입일: {user?.createdAt ? new Date(user.createdAt).toLocaleDateString('ko-KR') : '알 수 없음'}
+                  가입일: {user?.createdAt ? formatDateKorean(user.createdAt) : '알 수 없음'}
                 </Text>
               </View>
             </View>

@@ -22,6 +22,7 @@ export interface StoredUserInfo {
   nickname: string;
   profileImg?: string;
   role?: string;
+  createdAt?: string; // 가입일 (서버에서 가져온 실제 가입일)
 }
 
 /**

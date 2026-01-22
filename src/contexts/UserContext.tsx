@@ -10,7 +10,7 @@ import { User } from '../types';
 import { checkAutoLogin, getUserInfo, clearAuthData, saveUserInfo } from '../utils/tokenStorage';
 import { apiClient } from '../api/client';
 import { initializeGoogleSignIn } from '../services/googleSignIn';
-import { updateMyInfo } from '../api/userApi';
+import { updateMyInfo, getMyInfo } from '../api/userApi';
 import { registerFcmToken } from '../api/notificationApi';
 
 // UserContext 타입 정의
@@ -70,6 +70,25 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         const backendRole = storedUserInfo.role?.toLowerCase() || 'user';
         const role = backendRole === 'admin' ? 'admin' : 'user';
 
+        // 서버에서 실제 사용자 정보 가져오기 (createdAt 포함)
+        let serverCreatedAt: string | null = null;
+        let serverUserId: number | null = null;
+        try {
+          const myInfoResult = await getMyInfo();
+          if (myInfoResult.success && myInfoResult.data) {
+            serverCreatedAt = myInfoResult.data.createdAt;
+            serverUserId = myInfoResult.data.id;
+            // tokenStorage에도 createdAt과 id 저장
+            await saveUserInfo({
+              ...storedUserInfo,
+              id: serverUserId || storedUserInfo.id,
+              createdAt: serverCreatedAt,
+            });
+          }
+        } catch (error) {
+          console.warn('[UserContext] 서버에서 사용자 정보 가져오기 실패 (로컬 데이터 사용):', error);
+        }
+
         // User 객체 생성 또는 로드
         let userData: User | null = null;
         const existingData = await AsyncStorage.getItem(storageKeys.USER);
@@ -78,13 +97,20 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
           // 역할 업데이트
           if (userData && userData.role !== role) {
             userData.role = role;
-            await AsyncStorage.setItem(storageKeys.USER, JSON.stringify(userData));
           }
+          // 서버에서 가져온 createdAt이 있으면 업데이트 (실제 가입일 사용)
+          if (serverCreatedAt) {
+            userData.createdAt = serverCreatedAt;
+          }
+          await AsyncStorage.setItem(storageKeys.USER, JSON.stringify(userData));
         } else {
+          // 서버에서 가져온 createdAt이 있으면 사용, 없으면 tokenStorage의 createdAt 사용, 둘 다 없으면 현재 시간 사용
+          const createdAt = serverCreatedAt || storedUserInfo.createdAt || new Date().toISOString();
+          const actualUserId = serverUserId || storedUserInfo.id;
           userData = {
             nickname,
-            id: `user_${storedUserInfo.id}`,
-            createdAt: new Date().toISOString(),
+            id: actualUserId ? `user_${actualUserId}` : `user_${Date.now()}`,
+            createdAt,
             role
           };
           await AsyncStorage.setItem(storageKeys.USER, JSON.stringify(userData));
@@ -92,7 +118,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
 
         setUser(userData);
         setCurrentNickname(nickname);
-        setCurrentUserId(storedUserInfo.id || null);
+        setCurrentUserId(serverUserId || storedUserInfo.id || null);
         setIsLoading(false);
         
         // 자동 로그인 성공 시 FCM 토큰 등록
@@ -128,10 +154,12 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
           // 기존 User 객체가 없으면 새로 생성 (기존 사용자 호환성)
           // 닉네임이 "admin"이면 admin 역할 부여
           const role = nickname.toLowerCase() === 'admin' ? 'admin' : 'user';
+          // 레거시 사용자의 경우 기존 createdAt이 없으므로 현재 시간 사용 (하지만 서버에서 가져올 수 있으면 가져오기)
+          const createdAt = new Date().toISOString();
           const newUser: User = {
             nickname,
             id: `user_${Date.now()}`,
-            createdAt: new Date().toISOString(), // 기존 사용자도 현재 시간을 가입일로 설정
+            createdAt,
             role
           };
           await AsyncStorage.setItem(storageKeys.USER, JSON.stringify(newUser));
@@ -230,20 +258,44 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         ? JSON.parse(await AsyncStorage.getItem(storageKeys.USER) || 'null')
         : null;
 
+      // 서버에서 실제 사용자 정보 가져오기 (createdAt 포함)
+      let serverCreatedAt: string | null = null;
+      let serverUserId: number | null = null;
+      try {
+        const myInfoResult = await getMyInfo();
+        if (myInfoResult.success && myInfoResult.data) {
+          serverCreatedAt = myInfoResult.data.createdAt;
+          serverUserId = myInfoResult.data.id;
+          // tokenStorage에도 createdAt과 id 저장
+          if (storedUserInfo) {
+            await saveUserInfo({
+              ...storedUserInfo,
+              id: serverUserId || storedUserInfo.id,
+              createdAt: serverCreatedAt,
+            });
+          }
+        }
+      } catch (error) {
+        console.warn('[UserContext] 서버에서 사용자 정보 가져오기 실패 (로컬 데이터 사용):', error);
+      }
+
       if (existingUserData) {
         // 기존 사용자인 경우 - 데이터 초기화하지 않음
         // tokenStorage에서 role 정보 동기화
         if (storedUserInfo?.role) {
           const backendRole = storedUserInfo.role.toLowerCase();
           existingUserData.role = backendRole === 'admin' ? 'admin' : 'user';
-          await AsyncStorage.setItem(storageKeys.USER, JSON.stringify(existingUserData));
         } else if (!existingUserData.role && nickname.toLowerCase() === 'admin') {
           existingUserData.role = 'admin';
-          await AsyncStorage.setItem(storageKeys.USER, JSON.stringify(existingUserData));
         }
+        // 서버에서 가져온 createdAt이 있으면 업데이트 (실제 가입일 사용)
+        if (serverCreatedAt) {
+          existingUserData.createdAt = serverCreatedAt;
+        }
+        await AsyncStorage.setItem(storageKeys.USER, JSON.stringify(existingUserData));
         setUser(existingUserData);
         setCurrentNickname(nickname);
-        setCurrentUserId(storedUserInfo?.id || null);
+        setCurrentUserId(serverUserId || storedUserInfo?.id || null);
         logUserAction('login_success', { nickname, userId: existingUserData.id, isExistingUser: true });
         
         // 로그인 성공 시 FCM 토큰 등록
@@ -255,8 +307,10 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
       }
 
       // 신규 사용자인 경우 - tokenStorage 정보 기반으로 User 객체 생성
-      const userId = storedUserInfo?.id ? `user_${storedUserInfo.id}` : `user_${Date.now()}`;
-      const createdAt = new Date().toISOString();
+      const actualUserId = serverUserId || storedUserInfo?.id;
+      const userId = actualUserId ? `user_${actualUserId}` : `user_${Date.now()}`;
+      // 서버에서 가져온 createdAt이 있으면 사용, 없으면 tokenStorage의 createdAt 사용, 둘 다 없으면 현재 시간 사용
+      const createdAt = serverCreatedAt || storedUserInfo?.createdAt || new Date().toISOString();
       // tokenStorage에서 role 정보 사용, 없으면 닉네임 기반 판단
       let role: 'admin' | 'user' = 'user';
       if (storedUserInfo?.role) {
@@ -278,7 +332,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
 
       setUser(newUser);
       setCurrentNickname(nickname);
-      setCurrentUserId(storedUserInfo?.id || null);
+      setCurrentUserId(serverUserId || storedUserInfo?.id || null);
 
       // 미션 데이터 초기화 (신규 사용자만)
       await initializeUserData(userId, nickname);
@@ -326,8 +380,29 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         setCurrentNickname(nickname);
       } else {
         // 신규 사용자인 경우 - tokenStorage 정보 기반으로 생성
-        const userId = storedUserInfo?.id ? `user_${storedUserInfo.id}` : `user_${Date.now()}`;
-        const createdAt = new Date().toISOString();
+        // 서버에서 createdAt 가져오기 시도
+        let serverCreatedAt: string | null = null;
+        let serverUserId: number | null = null;
+        try {
+          const myInfoResult = await getMyInfo();
+          if (myInfoResult.success && myInfoResult.data) {
+            serverCreatedAt = myInfoResult.data.createdAt;
+            serverUserId = myInfoResult.data.id;
+            if (storedUserInfo) {
+              await saveUserInfo({
+                ...storedUserInfo,
+                id: serverUserId || storedUserInfo.id,
+                createdAt: serverCreatedAt,
+              });
+            }
+          }
+        } catch (error) {
+          console.warn('[UserContext] 서버에서 사용자 정보 가져오기 실패 (로컬 데이터 사용):', error);
+        }
+        const actualUserId = serverUserId || storedUserInfo?.id;
+        const userId = actualUserId ? `user_${actualUserId}` : `user_${Date.now()}`;
+        // 서버에서 가져온 createdAt이 있으면 사용, 없으면 tokenStorage의 createdAt 사용, 둘 다 없으면 현재 시간 사용
+        const createdAt = serverCreatedAt || storedUserInfo?.createdAt || new Date().toISOString();
         let role: 'admin' | 'user' = 'user';
         if (storedUserInfo?.role) {
           const backendRole = storedUserInfo.role.toLowerCase();
@@ -350,6 +425,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
 
         setUser(newUser);
         setCurrentNickname(nickname);
+        setCurrentUserId(serverUserId || storedUserInfo?.id || null);
 
         // 미션 데이터 초기화 (신규 사용자만)
         try {
@@ -399,14 +475,38 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
           ? JSON.parse(await AsyncStorage.getItem(storageKeys.USER) || 'null')
           : null;
 
+        // 서버에서 실제 사용자 정보 가져오기 (createdAt 포함)
+        let serverCreatedAt: string | null = null;
+        let serverUserId: number | null = null;
+        try {
+          const myInfoResult = await getMyInfo();
+          if (myInfoResult.success && myInfoResult.data) {
+            serverCreatedAt = myInfoResult.data.createdAt;
+            serverUserId = myInfoResult.data.id;
+            // tokenStorage에도 createdAt과 id 저장
+            if (storedUserInfo) {
+              await saveUserInfo({
+                ...storedUserInfo,
+                id: serverUserId || storedUserInfo.id,
+                createdAt: serverCreatedAt,
+              });
+            }
+          }
+        } catch (error) {
+          console.warn('[UserContext] 서버에서 사용자 정보 가져오기 실패 (로컬 데이터 사용):', error);
+        }
+
         // tokenStorage에 정보는 있지만 로컬 User 객체가 없는 경우 생성
         if (!userData && storedUserInfo) {
           const backendRole = storedUserInfo.role?.toLowerCase() || 'user';
           const role = backendRole === 'admin' ? 'admin' : 'user';
+          // 서버에서 가져온 createdAt이 있으면 사용, 없으면 tokenStorage의 createdAt 사용, 둘 다 없으면 현재 시간 사용
+          const createdAt = serverCreatedAt || storedUserInfo.createdAt || new Date().toISOString();
+          const actualUserId = serverUserId || storedUserInfo.id;
           userData = {
             nickname: storedUserInfo.nickname,
-            id: `user_${storedUserInfo.id}`,
-            createdAt: new Date().toISOString(),
+            id: actualUserId ? `user_${actualUserId}` : `user_${Date.now()}`,
+            createdAt,
             role
           };
           await AsyncStorage.setItem(storageKeys.USER, JSON.stringify(userData));
@@ -417,11 +517,15 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
           if (storedUserInfo?.role) {
             const backendRole = storedUserInfo.role.toLowerCase();
             userData.role = backendRole === 'admin' ? 'admin' : 'user';
-            await AsyncStorage.setItem(storageKeys.USER, JSON.stringify(userData));
           }
+          // 서버에서 가져온 createdAt이 있으면 업데이트 (실제 가입일 사용)
+          if (serverCreatedAt) {
+            userData.createdAt = serverCreatedAt;
+          }
+          await AsyncStorage.setItem(storageKeys.USER, JSON.stringify(userData));
           setUser(userData);
           setCurrentNickname(nickname);
-          setCurrentUserId(storedUserInfo?.id || null);
+          setCurrentUserId(serverUserId || storedUserInfo?.id || null);
         }
       }
     } catch (error) {
