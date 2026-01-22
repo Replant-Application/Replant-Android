@@ -2,7 +2,7 @@
  * 커뮤니티 게시글 상세 화면
  */
 
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React from 'react';
 import {
   View,
   Text,
@@ -10,177 +10,61 @@ import {
   ScrollView,
   TouchableOpacity,
   TextInput,
-  Alert,
   Image,
   KeyboardAvoidingView,
   Platform,
   ImageBackground,
 } from 'react-native';
-import { useCommunityPost } from '../../hooks/useCommunityPost';
-import { useCommunity } from '../../hooks/useCommunity';
 import { CommentCard } from '../../components/specialized';
 import { getOptimizedLineHeight } from '../../utils/textStyles';
 import { Loading, ErrorBoundary, EmptyState, Header, Card, AlertModal, ConfirmModal } from '../../components/ui';
 import { colors, spacing, typography, borderRadius, shadows } from '../../utils/designTokens';
 import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types/navigation';
-import { useUser } from '../../contexts/UserContext';
-import { getHiddenComments, hideComment } from '../../utils/hiddenContentStorage';
-import { logError } from '../../utils/logger';
+import { useCommunityPostDetailScreenContainer } from './CommunityPostDetailScreen.container';
 
 interface CommunityPostDetailScreenProps {
   navigation: NavigationProp<RootStackParamList>;
   route: RouteProp<RootStackParamList, 'CommunityPostDetail'>;
 }
 
-const CommunityPostDetailScreen: React.FC<CommunityPostDetailScreenProps> = ({
-  navigation,
-  route,
-}) => {
-  const { postId } = route.params;
-  const { currentNickname, currentUserId } = useUser();
-  const { post, comments, loading, error, createComment, updateComment, deleteComment, toggleLike } =
-    useCommunityPost(postId);
-  const { deletePost } = useCommunity();
-  const [commentContent, setCommentContent] = useState('');
-  const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
-  const [editingContent, setEditingContent] = useState('');
-  const [replyingToComment, setReplyingToComment] = useState<{ id: string; nickname: string } | null>(null);
-  
-  // 숨긴 댓글 ID 목록
-  const [hiddenCommentIds, setHiddenCommentIds] = useState<string[]>([]);
-  // AlertModal 상태
-  const [showAlert, setShowAlert] = useState(false);
-  const [alertTitle, setAlertTitle] = useState('');
-  const [alertMessage, setAlertMessage] = useState('');
-  // 삭제 확인 모달 상태
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [showDeleteCommentModal, setShowDeleteCommentModal] = useState(false);
-  const [deleteCommentId, setDeleteCommentId] = useState<string | null>(null);
-
-  // 본인 게시글인지 확인 (백엔드에서 제공하는 isAuthor 필드 사용)
-  // 로그인한 경우에만 isAuthor가 올바르게 설정됨
-  const isAuthor = post?.isAuthor === true;
-
-
-  // 숨긴 댓글 목록 로드
-  useEffect(() => {
-    const loadHiddenComments = async () => {
-      try {
-        const hiddenIds = await getHiddenComments();
-        setHiddenCommentIds(hiddenIds);
-      } catch (error) {
-        logError('숨긴 댓글 목록 로드 실패', error as Error);
-      }
-    };
-    loadHiddenComments();
-  }, []);
-
-  // 댓글 숨기기 처리
-  const handleHideComment = useCallback(async (commentId: string) => {
-    try {
-      await hideComment(commentId);
-      setHiddenCommentIds(prev => [...prev, commentId]);
-    } catch (error) {
-      logError('댓글 숨기기 실패', error as Error);
-      Alert.alert('오류', '댓글을 숨기는 중 문제가 발생했습니다.');
-    }
-  }, []);
-
-  const handleLike = async () => {
-    if (post) {
-      const result = await toggleLike();
-      // 내 게시글에는 좋아요를 누를 수 없음 에러 처리
-      if (!result.success && result.error === '내 게시글에는 좋아요를 누를 수 없습니다.') {
-        setAlertTitle('알림');
-        setAlertMessage('내 게시글에는 좋아요를 누를 수 없습니다.');
-        setShowAlert(true);
-      }
-      // toggleLike가 내부적으로 post 상태를 업데이트하므로 loadPost 불필요
-    }
-  };
-
-
-  const handleDeletePost = () => {
-    if (!post) return;
-    setShowDeleteModal(true);
-  };
-
-  const handleConfirmDelete = async () => {
-    if (!post) return;
-    setShowDeleteModal(false);
-    const result = await deletePost(post.post_id);
-    if (result.success) {
-      navigation.goBack();
-    } else {
-      setAlertTitle('오류');
-      setAlertMessage(result.error || '게시글 삭제에 실패했습니다.');
-      setShowAlert(true);
-    }
-  };
-
-  const handleSubmitComment = async () => {
-    if (!commentContent.trim()) {
-      Alert.alert('오류', '댓글을 입력해주세요.');
-      return;
-    }
-
-    // 대댓글인 경우 parentCommentId 전달
-    const result = await createComment(commentContent.trim(), replyingToComment?.id);
-    if (result.success) {
-      setCommentContent('');
-      setReplyingToComment(null); // 답글 모드 해제
-    } else {
-      Alert.alert('오류', result.error || '댓글 작성에 실패했습니다.');
-    }
-  };
-
-  // 답글 버튼 클릭 핸들러
-  const handleReplyComment = (comment: any) => {
-    setReplyingToComment({ id: comment.comment_id, nickname: comment.author_nickname });
-    // 답글 입력란에 포커스를 맞추기 위해 placeholder를 변경
-  };
-
-  // 답글 모드 취소 핸들러
-  const handleCancelReply = () => {
-    setReplyingToComment(null);
-  };
-
-  const handleEditComment = (comment: any) => {
-    setEditingCommentId(comment.comment_id);
-    setEditingContent(comment.content);
-  };
-
-  const handleUpdateComment = async () => {
-    if (!editingCommentId || !editingContent.trim()) return;
-
-    const result = await updateComment(editingCommentId, editingContent.trim());
-    if (result.success) {
-      setEditingCommentId(null);
-      setEditingContent('');
-    } else {
-      Alert.alert('오류', result.error || '댓글 수정에 실패했습니다.');
-    }
-  };
-
-  const handleDeleteComment = (commentId: string) => {
-    setDeleteCommentId(commentId);
-    setShowDeleteCommentModal(true);
-  };
-
-  const handleConfirmDeleteComment = async () => {
-    if (deleteCommentId) {
-      try {
-        await deleteComment(deleteCommentId);
-        setShowDeleteCommentModal(false);
-        setDeleteCommentId(null);
-      } catch (error) {
-        logError('댓글 삭제 실패', error as Error);
-        setShowDeleteCommentModal(false);
-        setDeleteCommentId(null);
-      }
-    }
-  };
+const CommunityPostDetailScreen: React.FC<CommunityPostDetailScreenProps> = ({ navigation, route }) => {
+  // 비즈니스 로직은 Container에서 처리
+  const {
+    post,
+    comments,
+    loading,
+    error,
+    isAuthor,
+    hiddenCommentIds,
+    commentContent,
+    editingCommentId,
+    editingContent,
+    replyingToComment,
+    showAlert,
+    alertTitle,
+    alertMessage,
+    showDeleteModal,
+    showDeleteCommentModal,
+    setCommentContent,
+    setEditingContent,
+    handleLike,
+    handleDeletePost,
+    handleConfirmDelete,
+    handleSubmitComment,
+    handleReplyComment,
+    handleCancelReply,
+    handleEditComment,
+    handleCancelEdit,
+    handleUpdateComment,
+    handleDeleteComment,
+    handleConfirmDeleteComment,
+    handleEditPost,
+    handleHideComment,
+    handleCloseAlert,
+    handleCloseDeleteModal,
+    handleCloseDeleteCommentModal,
+  } = useCommunityPostDetailScreenContainer({ navigation, route });
 
   if (loading) {
     return <Loading text="게시글을 불러오는 중..." />;
@@ -220,11 +104,7 @@ const CommunityPostDetailScreen: React.FC<CommunityPostDetailScreenProps> = ({
             <View style={styles.postActionsContainer}>
               <TouchableOpacity
                 style={styles.postActionButton}
-                onPress={() => {
-                  if (post) {
-                    navigation.navigate('CommunityPostEdit', { postId: post.post_id });
-                  }
-                }}
+                onPress={handleEditPost}
                 hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
               >
                 <Image
@@ -363,10 +243,7 @@ const CommunityPostDetailScreen: React.FC<CommunityPostDetailScreenProps> = ({
                         <View style={styles.editCommentActions}>
                           <TouchableOpacity
                             style={styles.editCommentButton}
-                            onPress={() => {
-                              setEditingCommentId(null);
-                              setEditingContent('');
-                            }}
+                            onPress={handleCancelEdit}
                           >
                             <Text style={styles.editCommentButtonText}>취소</Text>
                           </TouchableOpacity>
@@ -412,10 +289,7 @@ const CommunityPostDetailScreen: React.FC<CommunityPostDetailScreenProps> = ({
                               <View style={styles.editCommentActions}>
                                 <TouchableOpacity
                                   style={styles.editCommentButton}
-                                  onPress={() => {
-                                    setEditingCommentId(null);
-                                    setEditingContent('');
-                                  }}
+                                  onPress={handleCancelEdit}
                                 >
                                   <Text style={styles.editCommentButtonText}>취소</Text>
                                 </TouchableOpacity>
@@ -488,7 +362,7 @@ const CommunityPostDetailScreen: React.FC<CommunityPostDetailScreenProps> = ({
         visible={showAlert}
         title={alertTitle}
         message={alertMessage}
-        onClose={() => setShowAlert(false)}
+        onClose={handleCloseAlert}
       />
       <ConfirmModal
         visible={showDeleteModal}
@@ -497,7 +371,7 @@ const CommunityPostDetailScreen: React.FC<CommunityPostDetailScreenProps> = ({
         confirmText="삭제"
         cancelText="취소"
         onConfirm={handleConfirmDelete}
-        onCancel={() => setShowDeleteModal(false)}
+        onCancel={handleCloseDeleteModal}
         confirmButtonColor={colors.error}
       />
       <ConfirmModal
@@ -507,10 +381,7 @@ const CommunityPostDetailScreen: React.FC<CommunityPostDetailScreenProps> = ({
         confirmText="삭제"
         cancelText="취소"
         onConfirm={handleConfirmDeleteComment}
-        onCancel={() => {
-          setShowDeleteCommentModal(false);
-          setDeleteCommentId(null);
-        }}
+        onCancel={handleCloseDeleteCommentModal}
         confirmButtonColor={colors.error}
       />
     </ImageBackground>

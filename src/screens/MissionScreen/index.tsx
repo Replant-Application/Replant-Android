@@ -1,12 +1,5 @@
-import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, RefreshControl, Platform, ImageBackground, ActivityIndicator, Dimensions, FlatList, Modal } from 'react-native';
-
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
-const ITEMS_PER_PAGE = 5; // 화면 표시용 페이지네이션 (한 화면에 5개)
-const MISSION_COLLECTION_PAGE_SIZE = 15; // 서버에서 가져올 미션 개수 (한 페이지당 15개)
-import { useMission } from '../../hooks/useMission';
-import { useCharacter } from '../../hooks/useCharacter';
-import { useErrorHandler } from '../../hooks/useErrorHandler';
+import React from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, RefreshControl, Platform, ImageBackground, ActivityIndicator, Dimensions, FlatList } from 'react-native';
 import { MissionCard, MissionVerificationModal, MissionProgressCard } from '../../components/specialized';
 import { Loading, ErrorBoundary, Header, EmptyState, ConfirmModal, SimpleTabBar } from '../../components/ui';
 import MissionInfoModal from './MissionInfoModal';
@@ -14,758 +7,63 @@ import MissionPagination from './MissionPagination';
 import MissionGroupList from './MissionGroupList';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
 import { getOptimizedLineHeight } from '../../utils/textStyles';
-import { useUser } from '../../contexts/UserContext';
-import { Mission } from '../../types';
-import { checkVerificationStatus, MissionType, verifyByGps, verifyByTime, createVerification, addSystemMissionToMyMissions, getSystemMissions, getCustomMissions, getUserMissions, getMissionCollection, MissionCategory } from '../../api/missionApi';
-import * as Location from 'expo-location';
-import { formatDateYYYYMMDD } from '../../utils/dateUtils';
-import { logError } from '../../utils/logger';
-import { MissionScreenProps, MissionFilter, MissionTab } from '../../types/screens/mission';
-import { getCurrentUser } from '../../services/authService';
+import { MissionScreenProps, MissionTab } from '../../types/screens/mission';
+import { useMissionScreenContainer } from './MissionScreen.container';
 
-// 미션 도감용 통합 미션 타입
-interface UnifiedMission {
-  id: number;
-  title: string;
-  description: string;
-  category?: MissionCategory;
-  verificationType: string;
-  requiredMinutes?: number;
-  expReward: number;
-  badgeDurationDays: number;
-  participantCount?: number;
-  isCustom: boolean;
-  creatorId?: number;
-  creatorNickname?: string;
-  isChallenge?: boolean;
-  challengeDays?: number;
-  deadlineDays?: number;
-  isPublic?: boolean;
-  worryType?: string;
-  isCompleted?: boolean;
-  isAttempted?: boolean;
-}
-
-type MissionGroupTab = 'official' | 'custom';
-
-// 단일 카테고리: 성장
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
-  const { addExperienceByCategory } = useCharacter();
-  const { missions, loading, error, saveMissionPhoto, saveMissionPhotos, deleteMissionPhoto, completeMissionWithPhoto, uncompleteMission, loadMissions } = useMission(addExperienceByCategory);
-  const { showError, showSuccess, showInfo, handleApiError, showConfirm } = useErrorHandler();
+  // 비즈니스 로직은 Container에서 처리
+  const {
+    loading,
+    error,
+    displayedMissions,
+    completedMissions,
+    totalMissions,
+    selectedFilter,
+    activeTab,
+    missionGroupTab,
+    verificationModalVisible,
+    selectedMissionForVerification,
+    showCompleteModal,
+    completeModalTitle,
+    completeModalMessage,
+    completedMissionForVerification,
+    isLevelUp,
+    groupMissions,
+    groupLoading,
+    selectedGroupMission,
+    currentServerPage,
+    totalServerPages,
+    currentUserId,
+    currentMissionPage,
+    totalMissionPages,
+    missionPages,
+    missionFlatListRef,
+    refreshing,
+    handleMissionComplete,
+    handleMissionUncomplete,
+    handleVerify,
+    handleLikeVerification,
+    handlePhotoUpload,
+    handleDeletePhoto,
+    handleCompleteModalConfirm,
+    handleCompleteModalCancel,
+    handleVerificationModalClose,
+    handleVerificationSuccess,
+    handleTabChange,
+    handleFilterChange,
+    handleMissionGroupTabChange,
+    handleServerPageChange,
+    setSelectedGroupMission,
+    onRefresh,
+    onMissionPageChange,
+    goToMissionPage,
+    getVerificationTypeLabel,
+    getVerificationTypeIcon,
+    getMissionCategoryLabel,
+  } = useMissionScreenContainer({ navigation, route });
 
-  // route params에서 사진 정보 확인
-  const routeParams = route?.params;
-  const processedPhotoRef = useRef<string | null>(null);
-  const [selectedFilter, setSelectedFilter] = useState<MissionFilter>('inProgress');
-  const [activeTab, setActiveTab] = useState<MissionTab>(routeParams?.activeTab || 'myMission');
-  const [refreshing, setRefreshing] = useState(false);
-
-  // 인증 모달 상태
-  const [verificationModalVisible, setVerificationModalVisible] = useState(false);
-  const [selectedMissionForVerification, setSelectedMissionForVerification] = useState<Mission | null>(null);
-  
-  // 미션 완료 모달 상태
-  const [showCompleteModal, setShowCompleteModal] = useState(false);
-  const [completeModalTitle, setCompleteModalTitle] = useState('');
-  const [completeModalMessage, setCompleteModalMessage] = useState('');
-  const [completedMissionForVerification, setCompletedMissionForVerification] = useState<Mission | null>(null);
-  const [isLevelUp, setIsLevelUp] = useState(false);
-
-  // 미션 도감 관련 상태
-  const [missionGroupTab, setMissionGroupTab] = useState<MissionGroupTab>('official');
-  const [groupMissions, setGroupMissions] = useState<UnifiedMission[]>([]);
-  const [groupLoading, setGroupLoading] = useState(false);
-  const [selectedGroupMission, setSelectedGroupMission] = useState<UnifiedMission | null>(null);
-  const [currentServerPage, setCurrentServerPage] = useState(0); // 서버 페이지 (0부터 시작)
-  const [totalServerPages, setTotalServerPages] = useState(0); // 전체 서버 페이지 수
-
-  // 현재 사용자 ID (커스텀 미션 수정 권한 확인용)
-  const [currentUserId, setCurrentUserId] = useState<number | null>(null);
-
-  // 현재 사용자 정보 로드
-  useEffect(() => {
-    const loadCurrentUser = async () => {
-      const user = await getCurrentUser();
-      if (user?.id) {
-        setCurrentUserId(user.id);
-      }
-    };
-    loadCurrentUser();
-  }, []);
-
-
-  // 필터링된 미션 목록 (진행중/인증대기/완료)
-  // 백엔드 API 변경: 오늘 할당된 완료된 커스텀 미션도 포함됨
-  const filteredMissions = useMemo(() => {
-    switch (selectedFilter) {
-      case 'completed':
-        // 완료된 미션 (status === 'COMPLETED')
-        return missions.filter(mission => mission.status === 'COMPLETED' || mission.completed);
-      case 'pendingVerification':
-        // 인증 대기 미션 (status === 'PENDING')
-        return missions.filter(mission => mission.status === 'PENDING');
-      case 'inProgress':
-      default:
-        // 진행중 미션 (status === 'ASSIGNED' 또는 status가 없는 경우)
-        return missions.filter(mission =>
-          mission.status === 'ASSIGNED' || 
-          (mission.status !== 'COMPLETED' && mission.status !== 'PENDING' && !mission.completed)
-        );
-    }
-  }, [missions, selectedFilter]);
-
-  const displayedMissions = filteredMissions;
-
-  // 진행률 계산
-  // 백엔드 API 변경: 오늘 할당된 완료된 커스텀 미션도 포함되므로 totalMissions가 정확함
-  const completedMissions = useMemo(() => {
-    const count = missions.filter(mission => mission.status === 'COMPLETED' || mission.completed).length;
-    return count;
-  }, [missions]);
-  // totalMissions는 이제 완료된 미션도 포함하므로 정확한 총 미션 수
-  const totalMissions = missions.length;
-
-  // 미션 목록 페이지네이션 상태
-  const [currentMissionPage, setCurrentMissionPage] = useState(0);
-  const missionFlatListRef = useRef<FlatList>(null);
-
-  // 페이지 수 계산
-  const totalMissionPages = Math.ceil(displayedMissions.length / ITEMS_PER_PAGE);
-
-  // 페이지별 미션 데이터 생성
-  const missionPages = useMemo(() => {
-    const pages: Mission[][] = [];
-    for (let i = 0; i < displayedMissions.length; i += ITEMS_PER_PAGE) {
-      pages.push(displayedMissions.slice(i, i + ITEMS_PER_PAGE));
-    }
-    return pages.length > 0 ? pages : [[]];
-  }, [displayedMissions]);
-
-  // 탭 변경 시 페이지 초기화
-  useEffect(() => {
-    setCurrentMissionPage(0);
-    if (missionFlatListRef.current && missionPages.length > 0) {
-      missionFlatListRef.current.scrollToIndex({ index: 0, animated: false });
-    }
-  }, [selectedFilter]);
-
-  // 미션 페이지 변경 핸들러
-  const onMissionPageChange = (event: any) => {
-    const pageIndex = Math.round(event.nativeEvent.contentOffset.x / (SCREEN_WIDTH - spacing[8]));
-    setCurrentMissionPage(pageIndex);
-  };
-
-  // 페이지 이동
-  const goToMissionPage = (pageIndex: number) => {
-    if (pageIndex >= 0 && pageIndex < totalMissionPages) {
-      missionFlatListRef.current?.scrollToIndex({ index: pageIndex, animated: true });
-      setCurrentMissionPage(pageIndex);
-    }
-  };
-
-  // 미션 도감 탭 변경 시 서버 페이지 초기화
-  useEffect(() => {
-    setCurrentServerPage(0);
-  }, [missionGroupTab]);
-
-  // 미션 완료 (사진이 있으면 그 사진으로, 없으면 null로)
-  const handleMissionComplete = async (missionId: string) => {
-    try {
-      // 미션에 저장된 사진이 있는지 확인
-      const mission = missions.find(m => m.mission_id === missionId);
-      const photoUrl = mission?.photo_url || null;
-
-      const result = await completeMissionWithPhoto(missionId, photoUrl);
-
-      if (result && result.success) {
-        const completedMission = missions.find(m => m.mission_id === missionId);
-        if (!completedMission) return;
-
-        const alertTitle = result.levelUp ? '레벨업!' : '미션 완료';
-        const alertMessage = result.levelUp
-          ? `축하합니다! 레벨 ${result.newLevel}이 되었습니다!`
-          : `+${result.experienceGained} EXP를 획득했습니다!`;
-
-        // 모달 표시
-        setIsLevelUp(result.levelUp || false);
-        setCompleteModalTitle(alertTitle);
-        setCompleteModalMessage(alertMessage);
-        setCompletedMissionForVerification(completedMission);
-        setShowCompleteModal(true);
-      }
-    } catch (completeError) {
-      showError('미션 완료에 실패했습니다.', 'MissionScreen.handleMissionComplete');
-    }
-  };
-
-  // 미션 유형별 인증 처리
-  const handleVerify = useCallback(async (mission: Mission, verificationType: 'COMMUNITY' | 'GPS' | 'TIME') => {
-    let userMissionId = mission.user_mission_id;
-
-    // user_mission_id가 없으면 자동으로 미션 할당
-    if (!userMissionId) {
-      try {
-        // 시스템 미션인 경우 미션 할당 API 호출
-        const missionId = parseInt(mission.mission_id, 10);
-        if (isNaN(missionId)) {
-          showError('미션 정보가 올바르지 않습니다.', 'MissionScreen.handleVerify');
-          return;
-        }
-
-        const assignResult = await addSystemMissionToMyMissions({ missionId });
-        if (assignResult.success && assignResult.data) {
-          userMissionId = assignResult.data.id;
-          // 미션 목록 새로고침하여 user_mission_id 업데이트
-          await loadMissions();
-        } else {
-          handleApiError(assignResult, 'MissionScreen.handleVerify');
-          return;
-        }
-      } catch (error) {
-        showError(
-          error instanceof Error ? error : new Error('미션을 시작하는 중 문제가 발생했습니다.'),
-          'MissionScreen.handleVerify'
-        );
-        return;
-      }
-    }
-
-    switch (verificationType) {
-      case 'COMMUNITY':
-        // 인증글 작성 화면으로 이동 (VerificationPostCreate)
-        if (!userMissionId) {
-          showError('미션 정보가 올바르지 않습니다.', 'MissionScreen.handleVerify.COMMUNITY');
-          return;
-        }
-        try {
-          const navParams = {
-            userMissionId: userMissionId,
-            missionId: mission.mission_id,
-            missionTitle: mission.title || '미션',
-            missionEmoji: mission.emoji || '🎯',
-            photoUrl: mission.photo_url,
-          };
-          navigation.navigate('VerificationPostCreate' as any, navParams);
-        } catch (navError) {
-          showError(
-            navError instanceof Error ? navError : new Error('화면 이동 중 문제가 발생했습니다.'),
-            'MissionScreen.handleVerify.COMMUNITY'
-          );
-        }
-        break;
-
-      case 'GPS':
-        // GPS 인증
-        try {
-          if (!userMissionId) {
-            showError('미션 정보가 올바르지 않습니다.', 'MissionScreen.handleVerify.GPS');
-            return;
-          }
-
-          const { status } = await Location.requestForegroundPermissionsAsync();
-          if (status !== 'granted') {
-            showInfo('위치 권한이 필요합니다.', '권한 필요');
-            return;
-          }
-
-          const location = await Location.getCurrentPositionAsync({});
-          const result = await verifyByGps(
-            userMissionId,
-            location.coords.latitude,
-            location.coords.longitude
-          );
-
-          if (result.success) {
-            showSuccess(`+${result.data?.expReward || 50} EXP를 획득했습니다!`, 'GPS 인증 완료');
-            await loadMissions();
-          } else {
-            handleApiError(result, 'MissionScreen.handleVerify.GPS');
-          }
-        } catch (error) {
-          showError(
-            error instanceof Error ? error : new Error('GPS 인증 중 문제가 발생했습니다.'),
-            'MissionScreen.handleVerify.GPS'
-          );
-        }
-        break;
-
-      case 'TIME':
-        // 시간 인증
-        try {
-          if (!userMissionId) {
-            showError('미션 정보가 올바르지 않습니다.', 'MissionScreen.handleVerify.TIME');
-            return;
-          }
-
-          const result = await verifyByTime(userMissionId);
-
-          if (result.success) {
-            showSuccess(`+${result.data?.expReward || 50} EXP를 획득했습니다!`, '시간 인증 완료');
-            await loadMissions();
-          } else {
-            handleApiError(result, 'MissionScreen.handleVerify.TIME');
-          }
-        } catch (error) {
-          showError(
-            error instanceof Error ? error : new Error('시간 인증 중 문제가 발생했습니다.'),
-            'MissionScreen.handleVerify.TIME'
-          );
-        }
-        break;
-    }
-  }, [navigation, loadMissions]);
-
-  // 좋아요 인증 선택 시 (커뮤니티 공유 화면으로 이동)
-  const handleLikeVerification = useCallback(() => {
-    if (!selectedMissionForVerification) return;
-
-    navigation.navigate('CommunityPostCreate', {
-      type: 'VERIFICATION', // 인증 게시글 타입
-      userMissionId: selectedMissionForVerification.user_mission_id, // 인증에 필요한 UserMission ID
-      missionId: selectedMissionForVerification.mission_id,
-      missionTitle: selectedMissionForVerification.title,
-      missionEmoji: selectedMissionForVerification.emoji,
-      photoUrl: selectedMissionForVerification.photo_url || undefined,
-    });
-  }, [selectedMissionForVerification, navigation]);
-
-  // GPS 인증 성공 시 (MissionVerificationModal에서 호출)
-  const handleGPSVerification = useCallback(async () => {
-    if (!selectedMissionForVerification) return;
-
-    try {
-      // 경험치 지급
-      const experienceToGrant = selectedMissionForVerification.experience || 50;
-      if (addExperienceByCategory && selectedMissionForVerification.category_id) {
-        const expResult = await addExperienceByCategory(selectedMissionForVerification.category_id, experienceToGrant);
-        if (expResult.levelUp) {
-          showSuccess(`레벨 ${expResult.newLevel}이 되었습니다!\n+${experienceToGrant} EXP 획득!`, '🎉 레벨업!');
-        } else {
-          showSuccess(`+${experienceToGrant} EXP를 획득했습니다!`, '✅ GPS 인증 완료');
-        }
-      }
-
-      setVerificationModalVisible(false);
-      setSelectedMissionForVerification(null);
-      await loadMissions();
-    } catch (error) {
-      showError(
-        error instanceof Error ? error : new Error('GPS 인증 처리 중 문제가 발생했습니다.'),
-        'MissionScreen.handleGPSVerification'
-      );
-    }
-  }, [selectedMissionForVerification, addExperienceByCategory, loadMissions]);
-
-  // 시간 인증 성공 시 (MissionVerificationModal에서 호출)
-  const handleTimeVerification = useCallback(async () => {
-    if (!selectedMissionForVerification) return;
-
-    try {
-      // 경험치 지급 (커스텀 미션은 제외)
-      const isCustomMission = selectedMissionForVerification.missionType === 'CUSTOM' || 
-                              selectedMissionForVerification.is_custom === true;
-      const experienceToGrant = selectedMissionForVerification.experience || 50;
-
-      if (!isCustomMission && addExperienceByCategory && selectedMissionForVerification.category_id) {
-        const expResult = await addExperienceByCategory(selectedMissionForVerification.category_id, experienceToGrant);
-        if (expResult.levelUp) {
-          showSuccess(`레벨 ${expResult.newLevel}이 되었습니다!\n+${experienceToGrant} EXP 획득!`, '🎉 레벨업!');
-        } else {
-          showSuccess(`+${experienceToGrant} EXP를 획득했습니다!`, '✅ 시간 인증 완료');
-        }
-      } else if (isCustomMission) {
-        showSuccess('미션이 완료되었습니다!', '✅ 시간 인증 완료');
-      }
-
-      setVerificationModalVisible(false);
-      setSelectedMissionForVerification(null);
-      await loadMissions();
-    } catch (error) {
-      showError(
-        error instanceof Error ? error : new Error('시간 인증 처리 중 문제가 발생했습니다.'),
-        'MissionScreen.handleTimeVerification'
-      );
-    }
-  }, [selectedMissionForVerification, addExperienceByCategory, loadMissions]);
-
-  // 인증 상태 확인 (게시글 작성 후 복귀 시) - loadGroupMissions 정의 이후에 배치됨
-
-  // 사진 인증 업로드
-  const handlePhotoUpload = (missionId: string) => {
-    const mission = missions.find(m => m.mission_id === missionId);
-    // 사진 선택 화면으로 이동
-    navigation.navigate('PhotoSelect', {
-      missionId,
-      missionTitle: mission?.title || '미션',
-    });
-  };
-
-  // 커뮤니티에 공유 (나중에 되살릴 수 있도록 주석 처리)
-  // const handleShareToCommunity = (missionId: string) => {
-  //   const mission = missions.find(m => m.mission_id === missionId);
-  //   if (!mission) return;
-  //
-  //   navigation.navigate('CommunityPostCreate', {
-  //     missionId: mission.mission_id,
-  //     missionTitle: mission.title,
-  //     missionEmoji: mission.emoji,
-  //     photoUrl: mission.photo_url || undefined,
-  //   });
-  // };
-
-  // 미션 사진 삭제
-  const handleDeletePhoto = async (missionId: string) => {
-    showConfirm(
-      '첨부한 사진을 삭제하시겠습니까?',
-      async () => {
-        try {
-          const result = await deleteMissionPhoto(missionId);
-          if (result.success) {
-            showSuccess('사진이 삭제되었습니다.', '완료');
-          } else {
-            handleApiError(result, 'MissionScreen.handleDeletePhoto');
-          }
-        } catch (error) {
-          showError(
-            error instanceof Error ? error : new Error('사진 삭제 중 오류가 발생했습니다.'),
-            'MissionScreen.handleDeletePhoto'
-          );
-        }
-      },
-      '사진 삭제'
-    );
-  };
-
-
-  // 사진 선택 후 돌아왔을 때 처리 (사진만 저장, 미션 완료하지 않음)
-  // 단일 사진 저장 (하위 호환성 유지)
-  const handlePhotoSelected = useCallback(async (missionId: string, photoUri: string) => {
-    try {
-      const result = await saveMissionPhoto(missionId, photoUri);
-
-      if (result && result.success) {
-        showSuccess('사진이 저장되었습니다.', '사진 저장');
-      } else {
-        handleApiError(result || { success: false, error: '사진 저장에 실패했습니다.' }, 'MissionScreen.handlePhotoSelected');
-      }
-    } catch (error) {
-      showError(
-        error instanceof Error ? error : new Error('사진 저장에 실패했습니다.'),
-        'MissionScreen.handlePhotoSelected'
-      );
-    }
-  }, [saveMissionPhoto, showSuccess, handleApiError, showError]);
-
-  // 다중 사진 저장
-  const handlePhotosSelected = useCallback(async (missionId: string, photoUrls: string[]) => {
-    try {
-      const result = await saveMissionPhotos(missionId, photoUrls);
-
-      if (result && result.success) {
-        showSuccess(`${photoUrls.length}개의 사진이 저장되었습니다.`, '사진 저장');
-      } else {
-        handleApiError(result || { success: false, error: '사진 저장에 실패했습니다.' }, 'MissionScreen.handlePhotosSelected');
-      }
-    } catch (error) {
-      showError(
-        error instanceof Error ? error : new Error('사진 저장에 실패했습니다.'),
-        'MissionScreen.handlePhotosSelected'
-      );
-    }
-  }, [saveMissionPhotos, showSuccess, handleApiError, showError]);
-
-  // route params 변경 감지 (한 번만 처리)
-  useEffect(() => {
-    const selectedPhotoUris = routeParams?.selectedPhotoUris;
-    const selectedPhotoUri = routeParams?.selectedPhotoUri; // 하위 호환성
-    const missionId = routeParams?.missionId;
-    const timestamp = routeParams?.timestamp;
-    
-    // 다중 사진 처리 (우선)
-    if (selectedPhotoUris && selectedPhotoUris.length > 0 && missionId && timestamp) {
-      const photoKey = `${missionId}_${selectedPhotoUris.join(',')}_${timestamp}`;
-      if (processedPhotoRef.current !== photoKey) {
-        processedPhotoRef.current = photoKey;
-        handlePhotosSelected(missionId, selectedPhotoUris);
-        
-        // 처리 후 params 초기화를 위해 빈 params로 navigate
-        setTimeout(() => {
-          navigation.navigate('Mission', {});
-        }, 0);
-      }
-    }
-    // 단일 사진 처리 (하위 호환성)
-    else if (selectedPhotoUri && missionId && timestamp) {
-      const photoKey = `${missionId}_${selectedPhotoUri}_${timestamp}`;
-      if (processedPhotoRef.current !== photoKey) {
-        processedPhotoRef.current = photoKey;
-        handlePhotoSelected(missionId, selectedPhotoUri);
-        
-        // 처리 후 params 초기화를 위해 빈 params로 navigate
-        setTimeout(() => {
-          navigation.navigate('Mission', {});
-        }, 0);
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [routeParams?.timestamp]);
-
-  // routeParams.activeTab이 변경되면 activeTab 상태 업데이트
-  useEffect(() => {
-    if (routeParams?.activeTab) {
-      setActiveTab(routeParams.activeTab);
-    }
-  }, [routeParams?.activeTab]);
-
-  const handleMissionUncomplete = async (missionId: string) => {
-    try {
-      await uncompleteMission(missionId);
-    } catch (uncompleteError) {
-      showError(
-        uncompleteError instanceof Error ? uncompleteError : new Error('미션 완료 취소에 실패했습니다.'),
-        'MissionScreen.handleMissionUncomplete'
-      );
-    }
-  };
-
-  // 미션 도감 목록 로드 (서버 사이드 페이지네이션 - 한 페이지당 15개)
-  const loadGroupMissions = useCallback(async (page: number = 0) => {
-    try {
-      setGroupLoading(true);
-      console.log('[MissionScreen] 미션 도감 로딩 시작... (서버 페이지:', page, ', 탭:', missionGroupTab, ')');
-
-      let missions: UnifiedMission[] = [];
-      let totalPages = 1;
-      let totalElements = 0;
-
-      // 커스텀 미션 탭일 때: 모든 커스텀 미션 조회
-      if (missionGroupTab === 'custom') {
-        const customMissionsResult = await getCustomMissions({ 
-          page, 
-          size: MISSION_COLLECTION_PAGE_SIZE 
-        });
-
-        if (!customMissionsResult.success || !customMissionsResult.data) {
-          console.error('[MissionScreen] 커스텀 미션 API 실패:', customMissionsResult.error);
-          handleApiError(customMissionsResult, 'MissionScreen.loadGroupMissions.custom');
-          setGroupMissions([]);
-          return;
-        }
-
-        totalPages = customMissionsResult.data.totalPages || 1;
-        totalElements = customMissionsResult.data.totalElements || 0;
-
-        console.log('[MissionScreen] 커스텀 미션 페이징 정보:', {
-          currentPage: page,
-          totalPages,
-          totalElements,
-          currentPageCount: customMissionsResult.data.content.length,
-        });
-
-        // 커스텀 미션을 UnifiedMission으로 변환 (모든 미션 표시, 잠금 없음)
-        missions = customMissionsResult.data.content.map(m => ({
-          id: m.id,
-          title: m.title, // 커스텀 미션은 항상 제목 표시
-          description: m.description, // 커스텀 미션은 항상 설명 표시
-          category: m.category,
-          verificationType: m.verificationType,
-          requiredMinutes: m.requiredMinutes,
-          expReward: m.expReward || 0,
-          badgeDurationDays: m.badgeDurationDays || 0,
-          participantCount: m.participantCount,
-          isCustom: true,
-          creatorId: m.creatorId,
-          creatorNickname: m.creatorNickname,
-          isCompleted: false, // 커스텀 미션은 완료 여부와 관계없이 모두 표시
-          isAttempted: false, // 커스텀 미션은 시도 여부와 관계없이 모두 표시
-          isPublic: m.isPublic,
-        }));
-      } else {
-        // 공식 미션 탭일 때: 기존 로직 (사용자가 수행한 미션만)
-        const collectionResult = await getMissionCollection({ 
-          page, 
-          size: MISSION_COLLECTION_PAGE_SIZE 
-        });
-
-        if (!collectionResult.success || !collectionResult.data) {
-          console.error('[MissionScreen] 미션 도감 API 실패:', collectionResult.error);
-          handleApiError(collectionResult, 'MissionScreen.loadGroupMissions.official');
-          setGroupMissions([]);
-          return;
-        }
-
-        totalPages = collectionResult.data.totalPages || 1;
-        totalElements = collectionResult.data.totalElements || 0;
-        
-        console.log('[MissionScreen] 미션 도감 페이징 정보:', {
-          currentPage: page,
-          totalPages,
-          totalElements,
-          currentPageCount: collectionResult.data.content.length,
-        });
-
-        // MissionCollectionItem을 UnifiedMission으로 변환 (모든 미션 정보 표시)
-        const allMissions = collectionResult.data.content.map(m => ({
-          id: m.id,
-          title: m.title, // 모든 미션 제목 표시
-          description: m.description, // 모든 미션 설명 표시
-          category: m.category,
-          verificationType: m.verificationType,
-          requiredMinutes: m.requiredMinutes,
-          expReward: m.expReward,
-          badgeDurationDays: m.badgeDurationDays,
-          participantCount: m.participantCount,
-          isCustom: m.missionType === 'CUSTOM',
-          creatorId: m.creatorId,
-          creatorNickname: m.creatorNickname,
-          isCompleted: m.isCompleted ?? false,
-          isAttempted: m.isAttempted ?? false,
-          isPublic: m.isPublic,
-        }));
-
-        // 공식 미션만 필터링
-        missions = allMissions.filter(m => !m.isCustom);
-        
-        // 백엔드에서 이미 수행한 미션을 먼저, 미수행 미션을 나중에 정렬해서 반환함
-        // 프론트엔드에서는 백엔드에서 받은 순서 그대로 사용 (추가 정렬 불필요)
-      }
-
-      // 서버 페이지 정보 저장
-      setTotalServerPages(totalPages);
-
-      console.log('[MissionScreen] 현재 페이지 미션 수:', missions.length);
-      console.log('[MissionScreen] 탭:', missionGroupTab, ', 미션 수:', missions.length);
-
-      setGroupMissions(missions);
-      console.log('[MissionScreen] 미션 도감 로딩 완료:', missions.length, '개');
-    } catch (error) {
-      console.error('[MissionScreen] 미션 도감 로딩 예외 발생:', error);
-      showError(
-        error instanceof Error ? error : new Error('미션 도감을 불러오는 중 문제가 발생했습니다.'),
-        'MissionScreen.loadGroupMissions'
-      );
-      setGroupMissions([]);
-    } finally {
-      setGroupLoading(false);
-    }
-  }, [missionGroupTab, currentServerPage]);
-
-  // 인증 상태 확인 (게시글 작성 후 복귀 시)
-  const checkVerificationOnReturn = useCallback(async () => {
-    if (!selectedMissionForVerification) return;
-    
-    try {
-      const result = await checkVerificationStatus(selectedMissionForVerification.mission_id);
-      if (result.success && result.data?.verified) {
-        // 인증 완료 시 미션 목록 새로고침
-        await loadMissions();
-        // 미션 도감도 새로고침 (잠금 해제 반영)
-        if (activeTab === 'missionGroup') {
-          await loadGroupMissions(currentServerPage);
-        }
-        showSuccess('미션이 인증되었습니다!', '✅ 인증 완료');
-      }
-    } catch (error) {
-      logError('인증 상태 확인 오류', error as Error);
-    }
-  }, [selectedMissionForVerification, loadMissions, activeTab, currentServerPage]);
-
-  // 탭 변경 시 미션 도감 로드
-  useEffect(() => {
-    if (activeTab === 'missionGroup') {
-      setCurrentServerPage(0); // 서버 페이지 초기화
-      setSelectedGroupMission(null);
-      loadGroupMissions(0);
-    }
-  }, [activeTab, missionGroupTab]);
-
-  // 서버 페이지 변경 시 미션 도감 로드
-  useEffect(() => {
-    if (activeTab === 'missionGroup' && currentServerPage >= 0) {
-      loadGroupMissions(currentServerPage);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentServerPage, activeTab]);
-
-  // 화면 포커스 시 인증 상태 확인 및 미션 목록 새로고침
-  useEffect(() => {
-    const unsubscribe = navigation.addListener('focus', () => {
-      // 미션 목록 새로고침 (투두리스트에서 미션 완료 후 돌아왔을 때 반영)
-      if (activeTab === 'myMission') {
-        loadMissions();
-      } else if (activeTab === 'missionGroup') {
-        // 미션 도감도 새로고침 (미션 완료 후 반영)
-        loadGroupMissions(currentServerPage);
-      }
-      // 인증 상태 확인
-      if (selectedMissionForVerification) {
-        checkVerificationOnReturn();
-      }
-    });
-    return unsubscribe;
-  }, [navigation, selectedMissionForVerification, checkVerificationOnReturn, activeTab, loadMissions, currentServerPage]);
-
-  // 인증 타입 한글 변환
-  const getVerificationTypeLabel = (type?: string) => {
-    switch (type) {
-      case 'GPS':
-        return 'GPS 인증';
-      case 'TIME':
-        return '시간 인증';
-      case 'COMMUNITY':
-        return '커뮤니티 인증';
-      default:
-        return '일반 인증';
-    }
-  };
-
-  // 인증 타입 아이콘
-  const getVerificationTypeIcon = (type?: string) => {
-    switch (type) {
-      case 'GPS':
-        return require('../../assets/images/location.png');
-      case 'COMMUNITY':
-        return require('../../assets/images/high-five.png');
-      default:
-        return null;
-    }
-  };
-
-  // 미션 카테고리 한글 변환
-  const getMissionCategoryLabel = (category?: MissionCategory) => {
-    switch (category) {
-      case 'DAILY_LIFE':
-        return '일상';
-      case 'GROWTH':
-        return '성장';
-      case 'EXERCISE':
-        return '운동';
-      case 'STUDY':
-        return '학습';
-      case 'HEALTH':
-        return '건강';
-      case 'RELATIONSHIP':
-        return '관계';
-      default:
-        return '';
-    }
-  };
-
-  // Pull-to-Refresh 핸들러
-  const onRefresh = useCallback(async () => {
-    setRefreshing(true);
-    try {
-      if (activeTab === 'myMission') {
-        await loadMissions();
-      } else {
-        await loadGroupMissions();
-      }
-    } finally {
-      setRefreshing(false);
-    }
-  }, [loadMissions, loadGroupMissions, activeTab]);
 
   if (loading) {
     return <Loading text="미션을 불러오는 중..." />;
@@ -792,7 +90,7 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
             { key: 'missionGroup', label: '미션 도감' },
           ]}
           activeTab={activeTab}
-          onTabChange={(key) => setActiveTab(key as MissionTab)}
+          onTabChange={handleTabChange}
           style={styles.topTabBar}
         />
       </View>
@@ -804,20 +102,8 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
         message={completeModalMessage}
         confirmText="인증하기"
         cancelText="나중에"
-        onConfirm={() => {
-          setShowCompleteModal(false);
-          if (completedMissionForVerification) {
-            setSelectedMissionForVerification(completedMissionForVerification);
-            setVerificationModalVisible(true);
-          }
-          setCompletedMissionForVerification(null);
-          setIsLevelUp(false);
-        }}
-        onCancel={() => {
-          setShowCompleteModal(false);
-          setCompletedMissionForVerification(null);
-          setIsLevelUp(false);
-        }}
+        onConfirm={handleCompleteModalConfirm}
+        onCancel={handleCompleteModalCancel}
         confirmButtonColor={colors.primary[500]}
         image={isLevelUp ? require('../../assets/images/gift.png') : require('../../assets/images/check2.png')}
       />
@@ -826,14 +112,9 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
       <MissionVerificationModal
         visible={verificationModalVisible}
         mission={selectedMissionForVerification}
-        onClose={() => {
-          setVerificationModalVisible(false);
-          setSelectedMissionForVerification(null);
-        }}
+        onClose={handleVerificationModalClose}
         onLikeVerification={handleLikeVerification}
-        onVerificationSuccess={async () => {
-          await loadMissions();
-        }}
+        onVerificationSuccess={handleVerificationSuccess}
       />
 
       {/* 나의 미션 콘텐츠 */}
@@ -867,7 +148,7 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
             { key: 'completed', label: '완료' },
           ]}
           activeTab={selectedFilter}
-          onTabChange={(key) => setSelectedFilter(key as MissionFilter)}
+          onTabChange={handleFilterChange}
           style={styles.tabBar}
         />
 
@@ -955,7 +236,7 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
                 { key: 'custom', label: '커스텀 미션' },
               ]}
               activeTab={missionGroupTab}
-              onTabChange={(key) => setMissionGroupTab(key as MissionGroupTab)}
+              onTabChange={handleMissionGroupTabChange}
               style={styles.groupTabBar}
             />
           </View>
@@ -974,8 +255,8 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
               currentServerPage={currentServerPage}
               totalServerPages={totalServerPages}
               refreshing={refreshing}
-              onMissionSelect={setSelectedGroupMission}
-              onServerPageChange={setCurrentServerPage}
+              onMissionSelect={(mission) => setSelectedGroupMission(mission)}
+              onServerPageChange={handleServerPageChange}
               onNavigateToCreate={() => navigation.navigate('CustomMissionCreate' as any)}
               onRefresh={onRefresh}
               getVerificationTypeLabel={getVerificationTypeLabel}

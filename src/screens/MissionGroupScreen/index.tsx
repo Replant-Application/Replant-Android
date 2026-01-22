@@ -3,7 +3,7 @@
  * 모든 미션 목록 + 미션 상세 정보 + 후기 기능
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React from 'react';
 import {
   View,
   Text,
@@ -22,278 +22,50 @@ import { NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types/navigation';
 import { Header, Loading, ErrorBoundary, EmptyState, SimpleTabBar } from '../../components/ui';
 import { colors, spacing, typography, borderRadius, shadows } from '../../utils/designTokens';
-import { useErrorHandler } from '../../hooks/useErrorHandler';
 import { getOptimizedLineHeight } from '../../utils/textStyles';
 import {
-  getSystemMissions,
-  getCustomMissions,
-  getMissionCollection,
-  getMissionReviews,
-  createMissionReview,
-  Mission,
-  MissionReview,
-  MissionCategory,
-  MissionCollectionItem,
-} from '../../api/missionApi';
-import { useUser } from '../../contexts/UserContext';
-
-type MissionGroupTab = 'official' | 'custom';
+  useMissionGroupScreenContainer,
+  UnifiedMission,
+  getVerificationTypeLabel,
+  getVerificationTypeIcon,
+  getMissionCategoryLabel,
+  getMissionIcon,
+} from './MissionGroupScreen.container';
 
 interface MissionGroupScreenProps {
   navigation: NavigationProp<RootStackParamList>;
 }
 
-// 통합 미션 타입 (공식/커스텀 모두 표시용)
-interface UnifiedMission {
-  id: number;
-  title: string;
-  description: string;
-  category?: MissionCategory;  // 미션 카테고리 (DAILY_LIFE, GROWTH 등)
-  verificationType: string;
-  requiredMinutes?: number;
-  expReward: number;
-  badgeDurationDays: number;
-  participantCount?: number;
-  isCustom: boolean;
-  creatorNickname?: string;
-  isAttempted?: boolean; // 사용자가 수행한 미션인지
-  isCompleted?: boolean; // 인증 완료 여부
-  isPublic?: boolean; // 커스텀 미션의 경우
-}
-
 const MissionGroupScreen: React.FC<MissionGroupScreenProps> = ({ navigation }) => {
-  const { user } = useUser();
-  const { showError, showSuccess, showInfo, handleApiError } = useErrorHandler();
-  const [activeTab, setActiveTab] = useState<MissionGroupTab>('official');
-  const [missions, setMissions] = useState<UnifiedMission[]>([]);
-  const [selectedMission, setSelectedMission] = useState<UnifiedMission | null>(null);
-  const [reviews, setReviews] = useState<MissionReview[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [reviewsLoading, setReviewsLoading] = useState(false);
-  const [refreshing, setRefreshing] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  // 비즈니스 로직은 Container에서 처리
+  const {
+    missions,
+    reviews,
+    activeTab,
+    selectedMission,
+    loading,
+    reviewsLoading,
+    refreshing,
+    error,
+    currentPage,
+    totalPages,
+    hasMore,
+    showReviewModal,
+    reviewContent,
+    submitting,
+    setActiveTab,
+    setReviewContent,
+    handleMissionSelect,
+    handleSubmitReview,
+    handleOpenReviewModal,
+    handleCloseReviewModal,
+    handleCreateCustomMission,
+    handleViewMissionDetail,
+    onRefresh,
+    loadMore,
+  } = useMissionGroupScreenContainer({ navigation });
 
-  // 페이지네이션
-  const [currentPage, setCurrentPage] = useState(0);
-  const [totalPages, setTotalPages] = useState(0);
-  const [hasMore, setHasMore] = useState(true);
-  const PAGE_SIZE = 10;
 
-  // 후기 작성 모달
-  const [showReviewModal, setShowReviewModal] = useState(false);
-  const [reviewContent, setReviewContent] = useState('');
-  const [submitting, setSubmitting] = useState(false);
-
-  // 미션 목록 로드 (미션 도감 API 사용)
-  const loadMissions = useCallback(async (page: number = 0, append: boolean = false) => {
-    try {
-      if (!append) {
-        setLoading(true);
-      }
-      setError(null);
-
-      // 미션 도감 API 사용 (사용자가 수행한 미션만 조회)
-      const result = await getMissionCollection({ page, size: PAGE_SIZE });
-      if (result.success && result.data) {
-        // isAttempted === true인 미션만 필터링 (엄격하게)
-        // 백엔드에서 이미 필터링되어야 하지만, 프론트엔드에서도 한 번 더 확인
-        const allMissions = result.data.content || [];
-        const attemptedMissions = allMissions.filter(m => m.isAttempted === true);
-        
-        console.log('[MissionGroupScreen] 미션 도감 조회:', {
-          total: allMissions.length,
-          attempted: attemptedMissions.length,
-          notAttempted: allMissions.filter(m => m.isAttempted !== true).length,
-          sample: allMissions.slice(0, 3).map(m => ({ 
-            id: m.id, 
-            title: m.title, 
-            isAttempted: m.isAttempted, 
-            isCompleted: m.isCompleted 
-          })),
-        });
-        
-        // isAttempted === true인 미션만 표시
-        // 백엔드 API가 전체 미션을 반환하는 경우를 대비해 프론트엔드에서 필터링
-        const unifiedMissions: UnifiedMission[] = attemptedMissions.map(m => ({
-          id: m.id,
-          // isCompleted === false인 경우 "?"로 마스킹
-          title: m.isCompleted === false ? '?' : m.title,
-          description: m.isCompleted === false ? '?' : m.description,
-          category: m.category, // 항상 표시
-          verificationType: m.verificationType, // 항상 표시
-          requiredMinutes: m.requiredMinutes,
-          expReward: m.expReward,
-          badgeDurationDays: m.badgeDurationDays,
-          participantCount: m.participantCount,
-          isCustom: m.missionType === 'CUSTOM',
-          creatorNickname: m.creatorNickname,
-          isAttempted: m.isAttempted,
-          isCompleted: m.isCompleted,
-          isPublic: m.isPublic, // 항상 표시
-        }));
-
-        if (append) {
-          setMissions(prev => [...prev, ...unifiedMissions]);
-        } else {
-          setMissions(unifiedMissions);
-        }
-        setTotalPages(result.data.totalPages);
-        setHasMore(page < result.data.totalPages - 1);
-      } else {
-        throw new Error(result.error || '미션 목록을 불러올 수 없습니다.');
-      }
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : '미션 목록을 불러오는 중 오류가 발생했습니다.';
-      setError(errorMessage);
-      console.error('[MissionGroupScreen] 미션 목록 로드 실패:', err);
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  }, [activeTab]);
-
-  // 더 보기 (페이지네이션)
-  const loadMore = useCallback(() => {
-    if (hasMore && !loading) {
-      const nextPage = currentPage + 1;
-      setCurrentPage(nextPage);
-      loadMissions(nextPage, true);
-    }
-  }, [hasMore, loading, currentPage, loadMissions]);
-
-  // 리뷰 목록 로드
-  const loadReviews = useCallback(async (missionId: number) => {
-    try {
-      setReviewsLoading(true);
-      const result = await getMissionReviews(missionId);
-      if (result.success && result.data) {
-        setReviews(result.data.content || []);
-      } else {
-        setReviews([]);
-      }
-    } catch (err) {
-      console.error('리뷰 로드 오류:', err);
-      setReviews([]);
-    } finally {
-      setReviewsLoading(false);
-    }
-  }, []);
-
-  // 새로고침
-  const onRefresh = useCallback(async () => {
-    setRefreshing(true);
-    setCurrentPage(0);
-    await loadMissions(0, false);
-    if (selectedMission) {
-      await loadReviews(selectedMission.id);
-    }
-    setRefreshing(false);
-  }, [loadMissions, loadReviews, selectedMission]);
-
-  // 탭 변경시 목록 초기화 및 로드
-  useEffect(() => {
-    setCurrentPage(0);
-    setSelectedMission(null);
-    setReviews([]);
-    loadMissions(0, false);
-  }, [activeTab]);
-
-  useEffect(() => {
-    loadMissions(0, false);
-  }, []);
-
-  // 미션 선택 시 리뷰 로드
-  useEffect(() => {
-    if (selectedMission) {
-      loadReviews(selectedMission.id);
-    } else {
-      setReviews([]);
-    }
-  }, [selectedMission, loadReviews]);
-
-  // 후기 제출
-  const handleSubmitReview = async () => {
-    if (!reviewContent.trim() || !selectedMission) return;
-
-    try {
-      setSubmitting(true);
-      const result = await createMissionReview(selectedMission.id, {
-        content: reviewContent.trim(),
-      });
-
-      if (result.success) {
-        showSuccess('후기가 등록되었습니다.', '성공');
-        setReviewContent('');
-        setShowReviewModal(false);
-        // 리뷰 목록 새로고침
-        await loadReviews(selectedMission.id);
-      } else {
-        if (result.error?.includes('뱃지') || result.error?.includes('badge')) {
-          showInfo('이 미션을 완료하고 뱃지를 획득해야 후기를 작성할 수 있습니다.', '후기 작성 불가');
-        } else {
-          handleApiError(result, 'MissionGroupScreen.handleSubmitReview');
-        }
-      }
-    } catch (err) {
-      showError(
-        err instanceof Error ? err : new Error('후기 등록 중 오류가 발생했습니다.'),
-        'MissionGroupScreen.handleSubmitReview'
-      );
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  // 인증 타입 한글 변환
-  const getVerificationTypeLabel = (type?: string) => {
-    switch (type) {
-      case 'GPS':
-        return 'GPS 인증';
-      case 'TIME':
-        return '⏱️ 시간 인증';
-      case 'COMMUNITY':
-        return '커뮤니티 인증';
-      default:
-        return '✅ 일반 인증';
-    }
-  };
-
-  // 인증 타입 아이콘
-  const getVerificationTypeIcon = (type?: string) => {
-    switch (type) {
-      case 'GPS':
-        return require('../../assets/images/location.png');
-      case 'COMMUNITY':
-        return require('../../assets/images/high-five.png');
-      default:
-        return null;
-    }
-  };
-
-  // 미션 카테고리 한글 변환
-  const getMissionCategoryLabel = (category?: MissionCategory) => {
-    switch (category) {
-      case 'DAILY_LIFE':
-        return '일상';
-      case 'GROWTH':
-        return '성장';
-      case 'EXERCISE':
-        return '운동';
-      case 'STUDY':
-        return '학습';
-      case 'HEALTH':
-        return '건강';
-      case 'RELATIONSHIP':
-        return '관계';
-      default:
-        return '';
-    }
-  };
-
-  // 미션 아이콘
-  const getMissionIcon = (title: string) => {
-    return require('../../assets/images/goal.png');
-  };
 
   if (loading) {
     return <Loading text="미션 도감을 불러오는 중..." />;
@@ -325,7 +97,7 @@ const MissionGroupScreen: React.FC<MissionGroupScreenProps> = ({ navigation }) =
           rightButton={
             activeTab === 'custom' ? (
               <TouchableOpacity
-                onPress={() => navigation.navigate('CustomMissionCreate' as any)}
+                onPress={handleCreateCustomMission}
                 style={styles.createButton}
               >
                 <Image
@@ -347,7 +119,7 @@ const MissionGroupScreen: React.FC<MissionGroupScreenProps> = ({ navigation }) =
               { key: 'custom', label: '커스텀 미션' },
             ]}
             activeTab={activeTab}
-            onTabChange={(key) => setActiveTab(key as MissionGroupTab)}
+            onTabChange={(key) => setActiveTab(key as 'official' | 'custom')}
             style={styles.tabBar}
           />
         </View>
@@ -387,11 +159,7 @@ const MissionGroupScreen: React.FC<MissionGroupScreenProps> = ({ navigation }) =
                       styles.missionCard,
                       selectedMission?.id === mission.id && styles.missionCardSelected,
                     ]}
-                    onPress={() => {
-                      setSelectedMission(
-                        selectedMission?.id === mission.id ? null : mission
-                      );
-                    }}
+                    onPress={() => handleMissionSelect(mission)}
                     activeOpacity={0.7}
                   >
                     <View style={styles.missionHeader}>
@@ -502,7 +270,7 @@ const MissionGroupScreen: React.FC<MissionGroupScreenProps> = ({ navigation }) =
 
                         <TouchableOpacity
                           style={styles.detailButton}
-                          onPress={() => navigation.navigate('MissionDetail', { missionId: String(selectedMission.id) })}
+                          onPress={() => handleViewMissionDetail(selectedMission)}
                           activeOpacity={0.7}
                         >
                           <Text style={styles.detailButtonText}>미션 상세 보기</Text>
@@ -591,14 +359,14 @@ const MissionGroupScreen: React.FC<MissionGroupScreenProps> = ({ navigation }) =
         visible={showReviewModal}
         transparent={true}
         animationType="slide"
-        onRequestClose={() => setShowReviewModal(false)}
+        onRequestClose={handleCloseReviewModal}
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>후기 작성</Text>
               <TouchableOpacity
-                onPress={() => setShowReviewModal(false)}
+                onPress={handleCloseReviewModal}
                 style={styles.modalCloseButton}
               >
                 <Text style={styles.modalCloseText}>✕</Text>
@@ -623,7 +391,7 @@ const MissionGroupScreen: React.FC<MissionGroupScreenProps> = ({ navigation }) =
             <View style={styles.modalButtons}>
               <TouchableOpacity
                 style={styles.cancelButton}
-                onPress={() => setShowReviewModal(false)}
+                onPress={handleCloseReviewModal}
                 activeOpacity={0.7}
               >
                 <Text style={styles.cancelButtonText}>취소</Text>

@@ -3,7 +3,7 @@
  * COMMUNITY 인증 타입 미션의 인증글 작성 및 수정
  */
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import {
   View,
   Text,
@@ -16,324 +16,42 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   ImageBackground,
-  Alert,
 } from 'react-native';
 import { Header, AlertModal } from '../../components/ui';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
 import { getOptimizedLineHeight } from '../../utils/textStyles';
-import { createVerification, updateVerification, getVerification } from '../../api/missionApi';
-import { uploadCommunityPhoto } from '../../api/fileApi';
 import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types/navigation';
-import { launchImageLibrary, launchCamera } from 'react-native-image-picker';
-import { logError } from '../../utils/logger';
-import { useErrorHandler } from '../../hooks/useErrorHandler';
+import { useVerificationPostCreateScreenContainer } from './VerificationPostCreateScreen.container';
 
 interface VerificationPostCreateScreenProps {
   navigation: NavigationProp<RootStackParamList>;
   route: RouteProp<RootStackParamList, 'VerificationPostCreate'>;
 }
 
-const VerificationPostCreateScreen: React.FC<VerificationPostCreateScreenProps> = ({
-  navigation,
-  route,
-}) => {
-  // route.params가 없을 경우 안전하게 처리
-  const params = route?.params || {};
+const VerificationPostCreateScreen: React.FC<VerificationPostCreateScreenProps> = ({ navigation, route }) => {
+  // 비즈니스 로직은 Container에서 처리
   const {
-    userMissionId,
-    missionId,
-    missionTitle = '미션',
-    missionEmoji = '',
-    photoUrl: initialPhotoUrl,
-    // 수정 모드용 params
-    mode = 'create',
-    verificationId,
-    initialContent,
-  } = params as any;
-
-  const isEditMode = mode === 'edit' && verificationId;
-  const [content, setContent] = useState(initialContent || '');
-  const [images, setImages] = useState<string[]>(initialPhotoUrl ? [initialPhotoUrl] : []); // 다중 이미지 지원
-  const [loading, setLoading] = useState(false);
-  const [uploadingPhoto, setUploadingPhoto] = useState(false);
-  const [showSuccessModal, setShowSuccessModal] = useState(false);
-  const [showAlreadyExistsModal, setShowAlreadyExistsModal] = useState(false);
-  const [showErrorModal, setShowErrorModal] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
-  const [loadingData, setLoadingData] = useState(isEditMode);
-  const { showError, showInfo, showConfirm, handleApiError } = useErrorHandler();
-
-  // 필수 파라미터 체크
-  useEffect(() => {
-    if (!isEditMode && (!userMissionId || userMissionId === 0)) {
-      logError('VerificationPostCreate: userMissionId 누락', new Error('Missing userMissionId'), { params });
-      showError(
-        new Error('미션 정보가 올바르지 않습니다.'),
-        'VerificationPostCreateScreen.useEffect'
-      );
-      navigation.goBack();
-      return;
-    }
-  }, [userMissionId, isEditMode, navigation, params, showError]);
-
-  // 수정 모드일 때 기존 데이터 로드
-  useEffect(() => {
-    if (isEditMode && verificationId) {
-      loadVerificationData();
-    }
-  }, [isEditMode, verificationId]);
-
-  const loadVerificationData = async () => {
-    try {
-      setLoadingData(true);
-      const result = await getVerification(verificationId);
-      if (result.success && result.data) {
-        setContent(result.data.content || '');
-        if (result.data.imageUrls && result.data.imageUrls.length > 0) {
-          setImages(result.data.imageUrls); // 다중 이미지 지원
-        }
-      }
-    } catch (error) {
-      logError('인증글 데이터 로드 오류', error as Error);
-    } finally {
-      setLoadingData(false);
-    }
-  };
-
-  // 사진 선택 (갤러리) - 자유게시판과 동일한 방식
-  const handleSelectPhoto = async () => {
-    try {
-      const result = await launchImageLibrary({
-        mediaType: 'photo',
-        quality: 0.8,
-        selectionLimit: 3, // 최대 3장 제한
-      });
-
-      // 사용자가 취소했거나 에러가 있는 경우 무시
-      if (result.didCancel) {
-        return;
-      }
-
-      if (result.errorCode) {
-        logError('갤러리 오류', new Error(result.errorMessage || result.errorCode));
-        if (result.errorCode === 'permission') {
-          showError(
-            new Error('사진을 선택하려면 갤러리 접근 권한이 필요합니다. 설정에서 권한을 허용해주세요.'),
-            'VerificationPostCreateScreen.handleSelectPhoto'
-          );
-        } else {
-          showError(
-            new Error('사진을 불러오는 중 오류가 발생했습니다.'),
-            'VerificationPostCreateScreen.handleSelectPhoto'
-          );
-        }
-        return;
-      }
-
-      if (result.assets && result.assets.length > 0) {
-        setUploadingPhoto(true);
-        try {
-          // 자유게시판과 완전히 동일하게 즉시 업로드
-          const uploadPromises = result.assets.map(async (asset) => {
-            if (asset.uri) {
-              const uploadResult = await uploadCommunityPhoto({
-                uri: asset.uri,
-                type: asset.type || 'image/jpeg',
-                name: asset.fileName || `verification_${Date.now()}_${Math.random()}.jpg`,
-              });
-              return uploadResult.success && uploadResult.data ? uploadResult.data.fileUrl : null;
-            }
-            return null;
-          });
-
-          const uploadedUrls = (await Promise.all(uploadPromises)).filter((url): url is string => url !== null);
-          
-          // 자유게시판과 완전히 동일하게 기존 이미지에 추가 (단순 추가)
-          setImages((prev) => [...prev, ...uploadedUrls]);
-        } catch (error) {
-          logError('이미지 업로드 오류', error as Error);
-          showError(
-            error instanceof Error ? error : new Error('이미지 업로드 중 오류가 발생했습니다.'),
-            'VerificationPostCreateScreen.handleSelectPhoto'
-          );
-        } finally {
-          setUploadingPhoto(false);
-        }
-      }
-    } catch (error) {
-      logError('사진 선택 오류', error as Error);
-      showError(
-        error instanceof Error ? error : new Error('사진을 선택하는 중 오류가 발생했습니다.'),
-        'VerificationPostCreateScreen.handleSelectPhoto'
-      );
-    }
-  };
-
-  // 사진 촬영
-  const handleTakePhoto = async () => {
-    try {
-      const result = await launchCamera({
-        mediaType: 'photo',
-        quality: 0.8,
-      });
-
-      // 사용자가 취소했거나 에러가 있는 경우 무시
-      if (result.didCancel) {
-        return;
-      }
-
-      if (result.errorCode) {
-        logError('카메라 오류', new Error(result.errorMessage || result.errorCode));
-        if (result.errorCode === 'permission') {
-          showError(
-            new Error('사진을 촬영하려면 카메라 권한이 필요합니다. 설정에서 권한을 허용해주세요.'),
-            'VerificationPostCreateScreen.handleTakePhoto'
-          );
-        } else if (result.errorCode === 'camera_unavailable') {
-          showError(
-            new Error('카메라를 사용할 수 없습니다.'),
-            'VerificationPostCreateScreen.handleTakePhoto'
-          );
-        } else {
-          showError(
-            new Error('카메라를 사용하는 중 오류가 발생했습니다.'),
-            'VerificationPostCreateScreen.handleTakePhoto'
-          );
-        }
-        return;
-      }
-
-      if (result.assets && result.assets[0]?.uri) {
-        if (images.length >= 3) {
-          showInfo('최대 3개의 사진만 선택할 수 있습니다.');
-          return;
-        }
-
-        setUploadingPhoto(true);
-        try {
-          const uploadResult = await uploadCommunityPhoto({
-            uri: result.assets[0].uri,
-            type: result.assets[0].type || 'image/jpeg',
-            name: result.assets[0].fileName || `verification_${Date.now()}.jpg`,
-          });
-
-          if (uploadResult.success && uploadResult.data) {
-            setImages((prev) => [...prev, uploadResult.data!.fileUrl]);
-          } else {
-            showError(
-              new Error(uploadResult.error || '사진 업로드에 실패했습니다.'),
-              'VerificationPostCreateScreen.handleTakePhoto'
-            );
-          }
-        } catch (error) {
-          logError('사진 업로드 오류', error as Error);
-          showError(
-            error instanceof Error ? error : new Error('사진 업로드 중 오류가 발생했습니다.'),
-            'VerificationPostCreateScreen.handleTakePhoto'
-          );
-        } finally {
-          setUploadingPhoto(false);
-        }
-      }
-    } catch (error) {
-      logError('카메라 오류', error as Error);
-      showError(
-        error instanceof Error ? error : new Error('카메라를 사용하는 중 오류가 발생했습니다.'),
-        'VerificationPostCreateScreen.handleTakePhoto'
-      );
-    }
-  };
-
-  // 이미지 제거
-  const handleRemoveImage = (index: number) => {
-    setImages((prev) => prev.filter((_, i) => i !== index));
-  };
-
-  // 사진 선택 옵션 표시
-  const showPhotoOptions = () => {
-    Alert.alert(
-      '사진 추가',
-      '사진을 추가할 방법을 선택해주세요.',
-      [
-        { text: '취소', style: 'cancel' },
-        { text: '카메라', onPress: handleTakePhoto },
-        { text: '갤러리', onPress: handleSelectPhoto },
-      ]
-    );
-  };
-
-  // 인증글 작성 또는 수정
-  const handleSubmitVerification = async () => {
-    if (!content.trim()) {
-      showError(
-        new Error('인증 내용을 입력해주세요.'),
-        'VerificationPostCreateScreen.handleSubmitVerification'
-      );
-      return;
-    }
-
-    if (!isEditMode && (!userMissionId || userMissionId === 0)) {
-      showError(
-        new Error('미션 정보가 올바르지 않습니다.'),
-        'VerificationPostCreateScreen.handleSubmitVerification'
-      );
-      return;
-    }
-
-    try {
-      setLoading(true);
-
-      if (isEditMode) {
-        // 수정 모드
-        const result = await updateVerification(verificationId, {
-          content: content.trim(),
-          imageUrls: images, // 다중 이미지 배열
-        });
-
-        if (result.success) {
-          setShowSuccessModal(true);
-        } else {
-          // 인증 통과 후 수정 불가 에러 처리
-          if (result.error?.includes('수정') || result.error?.includes('MODIFICATION')) {
-            showError(
-              new Error('인증이 완료된 게시글은 수정할 수 없습니다.'),
-              'VerificationPostCreateScreen.handleSubmitVerification'
-            );
-          } else {
-            handleApiError(result, 'VerificationPostCreateScreen.handleSubmitVerification');
-          }
-        }
-      } else {
-        // 작성 모드
-        const verificationData = {
-          userMissionId: userMissionId,
-          content: content.trim(),
-          imageUrls: images, // 다중 이미지 배열
-        };
-
-        const result = await createVerification(verificationData);
-
-        if (result.success) {
-          setShowSuccessModal(true);
-        } else {
-          // 이미 인증글이 존재하는 경우 처리
-          if (result.error?.includes('이미 인증') || result.error?.includes('ALREADY_EXISTS') || result.error?.includes('V013')) {
-            setShowAlreadyExistsModal(true);
-          } else {
-            setErrorMessage(result.error || '인증글 작성에 실패했습니다.');
-            setShowErrorModal(true);
-          }
-        }
-      }
-    } catch (error) {
-      logError('인증글 작성/수정 오류', error as Error);
-      setErrorMessage('인증글 작성 중 오류가 발생했습니다.');
-      setShowErrorModal(true);
-    } finally {
-      setLoading(false);
-    }
-  };
+    isEditMode,
+    missionTitle,
+    missionEmoji,
+    content,
+    images,
+    loading,
+    uploadingPhoto,
+    loadingData,
+    showSuccessModal,
+    showAlreadyExistsModal,
+    showErrorModal,
+    errorMessage,
+    setContent,
+    handleRemoveImage,
+    showPhotoOptions,
+    handleSubmitVerification,
+    handleSuccessModalClose,
+    handleAlreadyExistsModalClose,
+    handleErrorModalClose,
+  } = useVerificationPostCreateScreenContainer({ navigation, route });
 
   return (
     <ImageBackground
@@ -492,15 +210,13 @@ const VerificationPostCreateScreen: React.FC<VerificationPostCreateScreenProps> 
       {/* 성공 모달 */}
       <AlertModal
         visible={showSuccessModal}
-        title={isEditMode ? "인증글 수정 완료" : "인증글 작성 완료"}
-        message={isEditMode
-          ? "인증글이 수정되었습니다."
-          : "인증글이 등록되었습니다. 다른 사용자들의 좋아요를 받으면 미션이 인증됩니다!"
+        title={isEditMode ? '인증글 수정 완료' : '인증글 작성 완료'}
+        message={
+          isEditMode
+            ? '인증글이 수정되었습니다.'
+            : '인증글이 등록되었습니다. 다른 사용자들의 좋아요를 받으면 미션이 인증됩니다!'
         }
-        onClose={() => {
-          setShowSuccessModal(false);
-          navigation.goBack();
-        }}
+        onClose={handleSuccessModalClose}
       />
 
       {/* 이미 존재하는 인증글 모달 */}
@@ -509,10 +225,7 @@ const VerificationPostCreateScreen: React.FC<VerificationPostCreateScreenProps> 
         title="인증글이 이미 존재합니다"
         message="이미 작성한 인증글이 있습니다. 커뮤니티에서 다른 사용자들의 투표를 기다려주세요!"
         buttonText="확인"
-        onClose={() => {
-          setShowAlreadyExistsModal(false);
-          navigation.goBack();
-        }}
+        onClose={handleAlreadyExistsModalClose}
       />
 
       {/* 오류 모달 */}
@@ -521,7 +234,7 @@ const VerificationPostCreateScreen: React.FC<VerificationPostCreateScreenProps> 
         title="오류"
         message={errorMessage}
         buttonText="확인"
-        onClose={() => setShowErrorModal(false)}
+        onClose={handleErrorModalClose}
       />
     </KeyboardAvoidingView>
     </ImageBackground>

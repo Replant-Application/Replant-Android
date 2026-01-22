@@ -2,92 +2,44 @@
  * 커뮤니티 게시글 수정 화면
  */
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import {
   View,
   Text,
   StyleSheet,
   ScrollView,
   TextInput,
-  Alert,
   KeyboardAvoidingView,
   Platform,
   Image,
-  TouchableOpacity,
   ImageBackground,
 } from 'react-native';
-import { useCommunity } from '../../hooks/useCommunity';
-import { useCommunityPost } from '../../hooks/useCommunityPost';
 import { Button, Header } from '../../components/ui';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
 import { getOptimizedLineHeight } from '../../utils/textStyles';
 import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types/navigation';
-import { useUser } from '../../contexts/UserContext';
+import { useCommunityPostEditScreenContainer } from './CommunityPostEditScreen.container';
 
 interface CommunityPostEditScreenProps {
   navigation: NavigationProp<RootStackParamList>;
   route: RouteProp<RootStackParamList, 'CommunityPostEdit'>;
 }
 
-const CommunityPostEditScreen: React.FC<CommunityPostEditScreenProps> = ({
-  navigation,
-  route,
-}) => {
-  const { postId } = route.params;
-  const { currentNickname, currentUserId } = useUser();
-  const { post, loading } = useCommunityPost(postId);
-  const { updatePost } = useCommunity();
-  const [title, setTitle] = useState('');
-  const [content, setContent] = useState('');
-  const [saving, setSaving] = useState(false);
-
-  useEffect(() => {
-    if (post) {
-      setTitle(post.title);
-      setContent(post.content);
-    }
-  }, [post]);
-
-  const handleUpdatePost = async () => {
-    if (!content.trim()) {
-      Alert.alert('오류', '내용을 입력해주세요.');
-      return;
-    }
-
-    if (!post) return;
-
-    try {
-      setSaving(true);
-
-      // 인증글인 경우 제목은 변경하지 않음 (기존 제목 유지)
-      const updateTitle = post.category === '인증' ? post.title : (title.trim() || post.mission_title);
-      
-      const result = await updatePost(post.post_id, {
-        title: updateTitle,
-        content: content.trim(),
-      });
-
-      if (result.success) {
-        Alert.alert(
-          '성공!',
-          '게시글이 수정되었습니다!',
-          [
-            {
-              text: '확인',
-              onPress: () => navigation.goBack(),
-            },
-          ]
-        );
-      } else {
-        Alert.alert('오류', result.error || '게시글 수정에 실패했습니다.');
-      }
-    } catch (error) {
-      Alert.alert('오류', '게시글 수정 중 오류가 발생했습니다.');
-    } finally {
-      setSaving(false);
-    }
-  };
+const CommunityPostEditScreen: React.FC<CommunityPostEditScreenProps> = ({ navigation, route }) => {
+  // 비즈니스 로직은 Container에서 처리
+  const {
+    post,
+    loading,
+    isAuthor,
+    isVerificationPost,
+    title,
+    content,
+    saving,
+    setTitle,
+    setContent,
+    handleUpdatePost,
+  } = useCommunityPostEditScreenContainer({ navigation, route });
 
   if (loading || !post) {
     return (
@@ -111,13 +63,7 @@ const CommunityPostEditScreen: React.FC<CommunityPostEditScreenProps> = ({
     );
   }
 
-  // 본인 게시글인지 확인 (백엔드에서 제공하는 isAuthor 필드 사용)
-  // 로그인한 경우에만 isAuthor가 올바르게 설정됨
-  const isAuthor = post?.isAuthor === true;
-  
   if (!isAuthor) {
-    Alert.alert('오류', '본인의 게시글만 수정할 수 있습니다.');
-    navigation.goBack();
     return null;
   }
 
@@ -152,7 +98,7 @@ const CommunityPostEditScreen: React.FC<CommunityPostEditScreenProps> = ({
         {/* 제목 입력 */}
         <View style={styles.inputSection}>
           <Text style={styles.label}>제목</Text>
-          {post.category === '인증' ? (
+          {isVerificationPost ? (
             <>
               <TextInput
                 style={[styles.titleInput, styles.titleInputDisabled]}

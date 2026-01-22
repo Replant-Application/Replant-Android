@@ -1,9 +1,7 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Platform, Dimensions } from 'react-native';
-import { colors, spacing, typography, borderRadius, shadows } from '../../utils/designTokens';
-import { getOptimizedLineHeight } from '../../utils/textStyles';
-import { FACTOR_OPTIONS } from '../../constants/screens/diary';
-import { addOpacity } from './DiaryScreen.utils';
+import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
+import { useFactorSelectionStepContainer } from './FactorSelectionStep.container';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const COLUMNS = 3; // 그리드 열 수
@@ -28,83 +26,47 @@ const FactorSelectionStep: React.FC<FactorSelectionStepProps> = ({
   onToggleFactor,
   onCustomFactorChange,
 }) => {
-  // 요인별 색상 매핑
-  const getFactorColor = (factor: string): string => {
-    const factorColorMap: Record<string, string> = {
-      // 생활/일상
-      '공부': colors.blue[500],
-      '학업': colors.blue[600],
-      '일': colors.blue[400],
-      '취업': colors.purple[500],
-      // 관계
-      '가족': colors.green[500],
-      '친구': colors.green[400],
-      '연인': colors.red[400],
-      '인간관계': colors.purple[400],
-      // 건강/여가
-      '운동': colors.green[600],
-      '건강': colors.green[300],
-      '취미생활': colors.orange[400],
-      '게임': colors.purple[500],
-      '여행': colors.blue[300],
-      // 물질/시간
-      '돈': colors.orange[600],
-      '음식': colors.orange[500],
-      '잠': colors.blue[800],
-      // 시간
-      '미래': colors.purple[300],
-      '과거': colors.gray[500],
-    };
-    
-    return factorColorMap[factor] || colors.gray[500];
-  };
+  // 비즈니스 로직은 Container에서 처리
+  const { getFactorButtonStyle, isFactorSelected, factorOptions } = useFactorSelectionStepContainer({
+    selectedFactors,
+    customFactor,
+    onToggleFactor,
+    onCustomFactorChange,
+  });
 
   // 요인을 행 단위로 그룹화
   const renderFactorGrid = () => {
     const rows = [];
-    for (let i = 0; i < FACTOR_OPTIONS.length; i += COLUMNS) {
-      const rowFactors = FACTOR_OPTIONS.slice(i, i + COLUMNS);
+    for (let i = 0; i < factorOptions.length; i += COLUMNS) {
+      const rowFactors = factorOptions.slice(i, i + COLUMNS);
       rows.push(
         <View key={i} style={styles.factorRow}>
           {rowFactors.map((factor) => {
-            const isSelected = selectedFactors.includes(factor);
-            const factorColor = getFactorColor(factor);
+            const isSelected = isFactorSelected(factor);
+            const buttonStyle = getFactorButtonStyle(factor);
             return (
               <TouchableOpacity
                 key={factor}
-                style={[
-                  styles.factorButton,
-                  {
-                    backgroundColor: isSelected 
-                      ? addOpacity(factorColor, 0.3) 
-                      : 'rgba(255, 255, 255, 0.1)',
-                    borderColor: isSelected 
-                      ? addOpacity(factorColor, 0.5) 
-                      : 'rgba(255, 255, 255, 0.3)',
-                  },
-                ]}
+                style={[styles.factorButton, buttonStyle]}
                 onPress={() => onToggleFactor(factor)}
                 activeOpacity={0.7}
               >
-                <Text style={[
-                  styles.factorButtonText,
-                  isSelected && styles.factorButtonTextSelected
-                ]}>
+                <Text style={[styles.factorButtonText, isSelected && styles.factorButtonTextSelected]}>
                   {factor}
                 </Text>
               </TouchableOpacity>
             );
           })}
           {/* 빈 공간 채우기 (마지막 행) */}
-          {rowFactors.length < COLUMNS && 
-            Array(COLUMNS - rowFactors.length).fill(0).map((_, idx) => (
-              <View key={`empty-${idx}`} style={styles.factorButtonEmpty} />
-            ))
+          {rowFactors.length < COLUMNS &&
+            Array(COLUMNS - rowFactors.length)
+              .fill(0)
+              .map((_, idx) => <View key={`empty-${idx}`} style={styles.factorButtonEmpty} />)
           }
         </View>
       );
     }
-    
+
     return rows;
   };
 
