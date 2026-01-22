@@ -13,14 +13,13 @@ import React, { useRef, useCallback } from 'react';
 import {
   View,
   Text,
-  StyleSheet,
   TouchableOpacity,
   Platform,
   Image,
 } from 'react-native';
 import { useOverlay } from '../../contexts/OverlayContext';
-import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
-import { getOptimizedLineHeight } from '../../utils/textStyles';
+import { spacing } from '../../utils/designTokens';
+import { styles } from './HeaderActions.styles';
 
 interface HeaderActionsProps {
   showNotification?: boolean;
@@ -123,74 +122,5 @@ const HeaderActions: React.FC<HeaderActionsProps> = ({
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  iconButton: {
-    position: 'relative',
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginLeft: spacing[1],
-    backgroundColor: 'transparent',
-  },
-  iconButtonActive: {
-    backgroundColor: colors.gray[100],
-  },
-  icon: {
-    fontSize: 22,
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(22),
-  },
-  iconImage: {
-    width: 22,
-    height: 22,
-  },
-  badge: {
-    position: 'absolute',
-    top: 2,
-    right: 2,
-    backgroundColor: colors.error,
-    borderRadius: borderRadius.full,
-    minWidth: 16,
-    height: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 4,
-    borderWidth: 1.5,
-    borderColor: colors.background.primary,
-    ...Platform.select({
-      ios: {
-        shadowColor: colors.black,
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.2,
-        shadowRadius: 1,
-      },
-      android: {
-        elevation: 2,
-      },
-    }),
-  },
-  badgeText: {
-    fontSize: 9,
-    fontWeight: typography.fontWeight.medium as any,
-    color: colors.white,
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(9),
-  },
-});
 
 export default HeaderActions;
