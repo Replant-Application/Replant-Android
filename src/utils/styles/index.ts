@@ -12,6 +12,7 @@ export {
   createErrorTextStyle,
   createLinkTextStyle,
   createButtonTextStyle,
+  getOptimizedLineHeight,
 } from './textStyles';
 
 // 공통 컴포넌트 스타일

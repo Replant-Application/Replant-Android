@@ -17,12 +17,10 @@ import {
   ActivityIndicator,
   ImageBackground,
 } from 'react-native';
-import { Loading, Header, EmptyState } from '../../components/ui';
-import { formatDateKorean } from '../../utils/dateUtils';
+import { Loading, Header, EmptyState, ReviewCard } from '../../components/ui';
 import { colors } from '../../utils/designTokens';
 import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types/navigation';
-import { MissionReview } from '../../api/missionApi';
 import { useMissionDetailScreenContainer, getDifficultyLabel, getMissionTypeLabel } from './MissionDetailScreen.container';
 import { styles } from './MissionDetailScreen.styles';
 
@@ -30,51 +28,6 @@ interface MissionDetailScreenProps {
   navigation: NavigationProp<RootStackParamList>;
   route: RouteProp<RootStackParamList, 'MissionDetail'>;
 }
-
-// 별점 표시 컴포넌트
-const RatingStars: React.FC<{ rating: number }> = ({ rating }) => (
-  <View style={styles.ratingStarsDisplay}>
-    {[1, 2, 3, 4, 5].map((star) => (
-      <Text key={star} style={styles.ratingStarDisplay}>
-        {star <= rating ? '★' : '☆'}
-      </Text>
-    ))}
-  </View>
-);
-
-// 리뷰 카드 컴포넌트
-const ReviewCard: React.FC<{
-  review: MissionReview;
-}> = ({ review }) => {
-
-  return (
-    <View style={styles.reviewCard}>
-      <View style={styles.reviewHeader}>
-        <View style={styles.reviewAuthorInfo}>
-          {review.userProfileImg ? (
-            <Image
-              source={{ uri: review.userProfileImg }}
-              style={styles.reviewAuthorImage}
-              accessibilityLabel={`${review.userNickname || '사용자'} 프로필 이미지`}
-            />
-          ) : (
-            <View style={styles.reviewAuthorImagePlaceholder}>
-              <Text style={styles.reviewAuthorImageText}>
-                {review.userNickname?.charAt(0) || '?'}
-              </Text>
-            </View>
-          )}
-          <View>
-            <Text style={styles.reviewAuthor}>{review.userNickname}</Text>
-            {review.rating && <RatingStars rating={review.rating} />}
-          </View>
-        </View>
-        <Text style={styles.reviewDate}>{formatDateKorean(review.createdAt)}</Text>
-      </View>
-      <Text style={styles.reviewContent}>{review.content}</Text>
-    </View>
-  );
-};
 
 const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({ navigation, route }) => {
   // 비즈니스 로직은 Container에서 처리

@@ -14,7 +14,7 @@ import {
 } from 'react-native';
 import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types/navigation';
-import { Header, Loading } from '../../components/ui';
+import { Header, Loading, RatingSelector } from '../../components/ui';
 import { colors } from '../../utils/designTokens';
 import { useMissionSetDetailScreenContainer } from './MissionSetDetailScreen.container';
 import { styles } from './MissionSetDetailScreen.styles';
@@ -44,19 +44,6 @@ const MissionSetDetailScreen: React.FC<MissionSetDetailScreenProps> = ({ navigat
     handleCloseReviewForm,
     renderStars,
   } = useMissionSetDetailScreenContainer({ navigation, route });
-
-  // 별점 선택 렌더링 (UI 컴포넌트)
-  const renderRatingSelector = () => {
-    return (
-      <View style={styles.ratingSelector}>
-        {[1, 2, 3, 4, 5].map(star => (
-          <TouchableOpacity key={star} onPress={() => setReviewRating(star)} activeOpacity={0.7}>
-            <Text style={[styles.ratingStar, star <= reviewRating && styles.ratingStarActive]}>★</Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-    );
-  };
 
   if (loading) {
     return <Loading text="투두리스트를 불러오는 중..." />;
@@ -138,7 +125,7 @@ const MissionSetDetailScreen: React.FC<MissionSetDetailScreenProps> = ({ navigat
             ) : showReviewForm ? (
               <View style={styles.reviewFormCard}>
                 <Text style={styles.reviewFormLabel}>별점을 선택해주세요</Text>
-                {renderRatingSelector()}
+                <RatingSelector rating={reviewRating} onRatingChange={setReviewRating} />
                 <TextInput
                   style={styles.reviewInput}
                   placeholder="리뷰를 작성해주세요 (선택)"

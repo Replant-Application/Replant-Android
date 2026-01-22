@@ -5,7 +5,7 @@
 
 import { StyleSheet, Platform } from 'react-native';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
-import { getOptimizedLineHeight } from '../../utils/textStyles';
+import { getOptimizedLineHeight } from '../../utils/styles/textStyles';
 import { createTextStyle, createBodyStyle, createSecondaryTextStyle, createButtonTextStyle } from '../../utils/styles/textStyles';
 import { buttonStyles, inputStyles, emptyStateStyles } from '../../utils/styles/commonStyles';
 

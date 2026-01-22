@@ -6,7 +6,7 @@ import { useSse } from '../contexts/SseContext';
 import { useWakeUpMission } from '../contexts/WakeUpMissionContext';
 import { SCREEN_NAMES } from '../utils/constants';
 import { colors, spacing, typography } from '../utils/designTokens';
-import { getOptimizedLineHeight } from '../utils/textStyles';
+import { getOptimizedLineHeight } from '../utils/styles/textStyles';
 import { RootStackParamList, HistoryEntry } from '../types/navigation';
 import { apiClient } from '../api/client';
 import { logout } from '../services/authService';

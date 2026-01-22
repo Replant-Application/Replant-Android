@@ -4,18 +4,17 @@
  * 스텝별로 하나씩 입력하는 온보딩 형식
  */
 
-import React, { useState, useEffect, useRef } from 'react';
+import React from 'react';
 import {
   View,
   Text,
-  ScrollView,
   TouchableOpacity,
+  ScrollView,
   Platform,
   KeyboardAvoidingView,
   ImageBackground,
 } from 'react-native';
-import { Header, AlertModal } from '../../components/ui';
-import { typography } from '../../utils/designTokens';
+import { Header, AlertModal, WheelPicker } from '../../components/ui';
 import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types/navigation';
 import {
@@ -49,114 +48,6 @@ const SpontaneousMissionSetupScreen: React.FC<SpontaneousMissionSetupScreenProps
     handleSubmit,
     handleCloseAlert,
   } = useSpontaneousMissionSetupScreenContainer({ navigation, route });
-  
-  const ITEM_HEIGHT = 50;
-  const VISIBLE_ITEMS = 5;
-
-  // 휠 피커 컴포넌트 (갤럭시 스타일)
-  const WheelPicker = ({
-    value,
-    options,
-    onSelect,
-    width,
-  }: {
-    value: string | number;
-    options: Array<{ label: string; value: string | number }>;
-    onSelect: (value: string | number) => void;
-    width?: number;
-  }) => {
-    const scrollViewRef = useRef<ScrollView>(null);
-    const [selectedIndex, setSelectedIndex] = useState(() => {
-      const index = options.findIndex(opt => opt.value === value);
-      return index >= 0 ? index : 0;
-    });
-
-    useEffect(() => {
-      const index = options.findIndex(opt => opt.value === value);
-      if (index >= 0 && index !== selectedIndex) {
-        setSelectedIndex(index);
-        scrollToIndex(index, false);
-      }
-    }, [value]);
-
-    const scrollToIndex = (index: number, animated: boolean = true) => {
-      if (scrollViewRef.current) {
-        const y = index * ITEM_HEIGHT;
-        scrollViewRef.current.scrollTo({ y, animated });
-      }
-    };
-
-    const handleScroll = (event: any) => {
-      const y = event.nativeEvent.contentOffset.y;
-      const index = Math.round(y / ITEM_HEIGHT);
-      const clampedIndex = Math.max(0, Math.min(index, options.length - 1));
-      
-      if (clampedIndex !== selectedIndex) {
-        setSelectedIndex(clampedIndex);
-        onSelect(options[clampedIndex].value);
-      }
-    };
-
-    const handleScrollEnd = (event: any) => {
-      const y = event.nativeEvent.contentOffset.y;
-      const index = Math.round(y / ITEM_HEIGHT);
-      const clampedIndex = Math.max(0, Math.min(index, options.length - 1));
-      scrollToIndex(clampedIndex, true);
-    };
-
-    useEffect(() => {
-      scrollToIndex(selectedIndex, false);
-    }, []);
-
-    return (
-      <View style={[styles.wheelPickerContainer, width && { width }]}>
-        {/* 선택 영역 표시 */}
-        <View style={styles.wheelPickerSelection} />
-        <ScrollView
-          ref={scrollViewRef}
-          style={styles.wheelPickerScrollView}
-          contentContainerStyle={styles.wheelPickerContent}
-          showsVerticalScrollIndicator={false}
-          snapToInterval={ITEM_HEIGHT}
-          decelerationRate="fast"
-          onScroll={handleScroll}
-          onMomentumScrollEnd={handleScrollEnd}
-          scrollEventThrottle={16}
-        >
-          {/* 상단 패딩 */}
-          <View style={{ height: ITEM_HEIGHT * 2 }} />
-          {options.map((option, index) => {
-            const distance = Math.abs(index - selectedIndex);
-            const opacity = distance === 0 ? 1 : distance === 1 ? 0.4 : 0.2;
-            const scale = distance === 0 ? 1 : 0.9;
-            const fontSize = distance === 0 ? typography.fontSize['2xl'] : typography.fontSize.lg;
-            
-            return (
-              <TouchableOpacity
-                key={option.value}
-                style={[
-                  styles.wheelPickerItem,
-                  { height: ITEM_HEIGHT, opacity, transform: [{ scale }] }
-                ]}
-                onPress={() => {
-                  scrollToIndex(index, true);
-                  setSelectedIndex(index);
-                  onSelect(option.value);
-                }}
-                activeOpacity={0.7}
-              >
-                <Text style={[styles.wheelPickerItemText, { fontSize }]}>
-                  {option.label}
-                </Text>
-              </TouchableOpacity>
-            );
-          })}
-          {/* 하단 패딩 */}
-          <View style={{ height: ITEM_HEIGHT * 2 }} />
-        </ScrollView>
-      </View>
-    );
-  };
 
   // 드롭다운 컴포넌트 (레거시 - 제거 예정)
   const Dropdown = ({

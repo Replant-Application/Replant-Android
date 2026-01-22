@@ -5,7 +5,16 @@
 
 import { Platform, TextStyle } from 'react-native';
 import { typography, colors } from '../designTokens';
-import { getOptimizedLineHeight } from '../textStyles';
+
+/**
+ * 폰트 크기에 따른 최적화된 lineHeight 계산
+ * 폰트 적용 시 여백 문제를 해결하기 위한 헬퍼 함수
+ */
+export const getOptimizedLineHeight = (fontSize: number): number => {
+  // Neo-Regular 폰트 특성에 맞춘 lineHeight 계산
+  // 기본적으로 fontSize의 1.4배 정도가 적절하지만, 여백을 줄이기 위해 조정
+  return Math.round(fontSize * 1.35);
+};
 
 /**
  * 텍스트 스타일 생성 함수

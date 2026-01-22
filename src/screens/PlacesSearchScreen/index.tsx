@@ -14,29 +14,13 @@ import { Header, EmptyState } from '../../components/ui';
 import { PlaceCard } from '../../components/specialized/PlaceCard';
 import { colors } from '../../utils/designTokens';
 import { RootStackParamList } from '../../types/navigation';
+import { REGIONS, FILTERS } from '../../constants/screens/placesSearch';
 import { usePlacesSearchScreenContainer } from './PlacesSearchScreen.container';
 import { styles } from './PlacesSearchScreen.styles';
 
 interface PlacesSearchScreenProps {
   navigation: NavigationProp<RootStackParamList>;
 }
-
-const REGIONS = [
-  { id: 'all', name: '전체', location: '' },
-  { id: 'seoul', name: '서울', location: '서울' },
-  { id: 'busan', name: '부산', location: '부산' },
-  { id: 'daegu', name: '대구', location: '대구' },
-  { id: 'incheon', name: '인천', location: '인천' },
-  { id: 'gwangju', name: '광주', location: '광주' },
-  { id: 'daejeon', name: '대전', location: '대전' },
-  { id: 'gyeonggi', name: '경기', location: '경기' },
-];
-
-const FILTERS = [
-  { key: 'all' as const, label: '전체' },
-  { key: 'counseling' as const, label: '상담센터' },
-  { key: 'mental_health' as const, label: '정신건강' },
-];
 
 const PlacesSearchScreen: React.FC<PlacesSearchScreenProps> = ({ navigation }) => {
   // 비즈니스 로직은 Container에서 처리
