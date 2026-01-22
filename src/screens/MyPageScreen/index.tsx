@@ -1,14 +1,14 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, Platform, ImageBackground, Image } from 'react-native';
+import { View, Text, ScrollView, ImageBackground, Image } from 'react-native';
 import { NavigationProp } from '@react-navigation/native';
 import { useUserProfile } from '../../hooks/useUserProfile';
 import { useCharacter } from '../../hooks/useCharacter';
 import { CharacterCard } from '../../components/specialized';
 import { Loading, ErrorBoundary, Header } from '../../components/ui';
-import { colors, spacing, typography, borderRadius, shadows } from '../../utils/designTokens';
-import { getOptimizedLineHeight } from '../../utils/textStyles';
+import { colors } from '../../utils/designTokens';
 import { RootStackParamList } from '../../types/navigation';
 import { formatDateKorean } from '../../utils/dateUtils';
+import { styles } from './MyPageScreen.styles';
 
 interface MyPageScreenProps {
   navigation: NavigationProp<RootStackParamList>;
@@ -170,146 +170,5 @@ const MyPageScreen: React.FC<MyPageScreenProps> = ({ navigation }) => {
     </ImageBackground>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  content: {
-    padding: spacing[5],
-    paddingBottom: spacing[20],
-  },
-  sectionHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: spacing[4],
-    gap: spacing[2],
-  },
-  sectionIcon: {
-    width: 25,
-    height: 25,
-  },
-  sectionTitle: {
-    fontSize: typography.fontSize.lg,
-    fontWeight: typography.fontWeight.medium,
-    color: colors.text.primary,
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.lg),
-  },
-  profileCard: {
-    backgroundColor: colors.background.primary,
-    borderRadius: borderRadius.xl,
-    padding: spacing[5],
-    marginBottom: spacing[6],
-    borderWidth: 1,
-    borderColor: '#D4A574',
-    ...shadows.lg,
-  },
-  profileInfo: {
-    gap: spacing[3],
-  },
-  profileRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: spacing[2],
-  },
-  profileLabel: {
-    fontSize: typography.fontSize.base,
-    color: colors.text.secondary,
-    fontWeight: typography.fontWeight.medium,
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
-  },
-  profileValue: {
-    fontSize: typography.fontSize.base,
-    color: colors.text.primary,
-    fontWeight: typography.fontWeight.medium,
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
-  },
-  characterCard: {
-    backgroundColor: colors.background.primary,
-    borderRadius: borderRadius.xl,
-    padding: spacing[5],
-    marginBottom: spacing[6],
-    borderWidth: 1,
-    borderColor: '#D4A574',
-    ...shadows.lg,
-  },
-  characterCardInner: {
-    marginBottom: 0,
-  },
-  statsCard: {
-    backgroundColor: colors.background.primary,
-    borderRadius: borderRadius.xl,
-    padding: spacing[5],
-    marginBottom: spacing[6],
-    borderWidth: 1,
-    borderColor: '#D4A574',
-    ...shadows.lg,
-  },
-  statsContainer: {
-    gap: spacing[4],
-  },
-  statItem: {
-    gap: spacing[2],
-  },
-  statHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  statLabel: {
-    fontSize: typography.fontSize.base,
-    color: colors.text.primary,
-    fontWeight: typography.fontWeight.medium,
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
-  },
-  statValue: {
-    fontSize: typography.fontSize.lg,
-    color: colors.text.primary,
-    fontWeight: typography.fontWeight.medium,
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.lg),
-  },
-  barChartContainer: {
-    marginTop: spacing[1],
-  },
-  barChartBackground: {
-    height: 12,
-    backgroundColor: colors.gray[200],
-    borderRadius: borderRadius.full,
-    overflow: 'hidden',
-  },
-  barChartFill: {
-    height: '100%',
-    borderRadius: borderRadius.full,
-  },
-});
 
 export default MyPageScreen;

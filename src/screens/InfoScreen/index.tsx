@@ -1,10 +1,9 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, Platform, ImageBackground } from 'react-native';
-import { colors, spacing, typography, borderRadius, shadows } from '../../utils/designTokens';
-import { getOptimizedLineHeight } from '../../utils/textStyles';
+import { View, Text, ScrollView, ImageBackground } from 'react-native';
 import { NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types/navigation';
 import { Header } from '../../components/ui';
+import { styles } from './InfoScreen.styles';
 
 interface InfoScreenProps {
   navigation: NavigationProp<RootStackParamList>;
@@ -45,49 +44,5 @@ const InfoScreen: React.FC<InfoScreenProps> = ({ navigation, route }) => {
     </ImageBackground>
   );
 };
-
-const styles = StyleSheet.create({
-  backgroundImage: {
-    flex: 1,
-    width: '100%',
-    height: '100%',
-  },
-  container: {
-    flex: 1,
-  },
-  headerTitle: {
-    fontWeight: typography.fontWeight.medium as any,
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-  },
-  content: {
-    flex: 1,
-  },
-  contentContainer: {
-    padding: spacing[4],
-  },
-  contentCard: {
-    backgroundColor: colors.background.primary,
-    borderRadius: borderRadius.xl,
-    padding: spacing[5],
-    ...shadows.lg,
-  },
-  contentText: {
-    fontSize: typography.fontSize.base,
-    color: colors.text.primary,
-    letterSpacing: 0.3,
-    textAlign: 'left',
-    fontWeight: typography.fontWeight.medium as any,
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
-  },
-});
 
 export default InfoScreen;

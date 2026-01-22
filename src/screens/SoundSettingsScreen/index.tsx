@@ -1,11 +1,11 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Platform, ImageBackground } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Image, ImageBackground } from 'react-native';
 import Slider from '@react-native-community/slider';
 import { Header } from '../../components/ui';
-import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
-import { getOptimizedLineHeight } from '../../utils/textStyles';
+import { colors } from '../../utils/designTokens';
 import { SoundSettingsScreenProps } from '../../types/screens/settings';
 import { useSoundSettingsScreenContainer } from './SoundSettingsScreen.container';
+import { styles } from './SoundSettingsScreen.styles';
 
 const SoundSettingsScreen: React.FC<SoundSettingsScreenProps> = ({ navigation }) => {
   // 비즈니스 로직은 Container에서 처리
@@ -124,99 +124,5 @@ const SoundSettingsScreen: React.FC<SoundSettingsScreenProps> = ({ navigation })
     </ImageBackground>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    padding: spacing[5],
-    paddingBottom: 120,
-  },
-  settingsCard: {
-    backgroundColor: colors.background.primary,
-    borderRadius: borderRadius.lg,
-    padding: spacing[4],
-    marginBottom: spacing[4],
-  },
-  volumeSection: {
-    paddingVertical: spacing[3],
-  },
-  volumeRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: spacing[3],
-  },
-  iconContainer: {
-    width: 40,
-    height: 40,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: spacing[3],
-  },
-  volumeIcon: {
-    width: 32,
-    height: 32,
-  },
-  volumeLabel: {
-    flex: 1,
-    fontSize: typography.fontSize.base,
-    fontWeight: typography.fontWeight.medium,
-    color: colors.text.primary,
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
-  },
-  volumeValue: {
-    fontSize: typography.fontSize.sm,
-    fontWeight: typography.fontWeight.medium,
-    color: colors.text.secondary,
-    minWidth: 45,
-    textAlign: 'right',
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
-  },
-  slider: {
-    width: '100%',
-    height: 40,
-  },
-  divider: {
-    height: 1,
-    backgroundColor: colors.border.light,
-    marginVertical: spacing[2],
-  },
-  resetButton: {
-    backgroundColor: colors.background.primary,
-    borderRadius: borderRadius.lg,
-    paddingVertical: spacing[3],
-    paddingHorizontal: spacing[5],
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: colors.border.light,
-  },
-  resetButtonText: {
-    fontSize: typography.fontSize.base,
-    fontWeight: typography.fontWeight.medium,
-    color: colors.text.secondary,
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
-  },
-});
-
-
 
 export default SoundSettingsScreen;

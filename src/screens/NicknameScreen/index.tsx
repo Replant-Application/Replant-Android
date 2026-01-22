@@ -1,9 +1,8 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Platform } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
 import { Button, Input, Header } from '../../components/ui';
-import { colors, spacing, typography } from '../../utils/designTokens';
-import { getOptimizedLineHeight } from '../../utils/textStyles';
 import { useNicknameScreenContainer } from './NicknameScreen.container';
+import { styles } from './NicknameScreen.styles';
 
 interface NicknameScreenProps {
   onNavigate: (screen: string) => void;
@@ -65,68 +64,5 @@ const NicknameScreen: React.FC<NicknameScreenProps> = ({ onNavigate }) => {
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background.secondary,
-    justifyContent: 'space-between',
-    padding: spacing[5],
-  },
-  content: {
-    flex: 1,
-    justifyContent: 'center',
-  },
-  title: {
-    fontSize: typography.fontSize['2xl'],
-    fontWeight: typography.fontWeight.medium,
-    color: colors.text.primary,
-    marginBottom: spacing[4],
-    textAlign: 'center' as const,
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize['2xl']),
-  },
-  subtitle: {
-    fontSize: typography.fontSize.base,
-    color: colors.text.secondary,
-    textAlign: 'center',
-    marginBottom: spacing[10],
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
-  },
-  input: {
-    // textAlign은 Input 컴포넌트에서 처리
-  },
-  buttonContainer: {
-    paddingBottom: spacing[10],
-    gap: spacing[3],
-  },
-  button: {
-    width: '100%',
-  },
-  backToSocialButton: {
-    paddingVertical: spacing[3],
-    alignItems: 'center',
-  },
-  backToSocialText: {
-    fontSize: typography.fontSize.sm,
-    color: colors.text.secondary,
-    textDecorationLine: 'underline',
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
-  },
-});
 
 export default NicknameScreen;

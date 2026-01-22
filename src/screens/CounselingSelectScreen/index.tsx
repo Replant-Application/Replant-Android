@@ -2,18 +2,15 @@ import React from 'react';
 import {
   View,
   Text,
-  StyleSheet,
   TouchableOpacity,
   ScrollView,
-  Platform,
   ImageBackground,
   Image,
 } from 'react-native';
 import { Header, Card } from '../../components/ui';
-import { colors, spacing, typography, borderRadius, shadows } from '../../utils/designTokens';
-import { getOptimizedLineHeight } from '../../utils/textStyles';
 import { NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types/navigation';
+import { styles } from './CounselingSelectScreen.styles';
 
 interface CounselingSelectScreenProps {
   navigation: NavigationProp<RootStackParamList>;
@@ -99,155 +96,5 @@ const CounselingSelectScreen: React.FC<CounselingSelectScreenProps> = ({ navigat
     </ImageBackground>
   );
 };
-
-const styles = StyleSheet.create({
-  backgroundImage: {
-    flex: 1,
-    width: '100%',
-    height: '100%',
-  },
-  container: {
-    flex: 1,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingBottom: spacing[6],
-  },
-  backButtonIcon: {
-    width: 24,
-    height: 24,
-    tintColor: colors.text.primary,
-  },
-  content: {
-    padding: spacing[5],
-  },
-  title: {
-    fontSize: typography.fontSize.xxl,
-    fontWeight: typography.fontWeight.medium as any,
-    color: colors.text.primary,
-    marginBottom: spacing[2],
-    textAlign: 'center',
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.xxl),
-  },
-  subtitle: {
-    fontSize: typography.fontSize.base,
-    color: colors.text.secondary,
-    marginBottom: spacing[6],
-    textAlign: 'center',
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
-  },
-  counselingCard: {
-    marginBottom: spacing[5],
-  },
-  counselingCardContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: spacing[1],
-  },
-  cardIcon: {
-    width: 56,
-    height: 56,
-    borderRadius: borderRadius.full,
-    backgroundColor: '#FFF8E7',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: spacing[3],
-    borderWidth: 2,
-    borderColor: '#D4A574',
-    ...shadows.sm,
-  },
-  cardIconImage: {
-    width: 32,
-    height: 32,
-  },
-  cardContent: {
-    flex: 1,
-  },
-  cardTitle: {
-    fontSize: typography.fontSize.lg,
-    fontWeight: typography.fontWeight.medium as any,
-    color: colors.text.primary,
-    marginBottom: spacing[1],
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.lg),
-  },
-  cardDescription: {
-    fontSize: typography.fontSize.sm,
-    color: colors.text.secondary,
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
-  },
-  cardArrow: {
-    marginLeft: spacing[2],
-  },
-  arrowIcon: {
-    width: 20,
-    height: 20,
-  },
-  infoCard: {
-    marginTop: spacing[2],
-  },
-  infoTitle: {
-    fontSize: typography.fontSize.base,
-    fontWeight: typography.fontWeight.medium as any,
-    color: colors.text.primary,
-    marginBottom: spacing[3],
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
-  },
-  infoItem: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    marginBottom: spacing[2],
-  },
-  infoBullet: {
-    fontSize: typography.fontSize.sm,
-    color: '#8B6F47',
-    marginRight: spacing[2],
-    marginTop: 2,
-    fontWeight: typography.fontWeight.medium as any,
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
-  },
-  infoText: {
-    flex: 1,
-    fontSize: typography.fontSize.sm,
-    color: colors.text.secondary,
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
-  },
-});
 
 export default CounselingSelectScreen;

@@ -2,17 +2,14 @@ import React from 'react';
 import {
   View,
   Text,
-  StyleSheet,
   TouchableOpacity,
   FlatList,
   ImageBackground,
-  Platform,
-  Dimensions,
   Animated,
 } from 'react-native';
-import { spacing, typography, colors, borderRadius } from '../../utils/designTokens';
-import { getOptimizedLineHeight } from '../../utils/textStyles';
+import { colors } from '../../utils/designTokens';
 import { useOnboardingScreenContainer } from './OnboardingScreen.container';
+import { styles } from './OnboardingScreen.styles';
 
 interface OnboardingScreenProps {
   onNavigate: (screen: string) => void;
@@ -23,7 +20,8 @@ interface OnboardingSlide {
   image: any;
 }
 
-const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
+import { Dimensions } from 'react-native';
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 const ONBOARDING_SLIDES: OnboardingSlide[] = [
   {
@@ -181,84 +179,5 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onNavigate }) => {
     </ImageBackground>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    width: SCREEN_WIDTH,
-    height: SCREEN_HEIGHT,
-    backgroundColor: colors.white,
-  },
-  transparentFlatList: {
-    flex: 1,
-    backgroundColor: 'transparent',
-  },
-  skipButton: {
-    position: 'absolute',
-    top: Platform.OS === 'ios' ? 40 : 30,
-    right: spacing[6],
-    zIndex: 10,
-    paddingVertical: spacing[3],
-    paddingHorizontal: spacing[4],
-    minHeight: 44, // 최소 터치 영역 확보 (iOS 가이드라인: 44x44)
-    minWidth: 44, // 최소 너비 확보 (X 기호용)
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  skipButtonText: {
-    fontSize: typography.fontSize['2xl'],
-    color: colors.white,
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize['2xl']),
-    fontWeight: typography.fontWeight.medium,
-  },
-  startButtonText: {
-    fontSize: typography.fontSize.sm,
-    color: colors.white,
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
-    fontWeight: typography.fontWeight.medium,
-  },
-  slideContainer: {
-    width: SCREEN_WIDTH,
-    flex: 1,
-    paddingHorizontal: 0,
-    paddingTop: 0,
-    paddingBottom: 0,
-    backgroundColor: 'transparent',
-  },
-  paginationWrapper: {
-    position: 'absolute',
-    bottom: Platform.OS === 'android' ? spacing[12] + 8 : spacing[8],
-    left: 0,
-    right: 0,
-    zIndex: 10,
-  },
-  paginationContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: spacing[4],
-    gap: spacing[2],
-  },
-  paginationDot: {
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: colors.primary[600],
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 2,
-    elevation: 3,
-  },
-});
 
 export default OnboardingScreen;
