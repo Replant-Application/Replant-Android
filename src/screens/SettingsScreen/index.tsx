@@ -62,19 +62,12 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
         <View style={styles.section}>
           <View style={styles.userCard}>
             <View style={styles.userInfo}>
-              {currentCharacter ? (
+              {currentCharacter && (
                 <Image
                   source={getCharacterImage(currentCharacter.level || 1, 'default')}
                   style={styles.userIcon}
                   resizeMode="contain"
                   accessibilityLabel={`${currentCharacter.name || '캐릭터'} 이미지`}
-                />
-              ) : (
-                <Image
-                  source={require('../../assets/images/home.png')}
-                  style={styles.userIcon}
-                  resizeMode="contain"
-                  accessibilityLabel="사용자 아이콘"
                 />
               )}
               <View style={styles.userDetails}>

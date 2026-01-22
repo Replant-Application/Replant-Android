@@ -200,6 +200,7 @@ export const useCalendarScreenContainer = ({ navigation }: CalendarScreenContain
           // 해당 날짜의 미션만 추가/업데이트
           setAllMissions(prev => {
             const filtered = prev.filter(m => {
+              if (!m.assignedAt) return true; // assignedAt이 없으면 유지
               const missionDate = m.assignedAt.split('T')[0];
               return missionDate !== dateString;
             });
