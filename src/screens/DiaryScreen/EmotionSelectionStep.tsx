@@ -1,19 +1,9 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Platform, Dimensions } from 'react-native';
-import { colors, spacing, typography, borderRadius, shadows } from '../../utils/designTokens';
-import { getOptimizedLineHeight } from '../../utils/textStyles';
+import { View, Text, ScrollView, TouchableOpacity, TextInput } from 'react-native';
+import { colors } from '../../utils/designTokens';
 import { EMOTION_TAGS } from '../../constants/screens/diary';
 import { getEmotionColor, addOpacity } from './DiaryScreen.utils';
-
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
-const COLUMNS = 3; // 그리드 열 수
-const BUTTON_GAP = spacing[1]; // 버튼 간격
-const CONTAINER_PADDING = spacing[3]; // 컨테이너 패딩
-// modalContainer의 marginHorizontal (spacing[4]) + padding (spacing[3]) + content의 paddingHorizontal (CONTAINER_PADDING) 모두 고려
-const MODAL_MARGIN = spacing[4]; // modalContainer의 marginHorizontal
-const MODAL_PADDING = spacing[3]; // modalContainer의 padding
-const AVAILABLE_WIDTH = SCREEN_WIDTH - (MODAL_MARGIN * 2) - (MODAL_PADDING * 2) - (CONTAINER_PADDING * 2);
-const BUTTON_WIDTH = (AVAILABLE_WIDTH - BUTTON_GAP * (COLUMNS - 1)) / COLUMNS;
+import { styles, COLUMNS } from './EmotionSelectionStep.styles';
 
 interface EmotionSelectionStepProps {
   selectedEmotions: string[];
@@ -102,71 +92,6 @@ const EmotionSelectionStep: React.FC<EmotionSelectionStepProps> = ({
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    width: '100%',
-  },
-  emotionsContainer: {
-    maxHeight: 400,
-    marginBottom: spacing[3],
-  },
-  emotionsContent: {
-    paddingHorizontal: CONTAINER_PADDING,
-    paddingBottom: spacing[2],
-  },
-  emotionRow: {
-    flexDirection: 'row',
-    gap: BUTTON_GAP,
-    marginBottom: BUTTON_GAP,
-  },
-  emotionTag: {
-    width: BUTTON_WIDTH,
-    minHeight: spacing[8],
-    paddingHorizontal: spacing[1],
-    paddingVertical: spacing[2],
-    borderRadius: borderRadius.md,
-    borderWidth: 1, // 항상 동일한 borderWidth 유지
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  emotionTagEmpty: {
-    width: BUTTON_WIDTH,
-  },
-  inputContainer: {
-    width: '100%',
-  },
-  textInput: {
-    backgroundColor: colors.gray[900],
-    borderRadius: borderRadius.lg,
-    padding: spacing[3],
-    height: 37,
-    fontSize: typography.fontSize.sm,
-    color: colors.white,
-    borderWidth: 1,
-    borderColor: colors.gray[700],
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-  },
-  emotionTagText: {
-    fontSize: typography.fontSize.xs,
-    color: colors.white,
-    fontWeight: typography.fontWeight.medium,
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    textAlign: 'center',
-  },
-  emotionTagTextSelected: {
-    color: colors.white,
-    fontWeight: typography.fontWeight.medium,
-  },
-});
 
 export default EmotionSelectionStep;
 

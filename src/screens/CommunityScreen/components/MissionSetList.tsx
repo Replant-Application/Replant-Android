@@ -7,21 +7,19 @@ import React from 'react';
 import {
   View,
   Text,
-  StyleSheet,
   ScrollView,
   TouchableOpacity,
   TextInput,
   Image,
   RefreshControl,
-  Platform,
 } from 'react-native';
 import { NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../../types/navigation';
 import { MissionSetSimple } from '../../../api/todolistApi';
 import { Loading, EmptyState } from '../../../components/ui';
-import { colors, spacing, typography, borderRadius } from '../../../utils/designTokens';
-import { getOptimizedLineHeight } from '../../../utils/textStyles';
+import { colors } from '../../../utils/designTokens';
 import { SCREEN_NAMES } from '../../../utils/constants';
+import { styles } from './MissionSetList.styles';
 
 interface MissionSetListProps {
   missionSets: MissionSetSimple[];
@@ -166,172 +164,5 @@ const MissionSetList: React.FC<MissionSetListProps> = ({
     </>
   );
 };
-
-const styles = StyleSheet.create({
-  filterContainer: {
-    paddingHorizontal: spacing[4],
-    paddingTop: spacing[3],
-    paddingBottom: spacing[2],
-    backgroundColor: colors.background.primary,
-  },
-  searchRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing[3],
-  },
-  searchContainer: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.gray[100],
-    borderRadius: borderRadius.md,
-    paddingHorizontal: spacing[3],
-    paddingVertical: spacing[2],
-    borderWidth: 1,
-    borderColor: colors.gray[300],
-  },
-  searchIcon: {
-    width: 20,
-    height: 20,
-    marginRight: spacing[2],
-    tintColor: colors.text.tertiary,
-  },
-  searchInput: {
-    flex: 1,
-    fontSize: typography.fontSize.base,
-    color: colors.text.primary,
-    fontFamily: typography.fontFamily.regular,
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
-  },
-  filterButton: {
-    width: 44,
-    height: 44,
-    borderRadius: borderRadius.md,
-    backgroundColor: colors.gray[100],
-    borderWidth: 1,
-    borderColor: colors.gray[300],
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  filterIcon: {
-    width: 20,
-    height: 20,
-    tintColor: colors.text.secondary,
-  },
-  content: {
-    flex: 1,
-  },
-  missionSetList: {
-    padding: spacing[4],
-    gap: spacing[3],
-  },
-  missionSetCard: {
-    backgroundColor: colors.background.primary,
-    borderRadius: borderRadius.lg,
-    padding: spacing[4],
-    borderWidth: 1,
-    borderColor: colors.gray[200],
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  missionSetCardHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: spacing[2],
-  },
-  missionSetTitle: {
-    flex: 1,
-    fontSize: typography.fontSize.lg,
-    fontWeight: typography.fontWeight.semibold,
-    color: colors.text.primary,
-    fontFamily: typography.fontFamily.regular,
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.lg),
-    marginRight: spacing[2],
-  },
-  copyButton: {
-    paddingHorizontal: spacing[3],
-    paddingVertical: spacing[2],
-    borderRadius: borderRadius.md,
-    backgroundColor: colors.primary[500],
-  },
-  copyButtonText: {
-    fontSize: typography.fontSize.sm,
-    fontWeight: typography.fontWeight.medium,
-    color: colors.white,
-    fontFamily: typography.fontFamily.regular,
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
-  },
-  missionSetDescription: {
-    fontSize: typography.fontSize.base,
-    color: colors.text.secondary,
-    fontFamily: typography.fontFamily.regular,
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
-    marginBottom: spacing[3],
-  },
-  missionSetMeta: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: spacing[2],
-  },
-  metaText: {
-    fontSize: typography.fontSize.sm,
-    color: colors.text.tertiary,
-    fontFamily: typography.fontFamily.regular,
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
-  },
-  metaDot: {
-    fontSize: typography.fontSize.sm,
-    color: colors.text.tertiary,
-    marginHorizontal: spacing[2],
-  },
-  missionSetFooter: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  ratingContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing[1],
-  },
-  stars: {
-    fontSize: typography.fontSize.sm,
-    color: colors.warning,
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-  },
-  ratingText: {
-    fontSize: typography.fontSize.xs,
-    color: colors.text.secondary,
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
-  },
-  addedCount: {
-    fontSize: typography.fontSize.xs,
-    color: colors.text.tertiary,
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
-  },
-});
 
 export default MissionSetList;

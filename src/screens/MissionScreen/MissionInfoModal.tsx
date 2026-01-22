@@ -4,11 +4,10 @@
  */
 
 import React from 'react';
-import { View, Text, StyleSheet, Modal, ScrollView, TouchableOpacity, Image, Platform } from 'react-native';
+import { View, Text, Modal, ScrollView, TouchableOpacity, Image } from 'react-native';
 import { NavigationProp } from '@react-navigation/native';
-import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
-import { getOptimizedLineHeight } from '../../utils/textStyles';
 import { MissionCategory } from '../../api/missionApi';
+import { styles } from './MissionInfoModal.styles';
 
 // 미션 도감용 통합 미션 타입
 interface UnifiedMission {
@@ -161,118 +160,5 @@ const MissionInfoModal: React.FC<MissionInfoModalProps> = ({
     </Modal>
   );
 };
-
-const styles = StyleSheet.create({
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalContainer: {
-    width: '90%',
-    maxWidth: 400,
-    maxHeight: '80%',
-    backgroundColor: colors.background.primary,
-    borderRadius: borderRadius.xl,
-    padding: spacing[5],
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: spacing[4],
-    paddingBottom: spacing[3],
-    borderBottomWidth: 1,
-    borderBottomColor: colors.gray[200],
-  },
-  modalTitle: {
-    fontSize: typography.fontSize.xl,
-    fontWeight: typography.fontWeight.medium,
-    color: colors.text.primary,
-    fontFamily: Platform.select({ 
-      ios: typography.fontFamily.regular, 
-      android: typography.fontFamily.regular 
-    }),
-    includeFontPadding: false,
-  },
-  modalCloseButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: colors.gray[100],
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalCloseButtonText: {
-    fontSize: 20,
-    color: colors.text.secondary,
-    fontWeight: typography.fontWeight.medium,
-  },
-  modalContent: {
-    maxHeight: 400,
-  },
-  modalDetailRow: {
-    marginBottom: spacing[4],
-  },
-  modalDetailLabel: {
-    fontSize: typography.fontSize.sm,
-    fontWeight: typography.fontWeight.medium,
-    color: colors.text.secondary,
-    marginBottom: spacing[1],
-    fontFamily: Platform.select({ 
-      ios: typography.fontFamily.regular, 
-      android: typography.fontFamily.regular 
-    }),
-    includeFontPadding: false,
-  },
-  modalDetailValue: {
-    fontSize: typography.fontSize.base,
-    color: colors.text.primary,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
-    fontFamily: Platform.select({ 
-      ios: typography.fontFamily.regular, 
-      android: typography.fontFamily.regular 
-    }),
-    includeFontPadding: false,
-  },
-  modalButtonRow: {
-    flexDirection: 'row',
-    gap: spacing[2],
-    marginTop: spacing[4],
-    alignItems: 'center',
-  },
-  modalDetailButton: {
-    flex: 1,
-    backgroundColor: colors.primary[500],
-    borderRadius: borderRadius.md,
-    paddingVertical: spacing[3],
-    paddingHorizontal: spacing[4],
-    alignItems: 'center',
-  },
-  modalDetailButtonText: {
-    fontSize: typography.fontSize.base,
-    fontWeight: typography.fontWeight.medium,
-    color: colors.white,
-    fontFamily: Platform.select({ 
-      ios: typography.fontFamily.regular, 
-      android: typography.fontFamily.regular 
-    }),
-    includeFontPadding: false,
-  },
-  modalEditButton: {
-    width: 44,
-    height: 44,
-    borderRadius: borderRadius.md,
-    backgroundColor: colors.gray[100],
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalEditIcon: {
-    width: 20,
-    height: 20,
-    tintColor: colors.primary[600],
-  },
-});
 
 export default MissionInfoModal;

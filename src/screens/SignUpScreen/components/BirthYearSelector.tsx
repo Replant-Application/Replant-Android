@@ -3,10 +3,9 @@
  */
 
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
-import { colors, spacing, typography, borderRadius } from '../../../utils/designTokens';
-import { getOptimizedLineHeight } from '../../../utils/textStyles';
+import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
 import { getBirthYears } from '../../../constants/screens/auth';
+import { styles } from './BirthYearSelector.styles';
 
 interface BirthYearSelectorProps {
   birthYear: number | null;
@@ -87,100 +86,5 @@ const BirthYearSelector: React.FC<BirthYearSelectorProps> = ({
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  inputContainer: {
-    marginBottom: spacing[4],
-  },
-  label: {
-    fontSize: typography.fontSize.base,
-    fontWeight: typography.fontWeight.medium,
-    color: colors.text.primary,
-    marginBottom: spacing[2],
-    fontFamily: typography.fontFamily.regular,
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
-  },
-  dropdownButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: colors.background.primary,
-    borderRadius: borderRadius.md,
-    paddingVertical: spacing[3],
-    paddingHorizontal: spacing[4],
-    borderWidth: 1,
-    borderColor: colors.gray[300],
-    minHeight: 48,
-  },
-  dropdownButtonText: {
-    fontSize: typography.fontSize.base,
-    color: colors.text.primary,
-    fontFamily: typography.fontFamily.regular,
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
-  },
-  dropdownPlaceholder: {
-    color: colors.text.tertiary,
-  },
-  dropdownArrow: {
-    fontSize: typography.fontSize.sm,
-    color: colors.text.secondary,
-    marginLeft: spacing[2],
-  },
-  dropdownList: {
-    position: 'absolute',
-    top: '100%',
-    left: 0,
-    right: 0,
-    backgroundColor: colors.background.primary,
-    borderRadius: borderRadius.md,
-    borderWidth: 1,
-    borderColor: colors.gray[300],
-    marginTop: spacing[1],
-    maxHeight: 200,
-    zIndex: 1000,
-    elevation: 5,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-  },
-  dropdownScrollView: {
-    maxHeight: 200,
-  },
-  dropdownListItem: {
-    paddingVertical: spacing[3],
-    paddingHorizontal: spacing[4],
-    borderBottomWidth: 1,
-    borderBottomColor: colors.gray[200],
-  },
-  dropdownListItemFirst: {
-    borderTopLeftRadius: borderRadius.md,
-    borderTopRightRadius: borderRadius.md,
-  },
-  dropdownListItemSelected: {
-    backgroundColor: colors.primary[50],
-  },
-  dropdownListItemText: {
-    fontSize: typography.fontSize.base,
-    color: colors.text.primary,
-    fontFamily: typography.fontFamily.regular,
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
-  },
-  dropdownListItemTextSelected: {
-    color: colors.primary[700],
-    fontWeight: typography.fontWeight.medium,
-  },
-  errorText: {
-    fontSize: typography.fontSize.sm,
-    color: colors.red[500],
-    marginTop: spacing[1],
-    fontFamily: typography.fontFamily.regular,
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
-  },
-});
 
 export default BirthYearSelector;

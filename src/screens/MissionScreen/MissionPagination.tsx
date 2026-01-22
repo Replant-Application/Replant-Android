@@ -4,9 +4,8 @@
  */
 
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, Platform } from 'react-native';
-import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
-import { getOptimizedLineHeight } from '../../utils/textStyles';
+import { View, Text, TouchableOpacity, Image } from 'react-native';
+import { styles } from './MissionPagination.styles';
 
 interface MissionPaginationProps {
   currentPage: number;
@@ -81,71 +80,5 @@ const MissionPagination: React.FC<MissionPaginationProps> = ({
     </>
   );
 };
-
-const styles = StyleSheet.create({
-  paginationContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: spacing[4],
-    gap: spacing[1],
-  },
-  pageArrow: {
-    width: 32,
-    height: 32,
-    borderRadius: borderRadius.full,
-    backgroundColor: colors.primary[100],
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  pageArrowDisabled: {
-    backgroundColor: colors.gray[100],
-  },
-  pageArrowText: {
-    fontSize: typography.fontSize['2xl'],
-    color: colors.primary[600],
-    fontWeight: typography.fontWeight.medium,
-  },
-  pageArrowTextDisabled: {
-    color: colors.gray[400],
-  },
-  pageArrowIcon: {
-    width: 16,
-    height: 16,
-    tintColor: colors.primary[600],
-  },
-  pageArrowIconLeft: {
-    transform: [{ rotate: '180deg' }],
-  },
-  pageArrowIconDisabled: {
-    tintColor: colors.gray[400],
-  },
-  pageIndicators: {
-    flexDirection: 'row',
-    gap: spacing[2],
-  },
-  pageIndicator: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: colors.gray[300],
-  },
-  pageIndicatorActive: {
-    backgroundColor: colors.primary[500],
-    width: 20,
-  },
-  pageInfo: {
-    textAlign: 'center',
-    fontSize: typography.fontSize.sm,
-    color: colors.text.tertiary,
-    marginTop: spacing[2],
-    fontFamily: Platform.select({
-      ios: typography.fontFamily.regular,
-      android: typography.fontFamily.regular,
-    }),
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
-  },
-});
 
 export default MissionPagination;
