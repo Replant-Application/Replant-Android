@@ -239,7 +239,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                     style={styles.todoListHeader}
                     onPress={() => navigation.navigate(SCREEN_NAMES.TODO_LIST as any)}
                     activeOpacity={0.7}
-                    disabled={(activeTodoLists || []).length === 0}
                   >
                     <View style={styles.todoListHeaderLeft}>
                       <Image

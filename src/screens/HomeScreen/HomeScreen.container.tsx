@@ -8,6 +8,7 @@ import { Animated, PanResponder, Dimensions } from 'react-native';
 import { useCharacter } from '../../hooks/useCharacter';
 import { getBackgroundImage } from './HomeScreen.utils';
 import { getActiveTodoLists, getTodoListDetail } from '../../api/todolistApi';
+import { normalizeDate } from '../../utils/dateUtils';
 import { TodoList, TodoMission } from '../../types/todolist';
 import { NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types/navigation';
@@ -104,7 +105,16 @@ export const useHomeScreenContainer = ({ navigation }: HomeScreenContainerProps)
 
           const todayTodoLists = todoListResult.data.filter(todoList => {
             if (!todoList.createdAt) return false;
-            const createdDate = new Date(todoList.createdAt);
+            
+            // 날짜 정규화 (배열 형태 처리)
+            const normalizedDate = normalizeDate(todoList.createdAt);
+            if (!normalizedDate) return false;
+            
+            const createdDate = new Date(normalizedDate);
+            if (isNaN(createdDate.getTime())) {
+              console.warn('[HomeScreen] 잘못된 날짜 형식:', todoList.createdAt);
+              return false;
+            }
             createdDate.setHours(0, 0, 0, 0);
 
             // 오늘 날짜이고 완료되지 않은 투두리스트만
@@ -155,7 +165,17 @@ export const useHomeScreenContainer = ({ navigation }: HomeScreenContainerProps)
                 // 투두리스트가 오늘 생성되었는지 확인
                 const isTodayCreated = (() => {
                   if (!todoListDetail.createdAt) return false;
-                  const createdDate = new Date(todoListDetail.createdAt);
+                  
+                  // 날짜 정규화 (배열 형태 처리)
+                  const normalizedDate = normalizeDate(todoListDetail.createdAt);
+                  if (!normalizedDate) return false;
+                  
+                  const createdDate = new Date(normalizedDate);
+                  if (isNaN(createdDate.getTime())) {
+                    console.warn('[HomeScreen] 잘못된 날짜 형식:', todoListDetail.createdAt);
+                    return false;
+                  }
+                  
                   const today = new Date();
                   return (
                     createdDate.getFullYear() === today.getFullYear() &&
