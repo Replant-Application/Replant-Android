@@ -5,8 +5,7 @@
 
 import { init, track, identify, setUserId as amplitudeSetUserId, Identify, add } from '@amplitude/analytics-react-native';
 import { SessionReplayPlugin, SessionReplayConfig } from '@amplitude/plugin-session-replay-react-native';
-
-const AMPLITUDE_API_KEY = 'de3d2c3b9c4a94952c91e3221fd74bb0';
+import { AMPLITUDE_API_KEY } from '@env';
 
 let isInitialized = false;
 let sessionReplayPlugin: SessionReplayPlugin | null = null;

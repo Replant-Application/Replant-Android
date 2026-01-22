@@ -58,6 +58,9 @@ tmpclaude-*
 # Keystore files
 *.keystore
 
+# Android local properties (contains keystore passwords)
+android/local.properties
+
 # Rules
 .cursor/rules/
 

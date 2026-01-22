@@ -104,10 +104,17 @@ android {
             keyPassword 'android'
         }
         release {
-            storeFile file('replant-release-key.keystore')
-            storePassword 'replant2025'
-            keyAlias 'replant-key'
-            keyPassword 'replant2025'
+            // Load keystore properties from local.properties (not tracked in git)
+            def keystorePropertiesFile = rootProject.file("local.properties")
+            def keystoreProperties = new Properties()
+            if (keystorePropertiesFile.exists()) {
+                keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+            }
+            
+            storeFile file(keystoreProperties['RELEASE_STORE_FILE'] ?: 'replant-release-key.keystore')
+            storePassword keystoreProperties['RELEASE_STORE_PASSWORD'] ?: ''
+            keyAlias keystoreProperties['RELEASE_KEY_ALIAS'] ?: 'replant-key'
+            keyPassword keystoreProperties['RELEASE_KEY_PASSWORD'] ?: ''
         }
     }
     buildTypes {
