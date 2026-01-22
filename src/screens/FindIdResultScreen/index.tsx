@@ -1,9 +1,9 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform, Image } from 'react-native';
 import { Button, Header } from '../../components/ui';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
 import { getOptimizedLineHeight } from '../../utils/textStyles';
-import { SCREEN_NAMES } from '../../utils/constants';
+import { useFindIdResultScreenContainer } from './FindIdResultScreen.container';
 
 interface FindIdResultScreenProps {
   onNavigate: (screen: string, params?: any) => void;
@@ -17,26 +17,12 @@ interface FindIdResultScreenProps {
 const FindIdResultScreen: React.FC<FindIdResultScreenProps> = ({ onNavigate, route }) => {
   const email = route?.params?.email || '';
 
-  // 이메일 마스킹 처리 (이미 마스킹되어 올 수도 있지만, 안전을 위해)
-  const maskEmail = (email: string): string => {
-    if (!email) return '아이디를 찾을 수 없습니다.';
-    const [localPart, domain] = email.split('@');
-    if (!domain) return email;
-    
-    if (localPart.length <= 2) {
-      return `${localPart[0]}***@${domain}`;
-    }
-    return `${localPart.substring(0, 2)}***@${domain}`;
-  };
-
-  const maskedEmail = maskEmail(email);
-
-  // email이 없으면 아이디 찾기 화면으로 돌아가기
-  useEffect(() => {
-    if (!email) {
-      onNavigate(SCREEN_NAMES.FIND_ID as string);
-    }
-  }, [email, onNavigate]);
+  // 비즈니스 로직은 Container에서 처리
+  const { maskedEmail, handleGoBack, handleGoToLogin, handleGoToFindPassword } =
+    useFindIdResultScreenContainer({
+      email,
+      onNavigate,
+    });
 
   return (
     <KeyboardAvoidingView
@@ -47,7 +33,7 @@ const FindIdResultScreen: React.FC<FindIdResultScreenProps> = ({ onNavigate, rou
         title="아이디 찾기"
         leftButton={
           <TouchableOpacity
-            onPress={() => onNavigate(SCREEN_NAMES.FIND_ID as string)}
+            onPress={handleGoBack}
             style={styles.backButton}
           >
             <Image
@@ -85,13 +71,13 @@ const FindIdResultScreen: React.FC<FindIdResultScreenProps> = ({ onNavigate, rou
       <View style={styles.buttonContainer}>
         <Button
           title="로그인하기"
-          onPress={() => onNavigate(SCREEN_NAMES.LOGIN as string)}
+          onPress={handleGoToLogin}
           size="lg"
           style={styles.button}
           textStyle={styles.buttonText}
         />
         <TouchableOpacity
-          onPress={() => onNavigate(SCREEN_NAMES.FIND_PASSWORD as string)}
+          onPress={handleGoToFindPassword}
           style={styles.linkButton}
         >
           <Text style={styles.linkText}>비밀번호 찾기</Text>

@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React from 'react';
 import {
   View,
   Text,
@@ -12,8 +12,7 @@ import {
 } from 'react-native';
 import { spacing, typography, colors, borderRadius } from '../../utils/designTokens';
 import { getOptimizedLineHeight } from '../../utils/textStyles';
-import { SCREEN_NAMES } from '../../utils/constants';
-import { setOnboardingCompleted } from '../../services/onboardingService';
+import { useOnboardingScreenContainer } from './OnboardingScreen.container';
 
 interface OnboardingScreenProps {
   onNavigate: (screen: string) => void;
@@ -54,53 +53,21 @@ const ONBOARDING_SLIDES: OnboardingSlide[] = [
 ];
 
 const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onNavigate }) => {
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const flatListRef = useRef<FlatList>(null);
-  const scrollX = useRef(new Animated.Value(0)).current;
-  const previousScrollOffset = useRef(0);
-
-  const handleSkip = async () => {
-    await setOnboardingCompleted();
-    onNavigate(SCREEN_NAMES.LOGIN as string);
-  };
-
-  const handleStart = async () => {
-    await setOnboardingCompleted();
-    onNavigate(SCREEN_NAMES.LOGIN as string);
-  };
-
-  const handleScroll = Animated.event(
-    [{ nativeEvent: { contentOffset: { x: scrollX } } }],
-    { useNativeDriver: false }
-  );
-
-  const onViewableItemsChanged = useRef(({ viewableItems }: { viewableItems: Array<{ index: number | null }> }) => {
-    if (viewableItems.length > 0 && viewableItems[0].index !== null) {
-      setCurrentIndex(viewableItems[0].index);
-    }
-  }).current;
-
-  const viewabilityConfig = useRef({
-    itemVisiblePercentThreshold: 50,
-  }).current;
-
-  /**
-   * 스크롤이 끝났을 때 마지막 화면에서 오른쪽 스와이프를 했는지 확인하고 자동으로 넘어가기
-   */
-  const handleScrollEnd = (event: any) => {
-    const offsetX = event.nativeEvent.contentOffset.x;
-    const newIndex = Math.round(offsetX / SCREEN_WIDTH);
-    const scrollDirection = offsetX > previousScrollOffset.current ? 'right' : 'left';
-    
-    previousScrollOffset.current = offsetX;
-    
-    // 마지막 화면에서 오른쪽으로 스와이프한 경우에만 자동으로 넘어가기
-    if (newIndex === ONBOARDING_SLIDES.length - 1 && scrollDirection === 'right') {
-      setTimeout(() => {
-        handleStart();
-      }, 500); // 스와이프 애니메이션이 완료될 시간을 주기
-    }
-  };
+  // 비즈니스 로직은 Container에서 처리
+  const {
+    currentIndex,
+    flatListRef,
+    scrollX,
+    handleSkip,
+    handleStart,
+    handleScroll,
+    handleScrollEnd,
+    onViewableItemsChanged,
+    viewabilityConfig,
+  } = useOnboardingScreenContainer({
+    onNavigate,
+    slidesLength: ONBOARDING_SLIDES.length,
+  });
 
   const renderSlide = ({ item }: { item: OnboardingSlide }) => {
     // 투명한 슬라이드 - 배경은 상단에서 처리

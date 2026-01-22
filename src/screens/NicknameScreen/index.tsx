@@ -1,59 +1,25 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, Alert, TouchableOpacity, Platform } from 'react-native';
-import { useUser } from '../../contexts/UserContext';
+import React from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Platform } from 'react-native';
 import { Button, Input, Header } from '../../components/ui';
 import { colors, spacing, typography } from '../../utils/designTokens';
 import { getOptimizedLineHeight } from '../../utils/textStyles';
-import { SCREEN_NAMES } from '../../utils/constants';
+import { useNicknameScreenContainer } from './NicknameScreen.container';
 
 interface NicknameScreenProps {
   onNavigate: (screen: string) => void;
 }
 
 const NicknameScreen: React.FC<NicknameScreenProps> = ({ onNavigate }) => {
-  const { login } = useUser();
-  const [nickname, setNickname] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-
-  // 소셜 로그인 화면으로 돌아가기
-  const handleGoBackToSocialLogin = () => {
-    if (onNavigate) {
-      const loginScreen = SCREEN_NAMES.LOGIN;
-      if (loginScreen) {
-        onNavigate(loginScreen);
-      }
-    }
-  };
-
-  const handleSubmit = async () => {
-    // 닉네임 유효성 검사
-    if (!nickname.trim()) {
-      Alert.alert('오류', '닉네임을 입력해주세요.');
-      return;
-    }
-
-    if (nickname.length < 2) {
-      Alert.alert('오류', '닉네임은 2글자 이상 입력해주세요.');
-      return;
-    }
-
-    if (nickname.length > 20) {
-      Alert.alert('오류', '닉네임은 20글자 이하로 입력해주세요.');
-      return;
-    }
-
-    setIsLoading(true);
-
-    try {
-      // 간단한 로그인 처리 (인증 없이)
-      await login(nickname);
-      // 성공 시 자동으로 홈 화면으로 이동
-    } catch (error) {
-      Alert.alert('오류', (error as Error).message || '로그인 중 오류가 발생했습니다.');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  // 비즈니스 로직은 Container에서 처리
+  const {
+    nickname,
+    setNickname,
+    isLoading,
+    handleGoBackToSocialLogin,
+    handleSubmit,
+  } = useNicknameScreenContainer({
+    onNavigate,
+  });
 
   return (
     <View style={styles.container}>

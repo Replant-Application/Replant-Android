@@ -1,82 +1,22 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Platform, ImageBackground } from 'react-native';
 import Slider from '@react-native-community/slider';
 import { Header } from '../../components/ui';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
 import { getOptimizedLineHeight } from '../../utils/textStyles';
 import { SoundSettingsScreenProps } from '../../types/screens/settings';
-import { saveSoundSettings, loadSoundSettings, getDefaultSoundSettings, SoundSettings } from '../../utils/soundSettings';
-import { backgroundMusicService } from '../../services/backgroundMusicService';
-import { playButtonSound } from '../../utils/soundUtils';
+import { useSoundSettingsScreenContainer } from './SoundSettingsScreen.container';
 
 const SoundSettingsScreen: React.FC<SoundSettingsScreenProps> = ({ navigation }) => {
-  const [settings, setSettings] = useState<SoundSettings>(getDefaultSoundSettings());
-
-  useEffect(() => {
-    loadSettings();
-  }, []);
-
-  const loadSettings = async () => {
-    const loadedSettings = await loadSoundSettings();
-    setSettings(loadedSettings);
-    // 배경음악 서비스에 볼륨 적용
-    await backgroundMusicService.setVolume(loadedSettings.backgroundVolume);
-  };
-
-  const handleEffectMuteToggle = async () => {
-    await playButtonSound();
-    const newVolume = settings.effectVolume === 0 ? 1.0 : 0;
-    const newSettings = { ...settings, effectVolume: newVolume };
-    setSettings(newSettings);
-    await saveSoundSettings(newSettings);
-  };
-
-  const handleBackgroundMuteToggle = async () => {
-    await playButtonSound();
-    const newVolume = settings.backgroundVolume === 0 ? 0.5 : 0;
-    const newSettings = { ...settings, backgroundVolume: newVolume };
-    setSettings(newSettings);
-    await saveSoundSettings(newSettings);
-    await backgroundMusicService.setVolume(newVolume);
-  };
-
-  /**
-   * 볼륨 값 검증 (0.0 ~ 1.0 범위)
-   */
-  const validateVolume = (volume: number): number => {
-    if (volume < 0) return 0;
-    if (volume > 1) return 1;
-    return volume;
-  };
-
-  /**
-   * 효과음 볼륨 변경 핸들러
-   */
-  const handleEffectVolumeChange = async (value: number) => {
-    const validatedVolume = validateVolume(value);
-    const newSettings = { ...settings, effectVolume: validatedVolume };
-    setSettings(newSettings);
-    await saveSoundSettings(newSettings);
-  };
-
-  /**
-   * 배경소리 볼륨 변경 핸들러
-   */
-  const handleBackgroundVolumeChange = async (value: number) => {
-    const validatedVolume = validateVolume(value);
-    const newSettings = { ...settings, backgroundVolume: validatedVolume };
-    setSettings(newSettings);
-    await saveSoundSettings(newSettings);
-    // 실시간으로 배경음악 볼륨 적용
-    await backgroundMusicService.setVolume(validatedVolume);
-  };
-
-  const handleReset = async () => {
-    const defaultSettings = getDefaultSoundSettings();
-    setSettings(defaultSettings);
-    await saveSoundSettings(defaultSettings);
-    await backgroundMusicService.setVolume(defaultSettings.backgroundVolume);
-  };
+  // 비즈니스 로직은 Container에서 처리
+  const {
+    settings,
+    handleEffectMuteToggle,
+    handleBackgroundMuteToggle,
+    handleEffectVolumeChange,
+    handleBackgroundVolumeChange,
+    handleResetWithSound,
+  } = useSoundSettingsScreenContainer();
 
   return (
     <ImageBackground
@@ -175,10 +115,7 @@ const SoundSettingsScreen: React.FC<SoundSettingsScreenProps> = ({ navigation })
         {/* 초기화 버튼 */}
         <TouchableOpacity
           style={styles.resetButton}
-          onPress={async () => {
-            await playButtonSound();
-            await handleReset();
-          }}
+          onPress={handleResetWithSound}
           activeOpacity={0.7}
         >
           <Text style={styles.resetButtonText}>기본값으로 초기화</Text>
