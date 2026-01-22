@@ -17,8 +17,9 @@ import { clearAuthData } from '../../utils/tokenStorage';
 import { apiClient } from '../../api/client';
 import { deleteMyAccount } from '../../api/userApi';
 
-// 앱 버전 정보
-const APP_VERSION = '0.0.41';
+// 앱 버전 정보 (런타임에서 가져오기)
+import { version } from '../../../package.json';
+const APP_VERSION = version;
 
 const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
   const { user, logout, updateNickname } = useUser();
