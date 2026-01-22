@@ -47,7 +47,6 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation }) => {
     setMissionSetSearchQuery,
     setMissionSetSortBy,
     setShowMissionSetFilterModal,
-    handleCopyMissionSet,
     handleOpenShareModal,
     handleShareMissionSet,
     handleHidePost,
@@ -201,7 +200,6 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation }) => {
           onFilterPress={() => setShowMissionSetFilterModal(true)}
           refreshing={refreshing}
           onRefresh={onRefresh}
-          onCopyMissionSet={handleCopyMissionSet}
           renderStars={renderStars}
           navigation={navigation}
         />
@@ -237,7 +235,12 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation }) => {
           accessibilityHint="내 투두리스트를 공유합니다"
           disabled={myMissionSetsLoading}
         >
-          <Text style={styles.fabText}>+</Text>
+          <Image
+            source={require('../../assets/images/pencil.png')}
+            style={styles.fabIconImage}
+            resizeMode="contain"
+            accessibilityElementsHidden={true}
+          />
         </TouchableOpacity>
       )}
 

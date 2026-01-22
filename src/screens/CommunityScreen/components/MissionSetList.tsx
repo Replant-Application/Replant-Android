@@ -19,7 +19,8 @@ import { MissionSetSimple } from '../../../api/todolistApi';
 import { Loading, EmptyState } from '../../../components/ui';
 import { colors } from '../../../utils/designTokens';
 import { SCREEN_NAMES } from '../../../utils/constants';
-import { styles } from './MissionSetList.styles';
+import { styles as missionSetListStyles } from './MissionSetList.styles';
+import { styles as communityStyles } from '../CommunityScreen.styles';
 
 interface MissionSetListProps {
   missionSets: MissionSetSimple[];
@@ -29,7 +30,6 @@ interface MissionSetListProps {
   onFilterPress: () => void;
   refreshing: boolean;
   onRefresh: () => void;
-  onCopyMissionSet: (missionSet: MissionSetSimple) => void;
   renderStars: (rating: number) => string;
   navigation: NavigationProp<RootStackParamList>;
 }
@@ -42,32 +42,34 @@ const MissionSetList: React.FC<MissionSetListProps> = ({
   onFilterPress,
   refreshing,
   onRefresh,
-  onCopyMissionSet,
   renderStars,
   navigation,
 }) => {
   return (
     <>
-      {/* 검색창과 필터 버튼 */}
-      <View style={styles.filterContainer}>
-        <View style={styles.searchRow}>
-          <View style={styles.searchContainer}>
+      {/* 검색창과 필터 버튼 - 전체 게시판과 동일한 스타일 사용 */}
+      <View style={communityStyles.filterContainer}>
+        <View style={communityStyles.searchRow}>
+          <View style={communityStyles.searchContainer}>
             <Image
               source={require('../../../assets/images/search.png')}
-              style={styles.searchIcon}
+              style={communityStyles.searchIcon}
               resizeMode="contain"
-              accessibilityLabel="검색 아이콘"
+              accessibilityElementsHidden={true}
             />
             <TextInput
-              style={styles.searchInput}
+              style={communityStyles.searchInput}
               value={searchQuery}
               onChangeText={onSearchChange}
               placeholder="투두리스트 검색..."
               placeholderTextColor={colors.text.tertiary}
+              accessibilityLabel="투두리스트 검색"
+              accessibilityHint="투두리스트를 검색하려면 입력하세요"
+              allowFontScaling={true}
             />
           </View>
           <TouchableOpacity
-            style={styles.filterButton}
+            style={communityStyles.filterButton}
             onPress={onFilterPress}
             activeOpacity={0.7}
             accessibilityRole="button"
@@ -76,7 +78,7 @@ const MissionSetList: React.FC<MissionSetListProps> = ({
           >
             <Image
               source={require('../../../assets/images/filter.png')}
-              style={styles.filterIcon}
+              style={communityStyles.filterIcon}
               resizeMode="contain"
               accessibilityElementsHidden={true}
             />
@@ -88,7 +90,7 @@ const MissionSetList: React.FC<MissionSetListProps> = ({
         <Loading text="투두리스트를 불러오는 중..." />
       ) : (
         <ScrollView
-          style={styles.content}
+          style={missionSetListStyles.content}
           refreshControl={
             <RefreshControl
               refreshing={refreshing}
@@ -105,53 +107,46 @@ const MissionSetList: React.FC<MissionSetListProps> = ({
               description="다른 사용자들의 투두리스트를 기다려주세요!"
             />
           ) : (
-            <View style={styles.missionSetList}>
+            <View style={missionSetListStyles.missionSetList}>
               {missionSets.map(missionSet => (
                 <TouchableOpacity
                   key={missionSet.id}
-                  style={styles.missionSetCard}
+                  style={missionSetListStyles.missionSetCard}
                   onPress={() => navigation.navigate(SCREEN_NAMES.MISSION_SET_DETAIL as any, { missionSetId: missionSet.id })}
                   activeOpacity={0.7}
                 >
-                  <View style={styles.missionSetCardHeader}>
-                    <Text style={styles.missionSetTitle} numberOfLines={1}>
+                  <View style={missionSetListStyles.missionSetCardHeader}>
+                    <Text style={missionSetListStyles.missionSetTitle} numberOfLines={1}>
                       {missionSet.title}
                     </Text>
-                    <TouchableOpacity
-                      style={styles.copyButton}
-                      onPress={() => onCopyMissionSet(missionSet)}
-                      activeOpacity={0.7}
-                    >
-                      <Text style={styles.copyButtonText}>담기</Text>
-                    </TouchableOpacity>
                   </View>
 
                   {missionSet.description && (
-                    <Text style={styles.missionSetDescription} numberOfLines={2}>
+                    <Text style={missionSetListStyles.missionSetDescription} numberOfLines={2}>
                       {missionSet.description}
                     </Text>
                   )}
 
-                  <View style={styles.missionSetMeta}>
-                    <Text style={styles.metaText}>
+                  <View style={missionSetListStyles.missionSetMeta}>
+                    <Text style={missionSetListStyles.metaText}>
                       by {missionSet.creatorNickname}
                     </Text>
-                    <Text style={styles.metaDot}>·</Text>
-                    <Text style={styles.metaText}>
+                    <Text style={missionSetListStyles.metaDot}>·</Text>
+                    <Text style={missionSetListStyles.metaText}>
                       {missionSet.missionCount}개 미션
                     </Text>
                   </View>
 
-                  <View style={styles.missionSetFooter}>
-                    <View style={styles.ratingContainer}>
-                      <Text style={styles.stars}>
-                        {renderStars(missionSet.averageRating)}
+                  <View style={missionSetListStyles.missionSetFooter}>
+                    <View style={missionSetListStyles.ratingContainer}>
+                      <Text style={missionSetListStyles.stars}>
+                        {renderStars(missionSet.averageRating || 0)}
                       </Text>
-                      <Text style={styles.ratingText}>
-                        {missionSet.averageRating.toFixed(1)}
+                      <Text style={missionSetListStyles.ratingText}>
+                        {(missionSet.averageRating || 0).toFixed(1)}
                       </Text>
                     </View>
-                    <Text style={styles.addedCount}>
+                    <Text style={missionSetListStyles.addedCount}>
                       {missionSet.addedCount}명이 담음
                     </Text>
                   </View>

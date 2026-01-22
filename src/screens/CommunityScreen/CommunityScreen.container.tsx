@@ -11,13 +11,13 @@ import { CommunityPost } from '../../types';
 import { logError } from '../../utils/logger';
 import { getHiddenPosts, hidePost } from '../../utils/hiddenContentStorage';
 import {
-  getMissionSets,
-  searchMissionSets,
-  copyMissionSet,
+  getPublicTodoLists,
+  searchPublicTodoLists,
   getMyMissionSets,
   updateMissionSet,
   MissionSetSimple,
 } from '../../api/todolistApi';
+import { PublicTodoList } from '../../types/todolist';
 import { CommunityScreenProps, CommunityTab, VerificationFilter, PostFilter } from '../../types/screens/community';
 
 export const useCommunityScreenContainer = ({ navigation }: CommunityScreenProps) => {
@@ -99,18 +99,27 @@ export const useCommunityScreenContainer = ({ navigation }: CommunityScreenProps
       setMissionSetLoading(true);
       let result;
       if (debouncedMissionSetSearchQuery.trim()) {
-        result = await searchMissionSets({
-          keyword: debouncedMissionSetSearchQuery,
-          page: 0,
-          size: 50,
-          sortBy: missionSetSortBy,
-        });
+        result = await searchPublicTodoLists(debouncedMissionSetSearchQuery, 0, 50, missionSetSortBy);
       } else {
-        result = await getMissionSets({ page: 0, size: 50, sortBy: missionSetSortBy });
+        result = await getPublicTodoLists(0, 50, missionSetSortBy);
       }
 
       if (result.success && result.data) {
-        setMissionSets(result.data.content);
+        // 백엔드 SimpleResponse를 MissionSetSimple로 변환
+        // 백엔드에서 creatorNickname을 포함하여 반환함
+        const transformed: MissionSetSimple[] = result.data.content.map((todo: any) => ({
+          id: todo.id,
+          title: todo.title,
+          description: todo.description || undefined,
+          creatorId: todo.creatorId || 0,
+          creatorNickname: todo.creatorNickname || '알 수 없음',
+          isPublic: true, // 공개 투두리스트이므로 항상 true
+          missionCount: todo.missionCount || todo.totalCount || 0,
+          addedCount: todo.addedCount || 0,
+          averageRating: todo.averageRating || 0,
+          createdAt: todo.createdAt,
+        }));
+        setMissionSets(transformed);
       }
     } catch (error) {
       logError('미션세트 로딩 실패', error as Error);
@@ -128,30 +137,6 @@ export const useCommunityScreenContainer = ({ navigation }: CommunityScreenProps
     }
   }, [activeTab, loadMissionSets]);
 
-  /**
-   * 미션세트 담기
-   */
-  const handleCopyMissionSet = useCallback(
-    async (missionSet: MissionSetSimple) => {
-      try {
-        const result = await copyMissionSet(missionSet.id);
-        if (result.success) {
-          showSuccess(`"${missionSet.title}" 미션세트를 내 목록에 추가했습니다.`, '담기 완료');
-          setMissionSets(prev =>
-            prev.map(ms => (ms.id === missionSet.id ? { ...ms, addedCount: ms.addedCount + 1 } : ms))
-          );
-        } else {
-          handleApiError(result, 'CommunityScreen.handleCopyMissionSet');
-        }
-      } catch (error) {
-        showError(
-          error instanceof Error ? error : new Error('미션세트를 담는 중 문제가 발생했습니다.'),
-          'CommunityScreen.handleCopyMissionSet'
-        );
-      }
-    },
-    [showSuccess, handleApiError, showError]
-  );
 
   /**
    * 투두리스트 공유 모달 열기
@@ -416,7 +401,6 @@ export const useCommunityScreenContainer = ({ navigation }: CommunityScreenProps
     setMissionSetSortBy,
     setShowMissionSetFilterModal,
     // Handlers
-    handleCopyMissionSet,
     handleOpenShareModal,
     handleShareMissionSet,
     handleHidePost,
