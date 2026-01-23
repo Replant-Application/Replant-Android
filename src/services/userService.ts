@@ -3,8 +3,10 @@ import { logError } from '../utils/logger';
 import { ServiceResult, Character, UserProfile, UserInfoUpdateData, CalendarEvent, CalendarEventData, User, Mission, Diary, CommunityPost } from '../types';
 import { generateUserCharacterName } from '../utils/characterNameGenerator';
 import { getMyInfo } from '../api/userApi';
-import { getUserMissions } from '../api/missionApi';
+import { getMissionHistory } from '../api/missionApi';
 import { getMyBadges } from '../api/badgeApi';
+import { getMyReant } from '../api/reantApi';
+import { getDiaryStats } from '../api/diaryApi';
 
 // 카테고리별 캐릭터 설명
 const getCategoryDescription = (categoryId: string): string => {
@@ -100,32 +102,64 @@ export const getUserProfile = async (nickname: string): Promise<ServiceResult<Us
     // 1. 백엔드 API에서 사용자 기본 정보 가져오기
     const userInfoResult = await getMyInfo();
 
-    // 2. 백엔드 API에서 내 미션 목록 가져오기
-    const missionsResult = await getUserMissions();
-
-    // 3. 백엔드 API에서 뱃지 정보 가져오기
+    // 2. 백엔드 API에서 뱃지 정보 가져오기
     const badgesResult = await getMyBadges();
 
-    // 로컬 캐릭터 정보 로드
+    // 로컬 캐릭터 정보 로드 (폴백용)
     const characters: Character[] = await getData(storageKeys.CHARACTERS) || [];
     const character = characters.length > 0 ? characters[0] : null;
 
-    // 로컬 다이어리 통계
-    const diaries: Diary[] = await getData(storageKeys.DIARIES) || [];
-    const diaryCount = diaries.length;
-
-    // 미션 통계 계산
+    // 3. 완료한 미션 수 계산 (미션 이력 API 사용 - 모든 완료된 미션 포함)
     let completedMissions = 0;
-    let totalExperience = 0;
-
-    if (missionsResult.success && missionsResult.data) {
-      const missionsList = missionsResult.data.content || [];
-      completedMissions = missionsList.filter(m => m.status === 'COMPLETED').length;
+    try {
+      const historyResult = await getMissionHistory({ page: 0, size: 1000 });
+      if (historyResult.success && historyResult.data) {
+        completedMissions = historyResult.data.content.filter(
+          m => m.status === 'COMPLETED'
+        ).length;
+      }
+    } catch (missionError) {
+      // 에러 발생 시 로컬 스토리지 사용 (폴백)
+      console.log('미션 이력 조회 실패, 로컬 스토리지 사용:', missionError);
+      completedMissions = 0;
     }
 
-    // 경험치 계산 (캐릭터 총 경험치 사용)
-    if (character && 'total_experience' in character) {
-      totalExperience = character.total_experience || 0;
+    // 4. 총 경험치 계산 (Reant API 사용 - 백엔드 DB와 동기화)
+    let totalExperience = 0;
+    try {
+      const reantResult = await getMyReant();
+      if (reantResult.success && reantResult.data) {
+        totalExperience = reantResult.data.exp; // 백엔드의 실제 exp 값
+      } else {
+        // API 실패 시 로컬 스토리지 사용 (폴백)
+        if (character && 'total_experience' in character) {
+          totalExperience = character.total_experience || 0;
+        }
+      }
+    } catch (reantError) {
+      // 에러 발생 시 로컬 스토리지 사용 (폴백)
+      console.log('Reant 조회 실패, 로컬 스토리지 사용:', reantError);
+      if (character && 'total_experience' in character) {
+        totalExperience = character.total_experience || 0;
+      }
+    }
+
+    // 5. 작성한 다이어리 수 계산 (다이어리 통계 API 사용 - 백엔드 DB와 동기화)
+    let diaryCount = 0;
+    try {
+      const diaryStatsResult = await getDiaryStats();
+      if (diaryStatsResult.success && diaryStatsResult.data) {
+        diaryCount = diaryStatsResult.data.totalCount; // 백엔드의 실제 count
+      } else {
+        // API 실패 시 로컬 스토리지 사용 (폴백)
+        const diaries: Diary[] = await getData(storageKeys.DIARIES) || [];
+        diaryCount = diaries.length;
+      }
+    } catch (diaryError) {
+      // 에러 발생 시 로컬 스토리지에서 가져오기 (폴백)
+      console.log('다이어리 통계 조회 실패, 로컬 스토리지 사용:', diaryError);
+      const diaries: Diary[] = await getData(storageKeys.DIARIES) || [];
+      diaryCount = diaries.length;
     }
 
     // 프로필 닉네임 및 사용자 ID 가져오기
