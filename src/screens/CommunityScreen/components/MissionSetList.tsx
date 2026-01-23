@@ -144,10 +144,10 @@ const MissionSetList: React.FC<MissionSetListProps> = ({
                       <Text style={missionSetListStyles.stars}>
                         {renderStars(missionSet.averageRating || 0)}
                       </Text>
+                      <Text style={missionSetListStyles.reviewCount}>
+                        ({missionSet.addedCount || 0})
+                      </Text>
                     </View>
-                    <Text style={missionSetListStyles.addedCount}>
-                      {missionSet.addedCount}명이 담음
-                    </Text>
                   </View>
                 </TouchableOpacity>
               ))}

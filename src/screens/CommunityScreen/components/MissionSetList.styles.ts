@@ -127,9 +127,10 @@ export const styles = StyleSheet.create({
   ratingText: {
     ...createSecondaryTextStyle('xs'),
   },
-  addedCount: {
-    ...createSecondaryTextStyle('xs', {
+  reviewCount: {
+    ...createTextStyle('sm', {
       color: colors.text.tertiary,
+      marginLeft: spacing[1],
     }),
   },
 });
