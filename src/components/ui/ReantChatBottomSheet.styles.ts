@@ -58,7 +58,8 @@ export const styles = StyleSheet.create({
     minHeight: 150,
   },
   messagesList: {
-    padding: spacing[4],
+    paddingHorizontal: spacing[2],
+    paddingTop: spacing[4],
     paddingBottom: spacing[2],
   },
   emptyContainer: {
@@ -75,7 +76,10 @@ export const styles = StyleSheet.create({
   userMessageContainer: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
+    alignItems: 'flex-start',
     marginBottom: spacing[3],
+    paddingHorizontal: spacing[2],
+    width: '100%',
   },
   userMessageBubble: {
     maxWidth: '75%',
@@ -117,20 +121,21 @@ export const styles = StyleSheet.create({
   },
   inputContainer: {
     flexDirection: 'row',
-    alignItems: 'flex-end',
+    alignItems: 'center',
     paddingHorizontal: spacing[4],
-    paddingVertical: spacing[3],
+    paddingVertical: spacing[2],
     borderTopWidth: 1,
     borderTopColor: colors.border.light,
     backgroundColor: colors.background.primary,
-    paddingBottom: Platform.OS === 'ios' ? spacing[6] : spacing[3],
+    paddingBottom: Platform.OS === 'ios' ? spacing[4] : spacing[2],
   },
   input: {
     flex: 1,
     backgroundColor: colors.background.secondary,
     borderRadius: borderRadius.lg,
     paddingHorizontal: spacing[4],
-    paddingVertical: spacing[3],
+    paddingVertical: spacing[2],
+    minHeight: 44,
     maxHeight: 100,
     ...createTextStyle('sm', {
       fontWeight: typography.fontWeight.normal,

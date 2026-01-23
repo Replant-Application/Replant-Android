@@ -38,16 +38,15 @@ export const styles = StyleSheet.create({
   speechBubbleImage: {
     width: '100%',
     minHeight: 120,
-    paddingHorizontal: spacing[6],
+    paddingHorizontal: 0,
     paddingVertical: spacing[5],
     justifyContent: 'center',
     alignItems: 'center',
   },
   speechTextContainer: {
     width: '100%',
-    alignItems: 'flex-start',
+    alignItems: 'center',
     justifyContent: 'center',
-    paddingLeft: spacing[12],
   },
   speechText: {
     ...createTextStyle('lg', {
@@ -55,7 +54,7 @@ export const styles = StyleSheet.create({
       color: colors.text.primary,
       lineHeight: getOptimizedLineHeight(typography.fontSize.base),
       letterSpacing: 0,
-      textAlign: 'left',
+      textAlign: 'center',
       width: '100%',
     }),
   },

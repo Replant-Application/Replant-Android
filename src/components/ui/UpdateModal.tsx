@@ -27,6 +27,11 @@ const UpdateModal: React.FC<UpdateModalProps> = ({
   onUpdate,
   onClose,
 }) => {
+  // 강제 업데이트와 선택 업데이트에 따라 다른 메시지 표시
+  const displayMessage = isRequired
+    ? '앱을 계속 사용하려면 업데이트가 필요합니다.\n업데이트 후 다시 시도해주세요.'
+    : message || '더 나은 서비스 이용을 위해 업데이트를 권장합니다.';
+
   return (
     <Modal
       visible={visible}
@@ -37,7 +42,7 @@ const UpdateModal: React.FC<UpdateModalProps> = ({
       <View style={styles.overlay}>
         <View style={styles.modalContainer}>
           <Text style={styles.title}>업데이트 알림</Text>
-          <Text style={styles.message}>{message}</Text>
+          <Text style={styles.message}>{displayMessage}</Text>
           <View style={styles.buttonContainer}>
             {!isRequired && onClose && (
               <TouchableOpacity

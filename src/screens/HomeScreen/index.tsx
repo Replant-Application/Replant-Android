@@ -27,6 +27,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
     showSpeechBubble,
     speechBubbleAnim,
     currentReantMessage,
+    displayedMessage,
     isHeroCollapsed,
     heroHeightAnim,
     MIN_HERO_HEIGHT,
@@ -107,7 +108,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                   >
                     <View style={styles.speechTextContainer}>
                       <Text style={styles.speechText}>
-                        {currentReantMessage || currentCharacter.description || '안녕하세요! 오늘도 화이팅!'}
+                        {displayedMessage || currentCharacter.description || '안녕하세요! 오늘도 화이팅!'}
                       </Text>
                     </View>
                   </ImageBackground>

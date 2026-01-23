@@ -13,6 +13,8 @@ import { TodoList, TodoMission } from '../../types/todolist';
 import { NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types/navigation';
 import { ChatMessage, generateReantResponse, generateMessageId } from '../../utils/reantChatUtils';
+import { getData, setData, getStorageKeys } from '../../services/storage';
+import { useUser } from '../../contexts/UserContext';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -22,6 +24,7 @@ interface HomeScreenContainerProps {
 
 export const useHomeScreenContainer = ({ navigation }: HomeScreenContainerProps) => {
   const { characters, error: characterError } = useCharacter();
+  const { currentNickname } = useUser();
 
   // 배경 이미지 상태 및 애니메이션
   const [backgroundType, setBackgroundType] = useState<'day' | 'night'>(getBackgroundImage());
@@ -39,6 +42,8 @@ export const useHomeScreenContainer = ({ navigation }: HomeScreenContainerProps)
   const [showSpeechBubble, setShowSpeechBubble] = useState(false);
   const speechBubbleAnim = useRef(new Animated.Value(0)).current;
   const [currentReantMessage, setCurrentReantMessage] = useState<string>('');
+  const [displayedMessage, setDisplayedMessage] = useState<string>('');
+  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // 채팅 관련 상태
   const [showChatBottomSheet, setShowChatBottomSheet] = useState(false);
@@ -56,6 +61,7 @@ export const useHomeScreenContainer = ({ navigation }: HomeScreenContainerProps)
   // 진화 모달 상태
   const [showEvolutionModal, setShowEvolutionModal] = useState(false);
   const [previousLevel, setPreviousLevel] = useState<number | null>(null);
+  const [lastSeenLevel, setLastSeenLevel] = useState<number | null>(null);
   const evolutionFadeAnim = useRef(new Animated.Value(0)).current;
 
   // 캐릭터 영역 슬라이딩 상태
@@ -67,14 +73,45 @@ export const useHomeScreenContainer = ({ navigation }: HomeScreenContainerProps)
   const currentCharacter = characters.length > 0 ? characters[0] : null;
 
   /**
+   * 마지막으로 본 레벨 로드 (앱 시작 시)
+   */
+  useEffect(() => {
+    const loadLastSeenLevel = async () => {
+      if (!currentNickname) return;
+      
+      try {
+        const storageKeys = getStorageKeys(currentNickname);
+        const savedLevel = await getData(`${storageKeys.CHARACTERS}_lastSeenLevel`);
+        
+        if (savedLevel !== null && savedLevel !== undefined) {
+          setLastSeenLevel(savedLevel);
+        } else {
+          // 저장된 레벨이 없으면 null로 설정 (나중에 현재 레벨로 초기화)
+          setLastSeenLevel(null);
+        }
+      } catch (error) {
+        console.error('마지막으로 본 레벨 로드 실패:', error);
+        setLastSeenLevel(null);
+      }
+    };
+
+    loadLastSeenLevel();
+  }, [currentNickname]);
+
+  /**
    * 레벨업 감지 및 진화 모달 표시
    */
   useEffect(() => {
     if (currentCharacter && currentCharacter.level) {
       const currentLevel = currentCharacter.level;
 
-      // 이전 레벨이 있고 현재 레벨이 더 높으면 레벨업 발생
-      if (previousLevel !== null && currentLevel > previousLevel) {
+      // 저장된 마지막으로 본 레벨과 비교 (앱을 껐다가 켰을 때도 감지)
+      const shouldShowEvolution = lastSeenLevel !== null && currentLevel > lastSeenLevel;
+      
+      // 또는 세션 내 레벨업 감지 (앱이 켜져 있을 때)
+      const sessionLevelUp = previousLevel !== null && currentLevel > previousLevel;
+
+      if (shouldShowEvolution || sessionLevelUp) {
         // 진화 모달 표시
         setShowEvolutionModal(true);
         Animated.timing(evolutionFadeAnim, {
@@ -84,14 +121,29 @@ export const useHomeScreenContainer = ({ navigation }: HomeScreenContainerProps)
         }).start();
       }
 
-      // 현재 레벨을 이전 레벨로 저장
+      // 현재 레벨을 이전 레벨로 저장 (세션 내 추적용)
       setPreviousLevel(currentLevel);
+
+      // 초기 로드 시 저장된 레벨이 없으면 현재 레벨을 저장
+      if (lastSeenLevel === null && currentNickname) {
+        const saveInitialLevel = async () => {
+          try {
+            const storageKeys = getStorageKeys(currentNickname);
+            await setData(`${storageKeys.CHARACTERS}_lastSeenLevel`, currentLevel);
+            setLastSeenLevel(currentLevel);
+          } catch (error) {
+            console.error('초기 레벨 저장 실패:', error);
+          }
+        };
+        saveInitialLevel();
+      }
     } else if (currentCharacter && !previousLevel) {
       // 초기 로드 시 현재 레벨 저장
-      setPreviousLevel(currentCharacter.level || 1);
+      const initialLevel = currentCharacter.level || 1;
+      setPreviousLevel(initialLevel);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentCharacter?.level, previousLevel]);
+  }, [currentCharacter?.level, previousLevel, lastSeenLevel, currentNickname]);
 
   /**
    * 데이터 로딩 - 각 API 개별적으로 안전하게 처리
@@ -297,32 +349,67 @@ export const useHomeScreenContainer = ({ navigation }: HomeScreenContainerProps)
   }, [backgroundType, fadeAnim]);
 
   /**
+   * 타이핑 애니메이션 효과
+   */
+  useEffect(() => {
+    if (currentReantMessage) {
+      // 기존 타이핑 애니메이션 취소
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
+      
+      // 타이핑 시작
+      setDisplayedMessage('');
+      let currentIndex = 0;
+      
+      const typeNextChar = () => {
+        if (currentIndex < currentReantMessage.length) {
+          setDisplayedMessage(currentReantMessage.substring(0, currentIndex + 1));
+          currentIndex++;
+          typingTimeoutRef.current = setTimeout(typeNextChar, 50); // 한 글자당 50ms
+        }
+      };
+      
+      typeNextChar();
+    } else {
+      setDisplayedMessage('');
+    }
+    
+    return () => {
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
+    };
+  }, [currentReantMessage]);
+
+  /**
    * 캐릭터 클릭 핸들러 - 채팅창 열기
    */
   const handleCharacterPress = useCallback((): void => {
     setCharacterEmotion('happy');
     setShowChatBottomSheet(true);
     
-    // 채팅창이 비어있으면 인사 메시지를 말풍선에만 표시
-    if (chatMessages.length === 0) {
-      const welcomeMessage = generateReantResponse('안녕', currentCharacter?.name || '리앤트', currentCharacter?.level || 1);
-      setCurrentReantMessage(welcomeMessage);
-      setShowSpeechBubble(true);
-      Animated.timing(speechBubbleAnim, {
-        toValue: 1,
-        duration: 300,
-        useNativeDriver: true,
-      }).start();
-    }
-  }, [speechBubbleAnim, chatMessages.length, currentCharacter]);
+    // 채팅창 열 때 이전 메시지 초기화 (일회성 대화)
+    setChatMessages([]);
+    
+    // 인사 메시지를 말풍선에만 표시
+    const welcomeMessage = generateReantResponse('안녕', currentCharacter?.name || '리앤트', currentCharacter?.level || 1);
+    setCurrentReantMessage(welcomeMessage);
+    setShowSpeechBubble(true);
+    Animated.timing(speechBubbleAnim, {
+      toValue: 1,
+      duration: 300,
+      useNativeDriver: true,
+    }).start();
+  }, [speechBubbleAnim, currentCharacter]);
 
   /**
-   * 채팅 메시지 전송 핸들러
+   * 채팅 메시지 전송 핸들러 (일회성 대화)
    */
   const handleSendMessage = useCallback((message: string) => {
     if (!message.trim() || !currentCharacter) return;
 
-    // 사용자 메시지만 채팅창에 추가
+    // 이전 메시지 모두 지우고 새로운 사용자 메시지만 표시 (일회성)
     const userMessage: ChatMessage = {
       id: generateMessageId(),
       type: 'user',
@@ -330,7 +417,8 @@ export const useHomeScreenContainer = ({ navigation }: HomeScreenContainerProps)
       timestamp: new Date(),
     };
 
-    setChatMessages((prev) => [...prev, userMessage]);
+    // 이전 메시지 초기화하고 새로운 메시지만 표시
+    setChatMessages([userMessage]);
 
     // 리앤트 응답 생성 (말풍선에만 표시)
     const reantResponse = generateReantResponse(
@@ -349,16 +437,7 @@ export const useHomeScreenContainer = ({ navigation }: HomeScreenContainerProps)
       useNativeDriver: true,
     }).start();
 
-    // 3초 후 말풍선 자동 숨김
-    setTimeout(() => {
-      Animated.timing(speechBubbleAnim, {
-        toValue: 0,
-        duration: 300,
-        useNativeDriver: true,
-      }).start(() => {
-        setShowSpeechBubble(false);
-      });
-    }, 3000);
+    // 사용자가 다른 입력하기 전까지 말풍선 유지 (자동 숨김 제거)
   }, [currentCharacter, speechBubbleAnim]);
 
   /**
@@ -367,20 +446,33 @@ export const useHomeScreenContainer = ({ navigation }: HomeScreenContainerProps)
   const handleCloseChat = useCallback(() => {
     setShowChatBottomSheet(false);
     setCharacterEmotion('default');
+    // 채팅창을 닫을 때 말풍선도 숨김
+    setShowSpeechBubble(false);
   }, []);
 
   /**
    * 진화 모달 닫기 핸들러
    */
-  const handleEvolutionModalClose = useCallback((): void => {
+  const handleEvolutionModalClose = useCallback(async (): Promise<void> => {
     Animated.timing(evolutionFadeAnim, {
       toValue: 0,
       duration: 300,
       useNativeDriver: true,
-    }).start(() => {
+    }).start(async () => {
       setShowEvolutionModal(false);
+      
+      // 모달을 닫을 때 현재 레벨을 저장 (다음 앱 시작 시 비교용)
+      if (currentCharacter && currentCharacter.level && currentNickname) {
+        try {
+          const storageKeys = getStorageKeys(currentNickname);
+          await setData(`${storageKeys.CHARACTERS}_lastSeenLevel`, currentCharacter.level);
+          setLastSeenLevel(currentCharacter.level);
+        } catch (error) {
+          console.error('마지막으로 본 레벨 저장 실패:', error);
+        }
+      }
     });
-  }, [evolutionFadeAnim]);
+  }, [evolutionFadeAnim, currentCharacter, currentNickname]);
 
   /**
    * 드래그 핸들 클릭 핸들러
@@ -473,6 +565,7 @@ export const useHomeScreenContainer = ({ navigation }: HomeScreenContainerProps)
     showSpeechBubble,
     speechBubbleAnim,
     currentReantMessage,
+    displayedMessage,
     // Chat
     showChatBottomSheet,
     chatMessages,
