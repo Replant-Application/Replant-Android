@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, ActivityIndicator, ViewStyle, TextStyle } from 'react-native';
-import { colors } from '../../utils/designTokens';
+import { colors } from '../../../utils/designTokens';
 import { styles } from './Loading.styles';
 
 interface LoadingProps {

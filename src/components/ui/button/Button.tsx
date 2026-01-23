@@ -15,7 +15,7 @@
 
 import React from 'react';
 import { TouchableOpacity, Text, ActivityIndicator, ViewStyle, TextStyle, TouchableOpacityProps } from 'react-native';
-import { colors } from '../../utils/designTokens';
+import { colors } from '../../../utils/designTokens';
 import { styles } from './Button.styles';
 
 interface ButtonProps extends Omit<TouchableOpacityProps, 'onPress' | 'style'> {

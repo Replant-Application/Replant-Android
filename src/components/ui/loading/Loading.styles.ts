@@ -4,9 +4,9 @@
  */
 
 import { StyleSheet } from 'react-native';
-import { colors, spacing, typography } from '../../utils/designTokens';
-import { createSecondaryTextStyle } from '../../utils/styles/textStyles';
-import { loadingStyles } from '../../utils/styles/componentStyles';
+import { colors, spacing, typography } from '../../../utils/designTokens';
+import { createSecondaryTextStyle } from '../../../utils/styles/textStyles';
+import { loadingStyles } from '../../../utils/styles/componentStyles';
 
 export const styles = StyleSheet.create({
   container: {
