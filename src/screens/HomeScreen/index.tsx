@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Dimensions, ImageBackground, Animated, Modal, Image } from 'react-native';
 import FastImage from 'react-native-fast-image';
 import { Loading, ErrorBoundary, AppHeader } from '../../components/ui';
-import ReantChatBottomSheet from '../../components/ui/ReantChatBottomSheet';
+import { ReantChatBottomSheet } from '../../components/ui';
 import { getCharacterImage } from '../../utils/characterUtils';
 import { HomeScreenProps } from '../../types/screens/home';
 import { SCREEN_NAMES } from '../../utils/constants';

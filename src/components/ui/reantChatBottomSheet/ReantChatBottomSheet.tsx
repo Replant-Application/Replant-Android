@@ -16,9 +16,9 @@ import {
   ImageBackground,
   Animated,
 } from 'react-native';
-import { ChatMessage } from '../../utils/reantChatUtils';
-import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
-import { createTextStyle, createSecondaryTextStyle } from '../../utils/styles/textStyles';
+import { ChatMessage } from '../../../utils/reantChatUtils';
+import { colors, spacing, typography, borderRadius } from '../../../utils/designTokens';
+import { createTextStyle, createSecondaryTextStyle } from '../../../utils/styles/textStyles';
 import { styles } from './ReantChatBottomSheet.styles';
 
 interface ReantChatBottomSheetProps {

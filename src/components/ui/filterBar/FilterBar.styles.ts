@@ -4,9 +4,9 @@
  */
 
 import { StyleSheet, Platform } from 'react-native';
-import { colors, spacing, typography, borderRadius, shadows } from '../../utils/designTokens';
-import { createTextStyle } from '../../utils/styles/textStyles';
-import { filterBarStyles, tabBarStyles } from '../../utils/styles/componentStyles';
+import { colors, spacing, typography, borderRadius, shadows } from '../../../utils/designTokens';
+import { createTextStyle } from '../../../utils/styles/textStyles';
+import { filterBarStyles, tabBarStyles } from '../../../utils/styles/componentStyles';
 
 export const styles = StyleSheet.create({
   // Pill variant (MissionScreen 필터 탭 스타일)

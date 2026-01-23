@@ -4,22 +4,9 @@
  */
 
 import React from 'react';
-import { View, Text, TouchableOpacity, ViewStyle } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
 import { styles } from './FilterBar.styles';
-
-export interface FilterItem {
-  key: string;
-  label: string;
-}
-
-export interface FilterBarProps {
-  filters: FilterItem[];
-  selectedFilter: string;
-  onFilterChange: (key: string) => void;
-  variant?: 'pill' | 'button';
-  containerStyle?: ViewStyle;
-  style?: ViewStyle;
-}
+import { FilterBarProps } from './FilterBar.types';
 
 export const FilterBar: React.FC<FilterBarProps> = ({
   filters,

@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
-import { Card, CircularProgressBar } from './';
+import { Card, CircularProgressBar } from '../';
 import { styles } from './MissionProgressCard.styles';
 
 interface MissionProgressCardProps {

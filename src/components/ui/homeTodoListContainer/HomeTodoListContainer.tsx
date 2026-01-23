@@ -5,15 +5,9 @@
 
 import React from 'react';
 import { View, Text, TouchableOpacity, Image } from 'react-native';
-import { typography } from '../../utils/designTokens';
+import { typography } from '../../../utils/designTokens';
 import { styles } from './HomeTodoListContainer.styles';
-
-export interface HomeTodoListContainerProps {
-  title: string;
-  count: number;
-  onPress?: () => void;
-  children?: React.ReactNode;
-}
+import { HomeTodoListContainerProps } from './HomeTodoListContainer.types';
 
 export const HomeTodoListContainer: React.FC<HomeTodoListContainerProps> = ({
   title,
@@ -33,7 +27,7 @@ export const HomeTodoListContainer: React.FC<HomeTodoListContainerProps> = ({
       <View style={styles.header}>
         <View style={styles.titleRow}>
           <Image 
-            source={require('../../assets/images/list.png')} 
+            source={require('../../../assets/images/list.png')} 
             style={styles.icon} 
             resizeMode="contain" 
             accessibilityLabel="투두리스트 아이콘"

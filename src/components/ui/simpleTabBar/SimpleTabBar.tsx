@@ -1,18 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { styles } from './SimpleTabBar.styles';
-
-export interface SimpleTabItem {
-  key: string;
-  label: string;
-}
-
-export interface SimpleTabBarProps {
-  tabs: SimpleTabItem[];
-  activeTab: string;
-  onTabChange: (key: string) => void;
-  style?: any;
-}
+import { SimpleTabBarProps } from './SimpleTabBar.types';
 
 /**
  * 간단한 탭 바 컴포넌트

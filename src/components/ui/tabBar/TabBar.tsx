@@ -4,23 +4,9 @@
  */
 
 import React from 'react';
-import { View, Text, TouchableOpacity, ViewStyle } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
 import { styles } from './TabBar.styles';
-
-export interface TabItem {
-  key: string;
-  label: string;
-  badge?: number;
-}
-
-export interface TabBarProps {
-  tabs: TabItem[];
-  activeTab: string;
-  onTabChange: (key: string) => void;
-  variant?: 'pill' | 'underline' | 'simple';
-  containerStyle?: ViewStyle;
-  style?: ViewStyle;
-}
+import { TabBarProps } from './TabBar.types';
 
 export const TabBar: React.FC<TabBarProps> = ({
   tabs,
