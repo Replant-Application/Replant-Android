@@ -111,6 +111,7 @@ export const useMissionScreenContainer = ({
   // 미션 목록 페이지네이션 상태
   const [currentMissionPage, setCurrentMissionPage] = useState(0);
   const missionFlatListRef = useRef<FlatList>(null);
+  const savedPageOnFocusRef = useRef<number | null>(null); // 포커스 시 저장된 페이지
 
   /**
    * 현재 사용자 정보 로드
@@ -697,13 +698,13 @@ export const useMissionScreenContainer = ({
   }, [selectedMissionForVerification, loadMissions, activeTab, currentServerPage, loadGroupMissions, showSuccess]);
 
   /**
-   * 초기 마운트 시 나의 미션 로드
+   * 초기 마운트 시 및 activeTab 변경 시 나의 미션 로드
    */
   useEffect(() => {
     if (activeTab === 'myMission') {
       loadMissions();
     }
-  }, []); // 초기 마운트 시 한 번만 실행
+  }, [activeTab, loadMissions]); // activeTab이 변경될 때마다 실행
 
   /**
    * 탭 변경 시 미션 도감 로드
@@ -733,6 +734,8 @@ export const useMissionScreenContainer = ({
     const unsubscribe = navigation.addListener('focus', () => {
       // 미션 목록 새로고침 (투두리스트에서 미션 완료 후 돌아왔을 때 반영)
       if (activeTab === 'myMission') {
+        // 현재 페이지 위치 저장
+        savedPageOnFocusRef.current = currentMissionPage;
         loadMissions();
       } else if (activeTab === 'missionGroup') {
         // 미션 도감도 새로고침 (미션 완료 후 반영)
@@ -744,7 +747,26 @@ export const useMissionScreenContainer = ({
       }
     });
     return unsubscribe;
-  }, [navigation, selectedMissionForVerification, checkVerificationOnReturn, activeTab, loadMissions, currentServerPage, loadGroupMissions]);
+  }, [navigation, selectedMissionForVerification, checkVerificationOnReturn, activeTab, loadMissions, currentServerPage, loadGroupMissions, currentMissionPage]);
+
+  /**
+   * 미션 목록 로드 후 저장된 페이지 위치로 복원
+   */
+  useEffect(() => {
+    if (savedPageOnFocusRef.current !== null && activeTab === 'myMission' && missionPages.length > 0) {
+      const savedPage = savedPageOnFocusRef.current;
+      // 저장된 페이지가 유효한 범위인지 확인
+      if (savedPage >= 0 && savedPage < missionPages.length) {
+        // 다음 틱에서 스크롤 (렌더링 완료 후)
+        setTimeout(() => {
+          goToMissionPage(savedPage);
+          savedPageOnFocusRef.current = null; // 복원 후 초기화
+        }, 100);
+      } else {
+        savedPageOnFocusRef.current = null; // 유효하지 않으면 초기화
+      }
+    }
+  }, [missionPages, activeTab, goToMissionPage]);
 
   /**
    * Pull-to-Refresh 핸들러

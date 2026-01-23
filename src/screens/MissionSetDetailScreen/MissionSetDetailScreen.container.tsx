@@ -12,12 +12,12 @@ import {
   getMissionSetDetail,
   copyMissionSet,
   MissionSetDetail,
-  PublicTodoListDetail,
   createReview,
   updateReview,
   getMyReview,
   MissionSetReview,
 } from '../../api/todolistApi';
+import { PublicTodoListDetail } from '../../types/todolist';
 import { logError } from '../../utils/logger';
 import { useUser } from '../../contexts/UserContext';
 
@@ -37,7 +37,6 @@ export const useMissionSetDetailScreenContainer = ({ navigation, route }: Missio
   // 리뷰 관련 상태
   const [myReview, setMyReview] = useState<MissionSetReview | null>(null);
   const [reviewRating, setReviewRating] = useState(5);
-  const [reviewContent, setReviewContent] = useState('');
   const [submittingReview, setSubmittingReview] = useState(false);
   const [showReviewForm, setShowReviewForm] = useState(false);
 
@@ -60,10 +59,9 @@ export const useMissionSetDetailScreenContainer = ({ navigation, route }: Missio
           creatorNickname: publicDetail.creatorNickname,
           isPublic: true,
           // 백엔드에서 missionCount, addedCount, averageRating를 제공
-          missionCount: publicDetail.missionCount || publicDetail.totalCount || (publicDetail.missions?.length || 0),
+          missionCount: publicDetail.missionCount || (publicDetail.missions?.length || 0),
           addedCount: publicDetail.addedCount || 0,
           averageRating: publicDetail.averageRating || 0,
-          reviewCount: publicDetail.reviewCount || 0,
           // PublicMissionInfo를 MissionSetMission으로 변환
           missions: (publicDetail.missions || []).map((mission, index) => ({
             missionId: mission.missionId,
@@ -96,7 +94,6 @@ export const useMissionSetDetailScreenContainer = ({ navigation, route }: Missio
       if (result.success && result.data && result.data.rating) {
         setMyReview(result.data);
         setReviewRating(result.data.rating);
-        setReviewContent(result.data.content || '');
       } else {
         // 리뷰가 없으면 명시적으로 null로 설정
         console.log('[MissionSetDetail] No review found, setting to null');
@@ -152,7 +149,6 @@ export const useMissionSetDetailScreenContainer = ({ navigation, route }: Missio
     try {
       const reviewData = {
         rating: reviewRating,
-        content: reviewContent.trim() || undefined,
       };
 
       let result;
@@ -179,7 +175,7 @@ export const useMissionSetDetailScreenContainer = ({ navigation, route }: Missio
     } finally {
       setSubmittingReview(false);
     }
-  }, [missionSet, myReview, reviewRating, reviewContent, loadMissionSetDetail]);
+  }, [missionSet, myReview, reviewRating, loadMissionSetDetail]);
 
   /**
    * 별점 렌더링
@@ -210,11 +206,9 @@ export const useMissionSetDetailScreenContainer = ({ navigation, route }: Missio
     // 기존 리뷰가 있으면 그 값으로 폼 초기화
     if (myReview && myReview.rating) {
       setReviewRating(myReview.rating);
-      setReviewContent(myReview.content || '');
     } else {
       // 리뷰가 없으면 기본값으로 초기화
       setReviewRating(5);
-      setReviewContent('');
     }
     setShowReviewForm(true);
   }, [myReview]);
@@ -241,13 +235,11 @@ export const useMissionSetDetailScreenContainer = ({ navigation, route }: Missio
     loading,
     copying,
     reviewRating,
-    reviewContent,
     submittingReview,
     showReviewForm,
     isOwner,
     // Setters
     setReviewRating,
-    setReviewContent,
     // Handlers
     handleCopy,
     handleSubmitReview,

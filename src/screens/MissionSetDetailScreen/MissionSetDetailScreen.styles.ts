@@ -183,7 +183,7 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     gap: spacing[2],
-    marginBottom: spacing[3],
+    marginBottom: spacing[5],
   },
   ratingStar: {
     fontSize: 32,
@@ -208,7 +208,7 @@ export const styles = StyleSheet.create({
   cancelButton: {
     ...buttonStyles.secondary(),
     flex: 1,
-    paddingVertical: spacing[3],
+    paddingVertical: spacing[2],
   },
   cancelButtonText: {
     ...createButtonTextStyle('sm', {
@@ -218,7 +218,7 @@ export const styles = StyleSheet.create({
   submitButton: {
     ...buttonStyles.primary(),
     flex: 1,
-    paddingVertical: spacing[3],
+    paddingVertical: spacing[2],
   },
   submitButtonDisabled: {
     backgroundColor: colors.gray[300],

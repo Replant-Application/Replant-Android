@@ -25,7 +25,7 @@ export const useCommunityScreenContainer = ({ navigation, route }: CommunityScre
   const { showError, showSuccess, showInfo, handleApiError } = useErrorHandler();
 
   // route.params에서 activeTab을 가져오거나 기본값 'all' 사용
-  const initialTab = (route?.params?.activeTab || 'all') as CommunityTab;
+  const initialTab = ((route?.params as any)?.activeTab || 'all') as CommunityTab;
 
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState<'all' | 'popular'>('all');
@@ -89,10 +89,11 @@ export const useCommunityScreenContainer = ({ navigation, route }: CommunityScre
    * 커스텀 네비게이션을 사용하므로 useEffect만 사용
    */
   useEffect(() => {
-    if (route?.params?.activeTab) {
-      setActiveTab(route.params.activeTab as CommunityTab);
+    const params = route?.params as any;
+    if (params?.activeTab) {
+      setActiveTab(params.activeTab as CommunityTab);
     }
-  }, [route?.params?.activeTab]);
+  }, [route?.params]);
 
   /**
    * 미션세트 검색어 디바운싱

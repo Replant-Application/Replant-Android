@@ -50,10 +50,15 @@ export const useCommunity = (): UseCommunityReturn => {
     }
   }, [currentNickname]);
 
-  // 초기 로드
+  // 초기 로드 및 currentNickname 변경 시 로드
   useEffect(() => {
-    loadPosts();
-  }, [loadPosts]);
+    if (currentNickname) {
+      loadPosts();
+    } else {
+      // currentNickname이 없으면 로딩 상태를 false로 설정 (무한 로딩 방지)
+      setLoading(false);
+    }
+  }, [loadPosts, currentNickname]);
 
   // 게시글 생성
   const createPost = useCallback(

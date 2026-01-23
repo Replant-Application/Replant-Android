@@ -151,14 +151,12 @@ export interface TodoListReview {
   userId: number;
   userNickname: string;
   rating: number;
-  content: string | null;
   createdAt: string;
   updatedAt: string;
 }
 
 export interface ReviewRequest {
   rating: number;
-  content?: string;
 }
 
 export interface PageResponse<T> {

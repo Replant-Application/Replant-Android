@@ -10,7 +10,6 @@ import {
   ScrollView,
   TouchableOpacity,
   ImageBackground,
-  TextInput,
 } from 'react-native';
 import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types/navigation';
@@ -33,12 +32,10 @@ const MissionSetDetailScreen: React.FC<MissionSetDetailScreenProps> = ({ navigat
     loading,
     copying,
     reviewRating,
-    reviewContent,
     submittingReview,
     showReviewForm,
     isOwner,
     setReviewRating,
-    setReviewContent,
     handleSubmitReview,
     handleOpenReviewForm,
     handleCloseReviewForm,
@@ -128,7 +125,7 @@ const MissionSetDetailScreen: React.FC<MissionSetDetailScreenProps> = ({ navigat
         </View>
 
         {/* 리뷰 섹션 */}
-        {!isOwner && missionSet.isPublic && (
+        {!isOwner && (missionSet as any).isPublic && (
           <View style={styles.reviewSection}>
             <Text style={styles.sectionTitle}>리뷰</Text>
 
@@ -136,15 +133,6 @@ const MissionSetDetailScreen: React.FC<MissionSetDetailScreenProps> = ({ navigat
               <View style={styles.reviewFormCard}>
                 <Text style={styles.reviewFormLabel}>별점을 선택해주세요</Text>
                 <RatingSelector rating={reviewRating} onRatingChange={setReviewRating} />
-                <TextInput
-                  style={styles.reviewInput}
-                  placeholder="리뷰를 작성해주세요 (선택)"
-                  placeholderTextColor={colors.text.tertiary}
-                  value={reviewContent}
-                  onChangeText={setReviewContent}
-                  multiline
-                  maxLength={200}
-                />
                 <View style={styles.reviewFormButtons}>
                   <TouchableOpacity
                     style={styles.cancelButton}
@@ -156,7 +144,7 @@ const MissionSetDetailScreen: React.FC<MissionSetDetailScreenProps> = ({ navigat
                   <TouchableOpacity
                     style={[styles.submitButton, submittingReview && styles.submitButtonDisabled]}
                     onPress={handleSubmitReview}
-                    disabled={submittingReview}
+                    disabled={submittingReview || !reviewRating}
                     activeOpacity={0.7}
                   >
                     <Text style={styles.submitButtonText}>
@@ -181,9 +169,6 @@ const MissionSetDetailScreen: React.FC<MissionSetDetailScreenProps> = ({ navigat
                   <Text style={styles.myReviewLabel}>내 리뷰</Text>
                   <Text style={styles.myReviewStars}>{renderStars(myReview.rating)}</Text>
                 </View>
-                {myReview.content && (
-                  <Text style={styles.myReviewContent} pointerEvents="none">{myReview.content}</Text>
-                )}
               </TouchableOpacity>
             ) : (
               <TouchableOpacity
