@@ -78,8 +78,8 @@ const MissionSetDetailScreen: React.FC<MissionSetDetailScreenProps> = ({ navigat
 
           <View style={styles.statsRow}>
             <View style={styles.ratingContainer}>
-              <Text style={styles.stars}>{renderStars(missionSet.averageRating)}</Text>
-              <Text style={styles.ratingText}>{missionSet.averageRating.toFixed(1)}</Text>
+              <Text style={styles.stars}>{renderStars(missionSet.averageRating || 0)}</Text>
+              <Text style={styles.ratingText}>{(missionSet.averageRating || 0).toFixed(1)}</Text>
             </View>
             <Text style={styles.addedCount}>{missionSet.addedCount}명이 담음</Text>
           </View>

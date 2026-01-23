@@ -201,10 +201,10 @@ const MissionSetListScreen: React.FC<MissionSetListScreenProps> = ({ navigation 
                     </View>
                     <View style={styles.ratingContainer}>
                       <Text style={styles.stars}>
-                        {renderStars(todoList.averageRating)}
+                        {renderStars(todoList.averageRating || 0)}
                       </Text>
                       <Text style={styles.ratingText}>
-                        {todoList.averageRating.toFixed(1)}
+                        {(todoList.averageRating || 0).toFixed(1)}
                       </Text>
                     </View>
                   </View>
@@ -220,7 +220,7 @@ const MissionSetListScreen: React.FC<MissionSetListScreenProps> = ({ navigation 
         {/* 공유 모달 */}
         <Modal
           visible={shareModalVisible}
-          animationType="slide"
+          animationType="fade"
           transparent={true}
           onRequestClose={closeShareModal}
         >
@@ -240,7 +240,7 @@ const MissionSetListScreen: React.FC<MissionSetListScreenProps> = ({ navigation 
               ) : myTodoLists.length === 0 ? (
                 <View style={styles.modalEmpty}>
                   <Text style={styles.modalEmptyText}>공유할 수 있는 투두리스트가 없습니다.</Text>
-                  <Text style={styles.modalEmptySubText}>비공개 투두리스트를 먼저 만들어주세요.</Text>
+                  <Text style={styles.modalEmptySubText}>투두리스트를 먼저 만들어주세요.</Text>
                 </View>
               ) : (
                 <FlatList
@@ -267,9 +267,16 @@ const MissionSetListScreen: React.FC<MissionSetListScreenProps> = ({ navigation 
                               {item.description}
                             </Text>
                           )}
-                          <Text style={styles.modalItemMissionCount}>
-                            {item.totalCount}개 미션
-                          </Text>
+                          <View style={styles.modalItemInfoRow}>
+                            <Text style={styles.modalItemMissionCount}>
+                              {item.totalCount}개 미션
+                            </Text>
+                            {item.status === 'COMPLETED' && (
+                              <View style={styles.completedBadge}>
+                                <Text style={styles.completedBadgeText}>완료</Text>
+                              </View>
+                            )}
+                          </View>
                         </View>
                       </View>
                       <Image

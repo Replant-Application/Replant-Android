@@ -177,6 +177,23 @@ export const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border.light,
   },
+  filterOptionRow: {
+    flexDirection: 'row',
+    gap: spacing[2],
+    marginBottom: spacing[2],
+  },
+  filterOptionHorizontal: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: spacing[3],
+    paddingHorizontal: spacing[3],
+    borderRadius: borderRadius.base,
+    backgroundColor: colors.white,
+    borderWidth: 1,
+    borderColor: colors.border.light,
+  },
   filterOptionActive: {
     backgroundColor: colors.primary[50],
     borderColor: colors.primary[500],

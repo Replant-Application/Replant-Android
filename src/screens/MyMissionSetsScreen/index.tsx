@@ -187,10 +187,10 @@ const MyMissionSetsScreen: React.FC<MyMissionSetsScreenProps> = ({ navigation })
                     {missionSet.isPublic && (
                       <View style={styles.ratingContainer}>
                         <Text style={styles.stars}>
-                          {renderStars(missionSet.averageRating)}
+                          {renderStars(missionSet.averageRating || 0)}
                         </Text>
                         <Text style={styles.ratingText}>
-                          {missionSet.averageRating.toFixed(1)}
+                          {(missionSet.averageRating || 0).toFixed(1)}
                         </Text>
                       </View>
                     )}

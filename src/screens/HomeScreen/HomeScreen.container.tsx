@@ -98,12 +98,24 @@ export const useHomeScreenContainer = ({ navigation }: HomeScreenContainerProps)
       // 투두리스트 로드 (개별 try-catch)
       try {
         const todoListResult = await getActiveTodoLists();
+        console.log('[HomeScreen] getActiveTodoLists 응답:', JSON.stringify(todoListResult, null, 2));
+        
         if (todoListResult?.success && Array.isArray(todoListResult.data)) {
-          // 오늘 날짜의 투두리스트만 필터링
+          console.log('[HomeScreen] 전체 투두리스트 수:', todoListResult.data.length);
+          console.log('[HomeScreen] 전체 투두리스트 데이터:', todoListResult.data.map(tl => ({
+            id: tl.id,
+            title: tl.title,
+            status: tl.status,
+            completedCount: tl.completedCount,
+            totalCount: tl.totalCount
+          })));
+          
+          // 오늘 날짜인 투두리스트만 "진행중"에 표시 (TodoListScreen과 동일한 로직)
+          // 과거 날짜의 미완료 투두리스트는 제외
           const today = new Date();
           today.setHours(0, 0, 0, 0);
 
-          const todayTodoLists = todoListResult.data.filter(todoList => {
+          const activeTodoLists = todoListResult.data.filter(todoList => {
             if (!todoList.createdAt) return false;
             
             // 날짜 정규화 (배열 형태 처리)
@@ -119,13 +131,29 @@ export const useHomeScreenContainer = ({ navigation }: HomeScreenContainerProps)
 
             // 오늘 날짜이고 완료되지 않은 투두리스트만
             const isToday = createdDate.getTime() === today.getTime();
-            const isNotCompleted =
-              todoList.status === 'ACTIVE' && todoList.completedCount < todoList.totalCount;
+            const isNotCompleted = todoList.status === 'ACTIVE' && todoList.completedCount < todoList.totalCount;
+
+            console.log(`[HomeScreen] 투두리스트 ${todoList.id} 필터링:`, {
+              title: todoList.title,
+              createdAt: todoList.createdAt,
+              normalizedDate,
+              createdDate: createdDate.toISOString(),
+              isToday,
+              isNotCompleted,
+              matches: isToday && isNotCompleted
+            });
 
             return isToday && isNotCompleted;
           });
 
-          setActiveTodoLists(todayTodoLists);
+          console.log('[HomeScreen] 필터링 후 진행중 투두리스트 수:', activeTodoLists.length);
+          console.log('[HomeScreen] 필터링된 투두리스트:', activeTodoLists.map(tl => ({
+            id: tl.id,
+            title: tl.title,
+            completedCount: tl.completedCount,
+            totalCount: tl.totalCount
+          })));
+          setActiveTodoLists(activeTodoLists);
 
           // 각 투두리스트의 상세 정보를 가져와서 미션 추출 및 완료 확인
           const missionsByTime = new Map<
@@ -133,7 +161,7 @@ export const useHomeScreenContainer = ({ navigation }: HomeScreenContainerProps)
             { mission: TodoMission; todoListTitle: string }[]
           >();
 
-          for (const todoList of todayTodoLists) {
+          for (const todoList of activeTodoLists) {
             try {
               const detailResult = await getTodoListDetail(todoList.id);
               if (detailResult?.success && detailResult.data) {
@@ -186,6 +214,12 @@ export const useHomeScreenContainer = ({ navigation }: HomeScreenContainerProps)
 
                 // 모든 미션이 완료되었고 오늘 생성된 투두리스트인 경우 완료 상태 저장
                 if (allMissionsCompleted && isTodayCreated) {
+                  console.log('[HomeScreen] 완료된 투두리스트 감지:', {
+                    id: todoListDetail.id,
+                    title: todoListDetail.title,
+                    allMissionsCompleted,
+                    isTodayCreated
+                  });
                   setCompletedTodoList(todoListDetail);
                   break; // 하나만 표시
                 }

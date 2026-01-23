@@ -262,69 +262,73 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation }) => {
             
             {/* 정렬 옵션 */}
             <Text style={styles.modalSectionTitle}>정렬</Text>
-            {FILTER_OPTIONS.map((option) => (
-              <TouchableOpacity
-                key={option.value}
-                style={[
-                  styles.filterOption,
-                  filter === option.value && styles.filterOptionActive,
-                ]}
-                onPress={() => {
-                  setFilter(option.value);
-                }}
-                activeOpacity={0.7}
-                accessibilityRole="button"
-                accessibilityLabel={option.label}
-                accessibilityState={{ selected: filter === option.value }}
-              >
-                <Text
+            <View style={styles.filterOptionRow}>
+              {FILTER_OPTIONS.map((option) => (
+                <TouchableOpacity
+                  key={option.value}
                   style={[
-                    styles.filterOptionText,
-                    filter === option.value && styles.filterOptionTextActive,
+                    styles.filterOptionHorizontal,
+                    filter === option.value && styles.filterOptionActive,
                   ]}
+                  onPress={() => {
+                    setFilter(option.value);
+                  }}
+                  activeOpacity={0.7}
+                  accessibilityRole="button"
+                  accessibilityLabel={option.label}
+                  accessibilityState={{ selected: filter === option.value }}
                 >
-                  {option.label}
-                </Text>
-                {filter === option.value && (
-                  <Text style={styles.filterOptionCheck} accessibilityElementsHidden={true}>✓</Text>
-                )}
-              </TouchableOpacity>
-            ))}
+                  <Text
+                    style={[
+                      styles.filterOptionText,
+                      filter === option.value && styles.filterOptionTextActive,
+                    ]}
+                  >
+                    {option.label}
+                  </Text>
+                  {filter === option.value && (
+                    <Text style={styles.filterOptionCheck} accessibilityElementsHidden={true}>✓</Text>
+                  )}
+                </TouchableOpacity>
+              ))}
+            </View>
 
             {/* 인증 상태 필터 */}
             <Text style={styles.modalSectionTitle}>인증 상태</Text>
-            {[
-              { key: 'all', label: '전체' },
-              { key: 'pending', label: '인증대기' },
-              { key: 'approved', label: '인증완료' },
-            ].map((option) => (
-              <TouchableOpacity
-                key={option.key}
-                style={[
-                  styles.filterOption,
-                  verificationFilter === option.key && styles.filterOptionActive,
-                ]}
-                onPress={() => {
-                  setVerificationFilter(option.key as VerificationFilter);
-                }}
-                activeOpacity={0.7}
-                accessibilityRole="button"
-                accessibilityLabel={option.label}
-                accessibilityState={{ selected: verificationFilter === option.key }}
-              >
-                <Text
+            <View style={styles.filterOptionRow}>
+              {[
+                { key: 'all', label: '전체' },
+                { key: 'pending', label: '인증대기' },
+                { key: 'approved', label: '인증완료' },
+              ].map((option) => (
+                <TouchableOpacity
+                  key={option.key}
                   style={[
-                    styles.filterOptionText,
-                    verificationFilter === option.key && styles.filterOptionTextActive,
+                    styles.filterOptionHorizontal,
+                    verificationFilter === option.key && styles.filterOptionActive,
                   ]}
+                  onPress={() => {
+                    setVerificationFilter(option.key as VerificationFilter);
+                  }}
+                  activeOpacity={0.7}
+                  accessibilityRole="button"
+                  accessibilityLabel={option.label}
+                  accessibilityState={{ selected: verificationFilter === option.key }}
                 >
-                  {option.label}
-                </Text>
-                {verificationFilter === option.key && (
-                  <Text style={styles.filterOptionCheck} accessibilityElementsHidden={true}>✓</Text>
-                )}
-              </TouchableOpacity>
-            ))}
+                  <Text
+                    style={[
+                      styles.filterOptionText,
+                      verificationFilter === option.key && styles.filterOptionTextActive,
+                    ]}
+                  >
+                    {option.label}
+                  </Text>
+                  {verificationFilter === option.key && (
+                    <Text style={styles.filterOptionCheck} accessibilityElementsHidden={true}>✓</Text>
+                  )}
+                </TouchableOpacity>
+              ))}
+            </View>
 
             {/* 적용 버튼 */}
             <TouchableOpacity
@@ -357,37 +361,39 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation }) => {
             <Text style={styles.modalTitle}>정렬 선택</Text>
 
             {/* 정렬 옵션 */}
-            {[
-              { value: 'popular', label: '인기순' },
-              { value: 'latest', label: '최신순' },
-            ].map((option) => (
-              <TouchableOpacity
-                key={option.value}
-                style={[
-                  styles.filterOption,
-                  missionSetSortBy === option.value && styles.filterOptionActive,
-                ]}
-                onPress={() => {
-                  setMissionSetSortBy(option.value as 'popular' | 'latest');
-                }}
-                activeOpacity={0.7}
-                accessibilityRole="button"
-                accessibilityLabel={option.label}
-                accessibilityState={{ selected: missionSetSortBy === option.value }}
-              >
-                <Text
+            <View style={styles.filterOptionRow}>
+              {[
+                { value: 'latest', label: '최신순' },
+                { value: 'popular', label: '인기순' },
+              ].map((option) => (
+                <TouchableOpacity
+                  key={option.value}
                   style={[
-                    styles.filterOptionText,
-                    missionSetSortBy === option.value && styles.filterOptionTextActive,
+                    styles.filterOptionHorizontal,
+                    missionSetSortBy === option.value && styles.filterOptionActive,
                   ]}
+                  onPress={() => {
+                    setMissionSetSortBy(option.value as 'popular' | 'latest');
+                  }}
+                  activeOpacity={0.7}
+                  accessibilityRole="button"
+                  accessibilityLabel={option.label}
+                  accessibilityState={{ selected: missionSetSortBy === option.value }}
                 >
-                  {option.label}
-                </Text>
-                {missionSetSortBy === option.value && (
-                  <Text style={styles.filterOptionCheck} accessibilityElementsHidden={true}>✓</Text>
-                )}
-              </TouchableOpacity>
-            ))}
+                  <Text
+                    style={[
+                      styles.filterOptionText,
+                      missionSetSortBy === option.value && styles.filterOptionTextActive,
+                    ]}
+                  >
+                    {option.label}
+                  </Text>
+                  {missionSetSortBy === option.value && (
+                    <Text style={styles.filterOptionCheck} accessibilityElementsHidden={true}>✓</Text>
+                  )}
+                </TouchableOpacity>
+              ))}
+            </View>
 
             {/* 적용 버튼 */}
             <TouchableOpacity

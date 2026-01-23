@@ -10,7 +10,8 @@ import {
   searchPublicTodoLists,
   copyTodoList,
   getShareableTodoLists,
-  shareTodoList
+  shareTodoList,
+  getCompletedTodoLists
 } from '../../api/todolistApi';
 import { PublicTodoList, TodoList } from '../../types/todolist';
 import { logError } from '../../utils/logger';
@@ -88,16 +89,36 @@ export const useMissionSetListScreenContainer = ({
   }, []);
 
   /**
-   * 공유 모달 열기 - 내 투두리스트 로드
+   * 공유 모달 열기 - 내 투두리스트 로드 (완료된 투두리스트 포함)
    */
   const openShareModal = useCallback(async () => {
     setShareModalVisible(true);
     setLoadingMyTodoLists(true);
     try {
-      const result = await getShareableTodoLists();
-      if (result.success && result.data) {
-        setMyTodoLists(result.data);
+      // 공유 가능한 투두리스트와 완료된 투두리스트를 모두 가져와서 합치기
+      const [shareableResult, completedResult] = await Promise.all([
+        getShareableTodoLists(),
+        getCompletedTodoLists(0, 100)
+      ]);
+
+      const allTodoLists: TodoList[] = [];
+      
+      // 공유 가능한 투두리스트 추가
+      if (shareableResult.success && shareableResult.data) {
+        allTodoLists.push(...shareableResult.data);
       }
+      
+      // 완료된 투두리스트 추가 (중복 제거)
+      if (completedResult.success && completedResult.data) {
+        const existingIds = new Set(allTodoLists.map(tl => tl.id));
+        completedResult.data.content.forEach(todoList => {
+          if (!existingIds.has(todoList.id)) {
+            allTodoLists.push(todoList);
+          }
+        });
+      }
+
+      setMyTodoLists(allTodoLists);
     } catch (error) {
       logError('내 투두리스트 로딩 실패', error as Error);
     } finally {

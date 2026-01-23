@@ -252,7 +252,15 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                     <Text style={styles.todoListArrow}>›</Text>
                   </TouchableOpacity>
 
-                  {(activeTodoLists || []).length === 0 ? (
+                  {(() => {
+                    const activeCount = (activeTodoLists || []).length;
+                    console.log('[HomeScreen] 렌더링 조건 체크:', {
+                      activeTodoListsCount: activeCount,
+                      hasCompletedTodoList: !!completedTodoList,
+                      completedTodoListId: completedTodoList?.id
+                    });
+                    return activeCount === 0;
+                  })() ? (
                     <View style={styles.emptyTodoListContainer}>
                       <Text style={styles.emptyTodoListText}>
                         아직 투두리스트가 없어요{'\n'}첫 투두리스트를 만들어볼까요?

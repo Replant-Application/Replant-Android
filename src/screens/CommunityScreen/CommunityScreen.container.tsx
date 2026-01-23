@@ -47,7 +47,7 @@ export const useCommunityScreenContainer = ({ navigation }: CommunityScreenProps
   const [missionSetLoading, setMissionSetLoading] = useState(false);
   const [missionSetSearchQuery, setMissionSetSearchQuery] = useState('');
   const [debouncedMissionSetSearchQuery, setDebouncedMissionSetSearchQuery] = useState('');
-  const [missionSetSortBy, setMissionSetSortBy] = useState<'popular' | 'latest'>('popular');
+  const [missionSetSortBy, setMissionSetSortBy] = useState<'popular' | 'latest'>('latest');
   const [showMissionSetFilterModal, setShowMissionSetFilterModal] = useState(false);
 
   // 투두리스트 공유 모달 관련 상태
@@ -144,12 +144,39 @@ export const useCommunityScreenContainer = ({ navigation }: CommunityScreenProps
   const handleOpenShareModal = useCallback(async () => {
     try {
       setMyMissionSetsLoading(true);
-      const result = await getMyMissionSets({ page: 0, size: 100 });
-      if (result.success && result.data) {
-        setMyMissionSets(result.data.content);
+      // 내 투두리스트와 공개 투두리스트 목록을 동시에 가져옴
+      const [myResult, publicResult] = await Promise.all([
+        getMyMissionSets({ page: 0, size: 100 }),
+        getPublicTodoLists(0, 100, 'latest')
+      ]);
+      
+      if (myResult.success && myResult.data) {
+        // 공개 목록에 포함된 투두리스트 ID 집합 생성
+        const publicTodoListIds = new Set<number>();
+        if (publicResult.success && publicResult.data) {
+          publicResult.data.content.forEach((todo: any) => {
+            publicTodoListIds.add(todo.id);
+          });
+        }
+        
+        // 내 투두리스트를 MissionSetSimple로 변환
+        const transformed: MissionSetSimple[] = myResult.data.content.map((todo: any) => ({
+          id: todo.id,
+          title: todo.title,
+          description: todo.description || undefined,
+          creatorId: todo.creatorId || 0,
+          creatorNickname: todo.creatorNickname || '알 수 없음',
+          isPublic: publicTodoListIds.has(todo.id), // 공개 목록에 포함되어 있으면 true
+          missionCount: todo.totalCount || 0, // totalCount를 missionCount로 사용
+          addedCount: todo.addedCount || 0,
+          averageRating: todo.averageRating || 0,
+          createdAt: todo.createdAt,
+        }));
+        
+        setMyMissionSets(transformed);
         setShowShareModal(true);
       } else {
-        handleApiError(result, 'CommunityScreen.loadMissionSets');
+        handleApiError(myResult, 'CommunityScreen.loadMissionSets');
       }
     } catch (error) {
       showError(

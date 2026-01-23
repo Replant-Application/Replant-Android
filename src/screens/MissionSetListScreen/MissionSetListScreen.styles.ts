@@ -180,14 +180,26 @@ export const styles = StyleSheet.create({
     height: 24,
   },
   modalOverlay: {
-    ...modalStyles.overlayBottomSheet(),
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   modalContent: {
-    ...modalStyles.contentBottomSheet(),
-    borderTopLeftRadius: borderRadius.lg,
-    borderTopRightRadius: borderRadius.lg,
-    maxHeight: '70%',
+    backgroundColor: colors.background.primary,
+    borderRadius: borderRadius.xl,
+    width: '80%',
+    maxWidth: 400,
+    maxHeight: '80%',
     paddingBottom: spacing[6],
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 10,
+    },
+    shadowOpacity: 0.22,
+    shadowRadius: 14,
+    elevation: 18,
   },
   modalHeader: {
     flexDirection: 'row',
@@ -198,7 +210,7 @@ export const styles = StyleSheet.create({
     borderBottomColor: colors.border.light,
   },
   modalTitle: {
-    ...createTitleStyle('lg'),
+    ...createTitleStyle('xl'),
   },
   modalCloseText: {
     ...createTextStyle('base', {
@@ -262,9 +274,28 @@ export const styles = StyleSheet.create({
       marginBottom: spacing[0.5],
     }),
   },
+  modalItemInfoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing[2],
+  },
   modalItemMissionCount: {
     ...createTextStyle('xs', {
       color: colors.text.tertiary,
+    }),
+  },
+  completedBadge: {
+    backgroundColor: colors.primary[100],
+    paddingHorizontal: spacing[2],
+    paddingVertical: spacing[0.5],
+    borderRadius: borderRadius.sm,
+    borderWidth: 1,
+    borderColor: colors.primary[300],
+  },
+  completedBadgeText: {
+    ...createTextStyle('xs', {
+      color: colors.primary[700],
+      fontWeight: typography.fontWeight.medium,
     }),
   },
   modalItemArrow: {
