@@ -13,6 +13,9 @@ export const styles = StyleSheet.create({
     justifyContent: 'center',
     position: 'relative',
   },
+  svg: {
+    position: 'absolute',
+  },
   circle: {
     position: 'absolute',
   },
