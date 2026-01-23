@@ -4,8 +4,8 @@
  */
 
 import { StyleSheet } from 'react-native';
-import { colors, spacing, typography, borderRadius, shadows } from '../../utils/designTokens';
-import { createTextStyle } from '../../utils/styles/textStyles';
+import { colors, spacing, typography, borderRadius, shadows } from '../../../utils/designTokens';
+import { createTextStyle } from '../../../utils/styles/textStyles';
 
 export const styles = StyleSheet.create({
   header: {

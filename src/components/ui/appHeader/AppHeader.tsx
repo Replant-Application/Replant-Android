@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, Image, Modal, Animated } from 'react-native';
 import { NavigationProp } from '@react-navigation/native';
-import { RootStackParamList } from '../../types/navigation';
-import { useOverlay } from '../../contexts/OverlayContext';
-import { loadSoundSettings, saveSoundSettings, SoundSettings } from '../../utils/soundSettings';
-import { backgroundMusicService } from '../../services/backgroundMusicService';
-import { SCREEN_NAMES } from '../../utils/constants';
+import { RootStackParamList } from '../../../types/navigation';
+import { useOverlay } from '../../../contexts/OverlayContext';
+import { loadSoundSettings, saveSoundSettings, SoundSettings } from '../../../utils/soundSettings';
+import { backgroundMusicService } from '../../../services/backgroundMusicService';
+import { SCREEN_NAMES } from '../../../utils/constants';
 import { styles } from './AppHeader.styles';
 
 interface AppHeaderProps {
@@ -122,7 +122,7 @@ const AppHeader: React.FC<AppHeaderProps> = ({ navigation }) => {
         >
           <View style={styles.iconWrapper}>
             <Image
-              source={require('../../assets/images/notification.png')}
+              source={require('../../../assets/images/notification.png')}
               style={styles.iconImage}
               resizeMode="contain"
               accessibilityLabel="알림 아이콘"
@@ -146,7 +146,7 @@ const AppHeader: React.FC<AppHeaderProps> = ({ navigation }) => {
           accessibilityState={{ expanded: menuVisible }}
         >
           <Image
-            source={require('../../assets/images/menu.png')}
+            source={require('../../../assets/images/menu.png')}
             style={styles.menuIcon}
             resizeMode="contain"
             accessibilityLabel="메뉴 아이콘"
@@ -183,7 +183,7 @@ const AppHeader: React.FC<AppHeaderProps> = ({ navigation }) => {
               accessibilityLabel="프로필"
             >
               <Image
-                source={require('../../assets/images/boy.png')}
+                source={require('../../../assets/images/boy.png')}
                 style={styles.menuItemIcon}
                 resizeMode="contain"
                 accessibilityLabel="프로필 아이콘"
@@ -199,7 +199,7 @@ const AppHeader: React.FC<AppHeaderProps> = ({ navigation }) => {
               accessibilityLabel="상담"
             >
               <Image
-                source={require('../../assets/images/hospital.png')}
+                source={require('../../../assets/images/hospital.png')}
                 style={styles.menuItemIcon}
                 resizeMode="contain"
                 accessibilityLabel="상담 아이콘"
@@ -215,7 +215,7 @@ const AppHeader: React.FC<AppHeaderProps> = ({ navigation }) => {
               accessibilityLabel="캘린더"
             >
               <Image
-                source={require('../../assets/images/calendar.png')}
+                source={require('../../../assets/images/calendar.png')}
                 style={styles.menuItemIcon}
                 resizeMode="contain"
                 accessibilityLabel="캘린더 아이콘"
@@ -231,7 +231,7 @@ const AppHeader: React.FC<AppHeaderProps> = ({ navigation }) => {
               accessibilityLabel="사운드 설정"
             >
               <Image
-                source={require('../../assets/images/sound.png')}
+                source={require('../../../assets/images/sound.png')}
                 style={styles.menuItemIcon}
                 resizeMode="contain"
                 accessibilityLabel="사운드 설정 아이콘"
@@ -247,7 +247,7 @@ const AppHeader: React.FC<AppHeaderProps> = ({ navigation }) => {
               accessibilityLabel="돌발 미션 설정"
             >
               <Image
-                source={require('../../assets/images/surprised_mission.png')}
+                source={require('../../../assets/images/surprised_mission.png')}
                 style={styles.menuItemIcon}
                 resizeMode="contain"
                 accessibilityLabel="돌발 미션 설정 아이콘"

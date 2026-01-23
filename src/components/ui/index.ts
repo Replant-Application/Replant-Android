@@ -5,7 +5,7 @@ export type { TextProps } from './text';
 export { default as FAB } from './fab';
 export { default as FormCard } from './formCard';
 export { default as Header } from './header';
-export { default as AppHeader } from './AppHeader';
+export { default as AppHeader } from './appHeader';
 export { default as Input } from './input';
 export { default as Loading } from './loading';
 export { default as EmptyState } from './emptyState';
