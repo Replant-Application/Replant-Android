@@ -125,6 +125,7 @@ const AppHeader: React.FC<AppHeaderProps> = ({ navigation }) => {
               source={require('../../assets/images/notification.png')}
               style={styles.iconImage}
               resizeMode="contain"
+              accessibilityLabel="알림 아이콘"
               accessibilityElementsHidden={true}
             />
             {unreadNotificationCount > 0 && (
@@ -148,6 +149,7 @@ const AppHeader: React.FC<AppHeaderProps> = ({ navigation }) => {
             source={require('../../assets/images/menu.png')}
             style={styles.menuIcon}
             resizeMode="contain"
+            accessibilityLabel="메뉴 아이콘"
             accessibilityElementsHidden={true}
           />
         </TouchableOpacity>
@@ -184,6 +186,7 @@ const AppHeader: React.FC<AppHeaderProps> = ({ navigation }) => {
                 source={require('../../assets/images/boy.png')}
                 style={styles.menuItemIcon}
                 resizeMode="contain"
+                accessibilityLabel="프로필 아이콘"
                 accessibilityElementsHidden={true}
               />
               <Text style={styles.menuItemText}>프로필</Text>
@@ -199,6 +202,7 @@ const AppHeader: React.FC<AppHeaderProps> = ({ navigation }) => {
                 source={require('../../assets/images/hospital.png')}
                 style={styles.menuItemIcon}
                 resizeMode="contain"
+                accessibilityLabel="상담 아이콘"
                 accessibilityElementsHidden={true}
               />
               <Text style={styles.menuItemText}>상담</Text>
@@ -214,6 +218,7 @@ const AppHeader: React.FC<AppHeaderProps> = ({ navigation }) => {
                 source={require('../../assets/images/calendar.png')}
                 style={styles.menuItemIcon}
                 resizeMode="contain"
+                accessibilityLabel="캘린더 아이콘"
                 accessibilityElementsHidden={true}
               />
               <Text style={styles.menuItemText}>캘린더</Text>
@@ -229,6 +234,7 @@ const AppHeader: React.FC<AppHeaderProps> = ({ navigation }) => {
                 source={require('../../assets/images/sound.png')}
                 style={styles.menuItemIcon}
                 resizeMode="contain"
+                accessibilityLabel="사운드 설정 아이콘"
                 accessibilityElementsHidden={true}
               />
               <Text style={styles.menuItemText}>사운드 설정</Text>
@@ -244,6 +250,7 @@ const AppHeader: React.FC<AppHeaderProps> = ({ navigation }) => {
                 source={require('../../assets/images/surprised_mission.png')}
                 style={styles.menuItemIcon}
                 resizeMode="contain"
+                accessibilityLabel="돌발 미션 설정 아이콘"
                 accessibilityElementsHidden={true}
               />
               <Text style={styles.menuItemText}>돌발 미션 설정</Text>

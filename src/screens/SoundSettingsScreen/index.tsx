@@ -52,6 +52,7 @@ const SoundSettingsScreen: React.FC<SoundSettingsScreenProps> = ({ navigation })
                   }
                   style={styles.volumeIcon}
                   resizeMode="contain"
+                  accessibilityLabel={settings.effectVolume === 0 ? "효과음 음소거 아이콘" : "효과음 아이콘"}
                   accessibilityElementsHidden={true}
                 />
               </TouchableOpacity>
@@ -91,6 +92,7 @@ const SoundSettingsScreen: React.FC<SoundSettingsScreenProps> = ({ navigation })
                   }
                   style={styles.volumeIcon}
                   resizeMode="contain"
+                  accessibilityLabel={settings.backgroundVolume === 0 ? "배경소리 음소거 아이콘" : "배경소리 아이콘"}
                   accessibilityElementsHidden={true}
                 />
               </TouchableOpacity>

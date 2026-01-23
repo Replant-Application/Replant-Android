@@ -312,6 +312,7 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
                         source={getNotificationIcon(notification.type) as any}
                         style={styles.notificationIconImage}
                         resizeMode="contain"
+                        accessibilityLabel={`${notification.type} 알림 아이콘`}
                         accessibilityElementsHidden={true}
                       />
                     )}

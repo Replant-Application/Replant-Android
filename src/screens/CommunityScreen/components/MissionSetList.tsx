@@ -55,6 +55,7 @@ const MissionSetList: React.FC<MissionSetListProps> = ({
               source={require('../../../assets/images/search.png')}
               style={communityStyles.searchIcon}
               resizeMode="contain"
+              accessibilityLabel="검색 아이콘"
               accessibilityElementsHidden={true}
             />
             <TextInput
@@ -80,6 +81,7 @@ const MissionSetList: React.FC<MissionSetListProps> = ({
               source={require('../../../assets/images/filter.png')}
               style={communityStyles.filterIcon}
               resizeMode="contain"
+              accessibilityLabel="필터 아이콘"
               accessibilityElementsHidden={true}
             />
           </TouchableOpacity>

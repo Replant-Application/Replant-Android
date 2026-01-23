@@ -248,6 +248,7 @@ const MissionCard: React.FC<MissionCardProps> = ({
                   source={require('../../assets/images/edit.png')}
                   style={styles.reviewIcon}
                   resizeMode="contain"
+                  accessibilityLabel="후기 쓰기 아이콘"
                   accessibilityElementsHidden={true}
                 />
                 <Text style={styles.reviewButtonText}>후기 쓰기</Text>

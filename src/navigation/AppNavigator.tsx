@@ -984,6 +984,7 @@ const AppNavigator = () => {
               currentScreen === SCREEN_NAMES.HOME && styles.tabIconImageActive
             ]}
             resizeMode="contain"
+            accessibilityLabel="홈 아이콘"
             accessibilityElementsHidden={true}
           />
           <Text style={[
@@ -1007,6 +1008,7 @@ const AppNavigator = () => {
               currentScreen === SCREEN_NAMES.MISSION && styles.tabIconImageActive
             ]}
             resizeMode="contain"
+            accessibilityLabel="미션 아이콘"
             accessibilityElementsHidden={true}
           />
           <Text style={[
@@ -1030,6 +1032,7 @@ const AppNavigator = () => {
               currentScreen === SCREEN_NAMES.COMMUNITY && styles.tabIconImageActive
             ]}
             resizeMode="contain"
+            accessibilityLabel="커뮤니티 아이콘"
             accessibilityElementsHidden={true}
           />
           <Text style={[
@@ -1053,6 +1056,7 @@ const AppNavigator = () => {
               currentScreen === SCREEN_NAMES.DIARY && styles.tabIconImageActive
             ]}
             resizeMode="contain"
+            accessibilityLabel="감정일기 아이콘"
             accessibilityElementsHidden={true}
           />
           <Text style={[
@@ -1076,6 +1080,7 @@ const AppNavigator = () => {
               currentScreen === SCREEN_NAMES.SETTINGS && styles.tabIconImageActive
             ]}
             resizeMode="contain"
+            accessibilityLabel="설정 아이콘"
             accessibilityElementsHidden={true}
           />
           <Text style={[

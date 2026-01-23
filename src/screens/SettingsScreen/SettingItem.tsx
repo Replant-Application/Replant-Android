@@ -19,7 +19,7 @@ const SettingItem: React.FC<SettingItemProps> = ({
     accessibilityHint={showArrow ? "설정 화면으로 이동" : undefined}
   >
     <View style={styles.settingItemLeft}>
-      <Image source={icon} style={styles.settingIcon} resizeMode="contain" accessibilityElementsHidden={true} />
+      <Image source={icon} style={styles.settingIcon} resizeMode="contain" accessibilityLabel={`${title} 아이콘`} accessibilityElementsHidden={true} />
       <Text style={[
         styles.settingItemText, 
         danger && styles.settingItemTextDanger
@@ -32,6 +32,7 @@ const SettingItem: React.FC<SettingItemProps> = ({
         source={require('../../assets/images/left.png')}
         style={[styles.arrowIcon, { transform: [{ rotate: '180deg' }] }]}
         resizeMode="contain"
+        accessibilityLabel="다음 화면으로 이동"
         accessibilityElementsHidden={true}
       />
     )}

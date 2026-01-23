@@ -154,6 +154,7 @@ const TodoListCreateScreen: React.FC<TodoListCreateScreenProps> = ({ navigation 
                     source={require('../../assets/images/reroll.png')}
                     style={styles.rerollButtonIcon}
                     resizeMode="contain"
+                    accessibilityLabel="미션 다시 뽑기 아이콘"
                   />
                 )}
               </TouchableOpacity>

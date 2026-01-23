@@ -82,6 +82,7 @@ const HeaderActions: React.FC<HeaderActionsProps> = ({
             source={require('../../assets/images/say.png')}
             style={styles.iconImage}
             resizeMode="contain"
+            accessibilityLabel="채팅 아이콘"
             accessibilityElementsHidden={true}
           />
           {unreadChatCount > 0 && (

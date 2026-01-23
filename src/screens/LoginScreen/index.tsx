@@ -172,6 +172,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onNavigate }) => {
                     source={require('../../assets/images/kakao_logo.png')}
                     style={styles.socialIconImage}
                     resizeMode="contain"
+                    accessibilityLabel="카카오 로고"
                     accessibilityElementsHidden={true}
                   />
                 </View>
@@ -190,6 +191,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onNavigate }) => {
                     source={require('../../assets/images/google_logo.png')}
                     style={styles.socialIconImage}
                     resizeMode="contain"
+                    accessibilityLabel="구글 로고"
                     accessibilityElementsHidden={true}
                   />
                 </View>

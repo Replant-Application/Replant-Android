@@ -247,6 +247,7 @@ const PostCard: React.FC<PostCardProps> = ({
                 source={require('../../assets/images/heart.png')}
                 style={styles.statIconImage}
                 resizeMode="contain"
+                accessibilityLabel="좋아요 아이콘"
                 accessibilityElementsHidden={true}
               />
             )}
@@ -260,6 +261,7 @@ const PostCard: React.FC<PostCardProps> = ({
               source={require('../../assets/images/say.png')}
               style={styles.statIconImage}
               resizeMode="contain"
+              accessibilityLabel="댓글 아이콘"
               accessibilityElementsHidden={true}
             />
             <Text style={styles.statText}>{post.comment_count}</Text>

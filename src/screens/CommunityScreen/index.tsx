@@ -102,6 +102,7 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation, route }) 
                 source={require('../../assets/images/search.png')}
                 style={styles.searchIcon}
                 resizeMode="contain"
+                accessibilityLabel="검색 아이콘"
                 accessibilityElementsHidden={true}
               />
               <TextInput
@@ -128,6 +129,7 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation, route }) 
                 source={require('../../assets/images/filter.png')}
                 style={styles.filterIcon}
                 resizeMode="contain"
+                accessibilityLabel="필터 아이콘"
                 accessibilityElementsHidden={true}
               />
               {(verificationFilter !== 'all' || filter !== 'all') && (
@@ -219,6 +221,7 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation, route }) 
             source={require('../../assets/images/pencil.png')}
             style={styles.fabIconImage}
             resizeMode="contain"
+            accessibilityLabel="게시글 작성 아이콘"
             accessibilityElementsHidden={true}
           />
         </TouchableOpacity>
@@ -239,6 +242,7 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation, route }) 
             source={require('../../assets/images/pencil.png')}
             style={styles.fabIconImage}
             resizeMode="contain"
+            accessibilityLabel="게시글 작성 아이콘"
             accessibilityElementsHidden={true}
           />
         </TouchableOpacity>

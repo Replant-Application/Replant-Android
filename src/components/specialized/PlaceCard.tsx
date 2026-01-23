@@ -30,6 +30,7 @@ export const PlaceCard: React.FC<PlaceCardProps> = ({ place }) => {
               source={require('../../assets/images/star.png')}
               style={styles.ratingIcon}
               resizeMode="contain"
+              accessibilityLabel="별점 아이콘"
               accessibilityElementsHidden={true}
             />
             <Text style={styles.rating}>{place.rating.toFixed(1)}</Text>
@@ -45,6 +46,7 @@ export const PlaceCard: React.FC<PlaceCardProps> = ({ place }) => {
           source={require('../../assets/images/gps.png')}
           style={styles.addressIcon}
           resizeMode="contain"
+          accessibilityLabel="위치 아이콘"
           accessibilityElementsHidden={true}
         />
         <Text style={styles.address}>{place.formatted_address}</Text>
@@ -56,6 +58,7 @@ export const PlaceCard: React.FC<PlaceCardProps> = ({ place }) => {
             source={require('../../assets/images/call.png')}
             style={styles.phoneIcon}
             resizeMode="contain"
+            accessibilityLabel="전화 아이콘"
             accessibilityElementsHidden={true}
           />
           <Text style={styles.phone}>{place.formatted_phone_number}</Text>

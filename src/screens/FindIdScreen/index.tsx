@@ -42,6 +42,7 @@ const FindIdScreen: React.FC<FindIdScreenProps> = ({ onNavigate }) => {
               source={require('../../assets/images/left.png')}
               style={styles.backButtonIcon}
               resizeMode="contain"
+              accessibilityLabel="뒤로 가기"
               accessibilityElementsHidden={true}
             />
           </TouchableOpacity>
