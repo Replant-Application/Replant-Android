@@ -81,7 +81,8 @@ export const useMissionScreenContainer = ({
   // route params에서 사진 정보 확인
   const routeParams = route?.params;
   const processedPhotoRef = useRef<string | null>(null);
-  const [selectedFilter, setSelectedFilter] = useState<MissionFilter>('inProgress');
+  // route params에서 selectedFilter 복원 (나의 미션 탭 필터)
+  const [selectedFilter, setSelectedFilter] = useState<MissionFilter>(routeParams?.selectedFilter || 'inProgress');
   const [activeTab, setActiveTab] = useState<MissionTab>(routeParams?.activeTab || 'myMission');
   const [refreshing, setRefreshing] = useState(false);
 
@@ -96,8 +97,8 @@ export const useMissionScreenContainer = ({
   const [completedMissionForVerification, setCompletedMissionForVerification] = useState<Mission | null>(null);
   const [isLevelUp, setIsLevelUp] = useState(false);
 
-  // 미션 도감 관련 상태
-  const [missionGroupTab, setMissionGroupTab] = useState<MissionGroupTab>('official');
+  // 미션 도감 관련 상태 (route params에서 missionGroupTab 복원)
+  const [missionGroupTab, setMissionGroupTab] = useState<MissionGroupTab>(routeParams?.missionGroupTab || 'official');
   const [groupMissions, setGroupMissions] = useState<UnifiedMission[]>([]);
   const [groupLoading, setGroupLoading] = useState(false);
   const [selectedGroupMission, setSelectedGroupMission] = useState<UnifiedMission | null>(null);
@@ -509,6 +510,28 @@ export const useMissionScreenContainer = ({
       setActiveTab(routeParams.activeTab);
     }
   }, [routeParams?.activeTab]);
+
+  /**
+   * routeParams.missionGroupTab이 변경되면 missionGroupTab 상태 업데이트
+   * 단, activeTab이 'missionGroup'일 때만 적용 (나의 미션 탭에서는 무시)
+   */
+  useEffect(() => {
+    // activeTab이 'missionGroup'이고 missionGroupTab이 전달된 경우에만 업데이트
+    if (routeParams?.activeTab === 'missionGroup' && routeParams?.missionGroupTab) {
+      setMissionGroupTab(routeParams.missionGroupTab);
+    }
+  }, [routeParams?.activeTab, routeParams?.missionGroupTab]);
+
+  /**
+   * routeParams.selectedFilter가 변경되면 selectedFilter 상태 업데이트
+   * 단, activeTab이 'myMission'일 때만 적용 (미션 도감 탭에서는 무시)
+   */
+  useEffect(() => {
+    // activeTab이 'myMission'이고 selectedFilter가 전달된 경우에만 업데이트
+    if (routeParams?.activeTab === 'myMission' && routeParams?.selectedFilter) {
+      setSelectedFilter(routeParams.selectedFilter);
+    }
+  }, [routeParams?.activeTab, routeParams?.selectedFilter]);
 
   /**
    * 미션 완료 취소

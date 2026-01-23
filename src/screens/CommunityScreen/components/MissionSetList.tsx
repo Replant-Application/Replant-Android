@@ -112,7 +112,7 @@ const MissionSetList: React.FC<MissionSetListProps> = ({
                 <TouchableOpacity
                   key={missionSet.id}
                   style={missionSetListStyles.missionSetCard}
-                  onPress={() => navigation.navigate(SCREEN_NAMES.MISSION_SET_DETAIL as any, { missionSetId: missionSet.id, returnScreen: 'Community' })}
+                  onPress={() => navigation.navigate(SCREEN_NAMES.MISSION_SET_DETAIL as any, { missionSetId: missionSet.id, returnScreen: 'Community', activeTab: 'todo-share' })}
                   activeOpacity={0.7}
                 >
                   <View style={missionSetListStyles.missionSetCardHeader}>
@@ -141,9 +141,6 @@ const MissionSetList: React.FC<MissionSetListProps> = ({
                     <View style={missionSetListStyles.ratingContainer}>
                       <Text style={missionSetListStyles.stars}>
                         {renderStars(missionSet.averageRating || 0)}
-                      </Text>
-                      <Text style={missionSetListStyles.ratingText}>
-                        {(missionSet.averageRating || 0).toFixed(1)}
                       </Text>
                     </View>
                     <Text style={missionSetListStyles.addedCount}>

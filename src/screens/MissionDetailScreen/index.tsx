@@ -72,7 +72,16 @@ const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({ navigation, r
             goBack: () => {
               // returnTab이 있으면 해당 탭으로 복원
               if (returnTab) {
-                navigation.navigate('Mission', { activeTab: returnTab });
+                const navParams: any = { activeTab: returnTab };
+                // returnTab이 'missionGroup'일 때만 missionGroupTab 전달
+                if (returnTab === 'missionGroup' && route.params?.missionGroupTab) {
+                  navParams.missionGroupTab = route.params.missionGroupTab;
+                }
+                // returnTab이 'myMission'일 때만 selectedFilter 전달
+                if (returnTab === 'myMission' && route.params?.selectedFilter) {
+                  navParams.selectedFilter = route.params.selectedFilter;
+                }
+                navigation.navigate('Mission', navParams);
               } else {
                 navigation.goBack?.();
               }
@@ -109,7 +118,16 @@ const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({ navigation, r
             goBack: () => {
               // returnTab이 있으면 해당 탭으로 복원
               if (returnTab) {
-                navigation.navigate('Mission', { activeTab: returnTab });
+                const navParams: any = { activeTab: returnTab };
+                // returnTab이 'missionGroup'일 때만 missionGroupTab 전달
+                if (returnTab === 'missionGroup' && route.params?.missionGroupTab) {
+                  navParams.missionGroupTab = route.params.missionGroupTab;
+                }
+                // returnTab이 'myMission'일 때만 selectedFilter 전달
+                if (returnTab === 'myMission' && route.params?.selectedFilter) {
+                  navParams.selectedFilter = route.params.selectedFilter;
+                }
+                navigation.navigate('Mission', navParams);
               } else {
                 navigation.goBack?.();
               }

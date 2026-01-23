@@ -5,7 +5,6 @@
 
 import { useState, useMemo, useCallback, useEffect } from 'react';
 import { NavigationProp } from '@react-navigation/native';
-import { useFocusEffect } from '@react-navigation/native';
 import { useCommunity } from '../../hooks/useCommunity';
 import { useErrorHandler } from '../../hooks/useErrorHandler';
 import { CommunityPost } from '../../types';
@@ -87,18 +86,7 @@ export const useCommunityScreenContainer = ({ navigation, route }: CommunityScre
 
   /**
    * route.params.activeTab 변경 시 activeTab 업데이트
-   * useFocusEffect를 사용하여 화면이 포커스될 때마다 params 확인
-   */
-  useFocusEffect(
-    useCallback(() => {
-      if (route?.params?.activeTab) {
-        setActiveTab(route.params.activeTab as CommunityTab);
-      }
-    }, [route?.params?.activeTab])
-  );
-
-  /**
-   * route.params.activeTab 변경 시에도 업데이트 (useFocusEffect와 함께 사용)
+   * 커스텀 네비게이션을 사용하므로 useEffect만 사용
    */
   useEffect(() => {
     if (route?.params?.activeTab) {

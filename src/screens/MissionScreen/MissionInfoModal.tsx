@@ -111,7 +111,8 @@ const MissionInfoModal: React.FC<MissionInfoModalProps> = ({
                   onClose();
                   navigation.navigate('MissionDetail', { 
                     missionId: String(mission.id),
-                    returnTab: 'missionGroup'
+                    returnTab: 'missionGroup',
+                    missionGroupTab: missionGroupTab
                   });
                 }}
                 activeOpacity={0.7}

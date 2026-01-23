@@ -91,15 +91,15 @@ const CommunityPostDetailScreen: React.FC<CommunityPostDetailScreenProps> = ({ n
           navigation={{
             ...navigation,
             goBack: () => {
-              // returnScreen이 있으면 해당 화면으로 이동
+              // returnScreen이 있으면 해당 화면으로 복원
               const returnScreen = route.params?.returnScreen;
-              const activeTab = route.params?.activeTab;
-              if (returnScreen === 'Community') {
-                navigation.navigate(SCREEN_NAMES.COMMUNITY as any, { activeTab: activeTab || 'all' });
-              } else if (returnScreen === 'TodoList') {
-                navigation.navigate(SCREEN_NAMES.TODO_LIST as any);
-              } else if (returnScreen === 'MissionSetList') {
-                navigation.navigate(SCREEN_NAMES.MISSION_SET_LIST as any);
+              if (returnScreen) {
+                const navParams: any = {};
+                // Community로 돌아갈 때 activeTab 전달
+                if (returnScreen === 'Community' && route.params?.activeTab) {
+                  navParams.activeTab = route.params.activeTab;
+                }
+                navigation.navigate(returnScreen as any, navParams);
               } else {
                 // 기본 동작: 이전 화면으로 돌아가기
                 navigation.goBack?.();

@@ -17,6 +17,8 @@ export type RootStackParamList = {
     timestamp?: number;
     analysisResult?: { verified: boolean } | null;
     activeTab?: 'myMission' | 'missionGroup'; // 미션 도감에서 돌아올 때 탭 복원용
+    missionGroupTab?: 'official' | 'custom'; // 미션 도감 내부 탭 복원용 (공식/커스텀)
+    selectedFilter?: 'inProgress' | 'pendingVerification' | 'completed'; // 나의 미션 탭에서 돌아올 때 필터 복원용
   };
   CustomMissionCreate: {
     generatedMission?: any;
@@ -80,6 +82,8 @@ export type RootStackParamList = {
   MissionDetail: {
     missionId: string;
     returnTab?: 'myMission' | 'missionGroup'; // 뒤로가기 시 복원할 탭
+    missionGroupTab?: 'official' | 'custom'; // 미션 도감 탭에서 왔을 경우, 공식/커스텀 탭 복원
+    selectedFilter?: 'inProgress' | 'pendingVerification' | 'completed'; // 나의 미션 탭에서 왔을 경우, 필터 복원
   };
   BadgeDetail: {
     badge: {
@@ -130,6 +134,7 @@ export type RootStackParamList = {
   MissionSetDetail: {
     missionSetId: number;
     returnScreen?: 'TodoList' | 'Community' | 'MissionSetList'; // 뒤로가기 시 복원할 화면
+    activeTab?: 'all' | 'todo-share'; // Community로 돌아갈 때 활성화할 탭
   };
 };
 

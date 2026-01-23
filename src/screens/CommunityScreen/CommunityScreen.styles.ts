@@ -145,16 +145,26 @@ export const styles = StyleSheet.create({
     bottom: 0,
   },
   modalContent: {
-    ...modalStyles.content(),
+    backgroundColor: colors.background.primary,
+    borderRadius: borderRadius.xl,
+    padding: spacing[6],
+    width: '85%',
+    maxWidth: 350,
+    alignItems: 'stretch',
     borderWidth: 1,
     borderColor: colors.border.light,
     maxHeight: '80%',
     zIndex: 1,
     elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
   },
   modalTitle: {
     ...createTitleStyle('xl', {
-      marginBottom: spacing[4],
+      marginBottom: spacing[5],
+      textAlign: 'center',
     }),
   },
   modalSectionTitle: {
@@ -179,45 +189,52 @@ export const styles = StyleSheet.create({
   },
   filterOptionRow: {
     flexDirection: 'row',
-    gap: spacing[2],
-    marginBottom: spacing[2],
+    gap: spacing[3],
+    marginBottom: spacing[1],
   },
   filterOptionHorizontal: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: spacing[3],
-    paddingHorizontal: spacing[3],
-    borderRadius: borderRadius.base,
-    backgroundColor: colors.white,
-    borderWidth: 1,
+    paddingVertical: spacing[4],
+    paddingHorizontal: spacing[4],
+    borderRadius: borderRadius.lg,
+    backgroundColor: colors.background.secondary,
+    borderWidth: 1.5,
     borderColor: colors.border.light,
+    minHeight: 52,
   },
   filterOptionActive: {
-    backgroundColor: colors.primary[50],
+    backgroundColor: colors.primary[500],
     borderColor: colors.primary[500],
+    borderWidth: 1.5,
   },
   filterOptionText: {
-    ...createBodyStyle('base', {
-      fontWeight: typography.fontWeight.normal,
+    ...createTextStyle('base', {
+      fontWeight: typography.fontWeight.medium,
+      color: colors.text.primary,
     }),
   },
   filterOptionTextActive: {
-    ...createBodyStyle('base', {
-      color: colors.primary[600],
-      fontWeight: typography.fontWeight.normal,
+    ...createTextStyle('base', {
+      color: colors.white,
+      fontWeight: typography.fontWeight.semibold,
     }),
   },
   filterOptionCheck: {
-    ...createBodyStyle('base', {
-      color: colors.primary[600],
-      fontWeight: typography.fontWeight.normal,
+    ...createTextStyle('base', {
+      color: colors.white,
+      fontWeight: typography.fontWeight.bold,
+      marginLeft: spacing[2],
+      fontSize: 16,
     }),
   },
   modalApplyButton: {
     ...buttonStyles.primary(),
-    marginTop: spacing[6],
+    marginTop: spacing[5],
+    paddingVertical: spacing[4],
+    borderRadius: borderRadius.lg,
   },
   modalApplyButtonText: {
     ...createButtonTextStyle('base'),
