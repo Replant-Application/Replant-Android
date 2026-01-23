@@ -12,6 +12,7 @@ import { normalizeDate } from '../../utils/dateUtils';
 import { TodoList, TodoMission } from '../../types/todolist';
 import { NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types/navigation';
+import { ChatMessage, generateReantResponse, generateMessageId } from '../../utils/reantChatUtils';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -37,6 +38,11 @@ export const useHomeScreenContainer = ({ navigation }: HomeScreenContainerProps)
   // 말풍선 표시 상태
   const [showSpeechBubble, setShowSpeechBubble] = useState(false);
   const speechBubbleAnim = useRef(new Animated.Value(0)).current;
+  const [currentReantMessage, setCurrentReantMessage] = useState<string>('');
+
+  // 채팅 관련 상태
+  const [showChatBottomSheet, setShowChatBottomSheet] = useState(false);
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
 
   // 투두리스트 완료 상태
   const [completedTodoList, setCompletedTodoList] = useState<TodoList | null>(null);
@@ -291,10 +297,51 @@ export const useHomeScreenContainer = ({ navigation }: HomeScreenContainerProps)
   }, [backgroundType, fadeAnim]);
 
   /**
-   * 캐릭터 클릭 핸들러
+   * 캐릭터 클릭 핸들러 - 채팅창 열기
    */
   const handleCharacterPress = useCallback((): void => {
     setCharacterEmotion('happy');
+    setShowChatBottomSheet(true);
+    
+    // 채팅창이 비어있으면 인사 메시지를 말풍선에만 표시
+    if (chatMessages.length === 0) {
+      const welcomeMessage = generateReantResponse('안녕', currentCharacter?.name || '리앤트', currentCharacter?.level || 1);
+      setCurrentReantMessage(welcomeMessage);
+      setShowSpeechBubble(true);
+      Animated.timing(speechBubbleAnim, {
+        toValue: 1,
+        duration: 300,
+        useNativeDriver: true,
+      }).start();
+    }
+  }, [speechBubbleAnim, chatMessages.length, currentCharacter]);
+
+  /**
+   * 채팅 메시지 전송 핸들러
+   */
+  const handleSendMessage = useCallback((message: string) => {
+    if (!message.trim() || !currentCharacter) return;
+
+    // 사용자 메시지만 채팅창에 추가
+    const userMessage: ChatMessage = {
+      id: generateMessageId(),
+      type: 'user',
+      content: message,
+      timestamp: new Date(),
+    };
+
+    setChatMessages((prev) => [...prev, userMessage]);
+
+    // 리앤트 응답 생성 (말풍선에만 표시)
+    const reantResponse = generateReantResponse(
+      message,
+      currentCharacter.name || '리앤트',
+      currentCharacter.level || 1
+    );
+
+    setCurrentReantMessage(reantResponse);
+
+    // 말풍선에 리앤트 응답 표시
     setShowSpeechBubble(true);
     Animated.timing(speechBubbleAnim, {
       toValue: 1,
@@ -302,6 +349,7 @@ export const useHomeScreenContainer = ({ navigation }: HomeScreenContainerProps)
       useNativeDriver: true,
     }).start();
 
+    // 3초 후 말풍선 자동 숨김
     setTimeout(() => {
       Animated.timing(speechBubbleAnim, {
         toValue: 0,
@@ -309,10 +357,17 @@ export const useHomeScreenContainer = ({ navigation }: HomeScreenContainerProps)
         useNativeDriver: true,
       }).start(() => {
         setShowSpeechBubble(false);
-        setCharacterEmotion('default');
       });
     }, 3000);
-  }, [speechBubbleAnim]);
+  }, [currentCharacter, speechBubbleAnim]);
+
+  /**
+   * 채팅창 닫기 핸들러
+   */
+  const handleCloseChat = useCallback(() => {
+    setShowChatBottomSheet(false);
+    setCharacterEmotion('default');
+  }, []);
 
   /**
    * 진화 모달 닫기 핸들러
@@ -417,6 +472,12 @@ export const useHomeScreenContainer = ({ navigation }: HomeScreenContainerProps)
     // Speech Bubble
     showSpeechBubble,
     speechBubbleAnim,
+    currentReantMessage,
+    // Chat
+    showChatBottomSheet,
+    chatMessages,
+    handleSendMessage,
+    handleCloseChat,
     // Hero Section
     isHeroCollapsed,
     heroHeightAnim,

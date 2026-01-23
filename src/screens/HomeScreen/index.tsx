@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Dimensions, ImageBackground, Animated, Modal, Image } from 'react-native';
 import FastImage from 'react-native-fast-image';
 import { Loading, ErrorBoundary, AppHeader } from '../../components/ui';
+import ReantChatBottomSheet from '../../components/ui/ReantChatBottomSheet';
 import { getCharacterImage } from '../../utils/characterUtils';
 import { HomeScreenProps } from '../../types/screens/home';
 import { SCREEN_NAMES } from '../../utils/constants';
@@ -25,6 +26,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
     completedTodoList,
     showSpeechBubble,
     speechBubbleAnim,
+    currentReantMessage,
     isHeroCollapsed,
     heroHeightAnim,
     MIN_HERO_HEIGHT,
@@ -32,11 +34,15 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
     panResponder,
     showEvolutionModal,
     evolutionFadeAnim,
+    showChatBottomSheet,
+    chatMessages,
     loadData,
     handleCharacterPress,
     handleEvolutionModalClose,
     handleDragHandlePress,
     handleTodoListPress,
+    handleSendMessage,
+    handleCloseChat,
   } = useHomeScreenContainer({ navigation });
 
   // 에러 처리
@@ -101,7 +107,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                   >
                     <View style={styles.speechTextContainer}>
                       <Text style={styles.speechText}>
-                        {currentCharacter.description || '안녕하세요! 오늘도 화이팅!'}
+                        {currentReantMessage || currentCharacter.description || '안녕하세요! 오늘도 화이팅!'}
                       </Text>
                     </View>
                   </ImageBackground>
@@ -338,6 +344,15 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
             )}
           </ScrollView>
         </View>
+
+        {/* 리앤트 채팅 바텀시트 */}
+        <ReantChatBottomSheet
+          visible={showChatBottomSheet}
+          messages={chatMessages}
+          onClose={handleCloseChat}
+          onSendMessage={handleSendMessage}
+          reantName={currentCharacter?.name || '리앤트'}
+        />
       </ImageBackground>
     </Animated.View>
   );
