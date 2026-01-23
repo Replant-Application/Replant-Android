@@ -16,8 +16,8 @@ export const styles = StyleSheet.create({
     backgroundColor: colors.background.primary,
     borderTopLeftRadius: borderRadius.xl,
     borderTopRightRadius: borderRadius.xl,
-    maxHeight: '45%',
-    minHeight: '35%',
+    maxHeight: '30%',
+    minHeight: 'auto',
   },
   dragHandle: {
     alignItems: 'center',
@@ -54,19 +54,18 @@ export const styles = StyleSheet.create({
     }),
   },
   messagesContainer: {
-    flex: 1,
-    minHeight: 150,
+    maxHeight: 200,
   },
   messagesList: {
     paddingHorizontal: spacing[2],
-    paddingTop: spacing[4],
+    paddingTop: spacing[2],
     paddingBottom: spacing[2],
   },
   emptyContainer: {
-    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingVertical: spacing[8],
+    paddingVertical: spacing[4],
+    minHeight: 100,
   },
   emptyText: {
     ...createSecondaryTextStyle('sm', {

@@ -137,8 +137,12 @@ const ReantChatBottomSheet: React.FC<ReantChatBottomSheetProps> = ({
                 data={messages}
                 renderItem={renderMessage}
                 keyExtractor={(item) => item.id}
-                contentContainerStyle={styles.messagesList}
+                contentContainerStyle={[
+                  styles.messagesList,
+                  messages.length === 0 && { flexGrow: 0 },
+                ]}
                 showsVerticalScrollIndicator={false}
+                scrollEnabled={messages.length > 1}
                 ListEmptyComponent={
                   <View style={styles.emptyContainer}>
                     <Text style={styles.emptyText}>
