@@ -6,7 +6,7 @@ import React from 'react';
 import { View, Text, Image } from 'react-native';
 import { MissionReview } from '../../api/missionApi';
 import { formatDateKorean } from '../../utils/dateUtils';
-import RatingStars from './RatingStars';
+import RatingStars from './ratingStars';
 import { styles } from './ReviewCard.styles';
 
 interface ReviewCardProps {

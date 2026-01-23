@@ -4,24 +4,10 @@
  */
 
 import React from 'react';
-import { Text as RNText, TextProps as RNTextProps } from 'react-native';
-import { typography } from '../../utils/designTokens';
+import { Text as RNText } from 'react-native';
+import { typography } from '../../../utils/designTokens';
 import { styles } from './Text.styles';
-
-export interface TextProps extends RNTextProps {
-  /**
-   * 폰트 크기 (typography.fontSize의 키 또는 직접 숫자)
-   */
-  size?: keyof typeof typography.fontSize | number;
-  /**
-   * 폰트 굵기
-   */
-  weight?: keyof typeof typography.fontWeight;
-  /**
-   * lineHeight (자동 계산 또는 직접 지정)
-   */
-  lineHeight?: number;
-}
+import { TextProps } from './Text.types';
 
 /**
  * Neo-Regular 폰트가 적용된 Text 컴포넌트

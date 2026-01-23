@@ -4,7 +4,7 @@
  */
 
 import { StyleSheet, Platform } from 'react-native';
-import { typography } from '../../utils/designTokens';
+import { typography } from '../../../utils/designTokens';
 
 export const styles = StyleSheet.create({
   default: {

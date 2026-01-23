@@ -12,7 +12,7 @@ import {
   Image,
   ImageSourcePropType,
 } from 'react-native';
-import { colors } from '../../utils/designTokens';
+import { colors } from '../../../utils/designTokens';
 import { styles } from './ConfirmModal.styles';
 
 interface ConfirmModalProps {

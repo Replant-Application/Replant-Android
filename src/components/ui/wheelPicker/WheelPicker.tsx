@@ -5,7 +5,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
-import { typography } from '../../utils/designTokens';
+import { typography } from '../../../utils/designTokens';
 import { styles } from './WheelPicker.styles';
 
 interface WheelPickerOption {

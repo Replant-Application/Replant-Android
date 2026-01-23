@@ -3,7 +3,7 @@
  */
 
 import { StyleSheet } from 'react-native';
-import { colors, spacing, typography } from '../../utils/designTokens';
+import { colors, spacing, typography } from '../../../utils/designTokens';
 
 export const styles = StyleSheet.create({
   container: {

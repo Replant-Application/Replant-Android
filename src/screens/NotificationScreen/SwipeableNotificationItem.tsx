@@ -9,7 +9,7 @@ import {
 import { SwipeableNotificationItemProps } from '../../types/screens/notification';
 import { colors } from '../../utils/designTokens';
 import { formatTimeAgo } from '../../utils/dateUtils';
-import ConfirmModal from '../../components/ui/ConfirmModal';
+import { ConfirmModal } from '../../components/ui';
 import { useSwipeableNotificationItemContainer } from './SwipeableNotificationItem.container';
 import { styles } from './SwipeableNotificationItem.styles';
 
