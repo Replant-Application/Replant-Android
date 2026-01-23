@@ -179,6 +179,7 @@ interface BackendPostResponse {
   approveCount?: number;
   rejectCount?: number;
   verifiedAt?: string;
+  completionRate?: number; // 완료 정도 (0-100)
 }
 
 interface BackendPageResponse {
@@ -265,6 +266,7 @@ const transformBackendPost = (post: BackendPostResponse): CommunityPost => {
     is_liked: post.isLiked || false,
     isAuthor: post.isAuthor, // 백엔드에서 제공하는 본인 게시글 여부 (userId 기반)
     verified,  // 인증 완료 여부
+    completionRate: post.completionRate, // 완료 정도
   };
 };
 

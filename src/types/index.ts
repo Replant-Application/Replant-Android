@@ -268,6 +268,7 @@ export interface CommunityPost {
   isAuthor?: boolean; // 본인 게시글 여부 (백엔드에서 제공, userId 기반)
   verified?: boolean; // 인증 완료 여부 (false일 때만 수정/삭제 가능)
   status?: string; // 인증 상태 (PENDING, APPROVED) - VERIFICATION 타입일 때만
+  completionRate?: number; // 완료 정도 (0-100) - VERIFICATION 타입일 때만
 }
 
 export interface CommunityComment {

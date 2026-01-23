@@ -566,6 +566,7 @@ export interface VerificationPost {
   commentCount: number;
   createdAt: string;
   myVote?: VoteType;
+  completionRate?: number;
 }
 
 export interface VerificationPostListResponse {
@@ -579,6 +580,7 @@ export interface CreateVerificationRequest {
   userMissionId: number;
   content: string;
   imageUrls: string[];
+  completionRate?: number;
 }
 
 export interface VoteVerificationResponse {
@@ -633,7 +635,7 @@ export const createVerification = async (
  */
 export const updateVerification = async (
   verificationId: number,
-  data: { content?: string; imageUrls?: string[] }
+  data: { content?: string; imageUrls?: string[]; completionRate?: number }
 ): Promise<ServiceResult<VerificationPost>> => {
   const endpoint = API_CONFIG.endpoints.verification.update.replace(':verificationId', String(verificationId));
   return apiClient.put<VerificationPost>(endpoint, data);

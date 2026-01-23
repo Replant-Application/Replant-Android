@@ -93,6 +93,64 @@ export const styles = StyleSheet.create({
       color: colors.primary[700],
     }),
   },
+  completionSection: {
+    marginBottom: spacing[4],
+  },
+  completionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: spacing[2],
+  },
+  completionPercent: {
+    fontSize: typography.fontSize.lg,
+    fontWeight: typography.fontWeight.medium,
+    color: colors.primary[600],
+  },
+  sliderContainer: {
+    backgroundColor: colors.white,
+    borderRadius: borderRadius.base,
+    padding: spacing[4],
+    borderWidth: 1,
+    borderColor: colors.border.light,
+    marginBottom: spacing[2],
+  },
+  slider: {
+    width: '100%',
+    height: 40,
+  },
+  sliderLabels: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: spacing[1],
+  },
+  sliderLabel: {
+    fontSize: typography.fontSize.xs,
+    color: colors.text.tertiary,
+  },
+  warningBox: {
+    backgroundColor: colors.orange[50],
+    borderWidth: 1,
+    borderColor: colors.orange[200],
+    borderRadius: borderRadius.base,
+    padding: spacing[2],
+    marginBottom: spacing[2],
+  },
+  warningText: {
+    fontSize: typography.fontSize.xs,
+    color: colors.orange[700],
+    textAlign: 'center',
+  },
+  encouragementBox: {
+    backgroundColor: colors.primary[50],
+    borderRadius: borderRadius.base,
+    padding: spacing[3],
+  },
+  encouragementText: {
+    fontSize: typography.fontSize.sm,
+    color: colors.primary[700],
+    textAlign: 'center',
+  },
   inputSection: {
     marginBottom: spacing[4],
   },

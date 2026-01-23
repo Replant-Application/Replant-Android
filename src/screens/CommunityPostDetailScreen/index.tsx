@@ -176,7 +176,12 @@ const CommunityPostDetailScreen: React.FC<CommunityPostDetailScreenProps> = ({ n
               resizeMode="contain"
               accessibilityLabel="미션 아이콘"
             />
-            <Text style={styles.missionTitle}>{post.mission_title || '미션'}</Text>
+            <Text style={styles.missionTitle}>
+              {post.mission_title || '미션'}
+              {post.category === '인증' && post.completionRate !== undefined && post.completionRate !== null && (
+                ` (${post.completionRate}%)`
+              )}
+            </Text>
             {/* 인증 상태 뱃지 */}
             {post.verified === true ? (
               <View style={styles.verifiedBadge}>

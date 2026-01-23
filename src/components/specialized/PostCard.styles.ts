@@ -200,6 +200,13 @@ export const styles = StyleSheet.create({
       fontWeight: typography.fontWeight.medium,
     }),
   },
+  completionRateText: {
+    ...createTextStyle('xs', {
+      color: colors.text.secondary,
+      fontWeight: typography.fontWeight.normal,
+    }),
+    marginLeft: spacing[2],
+  },
   title: {
     ...createTextStyle('base', {
       fontWeight: typography.fontWeight.normal,

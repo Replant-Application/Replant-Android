@@ -16,6 +16,7 @@ import {
   ActivityIndicator,
   ImageBackground,
 } from 'react-native';
+import Slider from '@react-native-community/slider';
 import { Header, AlertModal } from '../../components/ui';
 import { colors } from '../../utils/designTokens';
 import { NavigationProp, RouteProp } from '@react-navigation/native';
@@ -50,6 +51,10 @@ const VerificationPostCreateScreen: React.FC<VerificationPostCreateScreenProps> 
     handleSuccessModalClose,
     handleAlreadyExistsModalClose,
     handleErrorModalClose,
+    completionRate,
+    showMinWarning,
+    handleSliderChange,
+    getEncouragementMessage,
   } = useVerificationPostCreateScreenContainer({ navigation, route });
 
   return (
@@ -95,6 +100,49 @@ const VerificationPostCreateScreen: React.FC<VerificationPostCreateScreenProps> 
           <View style={styles.missionTextContainer}>
             <Text style={styles.missionLabel}>미션</Text>
             <Text style={styles.missionTitle}>{missionTitle}</Text>
+          </View>
+        </View>
+
+        {/* 완료 정도 슬라이더 */}
+        <View style={styles.completionSection}>
+          <View style={styles.completionHeader}>
+            <Text style={styles.label}>완료 정도</Text>
+            <Text style={styles.completionPercent}>{completionRate}%</Text>
+          </View>
+          
+          <View style={styles.sliderContainer}>
+            <Slider
+              style={styles.slider}
+              minimumValue={0}
+              maximumValue={100}
+              step={5}
+              value={completionRate}
+              onValueChange={handleSliderChange}
+              minimumTrackTintColor={colors.primary[500]}
+              maximumTrackTintColor={colors.gray[200]}
+              thumbTintColor={colors.primary[500]}
+            />
+            <View style={styles.sliderLabels}>
+              <Text style={styles.sliderLabel}>0%</Text>
+              <Text style={styles.sliderLabel}>50%</Text>
+              <Text style={styles.sliderLabel}>100%</Text>
+            </View>
+          </View>
+
+          {/* 최소값 경고 메시지 */}
+          {showMinWarning && (
+            <View style={styles.warningBox}>
+              <Text style={styles.warningText}>
+                미션 완료를 위해 더 노력해요! (최소 25%)
+              </Text>
+            </View>
+          )}
+
+          {/* 응원 메시지 */}
+          <View style={styles.encouragementBox}>
+            <Text style={styles.encouragementText}>
+              {getEncouragementMessage(completionRate)}
+            </Text>
           </View>
         </View>
 

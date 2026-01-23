@@ -48,6 +48,9 @@ export const useVerificationPostCreateScreenContainer = ({
   const [showErrorModal, setShowErrorModal] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [loadingData, setLoadingData] = useState(isEditMode);
+  // 완료 정도 슬라이더 상태 (기본값 50%, 최소 25%, 5% 단위)
+  const [completionRate, setCompletionRate] = useState(50);
+  const [showMinWarning, setShowMinWarning] = useState(false);
 
   /**
    * 필수 파라미터 체크
@@ -81,6 +84,10 @@ export const useVerificationPostCreateScreenContainer = ({
         setContent(result.data.content || '');
         if (result.data.imageUrls && result.data.imageUrls.length > 0) {
           setImages(result.data.imageUrls); // 다중 이미지 지원
+        }
+        // 기존 완료 정도 로드
+        if (result.data.completionRate !== undefined) {
+          setCompletionRate(result.data.completionRate);
         }
       }
     } catch (error) {
@@ -278,6 +285,7 @@ export const useVerificationPostCreateScreenContainer = ({
         const result = await updateVerification(verificationId, {
           content: content.trim(),
           imageUrls: images, // 다중 이미지 배열
+          completionRate: completionRate,
         });
 
         if (result.success) {
@@ -299,6 +307,7 @@ export const useVerificationPostCreateScreenContainer = ({
           userMissionId: userMissionId,
           content: content.trim(),
           imageUrls: images, // 다중 이미지 배열
+          completionRate: completionRate, // 완료 정도 추가
         };
 
         const result = await createVerification(verificationData);
@@ -332,6 +341,7 @@ export const useVerificationPostCreateScreenContainer = ({
     userMissionId,
     verificationId,
     images,
+    completionRate,
     showError,
     handleApiError,
   ]);
@@ -359,6 +369,34 @@ export const useVerificationPostCreateScreenContainer = ({
     setShowErrorModal(false);
   }, []);
 
+  /**
+   * 슬라이더 값 변경 핸들러 (5% 단위로 스냅)
+   */
+  const handleSliderChange = useCallback((value: number) => {
+    // 5% 단위로 반올림
+    const snappedValue = Math.round(value / 5) * 5;
+    
+    // 25% 미만으로 내리려 하면 경고 표시
+    if (snappedValue < 25) {
+      setShowMinWarning(true);
+      setCompletionRate(25);
+    } else {
+      setShowMinWarning(false);
+      setCompletionRate(snappedValue);
+    }
+  }, []);
+
+  /**
+   * 완료 정도에 따른 응원 메시지
+   */
+  const getEncouragementMessage = useCallback((rate: number) => {
+    if (rate <= 30) return '시작이 반이에요. 조금이라도 해냈다는 게 대단해요!';
+    if (rate <= 50) return '절반 가까이 왔어요. 충분히 잘하고 있어요!';
+    if (rate <= 80) return '많이 해냈네요. 정말 멋져요!';
+    if (rate < 100) return '거의 다 왔어요! 스스로를 칭찬해주세요.';
+    return '완주했네요! 정말 대단해요 🎉';
+  }, []);
+
   return {
     // Route params
     isEditMode,
@@ -374,6 +412,8 @@ export const useVerificationPostCreateScreenContainer = ({
     showAlreadyExistsModal,
     showErrorModal,
     errorMessage,
+    completionRate,
+    showMinWarning,
     // Setters
     setContent,
     // Handlers
@@ -385,5 +425,7 @@ export const useVerificationPostCreateScreenContainer = ({
     handleSuccessModalClose,
     handleAlreadyExistsModalClose,
     handleErrorModalClose,
+    handleSliderChange,
+    getEncouragementMessage,
   };
 };

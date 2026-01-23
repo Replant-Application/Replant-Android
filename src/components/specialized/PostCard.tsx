@@ -183,6 +183,9 @@ const PostCard: React.FC<PostCardProps> = ({
             />
             <Text style={styles.missionTitle} numberOfLines={1}>
               {post.mission_title}
+              {post.category === '인증' && post.completionRate !== undefined && post.completionRate !== null && (
+                ` (${post.completionRate}%)`
+              )}
             </Text>
             {/* 인증 상태 뱃지 */}
             {post.verified === true ? (

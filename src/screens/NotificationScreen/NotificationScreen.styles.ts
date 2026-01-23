@@ -20,6 +20,7 @@ export const styles = StyleSheet.create({
   markAllButton: {
     paddingHorizontal: spacing[3],
     paddingVertical: spacing[2],
+    flexShrink: 0,
   },
   markAllReadText: {
     ...createSecondaryTextStyle('sm', {
