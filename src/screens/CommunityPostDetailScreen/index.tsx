@@ -22,6 +22,7 @@ import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types/navigation';
 import { useCommunityPostDetailScreenContainer } from './CommunityPostDetailScreen.container';
 import { styles } from './CommunityPostDetailScreen.styles';
+import { SCREEN_NAMES } from '../../utils/constants';
 
 interface CommunityPostDetailScreenProps {
   navigation: NavigationProp<RootStackParamList>;
@@ -87,7 +88,24 @@ const CommunityPostDetailScreen: React.FC<CommunityPostDetailScreenProps> = ({ n
       >
         <Header
           title="게시글"
-          navigation={navigation}
+          navigation={{
+            ...navigation,
+            goBack: () => {
+              // returnScreen이 있으면 해당 화면으로 이동
+              const returnScreen = route.params?.returnScreen;
+              const activeTab = route.params?.activeTab;
+              if (returnScreen === 'Community') {
+                navigation.navigate(SCREEN_NAMES.COMMUNITY as any, { activeTab: activeTab || 'all' });
+              } else if (returnScreen === 'TodoList') {
+                navigation.navigate(SCREEN_NAMES.TODO_LIST as any);
+              } else if (returnScreen === 'MissionSetList') {
+                navigation.navigate(SCREEN_NAMES.MISSION_SET_LIST as any);
+              } else {
+                // 기본 동작: 이전 화면으로 돌아가기
+                navigation.goBack?.();
+              }
+            },
+          }}
           showBorder={false}
           titleStyle={styles.headerTitle}
         />

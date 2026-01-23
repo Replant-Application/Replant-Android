@@ -14,7 +14,7 @@ import MissionSetList from './components/MissionSetList';
 import { useCommunityScreenContainer } from './CommunityScreen.container';
 import { styles } from './CommunityScreen.styles';
 
-const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation }) => {
+const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation, route }) => {
   // 비즈니스 로직은 Container에서 처리
   const {
     posts,
@@ -60,7 +60,7 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation }) => {
     handleCreatePost,
     onRefresh,
     renderStars,
-  } = useCommunityScreenContainer({ navigation });
+  } = useCommunityScreenContainer({ navigation, route });
 
   if (loading) {
     return <Loading text="게시글을 불러오는 중..." />;

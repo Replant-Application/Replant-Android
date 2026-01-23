@@ -2,11 +2,12 @@
  * CommunityScreen 타입 정의
  */
 
-import { NavigationProp } from '@react-navigation/native';
+import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../navigation';
 
 export interface CommunityScreenProps {
   navigation: NavigationProp<RootStackParamList>;
+  route?: RouteProp<RootStackParamList, 'Community'>;
 }
 
 export type CommunityTab = 'all' | 'todo-share';

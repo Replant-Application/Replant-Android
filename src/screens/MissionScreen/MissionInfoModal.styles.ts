@@ -13,17 +13,28 @@ export const styles = StyleSheet.create({
     ...modalStyles.overlay(),
   },
   modalContainer: {
-    ...modalStyles.content(),
+    backgroundColor: colors.background.primary,
+    borderRadius: borderRadius.xl,
     width: '90%',
     maxWidth: 400,
     maxHeight: '80%',
+    padding: spacing[6],
+    alignItems: 'flex-start',
   },
   modalHeader: {
-    ...modalStyles.header(),
-    marginBottom: spacing[4],
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    width: '100%',
+    marginBottom: spacing[5],
+    paddingBottom: spacing[4],
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border.light,
   },
   modalTitle: {
     ...createTitleStyle('xl'),
+    flex: 1,
+    marginRight: spacing[3],
   },
   modalCloseButton: {
     width: 32,
@@ -32,17 +43,23 @@ export const styles = StyleSheet.create({
     backgroundColor: colors.gray[100],
     justifyContent: 'center',
     alignItems: 'center',
+    flexShrink: 0,
   },
   modalCloseButtonText: {
     fontSize: 20,
     color: colors.text.secondary,
-    fontWeight: typography.fontWeight.medium,
+    fontWeight: typography.fontWeight.semibold,
+    lineHeight: 20,
+    textAlign: 'center',
   },
   modalContent: {
     maxHeight: 400,
+    width: '100%',
+    paddingTop: spacing[1],
   },
   modalDetailRow: {
-    marginBottom: spacing[4],
+    marginBottom: spacing[5],
+    width: '100%',
   },
   modalDetailLabel: {
     ...createSecondaryTextStyle('sm', {

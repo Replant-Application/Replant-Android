@@ -58,6 +58,8 @@ export type RootStackParamList = {
   };
   CommunityPostDetail: {
     postId: string;
+    returnScreen?: 'Community' | 'TodoList' | 'MissionSetList'; // 뒤로가기 시 복원할 화면
+    activeTab?: 'all' | 'todo-share'; // Community로 돌아갈 때 활성화할 탭
   };
   CommunityPostEdit: {
     postId: string;
@@ -152,7 +154,9 @@ export interface NavigationParams {
     missionId?: string;
     missionTitle?: string;
   };
-  [ScreenNames.COMMUNITY]: undefined;
+  [ScreenNames.COMMUNITY]: {
+    activeTab?: 'all' | 'todo-share'; // 초기 활성 탭
+  };
   [ScreenNames.COMMUNITY_POST_CREATE]: {
     missionId: string;
     missionTitle: string;

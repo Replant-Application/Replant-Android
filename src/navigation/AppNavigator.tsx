@@ -882,7 +882,7 @@ const AppNavigator = () => {
       case SCREEN_NAMES.PHOTO_SELECT:
         return <PhotoSelectScreen navigation={navigation} route={route} />;
       case SCREEN_NAMES.COMMUNITY:
-        return <CommunityScreen navigation={navigation} />;
+        return <CommunityScreen navigation={navigation} route={route} />;
       case SCREEN_NAMES.COMMUNITY_POST_CREATE:
         return <CommunityPostCreateScreen navigation={navigation} route={route} />;
       case SCREEN_NAMES.COMMUNITY_POST_DETAIL:

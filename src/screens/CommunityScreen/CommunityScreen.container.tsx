@@ -5,6 +5,7 @@
 
 import { useState, useMemo, useCallback, useEffect } from 'react';
 import { NavigationProp } from '@react-navigation/native';
+import { useFocusEffect } from '@react-navigation/native';
 import { useCommunity } from '../../hooks/useCommunity';
 import { useErrorHandler } from '../../hooks/useErrorHandler';
 import { CommunityPost } from '../../types';
@@ -20,13 +21,16 @@ import {
 import { PublicTodoList } from '../../types/todolist';
 import { CommunityScreenProps, CommunityTab, VerificationFilter, PostFilter } from '../../types/screens/community';
 
-export const useCommunityScreenContainer = ({ navigation }: CommunityScreenProps) => {
+export const useCommunityScreenContainer = ({ navigation, route }: CommunityScreenProps) => {
   const { posts, loading, error, toggleLike, loadPosts } = useCommunity();
   const { showError, showSuccess, showInfo, handleApiError } = useErrorHandler();
 
+  // route.params에서 activeTab을 가져오거나 기본값 'all' 사용
+  const initialTab = (route?.params?.activeTab || 'all') as CommunityTab;
+
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState<'all' | 'popular'>('all');
-  const [activeTab, setActiveTab] = useState<CommunityTab>('all');
+  const [activeTab, setActiveTab] = useState<CommunityTab>(initialTab);
   const [showFilterModal, setShowFilterModal] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
@@ -80,6 +84,27 @@ export const useCommunityScreenContainer = ({ navigation }: CommunityScreenProps
     };
     loadHiddenPosts();
   }, []);
+
+  /**
+   * route.params.activeTab 변경 시 activeTab 업데이트
+   * useFocusEffect를 사용하여 화면이 포커스될 때마다 params 확인
+   */
+  useFocusEffect(
+    useCallback(() => {
+      if (route?.params?.activeTab) {
+        setActiveTab(route.params.activeTab as CommunityTab);
+      }
+    }, [route?.params?.activeTab])
+  );
+
+  /**
+   * route.params.activeTab 변경 시에도 업데이트 (useFocusEffect와 함께 사용)
+   */
+  useEffect(() => {
+    if (route?.params?.activeTab) {
+      setActiveTab(route.params.activeTab as CommunityTab);
+    }
+  }, [route?.params?.activeTab]);
 
   /**
    * 미션세트 검색어 디바운싱
@@ -329,7 +354,12 @@ export const useCommunityScreenContainer = ({ navigation }: CommunityScreenProps
    */
   const handlePostPress = useCallback(
     (postId: string) => {
-      navigation.navigate('CommunityPostDetail', { postId });
+      // 전체 게시판 탭에서 왔으므로 returnScreen과 activeTab 전달
+      navigation.navigate('CommunityPostDetail', { 
+        postId,
+        returnScreen: 'Community',
+        activeTab: 'all'
+      });
     },
     [navigation]
   );

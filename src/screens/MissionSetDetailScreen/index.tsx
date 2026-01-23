@@ -70,7 +70,7 @@ const MissionSetDetailScreen: React.FC<MissionSetDetailScreenProps> = ({ navigat
             if (returnScreen === 'TodoList') {
               navigation.navigate(SCREEN_NAMES.TODO_LIST as any);
             } else if (returnScreen === 'Community') {
-              navigation.navigate(SCREEN_NAMES.COMMUNITY as any);
+              navigation.navigate(SCREEN_NAMES.COMMUNITY as any, { activeTab: 'todo-share' });
             } else if (returnScreen === 'MissionSetList') {
               navigation.navigate(SCREEN_NAMES.MISSION_SET_LIST as any);
             } else {

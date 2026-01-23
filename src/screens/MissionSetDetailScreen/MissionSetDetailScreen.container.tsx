@@ -58,9 +58,10 @@ export const useMissionSetDetailScreenContainer = ({ navigation, route }: Missio
           creatorId: publicDetail.creatorId,
           creatorNickname: publicDetail.creatorNickname,
           isPublic: true,
-          missionCount: publicDetail.missionCount,
-          addedCount: publicDetail.addedCount,
-          averageRating: publicDetail.averageRating,
+          // 백엔드에서 missionCount, addedCount, averageRating를 제공
+          missionCount: publicDetail.missionCount || publicDetail.totalCount || (publicDetail.missions?.length || 0),
+          addedCount: publicDetail.addedCount || 0,
+          averageRating: publicDetail.averageRating || 0,
           reviewCount: publicDetail.reviewCount || 0,
           // PublicMissionInfo를 MissionSetMission으로 변환
           missions: (publicDetail.missions || []).map((mission, index) => ({
