@@ -163,7 +163,7 @@ export const styles = StyleSheet.create({
   },
   modalTitle: {
     ...createTitleStyle('xl', {
-      marginBottom: spacing[5],
+      marginBottom: spacing[4],
       textAlign: 'center',
     }),
   },
@@ -171,7 +171,7 @@ export const styles = StyleSheet.create({
     ...createTextStyle('sm', {
       fontWeight: typography.fontWeight.medium,
       color: colors.text.secondary,
-      marginTop: spacing[4],
+      marginTop: spacing[3],
       marginBottom: spacing[2],
     }),
   },
@@ -189,7 +189,7 @@ export const styles = StyleSheet.create({
   },
   filterOptionRow: {
     flexDirection: 'row',
-    gap: spacing[3],
+    gap: spacing[2],
     marginBottom: spacing[1],
   },
   filterOptionHorizontal: {
@@ -197,13 +197,13 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: spacing[4],
-    paddingHorizontal: spacing[4],
+    paddingVertical: spacing[2],
+    paddingHorizontal: spacing[3],
     borderRadius: borderRadius.lg,
     backgroundColor: colors.background.secondary,
     borderWidth: 1.5,
     borderColor: colors.border.light,
-    minHeight: 52,
+    minHeight: 40,
   },
   filterOptionActive: {
     backgroundColor: colors.primary[500],
@@ -232,8 +232,8 @@ export const styles = StyleSheet.create({
   },
   modalApplyButton: {
     ...buttonStyles.primary(),
-    marginTop: spacing[5],
-    paddingVertical: spacing[4],
+    marginTop: spacing[4],
+    paddingVertical: spacing[2],
     borderRadius: borderRadius.lg,
   },
   modalApplyButtonText: {

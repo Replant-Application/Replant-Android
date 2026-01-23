@@ -59,7 +59,6 @@ export const styles = StyleSheet.create({
   },
   statsRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
     paddingTop: spacing[3],
     borderTopWidth: 1,
@@ -80,6 +79,7 @@ export const styles = StyleSheet.create({
   addedCount: {
     ...createTextStyle('sm', {
       color: colors.text.tertiary,
+      marginLeft: spacing[1],
     }),
   },
   missionSection: {
@@ -137,11 +137,14 @@ export const styles = StyleSheet.create({
     marginBottom: spacing[4],
   },
   myReviewCard: {
-    ...cardStyles.base(),
     backgroundColor: colors.background.primary,
     borderRadius: borderRadius.lg,
+    padding: spacing[4],
     borderWidth: 1,
     borderColor: colors.primary[200],
+    marginBottom: spacing[2],
+    minHeight: 60,
+    justifyContent: 'center',
   },
   myReviewHeader: {
     flexDirection: 'row',

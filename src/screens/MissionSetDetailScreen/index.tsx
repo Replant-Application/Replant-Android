@@ -100,8 +100,8 @@ const MissionSetDetailScreen: React.FC<MissionSetDetailScreenProps> = ({ navigat
           <View style={styles.statsRow}>
             <View style={styles.ratingContainer}>
               <Text style={styles.stars}>{renderStars(missionSet.averageRating || 0)}</Text>
+              <Text style={styles.addedCount}>({missionSet.addedCount})</Text>
             </View>
-            <Text style={styles.addedCount}>{missionSet.addedCount}명이 담음</Text>
           </View>
         </View>
 
@@ -132,17 +132,7 @@ const MissionSetDetailScreen: React.FC<MissionSetDetailScreenProps> = ({ navigat
           <View style={styles.reviewSection}>
             <Text style={styles.sectionTitle}>리뷰</Text>
 
-            {myReview ? (
-              <View style={styles.myReviewCard}>
-                <View style={styles.myReviewHeader}>
-                  <Text style={styles.myReviewLabel}>내 리뷰</Text>
-                  <Text style={styles.myReviewStars}>{renderStars(myReview.rating)}</Text>
-                </View>
-                {myReview.content && (
-                  <Text style={styles.myReviewContent}>{myReview.content}</Text>
-                )}
-              </View>
-            ) : showReviewForm ? (
+            {showReviewForm ? (
               <View style={styles.reviewFormCard}>
                 <Text style={styles.reviewFormLabel}>별점을 선택해주세요</Text>
                 <RatingSelector rating={reviewRating} onRatingChange={setReviewRating} />
@@ -175,6 +165,24 @@ const MissionSetDetailScreen: React.FC<MissionSetDetailScreenProps> = ({ navigat
                   </TouchableOpacity>
                 </View>
               </View>
+            ) : myReview && myReview.rating ? (
+              <TouchableOpacity
+                style={styles.myReviewCard}
+                onPress={() => {
+                  console.log('[MissionSetDetail] My Review card pressed');
+                  handleOpenReviewForm();
+                }}
+                activeOpacity={0.7}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+              >
+                <View style={styles.myReviewHeader} pointerEvents="none">
+                  <Text style={styles.myReviewLabel}>내 리뷰</Text>
+                  <Text style={styles.myReviewStars}>{renderStars(myReview.rating)}</Text>
+                </View>
+                {myReview.content && (
+                  <Text style={styles.myReviewContent} pointerEvents="none">{myReview.content}</Text>
+                )}
+              </TouchableOpacity>
             ) : (
               <TouchableOpacity
                 style={styles.writeReviewButton}

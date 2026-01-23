@@ -91,13 +91,20 @@ export const useMissionSetDetailScreenContainer = ({ navigation, route }: Missio
   const loadMyReview = useCallback(async () => {
     try {
       const result = await getMyReview(missionSetId);
-      if (result.success && result.data) {
+      console.log('[MissionSetDetail] loadMyReview result:', { success: result.success, data: result.data });
+      if (result.success && result.data && result.data.rating) {
         setMyReview(result.data);
         setReviewRating(result.data.rating);
         setReviewContent(result.data.content || '');
+      } else {
+        // 리뷰가 없으면 명시적으로 null로 설정
+        console.log('[MissionSetDetail] No review found, setting to null');
+        setMyReview(null);
       }
     } catch (error) {
-      // 리뷰가 없는 경우 무시
+      console.log('[MissionSetDetail] loadMyReview error:', error);
+      // 리뷰가 없는 경우 명시적으로 null로 설정
+      setMyReview(null);
     }
   }, [missionSetId]);
 
@@ -187,8 +194,18 @@ export const useMissionSetDetailScreenContainer = ({ navigation, route }: Missio
    * 리뷰 작성 폼 열기
    */
   const handleOpenReviewForm = useCallback(() => {
+    console.log('[MissionSetDetail] handleOpenReviewForm called', { myReview, hasRating: myReview?.rating });
+    // 기존 리뷰가 있으면 그 값으로 폼 초기화
+    if (myReview && myReview.rating) {
+      setReviewRating(myReview.rating);
+      setReviewContent(myReview.content || '');
+    } else {
+      // 리뷰가 없으면 기본값으로 초기화
+      setReviewRating(5);
+      setReviewContent('');
+    }
     setShowReviewForm(true);
-  }, []);
+  }, [myReview]);
 
   /**
    * 리뷰 작성 폼 닫기
