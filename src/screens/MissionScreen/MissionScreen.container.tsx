@@ -697,6 +697,15 @@ export const useMissionScreenContainer = ({
   }, [selectedMissionForVerification, loadMissions, activeTab, currentServerPage, loadGroupMissions, showSuccess]);
 
   /**
+   * 초기 마운트 시 나의 미션 로드
+   */
+  useEffect(() => {
+    if (activeTab === 'myMission') {
+      loadMissions();
+    }
+  }, []); // 초기 마운트 시 한 번만 실행
+
+  /**
    * 탭 변경 시 미션 도감 로드
    */
   useEffect(() => {
