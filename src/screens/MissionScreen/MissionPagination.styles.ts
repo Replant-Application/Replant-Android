@@ -13,7 +13,7 @@ export const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginTop: spacing[4],
-    gap: spacing[1],
+    gap: spacing[6], // 인디케이터와 이전/다음 버튼 사이 간격 넓히기
   },
   pageArrow: {
     width: 32,
