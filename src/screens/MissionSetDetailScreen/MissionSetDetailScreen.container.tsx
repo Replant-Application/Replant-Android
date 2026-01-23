@@ -14,6 +14,7 @@ import {
   MissionSetDetail,
   PublicTodoListDetail,
   createReview,
+  updateReview,
   getMyReview,
   MissionSetReview,
 } from '../../api/todolistApi';
@@ -141,33 +142,44 @@ export const useMissionSetDetailScreenContainer = ({ navigation, route }: Missio
   }, [missionSet, navigation]);
 
   /**
-   * 리뷰 제출
+   * 리뷰 제출 (작성 또는 수정)
    */
   const handleSubmitReview = useCallback(async () => {
     if (!missionSet) return;
 
+    const isUpdate = myReview && myReview.id;
     setSubmittingReview(true);
     try {
-      const result = await createReview(missionSet.id, {
+      const reviewData = {
         rating: reviewRating,
         content: reviewContent.trim() || undefined,
-      });
+      };
+
+      let result;
+      if (isUpdate) {
+        // 기존 리뷰가 있으면 수정
+        result = await updateReview(myReview.id, reviewData);
+      } else {
+        // 리뷰가 없으면 새로 작성
+        result = await createReview(missionSet.id, reviewData);
+      }
+
       if (result.success && result.data) {
         setMyReview(result.data);
         setShowReviewForm(false);
-        Alert.alert('완료', '리뷰가 등록되었습니다.');
+        Alert.alert('완료', isUpdate ? '리뷰가 수정되었습니다.' : '리뷰가 등록되었습니다.');
         // 미션세트 평점 갱신을 위해 다시 로딩
         loadMissionSetDetail();
       } else {
-        Alert.alert('오류', result.error || '리뷰 등록에 실패했습니다.');
+        Alert.alert('오류', result.error || (isUpdate ? '리뷰 수정에 실패했습니다.' : '리뷰 등록에 실패했습니다.'));
       }
     } catch (error) {
-      logError('리뷰 등록 실패', error as Error);
-      Alert.alert('오류', '리뷰 등록 중 문제가 발생했습니다.');
+      logError(isUpdate ? '리뷰 수정 실패' : '리뷰 등록 실패', error as Error);
+      Alert.alert('오류', (isUpdate ? '리뷰 수정' : '리뷰 등록') + ' 중 문제가 발생했습니다.');
     } finally {
       setSubmittingReview(false);
     }
-  }, [missionSet, reviewRating, reviewContent, loadMissionSetDetail]);
+  }, [missionSet, myReview, reviewRating, reviewContent, loadMissionSetDetail]);
 
   /**
    * 별점 렌더링

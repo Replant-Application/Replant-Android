@@ -160,7 +160,9 @@ const MissionSetDetailScreen: React.FC<MissionSetDetailScreenProps> = ({ navigat
                     activeOpacity={0.7}
                   >
                     <Text style={styles.submitButtonText}>
-                      {submittingReview ? '등록 중...' : '등록'}
+                      {submittingReview 
+                        ? (myReview && myReview.id ? '수정 중...' : '등록 중...')
+                        : (myReview && myReview.id ? '수정' : '등록')}
                     </Text>
                   </TouchableOpacity>
                 </View>
