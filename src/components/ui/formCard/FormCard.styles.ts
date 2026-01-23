@@ -4,7 +4,7 @@
  */
 
 import { StyleSheet } from 'react-native';
-import { spacing } from '../../utils/designTokens';
+import { spacing } from '../../../utils/designTokens';
 
 export const styles = StyleSheet.create({
   formCard: {

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Text, TextStyle } from 'react-native';
-import { colors, spacing } from '../../utils/designTokens';
+import { colors, spacing } from '../../../utils/designTokens';
 import { styles } from './SectionTitle.styles';
 
 interface SectionTitleProps {

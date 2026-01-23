@@ -1,6 +1,6 @@
 import React from 'react';
 import { ViewStyle } from 'react-native';
-import Card from './Card';
+import { Card } from '../';
 import { styles } from './FormCard.styles';
 
 interface FormCardProps {

@@ -1,6 +1,6 @@
 import React from 'react';
 import { TouchableOpacity, View, ViewStyle } from 'react-native';
-import { colors, borderRadius } from '../../utils/designTokens';
+import { colors, borderRadius } from '../../../utils/designTokens';
 import { styles } from './PlusButton.styles';
 
 interface PlusButtonProps {

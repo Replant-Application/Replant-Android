@@ -20,7 +20,7 @@ const ErrorBoundary: React.FC<ErrorBoundaryProps> = ({
   return (
     <View style={[styles.container, style]}>
       <Image
-        source={require('../../assets/images/warning.png')}
+        source={require('../../../assets/images/warning.png')}
         style={styles.iconImage}
         resizeMode="contain"
         accessibilityLabel="오류 경고 아이콘"

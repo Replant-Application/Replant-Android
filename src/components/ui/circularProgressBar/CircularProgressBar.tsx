@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { View, Text } from 'react-native';
 import Svg, { Circle, Path } from 'react-native-svg';
-import { colors } from '../../utils/designTokens';
+import { colors } from '../../../utils/designTokens';
 import { styles } from './CircularProgressBar.styles';
 
 interface CircularProgressBarProps {

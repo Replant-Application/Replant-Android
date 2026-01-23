@@ -4,7 +4,7 @@
  */
 
 import { StyleSheet } from 'react-native';
-import { borderRadius } from '../../utils/designTokens';
+import { borderRadius } from '../../../utils/designTokens';
 
 export const styles = StyleSheet.create({
   container: {
