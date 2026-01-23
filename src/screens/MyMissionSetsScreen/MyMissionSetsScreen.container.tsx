@@ -91,6 +91,7 @@ export const useMyMissionSetsScreenContainer = ({
   const handleDetail = useCallback((missionSet: MissionSetSimple) => {
     navigation.navigate(SCREEN_NAMES.MISSION_SET_DETAIL as any, {
       missionSetId: missionSet.id,
+      returnScreen: 'TodoList',
     });
   }, [navigation]);
 

@@ -135,7 +135,7 @@ const MissionSetListScreen: React.FC<MissionSetListScreenProps> = ({ navigation 
                 <TouchableOpacity
                   key={todoList.id}
                   style={styles.missionSetCard}
-                  onPress={() => navigation.navigate(SCREEN_NAMES.MISSION_SET_DETAIL as any, { missionSetId: todoList.id })}
+                  onPress={() => navigation.navigate(SCREEN_NAMES.MISSION_SET_DETAIL as any, { missionSetId: todoList.id, returnScreen: 'MissionSetList' })}
                   activeOpacity={0.7}
                 >
                   {/* 카드 헤더 */}

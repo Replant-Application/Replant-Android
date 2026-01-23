@@ -16,6 +16,7 @@ import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types/navigation';
 import { Header, Loading, RatingSelector } from '../../components/ui';
 import { colors } from '../../utils/designTokens';
+import { SCREEN_NAMES } from '../../utils/constants';
 import { useMissionSetDetailScreenContainer } from './MissionSetDetailScreen.container';
 import { styles } from './MissionSetDetailScreen.styles';
 
@@ -38,7 +39,6 @@ const MissionSetDetailScreen: React.FC<MissionSetDetailScreenProps> = ({ navigat
     isOwner,
     setReviewRating,
     setReviewContent,
-    handleCopy,
     handleSubmitReview,
     handleOpenReviewForm,
     handleCloseReviewForm,
@@ -59,7 +59,27 @@ const MissionSetDetailScreen: React.FC<MissionSetDetailScreenProps> = ({ navigat
       style={styles.container}
       resizeMode="cover"
     >
-      <Header title="투두리스트 상세" showBackButton={true} navigation={navigation} />
+      <Header 
+        title="투두리스트 상세" 
+        showBackButton={true} 
+        navigation={{
+          ...navigation,
+          goBack: () => {
+            // returnScreen이 있으면 해당 화면으로 이동
+            const returnScreen = route.params?.returnScreen;
+            if (returnScreen === 'TodoList') {
+              navigation.navigate(SCREEN_NAMES.TODO_LIST as any);
+            } else if (returnScreen === 'Community') {
+              navigation.navigate(SCREEN_NAMES.COMMUNITY as any);
+            } else if (returnScreen === 'MissionSetList') {
+              navigation.navigate(SCREEN_NAMES.MISSION_SET_LIST as any);
+            } else {
+              // 기본 동작: 이전 화면으로 돌아가기
+              navigation.goBack?.();
+            }
+          },
+        }} 
+      />
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {/* 헤더 정보 */}
@@ -79,7 +99,6 @@ const MissionSetDetailScreen: React.FC<MissionSetDetailScreenProps> = ({ navigat
           <View style={styles.statsRow}>
             <View style={styles.ratingContainer}>
               <Text style={styles.stars}>{renderStars(missionSet.averageRating || 0)}</Text>
-              <Text style={styles.ratingText}>{(missionSet.averageRating || 0).toFixed(1)}</Text>
             </View>
             <Text style={styles.addedCount}>{missionSet.addedCount}명이 담음</Text>
           </View>
@@ -170,22 +189,6 @@ const MissionSetDetailScreen: React.FC<MissionSetDetailScreenProps> = ({ navigat
         {/* 여백 */}
         <View style={{ height: 120 }} />
       </ScrollView>
-
-      {/* 하단 버튼 */}
-      {!isOwner && (
-        <View style={styles.bottomContainer}>
-          <TouchableOpacity
-            style={[styles.copyButton, copying && styles.copyButtonDisabled]}
-            onPress={handleCopy}
-            disabled={copying}
-            activeOpacity={0.7}
-          >
-            <Text style={styles.copyButtonText}>
-              {copying ? '담는 중...' : '내 목록에 담기'}
-            </Text>
-          </TouchableOpacity>
-        </View>
-      )}
     </ImageBackground>
   );
 };

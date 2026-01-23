@@ -112,7 +112,7 @@ const MissionSetList: React.FC<MissionSetListProps> = ({
                 <TouchableOpacity
                   key={missionSet.id}
                   style={missionSetListStyles.missionSetCard}
-                  onPress={() => navigation.navigate(SCREEN_NAMES.MISSION_SET_DETAIL as any, { missionSetId: missionSet.id })}
+                  onPress={() => navigation.navigate(SCREEN_NAMES.MISSION_SET_DETAIL as any, { missionSetId: missionSet.id, returnScreen: 'Community' })}
                   activeOpacity={0.7}
                 >
                   <View style={missionSetListStyles.missionSetCardHeader}>

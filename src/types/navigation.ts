@@ -127,6 +127,7 @@ export type RootStackParamList = {
   };
   MissionSetDetail: {
     missionSetId: number;
+    returnScreen?: 'TodoList' | 'Community' | 'MissionSetList'; // 뒤로가기 시 복원할 화면
   };
 };
 

@@ -8,9 +8,11 @@ import { Alert } from 'react-native';
 import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types/navigation';
 import {
+  getPublicTodoListDetail,
   getMissionSetDetail,
   copyMissionSet,
   MissionSetDetail,
+  PublicTodoListDetail,
   createReview,
   getMyReview,
   MissionSetReview,
@@ -27,7 +29,7 @@ export const useMissionSetDetailScreenContainer = ({ navigation, route }: Missio
   const { missionSetId } = route.params as { missionSetId: number };
   const { user, currentUserId } = useUser();
 
-  const [missionSet, setMissionSet] = useState<MissionSetDetail | null>(null);
+  const [missionSet, setMissionSet] = useState<MissionSetDetail | PublicTodoListDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [copying, setCopying] = useState(false);
 
@@ -40,12 +42,35 @@ export const useMissionSetDetailScreenContainer = ({ navigation, route }: Missio
 
   /**
    * 미션세트 상세 로딩
+   * 공개 투두리스트는 getPublicTodoListDetail 사용
    */
   const loadMissionSetDetail = useCallback(async () => {
     try {
-      const result = await getMissionSetDetail(missionSetId);
+      // 공개 투두리스트 상세 조회 API 사용
+      const result = await getPublicTodoListDetail(missionSetId);
       if (result.success && result.data) {
-        setMissionSet(result.data);
+        // PublicTodoListDetail을 MissionSetDetail 형식으로 변환
+        const publicDetail = result.data;
+        const converted: MissionSetDetail = {
+          id: publicDetail.id,
+          title: publicDetail.title,
+          description: publicDetail.description || undefined,
+          creatorId: publicDetail.creatorId,
+          creatorNickname: publicDetail.creatorNickname,
+          isPublic: true,
+          missionCount: publicDetail.missionCount,
+          addedCount: publicDetail.addedCount,
+          averageRating: publicDetail.averageRating,
+          reviewCount: publicDetail.reviewCount || 0,
+          // PublicMissionInfo를 MissionSetMission으로 변환
+          missions: (publicDetail.missions || []).map((mission, index) => ({
+            missionId: mission.missionId,
+            missionTitle: mission.title,
+            displayOrder: mission.displayOrder !== undefined ? mission.displayOrder : index,
+          })),
+          createdAt: publicDetail.createdAt,
+        };
+        setMissionSet(converted);
       } else {
         Alert.alert('오류', '미션세트를 불러올 수 없습니다.');
         navigation.goBack();
