@@ -22,6 +22,10 @@ export const styles = StyleSheet.create({
   section: {
     marginBottom: spacing[5],
   },
+  /** 버전 바로 위 섹션(고객지원): 아래 여백 축소 */
+  sectionBeforeVersion: {
+    marginBottom: spacing[2],
+  },
   sectionTitle: {
     ...createTitleStyle('lg', {
       fontWeight: typography.fontWeight.medium,
@@ -122,7 +126,7 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: colors.primary[50],
-    paddingVertical: spacing[3],
+    paddingVertical: spacing[2],
     borderRadius: borderRadius.base,
     borderWidth: 1,
     borderColor: colors.primary[200],
@@ -184,7 +188,8 @@ export const styles = StyleSheet.create({
     marginLeft: 22 + spacing[2], // icon width + icon margin (left padding 0)
   },
   versionContainer: {
-    paddingTop: spacing[3],
+    marginTop: spacing[2],
+    marginBottom: spacing[2],
     paddingHorizontal: spacing[4],
     alignItems: 'flex-start',
   },

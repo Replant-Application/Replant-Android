@@ -165,12 +165,6 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
           <Text style={styles.sectionTitle}>기능</Text>
           <View style={styles.settingsCard}>
             <SettingItem
-              icon={require('../../assets/images/chat.png')}
-              title="상담 서비스"
-              onPress={() => navigation?.navigate('CounselingSelect')}
-            />
-            <View style={styles.divider} />
-            <SettingItem
               icon={require('../../assets/images/boy.png')}
               title="마이페이지"
               onPress={() => navigation?.navigate('MyPage')}
@@ -183,15 +177,21 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
             />
             <View style={styles.divider} />
             <SettingItem
+              icon={require('../../assets/images/surprised_mission.png')}
+              title="돌발 미션 설정"
+              onPress={() => navigation?.navigate('SpontaneousMissionSetup' as any, { mode: 'edit' })}
+            />
+            <View style={styles.divider} />
+            <SettingItem
               icon={require('../../assets/images/alarm.png')}
               title="사운드"
               onPress={() => navigation?.navigate('SoundSettings' as any)}
             />
             <View style={styles.divider} />
             <SettingItem
-              icon={require('../../assets/images/surprised_mission.png')}
-              title="돌발 미션 설정"
-              onPress={() => navigation?.navigate('SpontaneousMissionSetup' as any, { mode: 'edit' })}
+              icon={require('../../assets/images/chat.png')}
+              title="상담 서비스"
+              onPress={() => navigation?.navigate('CounselingSelect')}
             />
           </View>
         </View>
@@ -216,18 +216,6 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
               icon={require('../../assets/images/books.png')}
               title="오픈소스 라이선스"
               onPress={() => openInfoScreen('오픈소스 라이선스', OPEN_SOURCE_LICENSE)}
-            />
-          </View>
-        </View>
-
-        {/* 고객지원 섹션 */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>고객지원</Text>
-          <View style={styles.settingsCard}>
-            <SettingItem
-              icon={require('../../assets/images/siren.png')}
-              title="불편신고 및 개선 요청"
-              onPress={handleSendFeedback}
             />
           </View>
         </View>
@@ -258,10 +246,23 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
               danger={true}
             />
           </View>
-          {/* 버전 정보 */}
-          <View style={styles.versionContainer}>
-            <Text style={styles.versionText}>v{APP_VERSION}</Text>
+        </View>
+
+        {/* 고객지원 섹션 */}
+        <View style={[styles.section, styles.sectionBeforeVersion]}>
+          <Text style={styles.sectionTitle}>고객지원</Text>
+          <View style={styles.settingsCard}>
+            <SettingItem
+              icon={require('../../assets/images/siren.png')}
+              title="불편신고 및 개선 요청"
+              onPress={handleSendFeedback}
+            />
           </View>
+        </View>
+
+        {/* 버전 정보 (맨 밑) */}
+        <View style={styles.versionContainer}>
+          <Text style={styles.versionText}>v{APP_VERSION}</Text>
         </View>
       </ScrollView>
 
