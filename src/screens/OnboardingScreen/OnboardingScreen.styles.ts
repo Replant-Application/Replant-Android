@@ -19,9 +19,9 @@ export const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   imageBackground: {
-    width: SCREEN_WIDTH * 0.85,
-    height: SCREEN_HEIGHT * 0.85,
-    alignSelf: 'center',
+    flex: 1,
+    width: '100%',
+    height: '100%',
   },
   transparentFlatList: {
     flex: 1,
@@ -32,24 +32,17 @@ export const styles = StyleSheet.create({
     top: Platform.OS === 'ios' ? 40 + spacing[2] : 30 + spacing[2],
     right: spacing[3],
     zIndex: 10,
-    borderWidth: 1,
-    borderColor: colors.gray[400],
-    borderRadius: 999,
-    overflow: 'hidden',
-  },
-  skipButtonBackground: {
     paddingVertical: spacing[1],
     paddingHorizontal: spacing[2],
-    minHeight: 20,
-    minWidth: 60,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   skipButtonText: {
-    ...createTextStyle('xs', {
-      color: colors.gray[700] || '#1a1a1a',
-      fontFamily: typography.fontFamily.regular,
-      fontWeight: typography.fontWeight.bold,
+    ...createTextStyle('sm', {
+      color: '#000000',
+      fontFamily: typography.fontFamily.bold,
+      fontWeight: '800',
+      textShadowColor: 'rgba(255,255,255,0.95)',
+      textShadowOffset: { width: 0, height: 0 },
+      textShadowRadius: 4,
     }),
   },
   slideContainer: {

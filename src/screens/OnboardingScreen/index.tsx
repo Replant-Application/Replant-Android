@@ -78,19 +78,13 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onNavigate }) => {
         onPress={handleSkip}
         activeOpacity={0.8}
       >
-        <ImageBackground
-          source={require('../../assets/images/background.png')}
-          style={styles.skipButtonBackground}
-          resizeMode="cover"
-        >
-          <Text style={styles.skipButtonText}>Skip</Text>
-        </ImageBackground>
+        <Text style={styles.skipButtonText}>Skip</Text>
       </TouchableOpacity>
 
       <ImageBackground
         source={ONBOARDING_SLIDES[currentIndex].image}
         style={styles.imageBackground}
-        resizeMode="contain"
+        resizeMode="cover"
         accessibilityLabel="온보딩 배경 이미지"
       >
         {/* 슬라이드 - 투명하게 처리하여 스와이프만 가능하게 */}
