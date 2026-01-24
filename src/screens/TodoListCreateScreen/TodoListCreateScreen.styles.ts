@@ -206,15 +206,20 @@ export const styles = StyleSheet.create({
     ...createTextStyle('sm', {
       fontWeight: typography.fontWeight.medium,
       marginBottom: spacing[2],
+      fontFamily: typography.fontFamily.regular,
     }),
   },
   textInput: {
     ...inputStyles.base(),
+    ...createTextStyle('base'),
     backgroundColor: 'rgba(255, 255, 255, 0.95)',
   },
   textArea: { 
     height: 100, 
     textAlignVertical: 'top' 
+  },
+  descriptionTextArea: {
+    paddingTop: spacing[3],
   },
 
   buttonContainer: { 
@@ -286,17 +291,22 @@ export const styles = StyleSheet.create({
   todaySection: { 
     backgroundColor: 'rgba(255, 255, 255, 0.95)', 
     borderRadius: borderRadius.md, 
-    padding: spacing[4], 
-    marginTop: spacing[4], 
+    padding: spacing[4],
+    paddingTop: spacing[2],
+    marginTop: spacing[2], 
     marginBottom: spacing[4] 
   },
   todayHeader: { 
-    flexDirection: 'row', 
-    alignItems: 'center', 
+    flexDirection: 'row',
+    alignItems: 'center',
     marginBottom: spacing[3], 
     paddingBottom: spacing[3], 
     borderBottomWidth: 1, 
     borderBottomColor: colors.primary[500] 
+  },
+  todayDateRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   todayDayName: {
     ...createTitleStyle('lg', {
@@ -362,12 +372,12 @@ export const styles = StyleSheet.create({
   },
 
   missionsListSection: { 
-    marginTop: spacing[4], 
+    marginTop: spacing[2], 
     marginBottom: spacing[4] 
   },
   missionsListTitle: {
     ...createTitleStyle('lg', {
-      marginBottom: spacing[3],
+      marginBottom: spacing[4],
     }),
   },
   missionListItem: { 
@@ -467,7 +477,7 @@ export const styles = StyleSheet.create({
   timePickerModalMissionTitle: {
     ...createBodyStyle('base', {
       color: colors.text.secondary,
-      marginBottom: spacing[4],
+      marginBottom: spacing[5],
       textAlign: 'center',
     }),
   },
@@ -516,8 +526,24 @@ export const styles = StyleSheet.create({
     justifyContent: 'center', 
     alignItems: 'center' 
   },
+  timePickerWrapper: {
+    width: '100%',
+  },
+  timeSeparator: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: 250,
+    paddingHorizontal: spacing[2],
+  },
+  timeSeparatorText: {
+    fontSize: typography.fontSize['3xl'],
+    fontWeight: typography.fontWeight.bold,
+    color: colors.text.primary,
+    fontFamily: typography.fontFamily.regular,
+    includeFontPadding: false,
+  },
 
-  /* 드롭다운 스타일 */
+  /* 드롭다운 스타일 (레거시 - 시간 모달에서 WheelPicker 사용) */
   dropdownContainer: {
     flex: 1,
     position: 'relative',

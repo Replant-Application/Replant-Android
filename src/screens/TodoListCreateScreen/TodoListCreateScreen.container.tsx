@@ -9,8 +9,8 @@ import { SCREEN_NAMES } from '../../utils/constants';
 import { initTodoList, getSelectableMissions, createTodoList, rerollRandomMission } from '../../api/todolistApi';
 import { MissionSimple, TodoListCreateRequest } from '../../types/todolist';
 import { createCustomMission, CreateMissionRequest } from '../../api/missionApi';
-import { Step, TodoListCreateScreenProps, TimePeriod, DropdownType } from '../../types/screens/todolist';
-import { DEFAULT_START_TIME, DEFAULT_END_TIME, TIME_PERIODS } from '../../constants/screens/todolist';
+import { Step, TodoListCreateScreenProps, TimePeriod } from '../../types/screens/todolist';
+import { DEFAULT_START_TIME, DEFAULT_END_TIME } from '../../constants/screens/todolist';
 
 export const useTodoListCreateScreenContainer = ({ navigation }: TodoListCreateScreenProps) => {
   const { showError, showSuccess, showInfo, handleApiError } = useErrorHandler();
@@ -59,8 +59,8 @@ export const useTodoListCreateScreenContainer = ({ navigation }: TodoListCreateS
   const [endHour, setEndHour] = useState(DEFAULT_END_TIME.hour);
   const [endMinute, setEndMinute] = useState(DEFAULT_END_TIME.minute);
 
-  // 드롭다운 열림 상태
-  const [openDropdown, setOpenDropdown] = useState<DropdownType>({ type: null });
+  // 시간 설정 모달 단계: 'start'(시작 시간) -> 'end'(종료 시간)
+  const [timePickerModalStep, setTimePickerModalStep] = useState<'start' | 'end'>('start');
 
   // 리롤 중인 미션 인덱스 (로딩 상태 추적)
   const [rerollingMissionIndex, setRerollingMissionIndex] = useState<number | null>(null);
@@ -303,10 +303,34 @@ export const useTodoListCreateScreenContainer = ({ navigation }: TodoListCreateS
       }
 
       setSelectedMissionForTime(missionId);
+      setTimePickerModalStep('start');
       setShowTimePickerModal(true);
     },
     [missionTimeRanges]
   );
+
+  /**
+   * 시간 설정 모달 닫기 (취소/오버레이)
+   */
+  const handleCloseTimePickerModal = useCallback(() => {
+    setShowTimePickerModal(false);
+    setSelectedMissionForTime(null);
+    setTimePickerModalStep('start');
+  }, []);
+
+  /**
+   * 시간 설정 모달: 다음(시작 -> 종료)
+   */
+  const handleTimePickerNext = useCallback(() => {
+    setTimePickerModalStep('end');
+  }, []);
+
+  /**
+   * 시간 설정 모달: 이전(종료 -> 시작)
+   */
+  const handleTimePickerPrev = useCallback(() => {
+    setTimePickerModalStep('start');
+  }, []);
 
   /**
    * 시간 저장
@@ -317,10 +341,8 @@ export const useTodoListCreateScreenContainer = ({ navigation }: TodoListCreateS
       const end = convertTo24Hour(endPeriod, endHour, endMinute);
       setMissionTimeRanges(prev => ({ ...prev, [selectedMissionForTime]: { start, end } }));
     }
-    setShowTimePickerModal(false);
-    setSelectedMissionForTime(null);
-    setOpenDropdown({ type: null });
-  }, [selectedMissionForTime, startPeriod, startHour, startMinute, endPeriod, endHour, endMinute, convertTo24Hour]);
+    handleCloseTimePickerModal();
+  }, [selectedMissionForTime, startPeriod, startHour, startMinute, endPeriod, endHour, endMinute, convertTo24Hour, handleCloseTimePickerModal]);
 
   /**
    * 시간 제거
@@ -366,11 +388,6 @@ export const useTodoListCreateScreenContainer = ({ navigation }: TodoListCreateS
     navigation.navigate(SCREEN_NAMES.TODO_LIST, { refresh: true });
   }, [navigation]);
 
-  /**
-   * 드롭다운 열림 상태 확인
-   */
-  const isOpen = useCallback((t: any) => openDropdown.type === t, [openDropdown]);
-
   return {
     // Data
     randomMissions,
@@ -401,7 +418,7 @@ export const useTodoListCreateScreenContainer = ({ navigation }: TodoListCreateS
     endPeriod,
     endHour,
     endMinute,
-    openDropdown,
+    timePickerModalStep,
     rerollingMissionIndex,
     // Setters
     setCurrentStep,
@@ -421,7 +438,6 @@ export const useTodoListCreateScreenContainer = ({ navigation }: TodoListCreateS
     setEndPeriod,
     setEndHour,
     setEndMinute,
-    setOpenDropdown,
     // Handlers
     handleCustomMissionToggle,
     handleRerollMission,
@@ -431,6 +447,8 @@ export const useTodoListCreateScreenContainer = ({ navigation }: TodoListCreateS
     handleSaveTime,
     handleRemoveTime,
     handleTodoListSuccessClose,
-    isOpen,
+    handleTimePickerNext,
+    handleTimePickerPrev,
+    handleCloseTimePickerModal,
   };
 };

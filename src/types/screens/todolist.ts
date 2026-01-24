@@ -20,7 +20,3 @@ export interface MissionTimeRange {
   start: string; // "HH:mm" 형식
   end: string;   // "HH:mm" 형식
 }
-
-export interface DropdownType {
-  type: 'startPeriod' | 'startHour' | 'startMinute' | 'endPeriod' | 'endHour' | 'endMinute' | null;
-}

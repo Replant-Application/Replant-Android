@@ -11,9 +11,9 @@ import {
   Modal,
 } from 'react-native';
 import { colors } from '../../utils/designTokens';
-import { Header, AlertModal } from '../../components/ui';
-import { TodoListCreateScreenProps, TimePeriod } from '../../types/screens/todolist';
-import { TIME_PERIODS, HOURS, MINUTES } from '../../constants/screens/todolist';
+import { Header, AlertModal, WheelPicker } from '../../components/ui';
+import { TodoListCreateScreenProps } from '../../types/screens/todolist';
+import { HOURS, MINUTES } from '../../constants/screens/todolist';
 import { useTodoListCreateScreenContainer } from './TodoListCreateScreen.container';
 import { styles } from './TodoListCreateScreen.styles';
 
@@ -47,7 +47,7 @@ const TodoListCreateScreen: React.FC<TodoListCreateScreenProps> = ({ navigation 
     endPeriod,
     endHour,
     endMinute,
-    openDropdown,
+    timePickerModalStep,
     rerollingMissionIndex,
     setCurrentStep,
     setTitle,
@@ -66,7 +66,6 @@ const TodoListCreateScreen: React.FC<TodoListCreateScreenProps> = ({ navigation 
     setEndPeriod,
     setEndHour,
     setEndMinute,
-    setOpenDropdown,
     handleCustomMissionToggle,
     handleRerollMission,
     handleCreateMission,
@@ -75,7 +74,9 @@ const TodoListCreateScreen: React.FC<TodoListCreateScreenProps> = ({ navigation 
     handleSaveTime,
     handleRemoveTime,
     handleTodoListSuccessClose,
-    isOpen,
+    handleTimePickerNext,
+    handleTimePickerPrev,
+    handleCloseTimePickerModal,
   } = useTodoListCreateScreenContainer({ navigation });
 
   const renderIntroStep = () => (
@@ -305,6 +306,7 @@ const TodoListCreateScreen: React.FC<TodoListCreateScreenProps> = ({ navigation 
   const renderConfirmStep = () => {
     const todayDate = new Date();
     const todayDayName = todayDate.toLocaleDateString('ko-KR', { weekday: 'short' });
+    const todayDayNameLong = todayDate.toLocaleDateString('ko-KR', { weekday: 'long' });
     const todayDayNumber = todayDate.getDate();
 
     return (
@@ -328,9 +330,9 @@ const TodoListCreateScreen: React.FC<TodoListCreateScreenProps> = ({ navigation 
           </View>
 
           <View style={styles.inputGroup}>
-            <Text style={styles.inputLabel}>오늘 하루의 다짐</Text>
+            <Text style={styles.inputLabel}>오늘 하루의 다짐 (선택)</Text>
             <TextInput
-              style={[styles.textInput, styles.textArea]}
+              style={[styles.textInput, styles.textArea, styles.descriptionTextArea]}
               placeholder="오늘 하루의 다짐을 입력하세요"
               placeholderTextColor={colors.gray[400]}
               value={description}
@@ -341,9 +343,15 @@ const TodoListCreateScreen: React.FC<TodoListCreateScreenProps> = ({ navigation 
           </View>
 
           <View style={styles.todaySection}>
-            <View style={styles.todayHeader}>
-              <Text style={styles.todayDayName}>{todayDayName}</Text>
-              <Text style={styles.todayDayNumber}>{todayDayNumber}</Text>
+            <View
+              style={styles.todayHeader}
+              accessibilityLabel={`오늘, ${todayDayNameLong} ${todayDayNumber}일`}
+              accessibilityRole="header"
+            >
+              <View style={styles.todayDateRow}>
+                <Text style={styles.todayDayName}>{todayDayName}</Text>
+                <Text style={styles.todayDayNumber}>{todayDayNumber}</Text>
+              </View>
             </View>
 
             {missionsWithTime.length > 0 ? (
@@ -412,29 +420,23 @@ const TodoListCreateScreen: React.FC<TodoListCreateScreenProps> = ({ navigation 
           </TouchableOpacity>
         </View>
 
-        {/* 시간 설정 모달 */}
+        {/* 시간 설정 모달: 1단계 시작 시간 -> 2단계 종료 시간 (WheelPicker) */}
         <Modal
           visible={showTimePickerModal}
           transparent
           animationType="fade"
-          onRequestClose={() => {
-            setShowTimePickerModal(false);
-            setOpenDropdown({ type: null });
-          }}
+          onRequestClose={handleCloseTimePickerModal}
         >
           <TouchableOpacity
             style={styles.timePickerModalOverlay}
             activeOpacity={1}
-            onPress={() => {
-              if (openDropdown.type === null) {
-                setShowTimePickerModal(false);
-                setOpenDropdown({ type: null });
-              }
-            }}
-            disabled={openDropdown.type !== null}
+            onPress={handleCloseTimePickerModal}
           >
-            <View>
-              {/* 그림자 wrapper (Android 사각 그림자 방지 + 드롭다운 안 가리도록 overflow 숨기지 않음) */}
+            <TouchableOpacity
+              activeOpacity={1}
+              onPress={() => {}}
+              style={{ alignSelf: 'stretch', alignItems: 'center' }}
+            >
               <View style={styles.modalShadowWrap}>
                 <View style={styles.timePickerModalContainer}>
                   <Text style={styles.timePickerModalTitle}>시간 설정</Text>
@@ -444,296 +446,90 @@ const TodoListCreateScreen: React.FC<TodoListCreateScreenProps> = ({ navigation 
                     </Text>
                   )}
 
-                  {/* 시작 시간 */}
-                  <View style={styles.timeRangeSection}>
-                    <Text style={styles.timeRangeLabel}>시작 시간</Text>
-                    <View style={styles.timeRangeRow}>
-                      {/* AM/PM */}
-                      <View style={[styles.dropdownContainer, styles.dropdownContainerPeriod, isOpen('startPeriod') && styles.dropdownContainerOpen]}>
-                        <TouchableOpacity
-                          style={styles.dropdownButton}
-                          onPress={() => setOpenDropdown(isOpen('startPeriod') ? { type: null } : { type: 'startPeriod' })}
-                          activeOpacity={0.7}
-                        >
-                          <Text style={styles.dropdownButtonText}>{startPeriod}</Text>
-                          <Text style={styles.dropdownArrow}>▼</Text>
-                        </TouchableOpacity>
-                        {isOpen('startPeriod') && (
-                          <View style={styles.dropdownListSmall}>
-                            <ScrollView 
-                              style={styles.dropdownScrollViewSmall}
-                              contentContainerStyle={styles.dropdownScrollContent}
-                              nestedScrollEnabled={true}
-                              showsVerticalScrollIndicator={false}
-                              bounces={false}
-                              scrollEnabled={false}
-                            >
-                              {TIME_PERIODS.map((period) => (
-                                <TouchableOpacity
-                                  key={period}
-                                  style={styles.dropdownItem}
-                                  onPress={() => {
-                                    setStartPeriod(period);
-                                    setOpenDropdown({ type: null });
-                                  }}
-                                  activeOpacity={0.7}
-                                >
-                                  <Text style={styles.dropdownItemText}>{period}</Text>
-                                </TouchableOpacity>
-                              ))}
-                            </ScrollView>
+                  {timePickerModalStep === 'start' ? (
+                    <>
+                      <View style={styles.timeRangeSection}>
+                        <Text style={styles.timeRangeLabel}>시작 시간</Text>
+                        <View style={[styles.timePickerWrapper, styles.timeRangeRow]}>
+                          <WheelPicker
+                            value={startPeriod}
+                            options={[
+                              { label: '오전', value: 'AM' },
+                              { label: '오후', value: 'PM' },
+                            ]}
+                            onSelect={(v) => { if (v === 'AM' || v === 'PM') setStartPeriod(v); }}
+                            width={80}
+                          />
+                          <WheelPicker
+                            value={startHour}
+                            options={HOURS.map((h) => ({ label: `${h}`, value: h }))}
+                            onSelect={(v) => setStartHour(v as number)}
+                            width={60}
+                          />
+                          <View style={styles.timeSeparator}>
+                            <Text style={styles.timeSeparatorText}>:</Text>
                           </View>
-                        )}
+                          <WheelPicker
+                            value={startMinute}
+                            options={MINUTES.map((m) => ({ label: m < 10 ? `0${m}` : `${m}`, value: m }))}
+                            onSelect={(v) => setStartMinute(v as number)}
+                            width={60}
+                          />
+                        </View>
                       </View>
-
-                      {/* Hour */}
-                      <View style={[styles.dropdownContainer, styles.dropdownContainerHour, isOpen('startHour') && styles.dropdownContainerOpen]}>
-                        <TouchableOpacity
-                          style={styles.dropdownButton}
-                          onPress={() => setOpenDropdown(isOpen('startHour') ? { type: null } : { type: 'startHour' })}
-                          activeOpacity={0.7}
-                        >
-                          <Text style={styles.dropdownButtonText}>{startHour}시</Text>
-                          <Text style={styles.dropdownArrow}>▼</Text>
+                      <View style={styles.timePickerModalButtons}>
+                        <TouchableOpacity style={styles.timePickerModalCancelButton} onPress={handleCloseTimePickerModal} activeOpacity={0.7}>
+                          <Text style={styles.timePickerModalCancelText}>취소</Text>
                         </TouchableOpacity>
-                        {isOpen('startHour') && (
-                          <View 
-                            style={styles.dropdownList}
-                            onStartShouldSetResponder={() => true}
-                            onMoveShouldSetResponder={() => true}
-                          >
-                            <ScrollView
-                              style={styles.dropdownScrollView}
-                              contentContainerStyle={styles.dropdownScrollContent}
-                              nestedScrollEnabled={true}
-                              showsVerticalScrollIndicator={true}
-                              bounces={false}
-                              scrollEnabled={true}
-                              persistentScrollbar={true}
-                              removeClippedSubviews={false}
-                              onStartShouldSetResponder={() => true}
-                              onMoveShouldSetResponder={() => true}
-                            >
-                              {HOURS.map((hour) => (
-                                <TouchableOpacity
-                                  key={hour}
-                                  style={styles.dropdownItem}
-                                  onPress={() => {
-                                    setStartHour(hour);
-                                    setOpenDropdown({ type: null });
-                                  }}
-                                  activeOpacity={0.7}
-                                >
-                                  <Text style={styles.dropdownItemText}>{hour}시</Text>
-                                </TouchableOpacity>
-                              ))}
-                            </ScrollView>
-                          </View>
-                        )}
-                      </View>
-
-                      {/* Minute */}
-                      <View style={[styles.dropdownContainer, styles.dropdownContainerMinute, isOpen('startMinute') && styles.dropdownContainerOpen]}>
-                        <TouchableOpacity
-                          style={styles.dropdownButton}
-                          onPress={() => setOpenDropdown(isOpen('startMinute') ? { type: null } : { type: 'startMinute' })}
-                          activeOpacity={0.7}
-                        >
-                          <Text style={styles.dropdownButtonText}>{startMinute}분</Text>
-                          <Text style={styles.dropdownArrow}>▼</Text>
+                        <TouchableOpacity style={styles.timePickerModalConfirmButton} onPress={handleTimePickerNext} activeOpacity={0.7}>
+                          <Text style={styles.timePickerModalConfirmText}>다음</Text>
                         </TouchableOpacity>
-                        {isOpen('startMinute') && (
-                          <View 
-                            style={styles.dropdownList}
-                            onStartShouldSetResponder={() => true}
-                            onMoveShouldSetResponder={() => true}
-                          >
-                            <ScrollView 
-                              style={styles.dropdownScrollView}
-                              contentContainerStyle={styles.dropdownScrollContent}
-                              nestedScrollEnabled={true}
-                              showsVerticalScrollIndicator={true}
-                              bounces={false}
-                              scrollEnabled={true}
-                              persistentScrollbar={true}
-                              removeClippedSubviews={false}
-                              onStartShouldSetResponder={() => true}
-                              onMoveShouldSetResponder={() => true}
-                            >
-                              {MINUTES.map((minute) => (
-                                <TouchableOpacity
-                                  key={minute}
-                                  style={styles.dropdownItem}
-                                  onPress={() => {
-                                    setStartMinute(minute);
-                                    setOpenDropdown({ type: null });
-                                  }}
-                                  activeOpacity={0.7}
-                                >
-                                  <Text style={styles.dropdownItemText}>{minute}분</Text>
-                                </TouchableOpacity>
-                              ))}
-                            </ScrollView>
-                          </View>
-                        )}
                       </View>
-                    </View>
-                  </View>
-
-                  {/* 종료 시간 */}
-                  <View style={styles.timeRangeSection}>
-                    <Text style={styles.timeRangeLabel}>종료 시간</Text>
-                    <View style={styles.timeRangeRow}>
-                      {/* AM/PM */}
-                      <View style={[styles.dropdownContainer, styles.dropdownContainerPeriod, isOpen('endPeriod') && styles.dropdownContainerOpen]}>
-                        <TouchableOpacity
-                          style={styles.dropdownButton}
-                          onPress={() => setOpenDropdown(isOpen('endPeriod') ? { type: null } : { type: 'endPeriod' })}
-                          activeOpacity={0.7}
-                        >
-                          <Text style={styles.dropdownButtonText}>{endPeriod}</Text>
-                          <Text style={styles.dropdownArrow}>▼</Text>
+                    </>
+                  ) : (
+                    <>
+                      <View style={styles.timeRangeSection}>
+                        <Text style={styles.timeRangeLabel}>종료 시간</Text>
+                        <View style={[styles.timePickerWrapper, styles.timeRangeRow]}>
+                          <WheelPicker
+                            value={endPeriod}
+                            options={[
+                              { label: '오전', value: 'AM' },
+                              { label: '오후', value: 'PM' },
+                            ]}
+                            onSelect={(v) => { if (v === 'AM' || v === 'PM') setEndPeriod(v); }}
+                            width={80}
+                          />
+                          <WheelPicker
+                            value={endHour}
+                            options={HOURS.map((h) => ({ label: `${h}`, value: h }))}
+                            onSelect={(v) => setEndHour(v as number)}
+                            width={60}
+                          />
+                          <View style={styles.timeSeparator}>
+                            <Text style={styles.timeSeparatorText}>:</Text>
+                          </View>
+                          <WheelPicker
+                            value={endMinute}
+                            options={MINUTES.map((m) => ({ label: m < 10 ? `0${m}` : `${m}`, value: m }))}
+                            onSelect={(v) => setEndMinute(v as number)}
+                            width={60}
+                          />
+                        </View>
+                      </View>
+                      <View style={styles.timePickerModalButtons}>
+                        <TouchableOpacity style={styles.timePickerModalCancelButton} onPress={handleTimePickerPrev} activeOpacity={0.7}>
+                          <Text style={styles.timePickerModalCancelText}>이전</Text>
                         </TouchableOpacity>
-                        {isOpen('endPeriod') && (
-                          <View style={styles.dropdownListSmall}>
-                            <ScrollView 
-                              style={styles.dropdownScrollViewSmall}
-                              contentContainerStyle={styles.dropdownScrollContent}
-                              nestedScrollEnabled={true}
-                              showsVerticalScrollIndicator={false}
-                              bounces={false}
-                              scrollEnabled={false}
-                            >
-                              {TIME_PERIODS.map((period) => (
-                                <TouchableOpacity
-                                  key={period}
-                                  style={styles.dropdownItem}
-                                  onPress={() => {
-                                    setEndPeriod(period);
-                                    setOpenDropdown({ type: null });
-                                  }}
-                                  activeOpacity={0.7}
-                                >
-                                  <Text style={styles.dropdownItemText}>{period}</Text>
-                                </TouchableOpacity>
-                              ))}
-                            </ScrollView>
-                          </View>
-                        )}
-                      </View>
-
-                      {/* Hour */}
-                      <View style={[styles.dropdownContainer, styles.dropdownContainerHour, isOpen('endHour') && styles.dropdownContainerOpen]}>
-                        <TouchableOpacity
-                          style={styles.dropdownButton}
-                          onPress={() => setOpenDropdown(isOpen('endHour') ? { type: null } : { type: 'endHour' })}
-                          activeOpacity={0.7}
-                        >
-                          <Text style={styles.dropdownButtonText}>{endHour}시</Text>
-                          <Text style={styles.dropdownArrow}>▼</Text>
+                        <TouchableOpacity style={styles.timePickerModalConfirmButton} onPress={handleSaveTime} activeOpacity={0.7}>
+                          <Text style={styles.timePickerModalConfirmText}>확인</Text>
                         </TouchableOpacity>
-                        {isOpen('endHour') && (
-                          <View 
-                            style={styles.dropdownList}
-                            onStartShouldSetResponder={() => true}
-                            onMoveShouldSetResponder={() => true}
-                          >
-                            <ScrollView 
-                              style={styles.dropdownScrollView}
-                              contentContainerStyle={styles.dropdownScrollContent}
-                              nestedScrollEnabled={true}
-                              showsVerticalScrollIndicator={true}
-                              bounces={false}
-                              scrollEnabled={true}
-                              persistentScrollbar={true}
-                              removeClippedSubviews={false}
-                              onStartShouldSetResponder={() => true}
-                              onMoveShouldSetResponder={() => true}
-                            >
-                              {Array.from({ length: 12 }, (_, i) => i + 1).map((hour) => (
-                                <TouchableOpacity
-                                  key={hour}
-                                  style={styles.dropdownItem}
-                                  onPress={() => {
-                                    setEndHour(hour);
-                                    setOpenDropdown({ type: null });
-                                  }}
-                                  activeOpacity={0.7}
-                                >
-                                  <Text style={styles.dropdownItemText}>{hour}시</Text>
-                                </TouchableOpacity>
-                              ))}
-                            </ScrollView>
-                          </View>
-                        )}
                       </View>
-
-                      {/* Minute */}
-                      <View style={[styles.dropdownContainer, styles.dropdownContainerMinute, isOpen('endMinute') && styles.dropdownContainerOpen]}>
-                        <TouchableOpacity
-                          style={styles.dropdownButton}
-                          onPress={() => setOpenDropdown(isOpen('endMinute') ? { type: null } : { type: 'endMinute' })}
-                          activeOpacity={0.7}
-                        >
-                          <Text style={styles.dropdownButtonText}>{endMinute}분</Text>
-                          <Text style={styles.dropdownArrow}>▼</Text>
-                        </TouchableOpacity>
-                        {isOpen('endMinute') && (
-                          <View 
-                            style={styles.dropdownList}
-                            onStartShouldSetResponder={() => true}
-                            onMoveShouldSetResponder={() => true}
-                          >
-                            <ScrollView 
-                              style={styles.dropdownScrollView}
-                              contentContainerStyle={styles.dropdownScrollContent}
-                              nestedScrollEnabled={true}
-                              showsVerticalScrollIndicator={true}
-                              bounces={false}
-                              scrollEnabled={true}
-                              persistentScrollbar={true}
-                              removeClippedSubviews={false}
-                              onStartShouldSetResponder={() => true}
-                              onMoveShouldSetResponder={() => true}
-                            >
-                              {Array.from({ length: 60 }, (_, i) => i).map((minute) => (
-                                <TouchableOpacity
-                                  key={minute}
-                                  style={styles.dropdownItem}
-                                  onPress={() => {
-                                    setEndMinute(minute);
-                                    setOpenDropdown({ type: null });
-                                  }}
-                                  activeOpacity={0.7}
-                                >
-                                  <Text style={styles.dropdownItemText}>{minute}분</Text>
-                                </TouchableOpacity>
-                              ))}
-                            </ScrollView>
-                          </View>
-                        )}
-                      </View>
-                    </View>
-                  </View>
-
-                  <View style={styles.timePickerModalButtons}>
-                    <TouchableOpacity
-                      style={styles.timePickerModalCancelButton}
-                      onPress={() => {
-                        setShowTimePickerModal(false);
-                        setOpenDropdown({ type: null });
-                      }}
-                      activeOpacity={0.7}
-                    >
-                      <Text style={styles.timePickerModalCancelText}>취소</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.timePickerModalConfirmButton} onPress={handleSaveTime} activeOpacity={0.7}>
-                      <Text style={styles.timePickerModalConfirmText}>확인</Text>
-                    </TouchableOpacity>
-                  </View>
+                    </>
+                  )}
                 </View>
               </View>
-            </View>
+            </TouchableOpacity>
           </TouchableOpacity>
         </Modal>
       </View>
