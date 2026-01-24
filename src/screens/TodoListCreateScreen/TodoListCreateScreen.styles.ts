@@ -162,8 +162,8 @@ export const styles = StyleSheet.create({
     marginLeft: spacing[2],
   },
   rerollButtonIcon: {
-    width: 20,
-    height: 20,
+    width: 30,
+    height: 30,
   },
 
   selectableMissionCard: { 

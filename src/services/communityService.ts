@@ -248,7 +248,7 @@ const transformBackendPost = (post: BackendPostResponse): CommunityPost => {
     post_id: post.id.toString(),
     mission_id: post.missionTag?.id?.toString() || '',
     mission_title: post.missionTag?.title || postTitle,
-    mission_emoji: post.postType === 'VERIFICATION' ? '✅' : '📝',
+    mission_emoji: post.postType === 'VERIFICATION' ? '' : '📝',
     title: postTitle, // title 필드를 직접 사용
     content: post.content,
     author: post.userId?.toString() || '',

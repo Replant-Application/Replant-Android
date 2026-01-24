@@ -58,13 +58,13 @@ export const useWakeUpVerificationScreenContainer = ({
         } else if (typeof params.userMissionId === 'number') {
           extractedId = params.userMissionId;
         }
-        console.log('[WakeUpVerificationScreen] ✅ route.params에서 추출:', extractedId);
+        console.log('[WakeUpVerificationScreen] route.params에서 추출:', extractedId);
       }
 
       // 2순위: Context에서 가져오기
       if (!extractedId && currentWakeUpMissionId) {
         extractedId = currentWakeUpMissionId;
-        console.log('[WakeUpVerificationScreen] ✅ Context에서 추출:', extractedId);
+        console.log('[WakeUpVerificationScreen] Context에서 추출:', extractedId);
       }
 
       // 3순위: AsyncStorage에서 가져오기 (Context가 아직 로드되지 않았을 수 있음)
@@ -72,13 +72,13 @@ export const useWakeUpVerificationScreenContainer = ({
         const storedId = await getWakeUpMissionId();
         if (storedId) {
           extractedId = storedId;
-          console.log('[WakeUpVerificationScreen] ✅ AsyncStorage에서 추출:', extractedId);
+          console.log('[WakeUpVerificationScreen] AsyncStorage에서 추출:', extractedId);
         }
       }
 
       // 유효성 검사
       if (extractedId !== undefined && !isNaN(extractedId) && extractedId !== 0) {
-        console.log('[WakeUpVerificationScreen] ✅ userMissionId 설정:', extractedId);
+        console.log('[WakeUpVerificationScreen] userMissionId 설정:', extractedId);
         setUserMissionId(extractedId);
       } else {
         console.error('[WakeUpVerificationScreen] ❌ userMissionId 추출 실패:', {
@@ -199,7 +199,7 @@ export const useWakeUpVerificationScreenContainer = ({
       });
 
       if (result.success && result.data) {
-        console.log('[WakeUpVerificationScreen] ✅ 미션 정보 로드 성공');
+        console.log('[WakeUpVerificationScreen] 미션 정보 로드 성공');
         setUserMission(result.data);
       } else {
         // 404 에러인 경우 특별 처리
@@ -271,7 +271,7 @@ export const useWakeUpVerificationScreenContainer = ({
 
           // API에서 받은 userMissionId 설정
           if (apiMissionId) {
-            console.log('[WakeUpVerificationScreen] ✅ API에서 userMissionId 받음:', apiMissionId);
+            console.log('[WakeUpVerificationScreen] API에서 userMissionId 받음:', apiMissionId);
             setUserMissionId(apiMissionId);
 
             // 상세 미션 정보 로드
@@ -423,7 +423,7 @@ export const useWakeUpVerificationScreenContainer = ({
       if (result.success) {
         // result.success가 true면 백엔드에서 성공한 것으로 간주
         // canVerify가 false여도 백엔드가 성공했다면 성공으로 처리
-        console.log('[WakeUpVerificationScreen] ✅ 백엔드 인증 성공 (result.success === true)');
+        console.log('[WakeUpVerificationScreen] 백엔드 인증 성공 (result.success === true)');
         setShowSuccessModal(true);
       } else {
         // result.success가 false면 실제 실패

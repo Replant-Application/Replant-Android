@@ -120,7 +120,7 @@ class SSEService {
 
       // 모든 이벤트를 로깅하기 위한 전역 리스너
       eventSource.addEventListener('open', () => {
-        console.log('[SSE] ✅ 연결 열림 (open 이벤트)');
+        console.log('[SSE] 연결 열림 (open 이벤트)');
       });
 
       /**
@@ -209,14 +209,14 @@ class SSEService {
           // react-native-sse의 타입 정의가 불완전하여 타입 단언 필요
           (eventSource as unknown as { addEventListener: (type: string, listener: EventSourceListener) => void })
             .addEventListener(eventType, listener);
-          console.log(`[SSE] ✅ 커스텀 이벤트 타입 등록 성공: ${eventType}`);
+          console.log(`[SSE] 커스텀 이벤트 타입 등록 성공: ${eventType}`);
         } catch (error) {
           console.warn(`[SSE] ⚠️ 커스텀 이벤트 타입 등록 실패 (${eventType}):`, error);
         }
       });
       
       // 모든 이벤트를 캐치하기 위해 'message' 이벤트도 처리 (백엔드가 커스텀 타입 대신 message로 보낼 수 있음)
-      console.log('[SSE] ✅ 모든 이벤트 리스너 등록 완료');
+      console.log('[SSE] 모든 이벤트 리스너 등록 완료');
       
       console.log('[SSE] 이벤트 리스너 등록 완료');
 

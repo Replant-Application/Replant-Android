@@ -291,7 +291,7 @@ const AppNavigator = () => {
           
           if (!hasSetupData) {
             // DB에 설정이 없으면 신규 가입자 - 설문 화면으로 이동
-            console.log('[AppNavigator] ✅ 신규 가입자 (DB에 설정 없음) - 설문 화면으로 이동');
+            console.log('[AppNavigator] 신규 가입자 (DB에 설정 없음) - 설문 화면으로 이동');
             try {
               setCurrentScreen(SCREEN_NAMES.SPONTANEOUS_MISSION_SETUP);
             } catch (error) {
@@ -301,7 +301,7 @@ const AppNavigator = () => {
             }
           } else {
             // DB에 설정이 있으면 기존 사용자 - 홈 화면으로 이동
-            console.log('[AppNavigator] ✅ 기존 사용자 (DB에 설정 있음) - 홈 화면으로 이동');
+            console.log('[AppNavigator] 기존 사용자 (DB에 설정 있음) - 홈 화면으로 이동');
             try {
               setCurrentScreen(SCREEN_NAMES.HOME);
             } catch (error) {
@@ -535,7 +535,7 @@ const AppNavigator = () => {
 
     // 업데이트 알림 처리 (APP_UPDATE)
     if (type === 'APP_UPDATE') {
-      console.log('[AppNavigator] ✅ 업데이트 알림 수신 (FCM)');
+      console.log('[AppNavigator] 업데이트 알림 수신 (FCM)');
       const data = lastNotification;
       const updateResult = {
         isRequired: data.isRequired === true || data.isRequired === 'true',
@@ -551,7 +551,7 @@ const AppNavigator = () => {
 
     // 기상 미션 알림 처리 (SPONTANEOUS_WAKE_UP)
     if (type === 'SPONTANEOUS_WAKE_UP') {
-      console.log('[AppNavigator] ✅ 기상 미션 알림 수신 (SSE/FCM)');
+      console.log('[AppNavigator] 기상 미션 알림 수신 (SSE/FCM)');
       console.log('[AppNavigator] 알림 전체 데이터:', JSON.stringify(lastNotification, null, 2));
       console.log('[AppNavigator] 알림 키:', Object.keys(lastNotification || {}));
       
@@ -597,7 +597,7 @@ const AppNavigator = () => {
       
       // Context에 userMissionId 저장 (전역 상태로 관리) - 비동기 처리
       setWakeUpMissionId(missionId).then(() => {
-        console.log('[AppNavigator] ✅ Context에 userMissionId 저장 완료:', missionId);
+        console.log('[AppNavigator] Context에 userMissionId 저장 완료:', missionId);
       }).catch((error) => {
         console.error('[AppNavigator] ❌ Context 저장 실패:', error);
         // Context 저장 실패해도 계속 진행
@@ -625,7 +625,7 @@ const AppNavigator = () => {
     console.log('[AppNavigator] 투두리스트 알림 여부:', isTodoNotification);
     
     if (isTodoNotification) {
-      console.log('[AppNavigator] ✅ 투두리스트 작성 알림 수신, 투두리스트 작성 화면으로 이동');
+      console.log('[AppNavigator] 투두리스트 작성 알림 수신, 투두리스트 작성 화면으로 이동');
       processedNotificationIdRef.current = notificationId || null;
       setCurrentScreen(SCREEN_NAMES.TODO_LIST_CREATE);
     } else {

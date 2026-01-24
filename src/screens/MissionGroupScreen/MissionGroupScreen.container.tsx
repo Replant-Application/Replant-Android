@@ -28,7 +28,7 @@ export const getVerificationTypeLabel = (type?: string): string => {
     case 'COMMUNITY':
       return '커뮤니티 인증';
     default:
-      return '✅ 일반 인증';
+      return '일반 인증';
   }
 };
 

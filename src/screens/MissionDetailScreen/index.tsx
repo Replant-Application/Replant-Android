@@ -221,7 +221,7 @@ const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({ navigation, r
         {/* 뱃지가 있고 이미 후기를 작성한 경우 */}
         {hasBadge && hasWrittenReview && (
           <View style={styles.alreadyWrittenSection}>
-            <Text style={styles.alreadyWrittenIcon}>✅</Text>
+            <Text style={styles.alreadyWrittenIcon}></Text>
             <Text style={styles.alreadyWrittenText}>
               이 뱃지로 후기를 이미 작성하셨습니다.{'\n'}
               다시 미션을 완료하면 새 후기를 작성할 수 있어요!

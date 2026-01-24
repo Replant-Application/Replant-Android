@@ -71,12 +71,7 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onNavigate }) => {
   };
 
   return (
-    <ImageBackground
-      source={ONBOARDING_SLIDES[currentIndex].image}
-      style={styles.container}
-      resizeMode="cover"
-      accessibilityLabel="온보딩 배경 이미지"
-    >
+    <View style={styles.container}>
       {/* Skip 버튼 */}
       <TouchableOpacity
         style={styles.skipButton}
@@ -92,28 +87,35 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onNavigate }) => {
         </ImageBackground>
       </TouchableOpacity>
 
-      {/* 슬라이드 - 투명하게 처리하여 스와이프만 가능하게 */}
-      <FlatList
-        ref={flatListRef}
-        data={ONBOARDING_SLIDES}
-        renderItem={renderSlide}
-        keyExtractor={(item) => String(item.id)}
-        horizontal
-        pagingEnabled
-        showsHorizontalScrollIndicator={false}
-        onScroll={handleScroll}
-        scrollEventThrottle={16}
-        onMomentumScrollEnd={handleScrollEnd}
-        onViewableItemsChanged={onViewableItemsChanged}
-        viewabilityConfig={viewabilityConfig}
-        getItemLayout={(_, index) => ({
-          length: SCREEN_WIDTH,
-          offset: SCREEN_WIDTH * index,
-          index,
-        })}
-        style={styles.transparentFlatList}
-      />
-    </ImageBackground>
+      <ImageBackground
+        source={ONBOARDING_SLIDES[currentIndex].image}
+        style={styles.imageBackground}
+        resizeMode="contain"
+        accessibilityLabel="온보딩 배경 이미지"
+      >
+        {/* 슬라이드 - 투명하게 처리하여 스와이프만 가능하게 */}
+        <FlatList
+          ref={flatListRef}
+          data={ONBOARDING_SLIDES}
+          renderItem={renderSlide}
+          keyExtractor={(item) => String(item.id)}
+          horizontal
+          pagingEnabled
+          showsHorizontalScrollIndicator={false}
+          onScroll={handleScroll}
+          scrollEventThrottle={16}
+          onMomentumScrollEnd={handleScrollEnd}
+          onViewableItemsChanged={onViewableItemsChanged}
+          viewabilityConfig={viewabilityConfig}
+          getItemLayout={(_, index) => ({
+            length: SCREEN_WIDTH,
+            offset: SCREEN_WIDTH * index,
+            index,
+          })}
+          style={styles.transparentFlatList}
+        />
+      </ImageBackground>
+    </View>
   );
 };
 

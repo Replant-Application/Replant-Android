@@ -130,7 +130,7 @@ export const useSettingsScreenContainer = ({ navigation }: SettingsScreenContain
     try {
       const result = await clearAllCommunityPosts();
       if (result.success) {
-        setAlertTitle('✅ 완료');
+        setAlertTitle('완료');
         setAlertMessage(`${result.deletedCount}개의 게시글이 삭제되었습니다.`);
         setShowAlert(true);
       } else {
@@ -160,7 +160,7 @@ export const useSettingsScreenContainer = ({ navigation }: SettingsScreenContain
     try {
       const result = await deleteAllUsers();
       if (result.success) {
-        setAlertTitle('✅ 완료');
+        setAlertTitle('완료');
         setAlertMessage(`${result.data?.deletedCount || 0}명의 유저가 삭제되었습니다.`);
         setShowAlert(true);
       } else {

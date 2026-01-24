@@ -15,6 +15,13 @@ export const styles = StyleSheet.create({
     width: SCREEN_WIDTH,
     height: SCREEN_HEIGHT,
     backgroundColor: colors.white,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  imageBackground: {
+    width: SCREEN_WIDTH * 0.85,
+    height: SCREEN_HEIGHT * 0.85,
+    alignSelf: 'center',
   },
   transparentFlatList: {
     flex: 1,

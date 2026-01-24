@@ -180,7 +180,7 @@ export const useNotificationScreenContainer = ({
         createdAt: new Date().toISOString(),
       };
       
-      console.log('[NotificationScreen] ✅ 새 알림 즉시 추가:', newNotification);
+      console.log('[NotificationScreen] 새 알림 즉시 추가:', newNotification);
       
       setNotifications(prev => {
         const now = Date.now();
@@ -307,7 +307,7 @@ export const useNotificationScreenContainer = ({
 
     // 돌발 미션 알림 처리
     if (type === 'SPONTANEOUS_WAKE_UP' || type === 'SPONTANEOUS_MEAL' || type === 'SPONTANEOUS_DIARY') {
-      console.log('[NotificationScreen] ✅ 돌발 미션 알림 클릭:', type);
+      console.log('[NotificationScreen] 돌발 미션 알림 클릭:', type);
       
       if (!referenceId) {
         console.error('[NotificationScreen] ❌ referenceId가 없습니다.');
@@ -331,7 +331,7 @@ export const useNotificationScreenContainer = ({
         }
 
         if (type === 'SPONTANEOUS_WAKE_UP') {
-          console.log('[NotificationScreen] ✅ 기상 미션 인증 화면으로 이동');
+          console.log('[NotificationScreen] 기상 미션 인증 화면으로 이동');
           
           if (!referenceId) {
             Alert.alert('오류', '미션 정보가 올바르지 않습니다.');
@@ -349,7 +349,7 @@ export const useNotificationScreenContainer = ({
             userMissionId: userMissionId,
           });
         } else if (type === 'SPONTANEOUS_MEAL') {
-          console.log('[NotificationScreen] ✅ 식사 미션 게시글 작성 화면으로 이동');
+          console.log('[NotificationScreen] 식사 미션 게시글 작성 화면으로 이동');
           safeNavigation.navigate(SCREEN_NAMES.COMMUNITY_POST_CREATE as any, {
             type: 'VERIFICATION',
             userMissionId: referenceId,
@@ -358,7 +358,7 @@ export const useNotificationScreenContainer = ({
             missionEmoji: '🍽️',
           });
         } else if (type === 'SPONTANEOUS_DIARY') {
-          console.log('[NotificationScreen] ✅ 감성일기 작성 화면으로 이동');
+          console.log('[NotificationScreen] 감성일기 작성 화면으로 이동');
           safeNavigation.navigate(SCREEN_NAMES.DIARY as any);
         }
       } catch (error) {
@@ -383,7 +383,7 @@ export const useNotificationScreenContainer = ({
       ));
 
     if (isTodoNotification) {
-      console.log('[NotificationScreen] ✅ 투두리스트 작성 알림 클릭, 투두리스트 작성 화면으로 이동');
+      console.log('[NotificationScreen] 투두리스트 작성 알림 클릭, 투두리스트 작성 화면으로 이동');
       try {
         safeNavigation.navigate(SCREEN_NAMES.TODO_LIST_CREATE as any);
       } catch (error) {

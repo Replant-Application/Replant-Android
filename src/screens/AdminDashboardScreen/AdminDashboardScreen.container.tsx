@@ -80,7 +80,7 @@ export const useAdminDashboardScreenContainer = ({ navigation }: AdminDashboardS
               const result = await deleteAllUsers();
               if (result.success) {
                 Alert.alert(
-                  '✅ 완료',
+                  '완료',
                   `${result.data?.deletedCount || 0}명의 유저가 삭제되었습니다.`
                 );
                 // 데이터 새로고침

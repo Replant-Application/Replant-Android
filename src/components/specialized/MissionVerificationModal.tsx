@@ -109,7 +109,7 @@ const MissionVerificationModal: React.FC<MissionVerificationModalProps> = ({
 
     if (result.isValid) {
       Alert.alert(
-        '✅ 시간 인증 성공',
+        '시간 인증 성공',
         result.message,
         [
           {
@@ -143,7 +143,7 @@ const MissionVerificationModal: React.FC<MissionVerificationModalProps> = ({
 
       if (result.withinRadius) {
         Alert.alert(
-          '✅ GPS 인증 성공',
+          'GPS 인증 성공',
           result.message,
           [
             {

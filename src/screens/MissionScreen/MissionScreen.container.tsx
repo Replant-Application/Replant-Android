@@ -690,7 +690,7 @@ export const useMissionScreenContainer = ({
         if (activeTab === 'missionGroup') {
           await loadGroupMissions(currentServerPage);
         }
-        showSuccess('미션이 인증되었습니다!', '✅ 인증 완료');
+        showSuccess('미션이 인증되었습니다!', '인증 완료');
       }
     } catch (error) {
       logError('인증 상태 확인 오류', error as Error);

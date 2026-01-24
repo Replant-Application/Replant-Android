@@ -108,7 +108,7 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
   const getNotificationIcon = (type: string) => {
     switch (type) {
       case 'MISSION': case 'MISSION_ASSIGNED': return require('../../assets/images/goal.png');
-      case 'VERIFICATION_APPROVED': return '✅';
+      case 'VERIFICATION_APPROVED': return '';
       case 'VERIFICATION_REJECTED': return '❌';
       case 'USER_RECOMMENDED': return '👋';
       case 'CHAT_MESSAGE': return require('../../assets/images/say.png');
@@ -142,7 +142,7 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
 
       // 돌발 미션 알림 처리
       if (type === 'SPONTANEOUS_WAKE_UP' || type === 'SPONTANEOUS_MEAL' || type === 'SPONTANEOUS_DIARY') {
-        console.log('[NotificationDropdown] ✅ 돌발 미션 알림 클릭:', type);
+        console.log('[NotificationDropdown] 돌발 미션 알림 클릭:', type);
         
         if (!referenceId) {
           console.error('[NotificationDropdown] ❌ referenceId가 없습니다.');
@@ -169,7 +169,7 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
           // 알림 타입에 따라 적절한 화면으로 이동
           if (type === 'SPONTANEOUS_WAKE_UP') {
             // 기상 미션 → 인증 화면으로 이동
-            console.log('[NotificationDropdown] ✅ 기상 미션 인증 화면으로 이동, userMissionId:', referenceId);
+            console.log('[NotificationDropdown] 기상 미션 인증 화면으로 이동, userMissionId:', referenceId);
             if (!referenceId) {
               console.error('[NotificationDropdown] ❌ referenceId가 없습니다.');
               Alert.alert('오류', '미션 정보가 올바르지 않습니다.');
@@ -180,7 +180,7 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
             });
           } else if (type === 'SPONTANEOUS_MEAL') {
             // 식사 미션 → 게시글 작성 화면으로 이동
-            console.log('[NotificationDropdown] ✅ 식사 미션 게시글 작성 화면으로 이동');
+            console.log('[NotificationDropdown] 식사 미션 게시글 작성 화면으로 이동');
             onNavigate(SCREEN_NAMES.COMMUNITY_POST_CREATE, {
               type: 'VERIFICATION',
               userMissionId: referenceId,
@@ -190,7 +190,7 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
             });
           } else if (type === 'SPONTANEOUS_DIARY') {
             // 감성일기 미션 → 감성일기 작성 화면으로 이동
-            console.log('[NotificationDropdown] ✅ 감성일기 작성 화면으로 이동');
+            console.log('[NotificationDropdown] 감성일기 작성 화면으로 이동');
             onNavigate(SCREEN_NAMES.DIARY);
           }
         } catch (error) {

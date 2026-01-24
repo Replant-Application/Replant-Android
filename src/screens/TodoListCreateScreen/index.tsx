@@ -193,7 +193,7 @@ const TodoListCreateScreen: React.FC<TodoListCreateScreenProps> = ({ navigation 
         onPress={() => setShowCreateForm(!showCreateForm)}
         activeOpacity={0.7}
       >
-        <Text style={styles.createMissionButtonText}>{showCreateForm ? '✕ 취소' : '+ 나만의 투두미션 생성'}</Text>
+        <Text style={styles.createMissionButtonText}>{showCreateForm ? '취소' : '나만의 투두미션 생성'}</Text>
       </TouchableOpacity>
 
       {showCreateForm && (
@@ -434,7 +434,7 @@ const TodoListCreateScreen: React.FC<TodoListCreateScreenProps> = ({ navigation 
             disabled={openDropdown.type !== null}
           >
             <View>
-              {/* ✅ 그림자 wrapper (Android 사각 그림자 방지 + 드롭다운 안 가리도록 overflow 숨기지 않음) */}
+              {/* 그림자 wrapper (Android 사각 그림자 방지 + 드롭다운 안 가리도록 overflow 숨기지 않음) */}
               <View style={styles.modalShadowWrap}>
                 <View style={styles.timePickerModalContainer}>
                   <Text style={styles.timePickerModalTitle}>시간 설정</Text>

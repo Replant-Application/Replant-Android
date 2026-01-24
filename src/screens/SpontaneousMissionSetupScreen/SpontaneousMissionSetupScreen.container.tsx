@@ -261,7 +261,7 @@ export const useSpontaneousMissionSetupScreenContainer = ({
               setBreakfastTime(parse24Hour(data.breakfastTime));
               setLunchTime(parse24Hour(data.lunchTime));
               setDinnerTime(parse24Hour(data.dinnerTime));
-              console.log('[SpontaneousMissionSetupScreen] ✅ 설정 로드 완료');
+              console.log('[SpontaneousMissionSetupScreen] 설정 로드 완료');
             } else {
               console.warn('[SpontaneousMissionSetupScreen] ⚠️ 설정 데이터가 불완전함');
               setCurrentStep(0);
