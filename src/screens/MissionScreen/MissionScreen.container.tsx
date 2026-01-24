@@ -17,6 +17,7 @@ import {
   addSystemMissionToMyMissions,
   getCustomMissions,
   getMissionCollection,
+  completeCustomMission,
   MissionCategory,
 } from '../../api/missionApi';
 import * as Location from 'expo-location';
@@ -96,6 +97,9 @@ export const useMissionScreenContainer = ({
   const [completeModalMessage, setCompleteModalMessage] = useState('');
   const [completedMissionForVerification, setCompletedMissionForVerification] = useState<Mission | null>(null);
   const [isLevelUp, setIsLevelUp] = useState(false);
+
+  // 커스텀 미션 완료 처리 중 (mission_id)
+  const [completingMissionId, setCompletingMissionId] = useState<string | null>(null);
 
   // 미션 도감 관련 상태 (route params에서 missionGroupTab 복원)
   const [missionGroupTab, setMissionGroupTab] = useState<MissionGroupTab>(routeParams?.missionGroupTab || 'official');
@@ -246,6 +250,34 @@ export const useMissionScreenContainer = ({
       }
     },
     [missions, completeMissionWithPhoto, showError]
+  );
+
+  /**
+   * 커스텀 미션 완료 (인증 없이 즉시 완료)
+   */
+  const handleCompleteCustomMission = useCallback(
+    async (missionId: string) => {
+      const numericId = parseInt(missionId.replace(/^custom_/, ''), 10);
+      if (isNaN(numericId)) {
+        showError('미션 ID가 올바르지 않습니다.', 'MissionScreen.handleCompleteCustomMission');
+        return;
+      }
+      setCompletingMissionId(missionId);
+      try {
+        const result = await completeCustomMission(numericId);
+        if (result.success) {
+          showSuccess('미션을 완료했어요.');
+          await loadMissions();
+        } else {
+          handleApiError(result, 'MissionScreen.handleCompleteCustomMission');
+        }
+      } catch (e) {
+        showError(e instanceof Error ? e : new Error('미션 완료에 실패했습니다.'), 'MissionScreen.handleCompleteCustomMission');
+      } finally {
+        setCompletingMissionId(null);
+      }
+    },
+    [loadMissions, showSuccess, showError, handleApiError]
   );
 
   /**
@@ -937,6 +969,8 @@ export const useMissionScreenContainer = ({
     refreshing,
     // Handlers
     handleMissionComplete,
+    handleCompleteCustomMission,
+    completingMissionId,
     handleMissionUncomplete,
     handleVerify,
     handleLikeVerification,

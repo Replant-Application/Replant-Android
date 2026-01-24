@@ -50,6 +50,8 @@ const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({ navigation, r
     handleSubmitReview,
     handleRefresh,
     loadMoreReviews,
+    handleCompleteCustom,
+    completingCustom,
   } = useMissionDetailScreenContainer({ navigation, route });
 
 
@@ -199,6 +201,22 @@ const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({ navigation, r
                 : '커뮤니티 인증'}
             </Text>
           </View>
+
+          {/* 커스텀 미션 완료 버튼 */}
+          {mission.missionType === 'CUSTOM' && (
+            <TouchableOpacity
+              style={[styles.completeCustomButton, completingCustom && styles.completeCustomButtonDisabled]}
+              onPress={handleCompleteCustom}
+              disabled={completingCustom}
+              activeOpacity={0.7}
+            >
+              {completingCustom ? (
+                <ActivityIndicator size="small" color={colors.white} />
+              ) : (
+                <Text style={styles.completeCustomButtonText}>완료하기</Text>
+              )}
+            </TouchableOpacity>
+          )}
         </View>
 
         {/* 후기 작성 섹션 */}

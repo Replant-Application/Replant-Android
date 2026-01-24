@@ -8,6 +8,7 @@ import Badge from './Badge';
 interface MissionCardProps {
   mission: Mission;
   onComplete?: (missionId: string) => void;
+  onCompleteCustom?: (missionId: string) => void;
   onUncomplete?: (missionId: string) => void;
   onUploadPhoto?: (missionId: string) => void;
   onDeletePhoto?: (missionId: string) => void;
@@ -24,6 +25,7 @@ interface MissionCardProps {
 const MissionCard: React.FC<MissionCardProps> = ({
   mission,
   onComplete,
+  onCompleteCustom,
   onUncomplete: _onUncomplete,
   onUploadPhoto,
   onDeletePhoto,
@@ -277,6 +279,31 @@ const MissionCard: React.FC<MissionCardProps> = ({
                   disabled && styles.disabledText
                 ]}>
                   {disabled ? '비활성화' : loading ? '처리중...' : getVerifyButtonLabel()}
+                </Text>
+              </TouchableOpacity>
+            )}
+            {/* 커스텀 미션 완료 버튼: 미완료 상태일 때, 커스텀 미션이고 onCompleteCustom이 있는 경우 */}
+            {!mission.completed && (mission.missionType === 'CUSTOM' || mission.is_custom === true) && onCompleteCustom && (
+              <TouchableOpacity
+                style={[
+                  styles.actionButton,
+                  styles.completeButton,
+                  styles.customCompleteButton,
+                  (loading || disabled) && styles.disabledButton
+                ]}
+                onPress={(loading || disabled) ? undefined : () => onCompleteCustom(mission.mission_id)}
+                disabled={loading || disabled}
+                activeOpacity={(loading || disabled) ? 1 : 0.7}
+                accessibilityRole="button"
+                accessibilityLabel={loading ? '처리중' : '완료하기'}
+                accessibilityState={{ disabled: loading || disabled }}
+              >
+                <Text style={[
+                  styles.actionText,
+                  styles.completeText,
+                  (loading || disabled) && styles.disabledText
+                ]}>
+                  {loading ? '처리중...' : '완료하기'}
                 </Text>
               </TouchableOpacity>
             )}

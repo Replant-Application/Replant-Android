@@ -11,6 +11,7 @@ import {
   getCustomMission,
   getMissionReviews,
   createMissionReview,
+  completeCustomMission,
   SystemMission,
   MissionReview,
   Mission,
@@ -77,6 +78,7 @@ export const useMissionDetailScreenContainer = ({ navigation, route }: MissionDe
   const [reviewRating, setReviewRating] = useState(5);
   const [submittingReview, setSubmittingReview] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<number | null>(null);
+  const [completingCustom, setCompletingCustom] = useState(false);
 
   /**
    * 미션 데이터 로드
@@ -266,6 +268,30 @@ export const useMissionDetailScreenContainer = ({ navigation, route }: MissionDe
   }, [currentPage, totalPages, loadReviews]);
 
   /**
+   * 커스텀 미션 완료 (인증 없이 즉시 완료)
+   */
+  const handleCompleteCustom = useCallback(
+    async () => {
+      if (!mission || mission.missionType !== 'CUSTOM' || !('id' in mission) || typeof mission.id !== 'number') return;
+      setCompletingCustom(true);
+      try {
+        const result = await completeCustomMission(mission.id);
+        if (result.success) {
+          showSuccess('미션을 완료했어요.');
+          navigation.goBack();
+        } else {
+          handleApiError(result, 'MissionDetailScreen.handleCompleteCustom');
+        }
+      } catch (e) {
+        showError(e instanceof Error ? e : new Error('미션 완료에 실패했습니다.'), 'MissionDetailScreen.handleCompleteCustom');
+      } finally {
+        setCompletingCustom(false);
+      }
+    },
+    [mission, navigation, showSuccess, showError, handleApiError]
+  );
+
+  /**
    * 초기 데이터 로드
    */
   useEffect(() => {
@@ -295,5 +321,7 @@ export const useMissionDetailScreenContainer = ({ navigation, route }: MissionDe
     handleSubmitReview,
     handleRefresh,
     loadMoreReviews,
+    handleCompleteCustom,
+    completingCustom,
   };
 };

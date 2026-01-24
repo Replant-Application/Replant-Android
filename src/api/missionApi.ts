@@ -517,6 +517,16 @@ export const addSystemMissionToMyMissions = async (data: {
 };
 
 /**
+ * 커스텀 미션 완료 (인증 없이 즉시 완료)
+ * PUT /api/missions/my/complete-custom/{missionId}
+ * 내 미션에 추가된 ASSIGNED 상태의 커스텀 미션만 가능
+ */
+export const completeCustomMission = async (missionId: number): Promise<ServiceResult<UserMission>> => {
+  const endpoint = API_CONFIG.endpoints.userMission.completeCustom.replace(':missionId', String(missionId));
+  return apiClient.put<UserMission>(endpoint);
+};
+
+/**
  * 미션 인증 (GPS/TIME)
  * POST /api/missions/my/{userMissionId}/verify
  * 인증 필요

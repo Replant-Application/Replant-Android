@@ -136,6 +136,23 @@ export const styles = StyleSheet.create({
       fontWeight: typography.fontWeight.medium,
     }),
   },
+  completeCustomButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing[2],
+    marginTop: spacing[4],
+    paddingVertical: spacing[3],
+    borderRadius: borderRadius.lg,
+    backgroundColor: colors.primary[500],
+    minHeight: 48,
+  },
+  completeCustomButtonDisabled: {
+    opacity: 0.7,
+  },
+  completeCustomButtonText: {
+    ...createButtonTextStyle('base', { color: colors.white }),
+  },
   // 리뷰 목록
   sectionTitle: {
     ...createTitleStyle('lg', {

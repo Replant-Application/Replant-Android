@@ -42,6 +42,8 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
     missionFlatListRef,
     refreshing,
     handleMissionComplete,
+    handleCompleteCustomMission,
+    completingMissionId,
     handleMissionUncomplete,
     handleVerify,
     handleLikeVerification,
@@ -183,7 +185,9 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
                       key={`${mission.mission_id}-${mission.id || index}`}
                       mission={mission}
                       onComplete={handleMissionComplete}
+                      onCompleteCustom={handleCompleteCustomMission}
                       onUncomplete={handleMissionUncomplete}
+                      loading={loading || completingMissionId === mission.mission_id}
                       onUploadPhoto={handlePhotoUpload}
                       onDeletePhoto={handleDeletePhoto}
                       onWriteReview={(missionId) => navigation.navigate('MissionDetail', { 

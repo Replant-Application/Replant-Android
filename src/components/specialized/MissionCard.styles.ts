@@ -241,6 +241,10 @@ export const styles = StyleSheet.create({
   completeButton: {
     // 기본 actionButton 스타일 사용
   },
+  customCompleteButton: {
+    flexDirection: 'row',
+    gap: spacing[1],
+  },
   gpsButton: {
     // 기본 actionButton 스타일 사용
   },
