@@ -5,7 +5,7 @@
 
 import { StyleSheet, Platform, Dimensions } from 'react-native';
 import { spacing, typography, colors } from '../../utils/designTokens';
-import { createTextStyle, createButtonTextStyle } from '../../utils/styles/textStyles';
+import { createTextStyle } from '../../utils/styles/textStyles';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -22,26 +22,27 @@ export const styles = StyleSheet.create({
   },
   skipButton: {
     position: 'absolute',
-    top: Platform.OS === 'ios' ? 40 : 30,
-    right: spacing[6],
+    top: Platform.OS === 'ios' ? 40 + spacing[2] : 30 + spacing[2],
+    right: spacing[3],
     zIndex: 10,
-    paddingVertical: spacing[3],
-    paddingHorizontal: spacing[4],
-    minHeight: 44, // 최소 터치 영역 확보 (iOS 가이드라인: 44x44)
-    minWidth: 44, // 최소 너비 확보 (X 기호용)
+    borderWidth: 1,
+    borderColor: colors.gray[400],
+    borderRadius: 999,
+    overflow: 'hidden',
+  },
+  skipButtonBackground: {
+    paddingVertical: spacing[1],
+    paddingHorizontal: spacing[2],
+    minHeight: 20,
+    minWidth: 60,
     alignItems: 'center',
     justifyContent: 'center',
   },
   skipButtonText: {
-    ...createTextStyle('2xl', {
-      color: colors.gray[900] || '#1a1a1a', // 진한 색상으로 변경
+    ...createTextStyle('xs', {
+      color: colors.gray[700] || '#1a1a1a',
+      fontFamily: typography.fontFamily.regular,
       fontWeight: typography.fontWeight.bold,
-    }),
-  },
-  startButtonText: {
-    ...createButtonTextStyle('sm', {
-      color: colors.white,
-      fontWeight: typography.fontWeight.medium,
     }),
   },
   slideContainer: {
@@ -51,29 +52,5 @@ export const styles = StyleSheet.create({
     paddingTop: 0,
     paddingBottom: 0,
     backgroundColor: 'transparent',
-  },
-  paginationWrapper: {
-    position: 'absolute',
-    bottom: Platform.OS === 'android' ? spacing[12] + 8 : spacing[8],
-    left: 0,
-    right: 0,
-    zIndex: 10,
-  },
-  paginationContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: spacing[4],
-    gap: spacing[2],
-  },
-  paginationDot: {
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: colors.primary[600],
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 2,
-    elevation: 3,
   },
 });

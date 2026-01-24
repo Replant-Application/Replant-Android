@@ -5,9 +5,7 @@ import {
   TouchableOpacity,
   FlatList,
   ImageBackground,
-  Animated,
 } from 'react-native';
-import { colors } from '../../utils/designTokens';
 import { useOnboardingScreenContainer } from './OnboardingScreen.container';
 import { styles } from './OnboardingScreen.styles';
 
@@ -55,9 +53,7 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onNavigate }) => {
   const {
     currentIndex,
     flatListRef,
-    scrollX,
     handleSkip,
-    handleStart,
     handleScroll,
     handleScrollEnd,
     onViewableItemsChanged,
@@ -74,56 +70,6 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onNavigate }) => {
     );
   };
 
-  const renderPagination = () => {
-    return (
-      <View style={styles.paginationContainer}>
-        {ONBOARDING_SLIDES.map((_, index) => {
-          const inputRange = [
-            (index - 1) * SCREEN_WIDTH,
-            index * SCREEN_WIDTH,
-            (index + 1) * SCREEN_WIDTH,
-          ];
-
-          const dotWidth = scrollX.interpolate({
-            inputRange,
-            outputRange: [8, 24, 8],
-            extrapolate: 'clamp',
-          });
-
-          const opacity = scrollX.interpolate({
-            inputRange,
-            outputRange: [0.4, 1, 0.4],
-            extrapolate: 'clamp',
-          });
-
-          const backgroundColor = scrollX.interpolate({
-            inputRange,
-            outputRange: [
-              colors.primary[300],
-              colors.primary[600],
-              colors.primary[300],
-            ],
-            extrapolate: 'clamp',
-          });
-
-          return (
-            <Animated.View
-              key={index}
-              style={[
-                styles.paginationDot,
-                {
-                  width: dotWidth,
-                  opacity,
-                  backgroundColor,
-                },
-              ]}
-            />
-          );
-        })}
-      </View>
-    );
-  };
-
   return (
     <ImageBackground
       source={ONBOARDING_SLIDES[currentIndex].image}
@@ -131,24 +77,20 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onNavigate }) => {
       resizeMode="cover"
       accessibilityLabel="온보딩 배경 이미지"
     >
-      {/* Skip/Start 버튼 */}
-      {currentIndex < ONBOARDING_SLIDES.length - 1 ? (
-        <TouchableOpacity 
-          style={styles.skipButton} 
-          onPress={handleSkip} 
-          activeOpacity={0.8}
+      {/* Skip 버튼 */}
+      <TouchableOpacity
+        style={styles.skipButton}
+        onPress={handleSkip}
+        activeOpacity={0.8}
+      >
+        <ImageBackground
+          source={require('../../assets/images/background.png')}
+          style={styles.skipButtonBackground}
+          resizeMode="cover"
         >
-          <Text style={styles.skipButtonText}>✕</Text>
-        </TouchableOpacity>
-      ) : (
-        <TouchableOpacity 
-          style={styles.skipButton} 
-          onPress={handleStart} 
-          activeOpacity={0.8}
-        >
-          <Text style={styles.startButtonText}>시작하기</Text>
-        </TouchableOpacity>
-      )}
+          <Text style={styles.skipButtonText}>Skip</Text>
+        </ImageBackground>
+      </TouchableOpacity>
 
       {/* 슬라이드 - 투명하게 처리하여 스와이프만 가능하게 */}
       <FlatList
@@ -171,11 +113,6 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onNavigate }) => {
         })}
         style={styles.transparentFlatList}
       />
-
-      {/* 페이지 인디케이터 */}
-      <View style={styles.paginationWrapper}>
-        {renderPagination()}
-      </View>
     </ImageBackground>
   );
 };

@@ -4,7 +4,7 @@
  */
 
 import { StyleSheet, Platform } from 'react-native';
-import { colors, spacing, typography, borderRadius, shadows } from '../../utils/designTokens';
+import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
 import { createTextStyle, createTitleStyle, createBodyStyle, createSecondaryTextStyle, createButtonTextStyle } from '../../utils/styles/textStyles';
 import { inputStyles, buttonStyles, cardStyles } from '../../utils/styles/commonStyles';
 
@@ -32,9 +32,8 @@ export const styles = StyleSheet.create({
   userCard: {
     ...cardStyles.base(),
     backgroundColor: colors.background.primary,
-    borderRadius: borderRadius.xl,
+    borderRadius: borderRadius.base,
     padding: spacing[5],
-    ...shadows.lg,
   },
   userInfo: {
     flexDirection: 'row',
@@ -73,7 +72,7 @@ export const styles = StyleSheet.create({
   },
   textInputWrapper: {
     backgroundColor: colors.background.secondary,
-    borderRadius: borderRadius.md,
+    borderRadius: borderRadius.base,
     borderWidth: 1,
     borderColor: colors.border.light,
     height: 48,
@@ -95,7 +94,7 @@ export const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.background.secondary,
     paddingVertical: spacing[2],
-    borderRadius: borderRadius.xl,
+    borderRadius: borderRadius.base,
     borderWidth: 1,
     borderColor: colors.border.medium,
     alignItems: 'center',
@@ -110,7 +109,7 @@ export const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.green[500],
     paddingVertical: spacing[2],
-    borderRadius: borderRadius.xl,
+    borderRadius: borderRadius.base,
     alignItems: 'center',
   },
   saveButtonText: {
@@ -124,7 +123,7 @@ export const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: colors.primary[50],
     paddingVertical: spacing[3],
-    borderRadius: borderRadius.md,
+    borderRadius: borderRadius.base,
     borderWidth: 1,
     borderColor: colors.primary[200],
   },
@@ -142,9 +141,10 @@ export const styles = StyleSheet.create({
   settingsCard: {
     ...cardStyles.base(),
     backgroundColor: colors.background.primary,
-    borderRadius: borderRadius.xl,
+    borderRadius: borderRadius.base,
     overflow: 'hidden',
-    ...shadows.lg,
+    paddingTop: spacing[2],
+    paddingBottom: spacing[2],
   },
   settingItem: {
     flexDirection: 'row',
@@ -181,7 +181,7 @@ export const styles = StyleSheet.create({
   divider: {
     height: 1,
     backgroundColor: colors.border.light,
-    marginLeft: spacing[4] + 24 + spacing[3], // icon width + margin + text margin
+    marginLeft: 22 + spacing[2], // icon width + icon margin (left padding 0)
   },
   versionContainer: {
     paddingTop: spacing[3],

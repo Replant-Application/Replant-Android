@@ -174,13 +174,15 @@ const CustomMissionCreateScreen: React.FC<CustomMissionCreateScreenProps> = ({ n
                 ]}
                 onPress={() => setVerificationType(option.id)}
               >
-                <Text style={styles.verificationEmoji}>{option.emoji}</Text>
-                <Text style={[
-                  styles.verificationText,
-                  verificationType === option.id && styles.selectedVerificationText
-                ]}>
-                  {option.name}
-                </Text>
+                <View style={styles.verificationRow}>
+                  <Text style={styles.verificationEmoji}>{option.emoji}</Text>
+                  <Text style={[
+                    styles.verificationText,
+                    verificationType === option.id && styles.selectedVerificationText
+                  ]}>
+                    {option.name}
+                  </Text>
+                </View>
                 <Text style={styles.verificationDesc}>{option.description}</Text>
               </TouchableOpacity>
             ))}
@@ -244,13 +246,15 @@ const CustomMissionCreateScreen: React.FC<CustomMissionCreateScreenProps> = ({ n
               ]}
               onPress={() => setIsChallenge(false)}
             >
-              <Text style={styles.missionTypeEmoji}>📋</Text>
-              <Text style={[
-                styles.missionTypeText,
-                !isChallenge && styles.selectedMissionTypeText
-              ]}>
-                일반 미션
-              </Text>
+              <View style={styles.missionTypeRow}>
+                <Text style={styles.missionTypeEmoji}>📋</Text>
+                <Text style={[
+                  styles.missionTypeText,
+                  !isChallenge && styles.selectedMissionTypeText
+                ]}>
+                  일반 미션
+                </Text>
+              </View>
               <Text style={styles.missionTypeDesc}>기한 내 1회 완료</Text>
             </TouchableOpacity>
             <TouchableOpacity
@@ -260,13 +264,15 @@ const CustomMissionCreateScreen: React.FC<CustomMissionCreateScreenProps> = ({ n
               ]}
               onPress={() => setIsChallenge(true)}
             >
-              <Text style={styles.missionTypeEmoji}>🔥</Text>
-              <Text style={[
-                styles.missionTypeText,
-                isChallenge && styles.selectedMissionTypeText
-              ]}>
-                챌린지 미션
-              </Text>
+              <View style={styles.missionTypeRow}>
+                <Text style={styles.missionTypeEmoji}>🔥</Text>
+                <Text style={[
+                  styles.missionTypeText,
+                  isChallenge && styles.selectedMissionTypeText
+                ]}>
+                  챌린지 미션
+                </Text>
+              </View>
               <Text style={styles.missionTypeDesc}>기간 동안 매일 인증</Text>
             </TouchableOpacity>
           </View>
@@ -285,13 +291,15 @@ const CustomMissionCreateScreen: React.FC<CustomMissionCreateScreenProps> = ({ n
                   ]}
                   onPress={() => setChallengeDays(option.id)}
                 >
-                  <Text style={styles.daysEmoji}>{option.emoji}</Text>
-                  <Text style={[
-                    styles.daysText,
-                    challengeDays === option.id && styles.selectedDaysText
-                  ]}>
-                    {option.name}
-                  </Text>
+                  <View style={styles.daysRow}>
+                    <Text style={styles.daysEmoji}>{option.emoji}</Text>
+                    <Text style={[
+                      styles.daysText,
+                      challengeDays === option.id && styles.selectedDaysText
+                    ]}>
+                      {option.name}
+                    </Text>
+                  </View>
                 </TouchableOpacity>
               ))}
             </View>
@@ -310,13 +318,15 @@ const CustomMissionCreateScreen: React.FC<CustomMissionCreateScreenProps> = ({ n
                   ]}
                   onPress={() => setDeadlineDays(option.id)}
                 >
-                  <Text style={styles.daysEmoji}>{option.emoji}</Text>
-                  <Text style={[
-                    styles.daysText,
-                    deadlineDays === option.id && styles.selectedDaysText
-                  ]}>
-                    {option.name}
-                  </Text>
+                  <View style={styles.daysRow}>
+                    <Text style={styles.daysEmoji}>{option.emoji}</Text>
+                    <Text style={[
+                      styles.daysText,
+                      deadlineDays === option.id && styles.selectedDaysText
+                    ]}>
+                      {option.name}
+                    </Text>
+                  </View>
                 </TouchableOpacity>
               ))}
             </View>

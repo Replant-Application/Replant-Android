@@ -122,7 +122,9 @@ export const styles = StyleSheet.create({
     gap: spacing[2],
   },
   verificationButton: {
+    flexDirection: 'column',
     alignItems: 'center',
+    justifyContent: 'center',
     padding: spacing[3],
     borderRadius: borderRadius.md,
     backgroundColor: colors.background.primary,
@@ -133,15 +135,18 @@ export const styles = StyleSheet.create({
     backgroundColor: colors.primary[100],
     borderColor: colors.primary[500],
   },
+  verificationRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
   verificationEmoji: {
     fontSize: typography.fontSize.xl,
-    marginBottom: spacing[1],
+    marginRight: spacing[2],
   },
   verificationText: {
     ...createTextStyle('sm', {
       fontWeight: typography.fontWeight.medium,
       color: colors.text.secondary,
-      marginBottom: spacing[1],
     }),
   },
   selectedVerificationText: {
@@ -152,6 +157,7 @@ export const styles = StyleSheet.create({
     ...createTextStyle('xs', {
       color: colors.text.tertiary,
       textAlign: 'center',
+      marginTop: spacing[1],
     }),
   },
   timeSettingContainer: {
@@ -223,7 +229,9 @@ export const styles = StyleSheet.create({
   },
   missionTypeButton: {
     flex: 1,
+    flexDirection: 'column',
     alignItems: 'center',
+    justifyContent: 'center',
     padding: spacing[4],
     marginHorizontal: spacing[1],
     borderRadius: borderRadius.md,
@@ -235,15 +243,18 @@ export const styles = StyleSheet.create({
     backgroundColor: colors.primary[100],
     borderColor: colors.primary[500],
   },
+  missionTypeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
   missionTypeEmoji: {
     fontSize: typography.fontSize['2xl'],
-    marginBottom: spacing[2],
+    marginRight: spacing[2],
   },
   missionTypeText: {
     ...createBodyStyle('base', {
       fontWeight: typography.fontWeight.medium,
       color: colors.text.secondary,
-      marginBottom: spacing[1],
     }),
   },
   selectedMissionTypeText: {
@@ -254,6 +265,7 @@ export const styles = StyleSheet.create({
     ...createTextStyle('xs', {
       color: colors.text.tertiary,
       textAlign: 'center',
+      marginTop: spacing[1],
     }),
   },
   daysContainer: {
@@ -263,6 +275,7 @@ export const styles = StyleSheet.create({
   daysButton: {
     flex: 1,
     alignItems: 'center',
+    justifyContent: 'center',
     padding: spacing[3],
     marginHorizontal: spacing[1],
     borderRadius: borderRadius.md,
@@ -274,9 +287,13 @@ export const styles = StyleSheet.create({
     backgroundColor: colors.primary[100],
     borderColor: colors.primary[500],
   },
+  daysRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
   daysEmoji: {
     fontSize: typography.fontSize.xl,
-    marginBottom: spacing[1],
+    marginRight: spacing[2],
   },
   daysText: {
     ...createTextStyle('sm', {

@@ -12,8 +12,9 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: spacing[4],
-    paddingHorizontal: spacing[5],
+    paddingVertical: spacing[3],
+    paddingLeft: 0,
+    paddingRight: spacing[3],
     borderBottomWidth: 1,
     borderBottomColor: colors.gray[100],
   },
@@ -26,9 +27,9 @@ export const styles = StyleSheet.create({
     flex: 1,
   },
   settingIcon: {
-    width: 24,
-    height: 24,
-    marginRight: spacing[3],
+    width: 22,
+    height: 22,
+    marginRight: spacing[2],
   },
   settingItemText: {
     ...createTextStyle('base', {
