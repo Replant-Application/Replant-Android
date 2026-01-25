@@ -128,7 +128,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
               >
                 <Image
                   source={require('../../assets/images/pencil.png')}
-                  style={styles.editIcon}
+                  style={[styles.editIcon, styles.changeNicknameEditIcon]}
                   resizeMode="contain"
                   accessibilityLabel="닉네임 수정 아이콘"
                   accessibilityElementsHidden={true}

@@ -241,15 +241,17 @@ export const styles = StyleSheet.create({
   completeButton: {
     // 기본 actionButton 스타일 사용
   },
+  /** 인증 버튼 고대비: 짙은 배경 + 흰색 텍스트 */
+  verifyButton: {
+    backgroundColor: colors.primary[600],
+    borderColor: colors.primary[700],
+  },
+  verifyText: {
+    color: colors.white,
+  },
   customCompleteButton: {
     flexDirection: 'row',
     gap: spacing[1],
-  },
-  gpsButton: {
-    // 기본 actionButton 스타일 사용
-  },
-  timeButton: {
-    // 기본 actionButton 스타일 사용
   },
   uncompleteButton: {
     backgroundColor: colors.gray[300],

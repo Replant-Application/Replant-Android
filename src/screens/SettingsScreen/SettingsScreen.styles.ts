@@ -121,24 +121,28 @@ export const styles = StyleSheet.create({
       fontWeight: typography.fontWeight.medium,
     }),
   },
+  /** 닉네임 변경 버튼 (고대비: 짙은 배경 + 흰색 텍스트/아이콘) */
   changeNicknameButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.primary[50],
+    backgroundColor: colors.primary[600],
     paddingVertical: spacing[2],
     borderRadius: borderRadius.base,
     borderWidth: 1,
-    borderColor: colors.primary[200],
+    borderColor: colors.primary[700],
   },
   editIcon: {
     width: 16,
     height: 16,
     marginRight: spacing[2],
   },
+  changeNicknameEditIcon: {
+    tintColor: colors.white,
+  },
   changeNicknameText: {
     ...createBodyStyle('base', {
-      color: colors.primary[600],
+      color: colors.white,
       fontWeight: typography.fontWeight.medium,
     }),
   },

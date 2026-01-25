@@ -258,9 +258,7 @@ const MissionCard: React.FC<MissionCardProps> = ({
               <TouchableOpacity
                 style={[
                   styles.actionButton,
-                  verificationType === 'GPS' ? styles.gpsButton :
-                  verificationType === 'TIME' ? styles.timeButton :
-                  styles.completeButton,
+                  styles.verifyButton,
                   disabled && styles.disabledButton
                 ]}
                 onPress={disabled ? undefined : handleVerifyPress}
@@ -273,6 +271,7 @@ const MissionCard: React.FC<MissionCardProps> = ({
                 <Text style={[
                   styles.actionText,
                   styles.completeText,
+                  styles.verifyText,
                   disabled && styles.disabledText
                 ]}>
                   {disabled ? '비활성화' : loading ? '처리중...' : getVerifyButtonLabel()}
