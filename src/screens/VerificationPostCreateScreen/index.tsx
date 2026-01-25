@@ -3,7 +3,7 @@
  * COMMUNITY 인증 타입 미션의 인증글 작성 및 수정
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -56,6 +56,8 @@ const VerificationPostCreateScreen: React.FC<VerificationPostCreateScreenProps> 
     getEncouragementMessage,
   } = useVerificationPostCreateScreenContainer({ navigation, route });
 
+  const [showInfoMessage, setShowInfoMessage] = useState(false);
+
   return (
     <ImageBackground
       source={require('../../assets/images/background.png')}
@@ -106,8 +108,9 @@ const VerificationPostCreateScreen: React.FC<VerificationPostCreateScreenProps> 
         {/* 완료 정도 슬라이더 */}
         <View style={styles.completionSection}>
           <View style={styles.completionHeader}>
-            <Text style={styles.label}>완료 정도</Text>
-            <Text style={styles.completionPercent}>{completionRate}%</Text>
+            <Text style={styles.completionHeaderLabel}>
+              완료 정도 <Text style={styles.completionPercent}>({completionRate}%)</Text>
+            </Text>
           </View>
           
           <View style={styles.sliderContainer}>
@@ -119,8 +122,8 @@ const VerificationPostCreateScreen: React.FC<VerificationPostCreateScreenProps> 
               value={completionRate}
               onValueChange={handleSliderChange}
               minimumTrackTintColor={colors.primary[500]}
-              maximumTrackTintColor={colors.gray[200]}
-              thumbTintColor={colors.primary[500]}
+              maximumTrackTintColor={colors.gray[300]}
+              thumbTintColor={colors.primary[700]}
             />
             <View style={styles.sliderLabels}>
               <Text style={styles.sliderLabel}>0%</Text>
@@ -146,27 +149,38 @@ const VerificationPostCreateScreen: React.FC<VerificationPostCreateScreenProps> 
           </View>
         </View>
 
-        {/* 안내 메시지 */}
-        <View style={styles.infoBox}>
-          <Image
-            source={require('../../assets/images/light.png')}
-            style={styles.infoIconImage}
-            resizeMode="contain"
-            accessibilityLabel="안내 아이콘"
-          />
-          <Text style={styles.infoText}>
-            인증글을 작성하면 커뮤니티에 공개됩니다.{'\n'}
-            다른 사용자들의 좋아요를 받으면 미션이 완료됩니다.
-          </Text>
-        </View>
-
         {/* 내용 입력 */}
         <View style={styles.inputSection}>
-          <Text style={styles.label}>인증 내용 *</Text>
+          <View style={styles.inputHeaderRow}>
+            <Text style={[styles.label, styles.inputLabelNoMargin]}>인증 내용</Text>
+            <TouchableOpacity
+              style={styles.infoToggleButton}
+              onPress={() => setShowInfoMessage(prev => !prev)}
+              activeOpacity={0.7}
+              accessibilityRole="button"
+              accessibilityLabel="안내 보기"
+            >
+              <Text style={styles.infoToggleButtonText}>?</Text>
+            </TouchableOpacity>
+          </View>
+          {showInfoMessage && (
+            <View style={styles.infoBox}>
+              <Image
+                source={require('../../assets/images/light.png')}
+                style={styles.infoIconImage}
+                resizeMode="contain"
+                accessibilityLabel="안내 아이콘"
+              />
+              <Text style={styles.infoText}>
+                인증글을 작성하면 커뮤니티에 공개됩니다.{'\n'}
+                다른 사용자들의 좋아요를 받으면 미션이 완료됩니다.
+              </Text>
+            </View>
+          )}
           <View style={styles.notebookContainer}>
             <View style={styles.notebookLines}>
               {[...Array(20)].map((_, i) => (
-                <View key={i} style={styles.notebookLine} />
+                <View key={i} style={i === 19 ? styles.notebookLineLast : styles.notebookLine} />
               ))}
             </View>
             <TextInput

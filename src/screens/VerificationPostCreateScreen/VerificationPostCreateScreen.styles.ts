@@ -68,12 +68,39 @@ export const styles = StyleSheet.create({
       color: colors.text.primary,
     }),
   },
+  inputHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: spacing[2],
+    gap: spacing[2],
+  },
+  inputLabelNoMargin: {
+    marginBottom: 0,
+  },
+  infoToggleButton: {
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    backgroundColor: colors.gray[50],
+    borderWidth: 1,
+    borderStyle: 'dashed',
+    borderColor: colors.gray[400],
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  infoToggleButtonText: {
+    ...createTextStyle('xs', {
+      color: colors.text.tertiary,
+      fontWeight: typography.fontWeight.medium,
+      fontSize: 10,
+    }),
+  },
   infoBox: {
     flexDirection: 'row',
     backgroundColor: colors.primary[50],
     padding: spacing[3],
     borderRadius: borderRadius.base,
-    marginBottom: spacing[4],
+    marginBottom: spacing[2],
     alignItems: 'flex-start',
   },
   infoIcon: {
@@ -97,10 +124,14 @@ export const styles = StyleSheet.create({
     marginBottom: spacing[4],
   },
   completionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
     marginBottom: spacing[2],
+  },
+  completionHeaderLabel: {
+    ...createTitleStyle('lg', {
+      fontWeight: typography.fontWeight.normal,
+      color: colors.text.primary,
+      marginBottom: 0,
+    }),
   },
   completionPercent: {
     fontSize: typography.fontSize.lg,
@@ -109,11 +140,17 @@ export const styles = StyleSheet.create({
   },
   sliderContainer: {
     backgroundColor: colors.white,
-    borderRadius: borderRadius.base,
-    padding: spacing[4],
+    borderRadius: borderRadius.md,
+    paddingVertical: spacing[4],
+    paddingHorizontal: spacing[5],
     borderWidth: 1,
-    borderColor: colors.border.light,
-    marginBottom: spacing[2],
+    borderColor: colors.primary[200],
+    marginBottom: spacing[1],
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    elevation: 3,
   },
   slider: {
     width: '100%',
@@ -122,11 +159,13 @@ export const styles = StyleSheet.create({
   sliderLabels: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: spacing[1],
+    marginTop: spacing[2],
   },
   sliderLabel: {
-    fontSize: typography.fontSize.xs,
-    color: colors.text.tertiary,
+    ...createTextStyle('sm', {
+      color: colors.gray[600],
+      fontWeight: typography.fontWeight.medium,
+    }),
   },
   warningBox: {
     backgroundColor: colors.orange[50],
@@ -147,9 +186,10 @@ export const styles = StyleSheet.create({
     padding: spacing[3],
   },
   encouragementText: {
-    fontSize: typography.fontSize.sm,
-    color: colors.primary[700],
-    textAlign: 'center',
+    ...createTextStyle('sm', {
+      color: colors.primary[700],
+      textAlign: 'center',
+    }),
   },
   inputSection: {
     marginBottom: spacing[4],
@@ -177,7 +217,7 @@ export const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     paddingLeft: spacing[6],
-    paddingTop: spacing[4],
+    paddingTop: spacing[5],
     paddingBottom: spacing[4],
   },
   notebookLine: {
@@ -186,13 +226,17 @@ export const styles = StyleSheet.create({
     borderBottomColor: colors.gray[200],
     marginBottom: 0,
   },
+  notebookLineLast: {
+    height: 24,
+    marginBottom: 0,
+  },
   contentInput: {
     ...inputStyles.base(),
+    ...createTextStyle('sm', { color: colors.text.primary }),
     backgroundColor: 'transparent',
     padding: spacing[4],
+    paddingTop: spacing[5],
     paddingLeft: spacing[6],
-    fontSize: typography.fontSize.sm,
-    color: colors.text.primary,
     minHeight: 200,
     textAlignVertical: 'top',
   },
