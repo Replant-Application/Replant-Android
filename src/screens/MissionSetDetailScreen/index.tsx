@@ -14,8 +14,6 @@ import {
 import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types/navigation';
 import { Header, Loading, RatingSelector } from '../../components/ui';
-import { colors } from '../../utils/designTokens';
-import { SCREEN_NAMES } from '../../utils/constants';
 import { useMissionSetDetailScreenContainer } from './MissionSetDetailScreen.container';
 import { styles } from './MissionSetDetailScreen.styles';
 
@@ -30,7 +28,6 @@ const MissionSetDetailScreen: React.FC<MissionSetDetailScreenProps> = ({ navigat
     missionSet,
     myReview,
     loading,
-    copying,
     reviewRating,
     submittingReview,
     showReviewForm,

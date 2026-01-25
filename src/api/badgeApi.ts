@@ -5,8 +5,6 @@
 import { apiClient } from './client';
 import { API_CONFIG } from '../config/apiConfig';
 import { ServiceResult } from '../types';
-import { MissionType } from './missionApi';
-
 // ============================================
 // 타입 정의
 // ============================================

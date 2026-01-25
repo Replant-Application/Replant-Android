@@ -3,7 +3,6 @@ import { View, Text, TouchableOpacity, Image, ViewStyle, Alert } from 'react-nat
 import { styles } from './PostCard.styles';
 import { CommunityPost } from '../../types';
 import { formatTimeAgo } from '../../utils/dateUtils';
-import { useUser } from '../../contexts/UserContext';
 
 interface PostCardProps {
   post: CommunityPost;
@@ -19,17 +18,16 @@ interface PostCardProps {
 
 const PostCard: React.FC<PostCardProps> = ({
   post,
-  currentUserId,
+  currentUserId: _currentUserId,
   onPress,
   onLike,
-  onScrap,
+  onScrap: _onScrap,
   onEdit,
   onDelete,
   onHide,
   style
 }) => {
   const [showMenu, setShowMenu] = useState(false);
-  const { currentUserId: contextUserId } = useUser();
   
   // 본인 게시글인지 확인 (백엔드에서 제공하는 isAuthor 필드 사용)
   // 로그인한 경우에만 isAuthor가 올바르게 설정됨

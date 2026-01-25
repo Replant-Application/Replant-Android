@@ -14,7 +14,7 @@ export const TabBar: React.FC<TabBarProps> = ({
   onTabChange,
   variant = 'pill',
   containerStyle,
-  style,
+  style: _style,
 }) => {
   const renderPillVariant = () => (
     <View style={[styles.pillContainer, containerStyle]}>

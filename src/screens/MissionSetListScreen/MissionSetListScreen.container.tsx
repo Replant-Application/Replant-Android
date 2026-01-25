@@ -21,7 +21,7 @@ interface MissionSetListScreenContainerProps {
 }
 
 export const useMissionSetListScreenContainer = ({
-  navigation,
+  navigation: _navigation,
 }: MissionSetListScreenContainerProps) => {
   const [publicTodoLists, setPublicTodoLists] = useState<PublicTodoList[]>([]);
   const [loading, setLoading] = useState(true);

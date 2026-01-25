@@ -9,7 +9,6 @@ import {
   View,
   Text,
   TouchableOpacity,
-  ScrollView,
   Platform,
   KeyboardAvoidingView,
   ImageBackground,
@@ -20,8 +19,6 @@ import { RootStackParamList } from '../../types/navigation';
 import {
   useSpontaneousMissionSetupScreenContainer,
   STEPS,
-  STEP_CONFIG,
-  TimeState,
 } from './SpontaneousMissionSetupScreen.container';
 import { styles } from './SpontaneousMissionSetupScreen.styles';
 
@@ -45,70 +42,8 @@ const SpontaneousMissionSetupScreen: React.FC<SpontaneousMissionSetupScreenProps
     setCurrentTime,
     handleNext,
     handlePrev,
-    handleSubmit,
     handleCloseAlert,
   } = useSpontaneousMissionSetupScreenContainer({ navigation, route });
-
-  // 드롭다운 컴포넌트 (레거시 - 제거 예정)
-  const Dropdown = ({
-    value,
-    options,
-    onSelect,
-    isOpen,
-    onToggle,
-    width,
-  }: {
-    value: string | number;
-    options: Array<{ label: string; value: string | number }>;
-    onSelect: (value: string | number) => void;
-    isOpen: boolean;
-    onToggle: () => void;
-    width?: number;
-  }) => (
-    <View style={[styles.dropdownContainer, width && { width }]}>
-      <TouchableOpacity
-        style={styles.dropdownButton}
-        onPress={(e) => {
-          e.stopPropagation();
-          onToggle();
-        }}
-        activeOpacity={0.7}
-      >
-        <Text style={styles.dropdownButtonText}>{value}</Text>
-        <Text style={styles.dropdownArrow}>▼</Text>
-      </TouchableOpacity>
-      {isOpen && (
-        <View 
-          style={styles.dropdownList}
-          onStartShouldSetResponder={() => true}
-          onMoveShouldSetResponder={() => true}
-        >
-          <ScrollView
-            style={styles.dropdownScrollView}
-            contentContainerStyle={styles.dropdownScrollContent}
-            nestedScrollEnabled={true}
-            showsVerticalScrollIndicator={true}
-            bounces={false}
-            scrollEnabled={true}
-            keyboardShouldPersistTaps="handled"
-          >
-            {options.map((option) => (
-              <TouchableOpacity
-                key={option.value}
-                style={styles.dropdownItem}
-                onPress={() => {
-                  onSelect(option.value);
-                }}
-                activeOpacity={0.7}
-              >
-                <Text style={styles.dropdownItemText}>{option.label}</Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
-        </View>
-      )}
-    </View>
-  );
 
   if (initialLoading && isEditMode) {
     return (

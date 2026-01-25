@@ -9,14 +9,14 @@ import { join, sendVerification, verifyEmail } from '../../api/authApi';
 import { saveTokens, saveUserInfo } from '../../utils/tokenStorage';
 import { apiClient } from '../../api/client';
 import { useUser } from '../../contexts/UserContext';
-import { SignUpErrors, Gender } from '../../types/screens/auth';
+import { Gender } from '../../types/screens/auth';
 import { getBirthYears } from '../../constants/screens/auth';
 
 interface SignUpScreenContainerProps {
   onNavigate: (screen: string) => void;
 }
 
-export const useSignUpScreenContainer = ({ onNavigate }: SignUpScreenContainerProps) => {
+export const useSignUpScreenContainer = ({ onNavigate: _onNavigate }: SignUpScreenContainerProps) => {
   const { login } = useUser();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');

@@ -28,18 +28,14 @@ const TodoListDetailScreen: React.FC<Props> = ({ navigation, route }) => {
   // 비즈니스 로직은 Container에서 처리
   const {
     todoList,
-    canCreate,
     loading,
     refreshing,
     completingMissionId,
-    archiving,
     showCompleteModal,
     actualCompletedCount,
     actualTotalCount,
     progressPercent,
     handleCompleteMission,
-    handleArchive,
-    handleCreateNew,
     handleCompleteModalClose,
     onRefresh,
   } = useTodoListDetailScreenContainer({ navigation, route });

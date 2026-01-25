@@ -2,7 +2,7 @@
  * 네비게이션 관련 타입 정의
  */
 
-import { Character, ScreenNames } from './index';
+import { ScreenNames } from './index';
 
 // React Navigation용 RootStackParamList
 export type RootStackParamList = {

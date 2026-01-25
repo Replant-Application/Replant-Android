@@ -4,15 +4,13 @@
  */
 
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
-import { Animated, PanResponder, Dimensions } from 'react-native';
+import { Animated, PanResponder } from 'react-native';
 import { useDiary } from '../../hooks/useDiary';
 import { useCharacter } from '../../hooks/useCharacter';
 import { SimpleDiaryData, Diary } from '../../types';
 import { formatDateYYYYMMDD } from '../../utils/dateUtils';
 import { DiaryStep } from '../../types/screens/diary';
 import { playButtonSound, playReadBookSound } from '../../utils/soundUtils';
-
-const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 // 기분 값에 따른 그라데이션 색상 계산 (0: 연한 빨강 → 100: 진한 초록)
 const getMoodColor = (value: number): string => {

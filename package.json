@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "android": "expo run:android",
-    "lint": "eslint ReplantMobile",
+    "lint": "eslint src",
+    "lint:fix": "eslint src --fix",
     "start": "react-native start",
     "test": "jest",
     "build:android": "cd android && ./gradlew assembleRelease",

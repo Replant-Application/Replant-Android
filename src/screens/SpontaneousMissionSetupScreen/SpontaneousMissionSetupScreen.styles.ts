@@ -6,7 +6,7 @@
 import { StyleSheet, Platform } from 'react-native';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
 import { getOptimizedLineHeight } from '../../utils/styles/textStyles';
-import { createTextStyle, createTitleStyle, createBodyStyle, createSecondaryTextStyle, createButtonTextStyle } from '../../utils/styles/textStyles';
+import { createTextStyle, createBodyStyle, createButtonTextStyle } from '../../utils/styles/textStyles';
 import { buttonStyles } from '../../utils/styles/commonStyles';
 
 export const styles = StyleSheet.create({

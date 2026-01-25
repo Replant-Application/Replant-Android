@@ -5,7 +5,7 @@
 
 import { StyleSheet, Platform } from 'react-native';
 import { colors, spacing, typography, borderRadius, shadows } from '../../utils/designTokens';
-import { createTextStyle, createTitleStyle } from '../../utils/styles/textStyles';
+import { createTextStyle } from '../../utils/styles/textStyles';
 
 export const styles = StyleSheet.create({
   backgroundImage: {

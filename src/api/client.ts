@@ -261,16 +261,16 @@ export class ApiClient {
       // CORS를 위한 Origin 헤더 추가 (필요시)
       // Android 에뮬레이터에서 localhost로 요청할 때 서버가 인식할 수 있도록
       if (url.includes('10.0.2.2')) {
-        headers['Origin'] = 'http://localhost:8081';
+        headers.Origin = 'http://localhost:8081';
       }
 
       // 토큰이 있으면 Authorization 헤더 추가
       if (this.accessToken) {
-        headers['Authorization'] = `Bearer ${this.accessToken}`;
+        headers.Authorization = `Bearer ${this.accessToken}`;
       }
 
       // body 직렬화 처리
-      let requestBody: string | FormData | undefined = undefined;
+      let requestBody: string | FormData | undefined;
       if (options.body) {
         if (options.body instanceof FormData) {
           // FormData는 그대로 사용 (파일 업로드)
@@ -481,7 +481,7 @@ export class ApiClient {
 
       // 토큰이 있으면 Authorization 헤더 추가
       if (this.accessToken) {
-        headers['Authorization'] = `Bearer ${this.accessToken}`;
+        headers.Authorization = `Bearer ${this.accessToken}`;
       }
 
       // fetch 요청 (타임아웃을 위한 signal 추가)

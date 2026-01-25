@@ -6,7 +6,7 @@
 import { StyleSheet, Platform } from 'react-native';
 import { colors, spacing, typography, borderRadius, shadows } from '../../utils/designTokens';
 import { createTextStyle, createBodyStyle, createSecondaryTextStyle, createButtonTextStyle } from '../../utils/styles/textStyles';
-import { buttonStyles, inputStyles, cardStyles } from '../../utils/styles/commonStyles';
+import { buttonStyles, inputStyles } from '../../utils/styles/commonStyles';
 
 export const styles = StyleSheet.create({
   backgroundImage: {

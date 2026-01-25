@@ -7,7 +7,7 @@ import { StyleSheet, Platform } from 'react-native';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
 import { getOptimizedLineHeight } from '../../utils/styles/textStyles';
 import { createTextStyle, createBodyStyle } from '../../utils/styles/textStyles';
-import { inputStyles, buttonStyles } from '../../utils/styles/commonStyles';
+import { inputStyles } from '../../utils/styles/commonStyles';
 
 export const styles = StyleSheet.create({
   container: {

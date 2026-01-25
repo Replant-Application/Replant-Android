@@ -1,13 +1,4 @@
 import { colors } from '../../utils/designTokens';
-import { EMOTION_CATEGORIES } from '../../constants/screens/diary';
-
-// 감정 카테고리 확인
-const getEmotionCategory = (emotion: string): 'positive' | 'neutral' | 'negative' => {
-  if (EMOTION_CATEGORIES.positive.includes(emotion)) return 'positive';
-  if (EMOTION_CATEGORIES.neutral.includes(emotion)) return 'neutral';
-  if (EMOTION_CATEGORIES.negative.includes(emotion)) return 'negative';
-  return 'neutral';
-};
 
 // 감정별 개별 색상 매핑
 export const getEmotionColor = (emotion: string): string => {

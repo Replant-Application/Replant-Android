@@ -20,10 +20,8 @@ import { NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types/navigation';
 import { Header, Loading, ErrorBoundary, EmptyState, SimpleTabBar } from '../../components/ui';
 import { colors } from '../../utils/designTokens';
-import { formatDateKorean } from '../../utils/dateUtils';
 import {
   useMissionGroupScreenContainer,
-  UnifiedMission,
   getVerificationTypeLabel,
   getVerificationTypeIcon,
   getMissionCategoryLabel,
@@ -39,11 +37,9 @@ const MissionGroupScreen: React.FC<MissionGroupScreenProps> = ({ navigation }) =
   // 비즈니스 로직은 Container에서 처리
   const {
     missions,
-    reviews,
     activeTab,
     selectedMission,
     loading,
-    reviewsLoading,
     refreshing,
     error,
     currentPage,
@@ -56,7 +52,6 @@ const MissionGroupScreen: React.FC<MissionGroupScreenProps> = ({ navigation }) =
     setReviewContent,
     handleMissionSelect,
     handleSubmitReview,
-    handleOpenReviewModal,
     handleCloseReviewModal,
     handleCreateCustomMission,
     handleViewMissionDetail,

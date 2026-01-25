@@ -13,7 +13,6 @@ import {
   createMissionReview,
   MissionReview,
   MissionCategory,
-  MissionCollectionItem,
 } from '../../api/missionApi';
 
 /**
@@ -71,7 +70,7 @@ export const getMissionCategoryLabel = (category?: MissionCategory): string => {
 /**
  * 미션 아이콘
  */
-export const getMissionIcon = (title: string) => {
+export const getMissionIcon = (_title: string) => {
   return require('../../assets/images/goal.png');
 };
 

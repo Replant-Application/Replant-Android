@@ -19,7 +19,6 @@ import { NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types/navigation';
 import { Header, Loading } from '../../components/ui';
 import { colors } from '../../utils/designTokens';
-import { UserMission } from '../../api/missionApi';
 import { useMissionSetCreateScreenContainer } from './MissionSetCreateScreen.container';
 import { styles } from './MissionSetCreateScreen.styles';
 

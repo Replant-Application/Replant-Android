@@ -22,7 +22,6 @@ import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types/navigation';
 import { useCommunityPostDetailScreenContainer } from './CommunityPostDetailScreen.container';
 import { styles } from './CommunityPostDetailScreen.styles';
-import { SCREEN_NAMES } from '../../utils/constants';
 
 interface CommunityPostDetailScreenProps {
   navigation: NavigationProp<RootStackParamList>;

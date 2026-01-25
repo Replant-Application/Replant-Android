@@ -5,7 +5,6 @@
 
 import { StyleSheet, Platform } from 'react-native';
 import { colors, spacing, typography, borderRadius, shadows } from '../../utils/designTokens';
-import { getOptimizedLineHeight } from '../../utils/styles/textStyles';
 import { createTextStyle, createTitleStyle, createSecondaryTextStyle } from '../../utils/styles/textStyles';
 
 export const styles = StyleSheet.create({

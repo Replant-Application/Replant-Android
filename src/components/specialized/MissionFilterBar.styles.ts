@@ -3,7 +3,7 @@
  * 미션 필터 바 컴포넌트의 모든 스타일 정의
  */
 
-import { StyleSheet, Platform } from 'react-native';
+import { StyleSheet } from 'react-native';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
 import { createTextStyle } from '../../utils/styles/textStyles';
 

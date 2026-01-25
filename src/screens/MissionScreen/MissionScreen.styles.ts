@@ -3,8 +3,8 @@
  * 미션 화면의 모든 스타일 정의
  */
 
-import { StyleSheet, Platform, Dimensions } from 'react-native';
-import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
+import { StyleSheet, Dimensions } from 'react-native';
+import { colors, spacing, borderRadius } from '../../utils/designTokens';
 import { createTextStyle, createTitleStyle, createBodyStyle, createSecondaryTextStyle, createButtonTextStyle } from '../../utils/styles/textStyles';
 import { loadingStyles } from '../../utils/styles/componentStyles';
 

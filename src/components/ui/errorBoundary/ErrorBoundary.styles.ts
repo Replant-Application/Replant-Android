@@ -4,8 +4,8 @@
  */
 
 import { StyleSheet, Platform } from 'react-native';
-import { colors, spacing, typography, borderRadius } from '../../../utils/designTokens';
-import { createTextStyle, createTitleStyle, createSecondaryTextStyle, createButtonTextStyle } from '../../../utils/styles/textStyles';
+import { colors, spacing, typography } from '../../../utils/designTokens';
+import { createTitleStyle, createSecondaryTextStyle, createButtonTextStyle } from '../../../utils/styles/textStyles';
 import { buttonStyles } from '../../../utils/styles/commonStyles';
 
 export const styles = StyleSheet.create({

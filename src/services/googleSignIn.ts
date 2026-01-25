@@ -32,7 +32,7 @@ export const initializeGoogleSignIn = () => {
 export const signInWithGoogle = async (): Promise<string | null> => {
   try {
     await GoogleSignin.hasPlayServices();
-    const userInfo = await GoogleSignin.signIn();
+    await GoogleSignin.signIn();
 
     // Get access token
     const tokens = await GoogleSignin.getTokens();

@@ -7,7 +7,7 @@ import { StyleSheet, Platform } from 'react-native';
 import { colors, spacing, typography, borderRadius, shadows } from '../../utils/designTokens';
 import { getOptimizedLineHeight } from '../../utils/styles/textStyles';
 import { createTextStyle, createTitleStyle, createBodyStyle, createSecondaryTextStyle, createButtonTextStyle } from '../../utils/styles/textStyles';
-import { cardStyles, modalStyles } from '../../utils/styles/commonStyles';
+import { modalStyles } from '../../utils/styles/commonStyles';
 
 export const styles = StyleSheet.create({
   container: {

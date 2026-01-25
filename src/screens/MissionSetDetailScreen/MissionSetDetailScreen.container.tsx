@@ -9,7 +9,6 @@ import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types/navigation';
 import {
   getPublicTodoListDetail,
-  getMissionSetDetail,
   copyMissionSet,
   MissionSetDetail,
   createReview,

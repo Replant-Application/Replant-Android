@@ -4,7 +4,6 @@
 
 import React from 'react';
 import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
-import { RegionInfo } from '../../../api/authApi';
 import { REGIONS } from '../../../constants/screens/auth';
 import { styles } from './RegionSelector.styles';
 

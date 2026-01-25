@@ -5,8 +5,7 @@
 
 import { StyleSheet, Platform } from 'react-native';
 import { colors, spacing, typography, borderRadius } from '../../../utils/designTokens';
-import { createTextStyle, createButtonTextStyle } from '../../../utils/styles/textStyles';
-import { buttonStyles } from '../../../utils/styles/commonStyles';
+import { createTextStyle } from '../../../utils/styles/textStyles';
 
 export const styles = StyleSheet.create({
   base: {

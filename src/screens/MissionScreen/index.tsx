@@ -28,7 +28,6 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
     showCompleteModal,
     completeModalTitle,
     completeModalMessage,
-    completedMissionForVerification,
     isLevelUp,
     groupMissions,
     groupLoading,

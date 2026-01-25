@@ -21,7 +21,7 @@ export const useCommunityPostEditScreenContainer = ({
   route,
 }: CommunityPostEditScreenContainerProps) => {
   const { postId } = route.params;
-  const { currentNickname, currentUserId } = useUser();
+  useUser();
   const { post, loading } = useCommunityPost(postId);
   const { updatePost } = useCommunity();
 

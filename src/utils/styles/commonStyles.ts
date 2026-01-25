@@ -5,7 +5,7 @@
 
 import { ViewStyle, TextStyle } from 'react-native';
 import { colors, spacing, typography, borderRadius } from '../designTokens';
-import { createTextStyle, createButtonTextStyle } from './textStyles';
+import { createTextStyle } from './textStyles';
 
 /**
  * 공통 버튼 스타일

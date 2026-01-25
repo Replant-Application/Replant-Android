@@ -3,10 +3,9 @@
  * 간단한 탭 바 컴포넌트의 모든 스타일 정의
  */
 
-import { StyleSheet, Platform } from 'react-native';
-import { colors, spacing, typography, borderRadius, shadows } from '../../../utils/designTokens';
+import { StyleSheet } from 'react-native';
+import { spacing, typography, borderRadius, shadows } from '../../../utils/designTokens';
 import { createTextStyle } from '../../../utils/styles/textStyles';
-import { tabBarStyles } from '../../../utils/styles/componentStyles';
 
 export const styles = StyleSheet.create({
   container: {

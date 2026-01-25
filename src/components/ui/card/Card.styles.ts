@@ -4,7 +4,7 @@
  */
 
 import { StyleSheet } from 'react-native';
-import { colors, spacing, borderRadius } from '../../../utils/designTokens';
+import { colors, spacing } from '../../../utils/designTokens';
 import { cardStyles } from '../../../utils/styles/commonStyles';
 
 export const styles = StyleSheet.create({

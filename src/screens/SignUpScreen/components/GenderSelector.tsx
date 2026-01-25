@@ -4,7 +4,7 @@
 
 import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
-import { Gender, SignUpErrors } from '../../../types/screens/auth';
+import { Gender } from '../../../types/screens/auth';
 import { styles } from './GenderSelector.styles';
 
 interface GenderSelectorProps {

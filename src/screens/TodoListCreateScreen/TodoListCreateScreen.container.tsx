@@ -13,7 +13,7 @@ import { Step, TodoListCreateScreenProps, TimePeriod } from '../../types/screens
 import { DEFAULT_START_TIME, DEFAULT_END_TIME } from '../../constants/screens/todolist';
 
 export const useTodoListCreateScreenContainer = ({ navigation }: TodoListCreateScreenProps) => {
-  const { showError, showSuccess, showInfo, handleApiError } = useErrorHandler();
+  const { showError, showInfo, handleApiError } = useErrorHandler();
 
   const [currentStep, setCurrentStep] = useState<Step>('intro');
   const [randomMissions, setRandomMissions] = useState<MissionSimple[]>([]);

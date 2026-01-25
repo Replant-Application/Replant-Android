@@ -3,7 +3,6 @@ import { View, Text, TouchableOpacity, Image, ViewStyle } from 'react-native';
 import { styles } from './MissionCard.styles';
 
 import { Mission } from '../../types';
-import Badge from './Badge';
 
 interface MissionCardProps {
   mission: Mission;
@@ -27,9 +26,9 @@ const MissionCard: React.FC<MissionCardProps> = ({
   onComplete,
   onCompleteCustom,
   onUncomplete: _onUncomplete,
-  onUploadPhoto,
+  onUploadPhoto: _onUploadPhoto,
   onDeletePhoto,
-  onShareToCommunity,
+  onShareToCommunity: _onShareToCommunity,
   onWriteReview,
   onViewDetails,
   onVerify,

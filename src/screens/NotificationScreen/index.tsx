@@ -14,7 +14,7 @@ import {
 } from 'react-native';
 import { type Notification as NotificationType } from '../../api/notificationApi';
 import { Loading, EmptyState, Header } from '../../components/ui';
-import { colors, spacing } from '../../utils/designTokens';
+import { colors } from '../../utils/designTokens';
 import { NotificationScreenProps } from '../../types/screens/notification';
 import SwipeableNotificationItem from './SwipeableNotificationItem';
 import { useNotificationScreenContainer } from './NotificationScreen.container';
@@ -30,7 +30,6 @@ const NotificationScreen: React.FC<NotificationScreenProps> = ({ navigation }) =
     unreadCount,
     handleRefresh,
     handleFilterChange,
-    handleMarkAsRead,
     handleMarkAllAsRead,
     handleDeleteNotification,
     handleNotificationPress,

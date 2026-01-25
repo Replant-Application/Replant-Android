@@ -19,7 +19,6 @@ import { NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types/navigation';
 import { Header, Loading } from '../../components/ui';
 import { colors, spacing } from '../../utils/designTokens';
-import { Badge } from '../../api/badgeApi';
 import { Mission } from '../../types';
 import { useMyProgressDetailScreenContainer } from './MyProgressDetailScreen.container';
 import { styles } from './MyProgressDetailScreen.styles';
@@ -50,7 +49,7 @@ const MyProgressDetailScreen: React.FC<MyProgressDetailScreenProps> = ({ navigat
   } = useMyProgressDetailScreenContainer({ navigation });
 
   // 미션 페이지 렌더링
-  const renderMissionPage = ({ item: pageMissions, index }: { item: Mission[]; index: number }) => (
+  const renderMissionPage = ({ item: pageMissions, index: _index }: { item: Mission[]; index: number }) => (
     <View style={styles.pageContainer}>
       {pageMissions.length === 0 ? (
         <View style={styles.emptyContainer}>

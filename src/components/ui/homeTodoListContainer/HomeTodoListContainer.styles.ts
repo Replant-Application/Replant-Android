@@ -3,8 +3,8 @@
  * 홈스크린 전용 투두리스트 컨테이너 컴포넌트의 모든 스타일 정의
  */
 
-import { StyleSheet, Platform } from 'react-native';
-import { colors, spacing, typography, borderRadius } from '../../../utils/designTokens';
+import { StyleSheet } from 'react-native';
+import { spacing, typography, borderRadius } from '../../../utils/designTokens';
 import { createTextStyle, createTitleStyle } from '../../../utils/styles/textStyles';
 
 export const styles = StyleSheet.create({

@@ -26,7 +26,6 @@ export const useVerificationPostCreateScreenContainer = ({
   const params = route?.params || {};
   const {
     userMissionId,
-    missionId,
     missionTitle = '미션',
     missionEmoji = '',
     photoUrl: initialPhotoUrl,

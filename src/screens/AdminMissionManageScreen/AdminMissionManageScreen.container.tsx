@@ -38,7 +38,7 @@ export const VERIFICATION_TYPES = [
 ];
 
 export const useAdminMissionManageScreenContainer = ({
-  navigation,
+  navigation: _navigation,
 }: AdminMissionManageScreenContainerProps) => {
   const [missions, setMissions] = useState<Mission[]>([]);
   const [loading, setLoading] = useState(true);

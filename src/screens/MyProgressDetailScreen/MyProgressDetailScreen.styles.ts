@@ -3,7 +3,7 @@
  * 나의 진행률 상세 화면의 모든 스타일 정의
  */
 
-import { StyleSheet, Platform, Dimensions } from 'react-native';
+import { StyleSheet, Dimensions } from 'react-native';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
 import { createTextStyle, createTitleStyle, createBodyStyle, createSecondaryTextStyle } from '../../utils/styles/textStyles';
 import { emptyStateStyles, paginationStyles } from '../../utils/styles/commonStyles';

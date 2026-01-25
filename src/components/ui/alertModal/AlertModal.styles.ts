@@ -4,7 +4,7 @@
  */
 
 import { StyleSheet } from 'react-native';
-import { colors, spacing, typography, borderRadius } from '../../../utils/designTokens';
+import { colors, spacing, borderRadius } from '../../../utils/designTokens';
 import { createTextStyle, createTitleStyle, createButtonTextStyle } from '../../../utils/styles/textStyles';
 import { modalStyles, buttonStyles } from '../../../utils/styles/commonStyles';
 

@@ -1,6 +1,6 @@
 import { getData, setData, getStorageKeys } from './storage';
 import { logError } from '../utils/logger';
-import { ServiceResult, Character, UserProfile, UserInfoUpdateData, CalendarEvent, CalendarEventData, User, Mission, Diary, CommunityPost } from '../types';
+import { ServiceResult, Character, UserProfile, UserInfoUpdateData, CalendarEvent, CalendarEventData, User, Diary, CommunityPost } from '../types';
 import { generateUserCharacterName } from '../utils/characterNameGenerator';
 import { getMyInfo } from '../api/userApi';
 import { getMissionHistory } from '../api/missionApi';

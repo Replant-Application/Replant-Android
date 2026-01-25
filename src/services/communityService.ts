@@ -224,7 +224,7 @@ const transformBackendPost = (post: BackendPostResponse): CommunityPost => {
   // - 인증글(VERIFICATION)이고 APPROVED 상태면 verified = true
   // - 인증글이고 PENDING 상태면 verified = false
   // - 일반글(GENERAL)이면 verified = undefined (인증 개념 없음)
-  let verified: boolean | undefined = undefined;
+  let verified: boolean | undefined;
   if (post.postType === 'VERIFICATION') {
     verified = post.status === 'APPROVED';
   }

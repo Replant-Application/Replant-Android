@@ -24,7 +24,7 @@ export const useCommunityPostDetailScreenContainer = ({
   route,
 }: CommunityPostDetailScreenContainerProps) => {
   const { postId } = route.params;
-  const { currentNickname, currentUserId } = useUser();
+  useUser();
   const { post, comments, loading, error, createComment, updateComment, deleteComment, toggleLike } =
     useCommunityPost(postId);
   const { deletePost } = useCommunity();

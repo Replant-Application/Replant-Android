@@ -7,7 +7,7 @@ import React from 'react';
 import { View, Text, ScrollView, TouchableOpacity, TextInput, Image, Modal, RefreshControl, ImageBackground, ActivityIndicator } from 'react-native';
 import { PostCard } from '../../components/specialized';
 import { Loading, ErrorBoundary, EmptyState, SimpleTabBar, Header, AlertModal } from '../../components/ui';
-import { colors, spacing } from '../../utils/designTokens';
+import { colors } from '../../utils/designTokens';
 import { CommunityScreenProps, CommunityTab, VerificationFilter } from '../../types/screens/community';
 import { FILTER_OPTIONS } from '../../constants/screens/community';
 import MissionSetList from './components/MissionSetList';
@@ -17,7 +17,6 @@ import { styles } from './CommunityScreen.styles';
 const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation, route }) => {
   // 비즈니스 로직은 Container에서 처리
   const {
-    posts,
     loading,
     error,
     filteredPosts,
@@ -52,7 +51,6 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation, route }) 
     handleHidePost,
     handlePostPress,
     handleLike,
-    handleMissionGroupPress,
     handleAlertClose,
     handleFilterModalClose,
     handleMissionSetFilterModalClose,

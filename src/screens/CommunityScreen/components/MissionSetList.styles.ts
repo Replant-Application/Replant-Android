@@ -6,7 +6,7 @@
 import { StyleSheet } from 'react-native';
 import { colors, spacing, typography, borderRadius } from '../../../utils/designTokens';
 import { createTextStyle, createTitleStyle, createSecondaryTextStyle, createButtonTextStyle } from '../../../utils/styles/textStyles';
-import { inputStyles, buttonStyles, cardStyles } from '../../../utils/styles/commonStyles';
+import { buttonStyles, cardStyles } from '../../../utils/styles/commonStyles';
 
 export const styles = StyleSheet.create({
   filterContainer: {

@@ -37,7 +37,6 @@ const WakeUpVerificationScreen: React.FC<WakeUpVerificationScreenProps> = ({ nav
     handleVerify,
     handleSuccessModalClose,
     handleErrorModalClose,
-    formatTime,
   } = useWakeUpVerificationScreenContainer({ navigation, route });
 
   const mission = userMission?.mission || userMission?.customMission;

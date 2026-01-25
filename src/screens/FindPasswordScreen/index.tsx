@@ -1,7 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform, Image } from 'react-native';
 import { Button, Input, Header } from '../../components/ui';
-import { SCREEN_NAMES } from '../../utils/constants';
 import { useFindPasswordScreenContainer } from './FindPasswordScreen.container';
 import { styles } from './FindPasswordScreen.styles';
 

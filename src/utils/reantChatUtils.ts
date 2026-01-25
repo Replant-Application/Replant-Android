@@ -19,8 +19,8 @@ export interface ChatMessage {
  */
 export const generateReantResponse = (
   userMessage: string,
-  reantName: string = '리앤트',
-  reantLevel: number = 1
+  _reantName: string = '리앤트',
+  _reantLevel: number = 1
 ): string => {
   const message = userMessage.toLowerCase().trim();
 

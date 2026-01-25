@@ -14,7 +14,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
   onFilterChange,
   variant = 'pill',
   containerStyle,
-  style,
+  style: _style,
 }) => {
   const renderPillVariant = () => (
     <View style={[styles.pillContainer, containerStyle]}>

@@ -9,7 +9,6 @@ import {
 } from 'react-native';
 import { NavigationProp } from '@react-navigation/native';
 import { Header, Card } from '../../components/ui';
-import { spacing } from '../../utils/designTokens';
 import { RootStackParamList } from '../../types/navigation';
 import { useStatisticsScreenContainer } from './StatisticsScreen.container';
 import { styles } from './StatisticsScreen.styles';
@@ -38,7 +37,6 @@ const StatisticsScreen: React.FC<StatisticsScreenProps> = ({ navigation }) => {
    * 캘린더 그리드 렌더링
    */
   const renderCalendarGrid = (completedDays: number[], daysInMonth: number) => {
-    const dayColors = ['#FFE066', '#FF6B6B', '#4ECDC4', '#95E1D3', '#F38181'];
     const gridData = generateCalendarGridData(completedDays, daysInMonth);
     const rows = [];
     const daysPerRow = 7;

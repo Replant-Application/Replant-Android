@@ -9,7 +9,7 @@ import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types/navigation';
 import { useCommunity } from '../../hooks/useCommunity';
 import { createVerificationPost } from '../../api/verificationApi';
-import { launchImageLibrary, ImagePickerResponse } from 'react-native-image-picker';
+import { launchImageLibrary } from 'react-native-image-picker';
 import { uploadCommunityPhoto } from '../../api/fileApi';
 import { logError } from '../../utils/logger';
 import { SCREEN_NAMES } from '../../utils/constants';

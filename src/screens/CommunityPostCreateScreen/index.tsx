@@ -33,7 +33,6 @@ const CommunityPostCreateScreen: React.FC<CommunityPostCreateScreenProps> = ({ n
   const {
     isGeneralPost,
     missionTitle,
-    missionEmoji,
     photoUrl,
     title,
     content,

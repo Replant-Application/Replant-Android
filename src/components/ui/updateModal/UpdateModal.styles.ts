@@ -3,10 +3,10 @@
  * 앱 업데이트 알림 모달 컴포넌트의 모든 스타일 정의
  */
 
-import { StyleSheet, Platform } from 'react-native';
-import { colors, spacing, typography, borderRadius } from '../../../utils/designTokens';
+import { StyleSheet } from 'react-native';
+import { colors, spacing, borderRadius } from '../../../utils/designTokens';
 import { createTextStyle, createTitleStyle, createButtonTextStyle } from '../../../utils/styles/textStyles';
-import { modalStyles, buttonStyles } from '../../../utils/styles/commonStyles';
+import { modalStyles } from '../../../utils/styles/commonStyles';
 
 export const styles = StyleSheet.create({
   overlay: {

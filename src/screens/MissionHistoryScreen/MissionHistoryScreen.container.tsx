@@ -14,7 +14,7 @@ interface MissionHistoryScreenContainerProps {
 type FilterType = 'all' | 'completed' | 'expired';
 
 export const useMissionHistoryScreenContainer = ({
-  navigation,
+  navigation: _navigation,
 }: MissionHistoryScreenContainerProps) => {
   const [missions, setMissions] = useState<UserMission[]>([]);
   const [loading, setLoading] = useState(true);

@@ -14,7 +14,6 @@ import {
   View,
   Text,
   TouchableOpacity,
-  Platform,
   Image,
 } from 'react-native';
 import { useOverlay } from '../../contexts/OverlayContext';

@@ -13,7 +13,6 @@ import {
   deleteComment as deleteCommentService,
   toggleLike as toggleLikeService,
 } from '../services/communityService';
-import { autoLevelupCharacter } from '../services/characterService';
 import { getData, getStorageKeys } from '../services/storage';
 import { useUser } from '../contexts/UserContext';
 import { logError } from '../utils/logger';

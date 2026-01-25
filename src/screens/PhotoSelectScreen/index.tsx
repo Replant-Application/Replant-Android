@@ -11,7 +11,6 @@ import {
   Image,
   ActivityIndicator,
   ScrollView,
-  Platform,
 } from 'react-native';
 import { Header, Button } from '../../components/ui';
 import { colors } from '../../utils/designTokens';

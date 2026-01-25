@@ -5,7 +5,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { Alert } from 'react-native';
-import { useAdmin, MemberDetail } from '../../hooks/useAdmin';
+import { useAdmin } from '../../hooks/useAdmin';
 import { UserInfo, updateUser } from '../../api/manageApi';
 
 interface AdminUserEditScreenContainerProps {

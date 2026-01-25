@@ -24,7 +24,7 @@ export const useMissionHandlers = ({
   deleteMissionPhoto,
   completeMissionWithPhoto,
   uncompleteMission,
-  loadMissions,
+  loadMissions: _loadMissions,
   navigation,
 }: UseMissionHandlersProps) => {
   const processedPhotoRef = useRef<string | null>(null);

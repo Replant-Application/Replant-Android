@@ -60,7 +60,7 @@ export const getMissionTypeLabel = (missionType?: string): string => {
 };
 
 export const useMissionDetailScreenContainer = ({ navigation, route }: MissionDetailScreenContainerProps) => {
-  const { missionId, returnTab, missionGroupTab, selectedFilter } = route.params;
+  const { missionId, returnTab } = route.params;
   const { showError, showSuccess, handleApiError } = useErrorHandler();
 
   const [mission, setMission] = useState<SystemMission | Mission | null>(null);

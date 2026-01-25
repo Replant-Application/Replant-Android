@@ -54,7 +54,7 @@ const MissionGroupList: React.FC<MissionGroupListProps> = ({
   missions,
   missionGroupTab,
   selectedMission,
-  currentUserId,
+  currentUserId: _currentUserId,
   currentServerPage,
   totalServerPages,
   refreshing = false,

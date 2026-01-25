@@ -25,7 +25,7 @@ import { getNotifications, markNotificationAsRead } from '../../api/notification
 import { getUserMission } from '../../api/missionApi';
 import { formatTimeAgo } from '../../utils/dateUtils';
 import { SCREEN_NAMES } from '../../utils/constants';
-import { styles, DROPDOWN_WIDTH } from './NotificationDropdown.styles';
+import { styles } from './NotificationDropdown.styles';
 
 interface Notification {
   id: number;

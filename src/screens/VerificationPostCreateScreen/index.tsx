@@ -34,7 +34,6 @@ const VerificationPostCreateScreen: React.FC<VerificationPostCreateScreenProps> 
   const {
     isEditMode,
     missionTitle,
-    missionEmoji,
     content,
     images,
     loading,

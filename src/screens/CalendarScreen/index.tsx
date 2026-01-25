@@ -1,7 +1,6 @@
 import React from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Image, ImageBackground } from 'react-native';
 import { Card, Header } from '../../components/ui';
-import { spacing } from '../../utils/designTokens';
 import { formatDateYYYYMMDD } from '../../utils/dateUtils';
 import { useCalendarScreenContainer } from './CalendarScreen.container';
 import { styles } from './CalendarScreen.styles';
@@ -20,7 +19,6 @@ const CalendarScreen: React.FC<CalendarScreenProps> = ({ navigation }) => {
     currentMonth,
     currentYear,
     selectedDate,
-    loadingMissions,
     calendarDays,
     missionsByDate,
     selectedDayMissions,
@@ -90,7 +88,6 @@ const CalendarScreen: React.FC<CalendarScreenProps> = ({ navigation }) => {
                   const isToday = dateString === todayString;
                   const isSelected = dateString === selectedDate;
                   const missionCount = dayMissionsForDate.length;
-                  const showMoreIndicator = missionCount > 2;
 
                   return (
                     <TouchableOpacity

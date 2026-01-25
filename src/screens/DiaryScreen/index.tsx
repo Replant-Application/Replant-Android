@@ -9,20 +9,16 @@ import {
   Image,
   FlatList,
   RefreshControl,
-  Dimensions,
   Animated
 } from 'react-native';
 import { Loading, ErrorBoundary, ConfirmModal, AlertModal } from '../../components/ui';
 import { colors } from '../../utils/designTokens';
-import { Diary } from '../../types';
 import { formatDateKorean, formatDateDivider } from '../../utils/dateUtils';
 import { getCharacterImage } from '../../utils/characterUtils';
 import EmotionSelectionStep from './EmotionSelectionStep';
 import FactorSelectionStep from './FactorSelectionStep';
 import { useDiaryScreenContainer } from './DiaryScreen.container';
 import { styles } from './DiaryScreen.styles';
-
-const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 const DiaryScreen: React.FC = () => {
   // 비즈니스 로직은 Container에서 처리
@@ -31,7 +27,6 @@ const DiaryScreen: React.FC = () => {
     loading,
     error,
     currentCharacter,
-    todayDiary,
     filteredDiaries,
     groupedDiaries,
     currentStep,
@@ -43,13 +38,11 @@ const DiaryScreen: React.FC = () => {
     expressionText,
     selectedDiary,
     viewingDiaryIndex,
-    showEmptyMessage,
     viewMode,
     searchDate,
     refreshing,
     searchingByDate,
     showDeleteConfirm,
-    deleteDiaryId,
     showAlert,
     alertTitle,
     alertMessage,
@@ -58,7 +51,6 @@ const DiaryScreen: React.FC = () => {
     panResponder,
     handleNext,
     handleBack,
-    handleSaveDiary,
     toggleEmotion,
     toggleFactor,
     handleViewDiaries,
@@ -72,7 +64,6 @@ const DiaryScreen: React.FC = () => {
     handleSearchDateClear,
     handleBookDetailView,
     onRefresh,
-    setMoodValue,
     setFactorText,
     setEmotionText,
     setExpressionText,

@@ -6,7 +6,6 @@ import React from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Platform, KeyboardAvoidingView } from 'react-native';
 import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { Header, Loading, ErrorBoundary, Button, Input } from '../../components/ui';
-import { spacing } from '../../utils/designTokens';
 import { RootStackParamList } from '../../types/navigation';
 import { useAdminUserEditScreenContainer } from './AdminUserEditScreen.container';
 import { styles } from './AdminUserEditScreen.styles';

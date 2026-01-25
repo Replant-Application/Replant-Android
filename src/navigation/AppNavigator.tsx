@@ -11,7 +11,6 @@ import { RootStackParamList, HistoryEntry } from '../types/navigation';
 import { apiClient } from '../api/client';
 import { logout } from '../services/authService';
 import { backgroundMusicService } from '../services/backgroundMusicService';
-import { playButtonSound } from '../utils/soundUtils';
 import { getSpontaneousMissionSetup } from '../api/missionApi';
 import { checkUpdateRequired } from '../services/versionService';
 import { UpdateCheckResult } from '../types';

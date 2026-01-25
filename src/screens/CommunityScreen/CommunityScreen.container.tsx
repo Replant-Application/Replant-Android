@@ -4,7 +4,6 @@
  */
 
 import { useState, useMemo, useCallback, useEffect } from 'react';
-import { NavigationProp } from '@react-navigation/native';
 import { useCommunity } from '../../hooks/useCommunity';
 import { useErrorHandler } from '../../hooks/useErrorHandler';
 import { CommunityPost } from '../../types';
@@ -17,8 +16,7 @@ import {
   updateMissionSet,
   MissionSetSimple,
 } from '../../api/todolistApi';
-import { PublicTodoList } from '../../types/todolist';
-import { CommunityScreenProps, CommunityTab, VerificationFilter, PostFilter } from '../../types/screens/community';
+import { CommunityScreenProps, CommunityTab, VerificationFilter } from '../../types/screens/community';
 
 export const useCommunityScreenContainer = ({ navigation, route }: CommunityScreenProps) => {
   const { posts, loading, error, toggleLike, loadPosts } = useCommunity();

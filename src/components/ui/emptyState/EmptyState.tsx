@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, ViewStyle, TextStyle, Image, ImageSourcePropType, Platform } from 'react-native';
+import { View, Text, ViewStyle, TextStyle, Image, ImageSourcePropType } from 'react-native';
 import { styles } from './EmptyState.styles';
 
 interface EmptyStateProps {

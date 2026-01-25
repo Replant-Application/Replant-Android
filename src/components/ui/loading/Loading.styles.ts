@@ -4,7 +4,7 @@
  */
 
 import { StyleSheet } from 'react-native';
-import { colors, spacing, typography } from '../../../utils/designTokens';
+import { spacing } from '../../../utils/designTokens';
 import { createSecondaryTextStyle } from '../../../utils/styles/textStyles';
 import { loadingStyles } from '../../../utils/styles/componentStyles';
 

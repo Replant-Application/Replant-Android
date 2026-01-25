@@ -3,7 +3,7 @@
  * 일기 카드 컴포넌트의 모든 스타일 정의
  */
 
-import { StyleSheet, Platform } from 'react-native';
+import { StyleSheet } from 'react-native';
 import { colors, spacing, typography, borderRadius, shadows } from '../../utils/designTokens';
 import { createTextStyle, createSecondaryTextStyle } from '../../utils/styles/textStyles';
 import { cardStyles } from '../../utils/styles/commonStyles';

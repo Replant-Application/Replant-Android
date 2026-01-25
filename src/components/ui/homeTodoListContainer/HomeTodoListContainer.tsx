@@ -5,7 +5,6 @@
 
 import React from 'react';
 import { View, Text, TouchableOpacity, Image } from 'react-native';
-import { typography } from '../../../utils/designTokens';
 import { styles } from './HomeTodoListContainer.styles';
 import { HomeTodoListContainerProps } from './HomeTodoListContainer.types';
 

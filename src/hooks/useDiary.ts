@@ -10,7 +10,6 @@ import { normalizeDate } from '../utils/dateUtils';
 import { Diary, UseDiaryReturn, ServiceResult, SimpleDiaryData, Emotion } from '../types';
 import {
   getDiaries,
-  getDiary as getDiaryApi,
   getDiaryByDate,
   createDiary,
   updateDiary as updateDiaryApi,

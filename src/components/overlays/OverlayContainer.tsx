@@ -23,7 +23,7 @@ interface OverlayContainerProps {
 const OverlayContainer: React.FC<OverlayContainerProps> = ({
   onNavigate,
   onViewAllNotifications,
-  onViewAllChats,
+  onViewAllChats: _onViewAllChats,
 }) => {
   return (
     <View style={styles.container} pointerEvents="box-none">

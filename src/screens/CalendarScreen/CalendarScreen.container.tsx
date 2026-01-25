@@ -14,7 +14,7 @@ interface CalendarScreenContainerProps {
   };
 }
 
-export const useCalendarScreenContainer = ({ navigation }: CalendarScreenContainerProps) => {
+export const useCalendarScreenContainer = ({ navigation: _navigation }: CalendarScreenContainerProps) => {
   const today = new Date();
   const [currentMonth, setCurrentMonth] = useState(today.getMonth());
   const [currentYear, setCurrentYear] = useState(today.getFullYear());

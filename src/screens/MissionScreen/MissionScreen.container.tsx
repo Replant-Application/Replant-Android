@@ -8,7 +8,6 @@ import { FlatList, Dimensions } from 'react-native';
 import { useMission } from '../../hooks/useMission';
 import { useCharacter } from '../../hooks/useCharacter';
 import { useErrorHandler } from '../../hooks/useErrorHandler';
-import { useUser } from '../../contexts/UserContext';
 import { Mission } from '../../types';
 import {
   checkVerificationStatus,

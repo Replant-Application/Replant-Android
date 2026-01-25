@@ -58,8 +58,6 @@ const TodoListCreateScreen: React.FC<TodoListCreateScreenProps> = ({ navigation 
     setShowMissionSuccessModal,
     setShowTimeRequiredModal,
     setShowAlreadyCreatedModal,
-    setShowTimePickerModal,
-    setSelectedMissionForTime,
     setStartPeriod,
     setStartHour,
     setStartMinute,

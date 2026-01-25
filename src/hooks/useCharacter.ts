@@ -18,7 +18,7 @@ import { updateCharacterName as updateCharacterNameService } from '../services/c
 import { useUser } from '../contexts/UserContext';
 import { logError } from '../utils/logger';
 import { Character, UseCharacterReturn, ExperienceResult, ServiceResult, MissionCategory } from '../types';
-import { getMyReant, updateReant, ReantResponse } from '../api/reantApi';
+import { getMyReant, ReantResponse } from '../api/reantApi';
 
 export const useCharacter = (): UseCharacterReturn => {
   const { currentNickname } = useUser();

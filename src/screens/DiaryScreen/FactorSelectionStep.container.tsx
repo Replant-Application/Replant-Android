@@ -3,7 +3,7 @@
  * 요인 선택 단계: 요인 색상 매핑, 그리드 렌더링 로직
  */
 
-import { useMemo, useCallback } from 'react';
+import { useCallback } from 'react';
 import { colors } from '../../utils/designTokens';
 import { FACTOR_OPTIONS } from '../../constants/screens/diary';
 import { addOpacity } from './DiaryScreen.utils';

@@ -49,7 +49,7 @@ export const useWakeUpVerificationScreenContainer = ({
       console.log('[WakeUpVerificationScreen] route.params:', params);
       console.log('[WakeUpVerificationScreen] Context currentWakeUpMissionId:', currentWakeUpMissionId);
 
-      let extractedId: number | undefined = undefined;
+      let extractedId: number | undefined;
 
       // 1순위: route.params에서 추출
       if (params && 'userMissionId' in params && params.userMissionId !== undefined && params.userMissionId !== null) {
@@ -264,9 +264,7 @@ export const useWakeUpVerificationScreenContainer = ({
         if (currentResult.success && currentResult.data) {
           const {
             userMissionId: apiMissionId,
-            assignedAt,
             timeRemaining: apiTimeRemaining,
-            canVerify: apiCanVerify,
           } = currentResult.data;
 
           // API에서 받은 userMissionId 설정

@@ -36,7 +36,6 @@ export const useNotificationScreenContainer = ({
   const overlayContext = useOverlay();
   
   const lastNotification = sseContext?.lastNotification || null;
-  const setUnreadNotificationCount = overlayContext?.setUnreadNotificationCount || (() => {});
   const lastNotificationIdRef = useRef<any>(null);
 
   // navigation 안전 처리

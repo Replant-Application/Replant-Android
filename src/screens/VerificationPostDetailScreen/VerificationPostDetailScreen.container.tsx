@@ -35,7 +35,7 @@ export const useVerificationPostDetailScreenContainer = ({
   route,
 }: VerificationPostDetailScreenContainerProps) => {
   const { verificationId } = route.params;
-  const { currentNickname, currentUserId } = useUser();
+  const { currentUserId } = useUser();
   const { showError, showSuccess, showInfo, handleApiError } = useErrorHandler();
 
   const [post, setPost] = useState<VerificationPost | null>(null);

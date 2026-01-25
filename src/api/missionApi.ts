@@ -672,7 +672,7 @@ export const deleteVerification = async (
  */
 export const voteVerification = async (
   verificationId: number,
-  data: { vote: VoteType }
+  _data: { vote: VoteType }
 ): Promise<ServiceResult<VoteVerificationResponse>> => {
   // 인증글 좋아요 API 호출
   // 백엔드에서 좋아요 3개 이상 시 자동으로 status = "APPROVED"로 변경

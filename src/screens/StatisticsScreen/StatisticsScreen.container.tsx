@@ -14,7 +14,7 @@ type TabType = 'monthly' | 'weekly';
 type CategoryFilter = 'all' | 'health' | 'selfcare' | 'daily' | 'regular';
 
 export const useStatisticsScreenContainer = ({
-  navigation,
+  navigation: _navigation,
 }: StatisticsScreenContainerProps) => {
   const { missions } = useMission();
   const [activeTab, setActiveTab] = useState<TabType>('monthly');

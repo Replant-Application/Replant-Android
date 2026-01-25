@@ -5,7 +5,6 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Alert, Platform } from 'react-native';
-import DateTimePicker from '@react-native-community/datetimepicker';
 import {
   UserRoutine,
   RoutineType,

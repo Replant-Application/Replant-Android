@@ -22,7 +22,7 @@ import {
 } from '../types';
 
 export const useCommunity = (): UseCommunityReturn => {
-  const { currentNickname, currentUserId } = useUser();
+  const { currentNickname } = useUser();
   const [posts, setPosts] = useState<CommunityPost[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);

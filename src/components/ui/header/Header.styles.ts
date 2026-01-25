@@ -4,7 +4,7 @@
  */
 
 import { StyleSheet } from 'react-native';
-import { colors, spacing, typography } from '../../../utils/designTokens';
+import { spacing, typography } from '../../../utils/designTokens';
 import { createTitleStyle } from '../../../utils/styles/textStyles';
 import { headerStyles } from '../../../utils/styles/componentStyles';
 

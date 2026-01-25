@@ -4,7 +4,7 @@
  */
 
 import { Audio } from 'expo-av';
-import { Platform, InteractionManager } from 'react-native';
+import { InteractionManager } from 'react-native';
 
 class BackgroundMusicService {
   private backgroundSound: Audio.Sound | null = null;

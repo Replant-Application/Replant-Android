@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { View, ViewProps } from 'react-native';
+import { ViewProps } from 'react-native';
 import { AmpMaskView as AmplitudeAmpMaskView } from '@amplitude/plugin-session-replay-react-native';
 
 interface AmpMaskViewProps extends ViewProps {

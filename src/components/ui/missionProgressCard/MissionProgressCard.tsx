@@ -18,15 +18,10 @@ interface MissionProgressCardProps {
 const MissionProgressCard: React.FC<MissionProgressCardProps> = ({
   completedMissions,
   totalMissions,
-  rewardThreshold = 10,
-  onRewardPress,
+  rewardThreshold: _rewardThreshold = 10,
+  onRewardPress: _onRewardPress,
   onHomePress,
 }) => {
-  const progressPercentage = totalMissions > 0 
-    ? (completedMissions / totalMissions) * 100 
-    : 0;
-  const remainingMissions = Math.max(0, rewardThreshold - totalMissions);
-
   return (
     <Card
       variant="flat"
