@@ -118,8 +118,8 @@ const ReantChatBottomSheet: React.FC<ReantChatBottomSheetProps> = ({
 
             {/* 헤더 */}
             <View style={styles.header}>
-              <Text style={styles.headerTitle}>{reantName}와 대화하기</Text>
-              <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+              <Text style={styles.headerTitle} accessibilityRole="header">{reantName}와 대화하기</Text>
+              <TouchableOpacity onPress={onClose} style={styles.closeButton} accessibilityRole="button" accessibilityLabel="닫기">
                 <Text style={styles.closeButtonText}>✕</Text>
               </TouchableOpacity>
             </View>
@@ -169,6 +169,8 @@ const ReantChatBottomSheet: React.FC<ReantChatBottomSheetProps> = ({
                 onPress={handleSend}
                 disabled={!inputText.trim()}
                 activeOpacity={0.7}
+                accessibilityRole="button"
+                accessibilityLabel="전송"
               >
                 <Text style={styles.sendButtonText}>전송</Text>
               </TouchableOpacity>

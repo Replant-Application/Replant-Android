@@ -109,6 +109,8 @@ const AppHeader: React.FC<AppHeaderProps> = ({ navigation }) => {
           style={styles.menuOverlay}
           activeOpacity={1}
           onPress={toggleMenu}
+          accessibilityRole="button"
+          accessibilityLabel="닫기"
         >
           <Animated.View
             style={[

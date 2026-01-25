@@ -55,18 +55,22 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
               accessibilityLabel="확인 모달 이미지"
             />
           )}
-          <Text style={styles.title}>{title}</Text>
+          <Text style={styles.title} accessibilityRole="header">{title}</Text>
           <Text style={styles.message}>{message}</Text>
           <View style={styles.buttonContainer}>
             <TouchableOpacity
               style={[styles.button, styles.cancelButton]}
               onPress={onCancel}
+              accessibilityRole="button"
+              accessibilityLabel={cancelText}
             >
               <Text style={styles.cancelButtonText}>{cancelText}</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.button, { backgroundColor: confirmButtonColor }]}
               onPress={onConfirm}
+              accessibilityRole="button"
+              accessibilityLabel={confirmText}
             >
               <Text style={styles.confirmButtonText}>{confirmText}</Text>
             </TouchableOpacity>

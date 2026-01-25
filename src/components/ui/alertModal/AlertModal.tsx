@@ -54,11 +54,13 @@ const AlertModal: React.FC<AlertModalProps> = ({
               />
             </View>
           )}
-          <Text style={styles.title}>{titleText}</Text>
+          <Text style={styles.title} accessibilityRole="header">{titleText}</Text>
           <Text style={styles.message}>{messageText}</Text>
           <TouchableOpacity
             style={styles.button}
             onPress={onClose}
+            accessibilityRole="button"
+            accessibilityLabel={buttonText}
           >
             <Text style={styles.buttonText}>{buttonText}</Text>
           </TouchableOpacity>

@@ -230,8 +230,8 @@ const MissionSetListScreen: React.FC<MissionSetListScreenProps> = ({ navigation 
           <View style={styles.modalOverlay}>
             <View style={styles.modalContent}>
               <View style={styles.modalHeader}>
-                <Text style={styles.modalTitle}>내 투두리스트 공유하기</Text>
-                <TouchableOpacity onPress={closeShareModal}>
+                <Text style={styles.modalTitle} accessibilityRole="header">내 투두리스트 공유하기</Text>
+                <TouchableOpacity onPress={closeShareModal} accessibilityRole="button" accessibilityLabel="닫기">
                   <Text style={styles.modalCloseText}>닫기</Text>
                 </TouchableOpacity>
               </View>
@@ -253,6 +253,8 @@ const MissionSetListScreen: React.FC<MissionSetListScreenProps> = ({ navigation 
                     <TouchableOpacity
                       style={styles.modalItem}
                       onPress={() => handleShare(item)}
+                      accessibilityRole="button"
+                      accessibilityLabel={item.title}
                     >
                       <View style={styles.modalItemContent}>
                         <Image

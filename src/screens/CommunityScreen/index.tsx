@@ -261,7 +261,7 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation, route }) 
             onPress={handleFilterModalClose}
           />
           <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>필터 선택</Text>
+            <Text style={styles.modalTitle} accessibilityRole="header">필터 선택</Text>
             
             {/* 정렬 옵션 */}
             <Text style={styles.modalSectionTitle}>정렬</Text>
@@ -361,7 +361,7 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation, route }) 
             onPress={handleMissionSetFilterModalClose}
           />
           <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>정렬 선택</Text>
+            <Text style={styles.modalTitle} accessibilityRole="header">정렬 선택</Text>
 
             {/* 정렬 옵션 */}
             <View style={styles.filterOptionRow}>
@@ -422,10 +422,12 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation, route }) 
         <View style={styles.shareModalOverlay}>
           <View style={styles.shareModalContent}>
             <View style={styles.shareModalHeader}>
-              <Text style={styles.shareModalTitle}>투두리스트 공유하기</Text>
+              <Text style={styles.shareModalTitle} accessibilityRole="header">투두리스트 공유하기</Text>
               <TouchableOpacity
                 onPress={handleShareModalClose}
                 style={styles.shareModalCloseButton}
+                accessibilityRole="button"
+                accessibilityLabel="닫기"
               >
                 <Text style={styles.shareModalCloseText}>×</Text>
               </TouchableOpacity>
@@ -449,13 +451,12 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation, route }) 
                 myMissionSets.map(missionSet => (
                   <TouchableOpacity
                     key={missionSet.id}
-                    style={[
-                      styles.shareModalItem,
-                      missionSet.isPublic && styles.shareModalItemShared,
-                    ]}
+                    style={styles.shareModalItem}
                     onPress={() => handleShareMissionSet(missionSet)}
                     disabled={sharingId === missionSet.id || missionSet.isPublic}
                     activeOpacity={0.7}
+                    accessibilityRole="button"
+                    accessibilityLabel={missionSet.title}
                   >
                     <View style={styles.shareModalItemContent}>
                       <Text style={styles.shareModalItemTitle} numberOfLines={1}>
@@ -473,13 +474,9 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation, route }) 
                     <View style={styles.shareModalItemAction}>
                       {sharingId === missionSet.id ? (
                         <ActivityIndicator size="small" color={colors.primary[500]} />
-                      ) : missionSet.isPublic ? (
-                        <View style={styles.sharedBadge}>
-                          <Text style={styles.sharedBadgeText}>공유됨</Text>
-                        </View>
                       ) : (
-                        <View style={styles.shareButton}>
-                          <Text style={styles.shareButtonText}>공유</Text>
+                        <View style={[styles.shareButton, missionSet.isPublic && styles.shareButtonDisabled]}>
+                          <Text style={[styles.shareButtonText, missionSet.isPublic && styles.shareButtonTextDisabled]}>공유</Text>
                         </View>
                       )}
                     </View>

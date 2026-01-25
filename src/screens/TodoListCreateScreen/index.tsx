@@ -443,7 +443,7 @@ const TodoListCreateScreen: React.FC<TodoListCreateScreenProps> = ({ navigation 
             >
               <View style={styles.modalShadowWrap}>
                 <View style={styles.timePickerModalContainer}>
-                  <Text style={styles.timePickerModalTitle}>시간 설정</Text>
+                  <Text style={styles.timePickerModalTitle} accessibilityRole="header">시간 설정</Text>
                   {selectedMissionForTime && (
                     <Text style={styles.timePickerModalMissionTitle}>
                       {allMissions.find((m) => m.id === selectedMissionForTime)?.title}
@@ -482,10 +482,10 @@ const TodoListCreateScreen: React.FC<TodoListCreateScreenProps> = ({ navigation 
                         </View>
                       </View>
                       <View style={styles.timePickerModalButtons}>
-                        <TouchableOpacity style={styles.timePickerModalCancelButton} onPress={handleCloseTimePickerModal} activeOpacity={0.7}>
+                        <TouchableOpacity style={styles.timePickerModalCancelButton} onPress={handleCloseTimePickerModal} activeOpacity={0.7} accessibilityRole="button" accessibilityLabel="취소">
                           <Text style={styles.timePickerModalCancelText}>취소</Text>
                         </TouchableOpacity>
-                        <TouchableOpacity style={styles.timePickerModalConfirmButton} onPress={handleTimePickerNext} activeOpacity={0.7}>
+                        <TouchableOpacity style={styles.timePickerModalConfirmButton} onPress={handleTimePickerNext} activeOpacity={0.7} accessibilityRole="button" accessibilityLabel="다음">
                           <Text style={styles.timePickerModalConfirmText}>다음</Text>
                         </TouchableOpacity>
                       </View>
@@ -522,10 +522,10 @@ const TodoListCreateScreen: React.FC<TodoListCreateScreenProps> = ({ navigation 
                         </View>
                       </View>
                       <View style={styles.timePickerModalButtons}>
-                        <TouchableOpacity style={styles.timePickerModalCancelButton} onPress={handleTimePickerPrev} activeOpacity={0.7}>
+                        <TouchableOpacity style={styles.timePickerModalCancelButton} onPress={handleTimePickerPrev} activeOpacity={0.7} accessibilityRole="button" accessibilityLabel="이전">
                           <Text style={styles.timePickerModalCancelText}>이전</Text>
                         </TouchableOpacity>
-                        <TouchableOpacity style={styles.timePickerModalConfirmButton} onPress={handleSaveTime} activeOpacity={0.7}>
+                        <TouchableOpacity style={styles.timePickerModalConfirmButton} onPress={handleSaveTime} activeOpacity={0.7} accessibilityRole="button" accessibilityLabel="확인">
                           <Text style={styles.timePickerModalConfirmText}>확인</Text>
                         </TouchableOpacity>
                       </View>

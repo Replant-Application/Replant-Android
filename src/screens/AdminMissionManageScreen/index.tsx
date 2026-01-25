@@ -174,6 +174,7 @@ const AdminMissionManageScreen: React.FC<AdminMissionManageScreenProps> = ({ nav
                 title={editingMission ? '미션 수정' : '새 미션 추가'}
                 size="lg"
                 marginBottom={spacing[4]}
+                accessibilityRole="header"
               />
 
               {/* 제목 */}
@@ -337,12 +338,16 @@ const AdminMissionManageScreen: React.FC<AdminMissionManageScreenProps> = ({ nav
                 <TouchableOpacity
                   style={styles.cancelButton}
                   onPress={closeModal}
+                  accessibilityRole="button"
+                  accessibilityLabel="취소"
                 >
                   <Text style={styles.cancelButtonText}>취소</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={styles.saveButton}
                   onPress={handleSaveMission}
+                  accessibilityRole="button"
+                  accessibilityLabel={editingMission ? '수정' : '추가'}
                 >
                   <Text style={styles.saveButtonText}>
                     {editingMission ? '수정' : '추가'}

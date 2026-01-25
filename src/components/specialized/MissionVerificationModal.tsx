@@ -190,7 +190,7 @@ const MissionVerificationModal: React.FC<MissionVerificationModalProps> = ({
       <View style={styles.overlay}>
         <View style={styles.modalContainer}>
           <View style={styles.header}>
-            <Text style={styles.title}>인증 방법 선택</Text>
+            <Text style={styles.title} accessibilityRole="header">인증 방법 선택</Text>
             <Text style={styles.subtitle}>
               {mission.title} 미션을 인증할 방법을 선택해주세요
             </Text>
@@ -203,6 +203,8 @@ const MissionVerificationModal: React.FC<MissionVerificationModalProps> = ({
                 style={styles.optionButton}
                 onPress={handleLikeVerification}
                 activeOpacity={0.7}
+                accessibilityRole="button"
+                accessibilityLabel="좋아요 인증"
               >
                 <View style={styles.optionIconContainer}>
                   <Image
@@ -248,6 +250,8 @@ const MissionVerificationModal: React.FC<MissionVerificationModalProps> = ({
                   onPress={handleGPSVerification}
                   activeOpacity={0.7}
                   disabled={gpsLoading}
+                  accessibilityRole="button"
+                  accessibilityLabel="GPS 인증"
                 >
                   <View style={styles.optionIconContainer}>
                     {gpsLoading || locationState.loading ? (
@@ -297,6 +301,8 @@ const MissionVerificationModal: React.FC<MissionVerificationModalProps> = ({
                   style={styles.optionButton}
                   onPress={handleTimeVerification}
                   activeOpacity={0.7}
+                  accessibilityRole="button"
+                  accessibilityLabel="시간 인증"
                 >
                   <View style={styles.optionIconContainer}>
                     <Image
@@ -320,6 +326,8 @@ const MissionVerificationModal: React.FC<MissionVerificationModalProps> = ({
           <TouchableOpacity
             style={styles.cancelButton}
             onPress={onClose}
+            accessibilityRole="button"
+            accessibilityLabel="나중에"
           >
             <Text style={styles.cancelButtonText}>나중에</Text>
           </TouchableOpacity>

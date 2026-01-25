@@ -163,6 +163,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
               style={styles.evolutionModalContent}
               activeOpacity={1}
               onPress={handleEvolutionModalClose}
+              accessibilityRole="button"
+              accessibilityLabel="닫기"
             >
               <View style={styles.evolutionImageContainer}>
                 <FastImage
@@ -180,7 +182,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                   accessibilityElementsHidden={true}
                 >
                   <View style={styles.evolutionSpeechTextContainer}>
-                    <Text style={styles.evolutionSpeechText}>
+                    <Text style={styles.evolutionSpeechText} accessibilityRole="header">
                       어라? 내 몸이 이상해요!
                     </Text>
                   </View>

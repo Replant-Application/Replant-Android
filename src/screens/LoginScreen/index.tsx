@@ -225,7 +225,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onNavigate }) => {
               />
             </View>
             <View style={styles.modalTextContainer}>
-              <Text style={styles.modalMessage}>
+              <Text style={styles.modalMessage} accessibilityRole="header">
                 환영합니다! <Text style={styles.modalUserName}>{userName}</Text>님,{'\n'}
                 함께 성장해요 🌱
               </Text>

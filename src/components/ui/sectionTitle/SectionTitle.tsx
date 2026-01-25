@@ -9,6 +9,7 @@ interface SectionTitleProps {
   color?: string;
   marginBottom?: number;
   style?: TextStyle;
+  accessibilityRole?: 'header';
 }
 
 /**
@@ -21,6 +22,7 @@ const SectionTitle: React.FC<SectionTitleProps> = ({
   color = colors.text.primary,
   marginBottom,
   style,
+  accessibilityRole,
 }) => {
   const sizeStyles = {
     sm: styles.sm,
@@ -30,12 +32,15 @@ const SectionTitle: React.FC<SectionTitleProps> = ({
   };
 
   return (
-    <Text style={[
-      styles.title,
-      sizeStyles[size],
-      { color, marginBottom: marginBottom || spacing[4] },
-      style
-    ]}>
+    <Text
+      style={[
+        styles.title,
+        sizeStyles[size],
+        { color, marginBottom: marginBottom || spacing[4] },
+        style
+      ]}
+      accessibilityRole={accessibilityRole}
+    >
       {title}
     </Text>
   );

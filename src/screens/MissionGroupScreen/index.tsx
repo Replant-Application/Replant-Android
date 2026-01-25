@@ -359,10 +359,12 @@ const MissionGroupScreen: React.FC<MissionGroupScreenProps> = ({ navigation }) =
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>후기 작성</Text>
+              <Text style={styles.modalTitle} accessibilityRole="header">후기 작성</Text>
               <TouchableOpacity
                 onPress={handleCloseReviewModal}
                 style={styles.modalCloseButton}
+                accessibilityRole="button"
+                accessibilityLabel="닫기"
               >
                 <Text style={styles.modalCloseText}>✕</Text>
               </TouchableOpacity>
@@ -388,6 +390,8 @@ const MissionGroupScreen: React.FC<MissionGroupScreenProps> = ({ navigation }) =
                 style={styles.cancelButton}
                 onPress={handleCloseReviewModal}
                 activeOpacity={0.7}
+                accessibilityRole="button"
+                accessibilityLabel="취소"
               >
                 <Text style={styles.cancelButtonText}>취소</Text>
               </TouchableOpacity>
@@ -399,6 +403,8 @@ const MissionGroupScreen: React.FC<MissionGroupScreenProps> = ({ navigation }) =
                 onPress={handleSubmitReview}
                 disabled={!reviewContent.trim() || submitting}
                 activeOpacity={0.7}
+                accessibilityRole="button"
+                accessibilityLabel="등록"
               >
                 {submitting ? (
                   <ActivityIndicator size="small" color={colors.white} />

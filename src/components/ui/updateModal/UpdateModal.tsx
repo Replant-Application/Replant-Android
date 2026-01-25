@@ -41,13 +41,15 @@ const UpdateModal: React.FC<UpdateModalProps> = ({
     >
       <View style={styles.overlay}>
         <View style={styles.modalContainer}>
-          <Text style={styles.title}>업데이트 알림</Text>
+          <Text style={styles.title} accessibilityRole="header">업데이트 알림</Text>
           <Text style={styles.message}>{displayMessage}</Text>
           <View style={styles.buttonContainer}>
             {!isRequired && onClose && (
               <TouchableOpacity
                 style={[styles.button, styles.cancelButton]}
                 onPress={onClose}
+                accessibilityRole="button"
+                accessibilityLabel="나중에"
               >
                 <Text style={styles.cancelButtonText}>나중에</Text>
               </TouchableOpacity>
@@ -55,6 +57,8 @@ const UpdateModal: React.FC<UpdateModalProps> = ({
             <TouchableOpacity
               style={[styles.button, styles.updateButton]}
               onPress={onUpdate}
+              accessibilityRole="button"
+              accessibilityLabel="업데이트"
             >
               <Text style={styles.updateButtonText}>업데이트</Text>
             </TouchableOpacity>

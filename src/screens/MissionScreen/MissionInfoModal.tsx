@@ -63,11 +63,13 @@ const MissionInfoModal: React.FC<MissionInfoModalProps> = ({
       <View style={styles.modalOverlay}>
         <View style={styles.modalContainer}>
           <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>미션 정보</Text>
+            <Text style={styles.modalTitle} accessibilityRole="header">미션 정보</Text>
             <TouchableOpacity
               style={styles.modalCloseButton}
               onPress={onClose}
               activeOpacity={0.7}
+              accessibilityRole="button"
+              accessibilityLabel="닫기"
             >
               <Text style={styles.modalCloseButtonText}>✕</Text>
             </TouchableOpacity>
@@ -116,6 +118,8 @@ const MissionInfoModal: React.FC<MissionInfoModalProps> = ({
                   });
                 }}
                 activeOpacity={0.7}
+                accessibilityRole="button"
+                accessibilityLabel="미션 상세 보기"
               >
                 <Text style={styles.modalDetailButtonText}>미션 상세 보기</Text>
               </TouchableOpacity>
@@ -145,6 +149,8 @@ const MissionInfoModal: React.FC<MissionInfoModalProps> = ({
                     });
                   }}
                   activeOpacity={0.7}
+                  accessibilityRole="button"
+                  accessibilityLabel="미션 수정"
                 >
                   <Image
                     source={require('../../assets/images/edit.png')}

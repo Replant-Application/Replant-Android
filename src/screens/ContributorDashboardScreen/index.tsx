@@ -280,7 +280,7 @@ const ContributorDashboardScreen: React.FC<ContributorDashboardScreenProps> = ({
       <Modal visible={showResourceModal} animationType="slide" transparent>
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
-            <SectionTitle title="상담 자료실" size="lg" marginBottom={spacing[4]} />
+            <SectionTitle title="상담 자료실" size="lg" marginBottom={spacing[4]} accessibilityRole="header" />
 
             <ScrollView style={styles.resourceList}>
               <TouchableOpacity style={styles.resourceItem}>
@@ -321,6 +321,8 @@ const ContributorDashboardScreen: React.FC<ContributorDashboardScreenProps> = ({
             <TouchableOpacity
               style={styles.closeButton}
               onPress={closeResourceModal}
+              accessibilityRole="button"
+              accessibilityLabel="닫기"
             >
               <Text style={styles.closeButtonText}>닫기</Text>
             </TouchableOpacity>
