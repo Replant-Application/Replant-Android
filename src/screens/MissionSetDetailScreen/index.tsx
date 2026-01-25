@@ -1,6 +1,6 @@
 /**
  * 미션세트 상세 화면
- * 미션세트의 미션 목록 확인 및 담기 기능, 리뷰 기능
+ * 미션세트의 미션 목록 확인 및 리뷰 기능
  */
 
 import React from 'react';
@@ -95,7 +95,7 @@ const MissionSetDetailScreen: React.FC<MissionSetDetailScreenProps> = ({ navigat
           <View style={styles.statsRow}>
             <View style={styles.ratingContainer}>
               <Text style={styles.stars}>{renderStars(missionSet.averageRating || 0)}</Text>
-              <Text style={styles.addedCount}>({missionSet.addedCount})</Text>
+              <Text style={styles.reviewCount}>({missionSet.reviewCount ?? 0})</Text>
             </View>
           </View>
         </View>

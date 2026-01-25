@@ -76,7 +76,7 @@ export const styles = StyleSheet.create({
   ratingText: {
     ...createSecondaryTextStyle('sm'),
   },
-  addedCount: {
+  reviewCount: {
     ...createTextStyle('sm', {
       color: colors.text.tertiary,
       marginLeft: spacing[1],
@@ -251,16 +251,5 @@ export const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 255, 255, 0.95)',
     borderTopWidth: 1,
     borderTopColor: colors.border.light,
-  },
-  copyButton: {
-    ...buttonStyles.primary(),
-    borderRadius: borderRadius.lg,
-    paddingVertical: spacing[4],
-  },
-  copyButtonDisabled: {
-    backgroundColor: colors.gray[300],
-  },
-  copyButtonText: {
-    ...createButtonTextStyle('lg'),
   },
 });

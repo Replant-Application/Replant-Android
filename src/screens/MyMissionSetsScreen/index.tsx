@@ -1,6 +1,6 @@
 /**
  * 내 미션세트 관리 화면
- * 내가 만든/담은 미션세트 목록 관리
+ * 내가 만든 미션세트 목록 관리
  */
 
 import React from 'react';
@@ -173,17 +173,6 @@ const MyMissionSetsScreen: React.FC<MyMissionSetsScreenProps> = ({ navigation })
                         />
                         <Text style={styles.statText}>{missionSet.missionCount}개 미션</Text>
                       </View>
-                      {missionSet.isPublic && (
-                        <View style={styles.statItem}>
-                          <Image
-                            source={require('../../assets/images/high-five.png')}
-                            style={styles.statIcon}
-                            resizeMode="contain"
-                            accessibilityLabel="참여자 아이콘"
-                          />
-                          <Text style={styles.statText}>{missionSet.addedCount}명</Text>
-                        </View>
-                      )}
                     </View>
                     {missionSet.isPublic && (
                       <View style={styles.ratingContainer}>

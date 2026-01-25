@@ -1,6 +1,6 @@
 /**
  * MissionSetDetailScreen 비즈니스 로직
- * 미션세트 상세 화면: 미션세트 조회, 담기, 리뷰 작성
+ * 미션세트 상세 화면: 미션세트 조회, 리뷰 작성
  */
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
@@ -9,7 +9,6 @@ import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types/navigation';
 import {
   getPublicTodoListDetail,
-  copyMissionSet,
   MissionSetDetail,
   createReview,
   updateReview,
@@ -31,7 +30,6 @@ export const useMissionSetDetailScreenContainer = ({ navigation, route }: Missio
 
   const [missionSet, setMissionSet] = useState<MissionSetDetail | PublicTodoListDetail | null>(null);
   const [loading, setLoading] = useState(true);
-  const [copying, setCopying] = useState(false);
 
   // 리뷰 관련 상태
   const [myReview, setMyReview] = useState<MissionSetReview | null>(null);
@@ -57,10 +55,9 @@ export const useMissionSetDetailScreenContainer = ({ navigation, route }: Missio
           creatorId: publicDetail.creatorId,
           creatorNickname: publicDetail.creatorNickname,
           isPublic: true,
-          // 백엔드에서 missionCount, addedCount, averageRating를 제공
           missionCount: publicDetail.missionCount || (publicDetail.missions?.length || 0),
-          addedCount: publicDetail.addedCount || 0,
           averageRating: publicDetail.averageRating || 0,
+          reviewCount: publicDetail.reviewCount ?? 0,  // 리뷰 한 사람 수 (별점 옆 표시)
           // PublicMissionInfo를 MissionSetMission으로 변환
           missions: (publicDetail.missions || []).map((mission, index) => ({
             missionId: mission.missionId,
@@ -112,30 +109,6 @@ export const useMissionSetDetailScreenContainer = ({ navigation, route }: Missio
     loadMissionSetDetail();
     loadMyReview();
   }, [loadMissionSetDetail, loadMyReview]);
-
-  /**
-   * 미션세트 담기
-   */
-  const handleCopy = useCallback(async () => {
-    if (!missionSet) return;
-
-    setCopying(true);
-    try {
-      const result = await copyMissionSet(missionSet.id);
-      if (result.success) {
-        Alert.alert('담기 완료', `"${missionSet.title}" 투두리스트의 미션들이 내 목록에 추가되었습니다.`, [
-          { text: '확인', onPress: () => navigation.goBack() },
-        ]);
-      } else {
-        Alert.alert('담기 실패', result.error || '미션세트를 담는데 실패했습니다.');
-      }
-    } catch (error) {
-      logError('미션세트 담기 실패', error as Error);
-      Alert.alert('오류', '미션세트를 담는 중 문제가 발생했습니다.');
-    } finally {
-      setCopying(false);
-    }
-  }, [missionSet, navigation]);
 
   /**
    * 리뷰 제출 (작성 또는 수정)
@@ -232,7 +205,6 @@ export const useMissionSetDetailScreenContainer = ({ navigation, route }: Missio
     myReview,
     // State
     loading,
-    copying,
     reviewRating,
     submittingReview,
     showReviewForm,
@@ -240,7 +212,6 @@ export const useMissionSetDetailScreenContainer = ({ navigation, route }: Missio
     // Setters
     setReviewRating,
     // Handlers
-    handleCopy,
     handleSubmitReview,
     handleOpenReviewForm,
     handleCloseReviewForm,

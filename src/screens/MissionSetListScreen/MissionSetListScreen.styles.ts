@@ -5,7 +5,7 @@
 
 import { StyleSheet } from 'react-native';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
-import { createTextStyle, createTitleStyle, createSecondaryTextStyle, createButtonTextStyle } from '../../utils/styles/textStyles';
+import { createTextStyle, createTitleStyle, createSecondaryTextStyle } from '../../utils/styles/textStyles';
 import { cardStyles } from '../../utils/styles/commonStyles';
 
 export const styles = StyleSheet.create({
@@ -58,27 +58,6 @@ export const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: spacing[4],
   },
-  infoBox: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.primary[50],
-    borderRadius: borderRadius.base,
-    padding: spacing[3],
-    marginBottom: spacing[3],
-    borderWidth: 1,
-    borderColor: colors.primary[200],
-    gap: spacing[3],
-  },
-  infoIcon: {
-    width: 24,
-    height: 24,
-  },
-  infoText: {
-    flex: 1,
-    ...createTextStyle('sm', {
-      color: colors.primary[700],
-    }),
-  },
   missionSetList: {
     gap: spacing[2],
   },
@@ -96,7 +75,6 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing[2],
-    marginRight: spacing[2],
   },
   cardIcon: {
     width: 20,
@@ -107,17 +85,6 @@ export const styles = StyleSheet.create({
     ...createTextStyle('base', {
       fontWeight: typography.fontWeight.normal,
       color: colors.text.primary,
-    }),
-  },
-  copyButton: {
-    backgroundColor: colors.primary[500],
-    paddingHorizontal: spacing[3],
-    paddingVertical: spacing[1.5],
-    borderRadius: borderRadius.base,
-  },
-  copyButtonText: {
-    ...createButtonTextStyle('sm', {
-      color: colors.white,
     }),
   },
   missionSetDescription: {

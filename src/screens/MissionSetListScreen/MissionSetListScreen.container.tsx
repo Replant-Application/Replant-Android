@@ -1,6 +1,6 @@
 /**
  * MissionSetListScreen 비즈니스 로직
- * 공개 투두리스트 목록 로드, 검색, 담기, 공유 처리
+ * 공개 투두리스트 목록 로드, 검색, 공유 처리
  */
 
 import { useState, useEffect, useCallback } from 'react';
@@ -8,7 +8,6 @@ import { Alert } from 'react-native';
 import {
   getPublicTodoLists,
   searchPublicTodoLists,
-  copyTodoList,
   getShareableTodoLists,
   shareTodoList,
   getCompletedTodoLists
@@ -143,7 +142,7 @@ export const useMissionSetListScreenContainer = ({
   const handleShare = useCallback(async (todoList: TodoList) => {
     Alert.alert(
       '공유 확인',
-      `"${todoList.title}" 투두리스트를 공유하시겠습니까?\n공유하면 다른 사용자들이 담을 수 있습니다.`,
+      `"${todoList.title}" 투두리스트를 공유하시겠습니까?`,
       [
         { text: '취소', style: 'cancel' },
         {
@@ -168,37 +167,6 @@ export const useMissionSetListScreenContainer = ({
       ]
     );
   }, [loadPublicTodoLists]);
-
-  /**
-   * 투두리스트 담기
-   * - copyTodoList API 호출
-   * - 성공/실패 Alert 표시
-   * - 담은 수 증가 반영
-   */
-  const handleCopy = useCallback(async (todoList: PublicTodoList) => {
-    try {
-      const result = await copyTodoList(todoList.id);
-      if (result.success) {
-        Alert.alert(
-          '담기 완료',
-          `"${todoList.title}" 투두리스트를 내 목록에 추가했습니다.`
-        );
-        // 담은 수 증가 반영
-        setPublicTodoLists(prev =>
-          prev.map(tl =>
-            tl.id === todoList.id
-              ? { ...tl, addedCount: tl.addedCount + 1 }
-              : tl
-          )
-        );
-      } else {
-        Alert.alert('담기 실패', result.error || '투두리스트를 담는데 실패했습니다.');
-      }
-    } catch (error) {
-      logError('투두리스트 담기 실패', error as Error);
-      Alert.alert('오류', '투두리스트를 담는 중 문제가 발생했습니다.');
-    }
-  }, []);
 
   /**
    * 별점 렌더링
@@ -234,7 +202,6 @@ export const useMissionSetListScreenContainer = ({
     openShareModal,
     closeShareModal,
     handleShare,
-    handleCopy,
     renderStars,
   };
 };

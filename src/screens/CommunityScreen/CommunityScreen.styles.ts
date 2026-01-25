@@ -322,14 +322,6 @@ export const styles = StyleSheet.create({
       marginRight: spacing[2],
     }),
   },
-  copyButton: {
-    ...buttonStyles.primary(),
-    paddingHorizontal: spacing[3],
-    paddingVertical: spacing[1.5],
-  },
-  copyButtonText: {
-    ...createButtonTextStyle('sm'),
-  },
   missionSetDescription: {
     ...createSecondaryTextStyle('sm', {
       marginBottom: spacing[3],
@@ -373,11 +365,6 @@ export const styles = StyleSheet.create({
   ratingText: {
     ...createTextStyle('xs', {
       color: colors.text.secondary,
-    }),
-  },
-  addedCount: {
-    ...createTextStyle('xs', {
-      color: colors.text.tertiary,
     }),
   },
   // 투두리스트 공유 모달 스타일
@@ -435,10 +422,6 @@ export const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border.light,
   },
-  shareModalItemShared: {
-    backgroundColor: colors.gray[50],
-    borderColor: colors.gray[200],
-  },
   shareModalItemContent: {
     flex: 1,
     marginRight: spacing[3],
@@ -463,24 +446,18 @@ export const styles = StyleSheet.create({
     minWidth: 60,
     alignItems: 'center',
   },
-  sharedBadge: {
-    backgroundColor: colors.gray[200],
-    paddingVertical: spacing[1.5],
-    paddingHorizontal: spacing[3],
-    borderRadius: borderRadius.full,
-  },
-  sharedBadgeText: {
-    ...createTextStyle('xs', {
-      color: colors.text.tertiary,
-      fontWeight: typography.fontWeight.medium,
-    }),
-  },
   shareButton: {
     ...buttonStyles.primary(),
     paddingVertical: spacing[2],
     paddingHorizontal: spacing[4],
   },
+  shareButtonDisabled: {
+    backgroundColor: colors.gray[200],
+  },
   shareButtonText: {
     ...createButtonTextStyle('sm'),
+  },
+  shareButtonTextDisabled: {
+    color: colors.text.tertiary,
   },
 });

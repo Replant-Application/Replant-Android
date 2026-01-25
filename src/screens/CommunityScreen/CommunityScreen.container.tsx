@@ -4,6 +4,7 @@
  */
 
 import { useState, useMemo, useCallback, useEffect } from 'react';
+import { Alert } from 'react-native';
 import { useCommunity } from '../../hooks/useCommunity';
 import { useErrorHandler } from '../../hooks/useErrorHandler';
 import { CommunityPost } from '../../types';
@@ -127,8 +128,8 @@ export const useCommunityScreenContainer = ({ navigation, route }: CommunityScre
           creatorNickname: todo.creatorNickname || '알 수 없음',
           isPublic: true, // 공개 투두리스트이므로 항상 true
           missionCount: todo.missionCount || todo.totalCount || 0,
-          addedCount: todo.addedCount || 0,
           averageRating: todo.averageRating || 0,
+          reviewCount: todo.reviewCount ?? 0,
           createdAt: todo.createdAt,
         }));
         setMissionSets(transformed);
@@ -180,8 +181,8 @@ export const useCommunityScreenContainer = ({ navigation, route }: CommunityScre
           creatorNickname: todo.creatorNickname || '알 수 없음',
           isPublic: publicTodoListIds.has(todo.id), // 공개 목록에 포함되어 있으면 true
           missionCount: todo.totalCount || 0, // totalCount를 missionCount로 사용
-          addedCount: todo.addedCount || 0,
           averageRating: todo.averageRating || 0,
+          reviewCount: todo.reviewCount ?? 0,
           createdAt: todo.createdAt,
         }));
         
@@ -202,34 +203,46 @@ export const useCommunityScreenContainer = ({ navigation, route }: CommunityScre
 
   /**
    * 투두리스트 공유하기 (공개로 변경)
+   * - 확인 Alert 표시 후 공유
    */
   const handleShareMissionSet = useCallback(
-    async (missionSet: MissionSetSimple) => {
+    (missionSet: MissionSetSimple) => {
       if (missionSet.isPublic) {
         showInfo('이미 공개된 투두리스트입니다.', '알림');
         return;
       }
 
-      try {
-        setSharingId(missionSet.id);
-        const result = await updateMissionSet(missionSet.id, { isPublic: true });
-        if (result.success) {
-          showSuccess(`"${missionSet.title}" 투두리스트가 커뮤니티에 공유되었습니다.`, '공유 완료');
-          setMyMissionSets(prev => prev.map(ms => (ms.id === missionSet.id ? { ...ms, isPublic: true } : ms)));
-          setShowShareModal(false);
-          // 공유 후 미션세트 목록 새로고침
-          loadMissionSets();
-        } else {
-          handleApiError(result, 'CommunityScreen.handleShareMissionSet');
-        }
-      } catch (error) {
-        showError(
-          error instanceof Error ? error : new Error('공유 중 문제가 발생했습니다.'),
-          'CommunityScreen.handleShareMissionSet'
-        );
-      } finally {
-        setSharingId(null);
-      }
+      Alert.alert(
+        '공유 확인',
+        `"${missionSet.title}" 투두리스트를 공유하시겠습니까?`,
+        [
+          { text: '취소', style: 'cancel' },
+          {
+            text: '공유',
+            onPress: async () => {
+              try {
+                setSharingId(missionSet.id);
+                const result = await updateMissionSet(missionSet.id, { isPublic: true });
+                if (result.success) {
+                  showSuccess(`"${missionSet.title}" 투두리스트가 커뮤니티에 공유되었습니다.`, '공유 완료');
+                  setMyMissionSets(prev => prev.map(ms => (ms.id === missionSet.id ? { ...ms, isPublic: true } : ms)));
+                  setShowShareModal(false);
+                  loadMissionSets();
+                } else {
+                  handleApiError(result, 'CommunityScreen.handleShareMissionSet');
+                }
+              } catch (error) {
+                showError(
+                  error instanceof Error ? error : new Error('공유 중 문제가 발생했습니다.'),
+                  'CommunityScreen.handleShareMissionSet'
+                );
+              } finally {
+                setSharingId(null);
+              }
+            },
+          },
+        ]
+      );
     },
     [showInfo, showSuccess, handleApiError, showError, loadMissionSets]
   );

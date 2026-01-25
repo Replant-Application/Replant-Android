@@ -38,13 +38,14 @@ export interface MissionSetSimple {
   creatorNickname: string;
   isPublic: boolean;
   missionCount: number;
-  addedCount: number;
   averageRating: number;
+  reviewCount?: number;  // 리뷰 한 사람 수
   createdAt: string;
 }
 
 export interface MissionSetDetail extends MissionSetSimple {
   missions: MissionSetMission[];
+  reviewCount?: number;  // 리뷰 한 사람 수 (별점 옆 표시)
 }
 
 export interface MissionSetListResponse {
@@ -296,16 +297,6 @@ export const getPublicTodoListDetail = async (
   return apiClient.get<PublicTodoListDetail>(`/todolists/public/${todoListId}`);
 };
 
-/**
- * 투두리스트 담기 (다른 사용자의 공개 투두리스트 복사)
- * POST /api/todolists/{todoListId}/copy
- */
-export const copyTodoList = async (
-  todoListId: number
-): Promise<ServiceResult<TodoList>> => {
-  return apiClient.post<TodoList>(`/todolists/${todoListId}/copy`);
-};
-
 // ============================================
 // 투두리스트 리뷰 API
 // ============================================
@@ -445,16 +436,6 @@ export const reorderMissions = async (
   missionIds: number[]
 ): Promise<ServiceResult<MissionSetDetail>> => {
   return apiClient.put<MissionSetDetail>(`/todolists/${setId}/missions/reorder`, { missionIds });
-};
-
-/**
- * 투두리스트 담기/복사 (copyMissionSet 별칭)
- * POST /api/todolists/:id/copy
- */
-export const copyMissionSet = async (
-  id: number
-): Promise<ServiceResult<MissionSetDetail>> => {
-  return apiClient.post<MissionSetDetail>(`/todolists/${id}/copy`);
 };
 
 /**

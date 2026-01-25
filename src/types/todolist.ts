@@ -124,7 +124,6 @@ export interface PublicTodoList {
   creatorId: number;
   creatorNickname: string;
   missionCount: number;
-  addedCount: number;       // 담은 횟수
   averageRating: number;    // 평균 별점
   reviewCount: number;      // 리뷰 수
   createdAt: string;

@@ -15,7 +15,7 @@ export const buttonStyles = {
    * Primary 버튼 (메인 액션)
    */
   primary: (): ViewStyle => ({
-    backgroundColor: colors.primary[500],
+    backgroundColor: colors.primary[700],
     borderRadius: borderRadius.base,
     paddingVertical: spacing[3],
     paddingHorizontal: spacing[6],

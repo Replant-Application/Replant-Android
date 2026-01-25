@@ -1,6 +1,6 @@
 /**
  * 투두리스트(미션세트) 공유 화면
- * 공개된 미션세트 목록 표시 및 담기 기능
+ * 공개된 미션세트 목록 표시 및 공유 기능
  */
 
 import React from 'react';
@@ -43,7 +43,6 @@ const MissionSetListScreen: React.FC<MissionSetListScreenProps> = ({ navigation 
     openShareModal,
     closeShareModal,
     handleShare,
-    handleCopy,
     renderStars,
   } = useMissionSetListScreenContainer({ navigation });
 
@@ -113,19 +112,6 @@ const MissionSetListScreen: React.FC<MissionSetListScreenProps> = ({ navigation 
             />
           }
         >
-          {/* 안내 박스 */}
-          <View style={styles.infoBox}>
-            <Image
-              source={require('../../assets/images/notes.png')}
-              style={styles.infoIcon}
-              resizeMode="contain"
-              accessibilityLabel="안내 아이콘"
-            />
-            <Text style={styles.infoText}>
-              다른 사용자의 투두리스트를 담아서 사용해보세요
-            </Text>
-          </View>
-
           {publicTodoLists.length === 0 ? (
             <EmptyState
               iconImage={require('../../assets/images/notes.png')}
@@ -154,16 +140,6 @@ const MissionSetListScreen: React.FC<MissionSetListScreenProps> = ({ navigation 
                         {todoList.title}
                       </Text>
                     </View>
-                    <TouchableOpacity
-                      style={styles.copyButton}
-                      onPress={(e) => {
-                        e.stopPropagation();
-                        handleCopy(todoList);
-                      }}
-                      activeOpacity={0.7}
-                    >
-                      <Text style={styles.copyButtonText}>담기</Text>
-                    </TouchableOpacity>
                   </View>
 
                   {/* 설명 */}
@@ -199,7 +175,7 @@ const MissionSetListScreen: React.FC<MissionSetListScreenProps> = ({ navigation 
                           resizeMode="contain"
                           accessibilityLabel="참여자 아이콘"
                         />
-                        <Text style={styles.statText}>{todoList.addedCount}명</Text>
+                        <Text style={styles.statText}>{todoList.reviewCount ?? 0}명</Text>
                       </View>
                     </View>
                     <View style={styles.ratingContainer}>

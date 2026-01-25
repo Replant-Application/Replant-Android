@@ -5,8 +5,8 @@
 
 import { StyleSheet } from 'react-native';
 import { colors, spacing, typography, borderRadius } from '../../../utils/designTokens';
-import { createTextStyle, createTitleStyle, createSecondaryTextStyle, createButtonTextStyle } from '../../../utils/styles/textStyles';
-import { buttonStyles, cardStyles } from '../../../utils/styles/commonStyles';
+import { createTextStyle, createTitleStyle, createSecondaryTextStyle } from '../../../utils/styles/textStyles';
+import { cardStyles } from '../../../utils/styles/commonStyles';
 
 export const styles = StyleSheet.create({
   filterContainer: {
@@ -80,14 +80,6 @@ export const styles = StyleSheet.create({
     ...createTitleStyle('lg', {
       marginRight: spacing[2],
     }),
-  },
-  copyButton: {
-    ...buttonStyles.primary(),
-    paddingHorizontal: spacing[3],
-    paddingVertical: spacing[2],
-  },
-  copyButtonText: {
-    ...createButtonTextStyle('sm'),
   },
   missionSetDescription: {
     ...createSecondaryTextStyle('base', {

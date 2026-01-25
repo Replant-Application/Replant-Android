@@ -145,7 +145,7 @@ const MissionSetList: React.FC<MissionSetListProps> = ({
                         {renderStars(missionSet.averageRating || 0)}
                       </Text>
                       <Text style={missionSetListStyles.reviewCount}>
-                        ({missionSet.addedCount || 0})
+                        ({missionSet.reviewCount ?? 0})
                       </Text>
                     </View>
                   </View>
