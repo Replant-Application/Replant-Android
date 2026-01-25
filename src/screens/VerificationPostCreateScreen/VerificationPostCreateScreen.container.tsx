@@ -47,9 +47,8 @@ export const useVerificationPostCreateScreenContainer = ({
   const [showErrorModal, setShowErrorModal] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [loadingData, setLoadingData] = useState(isEditMode);
-  // 완료 정도 슬라이더 상태 (기본값 50%, 최소 25%, 5% 단위)
+  // 완료 정도 슬라이더 상태 (기본값 50%, 0~100% 5% 단위)
   const [completionRate, setCompletionRate] = useState(50);
-  const [showMinWarning, setShowMinWarning] = useState(false);
 
   /**
    * 필수 파라미터 체크
@@ -369,20 +368,11 @@ export const useVerificationPostCreateScreenContainer = ({
   }, []);
 
   /**
-   * 슬라이더 값 변경 핸들러 (5% 단위로 스냅)
+   * 슬라이더 값 변경 핸들러 (5% 단위로 스냅, 0~100% 허용)
    */
   const handleSliderChange = useCallback((value: number) => {
-    // 5% 단위로 반올림
     const snappedValue = Math.round(value / 5) * 5;
-    
-    // 25% 미만으로 내리려 하면 경고 표시
-    if (snappedValue < 25) {
-      setShowMinWarning(true);
-      setCompletionRate(25);
-    } else {
-      setShowMinWarning(false);
-      setCompletionRate(snappedValue);
-    }
+    setCompletionRate(snappedValue);
   }, []);
 
   /**
@@ -412,7 +402,6 @@ export const useVerificationPostCreateScreenContainer = ({
     showErrorModal,
     errorMessage,
     completionRate,
-    showMinWarning,
     // Setters
     setContent,
     // Handlers

@@ -43,7 +43,6 @@ const TodoListDetailScreen: React.FC<Props> = ({ navigation, route }) => {
 
   const renderMissionItem = (mission: TodoMission) => {
     const isCompleting = completingMissionId === mission.missionId;
-    const isRequiredMission = mission.missionType === 'OFFICIAL' || mission.missionSource === 'RANDOM_OFFICIAL';
     const canComplete = !mission.isCompleted && todoList?.status === 'ACTIVE';
 
     return (
@@ -60,7 +59,6 @@ const TodoListDetailScreen: React.FC<Props> = ({ navigation, route }) => {
           style={[
             styles.missionCheckbox,
             mission.isCompleted && styles.missionCheckboxCompleted,
-            isRequiredMission && !mission.isCompleted && styles.missionCheckboxRequired,
           ]}
           onPress={() => canComplete && handleCompleteMission(mission)}
           disabled={mission.isCompleted || isCompleting || todoList?.status !== 'ACTIVE'}
@@ -74,13 +72,6 @@ const TodoListDetailScreen: React.FC<Props> = ({ navigation, route }) => {
               style={styles.checkIcon}
               resizeMode="contain"
               accessibilityLabel="완료 아이콘"
-            />
-          ) : isRequiredMission ? (
-            <Image
-              source={require('../../assets/images/badge.png')}
-              style={styles.requiredIcon}
-              resizeMode="contain"
-              accessibilityLabel="필수 미션 아이콘"
             />
           ) : null}
         </TouchableOpacity>
@@ -96,9 +87,6 @@ const TodoListDetailScreen: React.FC<Props> = ({ navigation, route }) => {
             >
               {mission.title}
             </Text>
-            {isRequiredMission && !mission.isCompleted && (
-              <Text style={styles.requiredBadge}>인증 필요</Text>
-            )}
           </View>
           {mission.description && (
             <Text style={styles.missionDescription} numberOfLines={1}>

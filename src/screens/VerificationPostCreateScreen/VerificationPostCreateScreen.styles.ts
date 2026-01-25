@@ -185,6 +185,15 @@ export const styles = StyleSheet.create({
     borderRadius: borderRadius.base,
     padding: spacing[3],
   },
+  /** 25% 이하일 때 경고+응원 통합 메시지 박스 스타일 (원래 표시되던 메시지 영역) */
+  messageBoxLowCompletion: {
+    backgroundColor: colors.orange[50],
+    borderWidth: 1,
+    borderColor: colors.orange[200],
+  },
+  messageBoxLowCompletionText: {
+    color: colors.orange[700],
+  },
   encouragementText: {
     ...createTextStyle('sm', {
       color: colors.primary[700],

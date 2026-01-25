@@ -185,19 +185,10 @@ export const styles = StyleSheet.create({
     borderColor: '#4CAF50',
     backgroundColor: '#4CAF50',
   },
-  missionCheckboxRequired: {
-    borderColor: colors.primary[500],
-    borderWidth: 2,
-  },
   checkIcon: {
     width: 16,
     height: 16,
     tintColor: colors.white,
-  },
-  requiredIcon: {
-    width: 14,
-    height: 14,
-    tintColor: colors.primary[500],
   },
   missionContent: {
     flex: 1,
@@ -212,13 +203,6 @@ export const styles = StyleSheet.create({
     ...createBodyStyle('base', {
       fontWeight: typography.fontWeight.medium,
       flex: 1,
-    }),
-  },
-  requiredBadge: {
-    ...createTextStyle('xs', {
-      fontWeight: typography.fontWeight.medium,
-      color: colors.primary[600],
-      marginLeft: spacing[2],
     }),
   },
   missionTitleCompleted: {

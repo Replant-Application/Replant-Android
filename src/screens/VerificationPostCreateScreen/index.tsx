@@ -51,12 +51,12 @@ const VerificationPostCreateScreen: React.FC<VerificationPostCreateScreenProps> 
     handleAlreadyExistsModalClose,
     handleErrorModalClose,
     completionRate,
-    showMinWarning,
     handleSliderChange,
     getEncouragementMessage,
   } = useVerificationPostCreateScreenContainer({ navigation, route });
 
   const [showInfoMessage, setShowInfoMessage] = useState(false);
+  const isCompletionAtOrBelow25 = completionRate <= 25;
 
   return (
     <ImageBackground
@@ -132,19 +132,12 @@ const VerificationPostCreateScreen: React.FC<VerificationPostCreateScreenProps> 
             </View>
           </View>
 
-          {/* 최소값 경고 메시지 */}
-          {showMinWarning && (
-            <View style={styles.warningBox}>
-              <Text style={styles.warningText}>
-                미션 완료를 위해 더 노력해요! (최소 25%)
-              </Text>
-            </View>
-          )}
-
-          {/* 응원 메시지 */}
-          <View style={styles.encouragementBox}>
-            <Text style={styles.encouragementText}>
-              {getEncouragementMessage(completionRate)}
+          {/* 원래 표시되던 메시지 영역: 25% 이하는 경고만, 25% 초과는 응원만 (항상 1개) */}
+          <View style={[styles.encouragementBox, isCompletionAtOrBelow25 && styles.messageBoxLowCompletion]}>
+            <Text style={[styles.encouragementText, isCompletionAtOrBelow25 && styles.messageBoxLowCompletionText]}>
+              {isCompletionAtOrBelow25
+                ? '미션 완료를 위해 더 노력해요! (최소 25%)'
+                : getEncouragementMessage(completionRate)}
             </Text>
           </View>
         </View>
