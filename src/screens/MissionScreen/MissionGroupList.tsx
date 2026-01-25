@@ -106,56 +106,6 @@ const MissionGroupList: React.FC<MissionGroupListProps> = ({
         />
       ) : (
         <>
-          {/* 서버 페이지네이션 (서버에서 가져올 페이지) */}
-          {totalServerPages > 1 && (
-            <View style={styles.serverPaginationContainer}>
-              <TouchableOpacity
-                style={[styles.serverPageButton, currentServerPage === 0 && styles.serverPageButtonDisabled]}
-                onPress={() => {
-                  if (currentServerPage > 0) {
-                    onServerPageChange(currentServerPage - 1);
-                  }
-                }}
-                disabled={currentServerPage === 0}
-              >
-                <Image
-                  source={require('../../assets/images/chevron.png')}
-                  style={[
-                    styles.serverPageArrowIcon,
-                    styles.serverPageArrowIconLeft,
-                    currentServerPage === 0 && styles.serverPageArrowIconDisabled,
-                  ]}
-                  resizeMode="contain"
-                  accessibilityLabel="이전 서버 페이지"
-                />
-              </TouchableOpacity>
-
-              <Text style={styles.serverPageInfo}>
-                Page {currentServerPage + 1} / {totalServerPages}
-              </Text>
-
-              <TouchableOpacity
-                style={[styles.serverPageButton, currentServerPage === totalServerPages - 1 && styles.serverPageButtonDisabled]}
-                onPress={() => {
-                  if (currentServerPage < totalServerPages - 1) {
-                    onServerPageChange(currentServerPage + 1);
-                  }
-                }}
-                disabled={currentServerPage === totalServerPages - 1}
-              >
-                <Image
-                  source={require('../../assets/images/chevron.png')}
-                  style={[
-                    styles.serverPageArrowIcon,
-                    currentServerPage === totalServerPages - 1 && styles.serverPageArrowIconDisabled,
-                  ]}
-                  resizeMode="contain"
-                  accessibilityLabel="다음 서버 페이지"
-                />
-              </TouchableOpacity>
-            </View>
-          )}
-
           {/* 미션 목록 */}
           <View style={styles.groupMissionList}>
             {missions.map((mission) => (
@@ -255,6 +205,56 @@ const MissionGroupList: React.FC<MissionGroupListProps> = ({
               </View>
             ))}
           </View>
+
+          {/* 서버 페이지네이션 (미션 카드 아래) */}
+          {totalServerPages > 1 && (
+            <View style={styles.serverPaginationContainer}>
+              <TouchableOpacity
+                style={[styles.serverPageButton, currentServerPage === 0 && styles.serverPageButtonDisabled]}
+                onPress={() => {
+                  if (currentServerPage > 0) {
+                    onServerPageChange(currentServerPage - 1);
+                  }
+                }}
+                disabled={currentServerPage === 0}
+              >
+                <Image
+                  source={require('../../assets/images/chevron.png')}
+                  style={[
+                    styles.serverPageArrowIcon,
+                    styles.serverPageArrowIconLeft,
+                    currentServerPage === 0 && styles.serverPageArrowIconDisabled,
+                  ]}
+                  resizeMode="contain"
+                  accessibilityLabel="이전 서버 페이지"
+                />
+              </TouchableOpacity>
+
+              <Text style={styles.serverPageInfo}>
+                Page {currentServerPage + 1} / {totalServerPages}
+              </Text>
+
+              <TouchableOpacity
+                style={[styles.serverPageButton, currentServerPage === totalServerPages - 1 && styles.serverPageButtonDisabled]}
+                onPress={() => {
+                  if (currentServerPage < totalServerPages - 1) {
+                    onServerPageChange(currentServerPage + 1);
+                  }
+                }}
+                disabled={currentServerPage === totalServerPages - 1}
+              >
+                <Image
+                  source={require('../../assets/images/chevron.png')}
+                  style={[
+                    styles.serverPageArrowIcon,
+                    currentServerPage === totalServerPages - 1 && styles.serverPageArrowIconDisabled,
+                  ]}
+                  resizeMode="contain"
+                  accessibilityLabel="다음 서버 페이지"
+                />
+              </TouchableOpacity>
+            </View>
+          )}
         </>
       )}
     </ScrollView>
