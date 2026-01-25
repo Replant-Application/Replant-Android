@@ -55,6 +55,7 @@ const MissionSetCreateScreen: React.FC<MissionSetCreateScreenProps> = ({ navigat
       source={require('../../assets/images/background.png')}
       style={styles.container}
       resizeMode="cover"
+      accessibilityElementsHidden={true}
     >
       <Header title="투두리스트 만들기" showBackButton={true} navigation={navigation} />
 

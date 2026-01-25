@@ -62,6 +62,7 @@ const VerificationPostCreateScreen: React.FC<VerificationPostCreateScreenProps> 
       source={require('../../assets/images/background.png')}
       style={styles.container}
       resizeMode="cover"
+      accessibilityElementsHidden={true}
     >
       <KeyboardAvoidingView
         style={styles.keyboardView}
@@ -178,6 +179,8 @@ const VerificationPostCreateScreen: React.FC<VerificationPostCreateScreenProps> 
               multiline
               numberOfLines={8}
               textAlignVertical="top"
+              accessibilityLabel="인증 내용"
+              accessibilityHint="미션을 완료한 과정을 자유롭게 작성해주세요"
             />
           </View>
         </View>
@@ -234,6 +237,7 @@ const VerificationPostCreateScreen: React.FC<VerificationPostCreateScreenProps> 
           source={require('../../assets/images/background.png')}
           style={styles.buttonBackground}
           resizeMode="cover"
+          accessibilityElementsHidden={true}
         >
         <TouchableOpacity
           style={[

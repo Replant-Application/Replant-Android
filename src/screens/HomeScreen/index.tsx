@@ -57,6 +57,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
           }
           style={styles.fullBackground}
           resizeMode="cover"
+          accessibilityElementsHidden={true}
         >
           <AppHeader navigation={navigation} />
           <ErrorBoundary error={characterError || 'Unknown error'} />
@@ -74,6 +75,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
         }
         style={styles.fullBackground}
         resizeMode="cover"
+        accessibilityElementsHidden={true}
       >
         <AppHeader navigation={navigation} />
 
@@ -105,6 +107,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                     source={require('../../assets/images/conversation.png')}
                     style={styles.speechBubbleImage}
                     resizeMode="stretch"
+                    accessibilityElementsHidden={true}
                   >
                     <View style={styles.speechTextContainer}>
                       <Text style={styles.speechText}>
@@ -168,6 +171,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                   source={require('../../assets/images/characters/transformation.gif')}
                   style={styles.evolutionImage}
                   resizeMode={FastImage.resizeMode.contain}
+                  accessibilityLabel="진화하는 캐릭터 애니메이션"
                 />
               </View>
               <View style={styles.evolutionSpeechBubble}>
@@ -175,6 +179,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                   source={require('../../assets/images/conversation.png')}
                   style={styles.evolutionSpeechBubbleImage}
                   resizeMode="stretch"
+                  accessibilityElementsHidden={true}
                 >
                   <View style={styles.evolutionSpeechTextContainer}>
                     <Text style={styles.evolutionSpeechText}>

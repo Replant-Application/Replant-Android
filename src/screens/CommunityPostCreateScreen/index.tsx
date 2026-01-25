@@ -54,6 +54,7 @@ const CommunityPostCreateScreen: React.FC<CommunityPostCreateScreenProps> = ({ n
       source={require('../../assets/images/background.png')}
       style={styles.backgroundImage}
       resizeMode="cover"
+      accessibilityElementsHidden={true}
     >
       <KeyboardAvoidingView
         style={styles.container}

@@ -116,6 +116,7 @@ const SpontaneousMissionSetupScreen: React.FC<SpontaneousMissionSetupScreenProps
         source={require('../../assets/images/background.png')}
         style={styles.backgroundImage}
         resizeMode="cover"
+        accessibilityElementsHidden={true}
       >
         <View style={styles.loadingContainer}>
           <Text style={styles.loadingText}>설정을 불러오는 중...</Text>
@@ -131,6 +132,7 @@ const SpontaneousMissionSetupScreen: React.FC<SpontaneousMissionSetupScreenProps
         source={require('../../assets/images/background.png')}
         style={styles.backgroundImage}
         resizeMode="cover"
+        accessibilityElementsHidden={true}
       >
         <View style={styles.loadingContainer}>
           <Text style={styles.loadingText}>초기화 중...</Text>
@@ -144,6 +146,7 @@ const SpontaneousMissionSetupScreen: React.FC<SpontaneousMissionSetupScreenProps
       source={require('../../assets/images/background.png')}
       style={styles.backgroundImage}
       resizeMode="cover"
+      accessibilityElementsHidden={true}
     >
       <KeyboardAvoidingView
         style={styles.container}

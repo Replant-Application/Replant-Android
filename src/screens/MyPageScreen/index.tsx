@@ -29,6 +29,7 @@ const MyPageScreen: React.FC<MyPageScreenProps> = ({ navigation }) => {
         source={require('../../assets/images/background.png')}
         style={styles.container}
         resizeMode="cover"
+        accessibilityElementsHidden={true}
       >
         <ScrollView style={styles.scrollView}>
           <Header title="마이페이지" navigation={navigation} />
@@ -75,6 +76,7 @@ const MyPageScreen: React.FC<MyPageScreenProps> = ({ navigation }) => {
       source={require('../../assets/images/background.png')}
       style={styles.container}
       resizeMode="cover"
+      accessibilityElementsHidden={true}
     >
       <ScrollView style={styles.scrollView}>
         <Header title="마이페이지" navigation={navigation} />

@@ -65,6 +65,7 @@ const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({ navigation, r
         source={require('../../assets/images/background.png')}
         style={styles.container}
         resizeMode="cover"
+        accessibilityElementsHidden={true}
       >
         <Header
           title="미션 상세"
@@ -106,6 +107,7 @@ const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({ navigation, r
       source={require('../../assets/images/background.png')}
       style={styles.container}
       resizeMode="cover"
+      accessibilityElementsHidden={true}
     >
       <KeyboardAvoidingView
         style={styles.keyboardView}

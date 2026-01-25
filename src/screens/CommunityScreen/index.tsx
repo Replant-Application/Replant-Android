@@ -75,6 +75,7 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation, route }) 
       source={require('../../assets/images/background.png')}
       style={styles.container}
       resizeMode="cover"
+      accessibilityElementsHidden={true}
     >
       {/* 헤더 */}
       <Header title="커뮤니티" showBackButton={false} navigation={navigation} />

@@ -64,6 +64,7 @@ const RoutineSettingScreen: React.FC<RoutineSettingScreenProps> = ({ navigation 
         source={require('../../assets/images/background.png')}
         style={styles.container}
         resizeMode="cover"
+        accessibilityElementsHidden={true}
       >
         <Header navigation={navigation} title="나의 루틴 설정" showBackButton />
         <View style={styles.loadingContainer}>
@@ -79,6 +80,7 @@ const RoutineSettingScreen: React.FC<RoutineSettingScreenProps> = ({ navigation 
       source={require('../../assets/images/background.png')}
       style={styles.container}
       resizeMode="cover"
+      accessibilityElementsHidden={true}
     >
       <Header navigation={navigation} title="나의 루틴 설정" showBackButton />
 

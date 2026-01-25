@@ -52,6 +52,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
       source={require('../../assets/images/background.png')}
       style={styles.container}
       resizeMode="cover"
+      accessibilityElementsHidden={true}
     >
       <Header title="설정" showBackButton={false} />
       <ScrollView 

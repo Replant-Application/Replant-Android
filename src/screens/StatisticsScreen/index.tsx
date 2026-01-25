@@ -87,6 +87,7 @@ const StatisticsScreen: React.FC<StatisticsScreenProps> = ({ navigation }) => {
       source={require('../../assets/images/background.png')}
       style={styles.backgroundImage}
       resizeMode="cover"
+      accessibilityElementsHidden={true}
     >
       <View style={styles.container}>
         <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>

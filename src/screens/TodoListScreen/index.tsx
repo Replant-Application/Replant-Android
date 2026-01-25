@@ -114,6 +114,7 @@ const TodoListScreen: React.FC<Props> = ({ navigation, route }) => {
         source={require('../../assets/images/background.png')}
         style={styles.container}
         resizeMode="cover"
+        accessibilityElementsHidden={true}
       >
         <Header title="나의 투두리스트" showBackButton={true} navigation={navigation} />
         <View style={styles.loadingContainer}>
@@ -128,6 +129,7 @@ const TodoListScreen: React.FC<Props> = ({ navigation, route }) => {
       source={require('../../assets/images/background.png')}
       style={styles.container}
       resizeMode="cover"
+      accessibilityElementsHidden={true}
     >
       <Header title="나의 투두리스트" showBackButton={true} navigation={navigation} />
 
@@ -158,6 +160,8 @@ const TodoListScreen: React.FC<Props> = ({ navigation, route }) => {
             style={styles.createButton}
             onPress={handleCreateTodoList}
             activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel="나만의 To-Do 만들기"
           >
             <Text style={styles.createButtonIcon}>+</Text>
             <View style={styles.createButtonContent}>

@@ -98,6 +98,7 @@ const DiaryScreen: React.FC = () => {
         source={require('../../assets/images/night.png')}
         style={styles.container}
         resizeMode="cover"
+        accessibilityElementsHidden={true}
       >
         <View style={styles.detailContainer}>
           <TouchableOpacity style={styles.backButton} onPress={handleBack}>
@@ -223,6 +224,7 @@ const DiaryScreen: React.FC = () => {
         source={require('../../assets/images/night.png')}
         style={styles.container}
         resizeMode="cover"
+        accessibilityElementsHidden={true}
       >
         <View style={styles.viewContainer}>
           <View style={styles.viewHeader}>
@@ -472,6 +474,7 @@ const DiaryScreen: React.FC = () => {
       source={require('../../assets/images/night.png')}
       style={styles.container}
       resizeMode="cover"
+      accessibilityElementsHidden={true}
     >
       {/* 캐릭터 */}
       {currentCharacter && (

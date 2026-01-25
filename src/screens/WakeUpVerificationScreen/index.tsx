@@ -48,6 +48,7 @@ const WakeUpVerificationScreen: React.FC<WakeUpVerificationScreenProps> = ({ nav
         source={require('../../assets/images/background.png')}
         style={styles.backgroundImage}
         resizeMode="cover"
+        accessibilityElementsHidden={true}
       >
         <View style={styles.container}>
           <Header title="기상 미션 인증" navigation={navigation} />
@@ -65,6 +66,7 @@ const WakeUpVerificationScreen: React.FC<WakeUpVerificationScreenProps> = ({ nav
       source={require('../../assets/images/background.png')}
       style={styles.backgroundImage}
       resizeMode="cover"
+      accessibilityElementsHidden={true}
     >
       <View style={styles.container}>
         <Header title="기상 미션 인증" navigation={navigation} />

@@ -13,7 +13,6 @@ import {
   FlatList,
   KeyboardAvoidingView,
   Platform,
-  ImageBackground,
   Animated,
 } from 'react-native';
 import { ChatMessage } from '../../../utils/reantChatUtils';

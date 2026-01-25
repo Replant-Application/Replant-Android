@@ -28,6 +28,7 @@ const CounselingSelectScreen: React.FC<CounselingSelectScreenProps> = ({ navigat
       source={require('../../assets/images/background.png')}
       style={styles.backgroundImage}
       resizeMode="cover"
+      accessibilityElementsHidden={true}
     >
       <View style={styles.container}>
         <Header title="상담 서비스" navigation={navigation} />

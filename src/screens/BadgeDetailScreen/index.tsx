@@ -27,6 +27,7 @@ const BadgeDetailScreen: React.FC<BadgeDetailScreenProps> = ({ navigation, route
       source={require('../../assets/images/background.png')}
       style={styles.backgroundImage}
       resizeMode="cover"
+      accessibilityElementsHidden={true}
     >
       <View style={styles.container}>
         <Header
@@ -115,6 +116,8 @@ const BadgeDetailScreen: React.FC<BadgeDetailScreenProps> = ({ navigation, route
             style={styles.viewMissionButton}
             onPress={() => navigation.navigate('MissionDetail', { missionId: String(badge.mission?.id) })}
             activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel="미션 상세 보기"
           >
             <Text style={styles.viewMissionButtonText}>미션 상세 보기</Text>
           </TouchableOpacity>

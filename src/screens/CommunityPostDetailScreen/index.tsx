@@ -80,6 +80,7 @@ const CommunityPostDetailScreen: React.FC<CommunityPostDetailScreenProps> = ({ n
       source={require('../../assets/images/background.png')}
       style={styles.backgroundImage}
       resizeMode="cover"
+      accessibilityElementsHidden={true}
     >
       <KeyboardAvoidingView
         style={styles.container}
@@ -262,6 +263,8 @@ const CommunityPostDetailScreen: React.FC<CommunityPostDetailScreenProps> = ({ n
                           value={editingContent}
                           onChangeText={setEditingContent}
                           multiline
+                          accessibilityLabel="댓글 수정"
+                          accessibilityHint="수정할 댓글 내용을 입력하세요"
                         />
                         <View style={styles.editCommentActions}>
                           <TouchableOpacity
@@ -370,6 +373,8 @@ const CommunityPostDetailScreen: React.FC<CommunityPostDetailScreenProps> = ({ n
               placeholder={replyingToComment ? `@${replyingToComment.nickname}님에게 답글...` : "댓글을 입력하세요"}
               placeholderTextColor={colors.text.tertiary}
               multiline
+              accessibilityLabel={replyingToComment ? "답글 입력" : "댓글 입력"}
+              accessibilityHint={replyingToComment ? "답글을 입력하세요" : "댓글을 입력하세요"}
             />
             <TouchableOpacity
               style={[styles.submitButton, !commentContent.trim() && styles.submitButtonDisabled]}

@@ -36,6 +36,7 @@ const CalendarScreen: React.FC<CalendarScreenProps> = ({ navigation }) => {
       source={require('../../assets/images/background.png')}
       style={styles.backgroundImage}
       resizeMode="cover"
+      accessibilityElementsHidden={true}
     >
       <View style={styles.container}>
         <ScrollView style={styles.scrollView}>

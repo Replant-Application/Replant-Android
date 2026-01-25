@@ -31,6 +31,7 @@ const ChangePasswordScreen: React.FC<ChangePasswordScreenProps> = ({ navigation 
       source={require('../../assets/images/background.png')}
       style={styles.container}
       resizeMode="cover"
+      accessibilityElementsHidden={true}
     >
       <Header title="비밀번호 변경" navigation={navigation} />
       <KeyboardAvoidingView

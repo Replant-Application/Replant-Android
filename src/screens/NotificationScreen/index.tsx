@@ -64,6 +64,7 @@ const NotificationScreen: React.FC<NotificationScreenProps> = ({ navigation }) =
       source={require('../../assets/images/background.png')}
       style={styles.backgroundImage}
       resizeMode="cover"
+      accessibilityElementsHidden={true}
     >
       <View style={styles.container}>
         {/* 헤더 섹션 */}

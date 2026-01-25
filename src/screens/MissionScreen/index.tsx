@@ -81,6 +81,7 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
       source={require('../../assets/images/background.png')}
       style={styles.container}
       resizeMode="cover"
+      accessibilityElementsHidden={true}
     >
       <Header title="미션" showBackButton={false} navigation={navigation} />
 

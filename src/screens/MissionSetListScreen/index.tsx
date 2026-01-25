@@ -56,6 +56,7 @@ const MissionSetListScreen: React.FC<MissionSetListScreenProps> = ({ navigation 
       source={require('../../assets/images/background.png')}
       style={styles.backgroundImage}
       resizeMode="cover"
+      accessibilityElementsHidden={true}
     >
       <View style={styles.container}>
         <Header
@@ -96,6 +97,8 @@ const MissionSetListScreen: React.FC<MissionSetListScreenProps> = ({ navigation 
             onChangeText={handleSearchChange}
             placeholder="투두리스트 검색..."
             placeholderTextColor={colors.text.tertiary}
+            accessibilityLabel="투두리스트 검색"
+            accessibilityHint="검색어 입력"
           />
         </View>
 

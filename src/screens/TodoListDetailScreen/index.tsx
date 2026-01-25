@@ -120,6 +120,7 @@ const TodoListDetailScreen: React.FC<Props> = ({ navigation, route }) => {
         source={require('../../assets/images/background.png')}
         style={styles.container}
         resizeMode="cover"
+        accessibilityElementsHidden={true}
       >
         <Header title="투두리스트" showBackButton={true} navigation={navigation} />
         <View style={styles.loadingContainer}>
@@ -135,6 +136,7 @@ const TodoListDetailScreen: React.FC<Props> = ({ navigation, route }) => {
         source={require('../../assets/images/background.png')}
         style={styles.container}
         resizeMode="cover"
+        accessibilityElementsHidden={true}
       >
         <Header title="투두리스트" showBackButton={true} navigation={navigation} />
         <View style={styles.emptyContainer}>
@@ -150,6 +152,7 @@ const TodoListDetailScreen: React.FC<Props> = ({ navigation, route }) => {
       source={require('../../assets/images/background.png')}
       style={styles.container}
       resizeMode="cover"
+      accessibilityElementsHidden={true}
     >
       <Header
         title="투두리스트"

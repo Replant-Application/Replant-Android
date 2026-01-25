@@ -41,6 +41,7 @@ const PlacesSearchScreen: React.FC<PlacesSearchScreenProps> = ({ navigation }) =
       source={require('../../assets/images/background.png')}
       style={styles.backgroundImage}
       resizeMode="cover"
+      accessibilityElementsHidden={true}
     >
       <View style={styles.container}>
         <Header
@@ -66,6 +67,8 @@ const PlacesSearchScreen: React.FC<PlacesSearchScreenProps> = ({ navigation }) =
             value={searchText}
             onChangeText={handleSearchChange}
             placeholderTextColor={colors.text.secondary}
+            accessibilityLabel="장소 검색"
+            accessibilityHint="장소 이름 또는 주소로 검색"
           />
         </View>
 

@@ -23,6 +23,7 @@ const SoundSettingsScreen: React.FC<SoundSettingsScreenProps> = ({ navigation })
       source={require('../../assets/images/background.png')}
       style={styles.container}
       resizeMode="cover"
+      accessibilityElementsHidden={true}
     >
       <Header 
         title="사운드 설정" 
