@@ -255,7 +255,7 @@ export const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: colors.primary[500],
+    backgroundColor: colors.primary[700],
     alignItems: 'center',
     justifyContent: 'center',
     elevation: 8,

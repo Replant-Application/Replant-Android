@@ -69,8 +69,6 @@ export const useMissionScreenContainer = ({
     missions,
     loading,
     error,
-    saveMissionPhoto,
-    saveMissionPhotos,
     deleteMissionPhoto,
     completeMissionWithPhoto,
     uncompleteMission,
@@ -78,9 +76,8 @@ export const useMissionScreenContainer = ({
   } = useMission(addExperienceByCategory);
   const { showError, showSuccess, showInfo, handleApiError, showConfirm } = useErrorHandler();
 
-  // route params에서 사진 정보 확인
+  // route params
   const routeParams = route?.params;
-  const processedPhotoRef = useRef<string | null>(null);
   // route params에서 selectedFilter 복원 (나의 미션 탭 필터)
   const [selectedFilter, setSelectedFilter] = useState<MissionFilter>(routeParams?.selectedFilter || 'inProgress');
   const [activeTab, setActiveTab] = useState<MissionTab>(routeParams?.activeTab || 'myMission');
@@ -414,21 +411,6 @@ export const useMissionScreenContainer = ({
   }, [selectedMissionForVerification, navigation]);
 
   /**
-   * 사진 인증 업로드
-   */
-  const handlePhotoUpload = useCallback(
-    (missionId: string) => {
-      const mission = missions.find(m => m.mission_id === missionId);
-      // 사진 선택 화면으로 이동
-      navigation.navigate('PhotoSelect', {
-        missionId,
-        missionTitle: mission?.title || '미션',
-      });
-    },
-    [missions, navigation]
-  );
-
-  /**
    * 미션 사진 삭제
    */
   const handleDeletePhoto = useCallback(
@@ -455,84 +437,6 @@ export const useMissionScreenContainer = ({
     },
     [showConfirm, deleteMissionPhoto, showSuccess, handleApiError, showError]
   );
-
-  /**
-   * 사진 선택 후 돌아왔을 때 처리 (사진만 저장, 미션 완료하지 않음)
-   */
-  const handlePhotoSelected = useCallback(
-    async (missionId: string, photoUri: string) => {
-      try {
-        const result = await saveMissionPhoto(missionId, photoUri);
-
-        if (result && result.success) {
-          showSuccess('사진이 저장되었습니다.', '사진 저장');
-        } else {
-          handleApiError(result || { success: false, error: '사진 저장에 실패했습니다.' }, 'MissionScreen.handlePhotoSelected');
-        }
-      } catch (error) {
-        showError(error instanceof Error ? error : new Error('사진 저장에 실패했습니다.'), 'MissionScreen.handlePhotoSelected');
-      }
-    },
-    [saveMissionPhoto, showSuccess, handleApiError, showError]
-  );
-
-  /**
-   * 다중 사진 저장
-   */
-  const handlePhotosSelected = useCallback(
-    async (missionId: string, photoUrls: string[]) => {
-      try {
-        const result = await saveMissionPhotos(missionId, photoUrls);
-
-        if (result && result.success) {
-          showSuccess(`${photoUrls.length}개의 사진이 저장되었습니다.`, '사진 저장');
-        } else {
-          handleApiError(result || { success: false, error: '사진 저장에 실패했습니다.' }, 'MissionScreen.handlePhotosSelected');
-        }
-      } catch (error) {
-        showError(error instanceof Error ? error : new Error('사진 저장에 실패했습니다.'), 'MissionScreen.handlePhotosSelected');
-      }
-    },
-    [saveMissionPhotos, showSuccess, handleApiError, showError]
-  );
-
-  /**
-   * route params 변경 감지 (한 번만 처리)
-   */
-  useEffect(() => {
-    const selectedPhotoUris = routeParams?.selectedPhotoUris;
-    const selectedPhotoUri = routeParams?.selectedPhotoUri; // 하위 호환성
-    const missionId = routeParams?.missionId;
-    const timestamp = routeParams?.timestamp;
-
-    // 다중 사진 처리 (우선)
-    if (selectedPhotoUris && selectedPhotoUris.length > 0 && missionId && timestamp) {
-      const photoKey = `${missionId}_${selectedPhotoUris.join(',')}_${timestamp}`;
-      if (processedPhotoRef.current !== photoKey) {
-        processedPhotoRef.current = photoKey;
-        handlePhotosSelected(missionId, selectedPhotoUris);
-
-        // 처리 후 params 초기화를 위해 빈 params로 navigate
-        setTimeout(() => {
-          navigation.navigate('Mission', {});
-        }, 0);
-      }
-    }
-    // 단일 사진 처리 (하위 호환성)
-    else if (selectedPhotoUri && missionId && timestamp) {
-      const photoKey = `${missionId}_${selectedPhotoUri}_${timestamp}`;
-      if (processedPhotoRef.current !== photoKey) {
-        processedPhotoRef.current = photoKey;
-        handlePhotoSelected(missionId, selectedPhotoUri);
-
-        // 처리 후 params 초기화를 위해 빈 params로 navigate
-        setTimeout(() => {
-          navigation.navigate('Mission', {});
-        }, 0);
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [routeParams?.timestamp]);
 
   /**
    * routeParams.activeTab이 변경되면 activeTab 상태 업데이트
@@ -973,7 +877,6 @@ export const useMissionScreenContainer = ({
     handleMissionUncomplete,
     handleVerify,
     handleLikeVerification,
-    handlePhotoUpload,
     handleDeletePhoto,
     handleCompleteModalConfirm,
     handleCompleteModalCancel,

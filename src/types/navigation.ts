@@ -11,11 +11,6 @@ export type RootStackParamList = {
   Home: undefined;
   Diary: undefined;
   Mission: {
-    selectedPhotoUri?: string; // @deprecated - selectedPhotoUris 사용 권장 (하위 호환성 유지)
-    selectedPhotoUris?: string[]; // 다중 사진 URL 배열
-    missionId?: string;
-    timestamp?: number;
-    analysisResult?: { verified: boolean } | null;
     activeTab?: 'myMission' | 'missionGroup'; // 미션 도감에서 돌아올 때 탭 복원용
     missionGroupTab?: 'official' | 'custom'; // 미션 도감 내부 탭 복원용 (공식/커스텀)
     selectedFilter?: 'inProgress' | 'pendingVerification' | 'completed'; // 나의 미션 탭에서 돌아올 때 필터 복원용
@@ -43,11 +38,6 @@ export type RootStackParamList = {
   Info: {
     title: string;
     content: string;
-  };
-  PhotoSelect: {
-    onPhotoSelected?: (photoUri: string) => void;
-    missionId?: string;
-    missionTitle?: string;
   };
   Community: undefined;
   CommunityPostCreate: {
@@ -153,11 +143,6 @@ export interface NavigationParams {
   [ScreenNames.INFO]: {
     title: string;
     content: string;
-  };
-  [ScreenNames.PHOTO_SELECT]: {
-    onPhotoSelected?: (photoUri: string) => void;
-    missionId?: string;
-    missionTitle?: string;
   };
   [ScreenNames.COMMUNITY]: {
     activeTab?: 'all' | 'todo-share'; // 초기 활성 탭

@@ -29,7 +29,6 @@ import CounselingSelectScreen from '../screens/CounselingSelectScreen';
 import PlacesSearchScreen from '../screens/PlacesSearchScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 import InfoScreen from '../screens/InfoScreen';
-import PhotoSelectScreen from '../screens/PhotoSelectScreen';
 import CommunityScreen from '../screens/CommunityScreen';
 import CommunityPostCreateScreen from '../screens/CommunityPostCreateScreen';
 import CommunityPostDetailScreen from '../screens/CommunityPostDetailScreen';
@@ -104,7 +103,7 @@ const AppNavigator = () => {
       setCurrentScreen(SCREEN_NAMES.COUNSELING_SELECT);
     } else if (currentScreen === SCREEN_NAMES.COUNSELING_SELECT || currentScreen === SCREEN_NAMES.INFO || currentScreen === SCREEN_NAMES.SOUND_SETTINGS || currentScreen === SCREEN_NAMES.CHANGE_PASSWORD) {
       setCurrentScreen(SCREEN_NAMES.SETTINGS);
-    } else if (currentScreen === SCREEN_NAMES.PHOTO_SELECT || currentScreen === SCREEN_NAMES.MISSION_DETAIL || currentScreen === SCREEN_NAMES.BADGE_DETAIL || currentScreen === SCREEN_NAMES.VERIFICATION_POST_CREATE) {
+    } else if (currentScreen === SCREEN_NAMES.MISSION_DETAIL || currentScreen === SCREEN_NAMES.BADGE_DETAIL || currentScreen === SCREEN_NAMES.VERIFICATION_POST_CREATE) {
       setCurrentScreen(SCREEN_NAMES.MISSION);
     } else if (
       currentScreen === SCREEN_NAMES.COMMUNITY_POST_CREATE ||
@@ -878,8 +877,6 @@ const AppNavigator = () => {
         return <SettingsScreen navigation={navigation} />;
       case SCREEN_NAMES.INFO:
         return <InfoScreen navigation={navigation} route={route} />;
-      case SCREEN_NAMES.PHOTO_SELECT:
-        return <PhotoSelectScreen navigation={navigation} route={route} />;
       case SCREEN_NAMES.COMMUNITY:
         return <CommunityScreen navigation={navigation} route={route} />;
       case SCREEN_NAMES.COMMUNITY_POST_CREATE:

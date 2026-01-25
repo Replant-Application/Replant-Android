@@ -9,7 +9,6 @@ interface MissionCardProps {
   onComplete?: (missionId: string) => void;
   onCompleteCustom?: (missionId: string) => void;
   onUncomplete?: (missionId: string) => void;
-  onUploadPhoto?: (missionId: string) => void;
   onDeletePhoto?: (missionId: string) => void;
   onShareToCommunity?: (missionId: string) => void;
   onWriteReview?: (missionId: string) => void;
@@ -26,7 +25,6 @@ const MissionCard: React.FC<MissionCardProps> = ({
   onComplete,
   onCompleteCustom,
   onUncomplete: _onUncomplete,
-  onUploadPhoto: _onUploadPhoto,
   onDeletePhoto,
   onShareToCommunity: _onShareToCommunity,
   onWriteReview,

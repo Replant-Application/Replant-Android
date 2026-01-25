@@ -463,7 +463,6 @@ export enum ScreenNames {
   COUNSELING_SELECT = 'CounselingSelect',
   PLACES_SEARCH = 'PlacesSearch',
   INFO = 'Info',
-  PHOTO_SELECT = 'PhotoSelect',
   COMMUNITY = 'Community',
   COMMUNITY_POST_CREATE = 'CommunityPostCreate',
   COMMUNITY_POST_EDIT = 'CommunityPostEdit',

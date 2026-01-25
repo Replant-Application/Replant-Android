@@ -10,7 +10,6 @@ interface MissionListProps {
   onMissionPress?: (mission: Mission) => void;
   onMissionComplete?: (missionId: string) => void;
   onMissionUncomplete?: (missionId: string) => void;
-  onPhotoUpload?: (missionId: string) => void;
   onShareToCommunity?: (missionId: string) => void;
   onDeletePhoto?: (missionId: string) => void;
 }
@@ -20,7 +19,6 @@ export const MissionList: React.FC<MissionListProps> = ({
   onMissionPress,
   onMissionComplete,
   onMissionUncomplete,
-  onPhotoUpload,
   onShareToCommunity,
   onDeletePhoto,
 }) => {
@@ -43,7 +41,6 @@ export const MissionList: React.FC<MissionListProps> = ({
           onViewDetails={onMissionPress ? () => onMissionPress(mission) : undefined}
           onComplete={onMissionComplete ? () => onMissionComplete(mission.mission_id) : undefined}
           onUncomplete={onMissionUncomplete ? () => onMissionUncomplete(mission.mission_id) : undefined}
-          onUploadPhoto={onPhotoUpload ? () => onPhotoUpload(mission.mission_id) : undefined}
           onShareToCommunity={onShareToCommunity ? () => onShareToCommunity(mission.mission_id) : undefined}
           onDeletePhoto={onDeletePhoto ? () => onDeletePhoto(mission.mission_id) : undefined}
         />

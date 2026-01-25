@@ -46,7 +46,6 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
     handleMissionUncomplete,
     handleVerify,
     handleLikeVerification,
-    handlePhotoUpload,
     handleDeletePhoto,
     handleCompleteModalConfirm,
     handleCompleteModalCancel,
@@ -188,7 +187,6 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
                       onCompleteCustom={handleCompleteCustomMission}
                       onUncomplete={handleMissionUncomplete}
                       loading={loading || completingMissionId === mission.mission_id}
-                      onUploadPhoto={handlePhotoUpload}
                       onDeletePhoto={handleDeletePhoto}
                       onWriteReview={(missionId) => navigation.navigate('MissionDetail', { 
                         missionId,

@@ -16,7 +16,6 @@ export const SCREEN_NAMES: Record<string, string> = {
   PLACES_SEARCH: 'PlacesSearch',
   SETTINGS: 'Settings',
   INFO: 'Info',
-  PHOTO_SELECT: 'PhotoSelect',
   COMMUNITY: 'Community',
   COMMUNITY_POST_CREATE: 'CommunityPostCreate',
   COMMUNITY_POST_EDIT: 'CommunityPostEdit',
