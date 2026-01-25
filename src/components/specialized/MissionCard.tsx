@@ -40,20 +40,7 @@ const MissionCard: React.FC<MissionCardProps> = ({
   // 인증 유형 결정 (verification_type 또는 기본값 COMMUNITY)
   const verificationType = mission.verification_type || 'COMMUNITY';
 
-  // 인증하기 버튼 라벨
-  const getVerifyButtonLabel = (): string => {
-    switch (verificationType) {
-      case 'GPS':
-        return '인증';
-      case 'TIME':
-        return '인증';
-      case 'COMMUNITY':
-      default:
-        return '인증';
-    }
-  };
-
-  // 인증하기 버튼 핸들러
+  // 인증 버튼 핸들러 (공식: 인증 플로우, 커스텀: 즉시 완료)
   const handleVerifyPress = () => {
     if (onVerify) {
       onVerify(mission, verificationType);
@@ -253,53 +240,39 @@ const MissionCard: React.FC<MissionCardProps> = ({
                 <Text style={styles.reviewButtonText}>후기 쓰기</Text>
               </TouchableOpacity>
             )}
-            {/* 인증 버튼: 미완료 상태일 때, 커스텀 미션이 아닌 경우만 */}
-            {!mission.completed && !(mission.missionType === 'CUSTOM' || mission.is_custom === true) && (
+            {/* 인증 버튼: 공식=인증 플로우, 커스텀=탭 시 즉시 완료 (스타일·문구 통일) */}
+            {!mission.completed &&
+              ((mission.missionType === 'CUSTOM' || mission.is_custom === true)
+                ? onCompleteCustom
+                : true) && (
               <TouchableOpacity
                 style={[
                   styles.actionButton,
                   styles.verifyButton,
-                  disabled && styles.disabledButton
+                  (loading || disabled) && styles.disabledButton,
                 ]}
-                onPress={disabled ? undefined : handleVerifyPress}
+                onPress={
+                  (loading || disabled)
+                    ? undefined
+                    : (mission.missionType === 'CUSTOM' || mission.is_custom === true)
+                      ? () => onCompleteCustom?.(mission.mission_id)
+                      : handleVerifyPress
+                }
                 disabled={loading || disabled}
-                activeOpacity={disabled ? 1 : 0.7}
+                activeOpacity={loading || disabled ? 1 : 0.7}
                 accessibilityRole="button"
-                accessibilityLabel={disabled ? '비활성화' : loading ? '처리중' : getVerifyButtonLabel()}
+                accessibilityLabel={loading ? '처리중' : disabled ? '비활성화' : '인증'}
                 accessibilityState={{ disabled: loading || disabled }}
               >
-                <Text style={[
-                  styles.actionText,
-                  styles.completeText,
-                  styles.verifyText,
-                  disabled && styles.disabledText
-                ]}>
-                  {disabled ? '비활성화' : loading ? '처리중...' : getVerifyButtonLabel()}
-                </Text>
-              </TouchableOpacity>
-            )}
-            {/* 커스텀 미션 완료 버튼: 미완료 상태일 때, 커스텀 미션이고 onCompleteCustom이 있는 경우 */}
-            {!mission.completed && (mission.missionType === 'CUSTOM' || mission.is_custom === true) && onCompleteCustom && (
-              <TouchableOpacity
-                style={[
-                  styles.actionButton,
-                  styles.completeButton,
-                  styles.customCompleteButton,
-                  (loading || disabled) && styles.disabledButton
-                ]}
-                onPress={(loading || disabled) ? undefined : () => onCompleteCustom(mission.mission_id)}
-                disabled={loading || disabled}
-                activeOpacity={(loading || disabled) ? 1 : 0.7}
-                accessibilityRole="button"
-                accessibilityLabel={loading ? '처리중' : '완료하기'}
-                accessibilityState={{ disabled: loading || disabled }}
-              >
-                <Text style={[
-                  styles.actionText,
-                  styles.completeText,
-                  (loading || disabled) && styles.disabledText
-                ]}>
-                  {loading ? '처리중...' : '완료하기'}
+                <Text
+                  style={[
+                    styles.actionText,
+                    styles.completeText,
+                    styles.verifyText,
+                    (loading || disabled) && styles.disabledText,
+                  ]}
+                >
+                  {loading ? '처리중...' : disabled ? '비활성화' : '인증'}
                 </Text>
               </TouchableOpacity>
             )}

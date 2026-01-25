@@ -249,10 +249,6 @@ export const styles = StyleSheet.create({
   verifyText: {
     color: colors.white,
   },
-  customCompleteButton: {
-    flexDirection: 'row',
-    gap: spacing[1],
-  },
   uncompleteButton: {
     backgroundColor: colors.gray[300],
   },
