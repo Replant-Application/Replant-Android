@@ -194,7 +194,7 @@ const TodoListCreateScreen: React.FC<TodoListCreateScreenProps> = ({ navigation 
         onPress={() => setShowCreateForm(!showCreateForm)}
         activeOpacity={0.7}
       >
-        <Text style={styles.createMissionButtonText}>{showCreateForm ? '취소' : '나만의 투두미션 생성'}</Text>
+        <Text style={styles.createMissionButtonText}>{showCreateForm ? '취소' : '나만의 커스텀 미션 생성'}</Text>
       </TouchableOpacity>
 
       {showCreateForm && (
@@ -342,39 +342,6 @@ const TodoListCreateScreen: React.FC<TodoListCreateScreenProps> = ({ navigation 
             />
           </View>
 
-          <View style={styles.todaySection}>
-            <View
-              style={styles.todayHeader}
-              accessibilityLabel={`오늘, ${todayDayNameLong} ${todayDayNumber}일`}
-              accessibilityRole="header"
-            >
-              <View style={styles.todayDateRow}>
-                <Text style={styles.todayDayName}>{todayDayName}</Text>
-                <Text style={styles.todayDayNumber}>{todayDayNumber}</Text>
-              </View>
-            </View>
-
-            {missionsWithTime.length > 0 ? (
-              missionsWithTime.map((mission) => (
-                <View key={mission.id} style={styles.timeMissionItem}>
-                  <View style={styles.timeMissionHeader}>
-                    <Text style={styles.timeMissionTime}>
-                      {mission.range.start} ~ {mission.range.end}
-                    </Text>
-                  </View>
-                  <View style={styles.timeMissionContent}>
-                    <Text style={styles.timeMissionTitle} numberOfLines={2}>{mission.title}</Text>
-                    <TouchableOpacity style={styles.timeMissionRemoveButton} onPress={() => handleRemoveTime(mission.id)} activeOpacity={0.7}>
-                      <Text style={styles.timeMissionRemoveText}>×</Text>
-                    </TouchableOpacity>
-                  </View>
-                </View>
-              ))
-            ) : (
-              <Text style={styles.emptyTodayText}>시간을 설정한 미션이 없습니다</Text>
-            )}
-          </View>
-
           <View style={styles.missionsListSection}>
             <Text style={styles.missionsListTitle}>미션을 시간대에 배치하세요</Text>
             {allMissions.map((mission) => {
@@ -408,6 +375,45 @@ const TodoListCreateScreen: React.FC<TodoListCreateScreenProps> = ({ navigation 
                 </TouchableOpacity>
               );
             })}
+          </View>
+
+          <View style={styles.todaySection}>
+            <View
+              style={styles.todayHeader}
+              accessibilityLabel={`오늘, ${todayDayNameLong} ${todayDayNumber}일`}
+              accessibilityRole="header"
+            >
+              <View style={styles.todayDateRow}>
+                <Text style={styles.todayDayName}>{todayDayName}</Text>
+                <Text style={styles.todayDayNumber}>{todayDayNumber}</Text>
+              </View>
+            </View>
+
+            {missionsWithTime.length > 0 ? (
+              missionsWithTime.map((mission, index) => (
+                <View
+                  key={mission.id}
+                  style={[
+                    styles.timeMissionItem,
+                    index === missionsWithTime.length - 1 && styles.timeMissionItemLast,
+                  ]}
+                >
+                  <View style={styles.timeMissionHeader}>
+                    <Text style={styles.timeMissionTime}>
+                      {mission.range.start} ~ {mission.range.end}
+                    </Text>
+                  </View>
+                  <View style={styles.timeMissionContent}>
+                    <Text style={styles.timeMissionTitle} numberOfLines={2}>{mission.title}</Text>
+                    <TouchableOpacity style={styles.timeMissionRemoveButton} onPress={() => handleRemoveTime(mission.id)} activeOpacity={0.7}>
+                      <Text style={styles.timeMissionRemoveText}>×</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              ))
+            ) : (
+              <Text style={styles.emptyTodayText}>시간을 설정한 미션이 없습니다</Text>
+            )}
           </View>
         </ScrollView>
 
@@ -537,7 +543,7 @@ const TodoListCreateScreen: React.FC<TodoListCreateScreenProps> = ({ navigation 
   };
 
   return (
-    <ImageBackground source={require('../../assets/images/background.png')} style={styles.container} resizeMode="cover">
+    <ImageBackground source={require('../../assets/images/background.png')} style={styles.container} resizeMode="cover" accessibilityElementsHidden={true}>
       <Header title="투두리스트 생성" showBackButton={true} navigation={navigation} />
       {currentStep === 'intro' && renderIntroStep()}
       {currentStep === 'random' && renderRandomStep()}

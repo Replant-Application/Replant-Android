@@ -260,7 +260,7 @@ export const styles = StyleSheet.create({
     alignItems: 'center', 
     justifyContent: 'center', 
     marginBottom: spacing[3], 
-    minHeight: 10 
+    minHeight: 36 
   },
   createMissionButtonText: {
     ...createButtonTextStyle('base'),
@@ -293,14 +293,15 @@ export const styles = StyleSheet.create({
     borderRadius: borderRadius.md, 
     padding: spacing[4],
     paddingTop: spacing[2],
+    paddingBottom: spacing[2],
     marginTop: spacing[2], 
     marginBottom: spacing[4] 
   },
   todayHeader: { 
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: spacing[3], 
-    paddingBottom: spacing[3], 
+    marginBottom: spacing[1], 
+    paddingBottom: spacing[2], 
     borderBottomWidth: 1, 
     borderBottomColor: colors.primary[500] 
   },
@@ -330,17 +331,20 @@ export const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 255, 255, 0.95)', 
     borderRadius: borderRadius.md, 
     padding: spacing[3], 
-    marginBottom: spacing[2] 
+    marginBottom: spacing[2],
+    borderBottomWidth: 1,
+    borderBottomColor: colors.gray[200],
+  },
+  timeMissionItemLast: {
+    marginBottom: 0,
+    borderBottomWidth: 0,
   },
   timeMissionHeader: { 
-    marginBottom: spacing[2], 
-    paddingBottom: spacing[2], 
-    borderBottomWidth: 1, 
-    borderBottomColor: colors.gray[200] 
+    marginBottom: spacing[1], 
   },
   timeMissionTime: {
-    ...createTextStyle('xs', {
-      fontWeight: typography.fontWeight.medium,
+    ...createTextStyle('sm', {
+      fontWeight: typography.fontWeight.bold,
       color: colors.primary[600],
     }),
   },
@@ -350,7 +354,7 @@ export const styles = StyleSheet.create({
     justifyContent: 'space-between' 
   },
   timeMissionTitle: {
-    ...createTextStyle('xs', {
+    ...createTextStyle('sm', {
       fontWeight: typography.fontWeight.medium,
       flex: 1,
       marginRight: spacing[2],
@@ -436,9 +440,10 @@ export const styles = StyleSheet.create({
     }),
   },
   missionListItemTimeSlot: {
-    ...createTextStyle('xs', {
+    ...createTextStyle('sm', {
       color: colors.primary[600],
       marginTop: spacing[1],
+      fontWeight: typography.fontWeight.bold,
     }),
   },
 
@@ -464,6 +469,8 @@ export const styles = StyleSheet.create({
     backgroundColor: colors.background.primary,
     borderRadius: borderRadius.xl,
     padding: spacing[10],
+    paddingTop: spacing[5],
+    paddingBottom: spacing[5],
     width: 350,
     alignSelf: 'center',
   },

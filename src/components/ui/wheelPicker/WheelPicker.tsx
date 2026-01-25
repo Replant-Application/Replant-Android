@@ -87,7 +87,7 @@ const WheelPicker: React.FC<WheelPickerProps> = ({ value, options, onSelect, wid
           const distance = Math.abs(index - selectedIndex);
           const opacity = distance === 0 ? 1 : distance === 1 ? 0.4 : 0.2;
           const scale = distance === 0 ? 1 : 0.9;
-          const fontSize = distance === 0 ? typography.fontSize['2xl'] : typography.fontSize.lg;
+          const fontSize = distance === 0 ? typography.fontSize.xl : typography.fontSize.base;
           
           return (
             <TouchableOpacity
