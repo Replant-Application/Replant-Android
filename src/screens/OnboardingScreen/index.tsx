@@ -8,6 +8,7 @@ import {
 } from 'react-native';
 import { useOnboardingScreenContainer } from './OnboardingScreen.container';
 import { styles } from './OnboardingScreen.styles';
+import { SkipNextIcon } from '../../components/ui/icon/SkipNextIcon';
 
 interface OnboardingScreenProps {
   onNavigate: (screen: string) => void;
@@ -62,10 +63,12 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onNavigate }) => {
     currentIndex,
     flatListRef,
     handleSkip,
+    handleStart,
     handleScroll,
-    handleScrollEnd,
     onViewableItemsChanged,
     viewabilityConfig,
+    goToPrev,
+    goToNext,
   } = useOnboardingScreenContainer({
     onNavigate,
     slidesLength: ONBOARDING_SLIDES.length,
@@ -85,8 +88,10 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onNavigate }) => {
         style={styles.skipButton}
         onPress={handleSkip}
         activeOpacity={0.8}
+        accessibilityRole="button"
+        accessibilityLabel="건너뛰기"
       >
-        <Text style={styles.skipButtonText}>Skip</Text>
+        <SkipNextIcon size={28} />
       </TouchableOpacity>
 
       <ImageBackground
@@ -106,7 +111,6 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onNavigate }) => {
           showsHorizontalScrollIndicator={false}
           onScroll={handleScroll}
           scrollEventThrottle={16}
-          onMomentumScrollEnd={handleScrollEnd}
           onViewableItemsChanged={onViewableItemsChanged}
           viewabilityConfig={viewabilityConfig}
           getItemLayout={(_, index) => ({
@@ -117,6 +121,42 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onNavigate }) => {
           style={styles.transparentFlatList}
         />
       </ImageBackground>
+
+      {/* 위치(1/6), 이전/다음·시작하기 (스와이프 대체, 2.2·2.4) */}
+      <View style={styles.navContainer}>
+        <View style={styles.pageIndicatorWrapper}>
+          <Text
+            style={styles.pageIndicator}
+            accessibilityLabel={`${currentIndex + 1} of ${ONBOARDING_SLIDES.length}`}
+          >
+            {currentIndex + 1} / {ONBOARDING_SLIDES.length}
+          </Text>
+        </View>
+        <View style={styles.navButtonRow}>
+          {currentIndex > 0 && (
+            <TouchableOpacity
+              style={[styles.navButton, styles.navButtonPrev]}
+              onPress={goToPrev}
+              activeOpacity={0.8}
+              accessibilityRole="button"
+              accessibilityLabel="이전"
+            >
+              <Text style={[styles.navButtonText, styles.navButtonTextPrev]}>이전</Text>
+            </TouchableOpacity>
+          )}
+          <TouchableOpacity
+            style={[styles.navButton, styles.navButtonNext]}
+            onPress={currentIndex < ONBOARDING_SLIDES.length - 1 ? goToNext : handleStart}
+            activeOpacity={0.8}
+            accessibilityRole="button"
+            accessibilityLabel={currentIndex < ONBOARDING_SLIDES.length - 1 ? '다음' : '시작하기'}
+          >
+            <Text style={[styles.navButtonText, styles.navButtonTextNext]}>
+              {currentIndex < ONBOARDING_SLIDES.length - 1 ? '다음' : '시작하기'}
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </View>
     </View>
   );
 };

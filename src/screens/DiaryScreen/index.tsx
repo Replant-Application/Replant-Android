@@ -263,6 +263,8 @@ const DiaryScreen: React.FC = () => {
                     onChangeText={setSearchDate}
                     keyboardType="numeric"
                     maxLength={10}
+                    accessibilityLabel="날짜 검색"
+                    accessibilityHint="YYYY-MM-DD 형식으로 날짜를 입력하세요"
                   />
                   {searchDate.length > 0 && (
                     <TouchableOpacity
@@ -558,6 +560,8 @@ const DiaryScreen: React.FC = () => {
                 placeholderTextColor={colors.text.tertiary}
                 multiline={true}
                 textAlignVertical="top"
+                accessibilityLabel="감정 직접 입력"
+                accessibilityHint="감정을 직접 입력하세요"
               />
             </View>
           )}

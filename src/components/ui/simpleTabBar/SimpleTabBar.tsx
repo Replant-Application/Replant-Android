@@ -23,6 +23,9 @@ export const SimpleTabBar: React.FC<SimpleTabBarProps> = ({
             style={[styles.tab, isActive && styles.tabActive]}
             onPress={() => onTabChange(tab.key)}
             activeOpacity={0.7}
+            accessibilityRole="tab"
+            accessibilityLabel={tab.label}
+            accessibilityState={{ selected: isActive }}
           >
             <Text
               style={[

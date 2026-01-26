@@ -108,6 +108,8 @@ const CommunityPostEditScreen: React.FC<CommunityPostEditScreenProps> = ({ navig
                 placeholder={post.mission_title || '미션'}
                 placeholderTextColor={colors.text.tertiary}
                 multiline={false}
+                accessibilityLabel="제목 (수정 불가)"
+                accessibilityHint="인증글은 제목을 수정할 수 없습니다"
               />
               <Text style={styles.disabledNote}>인증글은 제목을 수정할 수 없습니다.</Text>
             </>
@@ -119,6 +121,8 @@ const CommunityPostEditScreen: React.FC<CommunityPostEditScreenProps> = ({ navig
               placeholder={post.mission_title || '미션'}
               placeholderTextColor={colors.text.tertiary}
               multiline={false}
+              accessibilityLabel="제목"
+              accessibilityHint="게시글 제목을 입력하세요"
             />
           )}
         </View>
@@ -135,6 +139,8 @@ const CommunityPostEditScreen: React.FC<CommunityPostEditScreenProps> = ({ navig
             multiline
             numberOfLines={8}
             textAlignVertical="top"
+            accessibilityLabel="내용"
+            accessibilityHint="게시글 내용을 입력하세요"
           />
         </View>
 

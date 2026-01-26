@@ -27,7 +27,6 @@ export const useOnboardingScreenContainer = ({
   const [currentIndex, setCurrentIndex] = useState(0);
   const flatListRef = useRef<any>(null);
   const scrollX = useRef(new Animated.Value(0)).current;
-  const previousScrollOffset = useRef(0);
 
   // Skip 버튼 클릭 처리
   const handleSkip = async () => {
@@ -60,21 +59,25 @@ export const useOnboardingScreenContainer = ({
     itemVisiblePercentThreshold: 50,
   }).current;
 
-  /**
-   * 스크롤이 끝났을 때 마지막 화면에서 오른쪽 스와이프를 했는지 확인하고 자동으로 넘어가기
-   */
-  const handleScrollEnd = (event: any) => {
-    const offsetX = event.nativeEvent.contentOffset.x;
-    const newIndex = Math.round(offsetX / SCREEN_WIDTH);
-    const scrollDirection = offsetX > previousScrollOffset.current ? 'right' : 'left';
+  // 이전 슬라이드로 이동 (스와이프 대체)
+  const goToPrev = () => {
+    if (currentIndex > 0) {
+      flatListRef.current?.scrollToOffset({
+        offset: (currentIndex - 1) * SCREEN_WIDTH,
+        animated: true,
+      });
+    }
+  };
 
-    previousScrollOffset.current = offsetX;
-
-    // 마지막 화면에서 오른쪽으로 스와이프한 경우에만 자동으로 넘어가기
-    if (newIndex === slidesLength - 1 && scrollDirection === 'right') {
-      setTimeout(() => {
-        handleStart();
-      }, 500); // 스와이프 애니메이션이 완료될 시간을 주기
+  // 다음 슬라이드로 이동 (스와이프 대체). 마지막이면 시작하기
+  const goToNext = () => {
+    if (currentIndex < slidesLength - 1) {
+      flatListRef.current?.scrollToOffset({
+        offset: (currentIndex + 1) * SCREEN_WIDTH,
+        animated: true,
+      });
+    } else {
+      handleStart();
     }
   };
 
@@ -85,8 +88,9 @@ export const useOnboardingScreenContainer = ({
     handleSkip,
     handleStart,
     handleScroll,
-    handleScrollEnd,
     onViewableItemsChanged,
     viewabilityConfig,
+    goToPrev,
+    goToNext,
   };
 };

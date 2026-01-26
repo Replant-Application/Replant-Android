@@ -98,7 +98,12 @@ const FindPasswordScreen: React.FC<FindPasswordScreenProps> = ({ onNavigate }) =
 
           {/* 처음부터 다시 시작 버튼 (2단계 이상일 때) */}
           {step !== 'email' && (
-            <TouchableOpacity onPress={handleReset} style={styles.resetButton}>
+            <TouchableOpacity
+              onPress={handleReset}
+              style={styles.resetButton}
+              accessibilityRole="button"
+              accessibilityLabel="처음부터 다시 시작"
+            >
               <Text style={styles.resetButtonText}>처음부터 다시 시작</Text>
             </TouchableOpacity>
           )}
@@ -148,6 +153,8 @@ const FindPasswordScreen: React.FC<FindPasswordScreenProps> = ({ onNavigate }) =
         <TouchableOpacity
           onPress={handleGoToLogin}
           style={styles.linkButton}
+          accessibilityRole="button"
+          accessibilityLabel="로그인으로 돌아가기"
         >
           <Text style={styles.linkText}>로그인으로 돌아가기</Text>
         </TouchableOpacity>

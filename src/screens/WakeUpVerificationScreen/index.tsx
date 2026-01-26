@@ -75,9 +75,11 @@ const WakeUpVerificationScreen: React.FC<WakeUpVerificationScreenProps> = ({ nav
           {/* 미션 정보 카드 */}
           <View style={styles.missionCard}>
             <View style={styles.missionHeader}>
-              <Image 
-                source={require('../../assets/images/daily_mission.png')} 
+              <Image
+                source={require('../../assets/images/daily_mission.png')}
                 style={styles.missionIcon}
+                resizeMode="contain"
+                accessibilityLabel="기상 미션 아이콘"
               />
               <View style={styles.missionInfo}>
                 <Text style={styles.missionTitle}>
@@ -122,9 +124,11 @@ const WakeUpVerificationScreen: React.FC<WakeUpVerificationScreenProps> = ({ nav
                       </>
                     ) : (
                       <View style={styles.expiredContainer}>
-                        <Image 
-                          source={require('../../assets/images/bomb.png')} 
+                        <Image
+                          source={require('../../assets/images/bomb.png')}
                           style={styles.bombIcon}
+                          resizeMode="contain"
+                          accessibilityLabel="시간 초과"
                         />
                         <Text style={styles.expiredText}>시간 초과</Text>
                       </View>
@@ -167,6 +171,9 @@ const WakeUpVerificationScreen: React.FC<WakeUpVerificationScreenProps> = ({ nav
             onPress={handleVerify}
             disabled={isExpired || verifying || (timeRemaining !== null && timeRemaining <= 0)}
             activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel={isExpired ? '시간 초과' : '인증하기'}
+            accessibilityState={{ disabled: isExpired || verifying || (timeRemaining !== null && timeRemaining <= 0) }}
           >
             {verifying ? (
               <ActivityIndicator color={colors.white} />

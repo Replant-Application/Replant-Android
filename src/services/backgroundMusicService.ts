@@ -12,7 +12,7 @@ class BackgroundMusicService {
   private currentSound: Audio.Sound | null = null;
   private isPlaying = false;
   private currentScreen: string | null = null;
-  private currentVolume: number = 0.5;
+  private currentVolume: number = 0;
 
   /**
    * 배경음악 초기화
@@ -33,7 +33,7 @@ class BackgroundMusicService {
         this.currentVolume = settings.backgroundVolume;
       } catch (error) {
         console.error('[BackgroundMusic] 설정 로드 실패:', error);
-        this.currentVolume = 0.5;
+        this.currentVolume = 0;
       }
 
       // 배경음악 로드
@@ -68,7 +68,7 @@ class BackgroundMusicService {
     this.currentScreen = screenName;
 
     try {
-      // 볼륨이 0이면 재생하지 않음
+      // 볼륨이 0이면 재생하지 않음 (접근성 3.4: 기본 OFF, 설정에서 켜기 전까지 자동재생 금지)
       if (this.currentVolume <= 0) {
         return;
       }

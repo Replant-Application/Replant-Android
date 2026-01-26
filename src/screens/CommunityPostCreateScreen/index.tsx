@@ -113,6 +113,8 @@ const CommunityPostCreateScreen: React.FC<CommunityPostCreateScreenProps> = ({ n
             onChangeText={setTitle}
             placeholder={missionTitle}
             placeholderTextColor={colors.text.tertiary}
+            accessibilityLabel="제목"
+            accessibilityHint="게시글 제목을 입력하세요"
           />
         </View>
 
@@ -135,6 +137,8 @@ const CommunityPostCreateScreen: React.FC<CommunityPostCreateScreenProps> = ({ n
                 : "미션을 완료한 소감이나 경험을 공유해주세요..."
               }
               placeholderTextColor={colors.text.tertiary}
+              accessibilityLabel="내용"
+              accessibilityHint={isGeneralPost ? "자유롭게 이야기를 나눠보세요" : "미션을 완료한 소감이나 경험을 공유해주세요"}
               multiline
               textAlignVertical="top"
             />
@@ -263,6 +267,9 @@ const CommunityPostCreateScreen: React.FC<CommunityPostCreateScreenProps> = ({ n
                 minimumTrackTintColor={colors.green[500]}
                 maximumTrackTintColor={colors.gray[300]}
                 thumbTintColor={colors.green[500]}
+                accessibilityRole="adjustable"
+                accessibilityLabel="맛 점수"
+                accessibilityValue={{ min: 1, max: 5, now: tasteRating }}
               />
               <View style={styles.sliderLabels}>
                 <Text style={styles.sliderMinLabel}>1</Text>

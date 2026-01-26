@@ -208,6 +208,8 @@ const TodoListCreateScreen: React.FC<TodoListCreateScreenProps> = ({ navigation 
               value={newMissionTitle}
               onChangeText={setNewMissionTitle}
               maxLength={50}
+              accessibilityLabel="미션 제목"
+              accessibilityHint="미션 제목을 입력하세요"
             />
           </View>
 
@@ -221,6 +223,8 @@ const TodoListCreateScreen: React.FC<TodoListCreateScreenProps> = ({ navigation 
               onChangeText={setNewMissionDescription}
               multiline
               maxLength={200}
+              accessibilityLabel="미션 설명"
+              accessibilityHint="미션에 대한 자세한 설명을 입력하세요"
             />
           </View>
 
@@ -324,6 +328,8 @@ const TodoListCreateScreen: React.FC<TodoListCreateScreenProps> = ({ navigation 
               value={title}
               onChangeText={setTitle}
               maxLength={50}
+              accessibilityLabel="투두리스트 제목"
+              accessibilityHint="투두리스트 제목을 입력하세요"
             />
           </View>
 
@@ -337,6 +343,8 @@ const TodoListCreateScreen: React.FC<TodoListCreateScreenProps> = ({ navigation 
               onChangeText={setDescription}
               multiline
               maxLength={200}
+              accessibilityLabel="오늘 하루의 다짐"
+              accessibilityHint="오늘 하루의 다짐을 입력하세요"
             />
           </View>
 

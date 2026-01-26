@@ -70,7 +70,9 @@ const SoundSettingsScreen: React.FC<SoundSettingsScreenProps> = ({ navigation })
               maximumTrackTintColor={colors.border.light}
               thumbTintColor={colors.primary[500]}
               step={0.01}
-              accessibilityLabel="효과음 볼륨 조절"
+              accessibilityRole="adjustable"
+              accessibilityLabel="효과음 볼륨"
+              accessibilityValue={{ min: 0, max: 100, now: Math.round(settings.effectVolume * 100) }}
             />
           </View>
 
@@ -110,7 +112,9 @@ const SoundSettingsScreen: React.FC<SoundSettingsScreenProps> = ({ navigation })
               maximumTrackTintColor={colors.border.light}
               thumbTintColor={colors.primary[500]}
               step={0.01}
-              accessibilityLabel="배경소리 볼륨 조절"
+              accessibilityRole="adjustable"
+              accessibilityLabel="배경음 볼륨"
+              accessibilityValue={{ min: 0, max: 100, now: Math.round(settings.backgroundVolume * 100) }}
             />
           </View>
         </View>
@@ -120,6 +124,8 @@ const SoundSettingsScreen: React.FC<SoundSettingsScreenProps> = ({ navigation })
           style={styles.resetButton}
           onPress={handleResetWithSound}
           activeOpacity={0.7}
+          accessibilityRole="button"
+          accessibilityLabel="기본값으로 초기화"
         >
           <Text style={styles.resetButtonText}>기본값으로 초기화</Text>
         </TouchableOpacity>

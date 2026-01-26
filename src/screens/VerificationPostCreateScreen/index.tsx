@@ -124,6 +124,9 @@ const VerificationPostCreateScreen: React.FC<VerificationPostCreateScreenProps> 
               minimumTrackTintColor={colors.primary[500]}
               maximumTrackTintColor={colors.gray[300]}
               thumbTintColor={colors.primary[700]}
+              accessibilityRole="adjustable"
+              accessibilityLabel="완료 정도"
+              accessibilityValue={{ min: 0, max: 100, now: completionRate }}
             />
             <View style={styles.sliderLabels}>
               <Text style={styles.sliderLabel}>0%</Text>

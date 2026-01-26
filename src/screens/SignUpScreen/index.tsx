@@ -119,6 +119,9 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onNavigate }) => {
                     styles.verificationButtonInline,
                     (!validateEmail(email) || isSendingVerification) && styles.verificationButtonDisabled,
                   ]}
+                  accessibilityRole="button"
+                  accessibilityLabel={isSendingVerification ? '발송 중' : '인증번호 발송'}
+                  accessibilityState={{ disabled: isSendingVerification || !validateEmail(email) }}
                 >
                   <Text style={[
                     styles.verificationButtonText,
@@ -171,6 +174,9 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onNavigate }) => {
                             styles.verifyButtonInline,
                             (!validateVerificationCode(verificationCode) || isVerifyingCode) && styles.verifyButtonDisabled,
                           ]}
+                          accessibilityRole="button"
+                          accessibilityLabel={isVerifyingCode ? '확인 중' : '인증번호 확인'}
+                          accessibilityState={{ disabled: isVerifyingCode || !validateVerificationCode(verificationCode) }}
                         >
                           <Text style={[
                             styles.verifyButtonText,
@@ -187,6 +193,9 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onNavigate }) => {
                             styles.verifyButtonInline,
                             (!validateEmail(email) || isSendingVerification) && styles.verifyButtonDisabled,
                           ]}
+                          accessibilityRole="button"
+                          accessibilityLabel={isSendingVerification ? '발송 중' : '재전송'}
+                          accessibilityState={{ disabled: isSendingVerification || !validateEmail(email) }}
                         >
                           <Text style={[
                             styles.verifyButtonText,

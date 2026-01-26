@@ -21,7 +21,7 @@ export const buttonStyles = {
     paddingHorizontal: spacing[6],
     alignItems: 'center',
     justifyContent: 'center',
-    minHeight: 44,
+    minHeight: 48, // 접근성 2.5: 9mm(≈48dp) 최소 터치 영역
   }),
 
   /**
@@ -34,7 +34,7 @@ export const buttonStyles = {
     paddingHorizontal: spacing[6],
     alignItems: 'center',
     justifyContent: 'center',
-    minHeight: 44,
+    minHeight: 48, // 접근성 2.5: 9mm(≈48dp) 최소 터치 영역
     borderWidth: 1,
     borderColor: colors.gray[300],
   }),
@@ -48,12 +48,12 @@ export const buttonStyles = {
   }),
 
   /**
-   * Small 버튼
+   * Small 버튼 (접근성 2.5: 48dp 최소 터치 영역)
    */
   small: (): ViewStyle => ({
     paddingVertical: spacing[2],
     paddingHorizontal: spacing[4],
-    minHeight: 36,
+    minHeight: 48,
   }),
 
   /**

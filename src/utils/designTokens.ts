@@ -1,6 +1,10 @@
 /**
  * Replant Mobile Design Tokens
  * React Native용 디자인 시스템
+ *
+ * 접근성 1.4 명도 대비: text.primary/secondary 대 background.primary 등
+ * 자주 쓰는 색 조합을 Colour Contrast Analyser 또는 WebAIM으로 검증 필요.
+ * 일반 텍스트 4.5:1, UI 3:1. 다크/테마별 검증 권장.
  */
 
 import { Colors, Spacing, Typography, BorderRadius, Shadows, ComponentStyles } from '../types/design';
