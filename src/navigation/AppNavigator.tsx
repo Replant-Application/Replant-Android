@@ -529,8 +529,8 @@ const AppNavigator = () => {
   // SSE 알림 수신 시 화면 라우팅 처리
   useEffect(() => {
     console.log('[AppNavigator] 알림 체크:', { lastNotification: !!lastNotification, isLoggedIn });
-    
-    if (!lastNotification || !isLoggedIn) {
+
+    if (!lastNotification) {
       return;
     }
 
@@ -550,7 +550,7 @@ const AppNavigator = () => {
     console.log('[AppNavigator] 알림 제목:', title);
     console.log('[AppNavigator] 알림 내용:', content);
 
-    // 업데이트 알림 처리 (APP_UPDATE)
+    // 업데이트 알림 처리 (APP_UPDATE) - 로그인 무관 (버전 체크 API와 정책 통일)
     if (type === 'APP_UPDATE') {
       console.log('[AppNavigator] 업데이트 알림 수신 (FCM)');
       const data = lastNotification;
@@ -560,9 +560,44 @@ const AppNavigator = () => {
         message: data.message || data.content || '더 나은 서비스 이용을 위해 업데이트가 필요합니다.',
         storeUrl: data.storeUrl || 'https://play.google.com/store/apps/details?id=com.anonymous.replantmobileapp',
       };
-      setUpdateInfo(updateResult);
-      setUpdateModalVisible(true);
-      processedNotificationIdRef.current = notificationId || null;
+
+      if (updateResult.isRequired) {
+        setUpdateInfo(updateResult);
+        setUpdateModalVisible(true);
+        processedNotificationIdRef.current = notificationId || null;
+        return;
+      }
+
+      // 선택 업데이트: 24h 디스미스 체크 (checkUpdateRequired와 동일 정책)
+      (async () => {
+        try {
+          const dismissedKey = `@replant:updateDismissed_${updateResult.storeUrl}`;
+          const dismissedAt = await AsyncStorage.getItem(dismissedKey);
+          if (dismissedAt) {
+            const dismissedTime = parseInt(dismissedAt, 10);
+            const hoursSinceDismissed = (Date.now() - dismissedTime) / (1000 * 60 * 60);
+            if (hoursSinceDismissed < 24) {
+              console.log('[AppNavigator] FCM 선택 업데이트 - 24시간 내 "나중에" 선택, 표시 안 함');
+              processedNotificationIdRef.current = notificationId || null;
+              return;
+            }
+            await AsyncStorage.removeItem(dismissedKey);
+          }
+          setUpdateInfo(updateResult);
+          setUpdateModalVisible(true);
+          processedNotificationIdRef.current = notificationId || null;
+        } catch (e) {
+          console.error('[AppNavigator] FCM 선택 업데이트 24h 체크 실패:', e);
+          setUpdateInfo(updateResult);
+          setUpdateModalVisible(true);
+          processedNotificationIdRef.current = notificationId || null;
+        }
+      })();
+      return;
+    }
+
+    // 이하 로그인 필요 알림 (SPONTANEOUS_WAKE_UP, 투두 등)
+    if (!isLoggedIn) {
       return;
     }
 
@@ -987,7 +1022,7 @@ const AppNavigator = () => {
           isRequired={updateInfo.isRequired}
           message={updateInfo.message}
           onUpdate={handleUpdate}
-          onClose={updateInfo.isRequired ? undefined : () => setUpdateModalVisible(false)}
+          onClose={updateInfo.isRequired ? undefined : handleUpdateLater}
         />
       )}
 
