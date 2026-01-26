@@ -15,7 +15,7 @@ import {
   RefreshControl,
 } from 'react-native';
 import { CommentCard } from '../../components/specialized';
-import { Loading, ErrorBoundary, EmptyState } from '../../components/ui';
+import { Loading, ErrorBoundary, EmptyState, AlertModal } from '../../components/ui';
 import { colors } from '../../utils/designTokens';
 import { formatDateKorean } from '../../utils/dateUtils';
 import { NavigationProp, RouteProp } from '@react-navigation/native';
@@ -41,6 +41,10 @@ const VerificationPostDetailScreen: React.FC<VerificationPostDetailScreenProps> 
     editingContent,
     replyingToComment,
     isAuthor,
+    showAlert,
+    alertTitle,
+    alertMessage,
+    handleAlertClose,
     setCommentContent,
     setEditingContent,
     onRefresh,
@@ -340,6 +344,15 @@ const VerificationPostDetailScreen: React.FC<VerificationPostDetailScreenProps> 
           </TouchableOpacity>
         </View>
       </View>
+
+      {/* 오류 모달 */}
+      <AlertModal
+        visible={showAlert}
+        title={alertTitle}
+        message={alertMessage}
+        buttonText="확인"
+        onClose={handleAlertClose}
+      />
     </KeyboardAvoidingView>
   );
 };

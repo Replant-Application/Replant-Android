@@ -36,7 +36,7 @@ export const useVerificationPostCreateScreenContainer = ({
   } = params as any;
 
   const isEditMode = mode === 'edit' && verificationId;
-  const { showError, showInfo, handleApiError } = useErrorHandler();
+  const { showError, showInfo } = useErrorHandler();
 
   const [content, setContent] = useState(initialContent || '');
   const [images, setImages] = useState<string[]>(initialPhotoUrl ? [initialPhotoUrl] : []); // 다중 이미지 지원
@@ -296,7 +296,8 @@ export const useVerificationPostCreateScreenContainer = ({
               'VerificationPostCreateScreen.handleSubmitVerification'
             );
           } else {
-            handleApiError(result, 'VerificationPostCreateScreen.handleSubmitVerification');
+            setErrorMessage(result.error || '인증글 수정에 실패했습니다.');
+            setShowErrorModal(true);
           }
         }
       } else {
@@ -341,7 +342,6 @@ export const useVerificationPostCreateScreenContainer = ({
     images,
     completionRate,
     showError,
-    handleApiError,
   ]);
 
   /**

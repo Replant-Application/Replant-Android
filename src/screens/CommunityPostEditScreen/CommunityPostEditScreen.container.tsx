@@ -4,7 +4,6 @@
  */
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { Alert } from 'react-native';
 import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types/navigation';
 import { useCommunity } from '../../hooks/useCommunity';
@@ -28,6 +27,33 @@ export const useCommunityPostEditScreenContainer = ({
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [saving, setSaving] = useState(false);
+
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertTitle, setAlertTitle] = useState('');
+  const [alertMessage, setAlertMessage] = useState('');
+  const [alertCloseAction, setAlertCloseAction] = useState<'goBack' | null>(null);
+
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+
+  const showAlertModal = useCallback((title: string, message: string, closeAction?: 'goBack') => {
+    setAlertTitle(title);
+    setAlertMessage(message);
+    setAlertCloseAction(closeAction || null);
+    setShowAlert(true);
+  }, []);
+
+  const handleAlertClose = useCallback(() => {
+    setShowAlert(false);
+    if (alertCloseAction === 'goBack') {
+      navigation.goBack();
+      setAlertCloseAction(null);
+    }
+  }, [alertCloseAction, navigation]);
+
+  const handleSuccessModalClose = useCallback(() => {
+    setShowSuccessModal(false);
+    navigation.goBack();
+  }, [navigation]);
 
   /**
    * 게시글 데이터 로드 시 폼 초기화
@@ -58,7 +84,7 @@ export const useCommunityPostEditScreenContainer = ({
    */
   const handleUpdatePost = useCallback(async () => {
     if (!content.trim()) {
-      Alert.alert('오류', '내용을 입력해주세요.');
+      showAlertModal('오류', '내용을 입력해주세요.');
       return;
     }
 
@@ -76,47 +102,42 @@ export const useCommunityPostEditScreenContainer = ({
       });
 
       if (result.success) {
-        Alert.alert('성공!', '게시글이 수정되었습니다!', [
-          {
-            text: '확인',
-            onPress: () => navigation.goBack(),
-          },
-        ]);
+        setShowSuccessModal(true);
       } else {
-        Alert.alert('오류', result.error || '게시글 수정에 실패했습니다.');
+        showAlertModal('오류', result.error || '게시글 수정에 실패했습니다.');
       }
     } catch (error) {
-      Alert.alert('오류', '게시글 수정 중 오류가 발생했습니다.');
+      showAlertModal('오류', '게시글 수정 중 오류가 발생했습니다.');
     } finally {
       setSaving(false);
     }
-  }, [content, title, post, isVerificationPost, updatePost, navigation]);
+  }, [content, title, post, isVerificationPost, updatePost, showAlertModal]);
 
   /**
    * 권한 확인 및 네비게이션 처리
    */
   useEffect(() => {
     if (!loading && post && !isAuthor) {
-      Alert.alert('오류', '본인의 게시글만 수정할 수 있습니다.');
-      navigation.goBack();
+      showAlertModal('오류', '본인의 게시글만 수정할 수 있습니다.', 'goBack');
     }
-  }, [loading, post, isAuthor, navigation]);
+  }, [loading, post, isAuthor, showAlertModal]);
 
   return {
-    // Data from hooks
     post,
     loading,
-    // Computed values
     isAuthor,
     isVerificationPost,
-    // State
     title,
     content,
     saving,
-    // Setters
     setTitle,
     setContent,
-    // Handlers
     handleUpdatePost,
+    showAlert,
+    alertTitle,
+    alertMessage,
+    handleAlertClose,
+    showSuccessModal,
+    handleSuccessModalClose,
   };
 };

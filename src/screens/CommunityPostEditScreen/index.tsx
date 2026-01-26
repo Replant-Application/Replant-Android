@@ -13,7 +13,7 @@ import {
   Image,
   ImageBackground,
 } from 'react-native';
-import { Button, Header } from '../../components/ui';
+import { Button, Header, AlertModal } from '../../components/ui';
 import { colors } from '../../utils/designTokens';
 import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types/navigation';
@@ -38,6 +38,12 @@ const CommunityPostEditScreen: React.FC<CommunityPostEditScreenProps> = ({ navig
     setTitle,
     setContent,
     handleUpdatePost,
+    showAlert,
+    alertTitle,
+    alertMessage,
+    handleAlertClose,
+    showSuccessModal,
+    handleSuccessModalClose,
   } = useCommunityPostEditScreenContainer({ navigation, route });
 
   if (loading || !post) {
@@ -59,12 +65,43 @@ const CommunityPostEditScreen: React.FC<CommunityPostEditScreenProps> = ({ navig
             <Text>로딩 중...</Text>
           </View>
         </View>
+        <AlertModal
+          visible={showAlert}
+          title={alertTitle}
+          message={alertMessage}
+          buttonText="확인"
+          onClose={handleAlertClose}
+        />
+        <AlertModal
+          visible={showSuccessModal}
+          title="성공!"
+          message="게시글이 수정되었습니다!"
+          buttonText="확인"
+          onClose={handleSuccessModalClose}
+        />
       </ImageBackground>
     );
   }
 
   if (!isAuthor) {
-    return null;
+    return (
+      <>
+        <AlertModal
+          visible={showAlert}
+          title={alertTitle}
+          message={alertMessage}
+          buttonText="확인"
+          onClose={handleAlertClose}
+        />
+        <AlertModal
+          visible={showSuccessModal}
+          title="성공!"
+          message="게시글이 수정되었습니다!"
+          buttonText="확인"
+          onClose={handleSuccessModalClose}
+        />
+      </>
+    );
   }
 
   return (
@@ -168,6 +205,23 @@ const CommunityPostEditScreen: React.FC<CommunityPostEditScreenProps> = ({ navig
           />
         </View>
       </ScrollView>
+
+      {/* 오류 모달 */}
+      <AlertModal
+        visible={showAlert}
+        title={alertTitle}
+        message={alertMessage}
+        buttonText="확인"
+        onClose={handleAlertClose}
+      />
+      {/* 성공 모달 */}
+      <AlertModal
+        visible={showSuccessModal}
+        title="성공!"
+        message="게시글이 수정되었습니다!"
+        buttonText="확인"
+        onClose={handleSuccessModalClose}
+      />
       </KeyboardAvoidingView>
     </ImageBackground>
   );
