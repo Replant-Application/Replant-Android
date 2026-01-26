@@ -4,7 +4,6 @@
  */
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Alert } from 'react-native';
 import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types/navigation';
 import { getUserMission, verifyWakeupTime, getCurrentWakeupMission, UserMission } from '../../api/missionApi';
@@ -397,7 +396,8 @@ export const useWakeUpVerificationScreenContainer = ({
    */
   const handleVerify = useCallback(async () => {
     if (isExpired || (timeRemaining !== null && timeRemaining <= 0)) {
-      Alert.alert('시간 초과', '10분이 지나 인증할 수 없습니다.');
+      setErrorMessage('10분이 지나 인증할 수 없습니다.');
+      setShowErrorModal(true);
       return;
     }
 

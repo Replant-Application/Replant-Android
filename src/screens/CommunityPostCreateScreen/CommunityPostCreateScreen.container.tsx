@@ -4,11 +4,11 @@
  */
 
 import { useState, useCallback } from 'react';
-import { Alert } from 'react-native';
 import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types/navigation';
 import { useCommunity } from '../../hooks/useCommunity';
 import { createVerificationPost } from '../../api/verificationApi';
+import { verifyMeal } from '../../api/mealLogApi';
 import { launchImageLibrary } from 'react-native-image-picker';
 import { uploadCommunityPhoto } from '../../api/fileApi';
 import { logError } from '../../utils/logger';
@@ -35,12 +35,33 @@ export const useCommunityPostCreateScreenContainer = ({
 
   const { createPost } = useCommunity();
 
+  // 식사 미션 여부 확인
+  const isMealMission = missionTitle.includes('식사') || missionTitle.includes('아침') || missionTitle.includes('점심') || missionTitle.includes('저녁') || missionTitle.includes('밥');
+
   const [title, setTitle] = useState(missionTitle);
   const [content, setContent] = useState('');
   const [images, setImages] = useState<string[]>([]);
   const [uploadingImage, setUploadingImage] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [tasteRating, setTasteRating] = useState(3); // 맛 평가 1-5
+  
+  // AlertModal 상태
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertTitle, setAlertTitle] = useState('');
+  const [alertMessage, setAlertMessage] = useState('');
+
+  // AlertModal 표시 함수
+  const showAlertModal = useCallback((title: string, message: string) => {
+    setAlertTitle(title);
+    setAlertMessage(message);
+    setShowAlert(true);
+  }, []);
+
+  // AlertModal 닫기
+  const handleAlertClose = useCallback(() => {
+    setShowAlert(false);
+  }, []);
 
   /**
    * 이미지 선택 (갤러리)
@@ -60,9 +81,9 @@ export const useCommunityPostCreateScreenContainer = ({
       if (result.errorCode) {
         logError('갤러리 오류', new Error(result.errorMessage || result.errorCode));
         if (result.errorCode === 'permission') {
-          Alert.alert('권한 필요', '사진을 선택하려면 갤러리 접근 권한이 필요합니다.');
+          showAlertModal('권한 필요', '사진을 선택하려면 갤러리 접근 권한이 필요합니다.');
         } else {
-          Alert.alert('오류', '사진을 불러오는 중 오류가 발생했습니다.');
+          showAlertModal('오류', '사진을 불러오는 중 오류가 발생했습니다.');
         }
         return;
       }
@@ -86,16 +107,16 @@ export const useCommunityPostCreateScreenContainer = ({
           setImages(prev => [...prev, ...uploadedUrls]);
         } catch (error) {
           logError('이미지 업로드 오류', error as Error);
-          Alert.alert('오류', '이미지 업로드 중 오류가 발생했습니다.');
+          showAlertModal('오류', '이미지 업로드 중 오류가 발생했습니다.');
         } finally {
           setUploadingImage(false);
         }
       }
     } catch (error) {
       logError('이미지 선택 오류', error as Error);
-      Alert.alert('오류', '사진을 선택하는 중 오류가 발생했습니다.');
+      showAlertModal('오류', '사진을 선택하는 중 오류가 발생했습니다.');
     }
-  }, []);
+  }, [showAlertModal]);
 
   /**
    * 이미지 제거
@@ -115,13 +136,13 @@ export const useCommunityPostCreateScreenContainer = ({
     }
 
     if (!content.trim()) {
-      Alert.alert('오류', '내용을 입력해주세요.');
+      showAlertModal('오류', '내용을 입력해주세요.');
       return;
     }
 
     // 인증글인데 userMissionId가 없으면 오류
     if (!isGeneralPost && !userMissionId) {
-      Alert.alert('오류', '미션 정보가 없습니다. 다시 시도해주세요.');
+      showAlertModal('오류', '미션 정보가 없습니다. 다시 시도해주세요.');
       return;
     }
 
@@ -153,8 +174,27 @@ export const useCommunityPostCreateScreenContainer = ({
         };
         result = await createPost(postData);
         console.log('[CommunityPostCreateScreen] 일반 게시글 작성 완료:', result.success);
+      } else if (isMealMission) {
+        // 식사 미션: mealLogApi 사용
+        console.log('[CommunityPostCreateScreen] 식사 미션 인증 시작:', {
+          userMissionId: userMissionId!,
+          title: title.trim() || missionTitle,
+          hasDescription: !!content.trim(),
+          hasImages: images.length > 0,
+          rating: tasteRating,
+          isMealMission: true,
+        });
+
+        // 식사 미션은 verifyMeal API 호출 (게시글 자동 생성 + 식사 인증 완료 + 커뮤니티 노출)
+        result = await verifyMeal(userMissionId!, {
+          title: title.trim() || missionTitle,
+          description: content.trim(),
+          rating: tasteRating,
+          imageUrls: images.length > 0 ? images : undefined,
+        });
+        console.log('[CommunityPostCreateScreen] 식사 미션 인증 완료:', result.success);
       } else {
-        // 인증 게시글: verificationApi 사용 (일반 게시글 API 호출하지 않음)
+        // 일반 인증 게시글: verificationApi 사용
         console.log('[CommunityPostCreateScreen] 인증글 작성 시작:', {
           userMissionId: userMissionId!,
           hasContent: !!content.trim(),
@@ -170,27 +210,24 @@ export const useCommunityPostCreateScreenContainer = ({
           imageUrls: photoUrl ? [photoUrl] : undefined,
         });
         console.log('[CommunityPostCreateScreen] 인증글 작성 완료:', result.success);
-
-        // 인증글 작성 시 일반 게시글 API는 절대 호출하지 않음
-        if (result.success) {
-          console.log('[CommunityPostCreateScreen] 인증글만 생성됨 - 일반 게시글 API 호출 안 함');
-        }
       }
 
       if (result.success) {
         setShowSuccessModal(true);
       } else {
-        Alert.alert('오류', result.error || '게시글 작성에 실패했습니다.');
+        showAlertModal('오류', result.error || '게시글 작성에 실패했습니다.');
       }
     } catch (error) {
-      Alert.alert('오류', '게시글 작성 중 오류가 발생했습니다.');
+      showAlertModal('오류', '게시글 작성 중 오류가 발생했습니다.');
     } finally {
       setLoading(false);
     }
   }, [
+    showAlertModal,
     loading,
     content,
     isGeneralPost,
+    isMealMission,
     userMissionId,
     title,
     missionTitle,
@@ -198,6 +235,7 @@ export const useCommunityPostCreateScreenContainer = ({
     missionEmoji,
     photoUrl,
     images,
+    tasteRating,
     postType,
     createPost,
   ]);
@@ -213,6 +251,7 @@ export const useCommunityPostCreateScreenContainer = ({
   return {
     // Route params
     isGeneralPost,
+    isMealMission,
     missionTitle,
     missionEmoji,
     photoUrl,
@@ -223,13 +262,20 @@ export const useCommunityPostCreateScreenContainer = ({
     uploadingImage,
     loading,
     showSuccessModal,
+    tasteRating,
+    // AlertModal 상태
+    showAlert,
+    alertTitle,
+    alertMessage,
     // Setters
     setTitle,
     setContent,
+    setTasteRating,
     // Handlers
     handleSelectImage,
     handleRemoveImage,
     handleCreatePost,
     handleSuccessModalClose,
+    handleAlertClose,
   };
 };

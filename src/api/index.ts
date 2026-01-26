@@ -34,6 +34,9 @@ export * from './fileApi';
 // 관리자 API (프론트엔드 전용)
 export * from './manageApi';
 
+// 식사 로그 API
+export * from './mealLogApi';
+
 // API 클라이언트
 export { apiClient, ApiClient } from './client';
 

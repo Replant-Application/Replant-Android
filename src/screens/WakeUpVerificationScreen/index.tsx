@@ -10,6 +10,7 @@ import {
   TouchableOpacity,
   ImageBackground,
   ActivityIndicator,
+  Image,
 } from 'react-native';
 import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types/navigation';
@@ -74,7 +75,10 @@ const WakeUpVerificationScreen: React.FC<WakeUpVerificationScreenProps> = ({ nav
           {/* 미션 정보 카드 */}
           <View style={styles.missionCard}>
             <View style={styles.missionHeader}>
-              <Text style={styles.emoji}>🌅</Text>
+              <Image 
+                source={require('../../assets/images/daily_mission.png')} 
+                style={styles.missionIcon}
+              />
               <View style={styles.missionInfo}>
                 <Text style={styles.missionTitle}>
                   {mission?.title || '기상 미션'}
@@ -117,7 +121,13 @@ const WakeUpVerificationScreen: React.FC<WakeUpVerificationScreenProps> = ({ nav
                         </View>
                       </>
                     ) : (
-                      <Text style={styles.expiredText}>시간 초과</Text>
+                      <View style={styles.expiredContainer}>
+                        <Image 
+                          source={require('../../assets/images/bomb.png')} 
+                          style={styles.bombIcon}
+                        />
+                        <Text style={styles.expiredText}>시간 초과</Text>
+                      </View>
                     )}
                   </View>
                 </View>

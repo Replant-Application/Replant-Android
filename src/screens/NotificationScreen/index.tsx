@@ -13,7 +13,7 @@ import {
   ImageBackground,
 } from 'react-native';
 import { type Notification as NotificationType } from '../../api/notificationApi';
-import { Loading, EmptyState, Header } from '../../components/ui';
+import { Loading, EmptyState, Header, AlertModal } from '../../components/ui';
 import { colors } from '../../utils/designTokens';
 import { NotificationScreenProps } from '../../types/screens/notification';
 import SwipeableNotificationItem from './SwipeableNotificationItem';
@@ -28,11 +28,15 @@ const NotificationScreen: React.FC<NotificationScreenProps> = ({ navigation }) =
     refreshing,
     filter,
     unreadCount,
+    showAlert,
+    alertTitle,
+    alertMessage,
     handleRefresh,
     handleFilterChange,
     handleMarkAllAsRead,
     handleDeleteNotification,
     handleNotificationPress,
+    handleAlertClose,
     keyExtractor,
   } = useNotificationScreenContainer({ navigation });
 
@@ -133,6 +137,15 @@ const NotificationScreen: React.FC<NotificationScreenProps> = ({ navigation }) =
           />
         </View>
       </View>
+
+      {/* 오류 모달 */}
+      <AlertModal
+        visible={showAlert}
+        title={alertTitle}
+        message={alertMessage}
+        buttonText="확인"
+        onClose={handleAlertClose}
+      />
     </ImageBackground>
   );
 };

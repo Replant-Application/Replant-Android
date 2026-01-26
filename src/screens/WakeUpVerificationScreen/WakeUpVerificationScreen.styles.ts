@@ -47,6 +47,11 @@ export const styles = StyleSheet.create({
     fontSize: 48,
     marginRight: spacing[4],
   },
+  missionIcon: {
+    width: 56,
+    height: 56,
+    marginRight: spacing[4],
+  },
   missionInfo: {
     flex: 1,
   },
@@ -146,10 +151,20 @@ export const styles = StyleSheet.create({
     includeFontPadding: false,
     lineHeight: 56,
   },
+  expiredContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  bombIcon: {
+    width: 32,
+    height: 32,
+    marginRight: spacing[2],
+  },
   expiredText: {
     ...createTitleStyle('xl', {
       fontWeight: typography.fontWeight.medium,
-      color: colors.error[500],
+      color: '#dc2626',
     }),
   },
   progressContainer: {

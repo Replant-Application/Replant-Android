@@ -18,14 +18,15 @@ import {
   ScrollView,
   Animated,
   Image,
-  Alert,
 } from 'react-native';
 import { useOverlay } from '../../contexts/OverlayContext';
 import { getNotifications, markNotificationAsRead } from '../../api/notificationApi';
 import { getUserMission } from '../../api/missionApi';
+import { getMealLogDetail } from '../../api/mealLogApi';
 import { formatTimeAgo } from '../../utils/dateUtils';
 import { SCREEN_NAMES } from '../../utils/constants';
 import { styles } from './NotificationDropdown.styles';
+import AlertModal from '../ui/alertModal';
 
 interface Notification {
   id: number;
@@ -52,8 +53,25 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
   const [loading, setLoading] = useState(true);
   const [fadeAnim] = useState(new Animated.Value(0));
   const [scaleAnim] = useState(new Animated.Value(0.95));
+  
+  // AlertModal 상태
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertTitle, setAlertTitle] = useState('');
+  const [alertMessage, setAlertMessage] = useState('');
 
   const isVisible = activeOverlay === 'notification';
+  
+  // AlertModal 표시 함수
+  const showAlertModal = useCallback((title: string, message: string) => {
+    setAlertTitle(title);
+    setAlertMessage(message);
+    setShowAlert(true);
+  }, []);
+
+  // AlertModal 닫기
+  const handleAlertClose = useCallback(() => {
+    setShowAlert(false);
+  }, []);
 
   // 알림 데이터 로드
   const loadNotifications = useCallback(async () => {
@@ -142,7 +160,7 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
 
       // 돌발 미션 알림 처리
       if (type === 'SPONTANEOUS_WAKE_UP' || type === 'SPONTANEOUS_MEAL' || type === 'SPONTANEOUS_DIARY') {
-        console.log('[NotificationDropdown] 돌발 미션 알림 클릭:', type);
+        console.log('[NotificationDropdown] 돌발 미션 알림 클릭:', type, 'referenceType:', referenceType);
         
         if (!referenceId) {
           console.error('[NotificationDropdown] ❌ referenceId가 없습니다.');
@@ -150,44 +168,58 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
         }
 
         try {
-          // userMissionId로 미션 정보 조회
-          const missionResult = await getUserMission(referenceId);
-          
-          if (!missionResult.success || !missionResult.data) {
-            console.error('[NotificationDropdown] ❌ 미션 정보 조회 실패:', missionResult.error);
-            return;
-          }
-
-          const userMission = missionResult.data;
-          const mission = userMission.mission || userMission.customMission;
-          
-          if (!mission) {
-            console.error('[NotificationDropdown] ❌ 미션 정보가 없습니다.');
-            return;
-          }
-
           // 알림 타입에 따라 적절한 화면으로 이동
           if (type === 'SPONTANEOUS_WAKE_UP') {
             // 기상 미션 → 인증 화면으로 이동
             console.log('[NotificationDropdown] 기상 미션 인증 화면으로 이동, userMissionId:', referenceId);
-            if (!referenceId) {
-              console.error('[NotificationDropdown] ❌ referenceId가 없습니다.');
-              Alert.alert('오류', '미션 정보가 올바르지 않습니다.');
-              return;
-            }
             onNavigate(SCREEN_NAMES.WAKE_UP_VERIFICATION, {
               userMissionId: referenceId,
             });
           } else if (type === 'SPONTANEOUS_MEAL') {
-            // 식사 미션 → 게시글 작성 화면으로 이동
-            console.log('[NotificationDropdown] 식사 미션 게시글 작성 화면으로 이동');
-            onNavigate(SCREEN_NAMES.COMMUNITY_POST_CREATE, {
-              type: 'VERIFICATION',
-              userMissionId: referenceId,
-              missionId: String(mission.id),
-              missionTitle: mission.title || '식사 미션',
-              missionEmoji: '🍽️',
-            });
+            // 식사 미션 → referenceType에 따라 다른 API 호출
+            console.log('[NotificationDropdown] 식사 미션 처리, referenceType:', referenceType);
+            
+            if (referenceType === 'MEAL_LOG') {
+              // 새로운 식사 로그 API 사용
+              const mealLogResult = await getMealLogDetail(referenceId);
+              
+              if (!mealLogResult.success || !mealLogResult.data) {
+                console.error('[NotificationDropdown] ❌ 식사 로그 조회 실패:', mealLogResult.error);
+                showAlertModal('오류', '식사 미션 정보를 불러올 수 없습니다.');
+                return;
+              }
+
+              const mealLog = mealLogResult.data;
+              console.log('[NotificationDropdown] 식사 미션 게시글 작성 화면으로 이동');
+              onNavigate(SCREEN_NAMES.COMMUNITY_POST_CREATE, {
+                type: 'VERIFICATION',
+                userMissionId: mealLog.id,
+                missionId: String(mealLog.missionId || mealLog.id),
+                missionTitle: mealLog.title || '식사 미션',
+                missionEmoji: '🍽️',
+                isMealLog: true,
+              });
+            } else {
+              // 기존 USER_MISSION API 사용 (하위 호환)
+              const missionResult = await getUserMission(referenceId);
+              
+              if (!missionResult.success || !missionResult.data) {
+                console.error('[NotificationDropdown] ❌ 미션 정보 조회 실패:', missionResult.error);
+                return;
+              }
+
+              const userMission = missionResult.data;
+              const mission = userMission.mission || userMission.customMission;
+              
+              console.log('[NotificationDropdown] 식사 미션 게시글 작성 화면으로 이동');
+              onNavigate(SCREEN_NAMES.COMMUNITY_POST_CREATE, {
+                type: 'VERIFICATION',
+                userMissionId: referenceId,
+                missionId: String(mission?.id || referenceId),
+                missionTitle: mission?.title || '식사 미션',
+                missionEmoji: '🍽️',
+              });
+            }
           } else if (type === 'SPONTANEOUS_DIARY') {
             // 감성일기 미션 → 감성일기 작성 화면으로 이동
             console.log('[NotificationDropdown] 감성일기 작성 화면으로 이동');
@@ -353,6 +385,15 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
           </Animated.View>
         </TouchableWithoutFeedback>
       </View>
+
+      {/* 오류 모달 */}
+      <AlertModal
+        visible={showAlert}
+        title={alertTitle}
+        message={alertMessage}
+        buttonText="확인"
+        onClose={handleAlertClose}
+      />
     </TouchableWithoutFeedback>
   );
 };

@@ -4,7 +4,6 @@
  */
 
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
-import { Alert } from 'react-native';
 import { 
   getNotifications, 
   markNotificationAsRead, 
@@ -13,6 +12,7 @@ import {
   type Notification as NotificationType
 } from '../../api/notificationApi';
 import { getUserMission } from '../../api/missionApi';
+import { getMealLogDetail } from '../../api/mealLogApi';
 import { SCREEN_NAMES } from '../../utils/constants';
 import { useSse } from '../../contexts/SseContext';
 import { removeDuplicates } from '../../utils/arrayUtils';
@@ -30,6 +30,23 @@ export const useNotificationScreenContainer = ({
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [filter, setFilter] = useState<'all' | 'unread'>('all');
+  
+  // AlertModal 상태
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertTitle, setAlertTitle] = useState('');
+  const [alertMessage, setAlertMessage] = useState('');
+
+  // AlertModal 표시 함수
+  const showAlertModal = useCallback((title: string, message: string) => {
+    setAlertTitle(title);
+    setAlertMessage(message);
+    setShowAlert(true);
+  }, []);
+
+  // AlertModal 닫기
+  const handleAlertClose = useCallback(() => {
+    setShowAlert(false);
+  }, []);
   
   // Context
   const sseContext = useSse();
@@ -306,7 +323,7 @@ export const useNotificationScreenContainer = ({
 
     // 돌발 미션 알림 처리
     if (type === 'SPONTANEOUS_WAKE_UP' || type === 'SPONTANEOUS_MEAL' || type === 'SPONTANEOUS_DIARY') {
-      console.log('[NotificationScreen] 돌발 미션 알림 클릭:', type);
+      console.log('[NotificationScreen] 돌발 미션 알림 클릭:', type, 'referenceType:', referenceType);
       
       if (!referenceId) {
         console.error('[NotificationScreen] ❌ referenceId가 없습니다.');
@@ -314,33 +331,13 @@ export const useNotificationScreenContainer = ({
       }
 
       try {
-        const missionResult = await getUserMission(referenceId);
-        
-        if (!missionResult.success || !missionResult.data) {
-          console.error('[NotificationScreen] ❌ 미션 정보 조회 실패:', missionResult.error);
-          return;
-        }
-
-        const userMission = missionResult.data;
-        const mission = userMission.mission || userMission.customMission;
-        
-        if (!mission) {
-          console.error('[NotificationScreen] ❌ 미션 정보가 없습니다.');
-          return;
-        }
-
         if (type === 'SPONTANEOUS_WAKE_UP') {
           console.log('[NotificationScreen] 기상 미션 인증 화면으로 이동');
-          
-          if (!referenceId) {
-            Alert.alert('오류', '미션 정보가 올바르지 않습니다.');
-            return;
-          }
           
           const userMissionId = typeof referenceId === 'string' ? Number(referenceId) : referenceId;
           
           if (!userMissionId || isNaN(userMissionId)) {
-            Alert.alert('오류', '미션 정보가 올바르지 않습니다.');
+            showAlertModal('오류', '미션 정보가 올바르지 않습니다.');
             return;
           }
           
@@ -348,14 +345,50 @@ export const useNotificationScreenContainer = ({
             userMissionId: userMissionId,
           });
         } else if (type === 'SPONTANEOUS_MEAL') {
-          console.log('[NotificationScreen] 식사 미션 게시글 작성 화면으로 이동');
-          safeNavigation.navigate(SCREEN_NAMES.COMMUNITY_POST_CREATE as any, {
-            type: 'VERIFICATION',
-            userMissionId: referenceId,
-            missionId: String(mission.id),
-            missionTitle: mission.title || '식사 미션',
-            missionEmoji: '🍽️',
-          });
+          // 식사 미션 → referenceType에 따라 다른 API 호출
+          console.log('[NotificationScreen] 식사 미션 처리, referenceType:', referenceType);
+          
+          if (referenceType === 'MEAL_LOG') {
+            // 새로운 식사 로그 API 사용
+            const mealLogResult = await getMealLogDetail(referenceId);
+            
+            if (!mealLogResult.success || !mealLogResult.data) {
+              console.error('[NotificationScreen] ❌ 식사 로그 조회 실패:', mealLogResult.error);
+              showAlertModal('오류', '식사 미션 정보를 불러올 수 없습니다.');
+              return;
+            }
+
+            const mealLog = mealLogResult.data;
+            console.log('[NotificationScreen] 식사 미션 게시글 작성 화면으로 이동');
+            safeNavigation.navigate(SCREEN_NAMES.COMMUNITY_POST_CREATE as any, {
+              type: 'VERIFICATION',
+              userMissionId: mealLog.id,
+              missionId: String(mealLog.missionId || mealLog.id),
+              missionTitle: mealLog.title || '식사 미션',
+              missionEmoji: '🍽️',
+              isMealLog: true,
+            });
+          } else {
+            // 기존 USER_MISSION API 사용 (하위 호환)
+            const missionResult = await getUserMission(referenceId);
+            
+            if (!missionResult.success || !missionResult.data) {
+              console.error('[NotificationScreen] ❌ 미션 정보 조회 실패:', missionResult.error);
+              return;
+            }
+
+            const userMission = missionResult.data;
+            const mission = userMission.mission || userMission.customMission;
+            
+            console.log('[NotificationScreen] 식사 미션 게시글 작성 화면으로 이동');
+            safeNavigation.navigate(SCREEN_NAMES.COMMUNITY_POST_CREATE as any, {
+              type: 'VERIFICATION',
+              userMissionId: referenceId,
+              missionId: String(mission?.id || referenceId),
+              missionTitle: mission?.title || '식사 미션',
+              missionEmoji: '🍽️',
+            });
+          }
         } else if (type === 'SPONTANEOUS_DIARY') {
           console.log('[NotificationScreen] 감성일기 작성 화면으로 이동');
           safeNavigation.navigate(SCREEN_NAMES.DIARY as any);
@@ -439,7 +472,7 @@ export const useNotificationScreenContainer = ({
       default:
         break;
     }
-  }, [safeNavigation, handleMarkAsRead]);
+  }, [safeNavigation, handleMarkAsRead, showAlertModal]);
 
   /**
    * 필터링된 알림 목록
@@ -473,12 +506,17 @@ export const useNotificationScreenContainer = ({
     refreshing,
     filter,
     unreadCount,
+    // AlertModal 상태
+    showAlert,
+    alertTitle,
+    alertMessage,
     handleRefresh,
     handleFilterChange,
     handleMarkAsRead,
     handleMarkAllAsRead,
     handleDeleteNotification,
     handleNotificationPress,
+    handleAlertClose,
     keyExtractor,
   };
 };
