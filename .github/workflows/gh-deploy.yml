@@ -1,0 +1,93 @@
+name: Android Release
+
+on:
+  push:
+    branches: [ "release" ]
+  # 보안: pull_request 트리거 제거 - 외부 PR에서 파이프라인 실행 방지
+  workflow_dispatch: # 수동 실행 옵션 추가
+
+# 보안: 워크플로우 권한 제한
+permissions:
+  contents: read
+  id-token: write # OIDC 인증용 (선택사항)
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: gradle
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      # 보안: 의존성 취약점 검사 (선택사항)
+      - name: Run npm audit
+        continue-on-error: true
+        run: npm audit --audit-level=moderate
+
+      # 보안: 로그 마스킹 - 민감 정보가 로그에 노출되지 않도록 설정
+      - name: Mask sensitive values
+        run: |
+          echo "::add-mask::${{ secrets.KEYSTORE_BASE64 }}"
+          echo "::add-mask::${{ secrets.KEYSTORE_PASSWORD }}"
+          echo "::add-mask::${{ secrets.KEY_ALIAS }}"
+          echo "::add-mask::${{ secrets.KEY_PASSWORD }}"
+          echo "::add-mask::${{ secrets.SERVICE_ACCOUNT_JSON }}"
+
+      - name: Decode Keystore
+        id: decode_keystore
+        uses: timheuer/base64-to-file@v1.2
+        with:
+          fileName: 'release.keystore'
+          fileDir: './android/app'
+          encodedString: ${{ secrets.KEYSTORE_BASE64 }}
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./android/gradlew
+
+      - name: Build Release AAB
+        working-directory: ./android
+        # 보안: --no-daemon으로 빌드 (CI 환경 권장, 로그 노출 최소화)
+        run: ./gradlew bundleRelease --no-daemon --warning-mode all
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+
+      - name: Upload to Google Play
+        uses: r0adkll/upload-google-play@v1.1.1
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
+          packageName: com.anonymous.replantmobileapp
+          releaseFiles: android/app/build/outputs/bundle/release/app-release.aab
+          track: internal
+          status: completed
+
+      # 보안: 빌드 후 민감 파일 정리 (항상 실행)
+      - name: Cleanup sensitive files
+        if: always() # 실패해도 정리 실행
+        run: |
+          # 키스토어 파일 삭제
+          rm -f ./android/app/release.keystore
+          # 빌드 아티팩트 삭제 (AAB 파일 포함)
+          rm -rf ./android/app/build/outputs
+          # Gradle 캐시 정리 (선택사항)
+          rm -rf ~/.gradle/caches
+          echo "✅ Sensitive files cleaned up"
