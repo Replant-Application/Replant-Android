@@ -198,45 +198,50 @@ const VerificationPostCreateScreen: React.FC<VerificationPostCreateScreenProps> 
         {/* 사진 섹션 */}
         <View style={styles.photoSection}>
           <Text style={styles.label}>인증 사진 (선택)</Text>
-          <View style={styles.imageContainer}>
-            {images.map((imageUrl, index) => (
-              <View key={index} style={styles.imagePreviewWrapper}>
-                <Image 
-                  source={{ uri: imageUrl }} 
-                  style={styles.previewImage} 
-                  resizeMode="cover" 
-                  accessibilityLabel={`인증 사진 ${index + 1}`}
-                />
-                <TouchableOpacity
-                  style={styles.removeImageButton}
-                  onPress={() => handleRemoveImage(index)}
-                >
-                  <Text style={styles.removeImageText}>×</Text>
-                </TouchableOpacity>
-              </View>
-            ))}
-            {images.length < 3 && (
-              <TouchableOpacity
-                style={styles.addPhotoButton}
-                onPress={showPhotoOptions}
-                disabled={uploadingPhoto}
-              >
-                {uploadingPhoto ? (
-                  <ActivityIndicator color={colors.primary[500]} />
-                ) : (
-                  <>
-                    <Image
-                      source={require('../../assets/images/camera.png')}
-                      style={styles.addPhotoIcon}
-                      resizeMode="contain"
-                      accessibilityLabel="사진 첨부 아이콘"
-                    />
-                    <Text style={styles.addPhotoText}>사진 추가</Text>
-                  </>
-                )}
-              </TouchableOpacity>
-            )}
-          </View>
+          {images.length > 0 && (
+            <View style={styles.imageContainer}>
+              {images.map((imageUrl, index) => (
+                <View key={index} style={styles.imagePreviewWrapper}>
+                  <Image 
+                    source={{ uri: imageUrl }} 
+                    style={styles.previewImage} 
+                    resizeMode="cover" 
+                    accessibilityLabel={`인증 사진 ${index + 1}`}
+                  />
+                  <TouchableOpacity
+                    style={styles.removeImageButton}
+                    onPress={() => handleRemoveImage(index)}
+                  >
+                    <Text style={styles.removeImageText}>×</Text>
+                  </TouchableOpacity>
+                </View>
+              ))}
+            </View>
+          )}
+          {images.length < 3 && (
+            <TouchableOpacity
+              style={[
+                styles.addPhotoButton,
+                images.length > 0 && styles.addPhotoButtonWithImages
+              ]}
+              onPress={showPhotoOptions}
+              disabled={uploadingPhoto}
+            >
+              {uploadingPhoto ? (
+                <ActivityIndicator color={colors.primary[500]} />
+              ) : (
+                <>
+                  <Image
+                    source={require('../../assets/images/camera.png')}
+                    style={styles.addPhotoIcon}
+                    resizeMode="contain"
+                    accessibilityLabel="사진 첨부 아이콘"
+                  />
+                  <Text style={styles.addPhotoText}>사진 추가</Text>
+                </>
+              )}
+            </TouchableOpacity>
+          )}
         </View>
 
       </ScrollView>

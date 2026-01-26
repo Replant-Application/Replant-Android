@@ -287,16 +287,19 @@ export const styles = StyleSheet.create({
     lineHeight: 20,
   },
   addPhotoButton: {
-    width: 100,
+    width: '100%',
     height: 100,
     backgroundColor: colors.white,
     borderWidth: 1,
     borderColor: colors.border.light,
     borderStyle: 'dashed',
-    borderRadius: borderRadius.md,
-    alignItems: 'center',
+    borderRadius: borderRadius.base,
     justifyContent: 'center',
+    alignItems: 'center',
     gap: spacing[1],
+  },
+  addPhotoButtonWithImages: {
+    marginTop: spacing[2],
   },
   addPhotoIcon: {
     width: 32,
