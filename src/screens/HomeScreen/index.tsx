@@ -156,7 +156,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
                     >
                       <View style={styles.speechTextContainer}>
                         <Text style={styles.speechText}>
-                          {speechBubbleMessage || '저를 눌러서 대화하기'}
+                          {speechBubbleMessage || '눌러서 대화하기'}
                         </Text>
                       </View>
                     </ImageBackground>

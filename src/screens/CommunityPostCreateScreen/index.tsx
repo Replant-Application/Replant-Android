@@ -106,12 +106,12 @@ const CommunityPostCreateScreen: React.FC<CommunityPostCreateScreenProps> = ({ n
 
         {/* 제목 입력 */}
         <View style={styles.inputSection}>
-          <Text style={styles.label}>식사 일지 제목</Text>
+          <Text style={styles.label}>제목</Text>
           <TextInput
             style={styles.titleInput}
             value={title}
             onChangeText={setTitle}
-            placeholder={missionTitle}
+            placeholder="제목을 입력해주세요"
             placeholderTextColor={colors.text.tertiary}
             accessibilityLabel="제목"
             accessibilityHint="게시글 제목을 입력하세요"
@@ -120,7 +120,7 @@ const CommunityPostCreateScreen: React.FC<CommunityPostCreateScreenProps> = ({ n
 
         {/* 내용 입력 - 노트 스타일 */}
         <View style={styles.inputSection}>
-          <Text style={styles.label}>식사 요약 설명</Text>
+          <Text style={styles.label}>설명</Text>
           <View style={styles.contentInputWrapper}>
             {/* 노트 줄 배경 */}
             <View style={styles.noteLines}>

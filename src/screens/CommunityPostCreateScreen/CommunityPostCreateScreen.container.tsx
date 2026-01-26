@@ -38,7 +38,7 @@ export const useCommunityPostCreateScreenContainer = ({
   // 식사 미션 여부 확인
   const isMealMission = missionTitle.includes('식사') || missionTitle.includes('아침') || missionTitle.includes('점심') || missionTitle.includes('저녁') || missionTitle.includes('밥');
 
-  const [title, setTitle] = useState(missionTitle);
+  const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [images, setImages] = useState<string[]>([]);
   const [uploadingImage, setUploadingImage] = useState(false);
