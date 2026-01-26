@@ -393,9 +393,12 @@ export const useHomeScreenContainer = ({ navigation, route }: HomeScreenContaine
 
   /**
    * ReantChat에서 복귀 시 (fromReantChat) 바텀시트 애니메이션 (다른 경로로 ReantChat 갔다 오는 경우 대비)
+   * 리앤트 이미지를 원래 상태(default)로 복원
    */
   useEffect(() => {
     if (route?.params?.fromReantChat) {
+      // 리앤트 이미지를 원래 상태로 복원
+      setCharacterEmotion('default');
       bottomSheetTranslateY.setValue(SCREEN_HEIGHT * 0.4);
       Animated.spring(bottomSheetTranslateY, {
         toValue: 0,
@@ -437,8 +440,10 @@ export const useHomeScreenContainer = ({ navigation, route }: HomeScreenContaine
 
   /**
    * 바텀시트 채팅 닫기 → 투두리스트로 복귀
+   * 리앤트 이미지를 원래 상태(default)로 복원
    */
   const handleCloseChatInBottomSheet = useCallback((): void => {
+    setCharacterEmotion('default');
     setShowChatInBottomSheet(false);
     setChatMessages([]);
     setReantChatResponse(null);
