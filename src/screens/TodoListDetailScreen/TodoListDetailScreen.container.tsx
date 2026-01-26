@@ -125,6 +125,17 @@ export const useTodoListDetailScreenContainer = ({ navigation, route }: TodoList
 
       if (detailResult.success && detailResult.data) {
         const todoList = detailResult.data;
+        // 디버깅: isVerified 필드 확인
+        if (todoList.missions) {
+          todoList.missions.forEach((mission, index) => {
+            console.log(`[TodoListDetailScreen] 미션 ${index + 1}:`, {
+              title: mission.title,
+              missionType: mission.missionType,
+              isCompleted: mission.isCompleted,
+              isVerified: (mission as any).isVerified,
+            });
+          });
+        }
         setTodoList(todoList);
 
         // 완료 모달 표시 확인

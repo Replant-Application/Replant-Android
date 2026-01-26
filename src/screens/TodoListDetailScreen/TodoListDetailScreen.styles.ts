@@ -231,6 +231,27 @@ export const styles = StyleSheet.create({
   missionDescription: {
     ...createSecondaryTextStyle('sm'),
   },
+  verifiedBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#E8F5E9',
+    paddingVertical: spacing[0.5],
+    paddingHorizontal: spacing[2],
+    borderRadius: borderRadius.sm,
+    marginLeft: spacing[2],
+  },
+  verifiedIcon: {
+    fontSize: typography.fontSize.xs,
+    color: '#4CAF50',
+    marginRight: spacing[0.5],
+    fontWeight: typography.fontWeight.bold,
+  },
+  verifiedText: {
+    ...createTextStyle('xs', {
+      color: '#4CAF50',
+      fontWeight: typography.fontWeight.medium,
+    }),
+  },
   emptyMissions: {
     alignItems: 'center',
     paddingVertical: spacing[8],
