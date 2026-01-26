@@ -50,14 +50,10 @@ const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({ navigation, r
     handleSubmitReview,
     handleRefresh,
     loadMoreReviews,
-    handleCompleteCustom,
-    completingCustom,
     showAlert,
     alertTitle,
     alertMessage,
     handleCloseAlert,
-    showCompleteSuccessModal,
-    handleCloseCompleteSuccess,
   } = useMissionDetailScreenContainer({ navigation, route });
 
 
@@ -205,32 +201,18 @@ const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({ navigation, r
             </View>
           </View>
 
-          {/* 인증 방식 표시 */}
-          <View style={styles.verificationInfo}>
-            <Text style={styles.verificationLabel}>인증 방식</Text>
-            <Text style={styles.verificationValue}>
-              {mission.verificationType === 'GPS'
-                ? 'GPS 위치 인증'
-                : mission.verificationType === 'TIME'
-                ? `시간 인증 (${mission.requiredMinutes}분)`
-                : '커뮤니티 인증'}
-            </Text>
-          </View>
-
-          {/* 커스텀 미션 완료 버튼 */}
-          {mission.missionType === 'CUSTOM' && (
-            <TouchableOpacity
-              style={[styles.completeCustomButton, completingCustom && styles.completeCustomButtonDisabled]}
-              onPress={handleCompleteCustom}
-              disabled={completingCustom}
-              activeOpacity={0.7}
-            >
-              {completingCustom ? (
-                <ActivityIndicator size="small" color={colors.white} />
-              ) : (
-                <Text style={styles.completeCustomButtonText}>완료하기</Text>
-              )}
-            </TouchableOpacity>
+          {/* 인증 방식 표시 (커스텀 미션이 아닐 때만) */}
+          {mission.missionType !== 'CUSTOM' && (
+            <View style={styles.verificationInfo}>
+              <Text style={styles.verificationLabel}>인증 방식</Text>
+              <Text style={styles.verificationValue}>
+                {mission.verificationType === 'GPS'
+                  ? 'GPS 위치 인증'
+                  : mission.verificationType === 'TIME'
+                  ? `시간 인증 (${mission.requiredMinutes}분)`
+                  : '커뮤니티 인증'}
+              </Text>
+            </View>
           )}
         </View>
 
@@ -352,13 +334,6 @@ const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({ navigation, r
         message={alertMessage}
         buttonText="확인"
         onClose={handleCloseAlert}
-      />
-      <AlertModal
-        visible={showCompleteSuccessModal}
-        title="성공"
-        message="미션을 완료했어요."
-        buttonText="확인"
-        onClose={handleCloseCompleteSuccess}
       />
     </ImageBackground>
   );
