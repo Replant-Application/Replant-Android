@@ -34,16 +34,35 @@ export const useTodoListScreenContainer = ({ navigation, route }: TodoListScreen
         canCreateNewTodoList(),
       ]);
 
+      console.log('\n🟢 [TodoListScreen] ========== 투두리스트 로드 시작 ==========');
       console.log('[TodoListScreen] getActiveTodoLists 응답:', JSON.stringify(activeResult, null, 2));
 
       if (activeResult.success && activeResult.data) {
-        console.log('[TodoListScreen] activeResult.data:', activeResult.data);
+        console.log('[TodoListScreen] ✅ API 응답 성공');
         console.log('[TodoListScreen] activeResult.data 타입:', Array.isArray(activeResult.data) ? '배열' : typeof activeResult.data);
         const allActiveLists = Array.isArray(activeResult.data) ? activeResult.data : [];
+        console.log('[TodoListScreen] 전체 투두리스트 수:', allActiveLists.length);
+        console.log('[TodoListScreen] 전체 투두리스트 상세 데이터:');
+        allActiveLists.forEach((tl, index) => {
+          console.log(`  [${index + 1}] ID:${tl.id}, 제목:"${tl.title}", 상태:${tl.status}, 완료:${tl.completedCount}/${tl.totalCount}, createdAt:`, tl.createdAt);
+        });
 
         // 오늘 날짜인 투두리스트만 "진행중"에 표시
         // 과거 날짜의 미완료 투두리스트는 제외
         const todayActiveLists = filterTodayActiveTodoLists(allActiveLists, 'TodoListScreen');
+
+        console.log('[TodoListScreen] 📊 필터링 결과 요약:');
+        console.log(`  - 필터링 전: ${allActiveLists.length}개`);
+        console.log(`  - 필터링 후: ${todayActiveLists.length}개`);
+        if (todayActiveLists.length > 0) {
+          console.log('[TodoListScreen] ✅ 필터링된 투두리스트 목록:');
+          todayActiveLists.forEach((tl, index) => {
+            console.log(`  [${index + 1}] ID:${tl.id}, 제목:"${tl.title}", 완료:${tl.completedCount}/${tl.totalCount}`);
+          });
+        } else {
+          console.log('[TodoListScreen] ⚠️ 필터링된 투두리스트가 없습니다!');
+        }
+        console.log('🟢 [TodoListScreen] ========== 투두리스트 로드 완료 ==========\n');
 
         setActiveTodoLists(todayActiveLists);
       } else {

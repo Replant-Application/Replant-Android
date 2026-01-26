@@ -171,39 +171,51 @@ export const useHomeScreenContainer = ({ navigation, route }: HomeScreenContaine
 
       // 투두리스트 로드 (개별 try-catch)
       try {
+        console.log('\n🔵 [HomeScreen] ========== 투두리스트 로드 시작 ==========');
         const todoListResult = await getActiveTodoLists();
         console.log('[HomeScreen] getActiveTodoLists 응답:', JSON.stringify(todoListResult, null, 2));
         
         if (todoListResult?.success && Array.isArray(todoListResult.data)) {
+          console.log('[HomeScreen] ✅ API 응답 성공');
           console.log('[HomeScreen] 전체 투두리스트 수:', todoListResult.data.length);
-          console.log('[HomeScreen] 전체 투두리스트 데이터:', todoListResult.data.map(tl => ({
-            id: tl.id,
-            title: tl.title,
-            status: tl.status,
-            completedCount: tl.completedCount,
-            totalCount: tl.totalCount
-          })));
+          console.log('[HomeScreen] 전체 투두리스트 상세 데이터:');
+          todoListResult.data.forEach((tl, index) => {
+            console.log(`  [${index + 1}] ID:${tl.id}, 제목:"${tl.title}", 상태:${tl.status}, 완료:${tl.completedCount}/${tl.totalCount}, createdAt:`, tl.createdAt);
+          });
           
           // 오늘 날짜인 투두리스트만 "진행중"에 표시 (TodoListScreen과 동일한 로직)
           // 과거 날짜의 미완료 투두리스트는 제외
           const activeTodoLists = filterTodayActiveTodoLists(todoListResult.data, 'HomeScreen');
 
-          console.log('[HomeScreen] 필터링 후 진행중 투두리스트 수:', activeTodoLists.length);
-          console.log('[HomeScreen] 필터링된 투두리스트:', activeTodoLists.map(tl => ({
-            id: tl.id,
-            title: tl.title,
-            completedCount: tl.completedCount,
-            totalCount: tl.totalCount
-          })));
+          console.log('[HomeScreen] 📊 필터링 결과 요약:');
+          console.log(`  - 필터링 전: ${todoListResult.data.length}개`);
+          console.log(`  - 필터링 후: ${activeTodoLists.length}개`);
+          if (activeTodoLists.length > 0) {
+            console.log('[HomeScreen] ✅ 필터링된 투두리스트 목록:');
+            activeTodoLists.forEach((tl, index) => {
+              console.log(`  [${index + 1}] ID:${tl.id}, 제목:"${tl.title}", 완료:${tl.completedCount}/${tl.totalCount}`);
+            });
+          } else {
+            console.log('[HomeScreen] ⚠️ 필터링된 투두리스트가 없습니다!');
+          }
+          console.log('🔵 [HomeScreen] ========== 투두리스트 로드 완료 ==========\n');
+          
+          console.log('[HomeScreen] 🔵 setActiveTodoLists 호출 전:', {
+            activeTodoListsLength: activeTodoLists.length,
+            activeTodoListsIds: activeTodoLists.map(tl => tl.id)
+          });
           setActiveTodoLists(activeTodoLists);
+          console.log('[HomeScreen] 🔵 setActiveTodoLists 호출 완료');
 
           // 각 투두리스트의 상세 정보를 가져와서 미션 추출 및 완료 확인
-          const missionsByTime = new Map<
-            string,
-            { mission: TodoMission; todoListTitle: string }[]
-          >();
+          // 이 부분에서 에러가 발생해도 activeTodoLists는 유지되어야 함
+          try {
+            const missionsByTime = new Map<
+              string,
+              { mission: TodoMission; todoListTitle: string }[]
+            >();
 
-          for (const todoList of activeTodoLists) {
+            for (const todoList of activeTodoLists) {
             try {
               const detailResult = await getTodoListDetail(todoList.id);
               if (detailResult?.success && detailResult.data) {
@@ -214,14 +226,19 @@ export const useHomeScreenContainer = ({ navigation, route }: HomeScreenContaine
                   for (const mission of todoListDetail.missions) {
                     // 시간이 설정된 미션만 (완료 여부와 관계없이)
                     if (mission.scheduledStartTime) {
-                      const timeKey = mission.scheduledStartTime; // "09:00" 형식
-                      if (!missionsByTime.has(timeKey)) {
-                        missionsByTime.set(timeKey, []);
+                      // 안전하게 문자열로 변환
+                      const timeKey = String(mission.scheduledStartTime); // "09:00" 형식
+                      if (timeKey && timeKey.trim() !== '') {
+                        if (!missionsByTime.has(timeKey)) {
+                          missionsByTime.set(timeKey, []);
+                        }
+                        missionsByTime.get(timeKey)!.push({
+                          mission,
+                          todoListTitle: todoListDetail.title,
+                        });
+                      } else {
+                        console.warn('[HomeScreen] 빈 시간 키 발견:', mission.scheduledStartTime);
                       }
-                      missionsByTime.get(timeKey)!.push({
-                        mission,
-                        todoListTitle: todoListDetail.title,
-                      });
                     }
                   }
                 }
@@ -279,17 +296,46 @@ export const useHomeScreenContainer = ({ navigation, route }: HomeScreenContaine
           }
 
           // 시간대로 정렬 (Map을 배열로 변환하고 정렬)
-          const sortedMissionsByTime = new Map(
-            Array.from(missionsByTime.entries()).sort((a, b) => a[0].localeCompare(b[0]))
-          );
-
-          setTodoMissionsByTime(sortedMissionsByTime);
+          try {
+            const sortedMissionsByTime = new Map(
+              Array.from(missionsByTime.entries()).sort((a, b) => {
+                const timeA = a[0];
+                const timeB = b[0];
+                // 안전 검사: 문자열이 아니거나 undefined인 경우 처리
+                if (!timeA || typeof timeA !== 'string') {
+                  console.warn('[HomeScreen] 잘못된 시간 키:', timeA);
+                  return 1; // 뒤로 보냄
+                }
+                if (!timeB || typeof timeB !== 'string') {
+                  console.warn('[HomeScreen] 잘못된 시간 키:', timeB);
+                  return -1; // 앞으로 보냄
+                }
+                return timeA.localeCompare(timeB);
+              })
+            );
+            setTodoMissionsByTime(sortedMissionsByTime);
+          } catch (sortError) {
+            console.error('[HomeScreen] 시간대 정렬 실패:', sortError);
+            // 정렬 실패해도 빈 Map으로 설정하여 계속 진행
+            setTodoMissionsByTime(new Map());
+          }
+          } catch (missionLoadError) {
+            // 미션 상세 정보 로드 실패해도 activeTodoLists는 유지
+            console.error('[HomeScreen] 미션 상세 정보 로드 중 에러 발생:', missionLoadError);
+            console.log('[HomeScreen] ⚠️ 에러 발생했지만 activeTodoLists는 유지:', {
+              activeTodoListsLength: activeTodoLists.length,
+              activeTodoListsIds: activeTodoLists.map(tl => tl.id)
+            });
+            // todoMissionsByTime만 빈 Map으로 설정
+            setTodoMissionsByTime(new Map());
+          }
         } else {
           setActiveTodoLists([]);
           setTodoMissionsByTime(new Map());
         }
       } catch (e) {
-        console.log('투두리스트 로드 실패:', e);
+        console.log('[HomeScreen] 투두리스트 로드 실패:', e);
+        // API 호출 자체가 실패한 경우에만 빈 배열로 설정
         setActiveTodoLists([]);
         setTodoMissionsByTime(new Map());
       }
