@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, ScrollView, RefreshControl, ImageBackground, ActivityIndicator, Dimensions, FlatList } from 'react-native';
 import { MissionCard, MissionVerificationModal, MissionProgressCard } from '../../components/specialized';
-import { Loading, ErrorBoundary, Header, EmptyState, ConfirmModal, SimpleTabBar } from '../../components/ui';
+import { Loading, ErrorBoundary, Header, EmptyState, ConfirmModal, SimpleTabBar, AlertModal } from '../../components/ui';
 import MissionInfoModal from './MissionInfoModal';
 import MissionPagination from './MissionPagination';
 import MissionGroupList from './MissionGroupList';
@@ -23,6 +23,15 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
     selectedFilter,
     activeTab,
     missionGroupTab,
+    showAlert,
+    alertTitle,
+    alertMessage,
+    handleCloseAlert,
+    showConfirmModal,
+    confirmModalTitle,
+    confirmModalMessage,
+    handleConfirmModalConfirm,
+    handleConfirmModalCancel,
     verificationModalVisible,
     selectedMissionForVerification,
     showCompleteModal,
@@ -95,6 +104,26 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
           style={styles.topTabBar}
         />
       </View>
+
+      {/* useErrorHandler 오류/성공/알림 → AlertModal */}
+      <AlertModal
+        visible={showAlert}
+        title={alertTitle}
+        message={alertMessage}
+        buttonText="확인"
+        onClose={handleCloseAlert}
+      />
+
+      {/* useErrorHandler showConfirm → ConfirmModal (사진 삭제 등) */}
+      <ConfirmModal
+        visible={showConfirmModal}
+        title={confirmModalTitle}
+        message={confirmModalMessage}
+        confirmText="확인"
+        cancelText="취소"
+        onConfirm={handleConfirmModalConfirm}
+        onCancel={handleConfirmModalCancel}
+      />
 
       {/* 미션 완료 모달 */}
       <ConfirmModal

@@ -36,7 +36,27 @@ export const useVerificationPostCreateScreenContainer = ({
   } = params as any;
 
   const isEditMode = mode === 'edit' && verificationId;
-  const { showError, showInfo } = useErrorHandler();
+
+  const [showErrorModal, setShowErrorModal] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [alertTitle, setAlertTitle] = useState('오류');
+
+  const errorHandlerOverrides = useMemo(
+    () => ({
+      onShowError: (t: string, m: string) => {
+        setAlertTitle(t);
+        setErrorMessage(m);
+        setShowErrorModal(true);
+      },
+      onShowInfo: (t: string, m: string) => {
+        setAlertTitle(t);
+        setErrorMessage(m);
+        setShowErrorModal(true);
+      },
+    }),
+    []
+  );
+  const { showError, showInfo } = useErrorHandler(errorHandlerOverrides);
 
   const [content, setContent] = useState(initialContent || '');
   const [images, setImages] = useState<string[]>(initialPhotoUrl ? [initialPhotoUrl] : []); // 다중 이미지 지원
@@ -44,8 +64,6 @@ export const useVerificationPostCreateScreenContainer = ({
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [showAlreadyExistsModal, setShowAlreadyExistsModal] = useState(false);
-  const [showErrorModal, setShowErrorModal] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
   const [loadingData, setLoadingData] = useState(isEditMode);
   // 완료 정도 슬라이더 상태 (기본값 50%, 0~100% 5% 단위)
   const [completionRate, setCompletionRate] = useState(50);
@@ -296,6 +314,7 @@ export const useVerificationPostCreateScreenContainer = ({
               'VerificationPostCreateScreen.handleSubmitVerification'
             );
           } else {
+            setAlertTitle('오류');
             setErrorMessage(result.error || '인증글 수정에 실패했습니다.');
             setShowErrorModal(true);
           }
@@ -322,6 +341,7 @@ export const useVerificationPostCreateScreenContainer = ({
           ) {
             setShowAlreadyExistsModal(true);
           } else {
+            setAlertTitle('오류');
             setErrorMessage(result.error || '인증글 작성에 실패했습니다.');
             setShowErrorModal(true);
           }
@@ -329,6 +349,7 @@ export const useVerificationPostCreateScreenContainer = ({
       }
     } catch (error) {
       logError('인증글 작성/수정 오류', error as Error);
+      setAlertTitle('오류');
       setErrorMessage('인증글 작성 중 오류가 발생했습니다.');
       setShowErrorModal(true);
     } finally {
@@ -401,6 +422,7 @@ export const useVerificationPostCreateScreenContainer = ({
     showAlreadyExistsModal,
     showErrorModal,
     errorMessage,
+    alertTitle,
     completionRate,
     // Setters
     setContent,

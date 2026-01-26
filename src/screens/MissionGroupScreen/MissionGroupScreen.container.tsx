@@ -3,7 +3,7 @@
  * 미션 도감 화면: 미션 목록 조회, 리뷰 조회/작성, 페이지네이션
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types/navigation';
 import { useErrorHandler } from '../../hooks/useErrorHandler';
@@ -99,7 +99,32 @@ interface MissionGroupScreenContainerProps {
 }
 
 export const useMissionGroupScreenContainer = ({ navigation }: MissionGroupScreenContainerProps) => {
-  const { showError, showSuccess, showInfo, handleApiError } = useErrorHandler();
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertTitle, setAlertTitle] = useState('');
+  const [alertMessage, setAlertMessage] = useState('');
+  const handleCloseAlert = useCallback(() => setShowAlert(false), []);
+
+  const errorHandlerOverrides = useMemo(
+    () => ({
+      onShowError: (t: string, m: string) => {
+        setAlertTitle(t);
+        setAlertMessage(m);
+        setShowAlert(true);
+      },
+      onShowSuccess: (t: string, m: string) => {
+        setAlertTitle(t);
+        setAlertMessage(m);
+        setShowAlert(true);
+      },
+      onShowInfo: (t: string, m: string) => {
+        setAlertTitle(t);
+        setAlertMessage(m);
+        setShowAlert(true);
+      },
+    }),
+    []
+  );
+  const { showError, showSuccess, showInfo, handleApiError } = useErrorHandler(errorHandlerOverrides);
 
   const [activeTab, setActiveTab] = useState<MissionGroupTab>('official');
   const [missions, setMissions] = useState<UnifiedMission[]>([]);
@@ -339,6 +364,11 @@ export const useMissionGroupScreenContainer = ({ navigation }: MissionGroupScree
     // Data
     missions,
     reviews,
+    // State (오류/성공/알림 AlertModal)
+    showAlert,
+    alertTitle,
+    alertMessage,
+    handleCloseAlert,
     // State
     activeTab,
     selectedMission,

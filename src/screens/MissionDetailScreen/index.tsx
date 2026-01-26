@@ -17,7 +17,7 @@ import {
   ActivityIndicator,
   ImageBackground,
 } from 'react-native';
-import { Loading, Header, EmptyState, ReviewCard } from '../../components/ui';
+import { Loading, Header, EmptyState, ReviewCard, AlertModal } from '../../components/ui';
 import { colors } from '../../utils/designTokens';
 import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types/navigation';
@@ -52,6 +52,12 @@ const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({ navigation, r
     loadMoreReviews,
     handleCompleteCustom,
     completingCustom,
+    showAlert,
+    alertTitle,
+    alertMessage,
+    handleCloseAlert,
+    showCompleteSuccessModal,
+    handleCloseCompleteSuccess,
   } = useMissionDetailScreenContainer({ navigation, route });
 
 
@@ -95,6 +101,13 @@ const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({ navigation, r
           icon="📭"
           title="미션을 찾을 수 없습니다"
           description="해당 미션을 찾을 수 없습니다."
+        />
+        <AlertModal
+          visible={showAlert}
+          title={alertTitle}
+          message={alertMessage}
+          buttonText="확인"
+          onClose={handleCloseAlert}
         />
       </ImageBackground>
     );
@@ -332,6 +345,21 @@ const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({ navigation, r
         </View>
       </ScrollView>
       </KeyboardAvoidingView>
+
+      <AlertModal
+        visible={showAlert}
+        title={alertTitle}
+        message={alertMessage}
+        buttonText="확인"
+        onClose={handleCloseAlert}
+      />
+      <AlertModal
+        visible={showCompleteSuccessModal}
+        title="성공"
+        message="미션을 완료했어요."
+        buttonText="확인"
+        onClose={handleCloseCompleteSuccess}
+      />
     </ImageBackground>
   );
 };

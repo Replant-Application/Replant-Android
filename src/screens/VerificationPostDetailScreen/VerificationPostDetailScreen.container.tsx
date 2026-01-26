@@ -36,7 +36,6 @@ export const useVerificationPostDetailScreenContainer = ({
 }: VerificationPostDetailScreenContainerProps) => {
   const { verificationId } = route.params;
   const { currentUserId } = useUser();
-  const { showError, showSuccess, showInfo } = useErrorHandler();
 
   const [post, setPost] = useState<VerificationPost | null>(null);
   const [comments, setComments] = useState<VerificationComment[]>([]);
@@ -48,7 +47,7 @@ export const useVerificationPostDetailScreenContainer = ({
   const [editingContent, setEditingContent] = useState('');
   const [replyingToComment, setReplyingToComment] = useState<{ id: string; nickname: string } | null>(null);
 
-  // 오류용 AlertModal
+  // 오류/성공/알림용 AlertModal (showAlertModal API 오류 + useErrorHandler)
   const [showAlert, setShowAlert] = useState(false);
   const [alertTitle, setAlertTitle] = useState('');
   const [alertMessage, setAlertMessage] = useState('');
@@ -58,6 +57,16 @@ export const useVerificationPostDetailScreenContainer = ({
     setShowAlert(true);
   }, []);
   const handleAlertClose = useCallback(() => setShowAlert(false), []);
+
+  const errorHandlerOverrides = useMemo(
+    () => ({
+      onShowError: showAlertModal,
+      onShowSuccess: showAlertModal,
+      onShowInfo: showAlertModal,
+    }),
+    [showAlertModal]
+  );
+  const { showError, showSuccess, showInfo } = useErrorHandler(errorHandlerOverrides);
 
   /**
    * 본인 게시글인지 확인

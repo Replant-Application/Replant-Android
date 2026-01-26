@@ -74,7 +74,55 @@ export const useMissionScreenContainer = ({
     uncompleteMission,
     loadMissions,
   } = useMission(addExperienceByCategory);
-  const { showError, showSuccess, showInfo, handleApiError, showConfirm } = useErrorHandler();
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertTitle, setAlertTitle] = useState('');
+  const [alertMessage, setAlertMessage] = useState('');
+  const handleCloseAlert = useCallback(() => setShowAlert(false), []);
+
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [confirmModalTitle, setConfirmModalTitle] = useState('');
+  const [confirmModalMessage, setConfirmModalMessage] = useState('');
+  const confirmCallbackRef = useRef<(() => void) | null>(null);
+
+  const errorHandlerOverrides = useMemo(
+    () => ({
+      onShowError: (t: string, m: string) => {
+        setAlertTitle(t);
+        setAlertMessage(m);
+        setShowAlert(true);
+      },
+      onShowSuccess: (t: string, m: string) => {
+        setAlertTitle(t);
+        setAlertMessage(m);
+        setShowAlert(true);
+      },
+      onShowInfo: (t: string, m: string) => {
+        setAlertTitle(t);
+        setAlertMessage(m);
+        setShowAlert(true);
+      },
+      onShowConfirm: (t: string, m: string, onConfirm: () => void) => {
+        setConfirmModalTitle(t);
+        setConfirmModalMessage(m);
+        confirmCallbackRef.current = onConfirm;
+        setShowConfirmModal(true);
+      },
+    }),
+    []
+  );
+  const { showError, showSuccess, showInfo, handleApiError, showConfirm } = useErrorHandler(errorHandlerOverrides);
+
+  const handleConfirmModalConfirm = useCallback(() => {
+    const fn = confirmCallbackRef.current;
+    setShowConfirmModal(false);
+    confirmCallbackRef.current = null;
+    fn?.();
+  }, []);
+
+  const handleConfirmModalCancel = useCallback(() => {
+    setShowConfirmModal(false);
+    confirmCallbackRef.current = null;
+  }, []);
 
   // route params
   const routeParams = route?.params;
@@ -849,6 +897,15 @@ export const useMissionScreenContainer = ({
     activeTab,
     missionGroupTab,
     // Modals
+    showAlert,
+    alertTitle,
+    alertMessage,
+    handleCloseAlert,
+    showConfirmModal,
+    confirmModalTitle,
+    confirmModalMessage,
+    handleConfirmModalConfirm,
+    handleConfirmModalCancel,
     verificationModalVisible,
     selectedMissionForVerification,
     showCompleteModal,

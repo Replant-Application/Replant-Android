@@ -34,6 +34,10 @@ const TodoListCreateScreen: React.FC<TodoListCreateScreenProps> = ({ navigation 
     newMissionTitle,
     newMissionDescription,
     creatingMission,
+    showAlert,
+    alertTitle,
+    alertMessage,
+    handleCloseAlert,
     showMissionSuccessModal,
     showTodoListSuccessModal,
     showTimeRequiredModal,
@@ -586,6 +590,15 @@ const TodoListCreateScreen: React.FC<TodoListCreateScreenProps> = ({ navigation 
         message="오늘 이미 투두리스트를 생성했습니다."
         buttonText="확인"
         onClose={() => setShowAlreadyCreatedModal(false)}
+      />
+
+      {/* useErrorHandler 오류/알림 → 커스텀 모달 */}
+      <AlertModal
+        visible={showAlert}
+        title={alertTitle}
+        message={alertMessage}
+        buttonText="확인"
+        onClose={handleCloseAlert}
       />
     </ImageBackground>
   );
