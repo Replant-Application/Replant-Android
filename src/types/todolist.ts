@@ -36,6 +36,9 @@ export interface TodoList {
   missions?: TodoMission[];
   createdAt: string;
   updatedAt?: string;
+  creatorId?: number;
+  creatorNickname?: string;
+  isPublic?: boolean;
 }
 
 export interface TodoListInitResponse {

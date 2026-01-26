@@ -61,6 +61,7 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation, route }) 
     shareConfirmMissionSet,
     handleShareConfirm,
     handleShareConfirmCancel,
+    handleUnshareMissionSet,
     renderStars,
   } = useCommunityScreenContainer({ navigation, route });
 
@@ -207,6 +208,7 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation, route }) 
           onRefresh={onRefresh}
           renderStars={renderStars}
           navigation={navigation}
+          onUnshare={handleUnshareMissionSet}
         />
       )}
 

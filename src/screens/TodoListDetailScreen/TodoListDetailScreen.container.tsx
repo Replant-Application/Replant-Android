@@ -7,8 +7,9 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import * as Location from 'expo-location';
 import { useErrorHandler } from '../../hooks/useErrorHandler';
 import { SCREEN_NAMES } from '../../utils/constants';
-import { getTodoListDetail, completeTodoMission, archiveTodoList, canCreateNewTodoList } from '../../api/todolistApi';
+import { getTodoListDetail, completeTodoMission, archiveTodoList, canCreateNewTodoList, updateMissionSet } from '../../api/todolistApi';
 import { TodoList, TodoMission } from '../../types/todolist';
+import { useUser } from '../../contexts/UserContext';
 import {
   getVerifications,
   getUserMissions,
@@ -28,6 +29,7 @@ interface TodoListDetailScreenContainerProps {
 
 export const useTodoListDetailScreenContainer = ({ navigation, route }: TodoListDetailScreenContainerProps) => {
   const { todoListId } = route.params;
+  const { currentUserId } = useUser();
 
   const [showAlert, setShowAlert] = useState(false);
   const [alertTitle, setAlertTitle] = useState('');
@@ -63,9 +65,11 @@ export const useTodoListDetailScreenContainer = ({ navigation, route }: TodoList
   const [refreshing, setRefreshing] = useState(false);
   const [completingMissionId, setCompletingMissionId] = useState<number | null>(null);
   const [archiving, setArchiving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [canCreate, setCanCreate] = useState(false);
   const [showCompleteModal, setShowCompleteModal] = useState(false);
   const [hasShownCompleteModal, setHasShownCompleteModal] = useState(false);
+  const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false);
 
   /**
    * 모든 미션이 완료되었는지 확인
@@ -381,6 +385,56 @@ export const useTodoListDetailScreenContainer = ({ navigation, route }: TodoList
   }, []);
 
   /**
+   * 투두리스트 삭제 확인 모달 열기
+   */
+  const handleDelete = useCallback(() => {
+    setShowDeleteConfirmModal(true);
+  }, []);
+
+  /**
+   * 공유 해제 확인 모달: 공유 해제 실행 (isPublic을 false로 변경)
+   */
+  const handleDeleteConfirm = useCallback(async () => {
+    if (!todoList) return;
+    
+    setShowDeleteConfirmModal(false);
+    setDeleting(true);
+    try {
+      // isPublic만 false로 변경 (title, description은 그대로 유지)
+      const result = await updateMissionSet(Number(todoListId), {
+        title: todoList.title,
+        description: todoList.description || undefined,
+        isPublic: false,
+      });
+      if (result.success && result.data) {
+        showSuccess('커뮤니티 공유 게시판에서 제거되었습니다.');
+        // 투두리스트 정보 업데이트
+        loadData();
+      } else {
+        handleApiError(result, 'TodoListDetailScreen.handleDeleteConfirm');
+      }
+    } catch (error) {
+      showError(error instanceof Error ? error : new Error('공유 해제에 실패했습니다.'), 'TodoListDetailScreen.handleDeleteConfirm');
+    } finally {
+      setDeleting(false);
+    }
+  }, [todoListId, todoList, loadData, handleApiError, showError, showSuccess]);
+
+  /**
+   * 삭제 확인 모달: 취소
+   */
+  const handleDeleteConfirmCancel = useCallback(() => {
+    setShowDeleteConfirmModal(false);
+  }, []);
+
+  /**
+   * 본인이 만든 투두리스트인지 확인
+   */
+  const isOwner = useMemo(() => {
+    return todoList && currentUserId && todoList.creatorId === currentUserId;
+  }, [todoList, currentUserId]);
+
+  /**
    * 새 투두리스트 생성 화면으로 이동
    */
   const handleCreateNew = useCallback(() => {
@@ -416,6 +470,8 @@ export const useTodoListDetailScreenContainer = ({ navigation, route }: TodoList
     refreshing,
     completingMissionId,
     archiving,
+    deleting,
+    isOwner,
     showCompleteModal,
     showAlert,
     alertTitle,
@@ -424,6 +480,10 @@ export const useTodoListDetailScreenContainer = ({ navigation, route }: TodoList
     showArchiveConfirmModal,
     handleArchiveConfirm,
     handleArchiveConfirmCancel,
+    showDeleteConfirmModal,
+    handleDelete,
+    handleDeleteConfirm,
+    handleDeleteConfirmCancel,
     // Progress
     ...progressData,
     // Handlers

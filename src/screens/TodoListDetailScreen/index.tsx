@@ -31,6 +31,7 @@ const TodoListDetailScreen: React.FC<Props> = ({ navigation, route }) => {
     loading,
     refreshing,
     completingMissionId,
+    isOwner,
     showCompleteModal,
     showAlert,
     alertTitle,
@@ -39,6 +40,10 @@ const TodoListDetailScreen: React.FC<Props> = ({ navigation, route }) => {
     showArchiveConfirmModal,
     handleArchiveConfirm,
     handleArchiveConfirmCancel,
+    showDeleteConfirmModal,
+    handleDelete,
+    handleDeleteConfirm,
+    handleDeleteConfirmCancel,
     actualCompletedCount,
     actualTotalCount,
     progressPercent,
@@ -165,19 +170,30 @@ const TodoListDetailScreen: React.FC<Props> = ({ navigation, route }) => {
             <Text style={styles.infoTitle} numberOfLines={1}>
               {todoList.title}
             </Text>
-            <View style={[
-              styles.statusBadge,
-              todoList.status === 'COMPLETED' && styles.statusBadgeCompleted,
-              todoList.status === 'ARCHIVED' && styles.statusBadgeArchived,
-            ]}>
-              <Text style={[
-                styles.statusBadgeText,
-                todoList.status === 'COMPLETED' && styles.statusBadgeTextCompleted,
-                todoList.status === 'ARCHIVED' && styles.statusBadgeTextArchived,
+            <View style={styles.headerRight}>
+              <View style={[
+                styles.statusBadge,
+                todoList.status === 'COMPLETED' && styles.statusBadgeCompleted,
+                todoList.status === 'ARCHIVED' && styles.statusBadgeArchived,
               ]}>
-                {todoList.status === 'ACTIVE' ? '진행중' :
-                 todoList.status === 'COMPLETED' ? '완료' : '보관됨'}
-              </Text>
+                <Text style={[
+                  styles.statusBadgeText,
+                  todoList.status === 'COMPLETED' && styles.statusBadgeTextCompleted,
+                  todoList.status === 'ARCHIVED' && styles.statusBadgeTextArchived,
+                ]}>
+                  {todoList.status === 'ACTIVE' ? '진행중' :
+                   todoList.status === 'COMPLETED' ? '완료' : '보관됨'}
+                </Text>
+              </View>
+              {isOwner && todoList?.isPublic && (
+                <TouchableOpacity
+                  style={styles.deleteButton}
+                  onPress={handleDelete}
+                  activeOpacity={0.7}
+                >
+                  <Text style={styles.deleteButtonText}>공유 해제</Text>
+                </TouchableOpacity>
+              )}
             </View>
           </View>
 
@@ -239,6 +255,18 @@ const TodoListDetailScreen: React.FC<Props> = ({ navigation, route }) => {
         cancelText="취소"
         onConfirm={handleArchiveConfirm}
         onCancel={handleArchiveConfirmCancel}
+        confirmButtonColor={colors.primary[500]}
+      />
+
+      {/* 공유 해제 확인 ConfirmModal */}
+      <ConfirmModal
+        visible={showDeleteConfirmModal}
+        title="공유 게시판에서 제거"
+        message="이 투두리스트를 커뮤니티 공유 게시판에서 제거하시겠습니까?\n제거된 투두리스트는 다른 사용자에게 보이지 않지만, 본인은 계속 사용할 수 있습니다."
+        confirmText="제거"
+        cancelText="취소"
+        onConfirm={handleDeleteConfirm}
+        onCancel={handleDeleteConfirmCancel}
         confirmButtonColor={colors.primary[500]}
       />
 
