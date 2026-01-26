@@ -99,6 +99,15 @@ const TodoListDetailScreen: React.FC<Props> = ({ navigation, route }) => {
             >
               {mission.title}
             </Text>
+            {/* 공식 미션이 인증 완료된 경우 표시 */}
+            {!mission.isCompleted && 
+             (mission.missionType === 'OFFICIAL' || mission.missionSource === 'RANDOM_OFFICIAL') && 
+             mission.isVerified === true && (
+              <View style={styles.verifiedBadge}>
+                <Text style={styles.verifiedIcon}>✓</Text>
+                <Text style={styles.verifiedText}>인증완료</Text>
+              </View>
+            )}
           </View>
           {mission.description && (
             <Text style={styles.missionDescription} numberOfLines={1}>
