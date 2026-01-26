@@ -362,6 +362,10 @@ const TodoListCreateScreen: React.FC<TodoListCreateScreenProps> = ({ navigation 
                   style={[styles.missionListItem, missionRange && styles.missionListItemSelected]}
                   onPress={() => handleSetMissionTime(mission.id)}
                   activeOpacity={0.7}
+                  accessibilityRole="button"
+                  accessibilityLabel={missionRange ? `${mission.title}, 시간 설정됨: ${missionRange.start} ~ ${missionRange.end}` : `${mission.title}, 시간 설정하기`}
+                  accessibilityHint="탭하여 이 미션의 시간대를 설정합니다"
+                  accessibilityState={{ selected: !!missionRange }}
                 >
                   <View style={styles.missionListItemContent}>
                     <Text style={[styles.missionListItemTitle, missionRange && styles.missionListItemTitleSelected]}>{mission.title}</Text>
@@ -475,14 +479,16 @@ const TodoListCreateScreen: React.FC<TodoListCreateScreenProps> = ({ navigation 
                             ]}
                             onSelect={(v) => { if (v === 'AM' || v === 'PM') setStartPeriod(v); }}
                             width={80}
+                            accessibilityLabel="시작 시간 오전 오후 선택"
                           />
                           <WheelPicker
                             value={startHour}
                             options={HOURS.map((h) => ({ label: `${h}`, value: h }))}
                             onSelect={(v) => setStartHour(v as number)}
                             width={60}
+                            accessibilityLabel="시작 시간 시 선택"
                           />
-                          <View style={styles.timeSeparator}>
+                          <View style={styles.timeSeparator} accessibilityElementsHidden={true}>
                             <Text style={styles.timeSeparatorText}>:</Text>
                           </View>
                           <WheelPicker
@@ -490,6 +496,7 @@ const TodoListCreateScreen: React.FC<TodoListCreateScreenProps> = ({ navigation 
                             options={MINUTES.map((m) => ({ label: m < 10 ? `0${m}` : `${m}`, value: m }))}
                             onSelect={(v) => setStartMinute(v as number)}
                             width={60}
+                            accessibilityLabel="시작 시간 분 선택"
                           />
                         </View>
                       </View>
@@ -515,14 +522,16 @@ const TodoListCreateScreen: React.FC<TodoListCreateScreenProps> = ({ navigation 
                             ]}
                             onSelect={(v) => { if (v === 'AM' || v === 'PM') setEndPeriod(v); }}
                             width={80}
+                            accessibilityLabel="종료 시간 오전 오후 선택"
                           />
                           <WheelPicker
                             value={endHour}
                             options={HOURS.map((h) => ({ label: `${h}`, value: h }))}
                             onSelect={(v) => setEndHour(v as number)}
                             width={60}
+                            accessibilityLabel="종료 시간 시 선택"
                           />
-                          <View style={styles.timeSeparator}>
+                          <View style={styles.timeSeparator} accessibilityElementsHidden={true}>
                             <Text style={styles.timeSeparatorText}>:</Text>
                           </View>
                           <WheelPicker
@@ -530,6 +539,7 @@ const TodoListCreateScreen: React.FC<TodoListCreateScreenProps> = ({ navigation 
                             options={MINUTES.map((m) => ({ label: m < 10 ? `0${m}` : `${m}`, value: m }))}
                             onSelect={(v) => setEndMinute(v as number)}
                             width={60}
+                            accessibilityLabel="종료 시간 분 선택"
                           />
                         </View>
                       </View>

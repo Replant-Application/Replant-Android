@@ -23,6 +23,7 @@ export interface WheelPickerProps {
   options: WheelPickerOption[];
   onSelect: (value: string | number) => void;
   width?: number;
+  accessibilityLabel?: string;
 }
 
 function getIndexFromOffset(y: number, count: number): number {
@@ -30,7 +31,7 @@ function getIndexFromOffset(y: number, count: number): number {
   return Math.max(0, Math.min(i, count - 1));
 }
 
-const WheelPicker: React.FC<WheelPickerProps> = ({ value, options, onSelect, width }) => {
+const WheelPicker: React.FC<WheelPickerProps> = ({ value, options, onSelect, width, accessibilityLabel }) => {
   const scrollRef = useRef<ScrollView>(null);
   const hasCommittedRef = useRef(false);
 
@@ -109,6 +110,10 @@ const WheelPicker: React.FC<WheelPickerProps> = ({ value, options, onSelect, wid
     [options, onSelect, scrollToIndex]
   );
 
+  const selectedOption = options[selectedIndex];
+  const currentValue = selectedOption ? selectedOption.label : '';
+  const pickerLabel = accessibilityLabel || '선택기';
+
   return (
     <View style={[styles.container, width != null && { width }]}>
       <View style={styles.selection} pointerEvents="none" />
@@ -124,6 +129,10 @@ const WheelPicker: React.FC<WheelPickerProps> = ({ value, options, onSelect, wid
         onScrollEndDrag={onScrollEndDrag}
         onMomentumScrollEnd={onMomentumScrollEnd}
         scrollEventThrottle={16}
+        accessibilityLabel={pickerLabel}
+        accessibilityRole="adjustable"
+        accessibilityValue={{ text: currentValue }}
+        accessibilityHint="위아래로 스와이프하여 선택하거나 항목을 탭하여 선택할 수 있습니다"
       >
         <View style={{ height: ITEM_HEIGHT * 2 }} />
         {options.map((opt, index) => {
@@ -137,8 +146,12 @@ const WheelPicker: React.FC<WheelPickerProps> = ({ value, options, onSelect, wid
               style={[styles.item, { height: ITEM_HEIGHT, opacity, transform: [{ scale }] }]}
               onPress={() => onItemPress(index)}
               activeOpacity={0.7}
+              accessibilityRole="button"
+              accessibilityLabel={opt.label}
+              accessibilityState={{ selected: index === selectedIndex }}
+              accessibilityHint={index === selectedIndex ? `${opt.label} 선택됨` : `${opt.label} 선택`}
             >
-              <Text style={[styles.itemText, { fontSize }]}>{opt.label}</Text>
+              <Text style={[styles.itemText, { fontSize }]} accessibilityElementsHidden={true}>{opt.label}</Text>
             </TouchableOpacity>
           );
         })}
