@@ -214,49 +214,6 @@ export const useDiaryScreenContainer = () => {
   }, []);
 
   /**
-   * 다음 단계로 이동
-   */
-  const handleNext = useCallback(() => {
-    if (currentStep === 'mood') {
-      setCurrentStep('emotions');
-    } else if (currentStep === 'emotions') {
-      if (selectedEmotions.length === 0 && !emotionText.trim()) {
-        showAlertModal('알림', '감정을 하나 이상 선택해주세요.');
-        return;
-      }
-      setCurrentStep('factors');
-    } else if (currentStep === 'factors') {
-      setCurrentStep('expression');
-    } else if (currentStep === 'expression') {
-      if (!expressionText.trim()) {
-        showAlertModal('알림', '감정 표현을 입력해주세요.');
-        return;
-      }
-      handleSaveDiary();
-    }
-  }, [currentStep, selectedEmotions, emotionText, expressionText, showAlertModal]);
-
-  /**
-   * 이전 단계로 이동
-   */
-  const handleBack = useCallback(async () => {
-    await playButtonSound();
-    if (currentStep === 'mood') {
-      setCurrentStep('welcome');
-    } else if (currentStep === 'emotions') {
-      setCurrentStep('mood');
-    } else if (currentStep === 'factors') {
-      setCurrentStep('emotions');
-    } else if (currentStep === 'expression') {
-      setCurrentStep('factors');
-    } else if (currentStep === 'view') {
-      setCurrentStep('welcome');
-    } else if (currentStep === 'detail') {
-      setCurrentStep('view');
-    }
-  }, [currentStep]);
-
-  /**
    * 일기 저장
    */
   const handleSaveDiary = useCallback(async () => {
@@ -305,6 +262,49 @@ export const useDiaryScreenContainer = () => {
       showAlertModal('오류', '일기 저장에 실패했습니다.');
     }
   }, [moodValue, selectedEmotions, selectedFactors, factorText, emotionText, expressionText, saveDiary, showAlertModal]);
+
+  /**
+   * 다음 단계로 이동
+   */
+  const handleNext = useCallback(() => {
+    if (currentStep === 'mood') {
+      setCurrentStep('emotions');
+    } else if (currentStep === 'emotions') {
+      if (selectedEmotions.length === 0 && !emotionText.trim()) {
+        showAlertModal('알림', '감정을 하나 이상 선택해주세요.');
+        return;
+      }
+      setCurrentStep('factors');
+    } else if (currentStep === 'factors') {
+      setCurrentStep('expression');
+    } else if (currentStep === 'expression') {
+      if (!expressionText.trim()) {
+        showAlertModal('알림', '감정 표현을 입력해주세요.');
+        return;
+      }
+      handleSaveDiary();
+    }
+  }, [currentStep, selectedEmotions, emotionText, expressionText, showAlertModal, handleSaveDiary]);
+
+  /**
+   * 이전 단계로 이동
+   */
+  const handleBack = useCallback(async () => {
+    await playButtonSound();
+    if (currentStep === 'mood') {
+      setCurrentStep('welcome');
+    } else if (currentStep === 'emotions') {
+      setCurrentStep('mood');
+    } else if (currentStep === 'factors') {
+      setCurrentStep('emotions');
+    } else if (currentStep === 'expression') {
+      setCurrentStep('factors');
+    } else if (currentStep === 'view') {
+      setCurrentStep('welcome');
+    } else if (currentStep === 'detail') {
+      setCurrentStep('view');
+    }
+  }, [currentStep]);
 
   /**
    * 감정 태그 선택/해제

@@ -61,6 +61,7 @@ import TodoListDetailScreen from '../screens/TodoListDetailScreen';
 import OAuthCompleteSignUpScreen from '../screens/OAuthCompleteSignUpScreen';
 import SpontaneousMissionSetupScreen from '../screens/SpontaneousMissionSetupScreen';
 import WakeUpVerificationScreen from '../screens/WakeUpVerificationScreen';
+import ReantChatScreen from '../screens/ReantChatScreen';
 
 // 간단한 상태 기반 네비게이션 (React Navigation 없이)
 const AppNavigator = () => {
@@ -77,6 +78,7 @@ const AppNavigator = () => {
   const prevLoggedInRef = useRef<boolean>(isLoggedIn); // 로그인 상태 추적용
   const fadeAnim = useRef(new Animated.Value(1)).current;
   const slideAnim = useRef(new Animated.Value(0)).current;
+  const reantChatCloseHandlerRef = useRef<((onClosed?: () => void) => void) | null>(null);
   
   // 업데이트 모달 상태
   const [updateModalVisible, setUpdateModalVisible] = useState(false);
@@ -185,39 +187,56 @@ const AppNavigator = () => {
     }
   }, [currentScreen, navigationParams, isMainTabScreen]);
 
-  const goBack = useCallback(() => {
-    // 1. 히스토리가 있으면 마지막 항목으로 이동
+  const goBackImmediate = useCallback((overrideParams?: Record<string, any>) => {
     if (screenHistory.length > 0) {
       const lastEntry = screenHistory[screenHistory.length - 1];
-      
+      const nextParams =
+        overrideParams && lastEntry.screen === SCREEN_NAMES.HOME
+          ? overrideParams
+          : lastEntry.params;
       if (__DEV__) {
         console.log('[AppNavigator] goBack - 히스토리 사용:', lastEntry.screen, '남은 히스토리:', screenHistory.length - 1);
       }
-      
-      // 히스토리에서 제거
       setScreenHistory(prev => prev.slice(0, -1));
-      
-      // 이전 화면으로 복원
       setCurrentScreen(lastEntry.screen);
-      setNavigationParams(lastEntry.params);
-      navigationParamsRef.current = lastEntry.params;
-      
+      setNavigationParams(nextParams);
+      navigationParamsRef.current = nextParams;
       return;
     }
-    
-    // 2. 히스토리가 없으면 폴백 로직 (기존 하드코딩된 매핑)
-    // 이는 초기 진입이나 특수 상황을 위한 안전장치
     if (__DEV__) {
       console.log('[AppNavigator] goBack - 히스토리 없음, fallback 사용');
     }
     fallbackGoBack();
   }, [screenHistory, fallbackGoBack]);
 
+  const goBack = useCallback(() => {
+    if (currentScreen === SCREEN_NAMES.REANT_CHAT && reantChatCloseHandlerRef.current) {
+      reantChatCloseHandlerRef.current(() => {
+        goBackImmediate({ fromReantChat: true });
+      });
+      return;
+    }
+    goBackImmediate();
+  }, [currentScreen, goBackImmediate]);
+
   // canGoBack 함수 추가
   const canGoBack = useCallback((): boolean => {
-    // 히스토리가 있으면 뒤로가기 가능
     return screenHistory.length > 0;
   }, [screenHistory]);
+
+  // ReantChat에서 탭 전환 시 종료 애니 후 전환 (홈 탭에서 fromReantChat 전달)
+  const requestTabChange = useCallback((screenName: string) => {
+    if (currentScreen === SCREEN_NAMES.REANT_CHAT && reantChatCloseHandlerRef.current) {
+      reantChatCloseHandlerRef.current(() => {
+        setCurrentScreen(screenName);
+        const nextParams = screenName === SCREEN_NAMES.HOME ? { fromReantChat: true } : {};
+        setNavigationParams(nextParams);
+        navigationParamsRef.current = nextParams;
+      });
+      return;
+    }
+    setCurrentScreen(screenName);
+  }, [currentScreen]);
 
   // 온보딩 체크 및 초기 화면 결정
   useEffect(() => {
@@ -629,7 +648,7 @@ const AppNavigator = () => {
     } else {
       console.log('[AppNavigator] ⚠️ 특별 처리할 알림이 아님, 무시');
     }
-  }, [lastNotification, isLoggedIn]);
+  }, [lastNotification, isLoggedIn, navigate, setWakeUpMissionId]);
 
   // 화면 변경 시 배경음악 재생
   useEffect(() => {
@@ -816,6 +835,13 @@ const AppNavigator = () => {
       navigate: navigate as any,
       goBack,
       canGoBack,
+      setReantChatCloseHandler: (handler: ((onClosed?: () => void) => void) | null) => {
+        reantChatCloseHandlerRef.current = handler;
+      },
+      setParams: (params: any = {}) => {
+        setNavigationParams(params || {});
+        navigationParamsRef.current = params || {};
+      },
       reset: (screenName: string, params: any = {}) => {
         // 히스토리 초기화 후 특정 화면으로 이동
         setScreenHistory([]);
@@ -862,7 +888,7 @@ const AppNavigator = () => {
 
     switch (currentScreen) {
       case SCREEN_NAMES.HOME:
-        return <HomeScreen navigation={navigation} />;
+        return <HomeScreen navigation={navigation} route={route} />;
       case SCREEN_NAMES.DIARY:
         return <DiaryScreen />;
       case SCREEN_NAMES.MISSION:
@@ -940,6 +966,8 @@ const AppNavigator = () => {
         }
       case SCREEN_NAMES.WAKE_UP_VERIFICATION:
         return <WakeUpVerificationScreen navigation={navigation} route={route} />;
+      case SCREEN_NAMES.REANT_CHAT:
+        return <ReantChatScreen navigation={navigation} route={route} />;
       default:
         return <HomeScreen navigation={navigation} />;
     }
@@ -967,7 +995,7 @@ const AppNavigator = () => {
       <View style={styles.tabBar}>
         <TouchableOpacity
           style={[styles.tab, currentScreen === SCREEN_NAMES.HOME && styles.activeTab]}
-          onPress={() => setCurrentScreen(SCREEN_NAMES.HOME)}
+          onPress={() => requestTabChange(SCREEN_NAMES.HOME)}
           activeOpacity={0.7}
           accessibilityRole="tab"
           accessibilityLabel="홈"

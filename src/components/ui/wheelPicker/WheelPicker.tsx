@@ -64,7 +64,7 @@ const WheelPicker: React.FC<WheelPickerProps> = ({ value, options, onSelect, wid
 
   useEffect(() => {
     scrollToIndex(selectedIndex, false);
-  }, []);
+  }, [selectedIndex]);
 
   return (
     <View style={[styles.container, width && { width }]}>

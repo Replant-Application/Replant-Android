@@ -46,15 +46,48 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   const [currentUserId, setCurrentUserId] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  // OAuth 초기화 및 사용자 정보 로드
-  useEffect(() => {
-    // Google Sign-In 초기화
-    initializeGoogleSignIn();
+  // FCM 토큰 등록 함수
+  const registerFcmTokenToServer = useCallback(async () => {
+    try {
+      // Firebase Messaging이 사용 가능한지 확인
+      const authStatus = await messaging().requestPermission();
+      const enabled =
+        authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+        authStatus === messaging.AuthorizationStatus.PROVISIONAL;
 
-    loadUser();
+      if (!enabled) {
+        console.warn('[!] FCM 권한이 없습니다. 알림 권한을 확인해주세요.');
+        return;
+      }
+
+      // iOS에서는 원격 메시지 등록이 필요함
+      if (Platform.OS === 'ios') {
+        await messaging().registerDeviceForRemoteMessages();
+      }
+
+      const fcmToken = await messaging().getToken();
+      console.log('[+] FCM Token :: ', fcmToken);
+      
+      // 백엔드에 FCM 토큰 등록
+      if (fcmToken) {
+        const result = await registerFcmToken(fcmToken);
+        if (result.success) {
+          console.log('[+] FCM 토큰 등록 성공:', result.data);
+        } else {
+          console.warn('[!] FCM 토큰 등록 실패:', result.error);
+        }
+      }
+    } catch (error: any) {
+      // SERVICE_NOT_AVAILABLE 에러는 에뮬레이터에서 흔히 발생
+      if (error?.code === 'messaging/unknown' || error?.message?.includes('SERVICE_NOT_AVAILABLE')) {
+        console.log('[!] FCM 서비스 사용 불가 (에뮬레이터일 수 있음). 실제 기기에서 테스트해주세요.');
+      } else {
+        console.error('FCM Token 등록 실패:', error);
+      }
+    }
   }, []);
 
-  const loadUser = async () => {
+  const loadUser = useCallback(async () => {
     try {
       // 자동 로그인 체크 (로그인 유지가 false면 토큰 삭제)
       const shouldAutoLogin = await checkAutoLogin();
@@ -120,12 +153,12 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         setCurrentNickname(nickname);
         setCurrentUserId(serverUserId || storedUserInfo.id || null);
         setIsLoading(false);
-        
+
         // 자동 로그인 성공 시 FCM 토큰 등록
         registerFcmTokenToServer().catch(err => {
           console.warn('[UserContext] FCM 토큰 등록 실패 (앱은 정상 작동):', err);
         });
-        
+
         return;
       }
 
@@ -172,48 +205,15 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [registerFcmTokenToServer]);
 
-  // FCM 토큰 등록 함수
-  const registerFcmTokenToServer = useCallback(async () => {
-    try {
-      // Firebase Messaging이 사용 가능한지 확인
-      const authStatus = await messaging().requestPermission();
-      const enabled =
-        authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
-        authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+  // OAuth 초기화 및 사용자 정보 로드
+  useEffect(() => {
+    // Google Sign-In 초기화
+    initializeGoogleSignIn();
 
-      if (!enabled) {
-        console.warn('[!] FCM 권한이 없습니다. 알림 권한을 확인해주세요.');
-        return;
-      }
-
-      // iOS에서는 원격 메시지 등록이 필요함
-      if (Platform.OS === 'ios') {
-        await messaging().registerDeviceForRemoteMessages();
-      }
-
-      const fcmToken = await messaging().getToken();
-      console.log('[+] FCM Token :: ', fcmToken);
-      
-      // 백엔드에 FCM 토큰 등록
-      if (fcmToken) {
-        const result = await registerFcmToken(fcmToken);
-        if (result.success) {
-          console.log('[+] FCM 토큰 등록 성공:', result.data);
-        } else {
-          console.warn('[!] FCM 토큰 등록 실패:', result.error);
-        }
-      }
-    } catch (error: any) {
-      // SERVICE_NOT_AVAILABLE 에러는 에뮬레이터에서 흔히 발생
-      if (error?.code === 'messaging/unknown' || error?.message?.includes('SERVICE_NOT_AVAILABLE')) {
-        console.log('[!] FCM 서비스 사용 불가 (에뮬레이터일 수 있음). 실제 기기에서 테스트해주세요.');
-      } else {
-        console.error('FCM Token 등록 실패:', error);
-      }
-    }
-  }, []);
+    loadUser();
+  }, [loadUser]);
 
   // FCM 토큰 갱신 리스너 설정
   useEffect(() => {
@@ -437,7 +437,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     }
 
     return true;
-  }, []);
+  }, [registerFcmTokenToServer]);
 
   // 사용자 로그아웃
   const logout = useCallback(async () => {

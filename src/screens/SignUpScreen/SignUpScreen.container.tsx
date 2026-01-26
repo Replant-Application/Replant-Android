@@ -9,7 +9,7 @@ import { join, sendVerification, verifyEmail } from '../../api/authApi';
 import { saveTokens, saveUserInfo } from '../../utils/tokenStorage';
 import { apiClient } from '../../api/client';
 import { useUser } from '../../contexts/UserContext';
-import { Gender } from '../../types/screens/auth';
+import { Gender, SignUpErrors } from '../../types/screens/auth';
 import { getBirthYears } from '../../constants/screens/auth';
 
 interface SignUpScreenContainerProps {

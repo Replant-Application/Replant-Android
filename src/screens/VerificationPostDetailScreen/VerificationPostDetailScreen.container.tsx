@@ -382,6 +382,14 @@ export const useVerificationPostDetailScreenContainer = ({
   );
 
   /**
+   * 미션 제목 가져오기
+   */
+  const getMissionTitle = useCallback(() => {
+    if (!post) return '미션';
+    return post.missionTitle || post.mission?.title || post.customMission?.title || '미션';
+  }, [post]);
+
+  /**
    * 게시글 수정 화면으로 이동
    */
   const handleEditPost = useCallback(() => {
@@ -396,7 +404,7 @@ export const useVerificationPostDetailScreenContainer = ({
       missionTitle: getMissionTitle(),
       missionEmoji: '🎯',
     });
-  }, [post, verificationId, navigation]);
+  }, [post, verificationId, navigation, getMissionTitle]);
 
   /**
    * 상태 뱃지 렌더링 함수
@@ -413,14 +421,6 @@ export const useVerificationPostDetailScreenContainer = ({
       default:
         return { type: 'PENDING' as const, icon: '⏳', text: '인증대기' };
     }
-  }, [post]);
-
-  /**
-   * 미션 제목 가져오기
-   */
-  const getMissionTitle = useCallback(() => {
-    if (!post) return '미션';
-    return post.missionTitle || post.mission?.title || post.customMission?.title || '미션';
   }, [post]);
 
   return {

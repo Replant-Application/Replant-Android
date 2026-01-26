@@ -312,7 +312,7 @@ export const useWakeUpVerificationScreenContainer = ({
     };
 
     loadCurrentMission();
-  }, []); // 화면 진입 시 한 번만 실행
+  }, [loadMissionData, userMissionId]); // 화면 진입 시 한 번만 실행
 
   /**
    * 타이머 설정 (assignedAt 기준으로 계산)

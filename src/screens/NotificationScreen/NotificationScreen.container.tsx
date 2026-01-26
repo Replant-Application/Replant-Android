@@ -39,10 +39,10 @@ export const useNotificationScreenContainer = ({
   const lastNotificationIdRef = useRef<any>(null);
 
   // navigation 안전 처리
-  const safeNavigation = navigation || {
-    navigate: () => {},
-    goBack: () => {},
-  } as any;
+  const safeNavigation = useMemo(
+    () => navigation || { navigate: () => {}, goBack: () => {} } as any,
+    [navigation]
+  );
 
   /**
    * 알림 목록 조회

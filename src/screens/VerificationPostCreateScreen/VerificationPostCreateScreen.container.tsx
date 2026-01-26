@@ -3,7 +3,7 @@
  * 인증글 작성/수정 화면: 인증글 작성, 수정, 이미지 업로드
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Alert } from 'react-native';
 import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types/navigation';
@@ -23,7 +23,7 @@ export const useVerificationPostCreateScreenContainer = ({
   route,
 }: VerificationPostCreateScreenContainerProps) => {
   // route.params가 없을 경우 안전하게 처리
-  const params = route?.params || {};
+  const params = useMemo(() => route?.params || {}, [route?.params]);
   const {
     userMissionId,
     missionTitle = '미션',
@@ -63,15 +63,6 @@ export const useVerificationPostCreateScreenContainer = ({
   }, [userMissionId, isEditMode, navigation, params, showError]);
 
   /**
-   * 수정 모드일 때 기존 데이터 로드
-   */
-  useEffect(() => {
-    if (isEditMode && verificationId) {
-      loadVerificationData();
-    }
-  }, [isEditMode, verificationId]);
-
-  /**
    * 인증글 데이터 로드
    */
   const loadVerificationData = useCallback(async () => {
@@ -94,6 +85,15 @@ export const useVerificationPostCreateScreenContainer = ({
       setLoadingData(false);
     }
   }, [verificationId]);
+
+  /**
+   * 수정 모드일 때 기존 데이터 로드
+   */
+  useEffect(() => {
+    if (isEditMode && verificationId) {
+      loadVerificationData();
+    }
+  }, [isEditMode, verificationId, loadVerificationData]);
 
   /**
    * 사진 선택 (갤러리)

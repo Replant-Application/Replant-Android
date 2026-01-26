@@ -3,7 +3,7 @@
  * 홈 화면: 투두리스트 로드, 시간대별 미션 그룹화, 완료 확인, 레벨업 감지
  */
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { Animated, PanResponder, Dimensions } from 'react-native';
 import { useCharacter } from '../../hooks/useCharacter';
 import { getBackgroundImage } from './HomeScreen.utils';
@@ -12,17 +12,23 @@ import { normalizeDate } from '../../utils/dateUtils';
 import { TodoList, TodoMission } from '../../types/todolist';
 import { NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types/navigation';
-import { ChatMessage, generateReantResponse, generateMessageId } from '../../utils/reantChatUtils';
 import { getData, setData, getStorageKeys } from '../../services/storage';
 import { useUser } from '../../contexts/UserContext';
+import { sendChatMessage } from '../../api/chatApi';
+import { ChatMessage, generateMessageId } from '../../utils/reantChatUtils';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 interface HomeScreenContainerProps {
   navigation: NavigationProp<RootStackParamList>;
+  route?: {
+    params?: {
+      fromReantChat?: boolean;
+    };
+  };
 }
 
-export const useHomeScreenContainer = ({ navigation }: HomeScreenContainerProps) => {
+export const useHomeScreenContainer = ({ navigation, route }: HomeScreenContainerProps) => {
   const { characters, error: characterError } = useCharacter();
   const { currentNickname } = useUser();
 
@@ -38,16 +44,25 @@ export const useHomeScreenContainer = ({ navigation }: HomeScreenContainerProps)
   const [dataLoading, setDataLoading] = useState(true);
   const [dataError, setDataError] = useState<string | null>(null);
 
-  // 말풍선 표시 상태
-  const [showSpeechBubble, setShowSpeechBubble] = useState(false);
-  const speechBubbleAnim = useRef(new Animated.Value(0)).current;
-  const [currentReantMessage, setCurrentReantMessage] = useState<string>('');
-  const [displayedMessage, setDisplayedMessage] = useState<string>('');
-  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  // 말풍선 표시 상태 (안내 메시지용)
+  const [showSpeechBubble, setShowSpeechBubble] = useState(true);
+  const speechBubbleAnim = useRef(new Animated.Value(1)).current;
+  const [displayedMessage, setDisplayedMessage] = useState<string>('저를 눌러서 대화하기');
+  const guidanceIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  // 채팅 관련 상태
-  const [showChatBottomSheet, setShowChatBottomSheet] = useState(false);
+  // 안내 메시지 목록
+  const guidanceMessages = useMemo(
+    () => ['저를 눌러서 대화하기', '오늘 하루는 어땠어요?', '심심하면 말 걸어줘요~'],
+    []
+  );
+
+  // 바텀시트: 투두 vs 채팅 모드 (리앤트 탭 시 채팅으로 전환, 별도 화면 이동 없음)
+  const [showChatInBottomSheet, setShowChatInBottomSheet] = useState(false);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
+  const [reantChatResponse, setReantChatResponse] = useState<string | null>(null);
+  const [reantChatLoading, setReantChatLoading] = useState(false);
+
+  const bottomSheetTranslateY = useRef(new Animated.Value(0)).current;
 
   // 투두리스트 완료 상태
   const [completedTodoList, setCompletedTodoList] = useState<TodoList | null>(null);
@@ -349,105 +364,106 @@ export const useHomeScreenContainer = ({ navigation }: HomeScreenContainerProps)
   }, [backgroundType, fadeAnim]);
 
   /**
-   * 타이핑 애니메이션 효과
+   * 화면 마운트 시 말풍선 초기화, 10초마다 안내 메시지 순환 (채팅 바텀시트 열려 있으면 중단)
    */
   useEffect(() => {
-    if (currentReantMessage) {
-      // 기존 타이핑 애니메이션 취소
-      if (typingTimeoutRef.current) {
-        clearTimeout(typingTimeoutRef.current);
-      }
-      
-      // 타이핑 시작
-      setDisplayedMessage('');
-      let currentIndex = 0;
-      
-      const typeNextChar = () => {
-        if (currentIndex < currentReantMessage.length) {
-          setDisplayedMessage(currentReantMessage.substring(0, currentIndex + 1));
-          currentIndex++;
-          typingTimeoutRef.current = setTimeout(typeNextChar, 50); // 한 글자당 50ms
-        }
-      };
-      
-      typeNextChar();
-    } else {
-      setDisplayedMessage('');
-    }
-    
+    if (showChatInBottomSheet) return;
+    setDisplayedMessage('저를 눌러서 대화하기');
+    setShowSpeechBubble(true);
+    let messageIndex = 0;
+    guidanceIntervalRef.current = setInterval(() => {
+      messageIndex = (messageIndex + 1) % guidanceMessages.length;
+      Animated.timing(speechBubbleAnim, {
+        toValue: 0,
+        duration: 200,
+        useNativeDriver: true,
+      }).start(() => {
+        setDisplayedMessage(guidanceMessages[messageIndex]);
+        Animated.timing(speechBubbleAnim, {
+          toValue: 1,
+          duration: 200,
+          useNativeDriver: true,
+        }).start();
+      });
+    }, 10000);
     return () => {
-      if (typingTimeoutRef.current) {
-        clearTimeout(typingTimeoutRef.current);
-      }
+      if (guidanceIntervalRef.current) clearInterval(guidanceIntervalRef.current);
     };
-  }, [currentReantMessage]);
+  }, [speechBubbleAnim, showChatInBottomSheet, guidanceMessages]);
 
   /**
-   * 캐릭터 클릭 핸들러 - 채팅창 열기
+   * ReantChat에서 복귀 시 (fromReantChat) 바텀시트 애니메이션 (다른 경로로 ReantChat 갔다 오는 경우 대비)
+   */
+  useEffect(() => {
+    if (route?.params?.fromReantChat) {
+      bottomSheetTranslateY.setValue(SCREEN_HEIGHT * 0.4);
+      Animated.spring(bottomSheetTranslateY, {
+        toValue: 0,
+        useNativeDriver: true,
+        tension: 65,
+        friction: 11,
+      }).start();
+      (navigation as any)?.setParams?.({});
+    } else {
+      bottomSheetTranslateY.setValue(0);
+    }
+  }, [bottomSheetTranslateY, route?.params?.fromReantChat, navigation]);
+
+  /**
+   * 바텀시트에서 채팅 열었을 때 인사 메시지
+   */
+  useEffect(() => {
+    if (!showChatInBottomSheet) return;
+    const fetchWelcome = async () => {
+      setReantChatLoading(true);
+      const result = await sendChatMessage('안녕');
+      setReantChatLoading(false);
+      if (result.success && result.data) {
+        setReantChatResponse(result.data.message);
+      } else {
+        setReantChatResponse('안녕하세요! 오늘도 화이팅! 😊');
+      }
+    };
+    fetchWelcome();
+  }, [showChatInBottomSheet]);
+
+  /**
+   * 캐릭터/말풍선 클릭 - 별도 화면 이동 없이 바텀시트 내용을 투두 → 채팅으로 전환
    */
   const handleCharacterPress = useCallback((): void => {
     setCharacterEmotion('happy');
-    setShowChatBottomSheet(true);
-    
-    // 채팅창 열 때 이전 메시지 초기화 (일회성 대화)
-    setChatMessages([]);
-    
-    // 인사 메시지를 말풍선에만 표시
-    const welcomeMessage = generateReantResponse('안녕', currentCharacter?.name || '리앤트', currentCharacter?.level || 1);
-    setCurrentReantMessage(welcomeMessage);
-    setShowSpeechBubble(true);
-    Animated.timing(speechBubbleAnim, {
-      toValue: 1,
-      duration: 300,
-      useNativeDriver: true,
-    }).start();
-  }, [speechBubbleAnim, currentCharacter]);
+    setShowChatInBottomSheet(true);
+  }, []);
 
   /**
-   * 채팅 메시지 전송 핸들러 (일회성 대화)
+   * 바텀시트 채팅 닫기 → 투두리스트로 복귀
    */
-  const handleSendMessage = useCallback((message: string) => {
-    if (!message.trim() || !currentCharacter) return;
+  const handleCloseChatInBottomSheet = useCallback((): void => {
+    setShowChatInBottomSheet(false);
+    setChatMessages([]);
+    setReantChatResponse(null);
+    setDisplayedMessage('저를 눌러서 대화하기');
+  }, []);
 
-    // 이전 메시지 모두 지우고 새로운 사용자 메시지만 표시 (일회성)
-    const userMessage: ChatMessage = {
+  /**
+   * 바텀시트 채팅에서 메시지 전송
+   */
+  const onSendChatMessage = useCallback(async (text: string): Promise<void> => {
+    const userMsg: ChatMessage = {
       id: generateMessageId(),
       type: 'user',
-      content: message,
+      content: text,
       timestamp: new Date(),
     };
-
-    // 이전 메시지 초기화하고 새로운 메시지만 표시
-    setChatMessages([userMessage]);
-
-    // 리앤트 응답 생성 (말풍선에만 표시)
-    const reantResponse = generateReantResponse(
-      message,
-      currentCharacter.name || '리앤트',
-      currentCharacter.level || 1
-    );
-
-    setCurrentReantMessage(reantResponse);
-
-    // 말풍선에 리앤트 응답 표시
-    setShowSpeechBubble(true);
-    Animated.timing(speechBubbleAnim, {
-      toValue: 1,
-      duration: 300,
-      useNativeDriver: true,
-    }).start();
-
-    // 사용자가 다른 입력하기 전까지 말풍선 유지 (자동 숨김 제거)
-  }, [currentCharacter, speechBubbleAnim]);
-
-  /**
-   * 채팅창 닫기 핸들러
-   */
-  const handleCloseChat = useCallback(() => {
-    setShowChatBottomSheet(false);
-    setCharacterEmotion('default');
-    // 채팅창을 닫을 때 말풍선도 숨김
-    setShowSpeechBubble(false);
+    setChatMessages((prev) => [...prev, userMsg]);
+    setReantChatLoading(true);
+    const result = await sendChatMessage(text);
+    setReantChatLoading(false);
+    if (result.success && result.data) {
+      setReantChatResponse(result.data.message);
+    } else {
+      setReantChatResponse('잠깐 멍해졌어요... 다시 말해줄래요? 🤔');
+    }
   }, []);
 
   /**
@@ -487,7 +503,7 @@ export const useHomeScreenContainer = ({ navigation }: HomeScreenContainerProps)
       useNativeDriver: false,
       friction: 8,
     }).start();
-  }, [heroHeightAnim]);
+  }, [heroHeightAnim, MIN_HERO_HEIGHT, MAX_HERO_HEIGHT]);
 
   /**
    * PanResponder 설정
@@ -555,22 +571,26 @@ export const useHomeScreenContainer = ({ navigation }: HomeScreenContainerProps)
     // Background
     backgroundType,
     fadeAnim,
+    bottomSheetTranslateY,
     // Todo Lists
     activeTodoLists,
     todoMissionsByTime,
     dataLoading,
     dataError,
     completedTodoList,
-    // Speech Bubble
+    // Speech Bubble (안내 메시지 / 채팅 모드일 때 리앤트 응답)
     showSpeechBubble,
     speechBubbleAnim,
-    currentReantMessage,
-    displayedMessage,
-    // Chat
-    showChatBottomSheet,
+    speechBubbleMessage:
+      showChatInBottomSheet
+        ? (reantChatLoading ? '생각 중...' : (reantChatResponse || '안녕하세요!'))
+        : displayedMessage,
+    // 바텀시트 채팅 (리앤트 탭 시 투두 대신 채팅 표시, 별도 화면 이동 없음)
+    showChatInBottomSheet,
     chatMessages,
-    handleSendMessage,
-    handleCloseChat,
+    reantChatLoading,
+    handleCloseChatInBottomSheet,
+    onSendChatMessage,
     // Hero Section
     isHeroCollapsed,
     heroHeightAnim,
