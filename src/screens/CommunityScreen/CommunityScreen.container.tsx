@@ -278,6 +278,28 @@ export const useCommunityScreenContainer = ({ navigation, route }: CommunityScre
   }, []);
 
   /**
+   * 투두리스트 공유 해제 (커뮤니티에서 제거)
+   */
+  const handleUnshareMissionSet = useCallback(async (missionSetId: number) => {
+    try {
+      // isPublic을 false로 변경
+      const result = await updateMissionSet(missionSetId, { isPublic: false });
+      if (result.success) {
+        showSuccess('커뮤니티 공유 게시판에서 삭제되었습니다.');
+        // 목록 새로고침
+        await loadMissionSets();
+      } else {
+        handleApiError(result, 'CommunityScreen.handleUnshareMissionSet');
+      }
+    } catch (error) {
+      showError(
+        error instanceof Error ? error : new Error('삭제에 실패했습니다.'),
+        'CommunityScreen.handleUnshareMissionSet'
+      );
+    }
+  }, [showSuccess, handleApiError, showError, loadMissionSets]);
+
+  /**
    * 별점 렌더링
    */
   const renderStars = useCallback((rating: number) => {
@@ -505,6 +527,7 @@ export const useCommunityScreenContainer = ({ navigation, route }: CommunityScre
     shareConfirmMissionSet,
     handleShareConfirm,
     handleShareConfirmCancel,
+    handleUnshareMissionSet,
     // Utils
     renderStars,
   };

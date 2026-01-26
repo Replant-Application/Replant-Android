@@ -52,6 +52,25 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: spacing[4],
   },
+  headerRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing[2],
+  },
+  deleteButton: {
+    paddingVertical: spacing[1],
+    paddingHorizontal: spacing[3],
+    borderRadius: borderRadius.base,
+    backgroundColor: colors.primary[50],
+    borderWidth: 1,
+    borderColor: colors.primary[300],
+  },
+  deleteButtonText: {
+    ...createTextStyle('sm', {
+      color: colors.primary[600],
+      fontWeight: typography.fontWeight.medium,
+    }),
+  },
   infoTitle: {
     ...createTitleStyle('lg', {
       flex: 1,
