@@ -76,9 +76,11 @@ const NotificationScreen: React.FC<NotificationScreenProps> = ({ navigation }) =
               <TouchableOpacity 
                 style={styles.markAllButton}
                 onPress={handleMarkAllAsRead}
+                accessibilityRole="button"
+                accessibilityLabel="모두 읽음"
               >
                 <Text style={styles.markAllReadText} numberOfLines={1}>
-                  모두 읽음
+                  읽음
                 </Text>
               </TouchableOpacity>
             ) : undefined
