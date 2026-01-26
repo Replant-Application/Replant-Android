@@ -44,11 +44,18 @@ const EmotionSelectionStep: React.FC<EmotionSelectionStepProps> = ({
                 ]}
                 onPress={() => onToggleEmotion(emotion)}
                 activeOpacity={0.7}
+                accessibilityRole="button"
+                accessibilityLabel={emotion}
+                accessibilityState={{ selected: isSelected }}
+                accessibilityHint={isSelected ? `${emotion} 선택됨, 탭하여 선택 해제` : `${emotion} 선택되지 않음, 탭하여 선택`}
               >
-                <Text style={[
-                  styles.emotionTagText,
-                  isSelected && styles.emotionTagTextSelected
-                ]}>
+                <Text 
+                  style={[
+                    styles.emotionTagText,
+                    isSelected && styles.emotionTagTextSelected
+                  ]}
+                  accessibilityElementsHidden={true}
+                >
                   {emotion}
                 </Text>
               </TouchableOpacity>
@@ -87,6 +94,10 @@ const EmotionSelectionStep: React.FC<EmotionSelectionStepProps> = ({
           placeholderTextColor={colors.text.tertiary}
           multiline={false}
           editable={true}
+          autoComplete="off"
+          textContentType="none"
+          accessibilityLabel="감정 직접 입력"
+          accessibilityHint="감정을 직접 입력하세요. 자동완성 기능이 비활성화되어 있습니다"
         />
       </View>
     </View>

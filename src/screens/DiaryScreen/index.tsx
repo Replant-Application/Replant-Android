@@ -587,25 +587,42 @@ const DiaryScreen: React.FC = () => {
           </View>
         ) : currentStep === 'expression' ? (
           <View style={[styles.modalButtons, styles.modalButtonsExpression]}>
-            <TouchableOpacity style={styles.skipButton} onPress={handleBack}>
+            <TouchableOpacity 
+              style={styles.skipButton} 
+              onPress={handleBack}
+              accessibilityRole="button"
+              accessibilityLabel="이전 단계로 이동"
+            >
               <Text style={styles.skipButtonText}>이전</Text>
             </TouchableOpacity>
             <TouchableOpacity 
               style={[styles.confirmButton, !expressionText.trim() && styles.confirmButtonDisabled]}
               onPress={handleNext}
               disabled={!expressionText.trim()}
+              accessibilityRole="button"
+              accessibilityLabel="일기 등록 완료"
+              accessibilityHint={!expressionText.trim() ? "감정 표현을 입력해야 등록할 수 있습니다" : "일기를 등록하고 완료합니다"}
+              accessibilityState={{ disabled: !expressionText.trim() }}
             >
               <Text style={styles.confirmButtonText}>등록 완료</Text>
             </TouchableOpacity>
           </View>
         ) : (
           <View style={styles.modalButtons}>
-            <TouchableOpacity style={styles.cancelButton} onPress={handleBack}>
+            <TouchableOpacity 
+              style={styles.cancelButton} 
+              onPress={handleBack}
+              accessibilityRole="button"
+              accessibilityLabel="이전 단계로 이동"
+            >
               <Text style={styles.cancelButtonText}>이전</Text>
             </TouchableOpacity>
             <TouchableOpacity 
               style={styles.confirmButton}
               onPress={handleNext}
+              accessibilityRole="button"
+              accessibilityLabel="선택 완료하고 다음 단계로 이동"
+              accessibilityHint="현재 단계의 선택을 완료하고 다음 단계로 진행합니다"
             >
               <Text style={styles.confirmButtonText}>선택완료</Text>
             </TouchableOpacity>
