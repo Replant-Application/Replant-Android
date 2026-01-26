@@ -9,6 +9,7 @@ import { useCharacter } from '../../hooks/useCharacter';
 import { getBackgroundImage } from './HomeScreen.utils';
 import { getActiveTodoLists, getTodoListDetail } from '../../api/todolistApi';
 import { normalizeDate } from '../../utils/dateUtils';
+import { filterTodayActiveTodoLists } from '../../utils/todolistUtils';
 import { TodoList, TodoMission } from '../../types/todolist';
 import { NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types/navigation';
@@ -185,39 +186,7 @@ export const useHomeScreenContainer = ({ navigation, route }: HomeScreenContaine
           
           // 오늘 날짜인 투두리스트만 "진행중"에 표시 (TodoListScreen과 동일한 로직)
           // 과거 날짜의 미완료 투두리스트는 제외
-          const today = new Date();
-          today.setHours(0, 0, 0, 0);
-
-          const activeTodoLists = todoListResult.data.filter(todoList => {
-            if (!todoList.createdAt) return false;
-            
-            // 날짜 정규화 (배열 형태 처리)
-            const normalizedDate = normalizeDate(todoList.createdAt);
-            if (!normalizedDate) return false;
-            
-            const createdDate = new Date(normalizedDate);
-            if (isNaN(createdDate.getTime())) {
-              console.warn('[HomeScreen] 잘못된 날짜 형식:', todoList.createdAt);
-              return false;
-            }
-            createdDate.setHours(0, 0, 0, 0);
-
-            // 오늘 날짜이고 완료되지 않은 투두리스트만
-            const isToday = createdDate.getTime() === today.getTime();
-            const isNotCompleted = todoList.status === 'ACTIVE' && todoList.completedCount < todoList.totalCount;
-
-            console.log(`[HomeScreen] 투두리스트 ${todoList.id} 필터링:`, {
-              title: todoList.title,
-              createdAt: todoList.createdAt,
-              normalizedDate,
-              createdDate: createdDate.toISOString(),
-              isToday,
-              isNotCompleted,
-              matches: isToday && isNotCompleted
-            });
-
-            return isToday && isNotCompleted;
-          });
+          const activeTodoLists = filterTodayActiveTodoLists(todoListResult.data, 'HomeScreen');
 
           console.log('[HomeScreen] 필터링 후 진행중 투두리스트 수:', activeTodoLists.length);
           console.log('[HomeScreen] 필터링된 투두리스트:', activeTodoLists.map(tl => ({

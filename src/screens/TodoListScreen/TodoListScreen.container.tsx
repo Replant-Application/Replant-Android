@@ -7,7 +7,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { getActiveTodoLists, getTodoLists, canCreateNewTodoList } from '../../api/todolistApi';
 import { TodoList, CanCreateResponse } from '../../types/todolist';
 import { SCREEN_NAMES } from '../../utils/constants';
-import { normalizeDate } from '../../utils/dateUtils';
+import { filterTodayActiveTodoLists } from '../../utils/todolistUtils';
 
 interface TodoListScreenContainerProps {
   navigation: any;
@@ -43,29 +43,7 @@ export const useTodoListScreenContainer = ({ navigation, route }: TodoListScreen
 
         // 오늘 날짜인 투두리스트만 "진행중"에 표시
         // 과거 날짜의 미완료 투두리스트는 제외
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-
-        const todayActiveLists = allActiveLists.filter(todoList => {
-          if (!todoList.createdAt) return false;
-          
-          // 날짜 정규화 (배열 형태 처리)
-          const normalizedDate = normalizeDate(todoList.createdAt);
-          if (!normalizedDate) return false;
-          
-          const createdDate = new Date(normalizedDate);
-          if (isNaN(createdDate.getTime())) {
-            console.warn('[TodoListScreen] 잘못된 날짜 형식:', todoList.createdAt);
-            return false;
-          }
-          createdDate.setHours(0, 0, 0, 0);
-
-          // 오늘 날짜이고 완료되지 않은 투두리스트만
-          const isToday = createdDate.getTime() === today.getTime();
-          const isNotCompleted = todoList.status === 'ACTIVE' && todoList.completedCount < todoList.totalCount;
-
-          return isToday && isNotCompleted;
-        });
+        const todayActiveLists = filterTodayActiveTodoLists(allActiveLists, 'TodoListScreen');
 
         setActiveTodoLists(todayActiveLists);
       } else {
