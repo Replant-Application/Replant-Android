@@ -81,10 +81,13 @@ const PostCard: React.FC<PostCardProps> = ({
     if (post.mission_title) {
       label += `, ${post.mission_title} 미션`;
     }
-    if (post.verified === true) {
-      label += ', 인증완료';
-    } else if (post.verified === false) {
-      label += ', 인증대기';
+    // 인증 게시글일 때만 인증 상태 표시
+    if (post.category === '인증') {
+      if (post.verified === true) {
+        label += ', 인증완료';
+      } else if (post.verified === false) {
+        label += ', 인증대기';
+      }
     }
     return label;
   };
@@ -185,18 +188,20 @@ const PostCard: React.FC<PostCardProps> = ({
                 ` (${post.completionRate}%)`
               )}
             </Text>
-            {/* 인증 상태 뱃지 */}
-            {post.verified === true ? (
-              <View style={styles.verifiedBadge}>
-                <Text style={styles.verifiedIcon}>✓</Text>
-                <Text style={styles.verifiedText}>인증완료</Text>
-              </View>
-            ) : post.verified === false ? (
-              <View style={styles.pendingBadge}>
-                <Text style={styles.pendingIcon}>⏳</Text>
-                <Text style={styles.pendingText}>인증대기</Text>
-              </View>
-            ) : null}
+            {/* 인증 상태 뱃지 - 인증 게시글(category === '인증')일 때만 표시 */}
+            {post.category === '인증' && (
+              post.verified === true ? (
+                <View style={styles.verifiedBadge}>
+                  <Text style={styles.verifiedIcon}>✓</Text>
+                  <Text style={styles.verifiedText}>인증완료</Text>
+                </View>
+              ) : post.verified === false ? (
+                <View style={styles.pendingBadge}>
+                  <Text style={styles.pendingIcon}>⏳</Text>
+                  <Text style={styles.pendingText}>인증대기</Text>
+                </View>
+              ) : null
+            )}
           </View>
         )}
         <Text style={styles.title} numberOfLines={2}>
