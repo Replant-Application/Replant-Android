@@ -10,7 +10,7 @@ import {
   ImageBackground,
 } from 'react-native';
 import { colors } from '../../utils/designTokens';
-import { Header, AlertModal } from '../../components/ui';
+import { Header, AlertModal, ConfirmModal } from '../../components/ui';
 import { TodoMission } from '../../types/todolist';
 import { useTodoListDetailScreenContainer } from './TodoListDetailScreen.container';
 import { styles } from './TodoListDetailScreen.styles';
@@ -32,6 +32,13 @@ const TodoListDetailScreen: React.FC<Props> = ({ navigation, route }) => {
     refreshing,
     completingMissionId,
     showCompleteModal,
+    showAlert,
+    alertTitle,
+    alertMessage,
+    handleCloseAlert,
+    showArchiveConfirmModal,
+    handleArchiveConfirm,
+    handleArchiveConfirmCancel,
     actualCompletedCount,
     actualTotalCount,
     progressPercent,
@@ -213,6 +220,27 @@ const TodoListDetailScreen: React.FC<Props> = ({ navigation, route }) => {
           )}
         </View>
       </ScrollView>
+
+      {/* useErrorHandler 오류/성공/알림 → AlertModal */}
+      <AlertModal
+        visible={showAlert}
+        title={alertTitle}
+        message={alertMessage}
+        buttonText="확인"
+        onClose={handleCloseAlert}
+      />
+
+      {/* 보관 확인 ConfirmModal */}
+      <ConfirmModal
+        visible={showArchiveConfirmModal}
+        title="투두리스트 보관"
+        message="이 투두리스트를 보관하시겠습니까?\n보관된 투두리스트는 더 이상 수정할 수 없습니다."
+        confirmText="보관"
+        cancelText="취소"
+        onConfirm={handleArchiveConfirm}
+        onCancel={handleArchiveConfirmCancel}
+        confirmButtonColor={colors.primary[500]}
+      />
 
       {/* 오늘의 투두 완료 모달 */}
       <AlertModal

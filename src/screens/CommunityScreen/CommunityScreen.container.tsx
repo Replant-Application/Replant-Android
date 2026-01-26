@@ -4,7 +4,6 @@
  */
 
 import { useState, useMemo, useCallback, useEffect } from 'react';
-import { Alert } from 'react-native';
 import { useCommunity } from '../../hooks/useCommunity';
 import { useErrorHandler } from '../../hooks/useErrorHandler';
 import { CommunityPost } from '../../types';
@@ -21,7 +20,6 @@ import { CommunityScreenProps, CommunityTab, VerificationFilter } from '../../ty
 
 export const useCommunityScreenContainer = ({ navigation, route }: CommunityScreenProps) => {
   const { posts, loading, error, toggleLike, loadPosts } = useCommunity();
-  const { showError, showSuccess, showInfo, handleApiError } = useErrorHandler();
 
   // route.params에서 activeTab을 가져오거나 기본값 'all' 사용
   const initialTab = ((route?.params as any)?.activeTab || 'all') as CommunityTab;
@@ -39,10 +37,36 @@ export const useCommunityScreenContainer = ({ navigation, route }: CommunityScre
   // 숨긴 게시글 ID 목록
   const [hiddenPostIds, setHiddenPostIds] = useState<string[]>([]);
 
-  // AlertModal 상태
+  // AlertModal 상태 (오류/성공/알림 + handleLike 알림)
   const [showAlert, setShowAlert] = useState(false);
   const [alertTitle, setAlertTitle] = useState('');
   const [alertMessage, setAlertMessage] = useState('');
+
+  // 공유 확인 ConfirmModal
+  const [showShareConfirmModal, setShowShareConfirmModal] = useState(false);
+  const [shareConfirmMissionSet, setShareConfirmMissionSet] = useState<MissionSetSimple | null>(null);
+
+  const errorHandlerOverrides = useMemo(
+    () => ({
+      onShowError: (t: string, m: string) => {
+        setAlertTitle(t);
+        setAlertMessage(m);
+        setShowAlert(true);
+      },
+      onShowSuccess: (t: string, m: string) => {
+        setAlertTitle(t);
+        setAlertMessage(m);
+        setShowAlert(true);
+      },
+      onShowInfo: (t: string, m: string) => {
+        setAlertTitle(t);
+        setAlertMessage(m);
+        setShowAlert(true);
+      },
+    }),
+    []
+  );
+  const { showError, showSuccess, showInfo, handleApiError } = useErrorHandler(errorHandlerOverrides);
 
   // 투두 공유 (미션세트) 관련 상태
   const [missionSets, setMissionSets] = useState<MissionSetSimple[]>([]);
@@ -202,8 +226,7 @@ export const useCommunityScreenContainer = ({ navigation, route }: CommunityScre
   }, [handleApiError, showError]);
 
   /**
-   * 투두리스트 공유하기 (공개로 변경)
-   * - 확인 Alert 표시 후 공유
+   * 투두리스트 공유 확인 모달 열기
    */
   const handleShareMissionSet = useCallback(
     (missionSet: MissionSetSimple) => {
@@ -211,41 +234,48 @@ export const useCommunityScreenContainer = ({ navigation, route }: CommunityScre
         showInfo('이미 공개된 투두리스트입니다.', '알림');
         return;
       }
-
-      Alert.alert(
-        '공유 확인',
-        `"${missionSet.title}" 투두리스트를 공유하시겠습니까?`,
-        [
-          { text: '취소', style: 'cancel' },
-          {
-            text: '공유',
-            onPress: async () => {
-              try {
-                setSharingId(missionSet.id);
-                const result = await updateMissionSet(missionSet.id, { isPublic: true });
-                if (result.success) {
-                  showSuccess(`"${missionSet.title}" 투두리스트가 커뮤니티에 공유되었습니다.`, '공유 완료');
-                  setMyMissionSets(prev => prev.map(ms => (ms.id === missionSet.id ? { ...ms, isPublic: true } : ms)));
-                  setShowShareModal(false);
-                  loadMissionSets();
-                } else {
-                  handleApiError(result, 'CommunityScreen.handleShareMissionSet');
-                }
-              } catch (error) {
-                showError(
-                  error instanceof Error ? error : new Error('공유 중 문제가 발생했습니다.'),
-                  'CommunityScreen.handleShareMissionSet'
-                );
-              } finally {
-                setSharingId(null);
-              }
-            },
-          },
-        ]
-      );
+      setShareConfirmMissionSet(missionSet);
+      setShowShareConfirmModal(true);
     },
-    [showInfo, showSuccess, handleApiError, showError, loadMissionSets]
+    [showInfo]
   );
+
+  /**
+   * 공유 확인 모달: 공유 실행
+   */
+  const handleShareConfirm = useCallback(async () => {
+    const missionSet = shareConfirmMissionSet;
+    if (!missionSet) return;
+    setShowShareConfirmModal(false);
+    setShareConfirmMissionSet(null);
+    try {
+      setSharingId(missionSet.id);
+      const result = await updateMissionSet(missionSet.id, { isPublic: true });
+      if (result.success) {
+        showSuccess(`"${missionSet.title}" 투두리스트가 커뮤니티에 공유되었습니다.`, '공유 완료');
+        setMyMissionSets(prev => prev.map(ms => (ms.id === missionSet.id ? { ...ms, isPublic: true } : ms)));
+        setShowShareModal(false);
+        loadMissionSets();
+      } else {
+        handleApiError(result, 'CommunityScreen.handleShareConfirm');
+      }
+    } catch (error) {
+      showError(
+        error instanceof Error ? error : new Error('공유 중 문제가 발생했습니다.'),
+        'CommunityScreen.handleShareConfirm'
+      );
+    } finally {
+      setSharingId(null);
+    }
+  }, [shareConfirmMissionSet, showSuccess, handleApiError, showError, loadMissionSets]);
+
+  /**
+   * 공유 확인 모달: 취소
+   */
+  const handleShareConfirmCancel = useCallback(() => {
+    setShowShareConfirmModal(false);
+    setShareConfirmMissionSet(null);
+  }, []);
 
   /**
    * 별점 렌더링
@@ -470,6 +500,11 @@ export const useCommunityScreenContainer = ({ navigation, route }: CommunityScre
     handleShareModalClose,
     handleCreatePost,
     onRefresh,
+    // 공유 확인 ConfirmModal
+    showShareConfirmModal,
+    shareConfirmMissionSet,
+    handleShareConfirm,
+    handleShareConfirmCancel,
     // Utils
     renderStars,
   };

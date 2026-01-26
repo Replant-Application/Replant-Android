@@ -53,6 +53,10 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onNavigate }) => {
     validateVerificationCode,
     setShowVerificationModal,
     setShowVerificationCompleteModal,
+    showAlert,
+    alertTitle,
+    alertMessage,
+    handleAlertClose,
   } = useSignUpScreenContainer({ onNavigate });
 
   return (
@@ -309,7 +313,7 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onNavigate }) => {
       <AlertModal
         visible={showVerificationModal}
         title="인증번호 발송"
-        message="이메일로 인증번호를 보냈습니다. 인증번호를 입력해주세요."
+        message="이메일로 인증번호를 보냈습니다.\n인증번호를 입력해주세요."
         buttonText="확인"
         onClose={() => setShowVerificationModal(false)}
       />
@@ -328,6 +332,15 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onNavigate }) => {
         message="환영합니다! 지금의 나에서 한 단계 더 성장해보세요."
         buttonText="시작하기"
         onClose={handleSignUpCompleteModalClose}
+      />
+
+      {/* 회원가입 실패/오류 모달 (커스텀) */}
+      <AlertModal
+        visible={showAlert}
+        title={alertTitle}
+        message={alertMessage}
+        buttonText="확인"
+        onClose={handleAlertClose}
       />
 
       <View style={styles.buttonContainer}>

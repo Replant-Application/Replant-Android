@@ -3,7 +3,7 @@
  * 미션 상세 화면: 미션 정보 조회, 리뷰 조회/작성, 뱃지 확인
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types/navigation';
 import {
@@ -61,7 +61,28 @@ export const getMissionTypeLabel = (missionType?: string): string => {
 
 export const useMissionDetailScreenContainer = ({ navigation, route }: MissionDetailScreenContainerProps) => {
   const { missionId, returnTab } = route.params;
-  const { showError, showSuccess, handleApiError } = useErrorHandler();
+
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertTitle, setAlertTitle] = useState('');
+  const [alertMessage, setAlertMessage] = useState('');
+  const handleCloseAlert = useCallback(() => setShowAlert(false), []);
+
+  const errorHandlerOverrides = useMemo(
+    () => ({
+      onShowError: (t: string, m: string) => {
+        setAlertTitle(t);
+        setAlertMessage(m);
+        setShowAlert(true);
+      },
+      onShowSuccess: (t: string, m: string) => {
+        setAlertTitle(t);
+        setAlertMessage(m);
+        setShowAlert(true);
+      },
+    }),
+    []
+  );
+  const { showError, showSuccess, handleApiError } = useErrorHandler(errorHandlerOverrides);
 
   const [mission, setMission] = useState<SystemMission | Mission | null>(null);
   const [reviews, setReviews] = useState<MissionReview[]>([]);
@@ -79,6 +100,12 @@ export const useMissionDetailScreenContainer = ({ navigation, route }: MissionDe
   const [submittingReview, setSubmittingReview] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<number | null>(null);
   const [completingCustom, setCompletingCustom] = useState(false);
+  const [showCompleteSuccessModal, setShowCompleteSuccessModal] = useState(false);
+
+  const handleCloseCompleteSuccess = useCallback(() => {
+    setShowCompleteSuccessModal(false);
+    navigation.goBack();
+  }, [navigation]);
 
   /**
    * 미션 데이터 로드
@@ -277,8 +304,7 @@ export const useMissionDetailScreenContainer = ({ navigation, route }: MissionDe
       try {
         const result = await completeCustomMission(mission.id);
         if (result.success) {
-          showSuccess('미션을 완료했어요.');
-          navigation.goBack();
+          setShowCompleteSuccessModal(true);
         } else {
           handleApiError(result, 'MissionDetailScreen.handleCompleteCustom');
         }
@@ -288,7 +314,7 @@ export const useMissionDetailScreenContainer = ({ navigation, route }: MissionDe
         setCompletingCustom(false);
       }
     },
-    [mission, navigation, showSuccess, showError, handleApiError]
+    [mission, showError, handleApiError]
   );
 
   /**
@@ -302,6 +328,13 @@ export const useMissionDetailScreenContainer = ({ navigation, route }: MissionDe
     // Data
     mission,
     reviews,
+    // State (오류/성공 AlertModal)
+    showAlert,
+    alertTitle,
+    alertMessage,
+    handleCloseAlert,
+    showCompleteSuccessModal,
+    handleCloseCompleteSuccess,
     // State
     loading,
     refreshing,

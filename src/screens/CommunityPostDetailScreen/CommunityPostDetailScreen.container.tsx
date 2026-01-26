@@ -4,7 +4,6 @@
  */
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { Alert } from 'react-native';
 import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types/navigation';
 import { useCommunityPost } from '../../hooks/useCommunityPost';
@@ -76,7 +75,9 @@ export const useCommunityPostDetailScreenContainer = ({
       setHiddenCommentIds(prev => [...prev, commentId]);
     } catch (error) {
       logError('댓글 숨기기 실패', error as Error);
-      Alert.alert('오류', '댓글을 숨기는 중 문제가 발생했습니다.');
+      setAlertTitle('오류');
+      setAlertMessage('댓글을 숨기는 중 문제가 발생했습니다.');
+      setShowAlert(true);
     }
   }, []);
 
@@ -125,7 +126,9 @@ export const useCommunityPostDetailScreenContainer = ({
    */
   const handleSubmitComment = useCallback(async () => {
     if (!commentContent.trim()) {
-      Alert.alert('오류', '댓글을 입력해주세요.');
+      setAlertTitle('오류');
+      setAlertMessage('댓글을 입력해주세요.');
+      setShowAlert(true);
       return;
     }
 
@@ -135,7 +138,9 @@ export const useCommunityPostDetailScreenContainer = ({
       setCommentContent('');
       setReplyingToComment(null); // 답글 모드 해제
     } else {
-      Alert.alert('오류', result.error || '댓글 작성에 실패했습니다.');
+      setAlertTitle('오류');
+      setAlertMessage(result.error || '댓글 작성에 실패했습니다.');
+      setShowAlert(true);
     }
   }, [commentContent, replyingToComment, createComment]);
 
@@ -181,7 +186,9 @@ export const useCommunityPostDetailScreenContainer = ({
       setEditingCommentId(null);
       setEditingContent('');
     } else {
-      Alert.alert('오류', result.error || '댓글 수정에 실패했습니다.');
+      setAlertTitle('오류');
+      setAlertMessage(result.error || '댓글 수정에 실패했습니다.');
+      setShowAlert(true);
     }
   }, [editingCommentId, editingContent, updateComment]);
 

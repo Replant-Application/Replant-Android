@@ -18,7 +18,7 @@ import {
 } from 'react-native';
 import { NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types/navigation';
-import { Header, Loading, ErrorBoundary, EmptyState, SimpleTabBar } from '../../components/ui';
+import { Header, Loading, ErrorBoundary, EmptyState, SimpleTabBar, AlertModal } from '../../components/ui';
 import { colors } from '../../utils/designTokens';
 import {
   useMissionGroupScreenContainer,
@@ -37,6 +37,10 @@ const MissionGroupScreen: React.FC<MissionGroupScreenProps> = ({ navigation }) =
   // 비즈니스 로직은 Container에서 처리
   const {
     missions,
+    showAlert,
+    alertTitle,
+    alertMessage,
+    handleCloseAlert,
     activeTab,
     selectedMission,
     loading,
@@ -416,6 +420,14 @@ const MissionGroupScreen: React.FC<MissionGroupScreenProps> = ({ navigation }) =
           </View>
         </View>
       </Modal>
+
+      <AlertModal
+        visible={showAlert}
+        title={alertTitle}
+        message={alertMessage}
+        buttonText="확인"
+        onClose={handleCloseAlert}
+      />
       </View>
     </ImageBackground>
   );

@@ -6,7 +6,7 @@
 import React from 'react';
 import { View, Text, ScrollView, TouchableOpacity, TextInput, Image, Modal, RefreshControl, ImageBackground, ActivityIndicator } from 'react-native';
 import { PostCard } from '../../components/specialized';
-import { Loading, ErrorBoundary, EmptyState, SimpleTabBar, Header, AlertModal } from '../../components/ui';
+import { Loading, ErrorBoundary, EmptyState, SimpleTabBar, Header, AlertModal, ConfirmModal } from '../../components/ui';
 import { colors } from '../../utils/designTokens';
 import { CommunityScreenProps, CommunityTab, VerificationFilter } from '../../types/screens/community';
 import { FILTER_OPTIONS } from '../../constants/screens/community';
@@ -57,6 +57,10 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation, route }) 
     handleShareModalClose,
     handleCreatePost,
     onRefresh,
+    showShareConfirmModal,
+    shareConfirmMissionSet,
+    handleShareConfirm,
+    handleShareConfirmCancel,
     renderStars,
   } = useCommunityScreenContainer({ navigation, route });
 
@@ -492,6 +496,16 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation, route }) 
         title={alertTitle}
         message={alertMessage}
         onClose={handleAlertClose}
+      />
+      <ConfirmModal
+        visible={showShareConfirmModal}
+        title="공유 확인"
+        message={shareConfirmMissionSet ? `"${shareConfirmMissionSet.title}" 투두리스트를 공유하시겠습니까?` : ''}
+        confirmText="공유"
+        cancelText="취소"
+        onConfirm={handleShareConfirm}
+        onCancel={handleShareConfirmCancel}
+        confirmButtonColor={colors.primary[500]}
       />
     </ImageBackground>
   );

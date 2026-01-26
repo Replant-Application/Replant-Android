@@ -36,7 +36,6 @@ export const useVerificationPostDetailScreenContainer = ({
 }: VerificationPostDetailScreenContainerProps) => {
   const { verificationId } = route.params;
   const { currentUserId } = useUser();
-  const { showError, showSuccess, showInfo, handleApiError } = useErrorHandler();
 
   const [post, setPost] = useState<VerificationPost | null>(null);
   const [comments, setComments] = useState<VerificationComment[]>([]);
@@ -47,6 +46,27 @@ export const useVerificationPostDetailScreenContainer = ({
   const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
   const [editingContent, setEditingContent] = useState('');
   const [replyingToComment, setReplyingToComment] = useState<{ id: string; nickname: string } | null>(null);
+
+  // 오류/성공/알림용 AlertModal (showAlertModal API 오류 + useErrorHandler)
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertTitle, setAlertTitle] = useState('');
+  const [alertMessage, setAlertMessage] = useState('');
+  const showAlertModal = useCallback((title: string, message: string) => {
+    setAlertTitle(title);
+    setAlertMessage(message);
+    setShowAlert(true);
+  }, []);
+  const handleAlertClose = useCallback(() => setShowAlert(false), []);
+
+  const errorHandlerOverrides = useMemo(
+    () => ({
+      onShowError: showAlertModal,
+      onShowSuccess: showAlertModal,
+      onShowInfo: showAlertModal,
+    }),
+    [showAlertModal]
+  );
+  const { showError, showSuccess, showInfo } = useErrorHandler(errorHandlerOverrides);
 
   /**
    * 본인 게시글인지 확인
@@ -253,7 +273,7 @@ export const useVerificationPostDetailScreenContainer = ({
             }
           }
         } else {
-          handleApiError(result, 'VerificationPostDetailScreen.handleVote');
+          showAlertModal('오류', result.error || '투표 처리 중 오류가 발생했습니다.');
         }
       } catch (err) {
         showError(
@@ -262,7 +282,7 @@ export const useVerificationPostDetailScreenContainer = ({
         );
       }
     },
-    [post, isAuthor, verificationId, loadPost, completeTodoMissionForVerification, showInfo, showSuccess, handleApiError, showError]
+    [post, isAuthor, verificationId, loadPost, completeTodoMissionForVerification, showInfo, showSuccess, showAlertModal, showError]
   );
 
   /**
@@ -280,12 +300,12 @@ export const useVerificationPostDetailScreenContainer = ({
           if (result.success) {
             navigation.goBack();
           } else {
-            handleApiError(result, 'VerificationPostDetailScreen.handleDeletePost');
+            showAlertModal('오류', result.error || '인증글 삭제에 실패했습니다.');
           }
         },
       },
     ]);
-  }, [post, verificationId, navigation, handleApiError]);
+  }, [post, verificationId, navigation, showAlertModal]);
 
   /**
    * 댓글 작성
@@ -307,9 +327,9 @@ export const useVerificationPostDetailScreenContainer = ({
       setReplyingToComment(null);
       await loadComments();
     } else {
-      handleApiError(result, 'VerificationPostDetailScreen.handleSubmitComment');
+      showAlertModal('오류', result.error || '댓글 작성에 실패했습니다.');
     }
-  }, [commentContent, replyingToComment, verificationId, loadComments, showError, handleApiError]);
+  }, [commentContent, replyingToComment, verificationId, loadComments, showError, showAlertModal]);
 
   /**
    * 답글 버튼 클릭
@@ -354,9 +374,9 @@ export const useVerificationPostDetailScreenContainer = ({
       setEditingContent('');
       await loadComments();
     } else {
-      handleApiError(result, 'VerificationPostDetailScreen.handleUpdateComment');
+      showAlertModal('오류', result.error || '댓글 수정에 실패했습니다.');
     }
-  }, [editingCommentId, editingContent, verificationId, loadComments, handleApiError]);
+  }, [editingCommentId, editingContent, verificationId, loadComments, showAlertModal]);
 
   /**
    * 댓글 삭제
@@ -372,13 +392,13 @@ export const useVerificationPostDetailScreenContainer = ({
             if (result.success) {
               await loadComments();
             } else {
-              handleApiError(result, 'VerificationPostDetailScreen.handleDeleteComment');
+              showAlertModal('오류', result.error || '댓글 삭제에 실패했습니다.');
             }
           },
         },
       ]);
     },
-    [verificationId, loadComments, handleApiError]
+    [verificationId, loadComments, showAlertModal]
   );
 
   /**
@@ -436,6 +456,10 @@ export const useVerificationPostDetailScreenContainer = ({
     editingContent,
     replyingToComment,
     isAuthor,
+    showAlert,
+    alertTitle,
+    alertMessage,
+    handleAlertClose,
     // Setters
     setCommentContent,
     setEditingContent,

@@ -4,7 +4,6 @@
  */
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { Alert } from 'react-native';
 import * as Location from 'expo-location';
 import { useErrorHandler } from '../../hooks/useErrorHandler';
 import { SCREEN_NAMES } from '../../utils/constants';
@@ -29,7 +28,35 @@ interface TodoListDetailScreenContainerProps {
 
 export const useTodoListDetailScreenContainer = ({ navigation, route }: TodoListDetailScreenContainerProps) => {
   const { todoListId } = route.params;
-  const { showError, showSuccess, showInfo, handleApiError } = useErrorHandler();
+
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertTitle, setAlertTitle] = useState('');
+  const [alertMessage, setAlertMessage] = useState('');
+  const handleCloseAlert = useCallback(() => setShowAlert(false), []);
+
+  const [showArchiveConfirmModal, setShowArchiveConfirmModal] = useState(false);
+
+  const errorHandlerOverrides = useMemo(
+    () => ({
+      onShowError: (t: string, m: string) => {
+        setAlertTitle(t);
+        setAlertMessage(m);
+        setShowAlert(true);
+      },
+      onShowSuccess: (t: string, m: string) => {
+        setAlertTitle(t);
+        setAlertMessage(m);
+        setShowAlert(true);
+      },
+      onShowInfo: (t: string, m: string) => {
+        setAlertTitle(t);
+        setAlertMessage(m);
+        setShowAlert(true);
+      },
+    }),
+    []
+  );
+  const { showError, showSuccess, showInfo, handleApiError } = useErrorHandler(errorHandlerOverrides);
 
   const [todoList, setTodoList] = useState<TodoList | null>(null);
   const [loading, setLoading] = useState(true);
@@ -319,36 +346,39 @@ export const useTodoListDetailScreenContainer = ({ navigation, route }: TodoList
   );
 
   /**
-   * 투두리스트 보관
+   * 투두리스트 보관 확인 모달 열기
    */
-  const handleArchive = useCallback(async () => {
-    Alert.alert(
-      '투두리스트 보관',
-      '이 투두리스트를 보관하시겠습니까?\n보관된 투두리스트는 더 이상 수정할 수 없습니다.',
-      [
-        { text: '취소', style: 'cancel' },
-        {
-          text: '보관',
-          onPress: async () => {
-            setArchiving(true);
-            try {
-              const result = await archiveTodoList(Number(todoListId));
-              if (result.success) {
-                showSuccess('투두리스트가 보관되었습니다.');
-                navigation.goBack();
-              } else {
-                handleApiError(result, 'TodoListDetailScreen.handleArchive');
-              }
-            } catch (error) {
-              showError(error instanceof Error ? error : new Error('보관에 실패했습니다.'), 'TodoListDetailScreen.handleArchive');
-            } finally {
-              setArchiving(false);
-            }
-          },
-        },
-      ]
-    );
+  const handleArchive = useCallback(() => {
+    setShowArchiveConfirmModal(true);
+  }, []);
+
+  /**
+   * 보관 확인 모달: 보관 실행
+   */
+  const handleArchiveConfirm = useCallback(async () => {
+    setShowArchiveConfirmModal(false);
+    setArchiving(true);
+    try {
+      const result = await archiveTodoList(Number(todoListId));
+      if (result.success) {
+        showSuccess('투두리스트가 보관되었습니다.');
+        navigation.goBack();
+      } else {
+        handleApiError(result, 'TodoListDetailScreen.handleArchiveConfirm');
+      }
+    } catch (error) {
+      showError(error instanceof Error ? error : new Error('보관에 실패했습니다.'), 'TodoListDetailScreen.handleArchiveConfirm');
+    } finally {
+      setArchiving(false);
+    }
   }, [todoListId, navigation, handleApiError, showError, showSuccess]);
+
+  /**
+   * 보관 확인 모달: 취소
+   */
+  const handleArchiveConfirmCancel = useCallback(() => {
+    setShowArchiveConfirmModal(false);
+  }, []);
 
   /**
    * 새 투두리스트 생성 화면으로 이동
@@ -387,6 +417,13 @@ export const useTodoListDetailScreenContainer = ({ navigation, route }: TodoList
     completingMissionId,
     archiving,
     showCompleteModal,
+    showAlert,
+    alertTitle,
+    alertMessage,
+    handleCloseAlert,
+    showArchiveConfirmModal,
+    handleArchiveConfirm,
+    handleArchiveConfirmCancel,
     // Progress
     ...progressData,
     // Handlers

@@ -4,7 +4,6 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-import { Alert } from 'react-native';
 import { join, sendVerification, verifyEmail } from '../../api/authApi';
 import { saveTokens, saveUserInfo } from '../../utils/tokenStorage';
 import { apiClient } from '../../api/client';
@@ -33,6 +32,11 @@ export const useSignUpScreenContainer = ({ onNavigate: _onNavigate }: SignUpScre
   const [showVerificationModal, setShowVerificationModal] = useState(false);
   const [showVerificationCompleteModal, setShowVerificationCompleteModal] = useState(false);
   const [showSignUpCompleteModal, setShowSignUpCompleteModal] = useState(false);
+
+  // 회원가입 실패/오류 모달 (커스텀 AlertModal)
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertTitle, setAlertTitle] = useState('');
+  const [alertMessage, setAlertMessage] = useState('');
 
   // 성별, 지역, 출생연도 상태
   const [gender, setGender] = useState<Gender | null>(null);
@@ -199,6 +203,16 @@ export const useSignUpScreenContainer = ({ onNavigate: _onNavigate }: SignUpScre
     }
   }, [email, verificationCode, errors, validateVerificationCode]);
 
+  const showAlertModal = useCallback((title: string, message: string) => {
+    setAlertTitle(title);
+    setAlertMessage(message);
+    setShowAlert(true);
+  }, []);
+
+  const handleAlertClose = useCallback(() => {
+    setShowAlert(false);
+  }, []);
+
   /**
    * 회원가입
    */
@@ -330,15 +344,15 @@ export const useSignUpScreenContainer = ({ onNavigate: _onNavigate }: SignUpScre
         // 회원가입 완료 모달 표시 (로그인 처리 전에 먼저 표시)
         setShowSignUpCompleteModal(true);
       } else {
-        Alert.alert('회원가입 실패', result.error || '회원가입에 실패했습니다.\n잠시 후 다시 시도해주세요.');
+        showAlertModal('회원가입 실패', result.error || '회원가입에 실패했습니다.\n잠시 후 다시 시도해주세요.');
       }
     } catch (error) {
       console.error('SignUp error:', error);
-      Alert.alert('오류', '회원가입 중 오류가 발생했습니다.\n잠시 후 다시 시도해주세요.');
+      showAlertModal('오류', '회원가입 중 오류가 발생했습니다.\n잠시 후 다시 시도해주세요.');
     } finally {
       setIsLoading(false);
     }
-  }, [email, password, confirmPassword, nickname, phone, gender, region, birthYear, isEmailVerified, validateEmail, validatePhone]);
+  }, [email, password, confirmPassword, nickname, phone, gender, region, birthYear, isEmailVerified, validateEmail, validatePhone, showAlertModal]);
 
   /**
    * 이메일 변경 핸들러
@@ -474,5 +488,10 @@ export const useSignUpScreenContainer = ({ onNavigate: _onNavigate }: SignUpScre
     // Modal handlers
     setShowVerificationModal,
     setShowVerificationCompleteModal,
+    // 오류/실패 모달 (커스텀 AlertModal)
+    showAlert,
+    alertTitle,
+    alertMessage,
+    handleAlertClose,
   };
 };

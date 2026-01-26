@@ -34,8 +34,6 @@ const Input: React.FC<InputProps> = ({
 
   const containerStyle = [
     styles.container,
-    isFocused && styles.focused,
-    error && styles.error,
     style,
   ];
 
@@ -43,6 +41,8 @@ const Input: React.FC<InputProps> = ({
     styles.input,
     styles[size],
     multiline && styles.multiline,
+    isFocused && styles.focused,
+    error && styles.error,
     inputStyle,
   ];
 

@@ -47,12 +47,12 @@ export const useHomeScreenContainer = ({ navigation, route }: HomeScreenContaine
   // 말풍선 표시 상태 (안내 메시지용)
   const [showSpeechBubble, setShowSpeechBubble] = useState(true);
   const speechBubbleAnim = useRef(new Animated.Value(1)).current;
-  const [displayedMessage, setDisplayedMessage] = useState<string>('저를 눌러서 대화하기');
+  const [displayedMessage, setDisplayedMessage] = useState<string>('눌러서 대화하기');
   const guidanceIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // 안내 메시지 목록
   const guidanceMessages = useMemo(
-    () => ['저를 눌러서 대화하기', '오늘 하루는 어땠어요?', '심심하면 말 걸어줘요~'],
+    () => ['눌러서 대화하기', '오늘 하루는 어땠어요?', '심심하면 말 걸어줘요~'],
     []
   );
 
@@ -368,7 +368,7 @@ export const useHomeScreenContainer = ({ navigation, route }: HomeScreenContaine
    */
   useEffect(() => {
     if (showChatInBottomSheet) return;
-    setDisplayedMessage('저를 눌러서 대화하기');
+    setDisplayedMessage('눌러서 대화하기');
     setShowSpeechBubble(true);
     let messageIndex = 0;
     guidanceIntervalRef.current = setInterval(() => {
@@ -442,7 +442,7 @@ export const useHomeScreenContainer = ({ navigation, route }: HomeScreenContaine
     setShowChatInBottomSheet(false);
     setChatMessages([]);
     setReantChatResponse(null);
-    setDisplayedMessage('저를 눌러서 대화하기');
+    setDisplayedMessage('눌러서 대화하기');
   }, []);
 
   /**

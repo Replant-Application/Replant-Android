@@ -13,7 +13,28 @@ import { Step, TodoListCreateScreenProps, TimePeriod } from '../../types/screens
 import { DEFAULT_START_TIME, DEFAULT_END_TIME } from '../../constants/screens/todolist';
 
 export const useTodoListCreateScreenContainer = ({ navigation }: TodoListCreateScreenProps) => {
-  const { showError, showInfo, handleApiError } = useErrorHandler();
+  // 오류/알림용 AlertModal (useErrorHandler overrides)
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertTitle, setAlertTitle] = useState('');
+  const [alertMessage, setAlertMessage] = useState('');
+  const handleCloseAlert = useCallback(() => setShowAlert(false), []);
+
+  const errorHandlerOverrides = useMemo(
+    () => ({
+      onShowError: (t: string, m: string) => {
+        setAlertTitle(t);
+        setAlertMessage(m);
+        setShowAlert(true);
+      },
+      onShowInfo: (t: string, m: string) => {
+        setAlertTitle(t);
+        setAlertMessage(m);
+        setShowAlert(true);
+      },
+    }),
+    []
+  );
+  const { showError, showInfo, handleApiError } = useErrorHandler(errorHandlerOverrides);
 
   const [currentStep, setCurrentStep] = useState<Step>('intro');
   const [randomMissions, setRandomMissions] = useState<MissionSimple[]>([]);
@@ -394,6 +415,11 @@ export const useTodoListCreateScreenContainer = ({ navigation }: TodoListCreateS
     customMissions,
     allMissions,
     missionsWithTime,
+    // State (오류/알림 AlertModal)
+    showAlert,
+    alertTitle,
+    alertMessage,
+    handleCloseAlert,
     // State
     currentStep,
     selectedCustomMissions,

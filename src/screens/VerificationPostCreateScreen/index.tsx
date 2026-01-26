@@ -43,6 +43,7 @@ const VerificationPostCreateScreen: React.FC<VerificationPostCreateScreenProps> 
     showAlreadyExistsModal,
     showErrorModal,
     errorMessage,
+    alertTitle,
     setContent,
     handleRemoveImage,
     showPhotoOptions,
@@ -291,7 +292,7 @@ const VerificationPostCreateScreen: React.FC<VerificationPostCreateScreenProps> 
       {/* 오류 모달 */}
       <AlertModal
         visible={showErrorModal}
-        title="오류"
+        title={alertTitle || '오류'}
         message={errorMessage}
         buttonText="확인"
         onClose={handleErrorModalClose}

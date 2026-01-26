@@ -7,21 +7,27 @@ import { Platform } from 'react-native';
 import { API_BASE_URL, API_TIMEOUT } from '@env';
 
 // 백엔드 기본 URL 설정
-const getBaseURL = () => {
-  if (API_BASE_URL) {
+const getBaseURL = (): string => {
+  let url: string;
+  if (API_BASE_URL && API_BASE_URL.trim()) {
     // 환경변수에 localhost가 포함되어 있고 Android인 경우 자동 변환
     if (Platform.OS === 'android' && API_BASE_URL.includes('localhost')) {
-      return API_BASE_URL.replace('localhost', '10.0.2.2');
+      url = API_BASE_URL.replace('localhost', '10.0.2.2');
+    } else {
+      url = API_BASE_URL;
     }
-    return API_BASE_URL;
+  } else {
+    // 기본값: Platform에 따라 자동 설정
+    if (Platform.OS === 'android') {
+      url = 'http://10.0.2.2:8080/api';
+    } else {
+      url = 'http://localhost:8080/api';
+    }
   }
-  // 기본값: Platform에 따라 자동 설정
-  if (Platform.OS === 'android') {
-    // Android 에뮬레이터에서는 10.0.2.2를 사용
-    return 'http://10.0.2.2:8080/api';
+  if (__DEV__) {
+    console.log('[API_CONFIG] baseURL:', url, '| @env API_BASE_URL:', API_BASE_URL || '(empty)');
   }
-  // iOS 시뮬레이터나 실제 기기에서는 localhost 사용
-  return 'http://localhost:8080/api';
+  return url;
 };
 
 export const API_CONFIG = {

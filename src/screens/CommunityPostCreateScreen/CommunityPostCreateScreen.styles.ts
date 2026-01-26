@@ -152,18 +152,19 @@ export const styles = StyleSheet.create({
   addImageButton: {
     width: '100%',
     height: 100,
-    backgroundColor: '#fafafa',
-    borderRadius: 6,
-    borderWidth: 1.5,
-    borderColor: colors.green[400],
+    backgroundColor: colors.white,
+    borderWidth: 1,
+    borderColor: colors.border.light,
+    borderStyle: 'dashed',
+    borderRadius: borderRadius.base,
     justifyContent: 'center',
     alignItems: 'center',
-    gap: spacing[2],
+    gap: spacing[1],
   },
   addImageIcon: {
-    width: 36,
-    height: 36,
-    tintColor: colors.green[500],
+    width: 32,
+    height: 32,
+    marginBottom: spacing[2],
   },
   addImageIconSmall: {
     width: 28,
@@ -171,9 +172,8 @@ export const styles = StyleSheet.create({
   },
   addImageText: {
     ...createTextStyle('sm', {
-      color: colors.green[600],
+      color: colors.primary[600],
       fontWeight: typography.fontWeight.medium,
-      fontFamily: typography.fontFamily.regular,
     }),
   },
   removeImageButton: {

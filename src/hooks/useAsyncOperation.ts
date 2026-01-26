@@ -35,7 +35,7 @@
  */
 
 import { useState, useCallback } from 'react';
-import { useErrorHandler } from './useErrorHandler';
+import { useErrorHandler, UseErrorHandlerOverrides } from './useErrorHandler';
 import { ServiceResult } from '../types';
 
 interface UseAsyncOperationOptions<T> {
@@ -43,21 +43,26 @@ interface UseAsyncOperationOptions<T> {
    * 성공 시 호출되는 콜백
    */
   onSuccess?: (data: T) => void;
-  
+
   /**
    * 에러 시 호출되는 콜백
    */
   onError?: (error: string) => void;
-  
+
   /**
    * 에러를 자동으로 표시할지 여부 (기본값: true)
    */
   showError?: boolean;
-  
+
   /**
    * 에러 발생 컨텍스트 (로깅용)
    */
   context?: string;
+
+  /**
+   * useErrorHandler에 전달할 오버라이드 (커스텀 모달 사용 시)
+   */
+  errorHandlerOverrides?: UseErrorHandlerOverrides;
 }
 
 interface UseAsyncOperationReturn<T> {
@@ -96,14 +101,16 @@ export const useAsyncOperation = <T,>(
 ): UseAsyncOperationReturn<T> => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { showError: showErrorAlert, handleApiError } = useErrorHandler();
-  
+
   const {
     onSuccess,
     onError,
     showError = true,
     context,
+    errorHandlerOverrides,
   } = options || {};
+
+  const { showError: showErrorAlert, handleApiError } = useErrorHandler(errorHandlerOverrides);
 
   /**
    * 에러 상태 초기화
@@ -118,41 +125,37 @@ export const useAsyncOperation = <T,>(
   const execute = useCallback(async (): Promise<T | undefined> => {
     setLoading(true);
     setError(null);
-    
+
     try {
       const result = await operation();
-      
+
       if (result.success && result.data !== undefined) {
-        // 성공 처리
         onSuccess?.(result.data);
         return result.data;
       } else {
-        // API 에러 처리
         const errorMessage = result.error || '작업에 실패했습니다.';
         setError(errorMessage);
-        
+
         if (showError) {
           handleApiError(result, context);
         }
-        
+
         onError?.(errorMessage);
         return undefined;
       }
     } catch (err) {
-      // 예외 처리
-      const errorMessage = err instanceof Error 
-        ? err.message 
-        : '알 수 없는 오류가 발생했습니다.';
-      
+      const errorMessage =
+        err instanceof Error ? err.message : '알 수 없는 오류가 발생했습니다.';
+
       setError(errorMessage);
-      
+
       if (showError) {
         showErrorAlert(
           err instanceof Error ? err : new Error(errorMessage),
           context
         );
       }
-      
+
       onError?.(errorMessage);
       return undefined;
     } finally {
