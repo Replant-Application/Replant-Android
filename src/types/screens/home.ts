@@ -7,4 +7,9 @@ import { RootStackParamList } from '../navigation';
 
 export interface HomeScreenProps {
   navigation: NavigationProp<RootStackParamList>;
+  route?: {
+    params?: {
+      fromReantChat?: boolean;
+    };
+  };
 }

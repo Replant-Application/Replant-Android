@@ -63,10 +63,10 @@ export const useSpontaneousMissionSetupScreenContainer = ({
   const isEditMode = mode === 'edit';
 
   // navigation이 없으면 기본 navigation 객체 생성
-  const safeNavigation = navigation || {
-    navigate: () => {},
-    goBack: () => {},
-  } as any;
+  const safeNavigation = useMemo(
+    () => navigation || { navigate: () => {}, goBack: () => {} } as any,
+    [navigation]
+  );
 
   const [currentStep, setCurrentStep] = useState<number>(0);
 
@@ -335,34 +335,6 @@ export const useSpontaneousMissionSetupScreenContainer = ({
   }, [isEditMode, safeNavigation, parse24Hour]);
 
   /**
-   * 다음 스텝으로 이동
-   */
-  const handleNext = useCallback(() => {
-    try {
-      if (safeCurrentStep < STEPS.length - 1) {
-        setCurrentStep(safeCurrentStep + 1);
-      } else {
-        handleSubmit();
-      }
-    } catch (error) {
-      logError('다음 스텝 이동 실패', error as Error);
-    }
-  }, [safeCurrentStep]);
-
-  /**
-   * 이전 스텝으로 이동
-   */
-  const handlePrev = useCallback(() => {
-    try {
-      if (safeCurrentStep > 0) {
-        setCurrentStep(safeCurrentStep - 1);
-      }
-    } catch (error) {
-      logError('이전 스텝 이동 실패', error as Error);
-    }
-  }, [safeCurrentStep]);
-
-  /**
    * 설정 제출
    */
   const handleSubmit = useCallback(async () => {
@@ -456,6 +428,34 @@ export const useSpontaneousMissionSetupScreenContainer = ({
   ]);
 
   /**
+   * 다음 스텝으로 이동
+   */
+  const handleNext = useCallback(() => {
+    try {
+      if (safeCurrentStep < STEPS.length - 1) {
+        setCurrentStep(safeCurrentStep + 1);
+      } else {
+        handleSubmit();
+      }
+    } catch (error) {
+      logError('다음 스텝 이동 실패', error as Error);
+    }
+  }, [safeCurrentStep, handleSubmit]);
+
+  /**
+   * 이전 스텝으로 이동
+   */
+  const handlePrev = useCallback(() => {
+    try {
+      if (safeCurrentStep > 0) {
+        setCurrentStep(safeCurrentStep - 1);
+      }
+    } catch (error) {
+      logError('이전 스텝 이동 실패', error as Error);
+    }
+  }, [safeCurrentStep]);
+
+  /**
    * currentTime을 안전하게 가져오기
    */
   const currentTime = useMemo(() => {
@@ -476,7 +476,7 @@ export const useSpontaneousMissionSetupScreenContainer = ({
       logError('currentTime 가져오기 실패', error as Error);
       return { period: 'AM' as const, hour: 7, minute: 0 };
     }
-  }, [currentStepKey, wakeTime, sleepTime, breakfastTime, lunchTime, dinnerTime, getCurrentTime]);
+  }, [getCurrentTime]);
 
   /**
    * Alert 모달 닫기

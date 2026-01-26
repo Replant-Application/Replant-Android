@@ -40,6 +40,8 @@ export interface ApiRequestOptions {
   headers?: Record<string, string>;
   body?: ApiRequestBody;
   params?: Record<string, string | number | boolean>;
+  /** 요청별 타임아웃(ms). 미설정 시 API_CONFIG.timeout 사용. LLM/채팅 등 응답이 오래 걸리는 API는 60000 등으로 늘려 사용 */
+  timeout?: number;
 }
 
 /**
@@ -227,9 +229,10 @@ export class ApiClient {
     // URL 구성 (params가 있으면 query string 추가)
     let url = `${this.baseURL}${endpoint}`;
 
-    // 타임아웃 설정 (AbortController 사용)
+    // 타임아웃 설정 (AbortController 사용). options.timeout이 있으면 사용, 없으면 전역 설정
+    const timeoutMs = options.timeout ?? API_CONFIG.timeout;
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), API_CONFIG.timeout);
+    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
     try {
       // 토큰이 로드될 때까지 대기
@@ -399,11 +402,11 @@ export class ApiClient {
         method: options.method || 'GET',
         error: error instanceof Error ? error.message : String(error),
         errorType: error instanceof TypeError ? 'NetworkError' :
-                   (error instanceof DOMException && error.name === 'AbortError') ? 'TimeoutError' : 'UnknownError',
+                   (error && (error as { name?: string }).name === 'AbortError') ? 'TimeoutError' : 'UnknownError',
       });
 
-      // 타임아웃 에러 처리
-      if (error instanceof DOMException && error.name === 'AbortError') {
+      // 타임아웃 에러 처리 (AbortController.abort 시; DOMException은 브라우저 전용이라 RN에서는 error.name으로 체크)
+      if (error && (error as { name?: string }).name === 'AbortError') {
         return {
           success: false,
           error: '서버 응답 시간이 초과되었습니다. 네트워크 연결을 확인해주세요.',
@@ -436,9 +439,14 @@ export class ApiClient {
 
   /**
    * POST 요청
+   * @param options.timeout - 이 요청만의 타임아웃(ms). 채팅 등 LLM 호출은 60000 권장
    */
-  async post<T>(endpoint: string, body?: ApiRequestBody): Promise<ServiceResult<T>> {
-    return this.request<T>(endpoint, { method: 'POST', body });
+  async post<T>(
+    endpoint: string,
+    body?: ApiRequestBody,
+    options?: Pick<ApiRequestOptions, 'timeout' | 'headers'>
+  ): Promise<ServiceResult<T>> {
+    return this.request<T>(endpoint, { method: 'POST', body, ...options });
   }
 
   /**
@@ -552,8 +560,8 @@ export class ApiClient {
       // 타임아웃 클리어
       clearTimeout(timeoutId);
 
-      // 타임아웃 에러 처리
-      if (error instanceof DOMException && error.name === 'AbortError') {
+      // 타임아웃 에러 처리 (AbortController.abort 시; DOMException은 브라우저 전용이라 RN에서는 error.name으로 체크)
+      if (error && (error as { name?: string }).name === 'AbortError') {
         return {
           success: false,
           error: '파일 업로드 시간이 초과되었습니다. 네트워크 연결을 확인해주세요.',

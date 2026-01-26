@@ -22,7 +22,7 @@ interface TodoListDetailScreenContainerProps {
   navigation: any;
   route: {
     params: {
-      todoListId: number;
+      todoListId: number | string;
     };
   };
 }
@@ -243,7 +243,7 @@ export const useTodoListDetailScreenContainer = ({ navigation, route }: TodoList
             const result = await verifyByGps(userMissionId, location.coords.latitude, location.coords.longitude);
             if (result.success) {
               showSuccess(`+${result.data?.expReward || 50} EXP를 획득했습니다!`, 'GPS 인증 완료');
-              const completeRes = await completeTodoMission(todoListId, mission.missionId);
+              const completeRes = await completeTodoMission(Number(todoListId), mission.missionId);
               if (completeRes.success && completeRes.data) {
                 setTodoList(completeRes.data);
                 checkAndShowCompleteModal(completeRes.data);
@@ -261,7 +261,7 @@ export const useTodoListDetailScreenContainer = ({ navigation, route }: TodoList
             const result = await verifyByTime(userMissionId);
             if (result.success) {
               showSuccess(`+${result.data?.expReward || 50} EXP를 획득했습니다!`, '시간 인증 완료');
-              const completeRes = await completeTodoMission(todoListId, mission.missionId);
+              const completeRes = await completeTodoMission(Number(todoListId), mission.missionId);
               if (completeRes.success && completeRes.data) {
                 setTodoList(completeRes.data);
                 checkAndShowCompleteModal(completeRes.data);
@@ -290,7 +290,7 @@ export const useTodoListDetailScreenContainer = ({ navigation, route }: TodoList
       // 커스텀 미션은 바로 완료 처리
       setCompletingMissionId(mission.missionId);
       try {
-        const result = await completeTodoMission(todoListId, mission.missionId);
+        const result = await completeTodoMission(Number(todoListId), mission.missionId);
         if (result.success && result.data) {
           const updatedTodoList = result.data;
           setTodoList(updatedTodoList);
@@ -332,7 +332,7 @@ export const useTodoListDetailScreenContainer = ({ navigation, route }: TodoList
           onPress: async () => {
             setArchiving(true);
             try {
-              const result = await archiveTodoList(todoListId);
+              const result = await archiveTodoList(Number(todoListId));
               if (result.success) {
                 showSuccess('투두리스트가 보관되었습니다.');
                 navigation.goBack();

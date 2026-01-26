@@ -22,8 +22,8 @@ export * from './badgeApi';
 // 유저 추천 API
 export * from './recommendationApi';
 
-// 채팅 API
-// export * from './chatApi'; // TODO: 채팅 API 구현 필요
+// 채팅 API (리앤트 채팅 - /api/chat)
+export * from './chatApi';
 
 // 알림 API
 export * from './notificationApi';

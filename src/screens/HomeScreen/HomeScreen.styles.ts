@@ -3,7 +3,7 @@
  * 홈 화면의 모든 스타일 정의
  */
 
-import { StyleSheet, Dimensions } from 'react-native';
+import { StyleSheet, Dimensions, Platform } from 'react-native';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
 import { getOptimizedLineHeight } from '../../utils/styles/textStyles';
 import { createTextStyle, createTitleStyle, createBodyStyle, createSecondaryTextStyle, createButtonTextStyle } from '../../utils/styles/textStyles';
@@ -20,6 +20,39 @@ export const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
   },
+  startChatButtonContainer: {
+    position: 'absolute',
+    top: Platform.OS === 'ios' ? 100 : 70,
+    left: 0,
+    right: 0,
+    alignItems: 'center',
+    zIndex: 10,
+  },
+  startChatButton: {
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    paddingVertical: spacing[2],
+    paddingHorizontal: spacing[4],
+    borderRadius: borderRadius.full,
+    borderWidth: 2,
+    borderColor: '#D4A574',
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.15,
+        shadowRadius: 4,
+      },
+      android: {
+        elevation: 4,
+      },
+    }),
+  },
+  startChatButtonText: {
+    ...createTextStyle('sm', {
+      fontWeight: typography.fontWeight.semibold,
+      color: colors.text.primary,
+    }),
+  },
   heroSection: {
     width: '100%',
     justifyContent: 'center',
@@ -29,33 +62,39 @@ export const styles = StyleSheet.create({
   },
   speechBubble: {
     position: 'absolute',
-    top: '25%',
-    left: '12%',
-    transform: [{ translateX: -(SCREEN_WIDTH * 0.9) / 2 }],
-    width: SCREEN_WIDTH * 0.9,
+    top: '32%',
+    left: '50%',
+    transform: [{ translateX: -(SCREEN_WIDTH * 0.94) / 2 }],
+    width: SCREEN_WIDTH * 0.94,
     alignSelf: 'center',
   },
   speechBubbleImage: {
     width: '100%',
     minHeight: 120,
-    paddingHorizontal: 0,
-    paddingVertical: spacing[5],
+    paddingHorizontal: spacing[2],
+    paddingTop: spacing[1],
+    paddingBottom: spacing[2],
     justifyContent: 'center',
     alignItems: 'center',
   },
   speechTextContainer: {
-    width: '100%',
-    alignItems: 'center',
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 0,
     justifyContent: 'center',
+    alignItems: 'center',
   },
   speechText: {
     ...createTextStyle('lg', {
       fontWeight: typography.fontWeight.medium,
       color: colors.text.primary,
-      lineHeight: getOptimizedLineHeight(typography.fontSize.base),
+      lineHeight: getOptimizedLineHeight(typography.fontSize.lg),
       letterSpacing: 0,
       textAlign: 'center',
       width: '100%',
+      alignSelf: 'stretch',
     }),
   },
   characterImageContainer: {

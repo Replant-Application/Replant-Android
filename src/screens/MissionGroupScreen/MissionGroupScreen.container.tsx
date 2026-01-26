@@ -189,7 +189,7 @@ export const useMissionGroupScreenContainer = ({ navigation }: MissionGroupScree
         setRefreshing(false);
       }
     },
-    [activeTab]
+    []
   );
 
   /**
