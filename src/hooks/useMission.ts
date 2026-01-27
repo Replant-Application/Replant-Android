@@ -27,6 +27,7 @@ import {
   Mission as ApiMission,
   MissionCategory as ApiMissionCategory,
   CreateMissionRequest,
+  UserMission,
 } from '../api/missionApi';
 import { uploadMissionVerifyPhoto } from '../api/fileApi';
 
@@ -71,41 +72,58 @@ const transformApiMission = (apiMission: ApiMission): Mission => {
   };
 };
 
-// transformUserMission 함수는 현재 사용되지 않아 주석 처리
-// 필요시 다시 활성화할 수 있습니다
-/*
-const transformUserMission = (userMission: UserMission): Mission => {
-  // mission 필드 사용 (통합됨)
-  const mission = userMission.mission || userMission.customMission;
-  if (!mission) {
-    throw new Error('UserMission has no mission data');
+/**
+ * UserMission을 Mission 타입으로 변환
+ * getUserMissions API 응답을 미션 탭에서 사용할 수 있도록 변환
+ */
+const transformUserMissionToMission = (userMission: UserMission): Mission | null => {
+  try {
+    // mission 필드 사용 (통합됨)
+    // missionType이 OFFICIAL이면 mission, CUSTOM이면 customMission 사용
+    const mission = userMission.mission || userMission.customMission;
+    if (!mission) {
+      console.warn('[transformUserMissionToMission] UserMission에 mission 데이터가 없습니다:', userMission);
+      return null;
+    }
+
+    const isCustom = userMission.missionType === 'CUSTOM';
+    
+    // UserMission의 status를 그대로 사용 (ASSIGNED, PENDING, COMPLETED 등)
+    const status: MissionStatus = userMission.status;
+    
+    // completed는 COMPLETED 상태일 때만 true
+    const completed = userMission.status === 'COMPLETED';
+    
+    // verified는 COMPLETED 상태일 때만 true (인증 완료)
+    // PENDING 상태는 인증 대기 중이므로 verified = false
+    const verified = userMission.status === 'COMPLETED';
+
+    return {
+      id: userMission.id,
+      mission_id: isCustom ? `custom_${mission.id}` : mission.id.toString(),
+      user_mission_id: userMission.id,
+      title: mission.title,
+      description: mission.description || '',
+      emoji: getMissionEmoji(mission.title),
+      experience: isCustom ? 0 : (mission.expReward || 10),
+      category_id: (mission.category?.toLowerCase() as MissionCategory) || 'growth',
+      category: mission.category || 'DAILY_LIFE',
+      missionType: userMission.missionType,
+      status,
+      difficulty: 'medium' as const,
+      completed,
+      completed_at: userMission.completedAt || (completed ? userMission.verification?.verifiedAt : undefined),
+      created_at: userMission.assignedAt,
+      due_date: userMission.dueDate,
+      is_custom: isCustom,
+      verification_type: mission.verificationType || 'COMMUNITY',
+      verified,
+    };
+  } catch (e) {
+    console.error('[transformUserMissionToMission] 변환 실패:', e);
+    return null;
   }
-
-  const isCustom = userMission.missionType === 'CUSTOM';
-
-  return {
-    id: userMission.id,
-    mission_id: isCustom ? `custom_${mission.id}` : mission.id.toString(),
-    user_mission_id: userMission.id,
-    title: mission.title,
-    description: mission.description,
-    emoji: getMissionEmoji(mission.title),
-    experience: isCustom ? 0 : (mission.expReward || 10),
-    category_id: 'growth',
-    category: mission.category || 'DAILY_LIFE',
-    missionType: userMission.missionType,
-    status: userMission.status,
-    difficulty: 'medium' as const,
-    completed: userMission.status === 'COMPLETED',
-    completed_at: userMission.status === 'COMPLETED' ? userMission.verification?.verifiedAt : undefined,
-    created_at: userMission.assignedAt,
-    due_date: userMission.dueDate,
-    is_custom: isCustom,
-    verification_type: mission.verificationType || 'COMMUNITY',
-    verified: userMission.status === 'COMPLETED',
-  };
 };
-*/
 
 /**
  * TodoMission을 Mission 타입으로 변환
@@ -120,27 +138,29 @@ const transformTodoMissionToMission = (
     
     // TodoMission의 상태를 Mission의 status로 변환
     // UserMission의 status를 우선적으로 사용 (가장 정확함)
-    // isCompleted === true → COMPLETED
-    // userMissionStatus가 있으면 그대로 사용
-    // userMissionStatus가 없으면 기본값 ASSIGNED (백엔드에서 ASSIGNED로 생성되므로)
+    // userMissionStatus가 있으면 그대로 사용 (PENDING, COMPLETED 등)
+    // userMissionStatus가 없고 isCompleted === true → COMPLETED
+    // 둘 다 없으면 기본값 ASSIGNED
     let status: MissionStatus = 'ASSIGNED';
-    if (todoMission.isCompleted) {
-      status = 'COMPLETED';
-      console.log(`[transformTodoMissionToMission] isCompleted=true: ${todoMission.title} -> ${status}`, {
-        userMissionStatus: todoMission.userMissionStatus,
-        isCompleted: todoMission.isCompleted,
-        isVerified: todoMission.isVerified
-      });
-    } else if (todoMission.userMissionStatus) {
-      // 백엔드의 UserMission 상태를 그대로 사용 (ASSIGNED, PENDING, COMPLETED 등)
+    if (todoMission.userMissionStatus) {
+      // 백엔드의 UserMission 상태를 우선적으로 사용 (ASSIGNED, PENDING, COMPLETED 등)
+      // 인증글 작성 후 PENDING 상태가 제대로 반영되도록 우선순위를 높임
       status = todoMission.userMissionStatus as MissionStatus;
       console.log(`[transformTodoMissionToMission] userMissionStatus 사용: ${todoMission.title} -> ${status}`, {
         userMissionStatus: todoMission.userMissionStatus,
         isCompleted: todoMission.isCompleted,
         isVerified: todoMission.isVerified
       });
+    } else if (todoMission.isCompleted) {
+      // userMissionStatus가 없고 isCompleted === true인 경우 COMPLETED
+      status = 'COMPLETED';
+      console.log(`[transformTodoMissionToMission] isCompleted=true (userMissionStatus 없음): ${todoMission.title} -> ${status}`, {
+        userMissionStatus: todoMission.userMissionStatus,
+        isCompleted: todoMission.isCompleted,
+        isVerified: todoMission.isVerified
+      });
     } else {
-      // userMissionStatus가 없으면 기본값 ASSIGNED (백엔드에서 ASSIGNED로 생성되므로)
+      // userMissionStatus가 없고 isCompleted도 false면 기본값 ASSIGNED
       status = 'ASSIGNED';
       console.warn(`[transformTodoMissionToMission] ⚠️ userMissionStatus 없음, 기본값 ASSIGNED: ${todoMission.title}`, {
         userMissionStatus: todoMission.userMissionStatus,
@@ -185,9 +205,8 @@ export const useMission = (
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  // 미션 데이터 로드 (투두리스트에서 가져오기)
-  // 홈 화면과 동일하게 오늘 만든 투두리스트의 미션만 표시
-  // 캘린더용 과거 미션 조회는 /api/missions/my/calendar/date 또는 /range 사용
+  // 미션 데이터 로드 (모든 상태의 미션 가져오기)
+  // 진행중(ASSIGNED), 인증대기(PENDING), 완료(COMPLETED) 상태의 모든 미션 조회
   const loadMissions = useCallback(async (): Promise<void> => {
     if (!currentNickname) return;
 
@@ -197,119 +216,60 @@ export const useMission = (
 
       const allMissions: Mission[] = [];
 
-      // 오늘 만든 투두리스트 가져오기 (홈 화면과 동일한 로직)
-      const { getActiveTodoLists } = await import('../api/todolistApi');
-      const { filterTodayActiveTodoLists } = await import('../utils/todolistUtils');
-      const { getTodoListDetail } = await import('../api/todolistApi');
+      // getUserMissions API로 모든 미션 가져오기
+      const { getUserMissions } = await import('../api/missionApi');
       
-      const todoListResult = await getActiveTodoLists();
-      if (todoListResult?.success && Array.isArray(todoListResult.data)) {
-        // 오늘 만든 투두리스트만 필터링
-        const todayTodoLists = filterTodayActiveTodoLists(todoListResult.data, 'useMission');
-        
-        // 각 투두리스트의 미션 가져오기
-        const missionMap = new Map<string, Mission>(); // mission_id로 중복 제거
-        
-        for (const todoList of todayTodoLists) {
-          try {
-            console.log(`[useMission] 🔵 API 호출 시작: 투두리스트 ${todoList.id} 상세 조회`);
-            const detailResult = await getTodoListDetail(todoList.id);
-            console.log(`[useMission] 🟢 API 호출 완료: 투두리스트 ${todoList.id}`, {
-              success: detailResult?.success,
-              hasData: !!detailResult?.data,
-              hasMissions: !!detailResult?.data?.missions,
-              missionsCount: detailResult?.data?.missions?.length
-            });
-            if (detailResult?.success && detailResult.data?.missions) {
-              // 디버깅: API 응답 확인 (전체 응답도 확인)
+      // 모든 상태의 미션을 가져오기 위해 페이지네이션 처리
+      let page = 0;
+      const size = 100; // 한 번에 많이 가져오기
+      let hasMore = true;
+
+      while (hasMore) {
+        try {
+          const result = await getUserMissions({ 
+            page, 
+            size,
+            // status 필터 없이 모든 상태 가져오기
+          });
+
+          if (result.success && result.data?.content) {
+            const userMissions = result.data.content;
+            
+            // UserMission을 Mission으로 변환
+            for (const userMission of userMissions) {
               try {
-                const fullResponse = JSON.stringify(detailResult.data, null, 2);
-                console.log(`[useMission] 투두리스트 ${todoList.id} 전체 API 응답:`, fullResponse);
-                // missions 배열만 따로 확인
-                if (detailResult.data.missions) {
-                  detailResult.data.missions.forEach((m: any, idx: number) => {
-                    // userMissionStatus 필드 존재 여부와 값 확인
-                    const hasField = 'userMissionStatus' in m;
-                    const fieldValue = m.userMissionStatus;
-                    const fieldType = typeof m.userMissionStatus;
-                    const allKeys = Object.keys(m);
-                    
-                    console.log(`[useMission] 미션 ${idx} 상세 분석:`, {
-                      missionId: m.missionId,
-                      title: m.title,
-                      userMissionStatus: fieldValue,
-                      userMissionStatus_type: fieldType,
-                      has_userMissionStatus: hasField,
-                      is_null: fieldValue === null,
-                      is_undefined: fieldValue === undefined,
-                      all_keys: allKeys,
-                      raw_mission_object: m
-                    });
-                    
-                    // userMissionStatus가 없는 경우 경고
-                    if (!hasField) {
-                      console.warn(`[useMission] ⚠️ userMissionStatus 필드가 API 응답에 없습니다!`, {
-                        missionId: m.missionId,
-                        title: m.title,
-                        available_keys: allKeys
-                      });
-                    } else if (fieldValue === null || fieldValue === undefined) {
-                      console.warn(`[useMission] ⚠️ userMissionStatus가 null/undefined입니다.`, {
-                        missionId: m.missionId,
-                        title: m.title,
-                        value: fieldValue
-                      });
-                    }
-                  });
+                const mission = transformUserMissionToMission(userMission);
+                if (mission) {
+                  allMissions.push(mission);
                 }
               } catch (e) {
-                console.error(`[useMission] JSON.stringify 실패:`, e);
-                console.log(`[useMission] 원본 데이터:`, detailResult.data);
-              }
-              console.log(`[useMission] 투두리스트 ${todoList.id} 미션 데이터:`, 
-                detailResult.data.missions.map((m: any) => ({
-                  title: m.title,
-                  userMissionStatus: m.userMissionStatus,
-                  isVerified: m.isVerified,
-                  isCompleted: m.isCompleted,
-                  missionId: m.missionId
-                }))
-              );
-              
-              // 투두리스트의 미션을 Mission 형식으로 변환
-              for (const todoMission of detailResult.data.missions) {
-                try {
-                  const mission = transformTodoMissionToMission(todoMission, todoList.id);
-                  if (mission) {
-                    // 같은 미션이 여러 투두리스트에 포함되어 있을 수 있으므로 중복 제거
-                    // mission_id를 키로 사용하여 가장 최신 상태 유지
-                    const existingMission = missionMap.get(mission.mission_id);
-                    if (!existingMission || (mission.completed && !existingMission.completed)) {
-                      // 기존 미션이 없거나, 새 미션이 완료된 상태면 업데이트
-                      missionMap.set(mission.mission_id, mission);
-                    }
-                  }
-                } catch (e) {
-                  logError('TodoMission 변환 실패', e as Error, { todoMissionId: todoMission.id });
-                }
+                logError('UserMission 변환 실패', e as Error, { userMissionId: userMission.id });
               }
             }
-          } catch (e) {
-            logError('투두리스트 상세 조회 실패', e as Error, { todoListId: todoList.id });
+
+            // 다음 페이지 확인
+            hasMore = page < result.data.totalPages - 1;
+            page++;
+          } else {
+            hasMore = false;
+            if (result.error) {
+              console.error('[useMission] getUserMissions API 오류:', result.error);
+            }
           }
+        } catch (e) {
+          logError('미션 목록 조회 실패', e as Error, { page });
+          hasMore = false;
         }
-        
-        // Map을 배열로 변환
-        allMissions.push(...Array.from(missionMap.values()));
-        
-        console.log('[useMission] 투두리스트에서 로드된 미션:', {
-          todoListCount: todayTodoLists.length,
-          missionCount: allMissions.length,
-          completed: allMissions.filter(m => m.completed).length,
-          pending: allMissions.filter(m => m.status === 'PENDING').length,
-          assigned: allMissions.filter(m => m.status === 'ASSIGNED').length,
-        });
       }
+
+      console.log('[useMission] 로드된 미션:', {
+        totalCount: allMissions.length,
+        completed: allMissions.filter(m => m.status === 'COMPLETED').length,
+        pending: allMissions.filter(m => m.status === 'PENDING').length,
+        assigned: allMissions.filter(m => m.status === 'ASSIGNED').length,
+        expired: allMissions.filter(m => m.status === 'EXPIRED').length,
+        failed: allMissions.filter(m => m.status === 'FAILED').length,
+      });
 
       // 정렬
       const sortedMissions = sortMissionsByTitle(allMissions);
