@@ -301,7 +301,13 @@ export const styles = StyleSheet.create({
     minWidth: 120,
   },
   createTodoListButtonText: {
-    ...createButtonTextStyle('base'),
+    ...createButtonTextStyle('base', {
+      fontWeight: typography.fontWeight.bold,
+      fontFamily: Platform.select({
+        ios: undefined,
+        android: typography.fontFamily.regular,
+      }),
+    }),
   },
   completedTodoListContainer: {
     alignItems: 'center',

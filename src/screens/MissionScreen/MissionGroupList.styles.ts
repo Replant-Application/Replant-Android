@@ -3,7 +3,7 @@
  * 미션 도감 목록 컴포넌트의 모든 스타일 정의
  */
 
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Platform } from 'react-native';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
 import { createTextStyle, createTitleStyle, createSecondaryTextStyle, createButtonTextStyle } from '../../utils/styles/textStyles';
 import { buttonStyles, cardStyles } from '../../utils/styles/commonStyles';
@@ -67,7 +67,13 @@ export const styles = StyleSheet.create({
     tintColor: colors.gray[400],
   },
   serverPageInfo: {
-    ...createTitleStyle('base'),
+    ...createTitleStyle('base', {
+      fontWeight: typography.fontWeight.bold,
+      fontFamily: Platform.select({
+        ios: undefined,
+        android: typography.fontFamily.bold,
+      }),
+    }),
   },
   groupMissionList: {
     marginBottom: spacing[4],

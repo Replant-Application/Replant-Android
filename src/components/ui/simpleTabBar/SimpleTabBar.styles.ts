@@ -45,7 +45,7 @@ export const styles = StyleSheet.create({
       fontWeight: typography.fontWeight.bold,
       fontFamily: Platform.select({
         ios: undefined,
-        android: typography.fontFamily.bold,
+        android: typography.fontFamily.regular,
       }),
     }),
   },
@@ -63,7 +63,7 @@ export const styles = StyleSheet.create({
       marginLeft: spacing[1],
       fontFamily: Platform.select({
         ios: undefined,
-        android: typography.fontFamily.bold,
+        android: typography.fontFamily.regular,
       }),
     }),
   },
