@@ -3,7 +3,7 @@
  * 투두리스트 화면의 모든 스타일 정의
  */
 
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Platform } from 'react-native';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
 import { createTextStyle, createBodyStyle, createSecondaryTextStyle } from '../../utils/styles/textStyles';
 import { emptyStateStyles } from '../../utils/styles/commonStyles';
@@ -44,16 +44,24 @@ export const styles = StyleSheet.create({
     color: '#8B6F47',
     marginRight: spacing[3],
     fontWeight: typography.fontWeight.normal,
+    textAlignVertical: 'center',
+    includeFontPadding: false,
+    lineHeight: 32,
   },
   createButtonContent: {
     flex: 1,
+    justifyContent: 'center',
   },
   createButtonTitle: {
-    ...createBodyStyle('base', {
-      fontWeight: typography.fontWeight.medium,
-      color: '#6B5344',
-      marginBottom: spacing[1],
+    fontSize: typography.fontSize.base,
+    fontFamily: Platform.select({
+      ios: undefined,
+      android: typography.fontFamily.regular,
     }),
+    fontWeight: typography.fontWeight.medium,
+    color: '#6B5344',
+    includeFontPadding: false,
+    lineHeight: Math.round(typography.fontSize.base * 1.35),
   },
   createButtonSubtitle: {
     ...createSecondaryTextStyle('sm', {

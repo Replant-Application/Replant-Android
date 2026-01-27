@@ -71,7 +71,11 @@ export const styles = StyleSheet.create({
   },
   authorName: {
     ...createTextStyle('sm', {
-      fontWeight: typography.fontWeight.normal,
+      fontWeight: typography.fontWeight.bold,
+      fontFamily: Platform.select({
+        ios: undefined,
+        android: typography.fontFamily.bold,
+      }),
     }),
   },
   categoryBadge: {
@@ -123,6 +127,11 @@ export const styles = StyleSheet.create({
   date: {
     ...createTextStyle('xs', {
       color: colors.text.tertiary,
+      fontWeight: typography.fontWeight.bold,
+      fontFamily: Platform.select({
+        ios: undefined,
+        android: typography.fontFamily.bold,
+      }),
     }),
     marginLeft: 'auto',
   },

@@ -3,7 +3,7 @@
  * 간단한 탭 바 컴포넌트의 모든 스타일 정의
  */
 
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Platform } from 'react-native';
 import { spacing, typography, colors } from '../../../utils/designTokens';
 import { createTextStyle } from '../../../utils/styles/textStyles';
 
@@ -43,6 +43,10 @@ export const styles = StyleSheet.create({
     ...createTextStyle('sm', {
       color: colors.black,
       fontWeight: typography.fontWeight.bold,
+      fontFamily: Platform.select({
+        ios: undefined,
+        android: typography.fontFamily.bold,
+      }),
     }),
   },
   tabCount: {
@@ -57,6 +61,10 @@ export const styles = StyleSheet.create({
       fontWeight: typography.fontWeight.bold,
       color: colors.black,
       marginLeft: spacing[1],
+      fontFamily: Platform.select({
+        ios: undefined,
+        android: typography.fontFamily.bold,
+      }),
     }),
   },
   underline: {

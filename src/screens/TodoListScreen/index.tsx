@@ -158,11 +158,11 @@ const TodoListScreen: React.FC<Props> = ({ navigation, route }) => {
             onPress={handleCreateTodoList}
             activeOpacity={0.7}
             accessibilityRole="button"
-            accessibilityLabel="나만의 To-Do 만들기"
+            accessibilityLabel="나만의 투두리스트 만들기"
           >
             <Text style={styles.createButtonIcon}>+</Text>
             <View style={styles.createButtonContent}>
-              <Text style={styles.createButtonTitle}>나만의 To-Do 만들기</Text>
+              <Text style={styles.createButtonTitle}>나만의 투두리스트 만들기</Text>
             </View>
           </TouchableOpacity>
         )}
