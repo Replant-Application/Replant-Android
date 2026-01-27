@@ -302,15 +302,15 @@ export const useMissionScreenContainer = ({
           const completedMission = missions.find(m => m.mission_id === missionId);
           if (!completedMission) return;
 
-          const alertTitle = result.levelUp ? '레벨업!' : '미션 완료';
-          const alertMessage = result.levelUp
+          const resultAlertTitle = result.levelUp ? '레벨업!' : '미션 완료';
+          const resultAlertMessage = result.levelUp
             ? `축하합니다! 레벨 ${result.newLevel}이 되었습니다!`
             : `+${result.experienceGained} EXP를 획득했습니다!`;
 
           // 모달 표시
           setIsLevelUp(result.levelUp || false);
-          setCompleteModalTitle(alertTitle);
-          setCompleteModalMessage(alertMessage);
+          setCompleteModalTitle(resultAlertTitle);
+          setCompleteModalMessage(resultAlertMessage);
           setCompletedMissionForVerification(completedMission);
           setShowCompleteModal(true);
         }
@@ -583,7 +583,7 @@ export const useMissionScreenContainer = ({
         setGroupLoading(true);
         console.log('[MissionScreen] 미션 도감 로딩 시작... (서버 페이지:', page, ', 탭:', missionGroupTab, ')');
 
-        let missions: UnifiedMission[] = [];
+        let groupMissions: UnifiedMission[] = [];
         let totalPages = 1;
         let totalElements = 0;
 
@@ -612,7 +612,7 @@ export const useMissionScreenContainer = ({
           });
 
           // 커스텀 미션을 UnifiedMission으로 변환 (모든 미션 표시, 잠금 없음)
-          missions = customMissionsResult.data.content.map(m => ({
+          groupMissions = customMissionsResult.data.content.map(m => ({
             id: m.id,
             title: m.title, // 커스텀 미션은 항상 제목 표시
             description: m.description, // 커스텀 미션은 항상 설명 표시
@@ -673,17 +673,17 @@ export const useMissionScreenContainer = ({
           }));
 
           // 공식 미션만 필터링
-          missions = allMissions.filter(m => !m.isCustom);
+          groupMissions = allMissions.filter(m => !m.isCustom);
         }
 
         // 서버 페이지 정보 저장
         setTotalServerPages(totalPages);
 
-        console.log('[MissionScreen] 현재 페이지 미션 수:', missions.length);
-        console.log('[MissionScreen] 탭:', missionGroupTab, ', 미션 수:', missions.length);
+        console.log('[MissionScreen] 현재 페이지 미션 수:', groupMissions.length);
+        console.log('[MissionScreen] 탭:', missionGroupTab, ', 미션 수:', groupMissions.length);
 
-        setGroupMissions(missions);
-        console.log('[MissionScreen] 미션 도감 로딩 완료:', missions.length, '개');
+        setGroupMissions(groupMissions);
+        console.log('[MissionScreen] 미션 도감 로딩 완료:', groupMissions.length, '개');
       } catch (err) {
         console.error('[MissionScreen] 미션 도감 로딩 예외 발생:', err);
         showError(

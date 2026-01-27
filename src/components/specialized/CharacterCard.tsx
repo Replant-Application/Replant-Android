@@ -48,7 +48,6 @@ const CharacterCard: React.FC<CharacterCardProps> = ({
   // 접근성 라벨 생성
   const getAccessibilityLabel = () => {
     const levelName = getLevelName(character.level || 1);
-    const experienceProgress = character.experience || 0;
     return `${character.name || '캐릭터'}, ${levelName}, 레벨 ${character.level || 1}, 경험치 ${experienceProgress}/100`;
   };
 

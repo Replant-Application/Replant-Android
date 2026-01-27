@@ -171,18 +171,9 @@ export const useHomeScreenContainer = ({ navigation, route }: HomeScreenContaine
 
       // 투두리스트 로드 (개별 try-catch)
       try {
-        console.log('\n🔵 [HomeScreen] ========== 투두리스트 로드 시작 ==========');
         const todoListResult = await getActiveTodoLists();
-        console.log('[HomeScreen] getActiveTodoLists 응답:', JSON.stringify(todoListResult, null, 2));
         
         if (todoListResult?.success && Array.isArray(todoListResult.data)) {
-          console.log('[HomeScreen] ✅ API 응답 성공');
-          console.log('[HomeScreen] 전체 투두리스트 수:', todoListResult.data.length);
-          console.log('[HomeScreen] 전체 투두리스트 상세 데이터:');
-          todoListResult.data.forEach((tl, index) => {
-            console.log(`  [${index + 1}] ID:${tl.id}, 제목:"${tl.title}", 상태:${tl.status}, 완료:${tl.completedCount}/${tl.totalCount}, createdAt:`, tl.createdAt);
-          });
-          
           // 오늘 날짜인 투두리스트만 "진행중"에 표시 (TodoListScreen과 동일한 로직)
           // 과거 날짜의 미완료 투두리스트는 제외
           const filteredTodoLists = filterTodayActiveTodoLists(todoListResult.data, 'HomeScreen');
@@ -217,28 +208,7 @@ export const useHomeScreenContainer = ({ navigation, route }: HomeScreenContaine
             }
           });
 
-          console.log('[HomeScreen] 📊 필터링 결과 요약:');
-          console.log(`  - 필터링 전: ${todoListResult.data.length}개`);
-          console.log(`  - 활성 투두리스트: ${filteredTodoLists.length}개`);
-          console.log(`  - 완료된 투두리스트: ${completedTodayLists.length}개`);
-          console.log(`  - 최종 포함: ${allTodoLists.length}개`);
-          if (allTodoLists.length > 0) {
-            console.log('[HomeScreen] ✅ 최종 투두리스트 목록:');
-            allTodoLists.forEach((tl, index) => {
-              const isCompleted = tl.completedCount === tl.totalCount;
-              console.log(`  [${index + 1}] ID:${tl.id}, 제목:"${tl.title}", 완료:${tl.completedCount}/${tl.totalCount} ${isCompleted ? '(완료됨)' : ''}`);
-            });
-          } else {
-            console.log('[HomeScreen] ⚠️ 표시할 투두리스트가 없습니다!');
-          }
-          console.log('🔵 [HomeScreen] ========== 투두리스트 로드 완료 ==========\n');
-          
-          console.log('[HomeScreen] 🔵 setActiveTodoLists 호출 전:', {
-            activeTodoListsLength: allTodoLists.length,
-            activeTodoListsIds: allTodoLists.map(tl => tl.id)
-          });
           setActiveTodoLists(allTodoLists);
-          console.log('[HomeScreen] 🔵 setActiveTodoLists 호출 완료');
 
           // 각 투두리스트의 상세 정보를 가져와서 미션 추출 및 완료 확인
           // 이 부분에서 에러가 발생해도 activeTodoLists는 유지되어야 함
@@ -272,8 +242,6 @@ export const useHomeScreenContainer = ({ navigation, route }: HomeScreenContaine
                           mission,
                           todoListTitle: todoListDetail.title,
                         });
-                      } else {
-                        console.warn('[HomeScreen] 빈 시간 키 발견:', mission.scheduledStartTime);
                       }
                     } else {
                       // 시간이 없는 미션은 "시간 미정" 그룹에 추가
@@ -285,11 +253,8 @@ export const useHomeScreenContainer = ({ navigation, route }: HomeScreenContaine
                         mission,
                         todoListTitle: todoListDetail.title,
                       });
-                      console.log(`[HomeScreen] 미션 ${mission.id} (${mission.title}): 시간 미정으로 추가`);
                     }
                   }
-                } else {
-                  console.log(`[HomeScreen] 투두리스트 ${todoList.id}: missions 배열 없음`);
                 }
 
                 // 투두리스트 완료 확인
@@ -308,39 +273,25 @@ export const useHomeScreenContainer = ({ navigation, route }: HomeScreenContaine
                   
                   const createdDate = new Date(normalizedDate);
                   if (isNaN(createdDate.getTime())) {
-                    console.warn('[HomeScreen] 잘못된 날짜 형식:', todoListDetail.createdAt);
                     return false;
                   }
                   
-                  const today = new Date();
+                  const todayDate = new Date();
                   return (
-                    createdDate.getFullYear() === today.getFullYear() &&
-                    createdDate.getMonth() === today.getMonth() &&
-                    createdDate.getDate() === today.getDate()
+                    createdDate.getFullYear() === todayDate.getFullYear() &&
+                    createdDate.getMonth() === todayDate.getMonth() &&
+                    createdDate.getDate() === todayDate.getDate()
                   );
                 })();
 
                 // 모든 미션이 완료되었고 오늘 생성된 투두리스트인 경우 완료 상태 저장
                 if (allMissionsCompleted && isTodayCreated) {
-                  console.log('[HomeScreen] 완료된 투두리스트 감지:', {
-                    id: todoListDetail.id,
-                    title: todoListDetail.title,
-                    allMissionsCompleted,
-                    isTodayCreated
-                  });
                   setCompletedTodoList(todoListDetail);
                   break; // 하나만 표시
                 }
-              } else {
-                // 에러가 발생해도 다른 투두리스트는 계속 로드
-                console.log(
-                  `[HomeScreen] 투두리스트 ${todoList.id} 상세 정보 로드 실패:`,
-                  detailResult?.error
-                );
               }
             } catch (e) {
               // 개별 투두리스트 로드 실패는 무시하고 계속 진행
-              console.log(`[HomeScreen] 투두리스트 ${todoList.id} 상세 정보 로드 실패:`, e);
             }
           }
 
@@ -352,11 +303,9 @@ export const useHomeScreenContainer = ({ navigation, route }: HomeScreenContaine
                 const timeB = b[0];
                 // 안전 검사: 문자열이 아니거나 undefined인 경우 처리
                 if (!timeA || typeof timeA !== 'string') {
-                  console.warn('[HomeScreen] 잘못된 시간 키:', timeA);
                   return 1; // 뒤로 보냄
                 }
                 if (!timeB || typeof timeB !== 'string') {
-                  console.warn('[HomeScreen] 잘못된 시간 키:', timeB);
                   return -1; // 앞으로 보냄
                 }
                 return timeA.localeCompare(timeB);
@@ -389,7 +338,7 @@ export const useHomeScreenContainer = ({ navigation, route }: HomeScreenContaine
         setTodoMissionsByTime(new Map());
       }
     } catch (error) {
-      console.log('데이터 로드 전체 실패:', error);
+      console.error('데이터 로드 전체 실패:', error);
       setDataError('데이터를 불러오는데 실패했습니다.');
     } finally {
       setDataLoading(false);

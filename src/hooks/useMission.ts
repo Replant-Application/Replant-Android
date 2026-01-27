@@ -18,8 +18,7 @@ import { deleteMissionPhoto as deleteMissionPhotoService } from '../services/mis
 import { useUser } from '../contexts/UserContext';
 import { logError } from '../utils/logger';
 import { sortMissionsByTitle } from '../utils/missionUtils';
-import { Mission, MissionData, UseMissionReturn, MissionCompletionResult, ServiceResult, ExperienceResult, MissionCategory, MissionStatus, MissionType } from '../types';
-import { TodoMission } from '../types/todolist';
+import { Mission, MissionData, UseMissionReturn, MissionCompletionResult, ServiceResult, ExperienceResult, MissionCategory, MissionStatus } from '../types';
 import {
   createCustomMission as createCustomMissionApi,
   updateCustomMission as updateCustomMissionApi,
@@ -121,78 +120,6 @@ const transformUserMissionToMission = (userMission: UserMission): Mission | null
     };
   } catch (e) {
     console.error('[transformUserMissionToMission] 변환 실패:', e);
-    return null;
-  }
-};
-
-/**
- * TodoMission을 Mission 타입으로 변환
- * 투두리스트의 미션을 미션 탭에서 사용할 수 있도록 변환
- */
-const transformTodoMissionToMission = (
-  todoMission: TodoMission,
-  todoListId?: number
-): Mission | null => {
-  try {
-    const isCustom = todoMission.missionType === 'CUSTOM';
-    
-    // TodoMission의 상태를 Mission의 status로 변환
-    // UserMission의 status를 우선적으로 사용 (가장 정확함)
-    // userMissionStatus가 있으면 그대로 사용 (PENDING, COMPLETED 등)
-    // userMissionStatus가 없고 isCompleted === true → COMPLETED
-    // 둘 다 없으면 기본값 ASSIGNED
-    let status: MissionStatus = 'ASSIGNED';
-    if (todoMission.userMissionStatus) {
-      // 백엔드의 UserMission 상태를 우선적으로 사용 (ASSIGNED, PENDING, COMPLETED 등)
-      // 인증글 작성 후 PENDING 상태가 제대로 반영되도록 우선순위를 높임
-      status = todoMission.userMissionStatus as MissionStatus;
-      console.log(`[transformTodoMissionToMission] userMissionStatus 사용: ${todoMission.title} -> ${status}`, {
-        userMissionStatus: todoMission.userMissionStatus,
-        isCompleted: todoMission.isCompleted,
-        isVerified: todoMission.isVerified
-      });
-    } else if (todoMission.isCompleted) {
-      // userMissionStatus가 없고 isCompleted === true인 경우 COMPLETED
-      status = 'COMPLETED';
-      console.log(`[transformTodoMissionToMission] isCompleted=true (userMissionStatus 없음): ${todoMission.title} -> ${status}`, {
-        userMissionStatus: todoMission.userMissionStatus,
-        isCompleted: todoMission.isCompleted,
-        isVerified: todoMission.isVerified
-      });
-    } else {
-      // userMissionStatus가 없고 isCompleted도 false면 기본값 ASSIGNED
-      status = 'ASSIGNED';
-      console.warn(`[transformTodoMissionToMission] ⚠️ userMissionStatus 없음, 기본값 ASSIGNED: ${todoMission.title}`, {
-        userMissionStatus: todoMission.userMissionStatus,
-        isVerified: todoMission.isVerified,
-        isCompleted: todoMission.isCompleted,
-        missionId: todoMission.missionId,
-        missionType: todoMission.missionType
-      });
-    }
-    
-    return {
-      id: todoMission.id,
-      mission_id: isCustom ? `custom_${todoMission.missionId}` : todoMission.missionId.toString(),
-      title: todoMission.title,
-      description: todoMission.description,
-      emoji: getMissionEmoji(todoMission.title),
-      experience: isCustom ? 0 : 10, // TodoMission에는 expReward가 없으므로 기본값 사용
-      category_id: 'growth',
-      category: 'DAILY_LIFE',
-      missionType: todoMission.missionType as MissionType,
-      status,
-      difficulty: 'medium' as const,
-      completed: todoMission.isCompleted,
-      completed_at: todoMission.completedAt || undefined,
-      is_custom: isCustom,
-      verification_type: (todoMission.verificationType || 'COMMUNITY') as 'COMMUNITY' | 'GPS' | 'TIME',
-      verified: todoMission.isVerified === true,
-      // 투두리스트 정보 저장 (미션 완료 시 필요)
-      todoListId: todoListId,
-    };
-  } catch (e) {
-    console.error('[transformTodoMissionToMission] 변환 실패:', e);
     return null;
   }
 };

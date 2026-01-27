@@ -131,8 +131,8 @@ export const useFindIdScreenContainer = ({ onNavigate }: FindIdScreenContainerPr
         }
         setError(errorMessage);
       }
-    } catch (error) {
-      console.error('Find ID error:', error);
+    } catch (err) {
+      console.error('Find ID error:', err);
       setError('아이디 찾기 중 오류가 발생했습니다.\n잠시 후 다시 시도해주세요.');
     } finally {
       setIsLoading(false);

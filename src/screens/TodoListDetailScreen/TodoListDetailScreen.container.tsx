@@ -75,21 +75,21 @@ export const useTodoListDetailScreenContainer = ({ navigation, route }: TodoList
   /**
    * 모든 미션이 완료되었는지 확인
    */
-  const checkAllMissionsCompleted = useCallback((todoList: TodoList): boolean => {
-    return todoList.missions ? todoList.missions.every(mission => mission.isCompleted) : todoList.completedCount > 0 && todoList.completedCount === todoList.totalCount;
+  const checkAllMissionsCompleted = useCallback((targetTodoList: TodoList): boolean => {
+    return targetTodoList.missions ? targetTodoList.missions.every(mission => mission.isCompleted) : targetTodoList.completedCount > 0 && targetTodoList.completedCount === targetTodoList.totalCount;
   }, []);
 
   /**
    * 투두리스트가 오늘 생성되었는지 확인
    */
-  const checkIsTodayCreated = useCallback((todoList: TodoList): boolean => {
-    if (!todoList.createdAt) return false;
-    const createdDate = new Date(todoList.createdAt);
-    const today = new Date();
+  const checkIsTodayCreated = useCallback((targetTodoList: TodoList): boolean => {
+    if (!targetTodoList.createdAt) return false;
+    const createdDate = new Date(targetTodoList.createdAt);
+    const todayDate = new Date();
     return (
-      createdDate.getFullYear() === today.getFullYear() &&
-      createdDate.getMonth() === today.getMonth() &&
-      createdDate.getDate() === today.getDate()
+      createdDate.getFullYear() === todayDate.getFullYear() &&
+      createdDate.getMonth() === todayDate.getMonth() &&
+      createdDate.getDate() === todayDate.getDate()
     );
   }, []);
 
@@ -97,9 +97,9 @@ export const useTodoListDetailScreenContainer = ({ navigation, route }: TodoList
    * 완료 모달 표시 여부 확인 및 설정
    */
   const checkAndShowCompleteModal = useCallback(
-    (todoList: TodoList) => {
-      const allMissionsCompleted = checkAllMissionsCompleted(todoList);
-      const isTodayCreated = checkIsTodayCreated(todoList);
+    (targetTodoList: TodoList) => {
+      const allMissionsCompleted = checkAllMissionsCompleted(targetTodoList);
+      const isTodayCreated = checkIsTodayCreated(targetTodoList);
 
       if (allMissionsCompleted && isTodayCreated && !hasShownCompleteModal) {
         setShowCompleteModal(true);
@@ -128,14 +128,7 @@ export const useTodoListDetailScreenContainer = ({ navigation, route }: TodoList
         const todoList = detailResult.data;
         // 디버깅: isVerified 필드 확인
         if (todoList.missions) {
-          todoList.missions.forEach((mission, index) => {
-            console.log(`[TodoListDetailScreen] 미션 ${index + 1}:`, {
-              title: mission.title,
-              missionType: mission.missionType,
-              isCompleted: mission.isCompleted,
-              isVerified: (mission as any).isVerified,
-            });
-          });
+          // 미션 데이터 처리
         }
         setTodoList(todoList);
 
@@ -160,10 +153,6 @@ export const useTodoListDetailScreenContainer = ({ navigation, route }: TodoList
               });
 
               if (verificationResult.success && verificationResult.data && verificationResult.data.content && verificationResult.data.content.length > 0) {
-                console.log('[TodoListDetailScreen] 인증 완료된 미션 발견:', {
-                  missionId: mission.missionId,
-                  missionTitle: mission.title,
-                });
                 hasVerifiedMission = true;
               }
             } catch (error) {
@@ -173,7 +162,6 @@ export const useTodoListDetailScreenContainer = ({ navigation, route }: TodoList
 
           // 인증 완료된 미션이 있으면 투두리스트를 다시 조회하여 최신 상태 반영
           if (hasVerifiedMission) {
-            console.log('[TodoListDetailScreen] 인증 완료된 미션이 있으므로 투두리스트 재조회');
             setTimeout(async () => {
               const refreshResult = await getTodoListDetail(id);
               if (refreshResult.success && refreshResult.data) {
