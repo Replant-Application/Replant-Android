@@ -30,8 +30,15 @@ export const useOnboardingScreenContainer = ({
 
   // Skip 버튼 클릭 처리
   const handleSkip = async () => {
-    await setOnboardingCompleted();
-    onNavigate(SCREEN_NAMES.LOGIN as string);
+    try {
+      console.log('[OnboardingScreen] 스킵 버튼 클릭됨');
+      await setOnboardingCompleted();
+      console.log('[OnboardingScreen] 온보딩 완료 상태 저장됨');
+      console.log('[OnboardingScreen] 로그인 화면으로 이동:', SCREEN_NAMES.LOGIN);
+      onNavigate(SCREEN_NAMES.LOGIN as string);
+    } catch (error) {
+      console.error('[OnboardingScreen] 스킵 버튼 처리 오류:', error);
+    }
   };
 
   // Start 버튼 클릭 처리

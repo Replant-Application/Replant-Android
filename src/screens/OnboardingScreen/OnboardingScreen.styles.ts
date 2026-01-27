@@ -31,11 +31,13 @@ export const styles = StyleSheet.create({
     position: 'absolute',
     top: Platform.OS === 'ios' ? 40 + spacing[2] : 30 + spacing[2],
     right: spacing[3],
-    zIndex: 10,
+    zIndex: 1000, // ImageBackground 위에 표시되도록 높은 zIndex 설정
+    elevation: 10, // Android에서도 위에 표시되도록
     paddingVertical: spacing[2],
     paddingHorizontal: spacing[4],
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: 'transparent', // 배경 투명
   },
   slideContainer: {
     width: SCREEN_WIDTH,

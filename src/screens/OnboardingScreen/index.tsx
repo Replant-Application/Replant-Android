@@ -83,22 +83,12 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onNavigate }) => {
 
   return (
     <View style={styles.container}>
-      {/* Skip 버튼 */}
-      <TouchableOpacity
-        style={styles.skipButton}
-        onPress={handleSkip}
-        activeOpacity={0.8}
-        accessibilityRole="button"
-        accessibilityLabel="건너뛰기"
-      >
-        <SkipNextIcon size={28} />
-      </TouchableOpacity>
-
       <ImageBackground
         source={ONBOARDING_SLIDES[currentIndex].image}
         style={styles.imageBackground}
         resizeMode="cover"
         accessibilityLabel={ONBOARDING_SLIDES[currentIndex].accessibilityLabel ?? '온보딩 소개 이미지'}
+        pointerEvents="box-none"
       >
         {/* 슬라이드 - 투명하게 처리하여 스와이프만 가능하게 */}
         <FlatList
@@ -121,6 +111,21 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onNavigate }) => {
           style={styles.transparentFlatList}
         />
       </ImageBackground>
+
+      {/* Skip 버튼 - ImageBackground 위에 표시 */}
+      <TouchableOpacity
+        style={styles.skipButton}
+        onPress={() => {
+          console.log('[OnboardingScreen] 스킵 버튼 onPress 호출됨');
+          handleSkip();
+        }}
+        activeOpacity={0.8}
+        accessibilityRole="button"
+        accessibilityLabel="건너뛰기"
+        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+      >
+        <SkipNextIcon size={28} />
+      </TouchableOpacity>
 
       {/* 위치(1/6), 이전/다음·시작하기 (스와이프 대체, 2.2·2.4) */}
       <View style={styles.navContainer}>

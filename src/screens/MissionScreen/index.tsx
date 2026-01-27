@@ -174,9 +174,9 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
         {/* 진행중/인증대기/완료 탭 */}
         <SimpleTabBar
           tabs={[
-            { key: 'inProgress', label: `진행중 (${missionCounts?.inProgress || 0})` },
-            { key: 'pendingVerification', label: `인증 대기 (${missionCounts?.pendingVerification || 0})` },
-            { key: 'completed', label: `완료 (${missionCounts?.completed || 0})` },
+            { key: 'inProgress', label: '진행중', count: missionCounts?.inProgress || 0 },
+            { key: 'pendingVerification', label: '인증 대기', count: missionCounts?.pendingVerification || 0 },
+            { key: 'completed', label: '완료', count: missionCounts?.completed || 0 },
           ]}
           activeTab={selectedFilter}
           onTabChange={handleFilterChange}

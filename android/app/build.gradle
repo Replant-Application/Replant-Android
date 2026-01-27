@@ -111,7 +111,12 @@ android {
                 keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
             }
             
-            storeFile file(keystoreProperties['RELEASE_STORE_FILE'] ?: 'replant-release-key.keystore')
+            def keystoreFile = keystoreProperties['RELEASE_STORE_FILE']
+            if (keystoreFile) {
+                storeFile file(keystoreFile.startsWith('/') ? keystoreFile : rootProject.file(keystoreFile))
+            } else {
+                storeFile file('replant-release-key.keystore')
+            }
             storePassword keystoreProperties['RELEASE_STORE_PASSWORD'] ?: ''
             keyAlias keystoreProperties['RELEASE_KEY_ALIAS'] ?: 'replant-key'
             keyPassword keystoreProperties['RELEASE_KEY_PASSWORD'] ?: ''

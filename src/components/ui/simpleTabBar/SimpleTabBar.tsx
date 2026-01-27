@@ -24,17 +24,29 @@ export const SimpleTabBar: React.FC<SimpleTabBarProps> = ({
             onPress={() => onTabChange(tab.key)}
             activeOpacity={0.7}
             accessibilityRole="tab"
-            accessibilityLabel={tab.label}
+            accessibilityLabel={tab.count !== undefined ? `${tab.label}, ${tab.count}개` : tab.label}
             accessibilityState={{ selected: isActive }}
           >
-            <Text
-              style={[
-                styles.tabText,
-                isActive && styles.tabTextActive,
-              ]}
-            >
-              {tab.label}
-            </Text>
+            <View style={styles.tabContent}>
+              <Text
+                style={[
+                  styles.tabText,
+                  isActive && styles.tabTextActive,
+                ]}
+              >
+                {tab.label}
+              </Text>
+              {tab.count !== undefined && (
+                <Text
+                  style={[
+                    styles.tabCount,
+                    isActive && styles.tabCountActive,
+                  ]}
+                >
+                  {tab.count}
+                </Text>
+              )}
+            </View>
             {isActive && <View style={styles.underline} />}
           </TouchableOpacity>
         );

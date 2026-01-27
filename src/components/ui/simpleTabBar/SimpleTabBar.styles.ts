@@ -36,6 +36,10 @@ export const styles = StyleSheet.create({
     borderRadius: borderRadius.base,
     marginHorizontal: spacing[0.5],
   },
+  tabContent: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   tabActive: {
     backgroundColor: '#8B6F47', // 활성 탭 배경색 (책 등 색상)
     ...shadows.sm,
@@ -60,6 +64,19 @@ export const styles = StyleSheet.create({
       color: '#FFF8E7', // 활성 탭 텍스트 색상 (크림색)
       fontWeight: typography.fontWeight.medium,
       letterSpacing: 0.3,
+    }),
+  },
+  tabCount: {
+    ...createTextStyle('xs', {
+      fontWeight: typography.fontWeight.semibold,
+      color: '#8B6F47', // 비활성 탭 숫자 색상
+      marginTop: spacing[0.5],
+    }),
+  },
+  tabCountActive: {
+    ...createTextStyle('xs', {
+      fontWeight: typography.fontWeight.semibold,
+      color: '#FFF8E7', // 활성 탭 숫자 색상 (크림색)
     }),
   },
   underline: {
