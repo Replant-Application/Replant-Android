@@ -69,6 +69,8 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
     onRefresh,
     onMissionPageChange,
     goToMissionPage,
+    missionSortBy,
+    handleMissionSortChange,
     getVerificationTypeLabel,
     getVerificationTypeIcon,
     getMissionCategoryLabel,
@@ -292,10 +294,12 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
               currentServerPage={currentServerPage}
               totalServerPages={totalServerPages}
               refreshing={refreshing}
+              sortBy={missionSortBy}
               onMissionSelect={(mission) => setSelectedGroupMission(mission)}
               onServerPageChange={handleServerPageChange}
               onNavigateToCreate={() => navigation.navigate('CustomMissionCreate' as any)}
               onRefresh={onRefresh}
+              onSortChange={handleMissionSortChange}
               getVerificationTypeLabel={getVerificationTypeLabel}
               getVerificationTypeIcon={getVerificationTypeIcon}
               getMissionCategoryLabel={getMissionCategoryLabel}

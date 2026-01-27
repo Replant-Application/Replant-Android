@@ -169,6 +169,7 @@ export const useMissionScreenContainer = ({
   const [selectedGroupMission, setSelectedGroupMission] = useState<UnifiedMission | null>(null);
   const [currentServerPage, setCurrentServerPage] = useState(0); // 서버 페이지 (0부터 시작)
   const [totalServerPages, setTotalServerPages] = useState(0); // 전체 서버 페이지 수
+  const [missionSortBy, setMissionSortBy] = useState<'default' | 'participants' | 'exp' | 'difficulty'>('default'); // 정렬 옵션
 
   // 현재 사용자 ID (커스텀 미션 수정 권한 확인용)
   const [currentUserId, setCurrentUserId] = useState<number | null>(null);
@@ -598,17 +599,21 @@ export const useMissionScreenContainer = ({
     async (page: number = 0) => {
       try {
         setGroupLoading(true);
-        console.log('[MissionScreen] 미션 도감 로딩 시작... (서버 페이지:', page, ', 탭:', missionGroupTab, ')');
+        console.log('[MissionScreen] 미션 도감 로딩 시작... (서버 페이지:', page, ', 탭:', missionGroupTab, ', 정렬:', missionSortBy, ')');
 
         let loadedGroupMissions: UnifiedMission[] = [];
         let totalPages = 1;
         let totalElements = 0;
 
+        // 정렬이 선택된 경우: 전체 데이터를 받아와서 정렬 (커스텀 미션만)
+        const shouldLoadAll = missionGroupTab === 'custom' && missionSortBy !== 'default';
+        const loadSize = shouldLoadAll ? 1000 : MISSION_COLLECTION_PAGE_SIZE; // 정렬 시 전체 데이터 로드
+
         // 커스텀 미션 탭일 때: 모든 커스텀 미션 조회
         if (missionGroupTab === 'custom') {
           const customMissionsResult = await getCustomMissions({
-            page,
-            size: MISSION_COLLECTION_PAGE_SIZE,
+            page: shouldLoadAll ? 0 : page,
+            size: loadSize,
           });
 
           if (!customMissionsResult.success || !customMissionsResult.data) {
@@ -618,14 +623,15 @@ export const useMissionScreenContainer = ({
             return;
           }
 
-          totalPages = customMissionsResult.data.totalPages || 1;
+          totalPages = shouldLoadAll ? 1 : (customMissionsResult.data.totalPages || 1);
           totalElements = customMissionsResult.data.totalElements || 0;
 
           console.log('[MissionScreen] 커스텀 미션 페이징 정보:', {
-            currentPage: page,
+            currentPage: shouldLoadAll ? 0 : page,
             totalPages,
             totalElements,
             currentPageCount: customMissionsResult.data.content.length,
+            loadAll: shouldLoadAll,
           });
 
           // 커스텀 미션을 UnifiedMission으로 변환 (모든 미션 표시, 잠금 없음)
@@ -648,7 +654,7 @@ export const useMissionScreenContainer = ({
             isPublic: m.isPublic,
           }));
         } else {
-          // 공식 미션 탭일 때: 기존 로직 (사용자가 수행한 미션만)
+          // 공식 미션 탭일 때: 기존 로직 (사용자가 수행한 미션만, 정렬 없음)
           const collectionResult = await getMissionCollection({
             page,
             size: MISSION_COLLECTION_PAGE_SIZE,
@@ -695,11 +701,11 @@ export const useMissionScreenContainer = ({
           loadedGroupMissions = allMissions.filter(m => !m.isCustom);
         }
 
-        // 서버 페이지 정보 저장
-        setTotalServerPages(totalPages);
+        // 서버 페이지 정보 저장 (커스텀 미션 정렬 시에는 페이징 없음)
+        setTotalServerPages(shouldLoadAll ? 1 : totalPages);
 
         console.log('[MissionScreen] 현재 페이지 미션 수:', loadedGroupMissions.length);
-        console.log('[MissionScreen] 탭:', missionGroupTab, ', 미션 수:', loadedGroupMissions.length);
+        console.log('[MissionScreen] 탭:', missionGroupTab, ', 미션 수:', loadedGroupMissions.length, ', 정렬:', missionSortBy);
 
         setGroupMissions(loadedGroupMissions);
         console.log('[MissionScreen] 미션 도감 로딩 완료:', loadedGroupMissions.length, '개');
@@ -714,7 +720,7 @@ export const useMissionScreenContainer = ({
         setGroupLoading(false);
       }
     },
-    [missionGroupTab, handleApiError, showError]
+    [missionGroupTab, missionSortBy, handleApiError, showError]
   );
 
   /**
@@ -750,15 +756,75 @@ export const useMissionScreenContainer = ({
 
 
   /**
+   * 난이도 순서 값 (정렬용)
+   */
+  const getDifficultyOrder = (difficulty?: 'EASY' | 'MEDIUM' | 'HARD'): number => {
+    switch (difficulty) {
+      case 'EASY':
+        return 1;
+      case 'MEDIUM':
+        return 2;
+      case 'HARD':
+        return 3;
+      default:
+        return 0; // 난이도 없으면 가장 앞에
+    }
+  };
+
+  /**
+   * 정렬된 미션 목록 계산
+   * 정렬이 선택된 경우 전체 데이터를 기준으로 정렬
+   */
+  const sortedGroupMissions = useMemo(() => {
+    if (missionSortBy === 'default') {
+      return groupMissions;
+    }
+
+    const sorted = [...groupMissions];
+    
+    // 공식 미션 및 커스텀 미션: 참여순 정렬
+    sorted.sort((a, b) => {
+      switch (missionSortBy) {
+        case 'participants':
+          // 참여자 수 내림차순 (많은 것부터 위로)
+          const aParticipants = Number(a.participantCount) || 0;
+          const bParticipants = Number(b.participantCount) || 0;
+          
+          // 참여자 수가 다르면 참여자 수 기준으로 정렬
+          if (bParticipants !== aParticipants) {
+            return bParticipants - aParticipants;
+          }
+          // 참여자 수가 같으면 ID로 정렬 (안정적인 정렬)
+          return a.id - b.id;
+        default:
+          return 0;
+      }
+    });
+    
+    return sorted;
+  }, [groupMissions, missionSortBy, missionGroupTab]);
+
+  /**
    * 탭 변경 시 미션 도감 로드
    */
   useEffect(() => {
     if (activeTab === 'missionGroup') {
       setCurrentServerPage(0); // 서버 페이지 초기화
       setSelectedGroupMission(null);
+      setMissionSortBy('default'); // 정렬 초기화
       loadGroupMissions(0);
     }
   }, [activeTab, missionGroupTab, loadGroupMissions]);
+
+  /**
+   * 정렬 변경 시 미션 도감 재로드 (커스텀 미션만, 전체 데이터 기준 정렬)
+   */
+  useEffect(() => {
+    if (activeTab === 'missionGroup' && missionGroupTab === 'custom') {
+      setCurrentServerPage(0); // 서버 페이지 초기화
+      loadGroupMissions(0);
+    }
+  }, [missionSortBy, activeTab, missionGroupTab, loadGroupMissions]);
 
   /**
    * 서버 페이지 변경 시 미션 도감 로드
@@ -931,6 +997,13 @@ export const useMissionScreenContainer = ({
   }, []);
 
   /**
+   * 미션 정렬 변경 핸들러
+   */
+  const handleMissionSortChange = useCallback((sortBy: 'default' | 'participants' | 'exp' | 'difficulty') => {
+    setMissionSortBy(sortBy);
+  }, []);
+
+  /**
    * 미션 그룹 탭 변경 핸들러
    */
   const handleMissionGroupTabChange = useCallback((key: string) => {
@@ -975,13 +1048,15 @@ export const useMissionScreenContainer = ({
     completedMissionForVerification,
     isLevelUp,
     // Mission Group
-    groupMissions,
+    groupMissions: sortedGroupMissions,
     groupLoading,
     selectedGroupMission,
     setSelectedGroupMission,
     currentServerPage,
     totalServerPages,
     currentUserId,
+    missionSortBy,
+    handleMissionSortChange,
     // Pagination
     currentMissionPage,
     totalMissionPages,

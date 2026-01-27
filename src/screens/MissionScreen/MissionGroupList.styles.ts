@@ -9,6 +9,9 @@ import { createTextStyle, createTitleStyle, createSecondaryTextStyle, createButt
 import { buttonStyles, cardStyles } from '../../utils/styles/commonStyles';
 
 export const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
   content: {
     flex: 1,
   },
@@ -16,11 +19,39 @@ export const styles = StyleSheet.create({
     padding: spacing[4],
     paddingBottom: spacing[20],
   },
+  fab: {
+    position: 'absolute',
+    bottom: 50,
+    right: 20,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: colors.primary[700],
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    zIndex: 100,
+  },
+  fabIconImage: {
+    width: 24,
+    height: 24,
+    tintColor: colors.white,
+  },
+  customMissionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing[2],
+    marginBottom: spacing[4],
+  },
   createMissionButton: {
     ...buttonStyles.primary(),
     flexDirection: 'row',
     gap: spacing[2],
-    marginBottom: spacing[4],
+    flex: 1,
     paddingVertical: spacing[2],
     minHeight: 40,
   },
@@ -31,6 +62,77 @@ export const styles = StyleSheet.create({
   },
   createMissionText: {
     ...createButtonTextStyle('base'),
+  },
+  sortButtonWrapper: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    marginBottom: spacing[1],
+    marginTop: -spacing[3],
+    position: 'relative',
+    zIndex: 10,
+  },
+  sortButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing[1],
+    paddingVertical: spacing[3],
+    paddingHorizontal: spacing[2],
+  },
+  sortButtonText: {
+    ...createTextStyle('sm', {
+      color: colors.black,
+      fontWeight: typography.fontWeight.normal,
+    }),
+  },
+  sortButtonArrow: {
+    fontSize: typography.fontSize.base,
+    color: colors.black,
+    lineHeight: typography.fontSize.base,
+    fontWeight: typography.fontWeight.medium,
+  },
+  sortDropdown: {
+    position: 'absolute',
+    top: '100%',
+    right: 0,
+    marginTop: spacing[1],
+    backgroundColor: colors.background.primary,
+    borderRadius: borderRadius.sm,
+    borderWidth: 1,
+    borderColor: colors.gray[300],
+    minWidth: 120,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+    zIndex: 1000,
+  },
+  sortDropdownItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: spacing[2],
+    paddingHorizontal: spacing[3],
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border.light,
+  },
+  sortDropdownItemSelected: {
+    backgroundColor: colors.primary[50],
+  },
+  sortDropdownItemText: {
+    ...createTextStyle('sm', {
+      color: colors.text.primary,
+    }),
+  },
+  sortDropdownItemTextSelected: {
+    color: colors.primary[600],
+    fontWeight: typography.fontWeight.semibold,
+  },
+  sortDropdownCheck: {
+    fontSize: typography.fontSize.sm,
+    color: colors.primary[600],
+    fontWeight: typography.fontWeight.bold,
+    marginLeft: spacing[2],
   },
   serverPaginationContainer: {
     flexDirection: 'row',

@@ -3,7 +3,7 @@
  * 공식/커스텀 미션 목록을 표시하는 컴포넌트
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, Image, ScrollView, RefreshControl } from 'react-native';
 import { colors } from '../../utils/designTokens';
 import { EmptyState } from '../../components/ui';
@@ -42,10 +42,12 @@ interface MissionGroupListProps {
   currentServerPage: number;
   totalServerPages: number;
   refreshing?: boolean;
+  sortBy?: 'default' | 'participants' | 'exp' | 'difficulty';
   onMissionSelect: (mission: UnifiedMission | null) => void;
   onServerPageChange: (page: number) => void;
   onNavigateToCreate: () => void;
   onRefresh?: () => void;
+  onSortChange?: (sortBy: 'default' | 'participants' | 'exp' | 'difficulty') => void;
   getVerificationTypeLabel: (type?: string) => string;
   getVerificationTypeIcon: (type?: string) => any;
   getMissionCategoryLabel: (category?: MissionCategory) => string;
@@ -59,38 +61,108 @@ const MissionGroupList: React.FC<MissionGroupListProps> = ({
   currentServerPage,
   totalServerPages,
   refreshing = false,
+  sortBy = 'default',
   onMissionSelect,
   onServerPageChange,
   onNavigateToCreate,
   onRefresh,
+  onSortChange,
   getVerificationTypeLabel,
   getVerificationTypeIcon,
   getMissionCategoryLabel,
 }) => {
+  const [showSortDropdown, setShowSortDropdown] = useState(false);
+
   return (
-    <ScrollView
-      style={styles.content}
-      contentContainerStyle={styles.scrollContent}
-      refreshControl={
-        onRefresh ? (
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            colors={[colors.primary[500]]}
-            tintColor={colors.primary[500]}
-          />
-        ) : undefined
-      }
-    >
-      {/* 커스텀 미션 탭: 미션 만들기 버튼 */}
-      {missionGroupTab === 'custom' && (
-        <TouchableOpacity
-          style={styles.createMissionButton}
-          onPress={onNavigateToCreate}
-          activeOpacity={0.7}
-        >
-          <Text style={styles.createMissionText}>커스텀 미션 만들기</Text>
-        </TouchableOpacity>
+    <View style={styles.container}>
+      <ScrollView
+        style={styles.content}
+        contentContainerStyle={styles.scrollContent}
+        refreshControl={
+          onRefresh ? (
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              colors={[colors.primary[500]]}
+              tintColor={colors.primary[500]}
+            />
+          ) : undefined
+        }
+        onScrollBeginDrag={() => {
+          // 스크롤 시작 시 드롭다운 닫기
+          if (showSortDropdown) {
+            setShowSortDropdown(false);
+          }
+        }}
+      >
+      {/* 정렬 버튼 (커스텀 미션만) */}
+      {missions.length > 0 && missionGroupTab === 'custom' && (
+        <View style={styles.sortButtonWrapper}>
+          <TouchableOpacity
+            style={styles.sortButton}
+            onPress={() => setShowSortDropdown(!showSortDropdown)}
+            activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel="정렬 옵션"
+          >
+            <Text style={styles.sortButtonText}>
+              {sortBy === 'participants' ? '참여순' : '기본순'}
+            </Text>
+            <Text style={styles.sortButtonArrow}>↑↓</Text>
+          </TouchableOpacity>
+          
+          {/* 드롭다운 메뉴 */}
+          {showSortDropdown && (
+            <View style={styles.sortDropdown}>
+              <TouchableOpacity
+                style={[
+                  styles.sortDropdownItem,
+                  sortBy === 'default' && styles.sortDropdownItemSelected,
+                ]}
+                onPress={() => {
+                  onSortChange?.('default');
+                  setShowSortDropdown(false);
+                }}
+                activeOpacity={0.7}
+              >
+                <Text
+                  style={[
+                    styles.sortDropdownItemText,
+                    sortBy === 'default' && styles.sortDropdownItemTextSelected,
+                  ]}
+                >
+                  기본순
+                </Text>
+                {sortBy === 'default' && (
+                  <Text style={styles.sortDropdownCheck}>✓</Text>
+                )}
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[
+                  styles.sortDropdownItem,
+                  sortBy === 'participants' && styles.sortDropdownItemSelected,
+                ]}
+                onPress={() => {
+                  onSortChange?.('participants');
+                  setShowSortDropdown(false);
+                }}
+                activeOpacity={0.7}
+              >
+                <Text
+                  style={[
+                    styles.sortDropdownItemText,
+                    sortBy === 'participants' && styles.sortDropdownItemTextSelected,
+                  ]}
+                >
+                  참여순
+                </Text>
+                {sortBy === 'participants' && (
+                  <Text style={styles.sortDropdownCheck}>✓</Text>
+                )}
+              </TouchableOpacity>
+            </View>
+          )}
+        </View>
       )}
 
       {missions.length === 0 ? (
@@ -162,12 +234,6 @@ const MissionGroupList: React.FC<MissionGroupListProps> = ({
                     <View style={styles.groupMissionFooter}>
                       <View style={styles.groupMissionStats}>
                         <View style={styles.groupStatItem}>
-                          <Image
-                            source={require('../../assets/images/high-five.png')}
-                            style={styles.groupStatIcon}
-                            resizeMode="contain"
-                            accessibilityLabel="참여자 아이콘"
-                          />
                           <Text style={styles.groupStatText}>
                             참여 {mission.participantCount || 0}명
                           </Text>
@@ -260,7 +326,28 @@ const MissionGroupList: React.FC<MissionGroupListProps> = ({
           )}
         </>
       )}
-    </ScrollView>
+      </ScrollView>
+
+      {/* 커스텀 미션 탭: FAB 버튼 */}
+      {missionGroupTab === 'custom' && (
+        <TouchableOpacity
+          style={styles.fab}
+          onPress={onNavigateToCreate}
+          activeOpacity={0.8}
+          accessibilityRole="button"
+          accessibilityLabel="커스텀 미션 만들기"
+          accessibilityHint="새 커스텀 미션을 만듭니다"
+        >
+          <Image
+            source={require('../../assets/images/pencil.png')}
+            style={styles.fabIconImage}
+            resizeMode="contain"
+            accessibilityLabel="커스텀 미션 만들기 아이콘"
+            accessibilityElementsHidden={true}
+          />
+        </TouchableOpacity>
+      )}
+    </View>
   );
 };
 
