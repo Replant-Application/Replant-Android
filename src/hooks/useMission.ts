@@ -112,7 +112,10 @@ const transformUserMission = (userMission: UserMission): Mission => {
  * TodoMission을 Mission 타입으로 변환
  * 투두리스트의 미션을 미션 탭에서 사용할 수 있도록 변환
  */
-const transformTodoMissionToMission = (todoMission: TodoMission): Mission | null => {
+const transformTodoMissionToMission = (
+  todoMission: TodoMission,
+  todoListId?: number
+): Mission | null => {
   try {
     const isCustom = todoMission.missionType === 'CUSTOM';
     
@@ -148,6 +151,8 @@ const transformTodoMissionToMission = (todoMission: TodoMission): Mission | null
       is_custom: isCustom,
       verification_type: (todoMission.verificationType || 'COMMUNITY') as 'COMMUNITY' | 'GPS' | 'TIME',
       verified: todoMission.isVerified === true,
+      // 투두리스트 정보 저장 (미션 완료 시 필요)
+      todoListId: todoListId,
     };
   } catch (e) {
     console.error('[transformTodoMissionToMission] 변환 실패:', e);
@@ -195,7 +200,7 @@ export const useMission = (
               // 투두리스트의 미션을 Mission 형식으로 변환
               for (const todoMission of detailResult.data.missions) {
                 try {
-                  const mission = transformTodoMissionToMission(todoMission);
+                  const mission = transformTodoMissionToMission(todoMission, todoList.id);
                   if (mission) {
                     // 같은 미션이 여러 투두리스트에 포함되어 있을 수 있으므로 중복 제거
                     // mission_id를 키로 사용하여 가장 최신 상태 유지
@@ -408,6 +413,45 @@ export const useMission = (
         throw new Error('미션을 찾을 수 없습니다.');
       }
 
+      // 투두리스트 미션인 경우 completeTodoMission API 호출
+      if (mission.todoListId) {
+        const { completeTodoMission } = await import('../api/todolistApi');
+        const numericMissionId = parseInt(mission.mission_id.replace(/^custom_/, ''), 10);
+        if (isNaN(numericMissionId)) {
+          throw new Error('미션 ID가 올바르지 않습니다.');
+        }
+        
+        const result = await completeTodoMission(mission.todoListId, numericMissionId);
+        if (!result.success) {
+          throw new Error(result.error || '미션 완료에 실패했습니다.');
+        }
+        
+        // 미션 목록 새로고침
+        await loadMissions();
+        
+        // 경험치 추가 (캐릭터 시스템과 연동)
+        const verificationType = mission.verification_type || 'COMMUNITY';
+        const isCustomMission = mission.missionType === 'CUSTOM' || mission.is_custom === true;
+        let experienceResult: ExperienceResult | null = null;
+
+        if (!isCustomMission && verificationType !== 'COMMUNITY') {
+          // 공식 미션이고 COMMUNITY 타입이 아닌 경우에만 즉시 XP 지급
+          if (addExperienceByCategory && mission.category_id) {
+            experienceResult = await addExperienceByCategory(mission.category_id, mission.experience);
+          }
+        }
+
+        return {
+          success: true,
+          experienceGained: experienceResult?.experienceGained || (verificationType === 'COMMUNITY' ? 0 : mission.experience),
+          levelUp: experienceResult?.levelUp || false,
+          newLevel: experienceResult?.newLevel,
+          unlocked: false,
+          pendingVerification: verificationType === 'COMMUNITY'
+        };
+      }
+
+      // 기존 로직 (로컬 스토리지 기반 - 하위 호환성 유지)
       const updatedMission: Mission = {
         ...mission,
         completed: true,
@@ -457,7 +501,7 @@ export const useMission = (
       logError('미션 완료 실패', completeError as Error, { missionId, photoUrl });
       return { success: false, experienceGained: 0, levelUp: false, error: (completeError as Error).message };
     }
-  }, [missions, addExperienceByCategory, currentNickname]);
+  }, [missions, addExperienceByCategory, currentNickname, loadMissions]);
 
   // 미션 완료 취소
   const uncompleteMission = useCallback(async (missionId: string): Promise<ServiceResult<void>> => {

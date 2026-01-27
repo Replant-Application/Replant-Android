@@ -86,7 +86,8 @@ export interface Mission {
   verification_method?: 'like' | 'gps' | 'manual';
   verified?: boolean;
   verified_at?: string;
-  related_post_id?: string; // 좋아요 인증인 경우 게시글 ID
+  related_post_id?: string; // 좋아요 인증인 경우 게시글 ID 또는 투두리스트 ID (임시)
+  todoListId?: number; // 투두리스트 ID (투두리스트에서 가져온 미션인 경우)
   verification_requirements?: VerificationRequirements;
   // 커스텀 미션 전용 필드 (missionType === 'CUSTOM'일 때 사용)
   isChallenge?: boolean;    // 챌린지 미션 여부
