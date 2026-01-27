@@ -209,12 +209,12 @@ const MissionSetList: React.FC<MissionSetListProps> = ({
       <ConfirmModal
         visible={showUnshareModal}
         title="삭제"
-        message={selectedMissionSet ? `"${selectedMissionSet.title}" 투두리스트를 공유 게시판에서 삭제하시겠습니까?` : ''}
+        message={selectedMissionSet ? `"${selectedMissionSet.title}"를 공유 게시판에서 삭제하시겠습니까?` : ''}
         confirmText="삭제"
         cancelText="취소"
         onConfirm={handleUnshareConfirm}
         onCancel={handleUnshareCancel}
-        confirmButtonColor={colors.primary[500]}
+        confirmButtonColor={colors.error}
       />
     </>
   );
