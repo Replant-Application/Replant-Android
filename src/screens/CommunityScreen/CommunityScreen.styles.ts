@@ -169,7 +169,7 @@ export const styles = StyleSheet.create({
   },
   modalSectionTitle: {
     ...createTextStyle('sm', {
-      fontWeight: typography.fontWeight.medium,
+      fontWeight: typography.fontWeight.bold,
       color: colors.text.secondary,
       marginTop: spacing[3],
       marginBottom: spacing[2],

@@ -37,8 +37,6 @@ const DiaryScreen: React.FC = () => {
     emotionText,
     expressionText,
     selectedDiary,
-    viewingDiaryIndex,
-    viewMode,
     searchDate,
     refreshing,
     searchingByDate,
@@ -62,14 +60,11 @@ const DiaryScreen: React.FC = () => {
     handleDeleteCancel,
     handleAlertClose,
     handleSearchDateClear,
-    handleBookDetailView,
     onRefresh,
     setFactorText,
     setEmotionText,
     setExpressionText,
-    setViewMode,
     setSearchDate,
-    setViewingDiaryIndex,
     getMoodColor,
     getStepMessage,
   } = useDiaryScreenContainer();
@@ -92,14 +87,16 @@ const DiaryScreen: React.FC = () => {
         accessibilityElementsHidden={true}
       >
         <View style={styles.detailContainer}>
-          <TouchableOpacity style={styles.backButton} onPress={handleBack}>
-            <Image
-              source={require('../../assets/images/left.png')}
-              style={styles.backButtonIcon}
-              resizeMode="contain"
-              accessibilityLabel="뒤로 가기"
-            />
-          </TouchableOpacity>
+          <View style={styles.viewHeader}>
+            <TouchableOpacity style={styles.backButton} onPress={handleBack}>
+              <Image
+                source={require('../../assets/images/left.png')}
+                style={styles.backButtonIcon}
+                resizeMode="contain"
+                accessibilityLabel="뒤로 가기"
+              />
+            </TouchableOpacity>
+          </View>
           
           <ScrollView 
             style={styles.signboardScrollView}
@@ -227,31 +224,10 @@ const DiaryScreen: React.FC = () => {
                 accessibilityLabel="뒤로 가기"
               />
             </TouchableOpacity>
-            
-            {/* 뷰 모드 전환 버튼 */}
-            <View style={styles.viewModeButtons}>
-              <TouchableOpacity
-                style={[styles.viewModeButton, viewMode === 'list' && styles.viewModeButtonActive]}
-                onPress={() => setViewMode('list')}
-              >
-                <Text style={[styles.viewModeButtonText, viewMode === 'list' && styles.viewModeButtonTextActive]}>
-                  목록
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.viewModeButton, viewMode === 'book' && styles.viewModeButtonActive]}
-                onPress={() => setViewMode('book')}
-              >
-                <Text style={[styles.viewModeButtonText, viewMode === 'book' && styles.viewModeButtonTextActive]}>
-                  책
-                </Text>
-              </TouchableOpacity>
-            </View>
           </View>
 
           {/* 목록 뷰 */}
-          {viewMode === 'list' ? (
-            <>
+          <>
               {/* 날짜 검색 바 */}
               <View style={styles.searchContainer}>
                 <View style={styles.searchInputContainer}>
@@ -367,77 +343,6 @@ const DiaryScreen: React.FC = () => {
                 </View>
               )}
             </>
-          ) : (
-            /* 책 형태 뷰 */
-            <>
-              {diaries.length > 0 ? (
-                <>
-                  <View style={styles.topSection}>
-                    <TouchableOpacity
-                      style={styles.bookContainer}
-                      onPress={() => handleBookDetailView(diaries[viewingDiaryIndex])}
-                      activeOpacity={0.8}
-                    >
-                      <View style={styles.paperContainer}>
-                        <Image
-                          source={require('../../assets/images/paper.png')}
-                          style={styles.paperImage}
-                          resizeMode="contain"
-                          accessibilityLabel="종이 아이콘"
-                        />
-                        <View style={styles.paperTextOverlay}>
-                          <Text style={styles.paperDate}>
-                            {`${diaries[viewingDiaryIndex]?.date || ''}\n작성한 감정 일기`}
-                          </Text>
-                        </View>
-                      </View>
-                      <Image
-                        source={require('../../assets/images/book.png')}
-                        style={styles.bookImage}
-                        resizeMode="contain"
-                        accessibilityLabel="책 아이콘"
-                      />
-                    </TouchableOpacity>
-                  </View>
-                  
-                  {/* 이전/다음 버튼 */}
-                  {diaries.length > 1 && (
-                    <View style={styles.bookNavigation}>
-                      <TouchableOpacity
-                        style={[styles.navButton, viewingDiaryIndex === 0 && styles.navButtonDisabled]}
-                        onPress={() => setViewingDiaryIndex(Math.max(0, viewingDiaryIndex - 1))}
-                        disabled={viewingDiaryIndex === 0}
-                      >
-                        <Text style={styles.navButtonText}>← 다음</Text>
-                      </TouchableOpacity>
-                      <TouchableOpacity
-                        style={[styles.navButton, viewingDiaryIndex >= diaries.length - 1 && styles.navButtonDisabled]}
-                        onPress={() => setViewingDiaryIndex(Math.min(diaries.length - 1, viewingDiaryIndex + 1))}
-                        disabled={viewingDiaryIndex >= diaries.length - 1}
-                      >
-                        <Text style={styles.navButtonText}>이전 →</Text>
-                      </TouchableOpacity>
-                    </View>
-                  )}
-                </>
-              ) : (
-                <View style={styles.emptyView}>
-                  <Text style={styles.emptyText}>작성된 일기가 없습니다</Text>
-                </View>
-              )}
-
-              {currentCharacter && (
-                <View style={styles.characterContainer}>
-                  <Image
-                    source={getCharacterImage(currentCharacter.level || 1, 'default')}
-                    style={styles.characterImage}
-                    resizeMode="contain"
-                    accessibilityLabel={`${currentCharacter.name || '캐릭터'} 이미지`}
-                  />
-                </View>
-              )}
-            </>
-          )}
         </View>
 
         {/* 모달 컴포넌트 */}
@@ -499,7 +404,7 @@ const DiaryScreen: React.FC = () => {
         ]}
       >
         {/* 질문 */}
-        <Text style={styles.modalQuestion}>{getStepMessage()}</Text>
+        <Text style={[styles.modalQuestion, currentStep === 'confirm' && styles.modalQuestionCenter]}>{getStepMessage()}</Text>
 
         {/* 단계별 컨텐츠 */}
         <View style={
@@ -607,7 +512,7 @@ const DiaryScreen: React.FC = () => {
               <Text style={styles.confirmButtonText}>등록 완료</Text>
             </TouchableOpacity>
           </View>
-        ) : (
+        ) : currentStep !== 'confirm' ? (
           <View style={styles.modalButtons}>
             <TouchableOpacity 
               style={styles.cancelButton} 
@@ -624,10 +529,10 @@ const DiaryScreen: React.FC = () => {
               accessibilityLabel="선택 완료하고 다음 단계로 이동"
               accessibilityHint="현재 단계의 선택을 완료하고 다음 단계로 진행합니다"
             >
-              <Text style={styles.confirmButtonText}>선택완료</Text>
+              <Text style={styles.confirmButtonText}>선택 완료</Text>
             </TouchableOpacity>
           </View>
-        )}
+        ) : null}
       </Animated.View>
 
       {/* 모달 컴포넌트 */}

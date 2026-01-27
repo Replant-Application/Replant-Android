@@ -45,6 +45,9 @@ export const styles = StyleSheet.create({
       marginBottom: spacing[1],
     }),
   },
+  modalQuestionCenter: {
+    textAlign: 'center',
+  },
   modalContent: {
     marginBottom: spacing[3],
   },
@@ -234,6 +237,7 @@ export const styles = StyleSheet.create({
   backButtonIcon: {
     width: 24,
     height: 24,
+    tintColor: colors.white,
   },
   writeButton: {
     flex: 1,
@@ -286,30 +290,6 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: spacing[8],
     marginBottom: spacing[2],
-  },
-  viewModeButtons: {
-    flexDirection: 'row',
-    backgroundColor: 'rgba(0, 0, 0, 0.3)',
-    borderRadius: borderRadius.lg,
-    padding: spacing[1],
-    gap: spacing[1],
-  },
-  viewModeButton: {
-    paddingHorizontal: spacing[4],
-    paddingVertical: spacing[2],
-    borderRadius: borderRadius.md,
-  },
-  viewModeButtonActive: {
-    backgroundColor: colors.primary[500],
-  },
-  viewModeButtonText: {
-    ...createTextStyle('sm', {
-      color: colors.white,
-      fontWeight: typography.fontWeight.medium,
-    }),
-  },
-  viewModeButtonTextActive: {
-    color: colors.white,
   },
   searchContainer: {
     flexDirection: 'row',
@@ -432,84 +412,6 @@ export const styles = StyleSheet.create({
   diaryListItemTagMore: {
     ...createTextStyle('xs', {
       color: colors.gray[400],
-    }),
-  },
-  bookPageInfo: {
-    ...createTextStyle('sm', {
-      color: colors.white,
-      fontWeight: typography.fontWeight.medium,
-    }),
-  },
-  topSection: {
-    alignItems: 'center',
-  },
-  bookContainer: {
-    alignItems: 'center',
-    marginTop: spacing[0],
-    position: 'relative',
-  },
-  bookImage: {
-    width: SCREEN_WIDTH * 0.8,
-    height: SCREEN_WIDTH * 0.7 * 1,
-  },
-  paperContainer: {
-    position: 'absolute',
-    top: SCREEN_WIDTH * 0.3,
-    left: SCREEN_WIDTH * 0.1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: SCREEN_WIDTH * 0.6,
-    height: SCREEN_WIDTH * 0.6 * 1.3,
-  },
-  paperImage: {
-    width: SCREEN_WIDTH * 0.5,
-    height: SCREEN_WIDTH * 0.6 * 1.1,
-  },
-  paperTextOverlay: {
-    position: 'absolute',
-    top: spacing[15],
-    left: 0,
-    right: 0,
-    alignItems: 'center',
-    paddingHorizontal: spacing[4],
-    zIndex: 2,
-  },
-  paperTitle: {
-    ...createBodyStyle('base', {
-      fontWeight: typography.fontWeight.medium,
-      color: colors.black,
-      marginBottom: spacing[2],
-    }),
-  },
-  paperDate: {
-    ...createBodyStyle('base', {
-      fontWeight: typography.fontWeight.medium,
-      color: colors.black,
-      textAlign: 'center',
-    }),
-  },
-  bookNavigation: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    right: 20,
-    alignItems: 'center',
-    marginTop: -spacing[8],
-    paddingHorizontal: spacing[26],
-    width: '110%',
-  },
-  navButton: {
-    padding: spacing[3],
-    borderRadius: borderRadius.full,
-    backgroundColor: colors.gray[800],
-    opacity: 0.8,
-  },
-  navButtonDisabled: {
-    opacity: 0.3,
-  },
-  navButtonText: {
-    ...createTextStyle('xl', {
-      color: colors.white,
-      fontWeight: typography.fontWeight.medium,
     }),
   },
   viewDetailButton: {
