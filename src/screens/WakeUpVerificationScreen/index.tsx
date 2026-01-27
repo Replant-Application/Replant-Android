@@ -27,7 +27,6 @@ interface WakeUpVerificationScreenProps {
 const WakeUpVerificationScreen: React.FC<WakeUpVerificationScreenProps> = ({ navigation, route }) => {
   // 비즈니스 로직은 Container에서 처리
   const {
-    userMission,
     loading,
     verifying,
     timeRemaining,
@@ -39,8 +38,6 @@ const WakeUpVerificationScreen: React.FC<WakeUpVerificationScreenProps> = ({ nav
     handleSuccessModalClose,
     handleErrorModalClose,
   } = useWakeUpVerificationScreenContainer({ navigation, route });
-
-  const mission = userMission?.mission || userMission?.customMission;
 
   if (loading) {
     return (

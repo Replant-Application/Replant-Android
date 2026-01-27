@@ -128,8 +128,24 @@ export const useMissionScreenContainer = ({
   const routeParams = route?.params;
   // route params에서 selectedFilter 복원 (나의 미션 탭 필터)
   const [selectedFilter, setSelectedFilter] = useState<MissionFilter>(routeParams?.selectedFilter || 'inProgress');
-  const [activeTab, setActiveTab] = useState<MissionTab>(routeParams?.activeTab || 'myMission');
+  
+  // activeTab 초기값 설정 (유효성 검사 포함)
+  const getInitialActiveTab = (): MissionTab => {
+    const tab = routeParams?.activeTab;
+    return (tab === 'myMission' || tab === 'missionGroup') ? tab : 'myMission';
+  };
+  const [activeTab, setActiveTab] = useState<MissionTab>(getInitialActiveTab());
   const [refreshing, setRefreshing] = useState(false);
+
+  /**
+   * activeTab이 유효하지 않은 값일 때 자동으로 'myMission'으로 설정
+   * 나의 미션과 미션 도감 둘 중 아무것도 선택되지 않는 시나리오 방지
+   */
+  useEffect(() => {
+    if (activeTab !== 'myMission' && activeTab !== 'missionGroup') {
+      setActiveTab('myMission');
+    }
+  }, [activeTab]);
 
   // 인증 모달 상태
   const [verificationModalVisible, setVerificationModalVisible] = useState(false);

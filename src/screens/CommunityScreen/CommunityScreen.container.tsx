@@ -21,15 +21,28 @@ import { CommunityScreenProps, CommunityTab, VerificationFilter } from '../../ty
 export const useCommunityScreenContainer = ({ navigation, route }: CommunityScreenProps) => {
   const { posts, loading, error, toggleLike, loadPosts } = useCommunity();
 
-  // route.params에서 activeTab을 가져오거나 기본값 'all' 사용
-  const initialTab = ((route?.params as any)?.activeTab || 'all') as CommunityTab;
+  // activeTab 초기값 설정 (유효성 검사 포함)
+  const getInitialActiveTab = (): CommunityTab => {
+    const tab = (route?.params as any)?.activeTab;
+    return (tab === 'all' || tab === 'todo-share') ? tab : 'all';
+  };
 
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState<'all' | 'popular'>('all');
-  const [activeTab, setActiveTab] = useState<CommunityTab>(initialTab);
+  const [activeTab, setActiveTab] = useState<CommunityTab>(getInitialActiveTab());
   const [showFilterModal, setShowFilterModal] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
+
+  /**
+   * activeTab이 유효하지 않은 값일 때 자동으로 'all'로 설정
+   * 전체 게시판과 투두리스트 공유 둘 중 아무것도 선택되지 않는 시나리오 방지
+   */
+  useEffect(() => {
+    if (activeTab !== 'all' && activeTab !== 'todo-share') {
+      setActiveTab('all');
+    }
+  }, [activeTab]);
 
   // 인증 필터 상태
   const [verificationFilter, setVerificationFilter] = useState<VerificationFilter>('all');

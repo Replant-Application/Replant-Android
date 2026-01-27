@@ -88,7 +88,6 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onNavigate }) => {
         style={styles.imageBackground}
         resizeMode="cover"
         accessibilityLabel={ONBOARDING_SLIDES[currentIndex].accessibilityLabel ?? '온보딩 소개 이미지'}
-        pointerEvents="box-none"
       >
         {/* 슬라이드 - 투명하게 처리하여 스와이프만 가능하게 */}
         <FlatList
