@@ -83,10 +83,10 @@ const WakeUpVerificationScreen: React.FC<WakeUpVerificationScreenProps> = ({ nav
               />
               <View style={styles.missionInfo}>
                 <Text style={styles.missionTitle}>
-                  {mission?.title || '기상 미션'}
+                  기상 미션
                 </Text>
                 <Text style={styles.missionDescription}>
-                  {mission?.description || '기상 미션을 완료하세요!'}
+                  기상 미션을 완료하세요!
                 </Text>
               </View>
             </View>
@@ -187,8 +187,7 @@ const WakeUpVerificationScreen: React.FC<WakeUpVerificationScreenProps> = ({ nav
           {/* 안내 메시지 */}
           <View style={styles.infoContainer}>
             <Text style={styles.infoText}>
-              • 10분 이내에 인증 버튼을 눌러주세요{'\n'}
-              • 인증글 작성 없이 버튼만 누르면 경험치를 받을 수 있습니다
+              • 10분 이내에 인증 버튼을 눌러주세요
             </Text>
           </View>
         </View>
