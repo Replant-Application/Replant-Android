@@ -126,6 +126,11 @@ const transformTodoMissionToMission = (
     let status: MissionStatus = 'ASSIGNED';
     if (todoMission.isCompleted) {
       status = 'COMPLETED';
+      console.log(`[transformTodoMissionToMission] isCompleted=true: ${todoMission.title} -> ${status}`, {
+        userMissionStatus: todoMission.userMissionStatus,
+        isCompleted: todoMission.isCompleted,
+        isVerified: todoMission.isVerified
+      });
     } else if (todoMission.userMissionStatus) {
       // 백엔드의 UserMission 상태를 그대로 사용 (ASSIGNED, PENDING, COMPLETED 등)
       status = todoMission.userMissionStatus as MissionStatus;
@@ -137,10 +142,12 @@ const transformTodoMissionToMission = (
     } else {
       // userMissionStatus가 없으면 기본값 ASSIGNED (백엔드에서 ASSIGNED로 생성되므로)
       status = 'ASSIGNED';
-      console.log(`[transformTodoMissionToMission] userMissionStatus 없음, 기본값 ASSIGNED: ${todoMission.title}`, {
+      console.warn(`[transformTodoMissionToMission] ⚠️ userMissionStatus 없음, 기본값 ASSIGNED: ${todoMission.title}`, {
         userMissionStatus: todoMission.userMissionStatus,
         isVerified: todoMission.isVerified,
-        isCompleted: todoMission.isCompleted
+        isCompleted: todoMission.isCompleted,
+        missionId: todoMission.missionId,
+        missionType: todoMission.missionType
       });
     }
     
@@ -434,7 +441,7 @@ export const useMission = (
       }
 
       // 투두리스트 미션인 경우 completeTodoMission API 호출
-      // eslint-disable-next-line react-hooks/exhaustive-deps
+       
       if (mission.todoListId) {
         const { completeTodoMission } = await import('../api/todolistApi');
         const numericMissionId = parseInt(mission.mission_id.replace(/^custom_/, ''), 10);
