@@ -90,7 +90,7 @@ export const createErrorTextStyle = (
   options?: Partial<TextStyle>
 ): TextStyle => {
   return createTextStyle(fontSize, {
-    color: '#ef4444', // red[500]
+    color: colors.semantic.fg.error,
     ...options,
   });
 };
@@ -103,7 +103,7 @@ export const createLinkTextStyle = (
   options?: Partial<TextStyle>
 ): TextStyle => {
   return createTextStyle(fontSize, {
-    color: '#89C17E', // primary[500]
+    color: colors.semantic.fg.brand,
     textDecorationLine: 'underline',
     ...options,
   });
@@ -118,7 +118,7 @@ export const createButtonTextStyle = (
 ): TextStyle => {
   return createTextStyle(fontSize, {
     fontWeight: typography.fontWeight.medium,
-    color: '#ffffff',
+    color: colors.semantic.fg.inverse,
     textAlign: 'center',
     ...options,
   });

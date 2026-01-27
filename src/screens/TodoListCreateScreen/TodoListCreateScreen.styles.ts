@@ -42,7 +42,7 @@ export const styles = StyleSheet.create({
     }),
   },
   introDescriptionContainer: { 
-    backgroundColor: 'rgba(255, 255, 255, 0.9)', 
+    backgroundColor: colors.overlay.white.medium, 
     borderRadius: borderRadius.base, 
     padding: spacing[4], 
     maxWidth: '100%' 
@@ -86,7 +86,7 @@ export const styles = StyleSheet.create({
   },
   missionCard: { 
     flexDirection: 'row', 
-    backgroundColor: 'rgba(255, 255, 255, 0.95)', 
+    backgroundColor: colors.overlay.white.heavy, 
     borderRadius: borderRadius.md, 
     padding: spacing[4], 
     marginBottom: spacing[3], 
@@ -168,7 +168,7 @@ export const styles = StyleSheet.create({
 
   selectableMissionCard: { 
     flexDirection: 'row', 
-    backgroundColor: 'rgba(255, 255, 255, 0.95)', 
+    backgroundColor: colors.overlay.white.heavy, 
     borderRadius: borderRadius.md, 
     padding: spacing[4], 
     marginBottom: spacing[3] 
@@ -212,7 +212,7 @@ export const styles = StyleSheet.create({
   textInput: {
     ...inputStyles.base(),
     ...createTextStyle('base'),
-    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    backgroundColor: colors.overlay.white.heavy,
   },
   textArea: { 
     height: 100, 
@@ -266,7 +266,7 @@ export const styles = StyleSheet.create({
     ...createButtonTextStyle('base'),
   },
   createMissionForm: { 
-    backgroundColor: 'rgba(255, 255, 255, 0.95)', 
+    backgroundColor: colors.overlay.white.heavy, 
     borderRadius: borderRadius.md, 
     padding: spacing[4], 
     marginBottom: spacing[3] 
@@ -289,7 +289,7 @@ export const styles = StyleSheet.create({
   },
 
   todaySection: { 
-    backgroundColor: 'rgba(255, 255, 255, 0.95)', 
+    backgroundColor: colors.overlay.white.heavy, 
     borderRadius: borderRadius.md, 
     padding: spacing[4],
     paddingTop: spacing[2],
@@ -328,7 +328,7 @@ export const styles = StyleSheet.create({
 
   timeMissionItem: { 
     flexDirection: 'column', 
-    backgroundColor: 'rgba(255, 255, 255, 0.95)', 
+    backgroundColor: colors.overlay.white.heavy, 
     borderRadius: borderRadius.md, 
     padding: spacing[3], 
     marginBottom: spacing[2],
@@ -405,7 +405,7 @@ export const styles = StyleSheet.create({
   },
   missionListItem: { 
     flexDirection: 'row', 
-    backgroundColor: 'rgba(255, 255, 255, 0.95)', 
+    backgroundColor: colors.overlay.white.heavy, 
     borderRadius: borderRadius.md, 
     padding: spacing[4], 
     marginBottom: spacing[2], 

@@ -409,8 +409,8 @@ export const useTodoListDetailScreenContainer = ({ navigation, route }: TodoList
     try {
       // isPublic만 false로 변경 (title, description은 그대로 유지)
       const result = await updateMissionSet(Number(todoListId), {
-        title: loadedTodoList.title,
-        description: loadedTodoList.description || undefined,
+        title: todoList.title,
+        description: todoList.description || undefined,
         isPublic: false,
       });
       if (result.success && result.data) {

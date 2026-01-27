@@ -4,7 +4,7 @@
  */
 
 import { StyleSheet, Dimensions, Platform } from 'react-native';
-import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
+import { colors, spacing, typography, borderRadius, layout } from '../../utils/designTokens';
 import { getOptimizedLineHeight } from '../../utils/styles/textStyles';
 import { createTextStyle, createTitleStyle, createBodyStyle, createSecondaryTextStyle, createButtonTextStyle } from '../../utils/styles/textStyles';
 import { buttonStyles, emptyStateStyles, modalStyles } from '../../utils/styles/commonStyles';
@@ -29,12 +29,12 @@ export const styles = StyleSheet.create({
     zIndex: 10,
   },
   startChatButton: {
-    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    backgroundColor: colors.overlay.white.heavy,
     paddingVertical: spacing[2],
     paddingHorizontal: spacing[4],
     borderRadius: borderRadius.full,
     borderWidth: 2,
-    borderColor: '#D4A574',
+    borderColor: colors.brandAccent,
     ...Platform.select({
       ios: {
         shadowColor: '#000',
@@ -126,10 +126,10 @@ export const styles = StyleSheet.create({
   },
   bottomSheet: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.white,
     borderTopLeftRadius: borderRadius.xl + 8,
     borderTopRightRadius: borderRadius.xl + 8,
-    borderColor: '#0E0F37',
+    borderColor: colors.gray[900],
     borderTopWidth: 12,
     borderLeftWidth: 12,
     borderRightWidth: 12,
@@ -179,7 +179,7 @@ export const styles = StyleSheet.create({
     flex: 1,
   },
   contentScrollContent: {
-    paddingHorizontal: spacing[4],
+    paddingHorizontal: layout.globalGutter,
     paddingBottom: 150,
     flexGrow: 1,
   },
@@ -218,7 +218,7 @@ export const styles = StyleSheet.create({
     }),
   },
   missionItem: {
-    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+    backgroundColor: colors.overlay.white.light,
     borderRadius: borderRadius.base,
     padding: spacing[2],
     marginBottom: spacing[1],
@@ -227,7 +227,7 @@ export const styles = StyleSheet.create({
   },
   missionItemCompleted: {
     opacity: 0.6,
-    backgroundColor: 'rgba(240, 240, 240, 0.8)',
+    backgroundColor: colors.gray[100],
   },
   missionItemTitle: {
     ...createTextStyle('sm', {
@@ -250,12 +250,12 @@ export const styles = StyleSheet.create({
     color: colors.text.tertiary,
   },
   todoListSection: {
-    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    backgroundColor: colors.overlay.white.heavy,
     borderRadius: borderRadius.base,
     padding: spacing[4],
     marginBottom: spacing[4],
     borderWidth: 2,
-    borderColor: '#D4A574',
+    borderColor: colors.brandAccent,
   },
   todoListHeader: {
     flexDirection: 'row',
@@ -335,7 +335,7 @@ export const styles = StyleSheet.create({
   },
   evolutionModalOverlay: {
     ...modalStyles.overlay(),
-    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    backgroundColor: colors.overlay.dark,
   },
   evolutionModalContent: {
     width: '100%',

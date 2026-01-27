@@ -4,7 +4,7 @@
  */
 
 import { StyleSheet } from 'react-native';
-import { colors, spacing, typography, borderRadius, shadows } from '../../utils/designTokens';
+import { colors, spacing, typography, borderRadius, shadows, layout } from '../../utils/designTokens';
 import { createTextStyle, createTitleStyle, createSecondaryTextStyle } from '../../utils/styles/textStyles';
 
 export const styles = StyleSheet.create({
@@ -15,7 +15,8 @@ export const styles = StyleSheet.create({
     flex: 1,
   },
   content: {
-    padding: spacing[5],
+    paddingHorizontal: layout.globalGutterLarge,
+    paddingVertical: layout.globalGutterLarge,
     paddingBottom: spacing[20],
   },
   sectionHeader: {
@@ -37,7 +38,7 @@ export const styles = StyleSheet.create({
     padding: spacing[5],
     marginBottom: spacing[6],
     borderWidth: 1,
-    borderColor: '#D4A574',
+    borderColor: colors.brandAccent,
     ...shadows.lg,
   },
   profileInfo: {
@@ -66,7 +67,7 @@ export const styles = StyleSheet.create({
     padding: spacing[5],
     marginBottom: spacing[6],
     borderWidth: 1,
-    borderColor: '#D4A574',
+    borderColor: colors.brandAccent,
     ...shadows.lg,
   },
   characterCardInner: {
@@ -78,7 +79,7 @@ export const styles = StyleSheet.create({
     padding: spacing[5],
     marginBottom: spacing[6],
     borderWidth: 1,
-    borderColor: '#D4A574',
+    borderColor: colors.brandAccent,
     ...shadows.lg,
   },
   statsContainer: {
