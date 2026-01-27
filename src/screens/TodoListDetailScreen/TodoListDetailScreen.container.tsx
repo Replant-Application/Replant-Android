@@ -248,11 +248,88 @@ export const useTodoListDetailScreenContainer = ({ navigation, route }: TodoList
 
   /**
    * 미션 완료 처리
-   * - 모든 미션(공식/커스텀): 체크박스 클릭 시 즉시 완료 처리
+   * - 공식 미션: 인증 플로우(COMMUNITY→VerificationPostCreate, GPS/TIME→verify API)로 이동 후, GPS/TIME 성공 시 completeTodoMission
+   * - 커스텀 미션: 즉시 completeTodoMission
    */
   const handleCompleteMission = useCallback(
     async (mission: TodoMission) => {
-      // 모든 미션은 바로 완료 처리 (커스텀 미션처럼)
+      const isRequiredMission = mission.missionType === 'OFFICIAL' || mission.missionSource === 'RANDOM_OFFICIAL';
+
+      if (isRequiredMission) {
+        setCompletingMissionId(mission.missionId);
+        try {
+          const userMissionId = await getOrAssignUserMissionId(mission.missionId);
+          if (!userMissionId) {
+            showError(new Error('미션을 시작할 수 없습니다. 잠시 후 다시 시도해주세요.'), 'TodoListDetailScreen.handleCompleteMission');
+            return;
+          }
+
+          const vt = (mission.verificationType || '').toUpperCase();
+          if (vt === 'COMMUNITY') {
+            navigation.navigate(SCREEN_NAMES.VERIFICATION_POST_CREATE as any, {
+              userMissionId,
+              missionId: String(mission.missionId),
+              missionTitle: mission.title || '미션',
+              missionEmoji: '🎯',
+              photoUrl: undefined,
+            });
+            return;
+          }
+          if (vt === 'GPS') {
+            const { status } = await Location.requestForegroundPermissionsAsync();
+            if (status !== 'granted') {
+              showInfo('위치 권한이 필요합니다.', '권한 필요');
+              return;
+            }
+            const location = await Location.getCurrentPositionAsync({});
+            const result = await verifyByGps(userMissionId, location.coords.latitude, location.coords.longitude);
+            if (result.success) {
+              showSuccess(`+${result.data?.expReward || 50} EXP를 획득했습니다!`, 'GPS 인증 완료');
+              const completeRes = await completeTodoMission(Number(todoListId), mission.missionId);
+              if (completeRes.success && completeRes.data) {
+                setTodoList(completeRes.data);
+                checkAndShowCompleteModal(completeRes.data);
+              } else if (!completeRes.success) {
+                handleApiError(completeRes, 'TodoListDetailScreen.handleCompleteMission.GPS.complete');
+              }
+              const canCreateResult = await canCreateNewTodoList();
+              if (canCreateResult.success && canCreateResult.data) setCanCreate(canCreateResult.data.canCreate);
+            } else {
+              handleApiError(result, 'TodoListDetailScreen.handleCompleteMission.GPS');
+            }
+            return;
+          }
+          if (vt === 'TIME') {
+            const result = await verifyByTime(userMissionId);
+            if (result.success) {
+              showSuccess(`+${result.data?.expReward || 50} EXP를 획득했습니다!`, '시간 인증 완료');
+              const completeRes = await completeTodoMission(Number(todoListId), mission.missionId);
+              if (completeRes.success && completeRes.data) {
+                setTodoList(completeRes.data);
+                checkAndShowCompleteModal(completeRes.data);
+              } else if (!completeRes.success) {
+                handleApiError(completeRes, 'TodoListDetailScreen.handleCompleteMission.TIME.complete');
+              }
+              const canCreateResult = await canCreateNewTodoList();
+              if (canCreateResult.success && canCreateResult.data) setCanCreate(canCreateResult.data.canCreate);
+            } else {
+              handleApiError(result, 'TodoListDetailScreen.handleCompleteMission.TIME');
+            }
+            return;
+          }
+          showError(new Error('지원하지 않는 인증 방식입니다.'), 'TodoListDetailScreen.handleCompleteMission');
+        } catch (error) {
+          showError(
+            error instanceof Error ? error : new Error('인증을 시작하는 중 문제가 발생했습니다.'),
+            'TodoListDetailScreen.handleCompleteMission'
+          );
+        } finally {
+          setCompletingMissionId(null);
+        }
+        return;
+      }
+
+      // 커스텀 미션은 바로 완료 처리
       setCompletingMissionId(mission.missionId);
       try {
         const result = await completeTodoMission(Number(todoListId), mission.missionId);
@@ -273,9 +350,13 @@ export const useTodoListDetailScreenContainer = ({ navigation, route }: TodoList
     },
     [
       todoListId,
+      navigation,
+      getOrAssignUserMissionId,
       checkAndShowCompleteModal,
       handleApiError,
       showError,
+      showSuccess,
+      showInfo,
     ]
   );
 
