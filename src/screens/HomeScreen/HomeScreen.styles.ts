@@ -77,6 +77,9 @@ export const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  speechBubbleAnimatedContainer: {
+    width: '100%',
+  },
   speechTextContainer: {
     position: 'absolute',
     left: 0,
@@ -117,6 +120,9 @@ export const styles = StyleSheet.create({
     height: '70%',
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  keyboardAvoidingView: {
+    flex: 1,
   },
   bottomSheet: {
     flex: 1,

@@ -179,7 +179,7 @@ const MissionSetDetailScreen: React.FC<MissionSetDetailScreenProps> = ({ navigat
         )}
 
         {/* 여백 */}
-        <View style={{ height: 120 }} />
+        <View style={styles.spacer} />
       </ScrollView>
     </ImageBackground>
   );

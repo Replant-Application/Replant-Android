@@ -167,7 +167,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onNavigate }) => {
                 accessibilityLabel="카카오로 로그인"
                 accessibilityState={{ disabled: isLoading }}
               >
-                <View style={[styles.socialIconCircle, { backgroundColor: '#FEE500' }]}>
+                <View style={[styles.socialIconCircle, styles.socialIconCircleKakao]}>
                   <Image
                     source={require('../../assets/images/kakao_logo.png')}
                     style={styles.socialIconImage}
@@ -186,7 +186,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onNavigate }) => {
                 accessibilityLabel="구글로 로그인"
                 accessibilityState={{ disabled: isLoading }}
               >
-                <View style={[styles.socialIconCircle, { backgroundColor: colors.background.primary, borderWidth: 1, borderColor: colors.border.light }]}>
+                <View style={[styles.socialIconCircle, styles.socialIconCircleGoogle]}>
                   <Image
                     source={require('../../assets/images/google_logo.png')}
                     style={styles.socialIconImage}

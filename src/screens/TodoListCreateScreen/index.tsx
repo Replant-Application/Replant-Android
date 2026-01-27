@@ -468,7 +468,7 @@ const TodoListCreateScreen: React.FC<TodoListCreateScreenProps> = ({ navigation 
             <TouchableOpacity
               activeOpacity={1}
               onPress={() => {}}
-              style={{ alignSelf: 'stretch', alignItems: 'center' }}
+              style={styles.emptyTouchable}
             >
               <View style={styles.modalShadowWrap}>
                 <View style={styles.timePickerModalContainer}>

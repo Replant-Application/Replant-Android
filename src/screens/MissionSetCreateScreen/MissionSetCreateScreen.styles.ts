@@ -131,4 +131,7 @@ export const styles = StyleSheet.create({
   createButtonText: {
     ...createButtonTextStyle('lg'),
   },
+  spacer: {
+    height: 100,
+  },
 });

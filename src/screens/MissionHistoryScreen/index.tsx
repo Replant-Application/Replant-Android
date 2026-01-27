@@ -7,7 +7,6 @@ import React from 'react';
 import { View, Text, FlatList, TouchableOpacity, RefreshControl } from 'react-native';
 import { UserMission } from '../../api/missionApi';
 import { Loading, Header, EmptyState, FilterBar } from '../../components/ui';
-import { colors, spacing } from '../../utils/designTokens';
 import { formatDateDot } from '../../utils/dateUtils';
 import { NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types/navigation';
@@ -82,7 +81,7 @@ const MissionHistoryScreen: React.FC<MissionHistoryScreenProps> = ({ navigation 
         title="미션 이력"
         leftButton={
           <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Text style={{ fontSize: 24 }}>←</Text>
+            <Text style={styles.backButtonText}>←</Text>
           </TouchableOpacity>
         }
       />
@@ -97,12 +96,7 @@ const MissionHistoryScreen: React.FC<MissionHistoryScreenProps> = ({ navigation 
         selectedFilter={filter}
         onFilterChange={(key) => handleFilterChange(key as 'all' | 'completed' | 'expired')}
         variant="button"
-        containerStyle={{
-          paddingHorizontal: spacing[4],
-          paddingVertical: spacing[2],
-          borderBottomWidth: 1,
-          borderBottomColor: colors.border.light,
-        }}
+        containerStyle={styles.filterBarContainer}
       />
 
       {/* 통계 요약 */}

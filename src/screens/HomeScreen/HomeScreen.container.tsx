@@ -276,11 +276,11 @@ export const useHomeScreenContainer = ({ navigation, route }: HomeScreenContaine
                     return false;
                   }
                   
-                  const todayDate = new Date();
+                  const checkDate = new Date();
                   return (
-                    createdDate.getFullYear() === todayDate.getFullYear() &&
-                    createdDate.getMonth() === todayDate.getMonth() &&
-                    createdDate.getDate() === todayDate.getDate()
+                    createdDate.getFullYear() === checkDate.getFullYear() &&
+                    createdDate.getMonth() === checkDate.getMonth() &&
+                    createdDate.getDate() === checkDate.getDate()
                   );
                 })();
 

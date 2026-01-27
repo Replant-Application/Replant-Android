@@ -125,19 +125,19 @@ export const useTodoListDetailScreenContainer = ({ navigation, route }: TodoList
       const [detailResult, canCreateResult] = await Promise.all([getTodoListDetail(id), canCreateNewTodoList()]);
 
       if (detailResult.success && detailResult.data) {
-        const todoList = detailResult.data;
+        const loadedTodoList = detailResult.data;
         // 디버깅: isVerified 필드 확인
-        if (todoList.missions) {
+        if (loadedTodoList.missions) {
           // 미션 데이터 처리
         }
-        setTodoList(todoList);
+        setTodoList(loadedTodoList);
 
         // 완료 모달 표시 확인
-        checkAndShowCompleteModal(todoList);
+        checkAndShowCompleteModal(loadedTodoList);
 
         // 필수 미션 중 인증 완료되었지만 아직 투두리스트에서 완료되지 않은 미션 확인
-        if (todoList.missions) {
-          const incompleteRequiredMissions = todoList.missions.filter(
+        if (loadedTodoList.missions) {
+          const incompleteRequiredMissions = loadedTodoList.missions.filter(
             mission => (mission.missionType === 'OFFICIAL' || mission.missionSource === 'RANDOM_OFFICIAL') && !mission.isCompleted
           );
 
@@ -409,8 +409,8 @@ export const useTodoListDetailScreenContainer = ({ navigation, route }: TodoList
     try {
       // isPublic만 false로 변경 (title, description은 그대로 유지)
       const result = await updateMissionSet(Number(todoListId), {
-        title: todoList.title,
-        description: todoList.description || undefined,
+        title: loadedTodoList.title,
+        description: loadedTodoList.description || undefined,
         isPublic: false,
       });
       if (result.success && result.data) {

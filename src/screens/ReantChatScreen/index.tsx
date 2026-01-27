@@ -327,7 +327,7 @@ const ReantChatScreen: React.FC<ReantChatScreenProps> = ({ navigation, route: _r
               keyExtractor={(item) => item.id}
               contentContainerStyle={[
                 styles.messagesList,
-                chatMessages.length === 0 && { flexGrow: 0 },
+                chatMessages.length === 0 && styles.messagesListEmpty,
               ]}
               showsVerticalScrollIndicator={false}
               scrollEnabled={chatMessages.length > 1}

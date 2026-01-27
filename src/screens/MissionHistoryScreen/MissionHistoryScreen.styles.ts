@@ -103,4 +103,13 @@ export const styles = StyleSheet.create({
       fontWeight: typography.fontWeight.medium,
     }),
   },
+  backButtonText: {
+    fontSize: 24,
+  },
+  filterBarContainer: {
+    paddingHorizontal: spacing[4],
+    paddingVertical: spacing[2],
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border.light,
+  },
 });

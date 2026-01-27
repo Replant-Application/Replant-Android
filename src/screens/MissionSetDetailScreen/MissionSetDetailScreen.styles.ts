@@ -241,4 +241,7 @@ export const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: colors.border.light,
   },
+  spacer: {
+    height: 120,
+  },
 });

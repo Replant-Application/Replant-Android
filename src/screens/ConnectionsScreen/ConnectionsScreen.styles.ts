@@ -164,4 +164,7 @@ export const styles = StyleSheet.create({
       marginTop: spacing[1],
     }),
   },
+  backButtonText: {
+    fontSize: 24,
+  },
 });

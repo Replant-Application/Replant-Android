@@ -1,6 +1,5 @@
 import React from 'react';
 import { View, Text, ScrollView, TouchableOpacity, TextInput } from 'react-native';
-import { colors } from '../../utils/designTokens';
 import { EMOTION_TAGS } from '../../constants/screens/diary';
 import { getEmotionColor, addOpacity } from './DiaryScreen.utils';
 import { styles, COLUMNS } from './EmotionSelectionStep.styles';
@@ -33,6 +32,7 @@ const EmotionSelectionStep: React.FC<EmotionSelectionStepProps> = ({
                 key={emotion}
                 style={[
                   styles.emotionTag,
+                  // eslint-disable-next-line react-native/no-inline-styles
                   {
                     backgroundColor: isSelected 
                       ? addOpacity(emotionColor, 0.3) 

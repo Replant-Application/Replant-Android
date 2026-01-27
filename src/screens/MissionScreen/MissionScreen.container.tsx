@@ -583,7 +583,7 @@ export const useMissionScreenContainer = ({
         setGroupLoading(true);
         console.log('[MissionScreen] 미션 도감 로딩 시작... (서버 페이지:', page, ', 탭:', missionGroupTab, ')');
 
-        let groupMissions: UnifiedMission[] = [];
+        let loadedGroupMissions: UnifiedMission[] = [];
         let totalPages = 1;
         let totalElements = 0;
 
@@ -612,7 +612,7 @@ export const useMissionScreenContainer = ({
           });
 
           // 커스텀 미션을 UnifiedMission으로 변환 (모든 미션 표시, 잠금 없음)
-          groupMissions = customMissionsResult.data.content.map(m => ({
+          loadedGroupMissions = customMissionsResult.data.content.map(m => ({
             id: m.id,
             title: m.title, // 커스텀 미션은 항상 제목 표시
             description: m.description, // 커스텀 미션은 항상 설명 표시
@@ -673,17 +673,17 @@ export const useMissionScreenContainer = ({
           }));
 
           // 공식 미션만 필터링
-          groupMissions = allMissions.filter(m => !m.isCustom);
+          loadedGroupMissions = allMissions.filter(m => !m.isCustom);
         }
 
         // 서버 페이지 정보 저장
         setTotalServerPages(totalPages);
 
-        console.log('[MissionScreen] 현재 페이지 미션 수:', groupMissions.length);
-        console.log('[MissionScreen] 탭:', missionGroupTab, ', 미션 수:', groupMissions.length);
+        console.log('[MissionScreen] 현재 페이지 미션 수:', loadedGroupMissions.length);
+        console.log('[MissionScreen] 탭:', missionGroupTab, ', 미션 수:', loadedGroupMissions.length);
 
-        setGroupMissions(groupMissions);
-        console.log('[MissionScreen] 미션 도감 로딩 완료:', groupMissions.length, '개');
+        setGroupMissions(loadedGroupMissions);
+        console.log('[MissionScreen] 미션 도감 로딩 완료:', loadedGroupMissions.length, '개');
       } catch (err) {
         console.error('[MissionScreen] 미션 도감 로딩 예외 발생:', err);
         showError(

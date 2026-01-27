@@ -135,7 +135,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
                 >
                   <Animated.View
                     style={[
-                      { width: '100%' },
+                      styles.speechBubbleAnimatedContainer,
                       {
                         opacity: speechBubbleAnim,
                         transform: [
@@ -283,7 +283,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
           {showChatInBottomSheet ? (
             <KeyboardAvoidingView
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-                style={{ flex: 1 }}
+                style={styles.keyboardAvoidingView}
                 keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
               >
                 <FlatList
@@ -301,7 +301,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
                   keyExtractor={(item) => item.id}
                   contentContainerStyle={[
                     reantChatStyles.messagesList,
-                    chatMessages.length === 0 && { flexGrow: 0 },
+                    chatMessages.length === 0 && reantChatStyles.messagesListEmpty,
                   ]}
                   showsVerticalScrollIndicator={false}
                   scrollEnabled={chatMessages.length > 1}

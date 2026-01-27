@@ -690,4 +690,8 @@ export const styles = StyleSheet.create({
       width: '100%',
     }),
   },
+  emptyTouchable: {
+    alignSelf: 'stretch',
+    alignItems: 'center',
+  },
 });

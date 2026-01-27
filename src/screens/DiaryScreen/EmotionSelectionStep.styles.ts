@@ -75,4 +75,10 @@ export const styles = StyleSheet.create({
       fontWeight: typography.fontWeight.medium,
     }),
   },
+  emotionTagSelected: {
+    // 동적 스타일은 컴포넌트에서 처리
+  },
+  emotionTagUnselected: {
+    // 동적 스타일은 컴포넌트에서 처리
+  },
 });

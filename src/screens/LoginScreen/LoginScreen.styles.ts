@@ -218,6 +218,14 @@ export const styles = StyleSheet.create({
     width: RESPONSIVE_SOCIAL_IMAGE_SIZE,
     height: RESPONSIVE_SOCIAL_IMAGE_SIZE,
   },
+  socialIconCircleKakao: {
+    backgroundColor: '#FEE500',
+  },
+  socialIconCircleGoogle: {
+    backgroundColor: colors.background.primary,
+    borderWidth: 1,
+    borderColor: colors.border.light,
+  },
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.6)',
