@@ -390,7 +390,7 @@ export const useNotificationScreenContainer = ({
             });
           }
         } else if (type === 'SPONTANEOUS_DIARY') {
-          console.log('[NotificationScreen] 감성일기 작성 화면으로 이동');
+          console.log('[NotificationScreen] 감정일기 작성 화면으로 이동');
           safeNavigation.navigate(SCREEN_NAMES.DIARY as any);
         }
       } catch (error) {

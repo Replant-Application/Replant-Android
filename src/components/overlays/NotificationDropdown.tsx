@@ -221,8 +221,8 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
               });
             }
           } else if (type === 'SPONTANEOUS_DIARY') {
-            // 감성일기 미션 → 감성일기 작성 화면으로 이동
-            console.log('[NotificationDropdown] 감성일기 작성 화면으로 이동');
+            // 감정일기 미션 → 감정일기 작성 화면으로 이동
+            console.log('[NotificationDropdown] 감정일기 작성 화면으로 이동');
             onNavigate(SCREEN_NAMES.DIARY);
           }
         } catch (error) {
