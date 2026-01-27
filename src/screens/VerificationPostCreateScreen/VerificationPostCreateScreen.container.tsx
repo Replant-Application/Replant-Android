@@ -365,6 +365,7 @@ export const useVerificationPostCreateScreenContainer = ({
     images,
     completionRate,
     showError,
+    todoListId,
   ]);
 
   /**

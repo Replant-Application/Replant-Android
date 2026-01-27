@@ -21,12 +21,10 @@ import { sortMissionsByTitle } from '../utils/missionUtils';
 import { Mission, MissionData, UseMissionReturn, MissionCompletionResult, ServiceResult, ExperienceResult, MissionCategory, MissionStatus, MissionType } from '../types';
 import { TodoMission } from '../types/todolist';
 import {
-  getUserMissions,
   createCustomMission as createCustomMissionApi,
   updateCustomMission as updateCustomMissionApi,
   deleteCustomMission as deleteCustomMissionApi,
   Mission as ApiMission,
-  UserMission,
   MissionCategory as ApiMissionCategory,
   CreateMissionRequest,
 } from '../api/missionApi';
@@ -73,9 +71,9 @@ const transformApiMission = (apiMission: ApiMission): Mission => {
   };
 };
 
-/**
- * 백엔드 UserMission을 로컬 미션 형식으로 변환
- */
+// transformUserMission 함수는 현재 사용되지 않아 주석 처리
+// 필요시 다시 활성화할 수 있습니다
+/*
 const transformUserMission = (userMission: UserMission): Mission => {
   // mission 필드 사용 (통합됨)
   const mission = userMission.mission || userMission.customMission;
@@ -107,6 +105,7 @@ const transformUserMission = (userMission: UserMission): Mission => {
     verified: userMission.status === 'COMPLETED',
   };
 };
+*/
 
 /**
  * TodoMission을 Mission 타입으로 변환
@@ -435,6 +434,7 @@ export const useMission = (
       }
 
       // 투두리스트 미션인 경우 completeTodoMission API 호출
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       if (mission.todoListId) {
         const { completeTodoMission } = await import('../api/todolistApi');
         const numericMissionId = parseInt(mission.mission_id.replace(/^custom_/, ''), 10);
@@ -622,14 +622,14 @@ export const useMission = (
         ? parseInt(missionId.replace('custom_', ''), 10)
         : parseInt(missionId, 10);
 
-      const updateData: Partial<CreateMissionRequest> = {
+      const updateRequest: Partial<CreateMissionRequest> = {
         title: missionData.title,
         description: missionData.description,
         isPublic: missionData.isPublic,
         expReward: missionData.experience,
       };
 
-      const result = await updateCustomMissionApi(numericId, updateData);
+      const result = await updateCustomMissionApi(numericId, updateRequest);
 
       if (result.success && result.data) {
         const updatedMission = transformApiMission(result.data);
