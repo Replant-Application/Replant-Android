@@ -14,12 +14,14 @@ import { Header, AlertModal, ConfirmModal } from '../../components/ui';
 import { TodoMission } from '../../types/todolist';
 import { useTodoListDetailScreenContainer } from './TodoListDetailScreen.container';
 import { styles } from './TodoListDetailScreen.styles';
+import { SCREEN_NAMES } from '../../utils/constants';
 
 interface Props {
   navigation: any;
   route: {
     params: {
       todoListId: number;
+      activeTab?: 'active' | 'completed' | 'incomplete'; // 뒤로가기 시 복원할 탭
     };
   };
 }
@@ -118,7 +120,22 @@ const TodoListDetailScreen: React.FC<Props> = ({ navigation, route }) => {
         resizeMode="cover"
         accessibilityElementsHidden={true}
       >
-        <Header title="투두리스트" showBackButton={true} navigation={navigation} />
+        <Header 
+          title="투두리스트" 
+          showBackButton={true} 
+          navigation={{
+            ...navigation,
+            goBack: () => {
+              // activeTab이 있으면 해당 탭으로 복원
+              const activeTab = route.params?.activeTab;
+              if (activeTab) {
+                navigation.navigate(SCREEN_NAMES.TODO_LIST as any, { activeTab });
+              } else {
+                navigation.goBack?.();
+              }
+            },
+          }}
+        />
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={colors.primary[500]} />
         </View>
@@ -134,7 +151,22 @@ const TodoListDetailScreen: React.FC<Props> = ({ navigation, route }) => {
         resizeMode="cover"
         accessibilityElementsHidden={true}
       >
-        <Header title="투두리스트" showBackButton={true} navigation={navigation} />
+        <Header 
+          title="투두리스트" 
+          showBackButton={true} 
+          navigation={{
+            ...navigation,
+            goBack: () => {
+              // activeTab이 있으면 해당 탭으로 복원
+              const activeTab = route.params?.activeTab;
+              if (activeTab) {
+                navigation.navigate(SCREEN_NAMES.TODO_LIST as any, { activeTab });
+              } else {
+                navigation.goBack?.();
+              }
+            },
+          }}
+        />
         <View style={styles.emptyContainer}>
           <Text style={styles.emptyText}>투두리스트를 찾을 수 없습니다</Text>
         </View>
@@ -153,7 +185,18 @@ const TodoListDetailScreen: React.FC<Props> = ({ navigation, route }) => {
       <Header
         title="투두리스트"
         showBackButton={true}
-        navigation={navigation}
+        navigation={{
+          ...navigation,
+            goBack: () => {
+              // activeTab이 있으면 해당 탭으로 복원
+              const activeTab = route.params?.activeTab;
+              if (activeTab) {
+                navigation.navigate(SCREEN_NAMES.TODO_LIST as any, { activeTab });
+              } else {
+                navigation.goBack?.();
+              }
+            },
+        }}
       />
 
       <ScrollView

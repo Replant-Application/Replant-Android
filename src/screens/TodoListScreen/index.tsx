@@ -163,9 +163,6 @@ const TodoListScreen: React.FC<Props> = ({ navigation, route }) => {
             <Text style={styles.createButtonIcon}>+</Text>
             <View style={styles.createButtonContent}>
               <Text style={styles.createButtonTitle}>나만의 To-Do 만들기</Text>
-              <Text style={styles.createButtonSubtitle}>
-                필수미션을 조합해서 새로운 목표를 설정하세요
-              </Text>
             </View>
           </TouchableOpacity>
         )}

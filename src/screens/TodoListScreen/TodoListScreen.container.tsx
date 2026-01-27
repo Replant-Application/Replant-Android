@@ -110,6 +110,7 @@ export const useTodoListScreenContainer = ({ navigation, route }: TodoListScreen
 
   /**
    * route.params.refresh가 있으면 데이터 새로고침
+   * route.params.activeTab이 있으면 해당 탭으로 복원
    */
   useEffect(() => {
     if (route?.params?.refresh) {
@@ -121,6 +122,19 @@ export const useTodoListScreenContainer = ({ navigation, route }: TodoListScreen
       return () => clearTimeout(timer);
     }
   }, [route?.params?.refresh, loadData]);
+
+  /**
+   * route.params.activeTab이 있으면 해당 탭으로 복원
+   */
+  useEffect(() => {
+    if (route?.params?.activeTab) {
+      const tab = route.params.activeTab as 'active' | 'completed' | 'incomplete';
+      if (tab === 'active' || tab === 'completed' || tab === 'incomplete') {
+        console.log('[TodoListScreen] activeTab 복원:', tab);
+        setActiveTab(tab);
+      }
+    }
+  }, [route?.params?.activeTab]);
 
   /**
    * 새로고침 핸들러
@@ -143,9 +157,12 @@ export const useTodoListScreenContainer = ({ navigation, route }: TodoListScreen
    */
   const handleTodoListPress = useCallback(
     (todoList: TodoList) => {
-      navigation.navigate(SCREEN_NAMES.TODO_LIST_DETAIL, { todoListId: todoList.id });
+      navigation.navigate(SCREEN_NAMES.TODO_LIST_DETAIL, { 
+        todoListId: todoList.id,
+        activeTab: activeTab, // 현재 활성화된 탭 전달
+      });
     },
-    [navigation]
+    [navigation, activeTab]
   );
 
   /**

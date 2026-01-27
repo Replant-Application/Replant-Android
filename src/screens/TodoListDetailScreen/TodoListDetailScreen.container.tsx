@@ -23,6 +23,7 @@ interface TodoListDetailScreenContainerProps {
   route: {
     params: {
       todoListId: number | string;
+      activeTab?: 'active' | 'completed' | 'incomplete'; // 뒤로가기 시 복원할 탭
     };
   };
 }
@@ -378,7 +379,13 @@ export const useTodoListDetailScreenContainer = ({ navigation, route }: TodoList
       const result = await archiveTodoList(Number(todoListId));
       if (result.success) {
         showSuccess('투두리스트가 보관되었습니다.');
-        navigation.goBack();
+        // activeTab이 있으면 해당 탭으로 복원
+        const activeTab = route.params?.activeTab;
+        if (activeTab) {
+          navigation.navigate(SCREEN_NAMES.TODO_LIST as any, { activeTab });
+        } else {
+          navigation.goBack();
+        }
       } else {
         handleApiError(result, 'TodoListDetailScreen.handleArchiveConfirm');
       }
@@ -387,7 +394,7 @@ export const useTodoListDetailScreenContainer = ({ navigation, route }: TodoList
     } finally {
       setArchiving(false);
     }
-  }, [todoListId, navigation, handleApiError, showError, showSuccess]);
+  }, [todoListId, navigation, route.params?.activeTab, handleApiError, showError, showSuccess]);
 
   /**
    * 보관 확인 모달: 취소
