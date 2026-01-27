@@ -212,15 +212,67 @@ export const useMission = (
         
         for (const todoList of todayTodoLists) {
           try {
+            console.log(`[useMission] 🔵 API 호출 시작: 투두리스트 ${todoList.id} 상세 조회`);
             const detailResult = await getTodoListDetail(todoList.id);
+            console.log(`[useMission] 🟢 API 호출 완료: 투두리스트 ${todoList.id}`, {
+              success: detailResult?.success,
+              hasData: !!detailResult?.data,
+              hasMissions: !!detailResult?.data?.missions,
+              missionsCount: detailResult?.data?.missions?.length
+            });
             if (detailResult?.success && detailResult.data?.missions) {
-              // 디버깅: API 응답 확인
+              // 디버깅: API 응답 확인 (전체 응답도 확인)
+              try {
+                const fullResponse = JSON.stringify(detailResult.data, null, 2);
+                console.log(`[useMission] 투두리스트 ${todoList.id} 전체 API 응답:`, fullResponse);
+                // missions 배열만 따로 확인
+                if (detailResult.data.missions) {
+                  detailResult.data.missions.forEach((m: any, idx: number) => {
+                    // userMissionStatus 필드 존재 여부와 값 확인
+                    const hasField = 'userMissionStatus' in m;
+                    const fieldValue = m.userMissionStatus;
+                    const fieldType = typeof m.userMissionStatus;
+                    const allKeys = Object.keys(m);
+                    
+                    console.log(`[useMission] 미션 ${idx} 상세 분석:`, {
+                      missionId: m.missionId,
+                      title: m.title,
+                      userMissionStatus: fieldValue,
+                      userMissionStatus_type: fieldType,
+                      has_userMissionStatus: hasField,
+                      is_null: fieldValue === null,
+                      is_undefined: fieldValue === undefined,
+                      all_keys: allKeys,
+                      raw_mission_object: m
+                    });
+                    
+                    // userMissionStatus가 없는 경우 경고
+                    if (!hasField) {
+                      console.warn(`[useMission] ⚠️ userMissionStatus 필드가 API 응답에 없습니다!`, {
+                        missionId: m.missionId,
+                        title: m.title,
+                        available_keys: allKeys
+                      });
+                    } else if (fieldValue === null || fieldValue === undefined) {
+                      console.warn(`[useMission] ⚠️ userMissionStatus가 null/undefined입니다.`, {
+                        missionId: m.missionId,
+                        title: m.title,
+                        value: fieldValue
+                      });
+                    }
+                  });
+                }
+              } catch (e) {
+                console.error(`[useMission] JSON.stringify 실패:`, e);
+                console.log(`[useMission] 원본 데이터:`, detailResult.data);
+              }
               console.log(`[useMission] 투두리스트 ${todoList.id} 미션 데이터:`, 
                 detailResult.data.missions.map((m: any) => ({
                   title: m.title,
                   userMissionStatus: m.userMissionStatus,
                   isVerified: m.isVerified,
-                  isCompleted: m.isCompleted
+                  isCompleted: m.isCompleted,
+                  missionId: m.missionId
                 }))
               );
               

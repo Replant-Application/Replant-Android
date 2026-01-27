@@ -220,8 +220,8 @@ export const useVerificationPostDetailScreenContainer = ({
           }
         }
       }
-    } catch (error) {
-      console.error('[VerificationPostDetailScreen] 투두리스트 미션 완료 처리 중 오류:', error);
+    } catch (err) {
+      console.error('[VerificationPostDetailScreen] 투두리스트 미션 완료 처리 중 오류:', err);
     }
   }, []);
 
@@ -267,8 +267,8 @@ export const useVerificationPostDetailScreenContainer = ({
             if (post?.userMissionId) {
               try {
                 await completeTodoMissionForVerification(post.userMissionId);
-              } catch (error) {
-                console.error('[VerificationPostDetailScreen] 투두리스트 미션 완료 처리 실패:', error);
+              } catch (err) {
+                console.error('[VerificationPostDetailScreen] 투두리스트 미션 완료 처리 실패:', err);
               }
             }
           }

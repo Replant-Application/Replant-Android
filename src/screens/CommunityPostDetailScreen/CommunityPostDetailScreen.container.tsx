@@ -59,8 +59,8 @@ export const useCommunityPostDetailScreenContainer = ({
       try {
         const hiddenIds = await getHiddenComments();
         setHiddenCommentIds(hiddenIds);
-      } catch (error) {
-        logError('숨긴 댓글 목록 로드 실패', error as Error);
+      } catch (err) {
+        logError('숨긴 댓글 목록 로드 실패', err as Error);
       }
     };
     loadHiddenComments();
@@ -73,8 +73,8 @@ export const useCommunityPostDetailScreenContainer = ({
     try {
       await hideComment(commentId);
       setHiddenCommentIds(prev => [...prev, commentId]);
-    } catch (error) {
-      logError('댓글 숨기기 실패', error as Error);
+    } catch (err) {
+      logError('댓글 숨기기 실패', err as Error);
       setAlertTitle('오류');
       setAlertMessage('댓글을 숨기는 중 문제가 발생했습니다.');
       setShowAlert(true);
@@ -209,8 +209,8 @@ export const useCommunityPostDetailScreenContainer = ({
         await deleteComment(deleteCommentId);
         setShowDeleteCommentModal(false);
         setDeleteCommentId(null);
-      } catch (error) {
-        logError('댓글 삭제 실패', error as Error);
+      } catch (err) {
+        logError('댓글 삭제 실패', err as Error);
         setShowDeleteCommentModal(false);
         setDeleteCommentId(null);
       }

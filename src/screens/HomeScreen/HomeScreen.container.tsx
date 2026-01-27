@@ -164,7 +164,6 @@ export const useHomeScreenContainer = ({ navigation, route }: HomeScreenContaine
   /**
    * 데이터 로딩 - 각 API 개별적으로 안전하게 처리
    */
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   const loadData = useCallback(async () => {
     try {
       setDataLoading(true);

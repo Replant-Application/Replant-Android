@@ -21,6 +21,8 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: spacing[2],
     marginBottom: spacing[4],
+    paddingVertical: spacing[2],
+    minHeight: 40,
   },
   createMissionIcon: {
     width: 20,

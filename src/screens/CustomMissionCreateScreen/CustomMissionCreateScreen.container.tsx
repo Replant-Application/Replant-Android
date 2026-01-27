@@ -64,8 +64,8 @@ export const CHALLENGE_DAYS_OPTIONS = [
 // 완료 기한 옵션
 export const DEADLINE_DAYS_OPTIONS = [
   { id: 1, name: '1일', emoji: '⚡' },
-  { id: 3, name: '3일', emoji: '📆' },
-  { id: 7, name: '7일', emoji: '📅' },
+  { id: 3, name: '3일', emoji: '📋' },
+  { id: 7, name: '7일', emoji: '🗓️' },
 ];
 
 export const useCustomMissionCreateScreenContainer = ({

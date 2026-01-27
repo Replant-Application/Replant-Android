@@ -100,8 +100,8 @@ export const useCommunityScreenContainer = ({ navigation, route }: CommunityScre
       try {
         const hiddenIds = await getHiddenPosts();
         setHiddenPostIds(hiddenIds);
-      } catch (error) {
-        logError('숨긴 게시글 목록 로드 실패', error as Error);
+      } catch (err) {
+        logError('숨긴 게시글 목록 로드 실패', err as Error);
       }
     };
     loadHiddenPosts();
@@ -158,8 +158,8 @@ export const useCommunityScreenContainer = ({ navigation, route }: CommunityScre
         }));
         setMissionSets(transformed);
       }
-    } catch (error) {
-      logError('미션세트 로딩 실패', error as Error);
+    } catch (err) {
+      logError('미션세트 로딩 실패', err as Error);
     } finally {
       setMissionSetLoading(false);
     }
@@ -215,9 +215,9 @@ export const useCommunityScreenContainer = ({ navigation, route }: CommunityScre
       } else {
         handleApiError(myResult, 'CommunityScreen.loadMissionSets');
       }
-    } catch (error) {
+    } catch (err) {
       showError(
-        error instanceof Error ? error : new Error('투두리스트를 불러오는데 실패했습니다.'),
+        err instanceof Error ? err : new Error('투두리스트를 불러오는데 실패했습니다.'),
         'CommunityScreen.loadMissionSets'
       );
     } finally {
@@ -259,9 +259,9 @@ export const useCommunityScreenContainer = ({ navigation, route }: CommunityScre
       } else {
         handleApiError(result, 'CommunityScreen.handleShareConfirm');
       }
-    } catch (error) {
+    } catch (err) {
       showError(
-        error instanceof Error ? error : new Error('공유 중 문제가 발생했습니다.'),
+        err instanceof Error ? err : new Error('공유 중 문제가 발생했습니다.'),
         'CommunityScreen.handleShareConfirm'
       );
     } finally {
@@ -291,9 +291,9 @@ export const useCommunityScreenContainer = ({ navigation, route }: CommunityScre
       } else {
         handleApiError(result, 'CommunityScreen.handleUnshareMissionSet');
       }
-    } catch (error) {
+    } catch (err) {
       showError(
-        error instanceof Error ? error : new Error('삭제에 실패했습니다.'),
+        err instanceof Error ? err : new Error('삭제에 실패했습니다.'),
         'CommunityScreen.handleUnshareMissionSet'
       );
     }
@@ -391,9 +391,9 @@ export const useCommunityScreenContainer = ({ navigation, route }: CommunityScre
       try {
         await hidePost(postId);
         setHiddenPostIds(prev => [...prev, postId]);
-      } catch (error) {
+      } catch (err) {
         showError(
-          error instanceof Error ? error : new Error('게시글을 숨기는 중 문제가 발생했습니다.'),
+          err instanceof Error ? err : new Error('게시글을 숨기는 중 문제가 발생했습니다.'),
           'CommunityScreen.handleHidePost'
         );
       }

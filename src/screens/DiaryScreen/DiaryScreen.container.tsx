@@ -427,7 +427,7 @@ export const useDiaryScreenContainer = () => {
         } else {
           showAlertModal('알림', result.error || '해당 날짜에 작성한 일기가 없습니다.');
         }
-      } catch (error) {
+      } catch (err) {
         showAlertModal('오류', '일기 조회에 실패했습니다.');
       } finally {
         setSearchingByDate(false);

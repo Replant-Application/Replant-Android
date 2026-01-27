@@ -88,12 +88,6 @@ const MissionGroupList: React.FC<MissionGroupListProps> = ({
           onPress={onNavigateToCreate}
           activeOpacity={0.7}
         >
-          <Image
-            source={require('../../assets/images/goal.png')}
-            style={styles.createMissionIcon}
-            resizeMode="contain"
-            accessibilityLabel="미션 만들기 아이콘"
-          />
           <Text style={styles.createMissionText}>커스텀 미션 만들기</Text>
         </TouchableOpacity>
       )}

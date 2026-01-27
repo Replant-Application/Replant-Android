@@ -390,9 +390,9 @@ export const useMissionScreenContainer = ({
 
           // 미션 목록 새로고침하여 user_mission_id 업데이트
           await loadMissions();
-        } catch (error) {
+        } catch (err) {
           showError(
-            error instanceof Error ? error : new Error('미션을 시작하는 중 문제가 발생했습니다.'),
+            err instanceof Error ? err : new Error('미션을 시작하는 중 문제가 발생했습니다.'),
             'MissionScreen.handleVerify'
           );
           return;
@@ -446,9 +446,9 @@ export const useMissionScreenContainer = ({
             } else {
               handleApiError(result, 'MissionScreen.handleVerify.GPS');
             }
-          } catch (error) {
+          } catch (err) {
             showError(
-              error instanceof Error ? error : new Error('GPS 인증 중 문제가 발생했습니다.'),
+              err instanceof Error ? err : new Error('GPS 인증 중 문제가 발생했습니다.'),
               'MissionScreen.handleVerify.GPS'
             );
           }
@@ -470,9 +470,9 @@ export const useMissionScreenContainer = ({
             } else {
               handleApiError(result, 'MissionScreen.handleVerify.TIME');
             }
-          } catch (error) {
+          } catch (err) {
             showError(
-              error instanceof Error ? error : new Error('시간 인증 중 문제가 발생했습니다.'),
+              err instanceof Error ? err : new Error('시간 인증 중 문제가 발생했습니다.'),
               'MissionScreen.handleVerify.TIME'
             );
           }
@@ -513,9 +513,9 @@ export const useMissionScreenContainer = ({
             } else {
               handleApiError(result, 'MissionScreen.handleDeletePhoto');
             }
-          } catch (error) {
+          } catch (err) {
             showError(
-              error instanceof Error ? error : new Error('사진 삭제 중 오류가 발생했습니다.'),
+              err instanceof Error ? err : new Error('사진 삭제 중 오류가 발생했습니다.'),
               'MissionScreen.handleDeletePhoto'
             );
           }
@@ -684,10 +684,10 @@ export const useMissionScreenContainer = ({
 
         setGroupMissions(missions);
         console.log('[MissionScreen] 미션 도감 로딩 완료:', missions.length, '개');
-      } catch (error) {
-        console.error('[MissionScreen] 미션 도감 로딩 예외 발생:', error);
+      } catch (err) {
+        console.error('[MissionScreen] 미션 도감 로딩 예외 발생:', err);
         showError(
-          error instanceof Error ? error : new Error('미션 도감을 불러오는 중 문제가 발생했습니다.'),
+          err instanceof Error ? err : new Error('미션 도감을 불러오는 중 문제가 발생했습니다.'),
           'MissionScreen.loadGroupMissions'
         );
         setGroupMissions([]);
@@ -715,8 +715,8 @@ export const useMissionScreenContainer = ({
         }
         showSuccess('미션이 인증되었습니다!', '인증 완료');
       }
-    } catch (error) {
-      logError('인증 상태 확인 오류', error as Error);
+    } catch (err) {
+      logError('인증 상태 확인 오류', err as Error);
     }
   }, [selectedMissionForVerification, loadMissions, activeTab, currentServerPage, loadGroupMissions, showSuccess]);
 

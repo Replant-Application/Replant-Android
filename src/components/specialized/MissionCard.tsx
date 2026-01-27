@@ -75,8 +75,9 @@ const MissionCard: React.FC<MissionCardProps> = ({
   // 접근성 라벨 생성
   const getAccessibilityLabel = () => {
     const categoryName = getCategoryName(mission.category_id || '');
+    const isCustom = mission.missionType === 'CUSTOM' || mission.is_custom === true;
     const status = mission.completed 
-      ? (mission.verified === true ? '인증완료' : '인증대기중')
+      ? (isCustom || mission.verified === true ? '인증완료' : '인증대기중')
       : '진행중';
     return `${categoryName} 미션, ${mission.title}, ${status}`;
   };
@@ -114,8 +115,13 @@ const MissionCard: React.FC<MissionCardProps> = ({
         <View style={styles.statusContainer}>
           {mission.completed ? (
             <>
-              {/* 인증 완료된 경우 */}
-              {mission.verified === true ? (
+              {/* 커스텀 미션은 인증이 필요 없으므로 완료되면 바로 인증완료 표시 */}
+              {mission.missionType === 'CUSTOM' || mission.is_custom === true ? (
+                <View style={styles.verifiedBadge}>
+                  <Text style={styles.verifiedIcon}>✓</Text>
+                  <Text style={styles.verifiedText}>인증완료</Text>
+                </View>
+              ) : mission.verified === true ? (
                 <View style={styles.verifiedBadge}>
                   <Text style={styles.verifiedIcon}>✓</Text>
                   <Text style={styles.verifiedText}>인증완료</Text>
