@@ -41,6 +41,7 @@ interface UnifiedMission {
   expReward: number;
   badgeDurationDays: number;
   participantCount?: number;
+  difficultyLevel?: 'EASY' | 'MEDIUM' | 'HARD';
   isCustom: boolean;
   creatorId?: number;
   creatorNickname?: string;
@@ -638,6 +639,7 @@ export const useMissionScreenContainer = ({
             expReward: m.expReward || 0,
             badgeDurationDays: m.badgeDurationDays || 0,
             participantCount: m.participantCount,
+            difficultyLevel: m.difficultyLevel,
             isCustom: true,
             creatorId: m.creatorId,
             creatorNickname: m.creatorNickname,
@@ -680,6 +682,7 @@ export const useMissionScreenContainer = ({
             expReward: m.expReward,
             badgeDurationDays: m.badgeDurationDays,
             participantCount: m.participantCount,
+            difficultyLevel: (m as any).difficultyLevel, // MissionCollectionItem에 없지만 백엔드에서 제공할 수 있음
             isCustom: m.missionType === 'CUSTOM',
             creatorId: m.creatorId,
             creatorNickname: m.creatorNickname,
@@ -744,6 +747,7 @@ export const useMissionScreenContainer = ({
       loadMissions();
     }
   }, [activeTab, loadMissions]); // activeTab이 변경될 때마다 실행
+
 
   /**
    * 탭 변경 시 미션 도감 로드

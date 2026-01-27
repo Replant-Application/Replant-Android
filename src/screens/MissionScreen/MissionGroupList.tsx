@@ -21,6 +21,7 @@ interface UnifiedMission {
   expReward: number;
   badgeDurationDays: number;
   participantCount?: number;
+  difficultyLevel?: 'EASY' | 'MEDIUM' | 'HARD';
   isCustom: boolean;
   creatorId?: number;
   creatorNickname?: string;
@@ -160,17 +161,6 @@ const MissionGroupList: React.FC<MissionGroupListProps> = ({
 
                     <View style={styles.groupMissionFooter}>
                       <View style={styles.groupMissionStats}>
-                        {mission.expReward > 0 && (
-                          <View style={styles.groupStatItem}>
-                            <Image
-                              source={require('../../assets/images/sun.png')}
-                              style={styles.groupStatIcon}
-                              resizeMode="contain"
-                              accessibilityLabel="경험치 아이콘"
-                            />
-                            <Text style={styles.groupStatText}>{mission.expReward} EXP</Text>
-                          </View>
-                        )}
                         <View style={styles.groupStatItem}>
                           <Image
                             source={require('../../assets/images/high-five.png')}
@@ -182,6 +172,25 @@ const MissionGroupList: React.FC<MissionGroupListProps> = ({
                             참여 {mission.participantCount || 0}명
                           </Text>
                         </View>
+                        {mission.expReward > 0 && (
+                          <View style={styles.groupStatItem}>
+                            <Image
+                              source={require('../../assets/images/sun.png')}
+                              style={styles.groupStatIcon}
+                              resizeMode="contain"
+                              accessibilityLabel="경험치 아이콘"
+                            />
+                            <Text style={styles.groupStatText}>{mission.expReward} EXP</Text>
+                          </View>
+                        )}
+                        {missionGroupTab === 'official' && mission.difficultyLevel && (
+                          <View style={styles.groupStatItem}>
+                            <Text style={styles.groupStatText}>
+                              {mission.difficultyLevel === 'EASY' ? '쉬움' : 
+                               mission.difficultyLevel === 'MEDIUM' ? '보통' : '어려움'}
+                            </Text>
+                          </View>
+                        )}
                       </View>
                     </View>
                   </TouchableOpacity>
