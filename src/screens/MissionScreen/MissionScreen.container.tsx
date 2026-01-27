@@ -208,6 +208,31 @@ export const useMissionScreenContainer = ({
   const totalMissions = missions.length;
 
   /**
+   * 필터별 미션 개수 계산
+   */
+  const missionCounts = useMemo(() => {
+    const inProgressCount = missions.filter(
+      mission =>
+        mission.status === 'ASSIGNED' ||
+        (mission.status !== 'COMPLETED' && mission.status !== 'PENDING' && !mission.completed)
+    ).length;
+    
+    const pendingVerificationCount = missions.filter(
+      mission => mission.status === 'PENDING'
+    ).length;
+    
+    const completedCount = missions.filter(
+      mission => mission.status === 'COMPLETED' || mission.completed
+    ).length;
+    
+    return {
+      inProgress: inProgressCount,
+      pendingVerification: pendingVerificationCount,
+      completed: completedCount,
+    };
+  }, [missions]);
+
+  /**
    * 페이지 수 계산
    */
   const totalMissionPages = Math.ceil(displayedMissions.length / ITEMS_PER_PAGE);
@@ -331,25 +356,40 @@ export const useMissionScreenContainer = ({
     async (mission: Mission, verificationType: 'COMMUNITY' | 'GPS' | 'TIME') => {
       let userMissionId = mission.user_mission_id;
 
-      // user_mission_id가 없으면 자동으로 미션 할당
+      // user_mission_id가 없으면 찾거나 할당
       if (!userMissionId) {
         try {
-          // 시스템 미션인 경우 미션 할당 API 호출
-          const missionId = parseInt(mission.mission_id, 10);
+          const missionId = parseInt(mission.mission_id.replace(/^custom_/, ''), 10);
           if (isNaN(missionId)) {
             showError('미션 정보가 올바르지 않습니다.', 'MissionScreen.handleVerify');
             return;
           }
 
-          const assignResult = await addSystemMissionToMyMissions({ missionId });
-          if (assignResult.success && assignResult.data) {
-            userMissionId = assignResult.data.id;
-            // 미션 목록 새로고침하여 user_mission_id 업데이트
-            await loadMissions();
-          } else {
-            handleApiError(assignResult, 'MissionScreen.handleVerify');
-            return;
+          // 투두리스트 미션인 경우: getUserMissions에서 찾기
+          if (mission.todoListId) {
+            const { getUserMissions } = await import('../../api/missionApi');
+            const listRes = await getUserMissions({ size: 100 });
+            if (listRes.success && listRes.data?.content) {
+              const found = listRes.data.content.find(um => um.mission?.id === missionId);
+              if (found) {
+                userMissionId = found.id;
+              }
+            }
           }
+
+          // 여전히 없으면 미션 할당 API 호출
+          if (!userMissionId) {
+            const assignResult = await addSystemMissionToMyMissions({ missionId });
+            if (assignResult.success && assignResult.data) {
+              userMissionId = assignResult.data.id;
+            } else {
+              handleApiError(assignResult, 'MissionScreen.handleVerify');
+              return;
+            }
+          }
+
+          // 미션 목록 새로고침하여 user_mission_id 업데이트
+          await loadMissions();
         } catch (error) {
           showError(
             error instanceof Error ? error : new Error('미션을 시작하는 중 문제가 발생했습니다.'),
@@ -892,6 +932,7 @@ export const useMissionScreenContainer = ({
     displayedMissions,
     completedMissions,
     totalMissions,
+    missionCounts,
     // Filters & Tabs
     selectedFilter,
     activeTab,
