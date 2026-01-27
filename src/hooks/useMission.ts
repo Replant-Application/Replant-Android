@@ -120,18 +120,29 @@ const transformTodoMissionToMission = (
     const isCustom = todoMission.missionType === 'CUSTOM';
     
     // TodoMission의 상태를 Mission의 status로 변환
+    // UserMission의 status를 우선적으로 사용 (가장 정확함)
     // isCompleted === true → COMPLETED
-    // isCompleted === false && isVerified === false → PENDING (인증 대기)
-    // isCompleted === false && (isVerified === true || isVerified === undefined) → ASSIGNED (진행중)
+    // userMissionStatus가 있으면 그대로 사용
+    // userMissionStatus가 없으면 기본값 ASSIGNED (백엔드에서 ASSIGNED로 생성되므로)
     let status: MissionStatus = 'ASSIGNED';
     if (todoMission.isCompleted) {
       status = 'COMPLETED';
-    } else if (todoMission.isVerified === false) {
-      // 공식 미션이고 인증 대기 중
-      status = 'PENDING';
+    } else if (todoMission.userMissionStatus) {
+      // 백엔드의 UserMission 상태를 그대로 사용 (ASSIGNED, PENDING, COMPLETED 등)
+      status = todoMission.userMissionStatus as MissionStatus;
+      console.log(`[transformTodoMissionToMission] userMissionStatus 사용: ${todoMission.title} -> ${status}`, {
+        userMissionStatus: todoMission.userMissionStatus,
+        isCompleted: todoMission.isCompleted,
+        isVerified: todoMission.isVerified
+      });
     } else {
-      // 진행 중
+      // userMissionStatus가 없으면 기본값 ASSIGNED (백엔드에서 ASSIGNED로 생성되므로)
       status = 'ASSIGNED';
+      console.log(`[transformTodoMissionToMission] userMissionStatus 없음, 기본값 ASSIGNED: ${todoMission.title}`, {
+        userMissionStatus: todoMission.userMissionStatus,
+        isVerified: todoMission.isVerified,
+        isCompleted: todoMission.isCompleted
+      });
     }
     
     return {
@@ -197,6 +208,16 @@ export const useMission = (
           try {
             const detailResult = await getTodoListDetail(todoList.id);
             if (detailResult?.success && detailResult.data?.missions) {
+              // 디버깅: API 응답 확인
+              console.log(`[useMission] 투두리스트 ${todoList.id} 미션 데이터:`, 
+                detailResult.data.missions.map((m: any) => ({
+                  title: m.title,
+                  userMissionStatus: m.userMissionStatus,
+                  isVerified: m.isVerified,
+                  isCompleted: m.isCompleted
+                }))
+              );
+              
               // 투두리스트의 미션을 Mission 형식으로 변환
               for (const todoMission of detailResult.data.missions) {
                 try {
