@@ -93,6 +93,7 @@ export type RootStackParamList = {
     missionTitle: string;
     missionEmoji?: string;
     photoUrl?: string;
+    todoListId?: number; // 투두리스트 ID (선택사항)
     mode?: 'create' | 'edit';
     verificationId?: number;
     initialContent?: string;

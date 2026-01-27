@@ -591,6 +591,7 @@ export interface CreateVerificationRequest {
   content: string;
   imageUrls: string[];
   completionRate?: number;
+  todoListId?: number; // 투두리스트 ID (선택사항)
 }
 
 export interface VoteVerificationResponse {

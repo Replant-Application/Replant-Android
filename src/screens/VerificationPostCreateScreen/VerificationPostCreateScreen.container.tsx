@@ -29,6 +29,7 @@ export const useVerificationPostCreateScreenContainer = ({
     missionTitle = '미션',
     missionEmoji = '',
     photoUrl: initialPhotoUrl,
+    todoListId,
     // 수정 모드용 params
     mode = 'create',
     verificationId,
@@ -300,7 +301,7 @@ export const useVerificationPostCreateScreenContainer = ({
         // 수정 모드
         const result = await updateVerification(verificationId, {
           content: content.trim(),
-          imageUrls: images, // 다중 이미지 배열
+          imageUrls: images.length > 0 ? images : undefined, // 다중 이미지 배열 (있을 때만 전달)
           completionRate: completionRate,
         });
 
@@ -324,8 +325,9 @@ export const useVerificationPostCreateScreenContainer = ({
         const verificationData = {
           userMissionId: userMissionId,
           content: content.trim(),
-          imageUrls: images, // 다중 이미지 배열
+          imageUrls: images.length > 0 ? images : undefined, // 다중 이미지 배열 (있을 때만 전달)
           completionRate: completionRate, // 완료 정도 추가
+          todoListId: todoListId, // 투두리스트 ID (선택사항)
         };
 
         const result = await createVerification(verificationData);

@@ -272,6 +272,7 @@ export const useTodoListDetailScreenContainer = ({ navigation, route }: TodoList
               missionTitle: mission.title || '미션',
               missionEmoji: '🎯',
               photoUrl: undefined,
+              todoListId: Number(todoListId), // 투두리스트 ID 전달
             });
             return;
           }

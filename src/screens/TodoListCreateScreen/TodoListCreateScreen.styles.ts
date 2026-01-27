@@ -379,9 +379,28 @@ export const styles = StyleSheet.create({
     marginTop: spacing[2], 
     marginBottom: spacing[4] 
   },
+  missionsListTitleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: spacing[4],
+  },
   missionsListTitle: {
     ...createTitleStyle('lg', {
-      marginBottom: spacing[4],
+      flex: 1,
+    }),
+  },
+  defaultTimeButton: {
+    backgroundColor: colors.primary[500],
+    paddingHorizontal: spacing[3],
+    paddingVertical: spacing[2],
+    borderRadius: borderRadius.md,
+    marginLeft: spacing[3],
+  },
+  defaultTimeButtonText: {
+    ...createButtonTextStyle('sm', {
+      color: colors.white,
+      fontWeight: typography.fontWeight.medium,
     }),
   },
   missionListItem: { 
