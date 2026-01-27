@@ -83,7 +83,7 @@ export const styles = StyleSheet.create({
   deleteButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing[0.5],
+    gap: spacing[1],
     paddingHorizontal: spacing[1.5],
     paddingVertical: spacing[0.5],
   },
