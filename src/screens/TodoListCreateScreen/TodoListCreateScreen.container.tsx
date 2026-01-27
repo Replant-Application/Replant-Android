@@ -377,6 +377,28 @@ export const useTodoListCreateScreenContainer = ({ navigation }: TodoListCreateS
   }, []);
 
   /**
+   * 모든 미션에 기본 시간대 일괄 설정 (09:00 ~ 18:00)
+   */
+  const handleSetDefaultTimeForAll = useCallback(() => {
+    const defaultStart = convertTo24Hour(DEFAULT_START_TIME.period, DEFAULT_START_TIME.hour, DEFAULT_START_TIME.minute);
+    const defaultEnd = convertTo24Hour(DEFAULT_END_TIME.period, DEFAULT_END_TIME.hour, DEFAULT_END_TIME.minute);
+    
+    const newRanges: Record<number, { start: string; end: string }> = {};
+    // randomMissions의 모든 미션에 시간 설정
+    randomMissions.forEach(mission => {
+      newRanges[mission.id] = { start: defaultStart, end: defaultEnd };
+    });
+    // 선택된 커스텀 미션에도 시간 설정
+    const selectedMissions = customMissions.filter(m => selectedCustomMissions.includes(m.id));
+    selectedMissions.forEach(mission => {
+      newRanges[mission.id] = { start: defaultStart, end: defaultEnd };
+    });
+    
+    // 기존 시간대를 완전히 대체 (merge가 아닌 replace)
+    setMissionTimeRanges(newRanges);
+  }, [randomMissions, customMissions, selectedCustomMissions, convertTo24Hour]);
+
+  /**
    * 모든 미션 목록 (공식 + 커스텀)
    */
   const allMissions = useMemo(() => {
@@ -472,6 +494,7 @@ export const useTodoListCreateScreenContainer = ({ navigation }: TodoListCreateS
     handleSetMissionTime,
     handleSaveTime,
     handleRemoveTime,
+    handleSetDefaultTimeForAll,
     handleTodoListSuccessClose,
     handleTimePickerNext,
     handleTimePickerPrev,

@@ -75,6 +75,7 @@ const TodoListCreateScreen: React.FC<TodoListCreateScreenProps> = ({ navigation 
     handleSetMissionTime,
     handleSaveTime,
     handleRemoveTime,
+    handleSetDefaultTimeForAll,
     handleTodoListSuccessClose,
     handleTimePickerNext,
     handleTimePickerPrev,
@@ -353,7 +354,19 @@ const TodoListCreateScreen: React.FC<TodoListCreateScreenProps> = ({ navigation 
           </View>
 
           <View style={styles.missionsListSection}>
-            <Text style={styles.missionsListTitle}>미션을 시간대에 배치하세요</Text>
+            <View style={styles.missionsListTitleContainer}>
+              <Text style={styles.missionsListTitle}>미션을 시간대에 배치하세요</Text>
+              <TouchableOpacity
+                style={styles.defaultTimeButton}
+                onPress={handleSetDefaultTimeForAll}
+                activeOpacity={0.7}
+                accessibilityRole="button"
+                accessibilityLabel="모든 미션에 기본 시간대 설정"
+                accessibilityHint="모든 미션의 시간을 오전 9시부터 오후 6시까지 일괄 설정합니다"
+              >
+                <Text style={styles.defaultTimeButtonText}>기본값으로 설정</Text>
+              </TouchableOpacity>
+            </View>
             {allMissions.map((mission) => {
               const missionRange = missionTimeRanges[mission.id];
               return (

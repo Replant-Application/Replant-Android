@@ -58,6 +58,7 @@ export interface CreateVerificationRequest {
   userMissionId: number;
   content: string;
   imageUrls?: string[];
+  todoListId?: number; // 투두리스트 ID (선택사항)
 }
 
 /**
