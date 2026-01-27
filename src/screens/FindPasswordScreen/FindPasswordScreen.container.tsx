@@ -34,9 +34,9 @@ export const useFindPasswordScreenContainer = ({
   /**
    * 이메일 유효성 검사
    */
-  const validateEmail = useCallback((email: string): boolean => {
+  const validateEmail = useCallback((emailValue: string): boolean => {
     const emailRegex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,6}$/;
-    return emailRegex.test(email);
+    return emailRegex.test(emailValue);
   }, []);
 
   /**

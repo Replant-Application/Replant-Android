@@ -260,7 +260,7 @@ const VerificationPostDetailScreen: React.FC<VerificationPostDetailScreenProps> 
                         isAuthor={currentUserId !== null && 
                           (parentComment.author_id !== undefined 
                             ? Number(parentComment.author_id) === currentUserId
-                            : parseInt(parentComment.author) === currentUserId)}
+                            : parseInt(parentComment.author, 10) === currentUserId)}
                         onEdit={handleEditComment}
                         onDelete={handleDeleteComment}
                         onReply={handleReplyComment}
@@ -299,7 +299,7 @@ const VerificationPostDetailScreen: React.FC<VerificationPostDetailScreenProps> 
                               isAuthor={currentUserId !== null && 
                                 (reply.author_id !== undefined 
                                   ? Number(reply.author_id) === currentUserId
-                                  : parseInt(reply.author) === currentUserId)}
+                                  : parseInt(reply.author, 10) === currentUserId)}
                               isReply={true}
                               onEdit={handleEditComment}
                               onDelete={handleDeleteComment}

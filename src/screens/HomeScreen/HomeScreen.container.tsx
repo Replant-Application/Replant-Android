@@ -164,6 +164,7 @@ export const useHomeScreenContainer = ({ navigation, route }: HomeScreenContaine
   /**
    * 데이터 로딩 - 각 API 개별적으로 안전하게 처리
    */
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const loadData = useCallback(async () => {
     try {
       setDataLoading(true);
@@ -185,14 +186,14 @@ export const useHomeScreenContainer = ({ navigation, route }: HomeScreenContaine
           
           // 오늘 날짜인 투두리스트만 "진행중"에 표시 (TodoListScreen과 동일한 로직)
           // 과거 날짜의 미완료 투두리스트는 제외
-          const activeTodoLists = filterTodayActiveTodoLists(todoListResult.data, 'HomeScreen');
+          const filteredTodoLists = filterTodayActiveTodoLists(todoListResult.data, 'HomeScreen');
 
           console.log('[HomeScreen] 📊 필터링 결과 요약:');
           console.log(`  - 필터링 전: ${todoListResult.data.length}개`);
-          console.log(`  - 필터링 후: ${activeTodoLists.length}개`);
-          if (activeTodoLists.length > 0) {
+          console.log(`  - 필터링 후: ${filteredTodoLists.length}개`);
+          if (filteredTodoLists.length > 0) {
             console.log('[HomeScreen] ✅ 필터링된 투두리스트 목록:');
-            activeTodoLists.forEach((tl, index) => {
+            filteredTodoLists.forEach((tl, index) => {
               console.log(`  [${index + 1}] ID:${tl.id}, 제목:"${tl.title}", 완료:${tl.completedCount}/${tl.totalCount}`);
             });
           } else {
@@ -201,10 +202,10 @@ export const useHomeScreenContainer = ({ navigation, route }: HomeScreenContaine
           console.log('🔵 [HomeScreen] ========== 투두리스트 로드 완료 ==========\n');
           
           console.log('[HomeScreen] 🔵 setActiveTodoLists 호출 전:', {
-            activeTodoListsLength: activeTodoLists.length,
-            activeTodoListsIds: activeTodoLists.map(tl => tl.id)
+            activeTodoListsLength: filteredTodoLists.length,
+            activeTodoListsIds: filteredTodoLists.map(tl => tl.id)
           });
-          setActiveTodoLists(activeTodoLists);
+          setActiveTodoLists(filteredTodoLists);
           console.log('[HomeScreen] 🔵 setActiveTodoLists 호출 완료');
 
           // 각 투두리스트의 상세 정보를 가져와서 미션 추출 및 완료 확인
@@ -215,16 +216,19 @@ export const useHomeScreenContainer = ({ navigation, route }: HomeScreenContaine
               { mission: TodoMission; todoListTitle: string }[]
             >();
 
-            for (const todoList of activeTodoLists) {
+            console.log(`[HomeScreen] 미션 추출 시작: ${filteredTodoLists.length}개 투두리스트`);
+            for (const todoList of filteredTodoLists) {
             try {
               const detailResult = await getTodoListDetail(todoList.id);
               if (detailResult?.success && detailResult.data) {
                 const todoListDetail = detailResult.data;
 
+                console.log(`[HomeScreen] 투두리스트 ${todoList.id} 미션 수:`, todoListDetail.missions?.length || 0);
+
                 // 미션 추출 (시간대별로 그룹화) - 완료된 미션도 포함
                 if (todoListDetail.missions) {
                   for (const mission of todoListDetail.missions) {
-                    // 시간이 설정된 미션만 (완료 여부와 관계없이)
+                    // 시간이 설정된 미션은 시간대로 그룹화
                     if (mission.scheduledStartTime) {
                       // 안전하게 문자열로 변환
                       const timeKey = String(mission.scheduledStartTime); // "09:00" 형식
@@ -239,8 +243,21 @@ export const useHomeScreenContainer = ({ navigation, route }: HomeScreenContaine
                       } else {
                         console.warn('[HomeScreen] 빈 시간 키 발견:', mission.scheduledStartTime);
                       }
+                    } else {
+                      // 시간이 없는 미션은 "시간 미정" 그룹에 추가
+                      const timeKey = '시간 미정';
+                      if (!missionsByTime.has(timeKey)) {
+                        missionsByTime.set(timeKey, []);
+                      }
+                      missionsByTime.get(timeKey)!.push({
+                        mission,
+                        todoListTitle: todoListDetail.title,
+                      });
+                      console.log(`[HomeScreen] 미션 ${mission.id} (${mission.title}): 시간 미정으로 추가`);
                     }
                   }
+                } else {
+                  console.log(`[HomeScreen] 투두리스트 ${todoList.id}: missions 배열 없음`);
                 }
 
                 // 투두리스트 완료 확인
@@ -345,6 +362,7 @@ export const useHomeScreenContainer = ({ navigation, route }: HomeScreenContaine
     } finally {
       setDataLoading(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {

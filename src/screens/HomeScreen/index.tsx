@@ -427,7 +427,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
                     </View>
                   ) : (
                     <>
-                      {todoMissionsByTime.size > 0 && (
+                      {todoMissionsByTime.size > 0 ? (
                         <View style={styles.timeBasedMissions}>
                           {Array.from(todoMissionsByTime.entries()).map(([time, missions]) => (
                             <View key={time} style={styles.timeGroup}>
@@ -467,6 +467,19 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
                               })}
                             </View>
                           ))}
+                        </View>
+                      ) : (
+                        <View style={styles.emptyTodoListContainer}>
+                          <Text style={styles.emptyTodoListText}>
+                            투두리스트가 있지만{'\n'}표시할 미션이 없어요
+                          </Text>
+                          <TouchableOpacity
+                            style={styles.createTodoListButton}
+                            onPress={() => navigation.navigate(SCREEN_NAMES.TODO_LIST as any)}
+                            activeOpacity={0.7}
+                          >
+                            <Text style={styles.createTodoListButtonText}>투두리스트 보기</Text>
+                          </TouchableOpacity>
                         </View>
                       )}
                     </>

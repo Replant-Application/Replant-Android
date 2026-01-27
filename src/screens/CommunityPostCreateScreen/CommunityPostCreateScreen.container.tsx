@@ -52,9 +52,9 @@ export const useCommunityPostCreateScreenContainer = ({
   const [alertMessage, setAlertMessage] = useState('');
 
   // AlertModal 표시 함수
-  const showAlertModal = useCallback((title: string, message: string) => {
-    setAlertTitle(title);
-    setAlertMessage(message);
+  const showAlertModal = useCallback((alertTitleText: string, alertMessageText: string) => {
+    setAlertTitle(alertTitleText);
+    setAlertMessage(alertMessageText);
     setShowAlert(true);
   }, []);
 

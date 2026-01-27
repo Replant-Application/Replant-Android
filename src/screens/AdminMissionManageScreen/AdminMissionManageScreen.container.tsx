@@ -219,13 +219,13 @@ export const useAdminMissionManageScreenContainer = ({
                   description: formData.description,
                   type: formData.type,
                   verificationType: formData.verificationType,
-                  expReward: parseInt(formData.expReward) || 10,
-                  badgeDurationDays: parseInt(formData.badgeDurationDays) || 3,
+                  expReward: parseInt(formData.expReward, 10) || 10,
+                  badgeDurationDays: parseInt(formData.badgeDurationDays, 10) || 3,
                   isActive: formData.isActive,
-                  requiredMinutes: formData.requiredMinutes ? parseInt(formData.requiredMinutes) : undefined,
+                  requiredMinutes: formData.requiredMinutes ? parseInt(formData.requiredMinutes, 10) : undefined,
                   gpsLatitude: formData.gpsLatitude ? parseFloat(formData.gpsLatitude) : undefined,
                   gpsLongitude: formData.gpsLongitude ? parseFloat(formData.gpsLongitude) : undefined,
-                  gpsRadiusMeters: formData.gpsRadiusMeters ? parseInt(formData.gpsRadiusMeters) : undefined,
+                  gpsRadiusMeters: formData.gpsRadiusMeters ? parseInt(formData.gpsRadiusMeters, 10) : undefined,
                 }
               : m
           )
@@ -239,13 +239,13 @@ export const useAdminMissionManageScreenContainer = ({
           description: formData.description,
           type: formData.type,
           verificationType: formData.verificationType,
-          expReward: parseInt(formData.expReward) || 10,
-          badgeDurationDays: parseInt(formData.badgeDurationDays) || 3,
+          expReward: parseInt(formData.expReward, 10) || 10,
+          badgeDurationDays: parseInt(formData.badgeDurationDays, 10) || 3,
           isActive: formData.isActive,
-          requiredMinutes: formData.requiredMinutes ? parseInt(formData.requiredMinutes) : undefined,
+          requiredMinutes: formData.requiredMinutes ? parseInt(formData.requiredMinutes, 10) : undefined,
           gpsLatitude: formData.gpsLatitude ? parseFloat(formData.gpsLatitude) : undefined,
           gpsLongitude: formData.gpsLongitude ? parseFloat(formData.gpsLongitude) : undefined,
-          gpsRadiusMeters: formData.gpsRadiusMeters ? parseInt(formData.gpsRadiusMeters) : undefined,
+          gpsRadiusMeters: formData.gpsRadiusMeters ? parseInt(formData.gpsRadiusMeters, 10) : undefined,
         };
         setMissions(prev => [...prev, newMission]);
         Alert.alert('완료', '새 미션이 추가되었습니다.');

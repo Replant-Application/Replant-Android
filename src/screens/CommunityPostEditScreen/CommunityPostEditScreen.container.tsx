@@ -35,9 +35,9 @@ export const useCommunityPostEditScreenContainer = ({
 
   const [showSuccessModal, setShowSuccessModal] = useState(false);
 
-  const showAlertModal = useCallback((title: string, message: string, closeAction?: 'goBack') => {
-    setAlertTitle(title);
-    setAlertMessage(message);
+  const showAlertModal = useCallback((alertTitleText: string, alertMessageText: string, closeAction?: 'goBack') => {
+    setAlertTitle(alertTitleText);
+    setAlertMessage(alertMessageText);
     setAlertCloseAction(closeAction || null);
     setShowAlert(true);
   }, []);
