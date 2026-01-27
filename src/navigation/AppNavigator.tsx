@@ -1123,7 +1123,6 @@ const styles = StyleSheet.create({
   },
   tabIconImageActive: {
     opacity: 1,
-    tintColor: colors.green[600],
   },
   tabLabel: {
     fontSize: typography.fontSize.xs,
