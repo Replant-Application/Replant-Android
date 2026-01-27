@@ -208,6 +208,31 @@ export const useMissionScreenContainer = ({
   const totalMissions = missions.length;
 
   /**
+   * 필터별 미션 개수 계산
+   */
+  const missionCounts = useMemo(() => {
+    const inProgressCount = missions.filter(
+      mission =>
+        mission.status === 'ASSIGNED' ||
+        (mission.status !== 'COMPLETED' && mission.status !== 'PENDING' && !mission.completed)
+    ).length;
+    
+    const pendingVerificationCount = missions.filter(
+      mission => mission.status === 'PENDING'
+    ).length;
+    
+    const completedCount = missions.filter(
+      mission => mission.status === 'COMPLETED' || mission.completed
+    ).length;
+    
+    return {
+      inProgress: inProgressCount,
+      pendingVerification: pendingVerificationCount,
+      completed: completedCount,
+    };
+  }, [missions]);
+
+  /**
    * 페이지 수 계산
    */
   const totalMissionPages = Math.ceil(displayedMissions.length / ITEMS_PER_PAGE);
@@ -892,6 +917,7 @@ export const useMissionScreenContainer = ({
     displayedMissions,
     completedMissions,
     totalMissions,
+    missionCounts,
     // Filters & Tabs
     selectedFilter,
     activeTab,

@@ -132,12 +132,37 @@ export const useMission = (
       // 상태: ASSIGNED, PENDING, COMPLETED 모두 포함 (오늘 할당된 것만)
       const userMissionsResult = await getUserMissions({ size: 100 });
       if (userMissionsResult.success && userMissionsResult.data) {
+        // 오늘 날짜 확인 (년/월/일만 비교)
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const todayYear = today.getFullYear();
+        const todayMonth = today.getMonth();
+        const todayDate = today.getDate();
+        
         // UserMission을 Mission 형식으로 변환
         // 완료된 미션(status === 'COMPLETED')도 포함하여 변환
+        // 프론트엔드에서도 오늘 할당된 미션만 필터링 (이중 체크)
         userMissionsResult.data.content.forEach(um => {
           try {
-            const mission = transformUserMission(um);
-            allMissions.push(mission);
+            // assignedAt이 오늘 날짜인지 확인
+            if (um.assignedAt) {
+              const assignedDate = new Date(um.assignedAt);
+              assignedDate.setHours(0, 0, 0, 0);
+              const assignedYear = assignedDate.getFullYear();
+              const assignedMonth = assignedDate.getMonth();
+              const assignedDay = assignedDate.getDate();
+              
+              // 오늘 할당된 미션만 포함
+              if (assignedYear === todayYear && 
+                  assignedMonth === todayMonth && 
+                  assignedDay === todayDate) {
+                const mission = transformUserMission(um);
+                allMissions.push(mission);
+              }
+            } else {
+              // assignedAt이 없으면 제외
+              console.warn('[useMission] assignedAt이 없는 UserMission 제외:', um.id);
+            }
           } catch (e) {
             // 미션 데이터가 없는 경우 스킵
             logError('UserMission 변환 실패', e as Error, { userMissionId: um.id });
