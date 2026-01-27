@@ -67,16 +67,18 @@ export const styles = StyleSheet.create({
     }),
   },
   tabCount: {
-    ...createTextStyle('xs', {
-      fontWeight: typography.fontWeight.semibold,
+    ...createTextStyle('sm', {
+      fontWeight: typography.fontWeight.medium,
       color: '#8B6F47', // 비활성 탭 숫자 색상
       marginTop: spacing[0.5],
+      letterSpacing: 0.3,
     }),
   },
   tabCountActive: {
-    ...createTextStyle('xs', {
-      fontWeight: typography.fontWeight.semibold,
+    ...createTextStyle('sm', {
+      fontWeight: typography.fontWeight.medium,
       color: '#FFF8E7', // 활성 탭 숫자 색상 (크림색)
+      letterSpacing: 0.3,
     }),
   },
   underline: {

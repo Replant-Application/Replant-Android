@@ -203,7 +203,7 @@ export const getMissionReviews = async (
 /**
  * 미션 리뷰 작성
  * POST /api/missions/{missionId}/reviews
- * 인증 필요, 뱃지 필요
+ * 인증 필요, 배지 필요
  */
 export const createMissionReview = async (
   missionId: number,
@@ -281,7 +281,7 @@ export const getMissionQnADetail = async (
 /**
  * 미션 QnA 질문 작성
  * POST /api/missions/{missionId}/qna
- * 인증 필요, 뱃지 불필요
+ * 인증 필요, 배지 불필요
  */
 export const createMissionQuestion = async (
   missionId: number,
@@ -294,7 +294,7 @@ export const createMissionQuestion = async (
 /**
  * 미션 QnA 답변 작성
  * POST /api/missions/{missionId}/qna/{qnaId}/answers
- * 인증 필요, 뱃지 필요
+ * 인증 필요, 배지 필요
  */
 export const createMissionAnswer = async (
   missionId: number,

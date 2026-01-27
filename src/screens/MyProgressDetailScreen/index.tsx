@@ -1,6 +1,6 @@
 /**
  * 나의 진행률 상세 화면
- * 유효한 뱃지 목록
+ * 유효한 배지 목록
  */
 
 import React from 'react';
@@ -43,7 +43,7 @@ const MyProgressDetailScreen: React.FC<MyProgressDetailScreenProps> = ({ navigat
     >
       <View style={styles.container}>
         <Header
-          title="뱃지"
+          title="배지"
           leftButton={
             <TouchableOpacity onPress={() => navigation.goBack()}>
               <Image
@@ -68,25 +68,25 @@ const MyProgressDetailScreen: React.FC<MyProgressDetailScreenProps> = ({ navigat
             />
           }
         >
-          {/* 유효한 뱃지 섹션 */}
+          {/* 유효한 배지 섹션 */}
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>유효한 뱃지</Text>
+              <Text style={styles.sectionTitle}>유효한 배지</Text>
               <Text style={styles.sectionCount}>{validBadges.length}개</Text>
             </View>
 
             {badgesLoading ? (
-              <Loading text="뱃지를 불러오는 중..." />
+              <Loading text="배지를 불러오는 중..." />
             ) : validBadges.length === 0 ? (
               <View style={styles.emptyContainer}>
                 <Image
                   source={require('../../assets/images/check2.png')}
                   style={styles.emptyIcon}
                   resizeMode="contain"
-                  accessibilityLabel="뱃지 아이콘"
+                  accessibilityLabel="배지 아이콘"
                 />
-                <Text style={styles.emptyText}>유효한 뱃지가 없습니다</Text>
-                <Text style={styles.emptySubtext}>미션을 완료하고 뱃지를 획득해보세요!</Text>
+                <Text style={styles.emptyText}>유효한 배지가 없습니다</Text>
+                <Text style={styles.emptySubtext}>미션을 완료하고 배지를 획득해보세요!</Text>
               </View>
             ) : (
               <View style={styles.badgeGrid}>
@@ -105,7 +105,7 @@ const MyProgressDetailScreen: React.FC<MyProgressDetailScreenProps> = ({ navigat
                           source={require('../../assets/images/check2.png')}
                           style={styles.badgeIconImage}
                           resizeMode="contain"
-                          accessibilityLabel="뱃지 아이콘"
+                          accessibilityLabel="배지 아이콘"
                         />
                       </View>
                       <Text style={styles.badgeTitle} numberOfLines={2}>

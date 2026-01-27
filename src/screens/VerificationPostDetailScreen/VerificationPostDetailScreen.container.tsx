@@ -427,7 +427,7 @@ export const useVerificationPostDetailScreenContainer = ({
   }, [post, verificationId, navigation, getMissionTitle]);
 
   /**
-   * 상태 뱃지 렌더링 함수
+   * 상태 배지 렌더링 함수
    */
   const getStatusBadge = useCallback(() => {
     if (!post) return null;

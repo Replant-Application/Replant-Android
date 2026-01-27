@@ -255,8 +255,8 @@ const MissionGroupScreen: React.FC<MissionGroupScreenProps> = ({ navigation }) =
                           <Text style={styles.detailLabel}>보상</Text>
                           <Text style={styles.detailValue}>
                             {selectedMission.isCustom 
-                              ? `뱃지 (${selectedMission.badgeDurationDays}일)`
-                              : `${selectedMission.expReward} EXP + 뱃지 (${selectedMission.badgeDurationDays}일)`
+                              ? `배지 (${selectedMission.badgeDurationDays}일)`
+                              : `${selectedMission.expReward} EXP + 배지 (${selectedMission.badgeDurationDays}일)`
                             }
                           </Text>
                         </View>
@@ -276,7 +276,7 @@ const MissionGroupScreen: React.FC<MissionGroupScreenProps> = ({ navigation }) =
                         </TouchableOpacity>
                       </View>
 
-                      {/* 후기 섹션 - 주석처리 (미션 상세에서 뱃지 소유자만 작성 가능하도록 변경) */}
+                      {/* 후기 섹션 - 주석처리 (미션 상세에서 배지 소유자만 작성 가능하도록 변경) */}
                       {/* <View style={styles.inlineReviewSection}>
                           <View style={styles.reviewSectionHeader}>
                             <Text style={styles.sectionTitle}>미션 후기</Text>
@@ -289,7 +289,7 @@ const MissionGroupScreen: React.FC<MissionGroupScreenProps> = ({ navigation }) =
                             </TouchableOpacity>
                           </View>
                           <Text style={styles.reviewHint}>
-                            ※ 미션을 완료하고 뱃지를 획득해야 후기를 작성할 수 있습니다
+                            ※ 미션을 완료하고 배지를 획득해야 후기를 작성할 수 있습니다
                           </Text>
 
                           {reviewsLoading ? (

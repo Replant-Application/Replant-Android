@@ -34,7 +34,7 @@ export interface Post {
   title: string;
   content: string;
   imageUrls: string[];
-  hasValidBadge: boolean; // 작성자가 미션 뱃지를 보유중인지
+  hasValidBadge: boolean; // 작성자가 미션 배지를 보유중인지
   commentCount: number;
   likeCount?: number;
   isLiked?: boolean;
@@ -98,7 +98,7 @@ export interface CommentListResponse {
 export const getPosts = async (params?: {
   missionId?: number;
   customMissionId?: number;
-  badgeOnly?: boolean; // 뱃지 보유자 글만
+  badgeOnly?: boolean; // 배지 보유자 글만
   page?: number;
   size?: number;
 }): Promise<ServiceResult<PostListResponse>> => {

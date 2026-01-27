@@ -140,7 +140,7 @@ export const API_CONFIG = {
       like: '/community/posts/:postId/like',
     },
 
-    // 뱃지 (Badge)
+    // 배지 (Badge)
     badge: {
       list: '/badges',
       history: '/badges/history',

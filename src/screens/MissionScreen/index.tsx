@@ -231,6 +231,7 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
                         missionGroupTab: (activeTab as MissionTab) === 'missionGroup' ? missionGroupTab : undefined,
                         selectedFilter: (activeTab as MissionTab) === 'myMission' ? selectedFilter : undefined
                       })}
+                      selectedFilter={selectedFilter}
                     />
                   ))}
                 </View>

@@ -63,7 +63,7 @@ const VerificationPostDetailScreen: React.FC<VerificationPostDetailScreenProps> 
     currentUserId,
   } = useVerificationPostDetailScreenContainer({ navigation, route });
 
-  // 상태 뱃지 렌더링
+  // 상태 배지 렌더링
   const statusBadge = getStatusBadge();
 
   if (loading) {

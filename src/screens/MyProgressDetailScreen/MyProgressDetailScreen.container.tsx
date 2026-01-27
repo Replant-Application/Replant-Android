@@ -1,6 +1,6 @@
 /**
  * MyProgressDetailScreen 비즈니스 로직
- * 나의 진행률 상세 화면: 뱃지 목록
+ * 나의 진행률 상세 화면: 배지 목록
  */
 
 import { useState, useEffect, useCallback } from 'react';
@@ -19,7 +19,7 @@ export const useMyProgressDetailScreenContainer = ({ navigation }: MyProgressDet
   const [badgesLoading, setBadgesLoading] = useState(true);
 
   /**
-   * 뱃지 로딩
+   * 배지 로딩
    */
   const loadBadges = useCallback(async () => {
     try {
@@ -30,7 +30,7 @@ export const useMyProgressDetailScreenContainer = ({ navigation }: MyProgressDet
         setValidBadges(result.data.badges || []);
       }
     } catch (error) {
-      logError('뱃지 로딩 실패', error as Error);
+      logError('배지 로딩 실패', error as Error);
     } finally {
       setBadgesLoading(false);
     }
@@ -53,7 +53,7 @@ export const useMyProgressDetailScreenContainer = ({ navigation }: MyProgressDet
   }, [loadBadges]);
 
   /**
-   * 뱃지 클릭 핸들러
+   * 배지 클릭 핸들러
    */
   const handleBadgePress = useCallback(
     (badge: Badge) => {

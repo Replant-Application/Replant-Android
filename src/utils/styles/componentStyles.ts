@@ -243,7 +243,7 @@ export const filterBarStyles = {
 };
 
 /**
- * 배지/뱃지 스타일
+ * 배지/배지 스타일
  */
 export const badgeStyles = {
   /**

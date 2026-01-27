@@ -306,8 +306,8 @@ const AdminMissionManageScreen: React.FC<AdminMissionManageScreenProps> = ({ nav
                 keyboardType="numeric"
               />
 
-              {/* 뱃지 유효기간 */}
-              <Text style={styles.inputLabel}>뱃지 유효기간 (일)</Text>
+              {/* 배지 유효기간 */}
+              <Text style={styles.inputLabel}>배지 유효기간 (일)</Text>
               <TextInput
                 style={styles.input}
                 value={formData.badgeDurationDays}

@@ -43,7 +43,7 @@ export const SimpleTabBar: React.FC<SimpleTabBarProps> = ({
                     isActive && styles.tabCountActive,
                   ]}
                 >
-                  {tab.count}
+                  ({tab.count})
                 </Text>
               )}
             </View>

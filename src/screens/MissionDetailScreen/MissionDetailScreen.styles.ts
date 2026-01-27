@@ -61,12 +61,18 @@ export const styles = StyleSheet.create({
       paddingVertical: spacing[1],
       borderRadius: borderRadius.sm,
       overflow: 'hidden',
+      minHeight: 28, // 모든 배지 높이 통일
+      textAlign: 'center',
+      textAlignVertical: 'center',
     }),
   },
   difficultyBadge: {
     paddingHorizontal: spacing[2],
     paddingVertical: spacing[1],
     borderRadius: borderRadius.sm,
+    minHeight: 28, // 모든 배지 높이 통일
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   difficultyText: {
     ...createTextStyle('sm', {
@@ -80,7 +86,8 @@ export const styles = StyleSheet.create({
     backgroundColor: colors.blue[100],
     paddingHorizontal: spacing[2],
     paddingVertical: spacing[1],
-    borderRadius: borderRadius.base,
+    borderRadius: borderRadius.sm,
+    minHeight: 28, // 모든 배지 높이 통일
   },
   sunIcon: {
     width: 16,
@@ -89,9 +96,6 @@ export const styles = StyleSheet.create({
   missionExp: {
     ...createTextStyle('sm', {
       color: '#000000',
-      paddingVertical: spacing[1],
-      borderRadius: borderRadius.sm,
-      overflow: 'hidden',
     }),
   },
   missionDescription: {
@@ -236,7 +240,7 @@ export const styles = StyleSheet.create({
       fontWeight: typography.fontWeight.medium,
     }),
   },
-  // 뱃지 없음 안내 섹션
+  // 배지 없음 안내 섹션
   noBadgeSection: {
     backgroundColor: 'rgba(255, 255, 255, 0.9)',
     borderRadius: borderRadius.xl,
@@ -290,10 +294,12 @@ export const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: '#D4A574',
   },
+  writeReviewHintContainer: {
+    marginBottom: spacing[1],
+  },
   writeReviewHint: {
     ...createTextStyle('sm', {
       color: colors.primary[600],
-      marginBottom: spacing[3],
     }),
   },
   // 별점 선택 스타일
@@ -305,16 +311,18 @@ export const styles = StyleSheet.create({
   },
   ratingLabel: {
     ...createSecondaryTextStyle('sm'),
+    lineHeight: 28, // 별 버튼과 같은 높이로 정렬
   },
   starsContainer: {
     flexDirection: 'row',
+    alignItems: 'center',
     gap: spacing[1],
   },
   starButton: {
     padding: spacing[1],
   },
   starText: {
-    fontSize: 28,
+    fontSize: 20,
     color: colors.warning,
   },
   ratingValue: {

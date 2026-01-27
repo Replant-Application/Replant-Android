@@ -185,7 +185,7 @@ export const useCustomMissionCreateScreenContainer = ({
         durationDays: isChallenge ? challengeDays : deadlineDays, // 미션 기간
         isPublic: true, // 기본값: 공개
         verificationType: verificationType,
-        badgeDurationDays: isChallenge ? challengeDays : 7, // 뱃지 유효 기간
+        badgeDurationDays: isChallenge ? challengeDays : 7, // 배지 유효 기간
         worryType: worryType,
         // 새로운 필드들
         category: category, // 미션 카테고리

@@ -1,5 +1,5 @@
 /**
- * 뱃지 API 인터페이스
+ * 배지 API 인터페이스
  */
 
 import { apiClient } from './client';
@@ -40,11 +40,11 @@ export interface BadgeHistoryResponse {
 }
 
 // ============================================
-// 뱃지 API
+// 배지 API
 // ============================================
 
 /**
- * 내 유효 뱃지 목록 조회
+ * 내 유효 배지 목록 조회
  * GET /api/badges
  * 인증 필요
  * 백엔드: List<BadgeResponse> 반환 (배열 직접 반환)
@@ -72,10 +72,10 @@ export const getMyBadges = async (): Promise<ServiceResult<BadgeListResponse>> =
 };
 
 /**
- * 뱃지 히스토리 조회
+ * 배지 히스토리 조회
  * GET /api/badges/history
  * 인증 필요
- * 만료된 뱃지 포함
+ * 만료된 배지 포함
  */
 export const getBadgeHistory = async (params?: {
   page?: number;
@@ -85,7 +85,7 @@ export const getBadgeHistory = async (params?: {
 };
 
 /**
- * 특정 미션에 대한 유효 뱃지 보유 여부 확인
+ * 특정 미션에 대한 유효 배지 보유 여부 확인
  * GET /api/badges/check/{missionId}
  * 인증 필요
  */

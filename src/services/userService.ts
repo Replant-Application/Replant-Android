@@ -102,7 +102,7 @@ export const getUserProfile = async (nickname: string): Promise<ServiceResult<Us
     // 1. 백엔드 API에서 사용자 기본 정보 가져오기
     const userInfoResult = await getMyInfo();
 
-    // 2. 백엔드 API에서 뱃지 정보 가져오기
+    // 2. 백엔드 API에서 배지 정보 가져오기
     const badgesResult = await getMyBadges();
 
     // 로컬 캐릭터 정보 로드 (폴백용)
@@ -221,7 +221,7 @@ export const getUserProfile = async (nickname: string): Promise<ServiceResult<Us
       }
     }
 
-    // 뱃지 수 계산
+    // 배지 수 계산
     const badgeCount = badgesResult.success && badgesResult.data ? badgesResult.data.badges?.length || 0 : 0;
 
     // 프로필 생성

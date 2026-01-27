@@ -188,7 +188,7 @@ const PostCard: React.FC<PostCardProps> = ({
                 ` (${post.completionRate}%)`
               )}
             </Text>
-            {/* 인증 상태 뱃지 - 인증 게시글(category === '인증')일 때만 표시 */}
+            {/* 인증 상태 배지 - 인증 게시글(category === '인증')일 때만 표시 */}
             {post.category === '인증' && (
               post.verified === true ? (
                 <View style={styles.verifiedBadge}>

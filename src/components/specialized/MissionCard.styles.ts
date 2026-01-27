@@ -311,25 +311,25 @@ export const styles = StyleSheet.create({
   reviewButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: spacing[3],
-    paddingVertical: spacing[1.5],
-    borderRadius: borderRadius.base,
+    paddingHorizontal: spacing[2],
+    paddingVertical: spacing[1],
+    borderRadius: borderRadius.sm,
     backgroundColor: colors.green[100],
     borderWidth: 1,
     borderColor: colors.green[300],
-    minHeight: 32,
+    minHeight: 24,
     justifyContent: 'center',
     gap: spacing[1],
   },
   reviewIcon: {
-    width: 16,
-    height: 16,
-    tintColor: colors.green[600],
+    width: 14,
+    height: 14,
   },
   reviewButtonText: {
     ...createTextStyle('xs', {
       fontWeight: typography.fontWeight.medium,
       color: colors.green[600],
+      fontSize: 11,
     }),
   },
   disabledButton: {
