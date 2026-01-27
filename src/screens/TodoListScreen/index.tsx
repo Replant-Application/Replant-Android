@@ -93,9 +93,6 @@ const TodoListScreen: React.FC<Props> = ({ navigation, route }) => {
               ]}
             />
           </View>
-          <Text style={styles.progressText}>
-            {todoList.completedCount}/{todoList.totalCount}
-          </Text>
         </View>
 
         <View style={styles.cardFooter}>

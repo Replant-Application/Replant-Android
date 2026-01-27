@@ -187,24 +187,57 @@ export const useHomeScreenContainer = ({ navigation, route }: HomeScreenContaine
           // 과거 날짜의 미완료 투두리스트는 제외
           const filteredTodoLists = filterTodayActiveTodoLists(todoListResult.data, 'HomeScreen');
 
+          // 완료된 투두리스트도 포함 (오늘 날짜이고 완료된 것)
+          const today = new Date();
+          const todayYear = today.getFullYear();
+          const todayMonth = today.getMonth();
+          const todayDate = today.getDate();
+          
+          const completedTodayLists = todoListResult.data.filter(todoList => {
+            if (!todoList.createdAt) return false;
+            const normalizedDate = normalizeDate(todoList.createdAt);
+            if (!normalizedDate) return false;
+            const createdDate = new Date(normalizedDate);
+            if (isNaN(createdDate.getTime())) return false;
+            
+            const isToday = createdDate.getFullYear() === todayYear &&
+                           createdDate.getMonth() === todayMonth &&
+                           createdDate.getDate() === todayDate;
+            const isCompleted = todoList.completedCount > 0 && 
+                              todoList.completedCount === todoList.totalCount;
+            
+            return isToday && isCompleted;
+          });
+
+          // 완료된 투두리스트를 필터링된 목록에 추가 (중복 제거)
+          const allTodoLists = [...filteredTodoLists];
+          completedTodayLists.forEach(completedList => {
+            if (!allTodoLists.find(tl => tl.id === completedList.id)) {
+              allTodoLists.push(completedList);
+            }
+          });
+
           console.log('[HomeScreen] 📊 필터링 결과 요약:');
           console.log(`  - 필터링 전: ${todoListResult.data.length}개`);
-          console.log(`  - 필터링 후: ${filteredTodoLists.length}개`);
-          if (filteredTodoLists.length > 0) {
-            console.log('[HomeScreen] ✅ 필터링된 투두리스트 목록:');
-            filteredTodoLists.forEach((tl, index) => {
-              console.log(`  [${index + 1}] ID:${tl.id}, 제목:"${tl.title}", 완료:${tl.completedCount}/${tl.totalCount}`);
+          console.log(`  - 활성 투두리스트: ${filteredTodoLists.length}개`);
+          console.log(`  - 완료된 투두리스트: ${completedTodayLists.length}개`);
+          console.log(`  - 최종 포함: ${allTodoLists.length}개`);
+          if (allTodoLists.length > 0) {
+            console.log('[HomeScreen] ✅ 최종 투두리스트 목록:');
+            allTodoLists.forEach((tl, index) => {
+              const isCompleted = tl.completedCount === tl.totalCount;
+              console.log(`  [${index + 1}] ID:${tl.id}, 제목:"${tl.title}", 완료:${tl.completedCount}/${tl.totalCount} ${isCompleted ? '(완료됨)' : ''}`);
             });
           } else {
-            console.log('[HomeScreen] ⚠️ 필터링된 투두리스트가 없습니다!');
+            console.log('[HomeScreen] ⚠️ 표시할 투두리스트가 없습니다!');
           }
           console.log('🔵 [HomeScreen] ========== 투두리스트 로드 완료 ==========\n');
           
           console.log('[HomeScreen] 🔵 setActiveTodoLists 호출 전:', {
-            activeTodoListsLength: filteredTodoLists.length,
-            activeTodoListsIds: filteredTodoLists.map(tl => tl.id)
+            activeTodoListsLength: allTodoLists.length,
+            activeTodoListsIds: allTodoLists.map(tl => tl.id)
           });
-          setActiveTodoLists(filteredTodoLists);
+          setActiveTodoLists(allTodoLists);
           console.log('[HomeScreen] 🔵 setActiveTodoLists 호출 완료');
 
           // 각 투두리스트의 상세 정보를 가져와서 미션 추출 및 완료 확인
@@ -215,8 +248,8 @@ export const useHomeScreenContainer = ({ navigation, route }: HomeScreenContaine
               { mission: TodoMission; todoListTitle: string }[]
             >();
 
-            console.log(`[HomeScreen] 미션 추출 시작: ${filteredTodoLists.length}개 투두리스트`);
-            for (const todoList of filteredTodoLists) {
+            console.log(`[HomeScreen] 미션 추출 시작: ${allTodoLists.length}개 투두리스트`);
+            for (const todoList of allTodoLists) {
             try {
               const detailResult = await getTodoListDetail(todoList.id);
               if (detailResult?.success && detailResult.data) {
