@@ -42,8 +42,8 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
     groupMissions,
     groupLoading,
     selectedGroupMission,
-    currentServerPage,
-    totalServerPages,
+    currentClientPage,
+    totalClientPages,
     currentUserId,
     currentMissionPage,
     totalMissionPages,
@@ -64,13 +64,15 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
     handleTabChange,
     handleFilterChange,
     handleMissionGroupTabChange,
-    handleServerPageChange,
+    handleClientPageChange,
     setSelectedGroupMission,
     onRefresh,
     onMissionPageChange,
     goToMissionPage,
     missionSortBy,
     handleMissionSortChange,
+    showOnlyParticipated,
+    handleShowOnlyParticipatedChange,
     getVerificationTypeLabel,
     getVerificationTypeIcon,
     getMissionCategoryLabel,
@@ -291,15 +293,17 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
               missionGroupTab={missionGroupTab}
               selectedMission={selectedGroupMission}
               currentUserId={currentUserId}
-              currentServerPage={currentServerPage}
-              totalServerPages={totalServerPages}
+              currentServerPage={currentClientPage}
+              totalServerPages={totalClientPages}
               refreshing={refreshing}
               sortBy={missionSortBy}
+              showOnlyParticipated={showOnlyParticipated}
               onMissionSelect={(mission) => setSelectedGroupMission(mission)}
-              onServerPageChange={handleServerPageChange}
+              onServerPageChange={handleClientPageChange}
               onNavigateToCreate={() => navigation.navigate('CustomMissionCreate' as any)}
               onRefresh={onRefresh}
               onSortChange={handleMissionSortChange}
+              onShowOnlyParticipatedChange={handleShowOnlyParticipatedChange}
               getVerificationTypeLabel={getVerificationTypeLabel}
               getVerificationTypeIcon={getVerificationTypeIcon}
               getMissionCategoryLabel={getMissionCategoryLabel}

@@ -63,11 +63,55 @@ export const styles = StyleSheet.create({
   createMissionText: {
     ...createButtonTextStyle('base'),
   },
+  filterSortRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: spacing[3],
+    marginTop: spacing[2],
+  },
+  filterCheckboxWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: spacing[3],
+    marginTop: spacing[2],
+  },
+  filterCheckbox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing[2],
+  },
+  filterCheckboxPlaceholder: {
+    flex: 1,
+  },
+  checkbox: {
+    width: 20,
+    height: 20,
+    borderRadius: borderRadius.sm,
+    borderWidth: 2,
+    borderColor: colors.gray[400],
+    backgroundColor: colors.white,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  checkboxChecked: {
+    backgroundColor: colors.primary[500],
+    borderColor: colors.primary[500],
+  },
+  checkboxCheckmark: {
+    color: colors.white,
+    fontSize: typography.fontSize.xs,
+    fontWeight: typography.fontWeight.bold,
+    lineHeight: typography.fontSize.xs,
+  },
+  filterCheckboxLabel: {
+    ...createTextStyle('sm', {
+      color: colors.text.primary,
+    }),
+  },
   sortButtonWrapper: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
-    marginBottom: spacing[1],
-    marginTop: -spacing[3],
     position: 'relative',
     zIndex: 10,
   },
