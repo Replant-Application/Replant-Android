@@ -43,9 +43,18 @@ const PostCard: React.FC<PostCardProps> = ({
 
   const handleDelete = () => {
     setShowMenu(false);
+    
+    // 인증 게시글인지 확인 (category가 '인증'이거나 mission_id가 있는 경우)
+    const isVerificationPost = post.category === '인증' || (post.mission_id && post.mission_id !== 'undefined');
+    
+    const alertTitle = isVerificationPost ? '인증글 삭제' : '게시글 삭제';
+    const alertMessage = isVerificationPost
+      ? '인증글을 삭제하면\n미션이 실패 처리됩니다.'
+      : '정말 이 게시글을 삭제하시겠습니까?';
+    
     Alert.alert(
-      '게시글 삭제',
-      '정말 이 게시글을 삭제하시겠습니까?',
+      alertTitle,
+      alertMessage,
       [
         { text: '취소', style: 'cancel' },
         {

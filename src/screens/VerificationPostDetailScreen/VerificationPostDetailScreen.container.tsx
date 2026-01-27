@@ -291,20 +291,25 @@ export const useVerificationPostDetailScreenContainer = ({
   const handleDeletePost = useCallback(() => {
     if (!post) return;
 
-    Alert.alert('인증글 삭제', '정말로 이 인증글을 삭제하시겠습니까?', [
-      { text: '취소', style: 'cancel' },
-      {
-        text: '삭제',
-        onPress: async () => {
-          const result = await deleteVerification(verificationId);
-          if (result.success) {
-            navigation.goBack();
-          } else {
-            showAlertModal('오류', result.error || '인증글 삭제에 실패했습니다.');
-          }
+    Alert.alert(
+      '인증글 삭제',
+      '인증글을 삭제하면\n미션이 실패 처리됩니다.',
+      [
+        { text: '취소', style: 'cancel' },
+        {
+          text: '삭제',
+          style: 'destructive',
+          onPress: async () => {
+            const result = await deleteVerification(verificationId);
+            if (result.success) {
+              navigation.goBack();
+            } else {
+              showAlertModal('오류', result.error || '인증글 삭제에 실패했습니다.');
+            }
+          },
         },
-      },
-    ]);
+      ]
+    );
   }, [post, verificationId, navigation, showAlertModal]);
 
   /**

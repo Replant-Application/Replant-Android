@@ -395,8 +395,10 @@ const CommunityPostDetailScreen: React.FC<CommunityPostDetailScreenProps> = ({ n
       />
       <ConfirmModal
         visible={showDeleteModal}
-        title="게시글 삭제"
-        message="정말로 이 게시글을 삭제하시겠습니까?"
+        title={post.category === '인증' || (post.mission_id && post.mission_id !== 'undefined') ? '인증글 삭제' : '게시글 삭제'}
+        message={post.category === '인증' || (post.mission_id && post.mission_id !== 'undefined')
+          ? '인증글을 삭제하면\n미션이 실패 처리됩니다.'
+          : '정말로 이 게시글을 삭제하시겠습니까?'}
         confirmText="삭제"
         cancelText="취소"
         onConfirm={handleConfirmDelete}
