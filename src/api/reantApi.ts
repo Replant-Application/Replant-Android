@@ -45,13 +45,6 @@ export interface ReantUpdateRequest {
   appearance?: Record<string, any>;
 }
 
-export interface InteractionResponse {
-  message: string;
-  mood: number;
-  health: number;
-  hunger: number;
-}
-
 // ============================================
 // API 함수
 // ============================================
@@ -80,36 +73,4 @@ export const updateReant = async (
  */
 export const getReantStatus = async (): Promise<ServiceResult<ReantStatusResponse>> => {
   return apiClient.get<ReantStatusResponse>('/reant/status');
-};
-
-/**
- * 펫 먹이주기
- * POST /api/reant/feed
- */
-export const feedReant = async (): Promise<ServiceResult<InteractionResponse>> => {
-  return apiClient.post<InteractionResponse>('/reant/feed');
-};
-
-/**
- * 펫 쉬게하기
- * POST /api/reant/rest
- */
-export const restReant = async (): Promise<ServiceResult<InteractionResponse>> => {
-  return apiClient.post<InteractionResponse>('/reant/rest');
-};
-
-/**
- * 펫과 놀아주기
- * POST /api/reant/play
- */
-export const playWithReant = async (): Promise<ServiceResult<InteractionResponse>> => {
-  return apiClient.post<InteractionResponse>('/reant/play');
-};
-
-/**
- * 펫 쓰다듬기
- * POST /api/reant/pet
- */
-export const petReant = async (): Promise<ServiceResult<InteractionResponse>> => {
-  return apiClient.post<InteractionResponse>('/reant/pet');
 };
