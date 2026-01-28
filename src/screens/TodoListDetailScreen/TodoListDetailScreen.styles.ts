@@ -190,8 +190,8 @@ export const styles = StyleSheet.create({
     marginRight: spacing[3],
   },
   missionCheckbox: {
-    width: 24,
-    height: 24,
+    width: 20,
+    height: 20,
     borderRadius: borderRadius.base,
     borderWidth: 2,
     borderColor: colors.gray[400],
@@ -205,8 +205,8 @@ export const styles = StyleSheet.create({
     backgroundColor: '#4CAF50',
   },
   checkIcon: {
-    width: 16,
-    height: 16,
+    width: 14,
+    height: 14,
     tintColor: colors.white,
   },
   missionContent: {

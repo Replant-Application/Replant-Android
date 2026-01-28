@@ -2,7 +2,7 @@
  * TodoListCreateScreen 타입 정의
  */
 
-export type Step = 'intro' | 'random' | 'custom' | 'confirm';
+export type Step = 'random' | 'custom' | 'confirm';
 
 export interface TodoListCreateScreenProps {
   navigation: any;

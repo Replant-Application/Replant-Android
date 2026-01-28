@@ -4,17 +4,17 @@
 
 import { TimeState, TimePeriod } from '../../types/screens/todolist';
 
-// 시간 선택 기본값
+// 시간 선택 기본값 (하루 종일: 00:00 ~ 23:59)
 export const DEFAULT_START_TIME: TimeState = {
   period: 'AM' as TimePeriod,
-  hour: 9,
+  hour: 12,
   minute: 0,
 };
 
 export const DEFAULT_END_TIME: TimeState = {
   period: 'PM' as TimePeriod,
-  hour: 6,
-  minute: 0,
+  hour: 11,
+  minute: 59,
 };
 
 // 시간 선택 옵션
