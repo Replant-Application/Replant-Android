@@ -15,8 +15,7 @@ import { NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types/navigation';
 import { getData, setData, getStorageKeys } from '../../services/storage';
 import { useUser } from '../../contexts/UserContext';
-import { sendChatMessage } from '../../api/chatApi';
-import { ChatMessage, generateMessageId } from '../../utils/reantChatUtils';
+import { SCREEN_NAMES } from '../../utils/constants';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -46,22 +45,27 @@ export const useHomeScreenContainer = ({ navigation, route }: HomeScreenContaine
   const [dataError, setDataError] = useState<string | null>(null);
 
   // 말풍선 표시 상태 (안내 메시지용)
-  const [showSpeechBubble, setShowSpeechBubble] = useState(true);
-  const speechBubbleAnim = useRef(new Animated.Value(1)).current;
-  const [displayedMessage, setDisplayedMessage] = useState<string>('눌러서 대화하기');
-  const guidanceIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const [showSpeechBubble, setShowSpeechBubble] = useState(false);
+  const speechBubbleAnim = useRef(new Animated.Value(0)).current;
+  const [displayedMessage, setDisplayedMessage] = useState<string>('');
+  const speechBubbleTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // 안내 메시지 목록
+  // 안내 메시지 목록 (10개)
   const guidanceMessages = useMemo(
-    () => ['눌러서 대화하기', '오늘 하루는 어땠어요?', '심심하면 말 걸어줘요~'],
+    () => [
+      '안녕! 나랑 대화하려면 나를 터치해줘~',
+      '오늘 하루는 어땠어?',
+      '심심하면 말 걸어줘요~',
+      '무슨 생각해? 나한테 얘기해봐!',
+      '오늘도 수고했어! 힘내~',
+      '나 여기 있어~ 언제든 불러줘!',
+      '같이 이야기할래?',
+      '뭐 하고 있어? 궁금해~',
+      '나를 눌러서 대화를 시작해봐!',
+      '오늘 기분은 어때?',
+    ],
     []
   );
-
-  // 바텀시트: 투두 vs 채팅 모드 (리앤트 탭 시 채팅으로 전환, 별도 화면 이동 없음)
-  const [showChatInBottomSheet, setShowChatInBottomSheet] = useState(false);
-  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
-  const [reantChatResponse, setReantChatResponse] = useState<string | null>(null);
-  const [reantChatLoading, setReantChatLoading] = useState(false);
 
   const bottomSheetTranslateY = useRef(new Animated.Value(0)).current;
 
@@ -392,112 +396,74 @@ export const useHomeScreenContainer = ({ navigation, route }: HomeScreenContaine
   }, [backgroundType, fadeAnim]);
 
   /**
-   * 화면 마운트 시 말풍선 초기화, 10초마다 안내 메시지 순환 (채팅 바텀시트 열려 있으면 중단)
+   * 말풍선 표시/숨김 주기: 5초 표시 → 10초 숨김 (총 15초 주기)
    */
   useEffect(() => {
-    if (showChatInBottomSheet) return;
-    setDisplayedMessage(guidanceMessages[0]);
-    setShowSpeechBubble(true);
     let messageIndex = 0;
-    guidanceIntervalRef.current = setInterval(() => {
-      messageIndex = (messageIndex + 1) % guidanceMessages.length;
+    let isMounted = true;
+
+    const showBubble = () => {
+      if (!isMounted) return;
+      
+      // 랜덤 메시지 선택
+      messageIndex = Math.floor(Math.random() * guidanceMessages.length);
+      setDisplayedMessage(guidanceMessages[messageIndex]);
+      setShowSpeechBubble(true);
+      
+      // 페이드 인 애니메이션
       Animated.timing(speechBubbleAnim, {
-        toValue: 0,
-        duration: 200,
+        toValue: 1,
+        duration: 300,
         useNativeDriver: true,
-      }).start(() => {
-        setDisplayedMessage(guidanceMessages[messageIndex]);
+      }).start();
+
+      // 5초 후 숨김
+      speechBubbleTimerRef.current = setTimeout(() => {
+        if (!isMounted) return;
+        
+        // 페이드 아웃 애니메이션
         Animated.timing(speechBubbleAnim, {
-          toValue: 1,
-          duration: 200,
+          toValue: 0,
+          duration: 300,
           useNativeDriver: true,
-        }).start();
-      });
-    }, 10000);
-    return () => {
-      if (guidanceIntervalRef.current) clearInterval(guidanceIntervalRef.current);
+        }).start(() => {
+          if (!isMounted) return;
+          setShowSpeechBubble(false);
+          
+          // 10초 후 다시 표시
+          speechBubbleTimerRef.current = setTimeout(showBubble, 10000);
+        });
+      }, 5000);
     };
-  }, [speechBubbleAnim, showChatInBottomSheet, guidanceMessages]);
+
+    // 처음 1초 후 시작 (화면 진입 직후 바로 뜨지 않게)
+    speechBubbleTimerRef.current = setTimeout(showBubble, 1000);
+
+    return () => {
+      isMounted = false;
+      if (speechBubbleTimerRef.current) {
+        clearTimeout(speechBubbleTimerRef.current);
+      }
+    };
+  }, [speechBubbleAnim, guidanceMessages]);
 
   /**
-   * ReantChat에서 복귀 시 (fromReantChat) 바텀시트 애니메이션 (다른 경로로 ReantChat 갔다 오는 경우 대비)
-   * 리앤트 이미지를 원래 상태(default)로 복원
+   * ReantChat에서 복귀 시 리앤트 이미지를 원래 상태(default)로 복원
    */
   useEffect(() => {
     if (route?.params?.fromReantChat) {
-      // 리앤트 이미지를 원래 상태로 복원
       setCharacterEmotion('default');
-      bottomSheetTranslateY.setValue(SCREEN_HEIGHT * 0.4);
-      Animated.spring(bottomSheetTranslateY, {
-        toValue: 0,
-        useNativeDriver: true,
-        tension: 65,
-        friction: 11,
-      }).start();
       (navigation as any)?.setParams?.({});
-    } else {
-      bottomSheetTranslateY.setValue(0);
     }
-  }, [bottomSheetTranslateY, route?.params?.fromReantChat, navigation]);
+  }, [route?.params?.fromReantChat, navigation]);
 
   /**
-   * 바텀시트에서 채팅 열었을 때 인사 메시지
-   */
-  useEffect(() => {
-    if (!showChatInBottomSheet) return;
-    const fetchWelcome = async () => {
-      setReantChatLoading(true);
-      const result = await sendChatMessage('안녕');
-      setReantChatLoading(false);
-      if (result.success && result.data) {
-        setReantChatResponse(result.data.message);
-      } else {
-        setReantChatResponse('안녕하세요! 오늘도 화이팅! 😊');
-      }
-    };
-    fetchWelcome();
-  }, [showChatInBottomSheet]);
-
-  /**
-   * 캐릭터/말풍선 클릭 - 별도 화면 이동 없이 바텀시트 내용을 투두 → 채팅으로 전환
+   * 캐릭터/말풍선 클릭 - 채팅 스크린으로 이동
    */
   const handleCharacterPress = useCallback((): void => {
     setCharacterEmotion('happy');
-    setShowChatInBottomSheet(true);
-  }, []);
-
-  /**
-   * 바텀시트 채팅 닫기 → 투두리스트로 복귀
-   * 리앤트 이미지를 원래 상태(default)로 복원
-   */
-  const handleCloseChatInBottomSheet = useCallback((): void => {
-    setCharacterEmotion('default');
-    setShowChatInBottomSheet(false);
-    setChatMessages([]);
-    setReantChatResponse(null);
-    setDisplayedMessage('눌러서 대화하기');
-  }, []);
-
-  /**
-   * 바텀시트 채팅에서 메시지 전송
-   */
-  const onSendChatMessage = useCallback(async (text: string): Promise<void> => {
-    const userMsg: ChatMessage = {
-      id: generateMessageId(),
-      type: 'user',
-      content: text,
-      timestamp: new Date(),
-    };
-    setChatMessages((prev) => [...prev, userMsg]);
-    setReantChatLoading(true);
-    const result = await sendChatMessage(text);
-    setReantChatLoading(false);
-    if (result.success && result.data) {
-      setReantChatResponse(result.data.message);
-    } else {
-      setReantChatResponse('잠깐 멍해졌어요... 다시 말해줄래요? 🤔');
-    }
-  }, []);
+    navigation.navigate(SCREEN_NAMES.REANT_CHAT as any);
+  }, [navigation]);
 
   /**
    * 진화 모달 닫기 핸들러
@@ -611,21 +577,11 @@ export const useHomeScreenContainer = ({ navigation, route }: HomeScreenContaine
     dataLoading,
     dataError,
     completedTodoList,
-    // Speech Bubble (안내 메시지 / 채팅 모드일 때 리앤트 응답)
+    // Speech Bubble (안내 메시지)
     showSpeechBubble,
     speechBubbleAnim,
-    speechBubbleMessage:
-      showChatInBottomSheet
-        ? (reantChatLoading ? '생각 중...' : (reantChatResponse || '안녕하세요!'))
-        : displayedMessage,
-    // 바텀시트 채팅 (리앤트 탭 시 투두 대신 채팅 표시, 별도 화면 이동 없음)
-    showChatInBottomSheet,
-    chatMessages,
-    reantChatLoading,
-    handleCloseChatInBottomSheet,
-    onSendChatMessage,
+    speechBubbleMessage: displayedMessage,
     // Hero Section
-    isHeroCollapsed,
     heroHeightAnim,
     MIN_HERO_HEIGHT,
     MAX_HERO_HEIGHT,

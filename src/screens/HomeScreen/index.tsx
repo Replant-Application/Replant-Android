@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React from 'react';
 import {
   View,
   Text,
@@ -7,13 +7,7 @@ import {
   Dimensions,
   ImageBackground,
   Animated,
-  Modal,
   Image,
-  FlatList,
-  TextInput,
-  KeyboardAvoidingView,
-  Platform,
-  ActivityIndicator,
 } from 'react-native';
 import FastImage from 'react-native-fast-image';
 import { Loading, ErrorBoundary, AppHeader, AlertModal } from '../../components/ui';
@@ -23,7 +17,6 @@ import { HomeScreenProps } from '../../types/screens/home';
 import { SCREEN_NAMES } from '../../utils/constants';
 import { useHomeScreenContainer } from './HomeScreen.container';
 import { styles } from './HomeScreen.styles';
-import { styles as reantChatStyles } from '../ReantChatScreen/ReantChatScreen.styles';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -43,11 +36,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
     showSpeechBubble,
     speechBubbleAnim,
     speechBubbleMessage,
-    showChatInBottomSheet,
-    chatMessages,
-    reantChatLoading,
-    handleCloseChatInBottomSheet,
-    onSendChatMessage,
     heroHeightAnim,
     MIN_HERO_HEIGHT,
     MAX_HERO_HEIGHT,
@@ -60,15 +48,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
     handleDragHandlePress,
     handleTodoListPress,
   } = useHomeScreenContainer({ navigation, route });
-
-  const [chatInputText, setChatInputText] = useState('');
-  const chatFlatListRef = useRef<FlatList>(null);
-
-  useEffect(() => {
-    if (showChatInBottomSheet && chatMessages.length > 0) {
-      setTimeout(() => chatFlatListRef.current?.scrollToEnd({ animated: true }), 100);
-    }
-  }, [showChatInBottomSheet, chatMessages]);
 
   // 에러 처리
   if (characterError) {
@@ -103,19 +82,17 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
       >
         <AppHeader navigation={navigation} />
 
-        {/* 대화 시작하기 / 대화 종료하기 버튼 (채팅 열려 있으면 종료로 전환) */}
+        {/* 대화 시작하기 버튼 */}
         <View style={styles.startChatButtonContainer}>
           <TouchableOpacity
             style={styles.startChatButton}
-            onPress={showChatInBottomSheet ? handleCloseChatInBottomSheet : handleCharacterPress}
+            onPress={handleCharacterPress}
             activeOpacity={0.8}
             accessibilityRole="button"
-            accessibilityLabel={showChatInBottomSheet ? '대화 종료하기' : '대화 시작하기'}
-            accessibilityHint={showChatInBottomSheet ? '채팅을 종료합니다' : '리앤트와 대화를 시작합니다'}
+            accessibilityLabel="대화 시작하기"
+            accessibilityHint="리앤트와 대화를 시작합니다"
           >
-            <Text style={styles.startChatButtonText}>
-              {showChatInBottomSheet ? '💬 대화 종료하기' : '💬 대화 시작하기'}
-            </Text>
+            <Text style={styles.startChatButtonText}>💬 대화 시작하기</Text>
           </TouchableOpacity>
         </View>
 
@@ -259,79 +236,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
             </View>
           </TouchableOpacity>
 
-          {showChatInBottomSheet ? (
-            <KeyboardAvoidingView
-                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-                style={styles.keyboardAvoidingView}
-                keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
-              >
-                <FlatList
-                  ref={chatFlatListRef}
-                  data={chatMessages}
-                  renderItem={({ item }) =>
-                    item.type === 'user' ? (
-                      <View style={reantChatStyles.userMessageContainer}>
-                        <View style={reantChatStyles.userMessageBubble}>
-                          <Text style={reantChatStyles.userMessageText}>{item.content}</Text>
-                        </View>
-                      </View>
-                    ) : null
-                  }
-                  keyExtractor={(item) => item.id}
-                  contentContainerStyle={[
-                    reantChatStyles.messagesList,
-                    chatMessages.length === 0 && reantChatStyles.messagesListEmpty,
-                  ]}
-                  showsVerticalScrollIndicator={false}
-                  scrollEnabled={chatMessages.length > 1}
-                  ListEmptyComponent={
-                    <View style={reantChatStyles.emptyContainer}>
-                      <Text style={reantChatStyles.emptyText}>
-                        {currentCharacter?.name || '리앤트'}에게 메시지를 보내보세요!
-                      </Text>
-                    </View>
-                  }
-                />
-                <View style={reantChatStyles.inputContainer}>
-                  <TextInput
-                    style={reantChatStyles.input}
-                    value={chatInputText}
-                    onChangeText={setChatInputText}
-                    placeholder="메시지를 입력하세요..."
-                    placeholderTextColor="#999"
-                    multiline
-                    maxLength={200}
-                    onSubmitEditing={() => {
-                      if (chatInputText.trim()) {
-                        onSendChatMessage(chatInputText.trim());
-                        setChatInputText('');
-                      }
-                    }}
-                    returnKeyType="send"
-                  />
-                  <TouchableOpacity
-                    style={[
-                      reantChatStyles.sendButton,
-                      (!chatInputText.trim() || reantChatLoading) && reantChatStyles.sendButtonDisabled,
-                    ]}
-                    onPress={() => {
-                      if (chatInputText.trim() && !reantChatLoading) {
-                        onSendChatMessage(chatInputText.trim());
-                        setChatInputText('');
-                      }
-                    }}
-                    disabled={!chatInputText.trim() || reantChatLoading}
-                    activeOpacity={0.7}
-                  >
-                    {reantChatLoading ? (
-                      <ActivityIndicator size="small" color="#fff" />
-                    ) : (
-                      <Text style={reantChatStyles.sendButtonText}>전송</Text>
-                    )}
-                  </TouchableOpacity>
-                </View>
-              </KeyboardAvoidingView>
-          ) : (
           <ScrollView
             style={styles.contentScroll}
             showsVerticalScrollIndicator={false}
@@ -459,7 +363,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
               </>
             )}
           </ScrollView>
-          )}
         </Animated.View>
       </ImageBackground>
     </Animated.View>

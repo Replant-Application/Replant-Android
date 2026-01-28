@@ -36,6 +36,7 @@ export const createTextStyle = (
       ios: undefined, // iOS는 기본 시스템 폰트 사용
       android: typography.fontFamily.regular, // Android는 커스텀 폰트 사용
     }),
+    fontWeight: typography.fontWeight.medium, // 기본 medium ('500')
     includeFontPadding: false,
     lineHeight: getOptimizedLineHeight(fontSizeValue),
     ...options,

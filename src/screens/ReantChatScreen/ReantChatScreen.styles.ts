@@ -8,6 +8,9 @@ import { createTextStyle, createSecondaryTextStyle } from '../../utils/styles/te
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
+// 말풍선 가로 폭 (middle 기준, 홈스크린과 동일하게)
+const SPEECH_BUBBLE_WIDTH = SCREEN_WIDTH * 0.88;
+
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -17,49 +20,88 @@ export const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
   },
-  // 1. 대화 종료하기 버튼 (상단)
+  keyboardAvoidingView: {
+    flex: 1,
+    paddingTop: Platform.OS === 'ios' ? 120 : 90,
+  },
+  // 1. 대화 종료하기 버튼 (상단) - 홈스크린 스타일 적용
   topButtonContainer: {
-    paddingTop: Platform.OS === 'ios' ? spacing[12] : spacing[8],
-    paddingHorizontal: spacing[4],
-    paddingBottom: spacing[2],
+    position: 'absolute',
+    top: Platform.OS === 'ios' ? 50 : 30,
+    left: 0,
+    right: 0,
+    alignItems: 'center',
+    zIndex: 100,
   },
   endChatButton: {
-    alignSelf: 'flex-start',
+    backgroundColor: colors.overlay.white.heavy,
     paddingVertical: spacing[2],
-    paddingHorizontal: spacing[3],
+    paddingHorizontal: spacing[4],
+    borderRadius: borderRadius.full,
+    borderWidth: 2,
+    borderColor: colors.brandAccent,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.15,
+        shadowRadius: 4,
+      },
+      android: {
+        elevation: 4,
+      },
+    }),
   },
   endChatButtonText: {
     ...createTextStyle('sm', {
+      fontWeight: typography.fontWeight.semibold,
       color: colors.text.primary,
-      fontWeight: typography.fontWeight.medium,
     }),
   },
   // 2-3. 말풍선 + 리앤트 캐릭터 영역
   heroSection: {
-    height: SCREEN_HEIGHT * 0.52,
-    justifyContent: 'center',
+    flex: 1,
+    justifyContent: 'flex-start',
     alignItems: 'center',
-    paddingTop: spacing[4],
+    paddingTop: spacing[2],
   },
   characterImageContainer: {
-    width: SCREEN_WIDTH * 0.5,
-    height: SCREEN_WIDTH * 0.5,
+    width: SCREEN_WIDTH * 0.55,
+    height: SCREEN_WIDTH * 0.55,
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: spacing[8],
   },
   characterImage: {
     width: '100%',
     height: '100%',
   },
   speechBubble: {
-    position: 'absolute',
-    top: spacing[4],
-    left: spacing[2],
-    right: spacing[2],
-    maxWidth: SCREEN_WIDTH - spacing[4],
+    alignItems: 'center',
     zIndex: 10,
+    marginBottom: spacing[1],
   },
+  // 3분할 말풍선 컨테이너 - 텍스트에 맞게 자동 조절
+  speechBubbleContainer: {
+    width: SPEECH_BUBBLE_WIDTH,
+    alignItems: 'center',
+  },
+  speechBubbleTop: {
+    width: SPEECH_BUBBLE_WIDTH,
+    height: 12,
+  },
+  speechBubbleMiddle: {
+    width: SPEECH_BUBBLE_WIDTH,
+    minHeight: 40,
+    paddingHorizontal: spacing[5],
+    paddingVertical: spacing[2],
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  speechBubbleBottom: {
+    width: SPEECH_BUBBLE_WIDTH,
+    height: 28,
+  },
+  // 기존 단일 이미지용 (홈스크린에서 사용)
   speechBubbleImage: {
     width: '100%',
     minHeight: 70,
@@ -94,93 +136,75 @@ export const styles = StyleSheet.create({
       color: colors.text.secondary,
     }),
   },
-  // 4. 채팅칸 (하단 바텀시트)
-  chatSection: {
-    flex: 1,
-    backgroundColor: colors.background.primary,
-    borderTopLeftRadius: borderRadius.xl,
-    borderTopRightRadius: borderRadius.xl,
-    overflow: 'hidden',
-  },
-  dragHandleArea: {
+  // 둥둥 떠다니는 사용자 메시지
+  floatingMessageContainer: {
+    position: 'absolute',
+    bottom: SCREEN_HEIGHT * 0.25,
+    left: 0,
+    right: 0,
     alignItems: 'center',
-    paddingVertical: spacing[2],
-    paddingTop: spacing[3],
+    zIndex: 20,
   },
-  dragHandleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing[1],
-  },
-  dragHandleDot: {
-    width: 4,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: colors.gray[400],
-  },
-  messagesContainer: {
-    flex: 1,
-  },
-  messagesList: {
-    paddingHorizontal: spacing[2],
-    paddingTop: spacing[2],
-    paddingBottom: spacing[2],
-    flexGrow: 1,
-  },
-  messagesListEmpty: {
-    flexGrow: 0,
-  },
-  emptyContainer: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingVertical: spacing[4],
-    minHeight: 80,
-  },
-  emptyText: {
-    ...createSecondaryTextStyle('sm', {
-      color: colors.text.tertiary,
-    }),
-  },
-  userMessageContainer: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    alignItems: 'flex-start',
-    marginBottom: spacing[3],
-    paddingHorizontal: spacing[2],
-    width: '100%',
-  },
-  userMessageBubble: {
-    maxWidth: '75%',
+  floatingMessageBubble: {
     backgroundColor: colors.primary[500],
-    borderRadius: borderRadius.lg,
-    borderTopRightRadius: borderRadius.sm,
-    paddingHorizontal: spacing[4],
+    borderRadius: borderRadius.xl,
+    paddingHorizontal: spacing[5],
     paddingVertical: spacing[3],
+    maxWidth: SCREEN_WIDTH * 0.7,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 4,
   },
-  userMessageText: {
+  floatingMessageText: {
     ...createTextStyle('sm', {
       color: colors.white,
-      fontWeight: typography.fontWeight.normal,
+      fontWeight: typography.fontWeight.medium,
+      textAlign: 'center',
     }),
   },
+  // 4. 하단 입력창 - 둥근 모서리 + 키보드 반응형
   inputContainer: {
+    marginHorizontal: spacing[3],
+    marginBottom: spacing[3],
+    paddingHorizontal: spacing[4],
+    paddingVertical: spacing[3],
+    backgroundColor: colors.overlay.white.heavy,
+    borderRadius: borderRadius.xl,
+    borderWidth: 2,
+    borderColor: colors.brandAccent,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.15,
+        shadowRadius: 4,
+      },
+      android: {
+        elevation: 4,
+      },
+    }),
+  },
+  errorText: {
+    ...createSecondaryTextStyle('xs', {
+      color: colors.error[500],
+    }),
+    marginBottom: spacing[2],
+    textAlign: 'center',
+  },
+  inputRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: spacing[4],
-    paddingVertical: spacing[2],
-    borderTopWidth: 1,
-    borderTopColor: colors.border.light,
-    backgroundColor: colors.background.primary,
-    paddingBottom: Platform.OS === 'ios' ? spacing[6] : spacing[3],
   },
   input: {
     flex: 1,
     backgroundColor: colors.background.secondary,
     borderRadius: borderRadius.lg,
     paddingHorizontal: spacing[4],
-    paddingVertical: spacing[1],
-    minHeight: 36,
-    maxHeight: 80,
+    paddingVertical: spacing[3],
+    minHeight: 44,
+    maxHeight: 100,
     ...createTextStyle('sm', {
       fontWeight: typography.fontWeight.normal,
     }),
@@ -194,6 +218,7 @@ export const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     minWidth: 60,
+    minHeight: 44,
   },
   sendButtonDisabled: {
     backgroundColor: colors.gray[300],
