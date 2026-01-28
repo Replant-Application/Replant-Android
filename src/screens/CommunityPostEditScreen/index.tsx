@@ -12,6 +12,8 @@ import {
   Platform,
   Image,
   ImageBackground,
+  TouchableOpacity,
+  ActivityIndicator,
 } from 'react-native';
 import { Button, Header, AlertModal } from '../../components/ui';
 import { colors } from '../../utils/designTokens';
@@ -32,11 +34,16 @@ const CommunityPostEditScreen: React.FC<CommunityPostEditScreenProps> = ({ navig
     loading,
     isAuthor,
     isVerificationPost,
+    isGeneralPost,
     title,
     content,
+    images,
+    uploadingImage,
     saving,
     setTitle,
     setContent,
+    handleSelectImage,
+    handleRemoveImage,
     handleUpdatePost,
     showAlert,
     alertTitle,
@@ -181,13 +188,59 @@ const CommunityPostEditScreen: React.FC<CommunityPostEditScreenProps> = ({ navig
           />
         </View>
 
+        {/* 사진 수정 (일반 게시글만) */}
+        {isGeneralPost && (
+          <View style={styles.inputSection}>
+            <Text style={styles.label}>사진 (선택)</Text>
+            <View style={styles.imageContainer}>
+              {images.map((imageUrl, index) => (
+                <View key={index} style={styles.imagePreviewWrapper}>
+                  <Image 
+                    source={{ uri: imageUrl }} 
+                    style={styles.previewImage} 
+                    resizeMode="cover" 
+                    accessibilityLabel="이미지 미리보기"
+                  />
+                  <TouchableOpacity
+                    style={styles.removeImageButton}
+                    onPress={() => handleRemoveImage(index)}
+                  >
+                    <Text style={styles.removeImageText}>×</Text>
+                  </TouchableOpacity>
+                </View>
+              ))}
+              {images.length < 3 && (
+                <TouchableOpacity
+                  style={styles.addImageButton}
+                  onPress={handleSelectImage}
+                  disabled={uploadingImage}
+                >
+                  {uploadingImage ? (
+                    <ActivityIndicator color={colors.primary[500]} />
+                  ) : (
+                    <>
+                      <Image
+                        source={require('../../assets/images/camera.png')}
+                        style={styles.addImageIcon}
+                        resizeMode="contain"
+                        accessibilityLabel="이미지 추가 아이콘"
+                      />
+                      <Text style={styles.addImageText}>사진 추가</Text>
+                    </>
+                  )}
+                </TouchableOpacity>
+              )}
+            </View>
+          </View>
+        )}
+
         {/* 미션 인증 사진 표시 (수정 불가) */}
-        {post.images && post.images.length > 0 && (
+        {isVerificationPost && post.images && post.images.length > 0 && (
           <View style={styles.imageSection}>
             <Text style={styles.label}>인증 사진</Text>
             <Image 
               source={{ uri: post.images[0] }} 
-              style={styles.previewImage} 
+              style={styles.previewImageLarge} 
               resizeMode="cover" 
               accessibilityLabel="인증 사진"
             />
