@@ -135,6 +135,20 @@ export const useHomeScreenContainer = ({ navigation, route }: HomeScreenContaine
           duration: 300,
           useNativeDriver: true,
         }).start();
+        
+        // 현재 레벨을 저장 (다음 앱 시작 시 비교용)
+        if (currentNickname) {
+          const saveCurrentLevel = async () => {
+            try {
+              const storageKeys = getStorageKeys(currentNickname);
+              await setData(`${storageKeys.CHARACTERS}_lastSeenLevel`, currentLevel);
+              setLastSeenLevel(currentLevel);
+            } catch (error) {
+              console.error('레벨 저장 실패:', error);
+            }
+          };
+          saveCurrentLevel();
+        }
       }
 
       // 현재 레벨을 이전 레벨로 저장 (세션 내 추적용)
@@ -382,7 +396,7 @@ export const useHomeScreenContainer = ({ navigation, route }: HomeScreenContaine
    */
   useEffect(() => {
     if (showChatInBottomSheet) return;
-    setDisplayedMessage('눌러서 대화하기');
+    setDisplayedMessage(guidanceMessages[0]);
     setShowSpeechBubble(true);
     let messageIndex = 0;
     guidanceIntervalRef.current = setInterval(() => {

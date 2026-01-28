@@ -348,13 +348,28 @@ export const styles = StyleSheet.create({
     height: '100%',
     justifyContent: 'center',
     alignItems: 'center',
+    flexDirection: 'column',
+  },
+  evolutionContentContainer: {
+    width: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: spacing[4],
+  },
+  evolutionTitle: {
+    ...createTextStyle('xl', {
+      fontWeight: typography.fontWeight.bold,
+      color: colors.text.primary,
+      lineHeight: getOptimizedLineHeight(typography.fontSize.xl),
+      textAlign: 'center',
+      marginBottom: spacing[6],
+    }),
   },
   evolutionImageContainer: {
-    width: SCREEN_WIDTH * 0.8,
-    height: SCREEN_WIDTH * 0.8,
+    width: SCREEN_WIDTH * 0.7,
+    height: SCREEN_WIDTH * 0.7,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: spacing[6],
   },
   evolutionImage: {
     width: '100%',
@@ -363,12 +378,13 @@ export const styles = StyleSheet.create({
   evolutionSpeechBubble: {
     width: SCREEN_WIDTH * 0.8,
     alignItems: 'center',
+    alignSelf: 'center',
   },
   evolutionSpeechBubbleImage: {
     width: '100%',
-    minHeight: 120,
+    minHeight: 100,
     paddingHorizontal: spacing[6],
-    paddingVertical: spacing[5],
+    paddingVertical: spacing[4],
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -378,10 +394,10 @@ export const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   evolutionSpeechText: {
-    ...createTextStyle('xl', {
-      fontWeight: typography.fontWeight.bold,
+    ...createTextStyle('base', {
+      fontWeight: typography.fontWeight.medium,
       color: colors.text.primary,
-      lineHeight: getOptimizedLineHeight(typography.fontSize.xl),
+      lineHeight: getOptimizedLineHeight(typography.fontSize.base),
       letterSpacing: 0,
       textAlign: 'center',
     }),

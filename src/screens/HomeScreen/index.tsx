@@ -16,8 +16,9 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import FastImage from 'react-native-fast-image';
-import { Loading, ErrorBoundary, AppHeader } from '../../components/ui';
+import { Loading, ErrorBoundary, AppHeader, AlertModal } from '../../components/ui';
 import { getCharacterImage } from '../../utils/characterUtils';
+import characterTemplates from '../../data/characterTemplates.json';
 import { HomeScreenProps } from '../../types/screens/home';
 import { SCREEN_NAMES } from '../../utils/constants';
 import { useHomeScreenContainer } from './HomeScreen.container';
@@ -200,45 +201,23 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
         </Animated.View>
 
         {/* 진화 모달 */}
-        <Modal
-          visible={showEvolutionModal}
-          transparent={true}
-          animationType="none"
-          onRequestClose={handleEvolutionModalClose}
-        >
-          <Animated.View style={[styles.evolutionModalOverlay, { opacity: evolutionFadeAnim }]}>
-            <TouchableOpacity
-              style={styles.evolutionModalContent}
-              activeOpacity={1}
-              onPress={handleEvolutionModalClose}
-              accessibilityRole="button"
-              accessibilityLabel="닫기"
-            >
-              <View style={styles.evolutionImageContainer}>
-                <FastImage
-                  source={require('../../assets/images/characters/transformation.gif')}
-                  style={styles.evolutionImage}
-                  resizeMode={FastImage.resizeMode.contain}
-                  accessibilityLabel="진화하는 캐릭터 애니메이션"
-                />
-              </View>
-              <View style={styles.evolutionSpeechBubble}>
-                <ImageBackground
-                  source={require('../../assets/images/conversation.png')}
-                  style={styles.evolutionSpeechBubbleImage}
-                  resizeMode="stretch"
-                  accessibilityElementsHidden={true}
-                >
-                  <View style={styles.evolutionSpeechTextContainer}>
-                    <Text style={styles.evolutionSpeechText} accessibilityRole="header">
-                      어라? 내 몸이 이상해요!
-                    </Text>
-                  </View>
-                </ImageBackground>
-              </View>
-            </TouchableOpacity>
-          </Animated.View>
-        </Modal>
+        {(() => {
+          const currentLevel = currentCharacter?.level || 1;
+          const levelInfo = (characterTemplates as any[]).find(t => t.level === currentLevel) || characterTemplates[0];
+          const levelName = levelInfo?.name || '캐릭터';
+          const levelDescription = levelInfo?.description || '';
+          
+          return (
+            <AlertModal
+              visible={showEvolutionModal}
+              title="레벨 업! +1"
+              message={`레벨 ${currentLevel} ${levelName}로 진화했어요!\n${levelDescription}`}
+              buttonText="확인"
+              onClose={handleEvolutionModalClose}
+              icon={getCharacterImage(currentLevel, 'default')}
+            />
+          );
+        })()}
 
         {/* 하단: 바텀 시트 스타일 */}
         <Animated.View
