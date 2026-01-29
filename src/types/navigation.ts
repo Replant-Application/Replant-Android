@@ -126,6 +126,9 @@ export type RootStackParamList = {
     userMissionId: number;
   };
   ReantChat: undefined;
+  TodoList: {
+    refresh?: boolean; // 새로고침 여부
+  };
   TodoListCreate: {
     activeStep?: 'random' | 'custom' | 'confirm'; // 돌아올 때 활성화할 단계
   };

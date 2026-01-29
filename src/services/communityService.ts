@@ -280,7 +280,7 @@ export const getPosts = async (nickname: string): Promise<CommunityPost[]> => {
       API_CONFIG.endpoints.post.list,
       {
         page: 0,
-        size: 100, // 충분히 큰 값으로 설정
+        size: 20, // 한 페이지에 20개만 표시
       }
     );
 

@@ -309,7 +309,6 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
               missionEmoji: '🍽️',
             });
           } else if (type === 'SPONTANEOUS_DIARY') {
-<<<<<<< HEAD
             // 감성일기 미션 → 현재 진행 중인 미션 확인
             const currentMissionsResult = await getCurrentSpontaneousMissions();
             

@@ -492,7 +492,7 @@ export const useTodoListCreateScreenContainer = ({ navigation, route }: TodoList
    */
   const handleTodoListSuccessClose = useCallback(() => {
     setShowTodoListSuccessModal(false);
-    navigation.navigate(SCREEN_NAMES.TODO_LIST, { refresh: true });
+    navigation.navigate('TodoList' as any, { refresh: true });
   }, [navigation]);
 
   return {
