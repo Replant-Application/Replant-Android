@@ -42,6 +42,8 @@ export interface ApiRequestOptions {
   params?: Record<string, string | number | boolean>;
   /** 요청별 타임아웃(ms). 미설정 시 API_CONFIG.timeout 사용. LLM/채팅 등 응답이 오래 걸리는 API는 60000 등으로 늘려 사용 */
   timeout?: number;
+  /** 특정 HTTP 상태 코드에 대해 에러 로깅을 억제 (예: [404] - 404 에러는 조용히 처리) */
+  silentErrors?: number[];
 }
 
 /**
@@ -379,13 +381,24 @@ export class ApiClient {
         }
       }
       
-      console.error('[API Client] Error response:', {
-        status: response.status,
-        statusText: response.statusText,
-        url,
-        contentType: response.headers.get('content-type'),
-        dataPreview: typeof data === 'string' ? data.substring(0, 200) : data,
-      });
+      // silentErrors 옵션이 있고 현재 상태 코드가 포함되어 있으면 조용히 처리
+      const shouldSilence = options.silentErrors?.includes(response.status);
+      
+      if (!shouldSilence) {
+        console.error('[API Client] Error response:', {
+          status: response.status,
+          statusText: response.statusText,
+          url,
+          contentType: response.headers.get('content-type'),
+          dataPreview: typeof data === 'string' ? data.substring(0, 200) : data,
+        });
+      } else {
+        // 조용한 모드에서는 디버그 레벨로만 로깅
+        console.debug('[API Client] Silent error response:', {
+          status: response.status,
+          url,
+        });
+      }
       
       return {
         success: false,
@@ -433,18 +446,23 @@ export class ApiClient {
   /**
    * GET 요청
    */
-  async get<T>(endpoint: string, params?: Record<string, string | number | boolean>): Promise<ServiceResult<T>> {
-    return this.request<T>(endpoint, { method: 'GET', params });
+  async get<T>(
+    endpoint: string,
+    params?: Record<string, string | number | boolean>,
+    options?: Pick<ApiRequestOptions, 'silentErrors' | 'timeout'>
+  ): Promise<ServiceResult<T>> {
+    return this.request<T>(endpoint, { method: 'GET', params, ...options });
   }
 
   /**
    * POST 요청
    * @param options.timeout - 이 요청만의 타임아웃(ms). 채팅 등 LLM 호출은 60000 권장
+   * @param options.silentErrors - 특정 HTTP 상태 코드에 대해 에러 로깅 억제
    */
   async post<T>(
     endpoint: string,
     body?: ApiRequestBody,
-    options?: Pick<ApiRequestOptions, 'timeout' | 'headers'>
+    options?: Pick<ApiRequestOptions, 'timeout' | 'headers' | 'silentErrors'>
   ): Promise<ServiceResult<T>> {
     return this.request<T>(endpoint, { method: 'POST', body, ...options });
   }

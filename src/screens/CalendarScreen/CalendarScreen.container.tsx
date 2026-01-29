@@ -47,9 +47,13 @@ export const useCalendarScreenContainer = ({ navigation: _navigation }: Calendar
         const result = await getMissionsByRange(startDate, endDate);
         
         if (result.success && result.data) {
-          // 배열인지 확인
+          // 배열인지 확인하고 돌발 미션 제외
           if (Array.isArray(result.data)) {
-            setAllMissions(result.data);
+            // 돌발 미션 필터링 (isSpontaneous 플래그 또는 mission이 null인 경우)
+            const filteredMissions = result.data.filter(um => {
+              return !(um.isSpontaneous === true || um.mission === null);
+            });
+            setAllMissions(filteredMissions);
           } else {
             setAllMissions([]);
           }
@@ -168,7 +172,11 @@ export const useCalendarScreenContainer = ({ navigation: _navigation }: Calendar
         const result = await getMissionsByDate(dateString);
         
         if (result.success && result.data && Array.isArray(result.data)) {
-          // 해당 날짜의 미션만 추가/업데이트
+          // 해당 날짜의 미션만 추가/업데이트 (돌발 미션 제외)
+          const filteredNewMissions = result.data.filter(um => {
+            return !(um.isSpontaneous === true || um.mission === null);
+          });
+          
           setAllMissions(prev => {
             const filtered = prev.filter(m => {
               if (!m.assignedAt) return true; // assignedAt이 없으면 유지
@@ -178,7 +186,7 @@ export const useCalendarScreenContainer = ({ navigation: _navigation }: Calendar
               const missionDate = normalizedDate.split('T')[0];
               return missionDate !== dateString;
             });
-            return [...filtered, ...result.data!];
+            return [...filtered, ...filteredNewMissions];
           });
         }
       } catch (err) {

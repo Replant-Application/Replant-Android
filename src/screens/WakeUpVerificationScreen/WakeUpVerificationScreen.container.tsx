@@ -255,26 +255,34 @@ export const useWakeUpVerificationScreenContainer = ({
           success: currentResult.success,
           hasData: !!currentResult.data,
           error: currentResult.error,
-          userMissionId: currentResult.data?.userMissionId,
-          timeRemaining: currentResult.data?.timeRemaining,
+          missionId: currentResult.data?.id,
+          remainingSeconds: currentResult.data?.remainingSeconds,
           canVerify: currentResult.data?.canVerify,
         });
 
         if (currentResult.success && currentResult.data) {
           const {
-            userMissionId: apiMissionId,
-            timeRemaining: apiTimeRemaining,
+            id: apiMissionId,
+            remainingSeconds: apiTimeRemaining,
+            assignedAt: apiAssignedAt,
+            expired: apiExpired,
           } = currentResult.data;
 
-          // API에서 받은 userMissionId 설정
+          // API에서 받은 missionId 설정 (spontaneous_mission의 ID)
           if (apiMissionId) {
-            console.log('[WakeUpVerificationScreen] API에서 userMissionId 받음:', apiMissionId);
+            console.log('[WakeUpVerificationScreen] API에서 missionId 받음:', apiMissionId);
             setUserMissionId(apiMissionId);
 
-            // 상세 미션 정보 로드
-            const detailResult = await getUserMission(apiMissionId);
-            if (detailResult.success && detailResult.data) {
-              setUserMission(detailResult.data);
+            // assignedAt을 사용하여 UserMission 형태의 객체 생성 (타이머용)
+            if (apiAssignedAt) {
+              const mockUserMission: UserMission = {
+                id: apiMissionId,
+                missionType: 'OFFICIAL',
+                assignedAt: apiAssignedAt,
+                dueDate: currentResult.data.deadlineAt,
+                status: currentResult.data.status as any,
+              };
+              setUserMission(mockUserMission);
             }
           }
 
@@ -283,7 +291,7 @@ export const useWakeUpVerificationScreenContainer = ({
           if (apiTimeRemaining !== undefined) {
             // 초기값만 설정 (타이머가 자동으로 업데이트함)
             setTimeRemaining(apiTimeRemaining);
-            setIsExpired(apiTimeRemaining <= 0);
+            setIsExpired(apiExpired || apiTimeRemaining <= 0);
           }
           // assignedAt은 userMission에 포함되어 있으므로 타이머 useEffect가 처리함
         } else {

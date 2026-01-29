@@ -134,8 +134,27 @@ export const useMission = (
       if (userMissionsResult.success && userMissionsResult.data) {
         // UserMission을 Mission 형식으로 변환
         // 완료된 미션(status === 'COMPLETED')도 포함하여 변환
+        // 돌발 미션은 제외 (isSpontaneous 플래그 또는 mission이 null인 경우)
         userMissionsResult.data.content.forEach(um => {
           try {
+            // 돌발 미션 필터링: isSpontaneous 플래그가 true이거나 mission이 null인 경우 제외
+            if (um.isSpontaneous === true || um.mission === null) {
+              console.log('[useMission] 돌발 미션 제외:', { 
+                id: um.id, 
+                isSpontaneous: um.isSpontaneous,
+                hasMission: !!um.mission,
+                status: um.status 
+              });
+              return; // 돌발 미션은 제외
+            }
+            
+            // mission 필드가 없으면 변환 불가능하므로 제외
+            if (!um.mission && !um.customMission) {
+              console.log('[useMission] mission 필드 없음 - 제외:', { id: um.id, status: um.status });
+              return;
+            }
+            
+            // 정상적인 유저 미션만 변환
             const mission = transformUserMission(um);
             allMissions.push(mission);
           } catch (e) {

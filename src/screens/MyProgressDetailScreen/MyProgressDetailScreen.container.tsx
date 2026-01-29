@@ -33,6 +33,11 @@ export const useMyProgressDetailScreenContainer = ({ navigation }: MyProgressDet
    * UserMission을 Mission 타입으로 변환
    */
   const transformUserMissionToMission = useCallback((userMission: UserMission): Mission | null => {
+    // 돌발 미션은 제외
+    if (userMission.isSpontaneous === true || userMission.mission === null) {
+      return null;
+    }
+    
     const mission = userMission.mission || userMission.customMission;
     if (!mission) return null;
 

@@ -223,7 +223,11 @@ export const useTodoListDetailScreenContainer = ({ navigation, route }: TodoList
   const getOrAssignUserMissionId = useCallback(async (missionId: number): Promise<number | null> => {
     const listRes = await getUserMissions({ status: 'ASSIGNED', missionType: 'SYSTEM', size: 100 });
     if (listRes.success && listRes.data?.content) {
-      const found = listRes.data.content.find(um => um.mission?.id === missionId);
+      // 돌발 미션 제외하고 검색
+      const filteredMissions = listRes.data.content.filter(um => {
+        return !(um.isSpontaneous === true || um.mission === null);
+      });
+      const found = filteredMissions.find(um => um.mission?.id === missionId);
       if (found) return found.id;
     }
     const assignRes = await addSystemMissionToMyMissions({ missionId });

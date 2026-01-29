@@ -43,6 +43,8 @@ export type RootStackParamList = {
   CommunityPostCreate: {
     type?: 'GENERAL' | 'VERIFICATION'; // 게시글 타입
     userMissionId?: number; // 인증글 작성 시 필요한 UserMission ID
+    spontaneousMissionId?: number; // 돌발 미션 ID (spontaneous_mission의 ID)
+    mealLogId?: number; // 식사 로그 ID (MEAL_LOG 타입 알림에서 사용)
     missionId?: string;
     missionTitle?: string;
     missionEmoji?: string;

@@ -210,6 +210,11 @@ export const API_CONFIG = {
     // 돌발 미션 (Spontaneous Mission)
     spontaneousMission: {
       setup: '/spontaneous-missions/setup',
+      verify: '/spontaneous-missions/:missionId/verify',
+      wakeupCurrent: '/spontaneous-missions/wakeup/current',
+      wakeupVerify: '/spontaneous-missions/wakeup/verify',
+      current: '/spontaneous-missions/current',
+      byDate: '/spontaneous-missions/date',
     },
 
     // 버전 체크 (Version)

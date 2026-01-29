@@ -21,7 +21,7 @@ import {
 } from 'react-native';
 import { useOverlay } from '../../contexts/OverlayContext';
 import { getNotifications, markNotificationAsRead } from '../../api/notificationApi';
-import { getUserMission } from '../../api/missionApi';
+import { getUserMission, getCurrentSpontaneousMissions, getCurrentWakeupMission } from '../../api/missionApi';
 import { getMealLogDetail } from '../../api/mealLogApi';
 import { formatTimeAgo } from '../../utils/dateUtils';
 import { SCREEN_NAMES } from '../../utils/constants';
@@ -158,6 +158,69 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
     if (onNavigate) {
       const { referenceType, referenceId, type } = notification;
 
+      // MEAL_LOG 타입 알림 처리
+      if (referenceType === 'MEAL_LOG' && referenceId) {
+        console.log('[NotificationDropdown] MEAL_LOG 알림 클릭:', referenceId);
+        
+        try {
+          const mealLogId = typeof referenceId === 'string' ? Number(referenceId) : referenceId;
+          
+          if (!mealLogId || isNaN(mealLogId) || mealLogId <= 0) {
+            console.error('[NotificationDropdown] 유효하지 않은 mealLogId:', referenceId);
+            showAlertModal('오류', '미션 정보가 올바르지 않습니다.');
+            return;
+          }
+
+          // 미션 상태 조회
+          const mealLogResult = await getMealLogDetail(mealLogId);
+          
+          if (!mealLogResult.success || !mealLogResult.data) {
+            console.error('[NotificationDropdown] 식사 로그 조회 실패:', mealLogResult.error);
+            showAlertModal('오류', mealLogResult.error || '미션 정보를 불러올 수 없습니다.');
+            return;
+          }
+
+          const mealLog = mealLogResult.data;
+          console.log('[NotificationDropdown] 식사 로그 상태:', {
+            id: mealLog.id,
+            status: mealLog.status,
+            expired: mealLog.expired,
+            canVerify: mealLog.canVerify,
+          });
+
+          // 상태에 따라 처리
+          if (mealLog.status === 'COMPLETED') {
+            // 이미 완료된 미션
+            showAlertModal('알림', '이미 완료된 미션입니다.');
+            return;
+          } else if (mealLog.expired === true || mealLog.canVerify === false) {
+            // 만료된 미션
+            showAlertModal('알림', '만료된 미션입니다.');
+            return;
+          } else if (mealLog.status === 'ASSIGNED' && mealLog.canVerify === true) {
+            // 인증 가능한 미션 → 게시글 작성 화면으로 이동
+            console.log('[NotificationDropdown] 식사 미션 인증 화면으로 이동, mealLogId:', mealLogId);
+            onNavigate(SCREEN_NAMES.COMMUNITY_POST_CREATE, {
+              type: 'VERIFICATION',
+              mealLogId: mealLogId,
+              userMissionId: mealLog.userMissionId,
+              missionId: mealLog.mealType || 'MEAL',
+              missionTitle: mealLog.mealTypeDisplay || `${mealLog.mealType} 식사 미션`,
+              missionEmoji: '🍽️',
+            });
+            return;
+          } else {
+            // 기타 상태
+            showAlertModal('알림', '이미 수행한 미션이거나 만료된 미션입니다.');
+            return;
+          }
+        } catch (error) {
+          console.error('[NotificationDropdown] MEAL_LOG 알림 처리 중 오류:', error);
+          showAlertModal('오류', '미션 정보를 불러오는 중 문제가 발생했습니다.');
+          return;
+        }
+      }
+
       // 돌발 미션 알림 처리
       if (type === 'SPONTANEOUS_WAKE_UP' || type === 'SPONTANEOUS_MEAL' || type === 'SPONTANEOUS_DIARY') {
         console.log('[NotificationDropdown] 돌발 미션 알림 클릭:', type, 'referenceType:', referenceType);
@@ -170,58 +233,104 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
         try {
           // 알림 타입에 따라 적절한 화면으로 이동
           if (type === 'SPONTANEOUS_WAKE_UP') {
-            // 기상 미션 → 인증 화면으로 이동
-            console.log('[NotificationDropdown] 기상 미션 인증 화면으로 이동, userMissionId:', referenceId);
-            onNavigate(SCREEN_NAMES.WAKE_UP_VERIFICATION, {
-              userMissionId: referenceId,
-            });
-          } else if (type === 'SPONTANEOUS_MEAL') {
-            // 식사 미션 → referenceType에 따라 다른 API 호출
-            console.log('[NotificationDropdown] 식사 미션 처리, referenceType:', referenceType);
+            // 기상 미션 → 현재 진행 중인 미션 확인
+            const currentWakeupResult = await getCurrentWakeupMission();
             
-            if (referenceType === 'MEAL_LOG') {
-              // 새로운 식사 로그 API 사용
-              const mealLogResult = await getMealLogDetail(referenceId);
-              
-              if (!mealLogResult.success || !mealLogResult.data) {
-                console.error('[NotificationDropdown] ❌ 식사 로그 조회 실패:', mealLogResult.error);
-                showAlertModal('오류', '식사 미션 정보를 불러올 수 없습니다.');
-                return;
-              }
-
-              const mealLog = mealLogResult.data;
-              console.log('[NotificationDropdown] 식사 미션 게시글 작성 화면으로 이동');
-              onNavigate(SCREEN_NAMES.COMMUNITY_POST_CREATE, {
-                type: 'VERIFICATION',
-                userMissionId: mealLog.id,
-                missionId: String(mealLog.missionId || mealLog.id),
-                missionTitle: mealLog.title || '식사 미션',
-                missionEmoji: '🍽️',
-                isMealLog: true,
+            const missionId = typeof referenceId === 'string' ? Number(referenceId) : referenceId;
+            
+            // 백엔드 API가 아직 구현되지 않은 경우 referenceId만으로 진행 (하위 호환성)
+            if (!currentWakeupResult.success || !currentWakeupResult.data) {
+              console.log('[NotificationDropdown] 기상 미션 API 미구현 또는 미션 없음, referenceId로 진행:', missionId);
+              // 백엔드가 구현되지 않은 경우에도 알림으로 받은 referenceId를 사용하여 진행
+              onNavigate(SCREEN_NAMES.WAKE_UP_VERIFICATION, {
+                userMissionId: missionId,
+              });
+              return;
+            }
+            
+            const wakeupMission = currentWakeupResult.data;
+            
+            // 미션 ID가 일치하고 완료되지 않은 경우만 이동
+            if (wakeupMission.id === missionId && wakeupMission.status !== 'COMPLETED' && wakeupMission.canVerify) {
+              console.log('[NotificationDropdown] 기상 미션 인증 화면으로 이동, missionId:', missionId);
+              onNavigate(SCREEN_NAMES.WAKE_UP_VERIFICATION, {
+                userMissionId: missionId,
               });
             } else {
-              // 기존 USER_MISSION API 사용 (하위 호환)
-              const missionResult = await getUserMission(referenceId);
-              
-              if (!missionResult.success || !missionResult.data) {
-                console.error('[NotificationDropdown] ❌ 미션 정보 조회 실패:', missionResult.error);
-                return;
-              }
-
-              const userMission = missionResult.data;
-              const mission = userMission.mission || userMission.customMission;
-              
-              console.log('[NotificationDropdown] 식사 미션 게시글 작성 화면으로 이동');
+              showAlertModal('알림', '이미 수행한 미션이거나 만료된 미션입니다.');
+            }
+          } else if (type === 'SPONTANEOUS_MEAL') {
+            // 식사 미션 → 돌발 미션 API 사용
+            // 주의: referenceType이 "SPONTANEOUS_MISSION"으로 변경되었고, referenceId는 spontaneous_mission의 ID
+            console.log('[NotificationDropdown] 식사 미션 처리, referenceType:', referenceType, 'referenceId:', referenceId);
+            
+            // 현재 진행 중인 식사 미션 조회하여 미션 정보 가져오기
+            const currentMissionsResult = await getCurrentSpontaneousMissions();
+            
+            const missionId = typeof referenceId === 'string' ? Number(referenceId) : referenceId;
+            
+            let mealMission = null;
+            if (currentMissionsResult.success && currentMissionsResult.data && currentMissionsResult.data.length > 0) {
+              mealMission = currentMissionsResult.data.find(
+                m => m.id === missionId &&
+                     (m.missionType === 'MEAL_BREAKFAST' || m.missionType === 'MEAL_LUNCH' || m.missionType === 'MEAL_DINNER')
+              );
+            }
+            
+            // 백엔드 API가 아직 구현되지 않았거나, 미션이 없거나 이미 완료된 경우
+            // 백엔드가 구현되지 않은 경우에는 referenceId만으로 진행 (하위 호환성)
+            if (!currentMissionsResult.success || !currentMissionsResult.data || currentMissionsResult.data.length === 0) {
+              console.log('[NotificationDropdown] 돌발 미션 API 미구현 또는 미션 없음, referenceId로 진행:', missionId);
+              // 백엔드가 구현되지 않은 경우에도 알림으로 받은 referenceId를 사용하여 진행
               onNavigate(SCREEN_NAMES.COMMUNITY_POST_CREATE, {
                 type: 'VERIFICATION',
-                userMissionId: referenceId,
-                missionId: String(mission?.id || referenceId),
-                missionTitle: mission?.title || '식사 미션',
+                spontaneousMissionId: missionId,
+                userMissionId: missionId,
+                missionId: 'MEAL',
+                missionTitle: '식사 미션',
                 missionEmoji: '🍽️',
               });
+              return;
             }
+            
+            // 미션이 없거나 이미 완료된 경우
+            if (!mealMission || mealMission.status === 'COMPLETED' || !mealMission.canVerify) {
+              showAlertModal('알림', '이미 수행한 미션이거나 만료된 미션입니다.');
+              return;
+            }
+            
+            console.log('[NotificationDropdown] 식사 미션 게시글 작성 화면으로 이동');
+            onNavigate(SCREEN_NAMES.COMMUNITY_POST_CREATE, {
+              type: 'VERIFICATION',
+              spontaneousMissionId: missionId, // 돌발 미션 ID (spontaneous_mission의 ID)
+              userMissionId: missionId, // 하위 호환성을 위해 유지
+              missionId: String(mealMission.missionType || 'MEAL'),
+              missionTitle: mealMission.missionTypeDisplayName || '식사 미션',
+              missionEmoji: '🍽️',
+            });
           } else if (type === 'SPONTANEOUS_DIARY') {
-            // 감성일기 미션 → 감성일기 작성 화면으로 이동
+            // 감성일기 미션 → 현재 진행 중인 미션 확인
+            const currentMissionsResult = await getCurrentSpontaneousMissions();
+            
+            const missionId = typeof referenceId === 'string' ? Number(referenceId) : referenceId;
+            
+            // 백엔드 API가 아직 구현되지 않은 경우 referenceId만으로 진행 (하위 호환성)
+            if (!currentMissionsResult.success || !currentMissionsResult.data || currentMissionsResult.data.length === 0) {
+              console.log('[NotificationDropdown] 돌발 미션 API 미구현 또는 미션 없음, 감성일기 화면으로 이동');
+              onNavigate(SCREEN_NAMES.DIARY);
+              return;
+            }
+            
+            const diaryMission = currentMissionsResult.data.find(
+              m => m.id === missionId && m.missionType === 'EMOTION_DIARY'
+            );
+            
+            // 미션이 없거나 이미 완료된 경우
+            if (!diaryMission || diaryMission.status === 'COMPLETED' || !diaryMission.canVerify) {
+              showAlertModal('알림', '이미 수행한 미션이거나 만료된 미션입니다.');
+              return;
+            }
+            
             console.log('[NotificationDropdown] 감성일기 작성 화면으로 이동');
             onNavigate(SCREEN_NAMES.DIARY);
           }
