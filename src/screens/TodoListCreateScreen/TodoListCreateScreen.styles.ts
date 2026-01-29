@@ -172,7 +172,7 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: spacing[7],
+    marginBottom: spacing[3],
   },
   filterModalTitle: {
     ...createTitleStyle('lg', {
