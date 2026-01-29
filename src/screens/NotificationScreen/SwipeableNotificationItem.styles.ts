@@ -8,36 +8,8 @@ import { colors, spacing, typography, borderRadius } from '../../utils/designTok
 import { createTextStyle, createSecondaryTextStyle } from '../../utils/styles/textStyles';
 
 export const styles = StyleSheet.create({
-  swipeContainer: {
-    position: 'relative',
+  itemContainer: {
     marginBottom: spacing[3],
-    overflow: 'visible',
-  },
-  deleteButtonContainer: {
-    position: 'absolute',
-    right: 0,
-    top: 0,
-    bottom: 0,
-    justifyContent: 'center',
-    alignItems: 'center',
-    width: 100,
-    height: 95,
-    backgroundColor: '#FF0003',
-    borderWidth: 2,
-    borderColor: '#0E0F37',
-    borderTopRightRadius: borderRadius.base,
-    borderBottomRightRadius: borderRadius.base,
-  },
-  deleteButton: {
-    width: '100%',
-    height: '100%',
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: spacing[3],
-  },
-  deleteButtonIcon: {
-    width: 30,
-    height: 30,
   },
   notificationCard: {
     backgroundColor: colors.white,
@@ -62,8 +34,8 @@ export const styles = StyleSheet.create({
     alignItems: 'flex-start',
   },
   characterImage: {
-    width: 60,
-    height: 60,
+    width: 36,
+    height: 36,
     marginRight: spacing[3],
   },
   textContainer: {
