@@ -193,6 +193,20 @@ export const useLoginScreenContainer = ({ onNavigate }: LoginScreenContainerProp
           // 기존 사용자 - 성공 모달 표시
           setUserName(user.nickname || user.email);
           setShowSuccessModal(true);
+          // 모달 애니메이션
+          Animated.parallel([
+            Animated.spring(modalScaleAnim, {
+              toValue: 1,
+              useNativeDriver: true,
+              tension: 50,
+              friction: 7,
+            }),
+            Animated.timing(modalFadeAnim, {
+              toValue: 1,
+              duration: 300,
+              useNativeDriver: true,
+            }),
+          ]).start();
         } else {
           // 백엔드 에러 메시지 추출
           let errorMessage = '로그인에 실패했습니다.';
@@ -218,7 +232,7 @@ export const useLoginScreenContainer = ({ onNavigate }: LoginScreenContainerProp
         setIsLoading(false);
       }
     },
-    [isLoading, keepLoggedIn, onNavigate, showAlertModal]
+    [isLoading, keepLoggedIn, onNavigate, showAlertModal, modalScaleAnim, modalFadeAnim]
   );
 
   /**
