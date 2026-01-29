@@ -3,7 +3,7 @@
  * 커뮤니티 화면의 모든 스타일 정의
  */
 
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Platform } from 'react-native';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
 import { createTextStyle, createTitleStyle, createBodyStyle, createSecondaryTextStyle, createButtonTextStyle } from '../../utils/styles/textStyles';
 import { modalStyles, emptyStateStyles, buttonStyles } from '../../utils/styles/commonStyles';
@@ -44,10 +44,10 @@ export const styles = StyleSheet.create({
   filterButton: {
     backgroundColor: '#8B6F47',
     borderRadius: borderRadius.lg,
-    paddingHorizontal: spacing[3],
-    paddingVertical: spacing[3],
-    width: 48,
-    height: 48,
+    paddingHorizontal: spacing[2],
+    paddingVertical: spacing[2],
+    width: 44,
+    height: 44,
     alignItems: 'center',
     justifyContent: 'center',
     position: 'relative',
@@ -55,8 +55,8 @@ export const styles = StyleSheet.create({
     borderColor: '#D4A574',
   },
   filterIcon: {
-    width: 26,
-    height: 26,
+    width: 22,
+    height: 22,
     tintColor: colors.white,
   },
   filterBadge: {
@@ -192,6 +192,17 @@ export const styles = StyleSheet.create({
     gap: spacing[2],
     marginBottom: spacing[1],
   },
+  filterOptionLabel: {
+    ...createTextStyle('base', {
+      color: colors.text.primary,
+      fontWeight: typography.fontWeight.medium,
+      fontFamily: Platform.select({
+        ios: undefined,
+        android: typography.fontFamily.regular,
+      }),
+    }),
+    flex: 1,
+  },
   filterOptionHorizontal: {
     flex: 1,
     flexDirection: 'row',
@@ -233,7 +244,7 @@ export const styles = StyleSheet.create({
   modalApplyButton: {
     ...buttonStyles.primary(),
     marginTop: spacing[4],
-    paddingVertical: spacing[2],
+    paddingVertical: spacing[1],
     borderRadius: borderRadius.lg,
   },
   modalApplyButtonText: {
@@ -246,7 +257,46 @@ export const styles = StyleSheet.create({
   },
   postsList: {
     gap: spacing[3],
-    paddingBottom: spacing[16], // 추가 하단 여백
+    paddingBottom: spacing[4],
+  },
+  paginationContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: spacing[4],
+    paddingHorizontal: spacing[4],
+    marginTop: spacing[4],
+    marginBottom: 128, // 하단 탭바와의 간격 더 확보 (spacing[24] * 1.33)
+    gap: spacing[4],
+  },
+  paginationButton: {
+    backgroundColor: colors.primary[500],
+    borderRadius: borderRadius.base,
+    paddingVertical: spacing[2],
+    paddingHorizontal: spacing[4],
+    minWidth: 60,
+    alignItems: 'center',
+  },
+  paginationButtonDisabled: {
+    backgroundColor: colors.gray[300],
+  },
+  paginationButtonText: {
+    ...createButtonTextStyle('sm', {
+      color: colors.white,
+    }),
+  },
+  paginationButtonTextDisabled: {
+    ...createButtonTextStyle('sm', {
+      color: colors.text.tertiary,
+    }),
+  },
+  paginationInfo: {
+    ...createTextStyle('sm', {
+      color: colors.text.primary,
+      fontWeight: typography.fontWeight.medium,
+    }),
+    minWidth: 60,
+    textAlign: 'center',
   },
   fab: {
     position: 'absolute',

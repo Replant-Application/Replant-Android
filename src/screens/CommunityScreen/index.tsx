@@ -4,7 +4,8 @@
  */
 
 import React from 'react';
-import { View, Text, ScrollView, TouchableOpacity, TextInput, Image, Modal, RefreshControl, ImageBackground, ActivityIndicator } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, TextInput, Image, Modal, RefreshControl, ImageBackground, ActivityIndicator, Switch, Platform } from 'react-native';
+import { spacing, typography } from '../../utils/designTokens';
 import { PostCard } from '../../components/specialized';
 import { Loading, ErrorBoundary, EmptyState, SimpleTabBar, Header, AlertModal, ConfirmModal } from '../../components/ui';
 import { colors } from '../../utils/designTokens';
@@ -28,6 +29,7 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation, route }) 
     showFilterModal,
     refreshing,
     verificationFilter,
+    onlyMyPosts,
     showAlert,
     alertTitle,
     alertMessage,
@@ -43,6 +45,7 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation, route }) 
     setActiveTab,
     setShowFilterModal,
     setVerificationFilter,
+    setOnlyMyPosts,
     setMissionSetSearchQuery,
     setMissionSetSortBy,
     setShowMissionSetFilterModal,
@@ -57,6 +60,10 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation, route }) 
     handleShareModalClose,
     handleCreatePost,
     onRefresh,
+    currentPage,
+    totalPages,
+    handleNextPage,
+    handlePreviousPage,
     showShareConfirmModal,
     shareConfirmMissionSet,
     handleShareConfirm,
@@ -127,7 +134,7 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation, route }) 
               accessibilityRole="button"
               accessibilityLabel="필터"
               accessibilityHint="게시글 필터 옵션 열기"
-              accessibilityState={{ selected: verificationFilter !== 'all' || filter !== 'all' }}
+              accessibilityState={{ selected: verificationFilter !== 'all' || filter !== 'all' || onlyMyPosts }}
             >
               <Image
                 source={require('../../assets/images/filter.png')}
@@ -136,7 +143,7 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation, route }) 
                 accessibilityLabel="필터 아이콘"
                 accessibilityElementsHidden={true}
               />
-              {(verificationFilter !== 'all' || filter !== 'all') && (
+              {(verificationFilter !== 'all' || filter !== 'all' || onlyMyPosts) && (
                 <View style={styles.filterBadge} accessibilityElementsHidden={true} />
               )}
             </TouchableOpacity>
@@ -181,17 +188,50 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation, route }) 
             description="미션을 완료하고 커뮤니티에 공유해보세요!"
           />
         ) : (
-          <View style={styles.postsList}>
-            {filteredPosts.map(post => (
-              <PostCard
-                key={post.post_id}
-                post={post}
-                onPress={handlePostPress}
-                onLike={handleLike}
-                onHide={handleHidePost}
-              />
-            ))}
-          </View>
+          <>
+            <View style={styles.postsList}>
+              {filteredPosts.map(post => (
+                <PostCard
+                  key={post.post_id}
+                  post={post}
+                  onPress={handlePostPress}
+                  onLike={handleLike}
+                  onHide={handleHidePost}
+                />
+              ))}
+            </View>
+            
+            {/* 페이지네이션 */}
+            {totalPages > 1 && (
+              <View style={styles.paginationContainer}>
+                <TouchableOpacity
+                  style={[styles.paginationButton, currentPage === 0 && styles.paginationButtonDisabled]}
+                  onPress={handlePreviousPage}
+                  disabled={currentPage === 0}
+                  activeOpacity={0.7}
+                >
+                  <Text style={[styles.paginationButtonText, currentPage === 0 && styles.paginationButtonTextDisabled]}>
+                    이전
+                  </Text>
+                </TouchableOpacity>
+                
+                <Text style={styles.paginationInfo}>
+                  {currentPage + 1} / {totalPages}
+                </Text>
+                
+                <TouchableOpacity
+                  style={[styles.paginationButton, currentPage >= totalPages - 1 && styles.paginationButtonDisabled]}
+                  onPress={handleNextPage}
+                  disabled={currentPage >= totalPages - 1}
+                  activeOpacity={0.7}
+                >
+                  <Text style={[styles.paginationButtonText, currentPage >= totalPages - 1 && styles.paginationButtonTextDisabled]}>
+                    다음
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            )}
+          </>
         )}
       </ScrollView>
       )}
@@ -303,7 +343,7 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation, route }) 
             </View>
 
             {/* 인증 상태 필터 */}
-            <Text style={styles.modalSectionTitle}>인증 상태</Text>
+            <Text style={[styles.modalSectionTitle, { marginTop: spacing[5] }]}>인증 상태</Text>
             <View style={styles.filterOptionRow}>
               {[
                 { key: 'all', label: '전체' },
@@ -337,6 +377,18 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation, route }) 
                   )}
                 </TouchableOpacity>
               ))}
+            </View>
+
+            {/* 내가 쓴 게시글만 보기 */}
+            <View style={[styles.filterOptionRow, { marginTop: spacing[6] }]}>
+              <Text style={styles.filterOptionLabel}>내가 쓴 게시글만 보기</Text>
+              <Switch
+                value={onlyMyPosts}
+                onValueChange={setOnlyMyPosts}
+                trackColor={{ false: '#E0E0E0', true: '#8B6F47' }}
+                thumbColor={onlyMyPosts ? '#FFFFFF' : '#F4F3F4'}
+                ios_backgroundColor="#E0E0E0"
+              />
             </View>
 
             {/* 적용 버튼 */}

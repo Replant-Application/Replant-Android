@@ -86,7 +86,8 @@ const PostCard: React.FC<PostCardProps> = ({
 
   // 접근성 라벨 생성
   const getAccessibilityLabel = () => {
-    let label = `${post.author_nickname}의 게시글, ${post.title}`;
+    const authorName = post.author_nickname || '익명';
+    let label = `${authorName}의 게시글, ${post.title}`;
     if (post.mission_title) {
       label += `, ${post.mission_title} 미션`;
     }
@@ -113,11 +114,11 @@ const PostCard: React.FC<PostCardProps> = ({
         <View style={styles.authorInfo}>
           <View style={styles.authorAvatar}>
             <Text style={styles.authorAvatarText}>
-              {post.author_nickname.charAt(0).toUpperCase()}
+              {(post.author_nickname || '익').charAt(0).toUpperCase()}
             </Text>
           </View>
           <View style={styles.authorNameContainer}>
-            <Text style={styles.authorName}>{post.author_nickname}</Text>
+            <Text style={styles.authorName}>{post.author_nickname || '익명'}</Text>
             {post.category && (
               <View style={styles.categoryBadge}>
                 <Text style={styles.categoryText}>{post.category}</Text>

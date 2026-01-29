@@ -4,7 +4,6 @@
  */
 
 import { useState, useMemo, useCallback, useEffect } from 'react';
-import { useCommunity } from '../../hooks/useCommunity';
 import { useErrorHandler } from '../../hooks/useErrorHandler';
 import { CommunityPost } from '../../types';
 import { logError } from '../../utils/logger';
@@ -16,10 +15,21 @@ import {
   updateMissionSet,
   MissionSetSimple,
 } from '../../api/todolistApi';
+import { getPosts as getPostsApi } from '../../api/communityApi';
+import { toggleLike as toggleLikeService } from '../../services/communityService';
+import { useUser } from '../../contexts/UserContext';
 import { CommunityScreenProps, CommunityTab, VerificationFilter } from '../../types/screens/community';
 
 export const useCommunityScreenContainer = ({ navigation, route }: CommunityScreenProps) => {
-  const { posts, loading, error, toggleLike, loadPosts } = useCommunity();
+  const { currentNickname } = useUser();
+  
+  // 페이지네이션 상태
+  const [posts, setPosts] = useState<CommunityPost[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState<number>(0);
+  const [totalPages, setTotalPages] = useState<number>(1);
+  const PAGE_SIZE = 20;
 
   // activeTab 초기값 설정 (유효성 검사 포함)
   const getInitialActiveTab = (): CommunityTab => {
@@ -46,6 +56,9 @@ export const useCommunityScreenContainer = ({ navigation, route }: CommunityScre
 
   // 인증 필터 상태
   const [verificationFilter, setVerificationFilter] = useState<VerificationFilter>('all');
+  
+  // 내가 쓴 게시글만 보기 필터
+  const [onlyMyPosts, setOnlyMyPosts] = useState<boolean>(false);
 
   // 숨긴 게시글 ID 목록
   const [hiddenPostIds, setHiddenPostIds] = useState<string[]>([]);
@@ -334,13 +347,80 @@ export const useCommunityScreenContainer = ({ navigation, route }: CommunityScre
   }, []);
 
   /**
+   * 게시글 목록 로드 (페이지네이션)
+   */
+  const loadPosts = useCallback(async (page: number = 0) => {
+    if (!currentNickname) return;
+
+    try {
+      if (page === 0) {
+        setLoading(true);
+      }
+      setError(null);
+
+      const result = await getPostsApi({ page, size: PAGE_SIZE });
+      
+      if (result.success && result.data) {
+        const newPosts = result.data.content || [];
+        
+        // 백엔드 응답을 프론트엔드 형식으로 변환
+        const transformedPosts: CommunityPost[] = newPosts.map((post: any) => ({
+          id: String(post.id),
+          post_id: String(post.id),
+          mission_id: post.missionTag?.id ? String(post.missionTag.id) : '',
+          mission_title: post.missionTag?.title || '',
+          mission_emoji: '🎯',
+          title: post.title || '',
+          content: post.content || '',
+          author: String(post.userId),
+          author_id: String(post.userId),
+          userId: post.userId,
+          author_nickname: post.userNickname || '알 수 없음',
+          created_at: post.createdAt || new Date().toISOString(),
+          updated_at: post.updatedAt || post.createdAt || new Date().toISOString(),
+          like_count: post.likeCount || 0,
+          comment_count: post.commentCount || 0,
+          scrap_count: 0,
+          images: post.imageUrls || [],
+          category: post.category || '일반',
+          is_liked: post.isLiked || false,
+          is_scrapped: false, // 스크랩은 로컬에서 관리
+          verified: post.verified || false,
+          isAuthor: post.isAuthor || false,
+        }));
+
+        setPosts(transformedPosts);
+        setTotalPages(result.data.totalPages || 1);
+        setCurrentPage(page);
+      } else {
+        setError(result.error || '게시글을 불러오는데 실패했습니다.');
+      }
+    } catch (loadError) {
+      logError('게시글 목록 로드 실패', loadError as Error, { currentNickname, page });
+      setError((loadError as Error).message);
+    } finally {
+      setLoading(false);
+    }
+  }, [currentNickname]);
+
+  /**
+   * 초기 로드
+   */
+  useEffect(() => {
+    if (activeTab === 'all' && currentNickname) {
+      loadPosts(0);
+    }
+  }, [activeTab, currentNickname, loadPosts]);
+
+  /**
    * Pull-to-Refresh 핸들러
    */
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     try {
       if (activeTab === 'all') {
-        await loadPosts();
+        setCurrentPage(0);
+        await loadPosts(0);
       } else {
         await loadMissionSets();
       }
@@ -350,6 +430,24 @@ export const useCommunityScreenContainer = ({ navigation, route }: CommunityScre
   }, [loadPosts, loadMissionSets, activeTab]);
 
   /**
+   * 다음 페이지로 이동
+   */
+  const handleNextPage = useCallback(() => {
+    if (currentPage < totalPages - 1) {
+      loadPosts(currentPage + 1);
+    }
+  }, [currentPage, totalPages, loadPosts]);
+
+  /**
+   * 이전 페이지로 이동
+   */
+  const handlePreviousPage = useCallback(() => {
+    if (currentPage > 0) {
+      loadPosts(currentPage - 1);
+    }
+  }, [currentPage, loadPosts]);
+
+  /**
    * 검색 및 필터링 (디바운싱된 검색어 사용)
    */
   const filteredPosts = useMemo(() => {
@@ -357,6 +455,11 @@ export const useCommunityScreenContainer = ({ navigation, route }: CommunityScre
 
     // 숨긴 글 필터링
     allPosts = allPosts.filter(post => !hiddenPostIds.includes(post.post_id));
+
+    // 내가 쓴 게시글만 보기 필터
+    if (onlyMyPosts) {
+      allPosts = allPosts.filter(post => post.isAuthor === true);
+    }
 
     // 인증 필터 적용 (category가 '인증'인 게시글만 필터링)
     if (verificationFilter === 'pending') {
@@ -394,7 +497,7 @@ export const useCommunityScreenContainer = ({ navigation, route }: CommunityScre
     }
 
     return allPosts;
-  }, [posts, debouncedSearchQuery, filter, verificationFilter, hiddenPostIds]);
+  }, [posts, debouncedSearchQuery, filter, verificationFilter, hiddenPostIds, onlyMyPosts]);
 
   /**
    * 게시글 숨기기 처리
@@ -434,15 +537,49 @@ export const useCommunityScreenContainer = ({ navigation, route }: CommunityScre
    */
   const handleLike = useCallback(
     async (postId: string) => {
-      const result = await toggleLike(postId);
-      // 내 게시글에는 좋아요를 누를 수 없음 에러 처리
-      if (!result.success && result.error === '내 게시글에는 좋아요를 누를 수 없습니다.') {
+      if (!currentNickname) return;
+
+      // 해당 게시글 찾기
+      const targetPost = posts.find(p => p.post_id === postId);
+
+      // 내 게시글에는 좋아요를 누를 수 없음
+      if (targetPost?.isAuthor === true) {
         setAlertTitle('알림');
         setAlertMessage('내 게시글에는 좋아요를 누를 수 없습니다.');
         setShowAlert(true);
+        return;
+      }
+
+      try {
+        const result = await toggleLikeService(postId, currentNickname);
+
+        if (result.success && result.data) {
+          // 로컬 상태 업데이트
+          setPosts(prev =>
+            prev.map(p => {
+              if (p.post_id === postId) {
+                return {
+                  ...p,
+                  is_liked: result.data!.isLiked,
+                  like_count: result.data!.likeCount,
+                };
+              }
+              return p;
+            })
+          );
+        } else if (!result.success) {
+          setAlertTitle('오류');
+          setAlertMessage(result.error || '좋아요 처리에 실패했습니다.');
+          setShowAlert(true);
+        }
+      } catch (error) {
+        logError('좋아요 토글 실패', error as Error, { postId, currentNickname });
+        setAlertTitle('오류');
+        setAlertMessage('좋아요 처리 중 문제가 발생했습니다.');
+        setShowAlert(true);
       }
     },
-    [toggleLike]
+    [currentNickname, posts]
   );
 
   /**
@@ -502,6 +639,7 @@ export const useCommunityScreenContainer = ({ navigation, route }: CommunityScre
     showFilterModal,
     refreshing,
     verificationFilter,
+    onlyMyPosts,
     hiddenPostIds,
     showAlert,
     alertTitle,
@@ -519,6 +657,7 @@ export const useCommunityScreenContainer = ({ navigation, route }: CommunityScre
     setActiveTab,
     setShowFilterModal,
     setVerificationFilter,
+    setOnlyMyPosts,
     setMissionSetSearchQuery,
     setMissionSetSortBy,
     setShowMissionSetFilterModal,
@@ -535,6 +674,11 @@ export const useCommunityScreenContainer = ({ navigation, route }: CommunityScre
     handleShareModalClose,
     handleCreatePost,
     onRefresh,
+    // 페이지네이션
+    currentPage,
+    totalPages,
+    handleNextPage,
+    handlePreviousPage,
     // 공유 확인 ConfirmModal
     showShareConfirmModal,
     shareConfirmMissionSet,
