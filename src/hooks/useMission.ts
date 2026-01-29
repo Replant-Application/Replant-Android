@@ -143,49 +143,41 @@ export const useMission = (
 
       const allMissions: Mission[] = [];
 
-      // getUserMissions API로 모든 미션 가져오기
-      const { getUserMissions } = await import('../api/missionApi');
-      
-      // 모든 상태의 미션을 가져오기 위해 페이지네이션 처리
-      let page = 0;
-      const size = 100; // 한 번에 많이 가져오기
-      let hasMore = true;
-
-      while (hasMore) {
-        try {
-          const result = await getUserMissions({ 
-            page, 
-            size,
-            // status 필터 없이 모든 상태 가져오기
-          });
-
-          if (result.success && result.data?.content) {
-            const userMissions = result.data.content;
+<<<<<<< HEAD
+      // 오늘 할당된 미션만 불러오기 (투두리스트에 추가된 미션들)
+      // 백엔드 API: /api/missions/my는 assignedAt이 오늘인 미션만 반환
+      // 상태: ASSIGNED, PENDING, COMPLETED 모두 포함 (오늘 할당된 것만)
+      const userMissionsResult = await getUserMissions({ size: 100 });
+      if (userMissionsResult.success && userMissionsResult.data) {
+        // UserMission을 Mission 형식으로 변환
+        // 완료된 미션(status === 'COMPLETED')도 포함하여 변환
+        // 돌발 미션은 제외 (isSpontaneous 플래그 또는 mission이 null인 경우)
+        userMissionsResult.data.content.forEach(um => {
+          try {
+            // 돌발 미션 필터링: isSpontaneous 플래그가 true이거나 mission이 null인 경우 제외
+            if (um.isSpontaneous === true || um.mission === null) {
+              console.log('[useMission] 돌발 미션 제외:', { 
+                id: um.id, 
+                isSpontaneous: um.isSpontaneous,
+                hasMission: !!um.mission,
+                status: um.status 
+              });
+              return; // 돌발 미션은 제외
+            }
             
-            // UserMission을 Mission으로 변환
-            for (const userMission of userMissions) {
-              try {
-                const mission = transformUserMissionToMission(userMission);
-                if (mission) {
-                  allMissions.push(mission);
-                }
-              } catch (e) {
-                logError('UserMission 변환 실패', e as Error, { userMissionId: userMission.id });
-              }
+            // mission 필드가 없으면 변환 불가능하므로 제외
+            if (!um.mission && !um.customMission) {
+              console.log('[useMission] mission 필드 없음 - 제외:', { id: um.id, status: um.status });
+              return;
             }
-
-            // 다음 페이지 확인
-            hasMore = page < result.data.totalPages - 1;
-            page++;
-          } else {
-            hasMore = false;
-            if (result.error) {
-              console.error('[useMission] getUserMissions API 오류:', result.error);
-            }
+            
+            // 정상적인 유저 미션만 변환
+            const mission = transformUserMission(um);
+            allMissions.push(mission);
+          } catch (e) {
+            // 미션 데이터가 없는 경우 스킵
+            logError('UserMission 변환 실패', e as Error, { userMissionId: um.id });
           }
-        } catch (e) {
-          logError('미션 목록 조회 실패', e as Error, { page });
-          hasMore = false;
         }
       }
 

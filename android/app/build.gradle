@@ -104,7 +104,7 @@ android {
             keyPassword 'android'
         }
         release {
-            // Load keystore properties from local.properties (not tracked in git)
+            // CI/CD 환경변수 또는 local.properties에서 읽기
             def keystorePropertiesFile = rootProject.file("local.properties")
             def keystoreProperties = new Properties()
             if (keystorePropertiesFile.exists()) {

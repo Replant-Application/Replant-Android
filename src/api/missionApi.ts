@@ -415,7 +415,7 @@ export const deleteCustomMission = async (
 export interface UserMission {
   id: number;
   missionType: MissionType; // OFFICIAL | CUSTOM
-  mission?: Mission;  // 통합된 미션 (공식/커스텀 모두)
+  mission?: Mission | null;  // 통합된 미션 (공식/커스텀 모두), 돌발 미션의 경우 null
   // 하위 호환성을 위해 유지
   customMission?: Mission;
   assignedAt: string;
@@ -423,6 +423,7 @@ export interface UserMission {
   status: UserMissionStatus;
   completedAt?: string; // 완료 날짜 (ISO string)
   verification?: MissionVerification;
+  isSpontaneous?: boolean; // 돌발 미션 여부 (기상, 식사, 감성일기)
 }
 
 export interface UserMissionListResponse {
@@ -1173,19 +1174,41 @@ export interface WakeupVerificationResult {
 
 /**
  * 현재 활성화된 기상 미션 조회
- * GET /api/missions/my/wakeup/current
+ * GET /api/spontaneous-missions/wakeup/current
  * 인증 필요
+ * 주의: 백엔드에서 404가 반환되면 null로 처리 (아직 구현되지 않았을 수 있음)
  */
 export interface WakeupCurrentMissionResponse {
-  userMissionId: number;
+  id: number; // spontaneous_mission의 ID
+  userId: number;
+  missionType: 'WAKE_UP';
+  missionTypeDisplayName: string; // "기상"
   assignedAt: string;
-  timeRemaining: number; // 초 단위
+  deadlineAt: string;
+  status: 'ASSIGNED' | 'PENDING' | 'COMPLETED' | 'EXPIRED' | 'FAILED';
+  remainingSeconds: number; // 초 단위
+  expired: boolean;
   canVerify: boolean;
-  message?: string;
 }
 
-export const getCurrentWakeupMission = async (): Promise<ServiceResult<WakeupCurrentMissionResponse>> => {
-  return apiClient.get<WakeupCurrentMissionResponse>(API_CONFIG.endpoints.userMission.wakeupCurrent);
+export const getCurrentWakeupMission = async (): Promise<ServiceResult<WakeupCurrentMissionResponse | null>> => {
+  // 404 에러는 조용히 처리 (백엔드가 아직 구현하지 않았을 수 있음)
+  const result = await apiClient.get<WakeupCurrentMissionResponse>(
+    API_CONFIG.endpoints.spontaneousMission.wakeupCurrent,
+    undefined,
+    { silentErrors: [404] }
+  );
+  
+  // 404 에러인 경우 null 반환
+  if (!result.success && (result.error?.includes('404') || result.error?.includes('찾을 수 없습니다'))) {
+    console.debug('[getCurrentWakeupMission] 백엔드 엔드포인트가 아직 구현되지 않았습니다. null 반환.');
+    return {
+      success: true,
+      data: null,
+    };
+  }
+  
+  return result as ServiceResult<WakeupCurrentMissionResponse | null>;
 };
 
 /**
@@ -1351,4 +1374,125 @@ export const updateSpontaneousMissionSetup = async (
   data: SpontaneousMissionSetupRequest
 ): Promise<ServiceResult<SpontaneousMissionSetupResponse>> => {
   return apiClient.put<SpontaneousMissionSetupResponse>(API_CONFIG.endpoints.spontaneousMission.setup, data);
+};
+
+// ============================================
+// 돌발 미션 인증 및 조회
+// ============================================
+
+/**
+ * 돌발 미션 타입
+ */
+export type SpontaneousMissionType = 'WAKE_UP' | 'MEAL_BREAKFAST' | 'MEAL_LUNCH' | 'MEAL_DINNER' | 'EMOTION_DIARY';
+
+/**
+ * 돌발 미션 상태
+ */
+export type SpontaneousMissionStatus = 'ASSIGNED' | 'PENDING' | 'COMPLETED' | 'EXPIRED' | 'FAILED';
+
+/**
+ * 돌발 미션 정보
+ */
+export interface SpontaneousMission {
+  id: number;
+  userId: number;
+  missionType: SpontaneousMissionType;
+  missionTypeDisplayName: string;
+  assignedAt: string;
+  deadlineAt: string;
+  status: SpontaneousMissionStatus;
+  remainingSeconds?: number;
+  expired: boolean;
+  canVerify: boolean;
+}
+
+/**
+ * 돌발 미션 인증 요청
+ */
+export interface VerifySpontaneousMissionRequest {
+  postId?: number; // 식사/일기 미션의 경우만 필요, 기상 미션은 null 또는 생략
+}
+
+/**
+ * 돌발 미션 인증 응답
+ */
+export interface VerifySpontaneousMissionResponse {
+  missionId: number;
+  status: SpontaneousMissionStatus;
+  rewards?: {
+    expEarned: number;
+    badge?: {
+      id: number;
+      expiresAt: string;
+    };
+  };
+}
+
+/**
+ * 돌발 미션 인증
+ * POST /api/spontaneous-missions/{missionId}/verify
+ * 인증 필요
+ * @param missionId - spontaneous_mission의 ID
+ * @param data - 인증 데이터 (식사/일기 미션의 경우 postId 필요)
+ */
+export const verifySpontaneousMission = async (
+  missionId: number,
+  data?: VerifySpontaneousMissionRequest
+): Promise<ServiceResult<VerifySpontaneousMissionResponse>> => {
+  const endpoint = API_CONFIG.endpoints.spontaneousMission.verify.replace(':missionId', String(missionId));
+  // 404 에러는 조용히 처리 (백엔드가 아직 구현하지 않았을 수 있음)
+  const result = await apiClient.post<VerifySpontaneousMissionResponse>(
+    endpoint,
+    data || {},
+    { silentErrors: [404] }
+  );
+  
+  // 404 에러인 경우 사용자 친화적인 메시지로 변환
+  if (!result.success && (result.error?.includes('404') || result.error?.includes('찾을 수 없습니다'))) {
+    console.debug('[verifySpontaneousMission] 백엔드 엔드포인트가 아직 구현되지 않았거나 미션을 찾을 수 없습니다.');
+    return {
+      success: false,
+      error: '미션 인증 API가 아직 준비되지 않았습니다. 잠시 후 다시 시도해주세요.',
+    };
+  }
+  
+  return result;
+};
+
+/**
+ * 현재 진행 중인 돌발 미션 조회
+ * GET /api/spontaneous-missions/current
+ * 인증 필요
+ * 주의: 백엔드에서 404가 반환되면 빈 배열로 처리 (아직 구현되지 않았을 수 있음)
+ */
+export const getCurrentSpontaneousMissions = async (): Promise<ServiceResult<SpontaneousMission[]>> => {
+  // 404 에러는 조용히 처리 (백엔드가 아직 구현하지 않았을 수 있음)
+  const result = await apiClient.get<SpontaneousMission[]>(
+    API_CONFIG.endpoints.spontaneousMission.current,
+    undefined,
+    { silentErrors: [404] }
+  );
+  
+  // 404 에러인 경우 빈 배열 반환
+  if (!result.success && (result.error?.includes('404') || result.error?.includes('찾을 수 없습니다'))) {
+    console.debug('[getCurrentSpontaneousMissions] 백엔드 엔드포인트가 아직 구현되지 않았습니다. 빈 배열 반환.');
+    return {
+      success: true,
+      data: [],
+    };
+  }
+  
+  return result;
+};
+
+/**
+ * 특정 날짜의 돌발 미션 조회
+ * GET /api/spontaneous-missions/date?date=2026-01-26
+ * 인증 필요
+ * @param date - 조회할 날짜 (YYYY-MM-DD 형식)
+ */
+export const getSpontaneousMissionsByDate = async (
+  date: string
+): Promise<ServiceResult<SpontaneousMission[]>> => {
+  return apiClient.get<SpontaneousMission[]>(API_CONFIG.endpoints.spontaneousMission.byDate, { date });
 };

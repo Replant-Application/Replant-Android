@@ -8,7 +8,7 @@ import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types/navigation';
 import { useCommunity } from '../../hooks/useCommunity';
 import { createVerificationPost } from '../../api/verificationApi';
-import { verifyMeal } from '../../api/mealLogApi';
+import { verifySpontaneousMission } from '../../api/missionApi';
 import { launchImageLibrary } from 'react-native-image-picker';
 import { uploadCommunityPhoto } from '../../api/fileApi';
 import { logError } from '../../utils/logger';
@@ -27,7 +27,9 @@ export const useCommunityPostCreateScreenContainer = ({
   const params = route.params || {};
   const postType = params.type || 'VERIFICATION'; // GENERAL or VERIFICATION
   const isGeneralPost = postType === 'GENERAL';
-  const userMissionId = params.userMissionId; // 인증글 작성 시 필요한 UserMission ID
+  const userMissionId = params.userMissionId; // 인증글 작성 시 필요한 UserMission ID (하위 호환성)
+  const spontaneousMissionId = params.spontaneousMissionId || params.referenceId; // 돌발 미션 ID (spontaneous_mission의 ID)
+  const mealLogId = params.mealLogId; // 식사 로그 ID (MEAL_LOG 타입 알림에서 사용)
   const missionId = params.missionId || '';
   const missionTitle = isGeneralPost ? '자유게시판' : params.missionTitle || '미션';
   const missionEmoji = isGeneralPost ? '📝' : params.missionEmoji || '🎯';
@@ -175,9 +177,11 @@ export const useCommunityPostCreateScreenContainer = ({
         result = await createPost(postData);
         console.log('[CommunityPostCreateScreen] 일반 게시글 작성 완료:', result.success);
       } else if (isMealMission) {
-        // 식사 미션: mealLogApi 사용
+        // 식사 미션: 돌발 미션 API 사용
+        // 주의: 식사 미션은 이제 spontaneous_mission이므로 새로운 API 사용
         console.log('[CommunityPostCreateScreen] 식사 미션 인증 시작:', {
-          userMissionId: userMissionId!,
+          spontaneousMissionId: spontaneousMissionId,
+          userMissionId: userMissionId, // 하위 호환성
           title: title.trim() || missionTitle,
           hasDescription: !!content.trim(),
           hasImages: images.length > 0,
@@ -185,14 +189,58 @@ export const useCommunityPostCreateScreenContainer = ({
           isMealMission: true,
         });
 
-        // 식사 미션은 verifyMeal API 호출 (게시글 자동 생성 + 식사 인증 완료 + 커뮤니티 노출)
-        result = await verifyMeal(userMissionId!, {
-          title: title.trim() || missionTitle,
-          description: content.trim(),
-          rating: tasteRating,
-          imageUrls: images.length > 0 ? images : undefined,
-        });
-        console.log('[CommunityPostCreateScreen] 식사 미션 인증 완료:', result.success);
+        if (!spontaneousMissionId) {
+          showAlertModal('오류', '미션 정보가 없습니다. 다시 시도해주세요.');
+          return;
+        }
+
+        // 1단계: 먼저 게시글 작성
+        const postTitle = title.trim() || missionTitle;
+        const postData = {
+          mission_id: missionId,
+          mission_title: missionTitle,
+          mission_emoji: missionEmoji,
+          title: postTitle,
+          content: content.trim(),
+          images: photoUrl ? [photoUrl, ...images] : images,
+          category: postType,
+        };
+        
+        const postResult = await createPost(postData);
+        
+        if (!postResult.success || !postResult.data) {
+          showAlertModal('오류', postResult.error || '게시글 작성에 실패했습니다.');
+          return;
+        }
+
+        const postId = Number(postResult.data.id); // CommunityPost.id는 string이므로 number로 변환
+        console.log('[CommunityPostCreateScreen] 게시글 작성 완료, postId:', postId);
+
+        // 2단계: 돌발 미션 인증 API 호출 (postId 전달)
+        const verifyResult = await verifySpontaneousMission(
+          typeof spontaneousMissionId === 'string' ? Number(spontaneousMissionId) : spontaneousMissionId,
+          { postId }
+        );
+
+        if (verifyResult.success) {
+          console.log('[CommunityPostCreateScreen] 식사 미션 인증 완료:', verifyResult.success);
+          result = postResult; // 게시글 작성 결과를 반환
+        } else {
+          // 404 에러인 경우 (백엔드 미구현) 게시글은 성공적으로 작성되었으므로 계속 진행
+          const isNotFound = verifyResult.error?.includes('404') || 
+                            verifyResult.error?.includes('찾을 수 없습니다') ||
+                            verifyResult.error?.includes('아직 준비되지 않았습니다');
+          
+          if (isNotFound) {
+            console.warn('[CommunityPostCreateScreen] 미션 인증 API가 아직 구현되지 않았지만 게시글은 작성되었습니다.');
+            // 게시글 작성은 성공했으므로 결과 반환 (미션 인증은 나중에 처리될 수 있음)
+            result = postResult;
+          } else {
+            console.error('[CommunityPostCreateScreen] 식사 미션 인증 실패:', verifyResult.error);
+            showAlertModal('오류', verifyResult.error || '미션 인증에 실패했습니다.');
+            return;
+          }
+        }
       } else {
         // 일반 인증 게시글: verificationApi 사용
         console.log('[CommunityPostCreateScreen] 인증글 작성 시작:', {
@@ -229,6 +277,7 @@ export const useCommunityPostCreateScreenContainer = ({
     isGeneralPost,
     isMealMission,
     userMissionId,
+    spontaneousMissionId,
     title,
     missionTitle,
     missionId,

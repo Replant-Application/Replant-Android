@@ -39,7 +39,15 @@ export const useMissionHistoryScreenContainer = ({
       const result = await getUserMissions({ page: pageNum, size: 20 });
 
       if (result.success && result.data) {
-        const newMissions = result.data.content;
+        // 돌발 미션 제외 (isSpontaneous 플래그 또는 mission이 null인 경우)
+        const newMissions = result.data.content.filter(um => {
+          // 돌발 미션 필터링
+          if (um.isSpontaneous === true || um.mission === null) {
+            return false; // 돌발 미션은 제외
+          }
+          return true;
+        });
+        
         if (isRefresh || pageNum === 0) {
           setMissions(newMissions);
         } else {

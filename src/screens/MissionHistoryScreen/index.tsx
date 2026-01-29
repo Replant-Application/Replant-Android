@@ -34,6 +34,11 @@ const MissionHistoryScreen: React.FC<MissionHistoryScreenProps> = ({ navigation 
 
 
   const renderMissionItem = ({ item }: { item: UserMission }) => {
+    // 돌발 미션은 표시하지 않음
+    if (item.isSpontaneous === true || item.mission === null) {
+      return null;
+    }
+    
     const mission = item.mission || item.customMission;
     if (!mission) return null;
 

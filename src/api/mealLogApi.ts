@@ -21,6 +21,11 @@ export type MealType = 'BREAKFAST' | 'LUNCH' | 'DINNER' | 'SNACK';
 export type MealLogStatus = 'PENDING' | 'VERIFIED' | 'EXPIRED';
 
 /**
+ * 식사 미션 상태 (MealLogResponse.Status)
+ */
+export type MealMissionStatus = 'ASSIGNED' | 'COMPLETED' | 'FAILED' | 'SKIPPED';
+
+/**
  * 식사 로그 인터페이스
  */
 export interface MealLog {
@@ -31,23 +36,34 @@ export interface MealLog {
   content?: string;
   imageUrls?: string[];
   tasteRating?: number; // 1-5
-  status: MealLogStatus;
+  status: MealLogStatus | MealMissionStatus; // MealLogStatus 또는 MealMissionStatus ('ASSIGNED' | 'COMPLETED' | 'FAILED' | 'SKIPPED')
   missionId?: number;
   userMissionId?: number;
   verifiedAt?: string;
   expiredAt?: string;
   createdAt: string;
   updatedAt?: string;
+  // 식사 미션 상세 조회 시 추가 필드
+  expired?: boolean;
+  canVerify?: boolean;
+  mealTypeDisplay?: string; // "아침", "점심", "저녁" 등
+  remainingSeconds?: number; // 남은 시간 (초)
 }
 
 /**
  * 현재 진행 중인 식사 미션 응답
+ * GET /api/meal-logs/current
+ * 응답이 null이면 204 No Content 반환
+ * 미션이 있으면 다음 필드 반환
  */
 export interface CurrentMealMissionResponse {
-  mealLog: MealLog | null;
+  id: number;
   mealType: MealType;
-  remainingTime?: number; // 남은 시간 (초)
-  isExpired: boolean;
+  mealTypeDisplay: string; // "아침", "점심", "저녁" 등
+  status: MealMissionStatus; // 'ASSIGNED' | 'COMPLETED' | 'FAILED' | 'SKIPPED'
+  expired: boolean;
+  canVerify: boolean;
+  remainingSeconds: number; // 남은 시간 (초)
 }
 
 /**
@@ -117,9 +133,49 @@ export interface MealStatsResponse {
 /**
  * 현재 진행 중인 식사 미션 조회
  * GET /api/meal-logs/current
+ * 응답이 null이면 204 No Content 반환 (미션이 없음)
+ * 미션이 있으면 CurrentMealMissionResponse 반환
  */
-export async function getCurrentMealMission(): Promise<ServiceResult<CurrentMealMissionResponse>> {
-  return apiClient.get<CurrentMealMissionResponse>('/meal-logs/current');
+export async function getCurrentMealMission(): Promise<ServiceResult<CurrentMealMissionResponse | null>> {
+  const result = await apiClient.get<CurrentMealMissionResponse | null>('/meal-logs/current');
+  
+  // 204 No Content인 경우 (data가 null)
+  if (result.success && result.data === null) {
+    return {
+      success: true,
+      data: null, // 미션이 없음을 나타냄
+    };
+  }
+  
+  return result;
+}
+
+/**
+ * 식사 미션 상태 확인 및 에러 메시지 생성
+ * @param mealMission - 현재 식사 미션 응답 (null이면 미션이 없음)
+ * @returns 에러 메시지 또는 null (정상)
+ */
+export function validateMealMission(mealMission: CurrentMealMissionResponse | null): string | null {
+  if (!mealMission) {
+    return null; // 미션이 없는 것은 정상
+  }
+  
+  // expired: true 또는 canVerify: false면 "만료된 미션"
+  if (mealMission.expired === true || mealMission.canVerify === false) {
+    return '만료된 미션입니다.';
+  }
+  
+  // status: "COMPLETED"면 "이미 완료된 미션"
+  if (mealMission.status === 'COMPLETED') {
+    return '이미 완료된 미션입니다.';
+  }
+  
+  // status: "FAILED"면 "만료된 미션"
+  if (mealMission.status === 'FAILED') {
+    return '만료된 미션입니다.';
+  }
+  
+  return null; // 정상
 }
 
 /**

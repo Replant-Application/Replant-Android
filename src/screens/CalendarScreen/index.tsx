@@ -138,7 +138,9 @@ const CalendarScreen: React.FC<CalendarScreenProps> = ({ navigation }) => {
                   </View>
                   {selectedDayMissions.length > 0 && (
                     <>
-                      {selectedDayMissions.map((userMission) => {
+                      {selectedDayMissions
+                        .filter(userMission => !(userMission.isSpontaneous === true || userMission.mission === null))
+                        .map((userMission) => {
                         const missionTitle = userMission.mission?.title || userMission.customMission?.title || '미션';
                         const isCompleted = userMission.status === 'COMPLETED';
                         return (
