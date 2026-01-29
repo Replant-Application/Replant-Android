@@ -50,7 +50,7 @@ export const styles = StyleSheet.create({
   },
   navContainer: {
     position: 'absolute',
-    bottom: Platform.OS === 'ios' ? 50 : 36,
+    bottom: Platform.OS === 'ios' ? 80 : 66,
     left: 0,
     right: 0,
     flexDirection: 'row',
