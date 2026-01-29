@@ -36,6 +36,7 @@ export const createTextStyle = (
       ios: undefined, // iOS는 기본 시스템 폰트 사용
       android: typography.fontFamily.regular, // Android는 커스텀 폰트 사용
     }),
+    fontWeight: typography.fontWeight.medium, // 기본 medium ('500')
     includeFontPadding: false,
     lineHeight: getOptimizedLineHeight(fontSizeValue),
     ...options,
@@ -90,7 +91,7 @@ export const createErrorTextStyle = (
   options?: Partial<TextStyle>
 ): TextStyle => {
   return createTextStyle(fontSize, {
-    color: '#ef4444', // red[500]
+    color: colors.semantic.fg.error,
     ...options,
   });
 };
@@ -103,7 +104,7 @@ export const createLinkTextStyle = (
   options?: Partial<TextStyle>
 ): TextStyle => {
   return createTextStyle(fontSize, {
-    color: '#89C17E', // primary[500]
+    color: colors.semantic.fg.brand,
     textDecorationLine: 'underline',
     ...options,
   });
@@ -118,7 +119,7 @@ export const createButtonTextStyle = (
 ): TextStyle => {
   return createTextStyle(fontSize, {
     fontWeight: typography.fontWeight.medium,
-    color: '#ffffff',
+    color: colors.semantic.fg.inverse,
     textAlign: 'center',
     ...options,
   });

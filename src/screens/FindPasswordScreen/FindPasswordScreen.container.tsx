@@ -34,9 +34,9 @@ export const useFindPasswordScreenContainer = ({
   /**
    * 이메일 유효성 검사
    */
-  const validateEmail = useCallback((email: string): boolean => {
+  const validateEmail = useCallback((emailValue: string): boolean => {
     const emailRegex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,6}$/;
-    return emailRegex.test(email);
+    return emailRegex.test(emailValue);
   }, []);
 
   /**
@@ -110,8 +110,8 @@ export const useFindPasswordScreenContainer = ({
         }
         setErrors({ email: errorMessage, verificationCode: '' });
       }
-    } catch (error) {
-      console.error('Send verification error:', error);
+    } catch (err) {
+      console.error('Send verification error:', err);
       setErrors({ email: '인증번호 발송 중 오류가 발생했습니다.\n잠시 후 다시 시도해주세요.', verificationCode: '' });
     } finally {
       setIsLoading(false);
@@ -168,8 +168,8 @@ export const useFindPasswordScreenContainer = ({
         }
         setErrors({ email: '', verificationCode: errorMessage });
       }
-    } catch (error) {
-      console.error('Verify email error:', error);
+    } catch (err) {
+      console.error('Verify email error:', err);
       setErrors({ email: '', verificationCode: '인증번호 확인 중 오류가 발생했습니다.\n잠시 후 다시 시도해주세요.' });
     } finally {
       setIsLoading(false);
@@ -221,8 +221,8 @@ export const useFindPasswordScreenContainer = ({
         }
         Alert.alert('오류', errorMessage);
       }
-    } catch (error) {
-      console.error('Gen password error:', error);
+    } catch (err) {
+      console.error('Gen password error:', err);
       Alert.alert('오류', '임시 비밀번호 발급 중 오류가 발생했습니다.\n잠시 후 다시 시도해주세요.');
     } finally {
       setIsLoading(false);

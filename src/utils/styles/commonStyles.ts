@@ -116,7 +116,7 @@ export const modalStyles = {
    */
   overlay: (): ViewStyle => ({
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    backgroundColor: colors.overlay.dark,
     justifyContent: 'center',
     alignItems: 'center',
   }),
@@ -126,7 +126,7 @@ export const modalStyles = {
    */
   overlayBottomSheet: (): ViewStyle => ({
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: colors.overlay.medium,
     justifyContent: 'flex-end',
   }),
 
@@ -208,7 +208,7 @@ export const cardStyles = {
     borderRadius: borderRadius.base,
     padding: spacing[4],
     borderWidth: 4,
-    borderColor: '#0E0F37',
+    borderColor: colors.gray[900],
   }),
 
   /**

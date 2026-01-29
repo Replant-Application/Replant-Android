@@ -4,7 +4,7 @@
  */
 
 import { StyleSheet, Dimensions } from 'react-native';
-import { colors, spacing, borderRadius } from '../../utils/designTokens';
+import { colors, spacing, borderRadius, layout } from '../../utils/designTokens';
 import { createTextStyle, createTitleStyle, createBodyStyle, createSecondaryTextStyle, createButtonTextStyle } from '../../utils/styles/textStyles';
 import { loadingStyles } from '../../utils/styles/componentStyles';
 
@@ -34,7 +34,8 @@ export const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    padding: spacing[4],
+    paddingHorizontal: layout.globalGutter,
+    paddingVertical: layout.globalGutter,
     paddingBottom: spacing[20], // 하단 탭바 높이 + 여유 공간
   },
   missionList: {

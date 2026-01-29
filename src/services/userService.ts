@@ -102,7 +102,7 @@ export const getUserProfile = async (nickname: string): Promise<ServiceResult<Us
     // 1. 백엔드 API에서 사용자 기본 정보 가져오기
     const userInfoResult = await getMyInfo();
 
-    // 2. 백엔드 API에서 뱃지 정보 가져오기
+    // 2. 백엔드 API에서 배지 정보 가져오기
     const badgesResult = await getMyBadges();
 
     // 로컬 캐릭터 정보 로드 (폴백용)
@@ -125,11 +125,15 @@ export const getUserProfile = async (nickname: string): Promise<ServiceResult<Us
     }
 
     // 4. 총 경험치 계산 (Reant API 사용 - 백엔드 DB와 동기화)
+    // 백엔드 reant.exp는 "현재 레벨 경험치"만 저장 → 전체 누적은 (레벨업 소모 누적 + exp)로 계산
     let totalExperience = 0;
     try {
       const reantResult = await getMyReant();
       if (reantResult.success && reantResult.data) {
-        totalExperience = reantResult.data.exp; // 백엔드의 실제 exp 값
+        const { level, exp } = reantResult.data;
+        // 레벨 1→2: 100, 2→3: 200, ... (level-1)→level: (level-1)*100 → 누적 = 100 * (1+2+...+(level-1)) = 100 * (level-1)*level/2
+        const expToReachCurrentLevel = level > 1 ? 100 * ((level - 1) * level / 2) : 0;
+        totalExperience = expToReachCurrentLevel + exp;
       } else {
         // API 실패 시 로컬 스토리지 사용 (폴백)
         if (character && 'total_experience' in character) {
@@ -221,7 +225,7 @@ export const getUserProfile = async (nickname: string): Promise<ServiceResult<Us
       }
     }
 
-    // 뱃지 수 계산
+    // 배지 수 계산
     const badgeCount = badgesResult.success && badgesResult.data ? badgesResult.data.badges?.length || 0 : 0;
 
     // 프로필 생성

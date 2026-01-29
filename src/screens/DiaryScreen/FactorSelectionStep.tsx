@@ -41,8 +41,15 @@ const FactorSelectionStep: React.FC<FactorSelectionStepProps> = ({
                 style={[styles.factorButton, buttonStyle]}
                 onPress={() => onToggleFactor(factor)}
                 activeOpacity={0.7}
+                accessibilityRole="button"
+                accessibilityLabel={factor}
+                accessibilityState={{ selected: isSelected }}
+                accessibilityHint={isSelected ? `${factor} 선택됨, 탭하여 선택 해제` : `${factor} 선택되지 않음, 탭하여 선택`}
               >
-                <Text style={[styles.factorButtonText, isSelected && styles.factorButtonTextSelected]}>
+                <Text 
+                  style={[styles.factorButtonText, isSelected && styles.factorButtonTextSelected]}
+                  accessibilityElementsHidden={true}
+                >
                   {factor}
                 </Text>
               </TouchableOpacity>
@@ -82,6 +89,10 @@ const FactorSelectionStep: React.FC<FactorSelectionStepProps> = ({
           placeholderTextColor={colors.text.tertiary}
           multiline={false}
           editable={true}
+          autoComplete="off"
+          textContentType="none"
+          accessibilityLabel="감정 요인 직접 입력"
+          accessibilityHint="감정 요인을 직접 입력하세요. 자동완성 기능이 비활성화되어 있습니다"
         />
       </View>
     </View>

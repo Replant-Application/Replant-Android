@@ -61,6 +61,9 @@ export const styles = StyleSheet.create({
     paddingTop: spacing[2],
     paddingBottom: spacing[2],
   },
+  messagesListEmpty: {
+    flexGrow: 0,
+  },
   emptyContainer: {
     justifyContent: 'center',
     alignItems: 'center',

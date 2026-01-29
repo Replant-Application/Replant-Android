@@ -1,6 +1,6 @@
 /**
  * BadgeDetailScreen 스타일
- * 뱃지 상세 화면의 모든 스타일 정의
+ * 배지 상세 화면의 모든 스타일 정의
  */
 
 import { StyleSheet } from 'react-native';

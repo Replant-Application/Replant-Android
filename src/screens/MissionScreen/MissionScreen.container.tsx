@@ -11,15 +11,12 @@ import { useErrorHandler } from '../../hooks/useErrorHandler';
 import { Mission } from '../../types';
 import {
   checkVerificationStatus,
-  verifyByGps,
-  verifyByTime,
   addSystemMissionToMyMissions,
   getCustomMissions,
   getMissionCollection,
   completeCustomMission,
   MissionCategory,
 } from '../../api/missionApi';
-import * as Location from 'expo-location';
 import { logError } from '../../utils/logger';
 import { MissionScreenProps, MissionFilter, MissionTab } from '../../types/screens/mission';
 import { getCurrentUser } from '../../services/authService';
@@ -41,6 +38,7 @@ interface UnifiedMission {
   expReward: number;
   badgeDurationDays: number;
   participantCount?: number;
+  difficultyLevel?: 'EASY' | 'MEDIUM' | 'HARD';
   isCustom: boolean;
   creatorId?: number;
   creatorNickname?: string;
@@ -128,8 +126,24 @@ export const useMissionScreenContainer = ({
   const routeParams = route?.params;
   // route params에서 selectedFilter 복원 (나의 미션 탭 필터)
   const [selectedFilter, setSelectedFilter] = useState<MissionFilter>(routeParams?.selectedFilter || 'inProgress');
-  const [activeTab, setActiveTab] = useState<MissionTab>(routeParams?.activeTab || 'myMission');
+  
+  // activeTab 초기값 설정 (유효성 검사 포함)
+  const getInitialActiveTab = (): MissionTab => {
+    const tab = routeParams?.activeTab;
+    return (tab === 'myMission' || tab === 'missionGroup') ? tab : 'myMission';
+  };
+  const [activeTab, setActiveTab] = useState<MissionTab>(getInitialActiveTab());
   const [refreshing, setRefreshing] = useState(false);
+
+  /**
+   * activeTab이 유효하지 않은 값일 때 자동으로 'myMission'으로 설정
+   * 나의 미션과 미션 도감 둘 중 아무것도 선택되지 않는 시나리오 방지
+   */
+  useEffect(() => {
+    if (activeTab !== 'myMission' && activeTab !== 'missionGroup') {
+      setActiveTab('myMission');
+    }
+  }, [activeTab]);
 
   // 인증 모달 상태
   const [verificationModalVisible, setVerificationModalVisible] = useState(false);
@@ -150,8 +164,9 @@ export const useMissionScreenContainer = ({
   const [groupMissions, setGroupMissions] = useState<UnifiedMission[]>([]);
   const [groupLoading, setGroupLoading] = useState(false);
   const [selectedGroupMission, setSelectedGroupMission] = useState<UnifiedMission | null>(null);
-  const [currentServerPage, setCurrentServerPage] = useState(0); // 서버 페이지 (0부터 시작)
-  const [totalServerPages, setTotalServerPages] = useState(0); // 전체 서버 페이지 수
+  const [currentClientPage, setCurrentClientPage] = useState(0); // 클라이언트 사이드 페이지 (0부터 시작)
+  const [missionSortBy, setMissionSortBy] = useState<'default' | 'participants' | 'exp' | 'difficulty'>('default'); // 정렬 옵션
+  const [showOnlyParticipated, setShowOnlyParticipated] = useState(false); // 내가 참여한 미션만 보기 (공식 미션 전용)
 
   // 현재 사용자 ID (커스텀 미션 수정 권한 확인용)
   const [currentUserId, setCurrentUserId] = useState<number | null>(null);
@@ -208,6 +223,31 @@ export const useMissionScreenContainer = ({
   const totalMissions = missions.length;
 
   /**
+   * 필터별 미션 개수 계산
+   */
+  const missionCounts = useMemo(() => {
+    const inProgressCount = missions.filter(
+      mission =>
+        mission.status === 'ASSIGNED' ||
+        (mission.status !== 'COMPLETED' && mission.status !== 'PENDING' && !mission.completed)
+    ).length;
+    
+    const pendingVerificationCount = missions.filter(
+      mission => mission.status === 'PENDING'
+    ).length;
+    
+    const completedCount = missions.filter(
+      mission => mission.status === 'COMPLETED' || mission.completed
+    ).length;
+    
+    return {
+      inProgress: inProgressCount,
+      pendingVerification: pendingVerificationCount,
+      completed: completedCount,
+    };
+  }, [missions]);
+
+  /**
    * 페이지 수 계산
    */
   const totalMissionPages = Math.ceil(displayedMissions.length / ITEMS_PER_PAGE);
@@ -255,10 +295,10 @@ export const useMissionScreenContainer = ({
   );
 
   /**
-   * 미션 도감 탭 변경 시 서버 페이지 초기화
+   * 미션 도감 탭 변경 시 클라이언트 사이드 페이지 초기화
    */
   useEffect(() => {
-    setCurrentServerPage(0);
+    setCurrentClientPage(0);
   }, [missionGroupTab]);
 
   /**
@@ -277,15 +317,15 @@ export const useMissionScreenContainer = ({
           const completedMission = missions.find(m => m.mission_id === missionId);
           if (!completedMission) return;
 
-          const alertTitle = result.levelUp ? '레벨업!' : '미션 완료';
-          const alertMessage = result.levelUp
+          const resultAlertTitle = result.levelUp ? '레벨업!' : '미션 완료';
+          const resultAlertMessage = result.levelUp
             ? `축하합니다! 레벨 ${result.newLevel}이 되었습니다!`
             : `+${result.experienceGained} EXP를 획득했습니다!`;
 
           // 모달 표시
           setIsLevelUp(result.levelUp || false);
-          setCompleteModalTitle(alertTitle);
-          setCompleteModalMessage(alertMessage);
+          setCompleteModalTitle(resultAlertTitle);
+          setCompleteModalMessage(resultAlertMessage);
           setCompletedMissionForVerification(completedMission);
           setShowCompleteModal(true);
         }
@@ -331,28 +371,43 @@ export const useMissionScreenContainer = ({
     async (mission: Mission, verificationType: 'COMMUNITY' | 'GPS' | 'TIME') => {
       let userMissionId = mission.user_mission_id;
 
-      // user_mission_id가 없으면 자동으로 미션 할당
+      // user_mission_id가 없으면 찾거나 할당
       if (!userMissionId) {
         try {
-          // 시스템 미션인 경우 미션 할당 API 호출
-          const missionId = parseInt(mission.mission_id, 10);
+          const missionId = parseInt(mission.mission_id.replace(/^custom_/, ''), 10);
           if (isNaN(missionId)) {
             showError('미션 정보가 올바르지 않습니다.', 'MissionScreen.handleVerify');
             return;
           }
 
-          const assignResult = await addSystemMissionToMyMissions({ missionId });
-          if (assignResult.success && assignResult.data) {
-            userMissionId = assignResult.data.id;
-            // 미션 목록 새로고침하여 user_mission_id 업데이트
-            await loadMissions();
-          } else {
-            handleApiError(assignResult, 'MissionScreen.handleVerify');
-            return;
+          // 투두리스트 미션인 경우: getUserMissions에서 찾기
+          if (mission.todoListId) {
+            const { getUserMissions } = await import('../../api/missionApi');
+            const listRes = await getUserMissions({ size: 100 });
+            if (listRes.success && listRes.data?.content) {
+              const found = listRes.data.content.find(um => um.mission?.id === missionId);
+              if (found) {
+                userMissionId = found.id;
+              }
+            }
           }
-        } catch (error) {
+
+          // 여전히 없으면 미션 할당 API 호출
+          if (!userMissionId) {
+            const assignResult = await addSystemMissionToMyMissions({ missionId });
+            if (assignResult.success && assignResult.data) {
+              userMissionId = assignResult.data.id;
+            } else {
+              handleApiError(assignResult, 'MissionScreen.handleVerify');
+              return;
+            }
+          }
+
+          // 미션 목록 새로고침하여 user_mission_id 업데이트
+          await loadMissions();
+        } catch (err) {
           showError(
-            error instanceof Error ? error : new Error('미션을 시작하는 중 문제가 발생했습니다.'),
+            err instanceof Error ? err : new Error('미션을 시작하는 중 문제가 발생했습니다.'),
             'MissionScreen.handleVerify'
           );
           return;
@@ -383,59 +438,9 @@ export const useMissionScreenContainer = ({
           }
           break;
 
-        case 'GPS':
-          // GPS 인증
-          try {
-            if (!userMissionId) {
-              showError('미션 정보가 올바르지 않습니다.', 'MissionScreen.handleVerify.GPS');
-              return;
-            }
-
-            const { status } = await Location.requestForegroundPermissionsAsync();
-            if (status !== 'granted') {
-              showInfo('위치 권한이 필요합니다.', '권한 필요');
-              return;
-            }
-
-            const location = await Location.getCurrentPositionAsync({});
-            const result = await verifyByGps(userMissionId, location.coords.latitude, location.coords.longitude);
-
-            if (result.success) {
-              showSuccess(`+${result.data?.expReward || 50} EXP를 획득했습니다!`, 'GPS 인증 완료');
-              await loadMissions();
-            } else {
-              handleApiError(result, 'MissionScreen.handleVerify.GPS');
-            }
-          } catch (error) {
-            showError(
-              error instanceof Error ? error : new Error('GPS 인증 중 문제가 발생했습니다.'),
-              'MissionScreen.handleVerify.GPS'
-            );
-          }
-          break;
-
-        case 'TIME':
-          // 시간 인증
-          try {
-            if (!userMissionId) {
-              showError('미션 정보가 올바르지 않습니다.', 'MissionScreen.handleVerify.TIME');
-              return;
-            }
-
-            const result = await verifyByTime(userMissionId);
-
-            if (result.success) {
-              showSuccess(`+${result.data?.expReward || 50} EXP를 획득했습니다!`, '시간 인증 완료');
-              await loadMissions();
-            } else {
-              handleApiError(result, 'MissionScreen.handleVerify.TIME');
-            }
-          } catch (error) {
-            showError(
-              error instanceof Error ? error : new Error('시간 인증 중 문제가 발생했습니다.'),
-              'MissionScreen.handleVerify.TIME'
-            );
-          }
+        default:
+          // 모든 미션은 커뮤니티 인증으로 통일 (GPS/TIME은 사용 안 함)
+          showError('인증은 인증글 작성으로 진행해주세요.', 'MissionScreen.handleVerify');
           break;
       }
     },
@@ -473,9 +478,9 @@ export const useMissionScreenContainer = ({
             } else {
               handleApiError(result, 'MissionScreen.handleDeletePhoto');
             }
-          } catch (error) {
+          } catch (err) {
             showError(
-              error instanceof Error ? error : new Error('사진 삭제 중 오류가 발생했습니다.'),
+              err instanceof Error ? err : new Error('사진 삭제 중 오류가 발생했습니다.'),
               'MissionScreen.handleDeletePhoto'
             );
           }
@@ -535,23 +540,25 @@ export const useMissionScreenContainer = ({
   );
 
   /**
-   * 미션 도감 목록 로드 (서버 사이드 페이지네이션 - 한 페이지당 15개)
+   * 미션 도감 목록 로드 (프론트엔드 정렬 방식)
+   * 서버에서는 정렬 없이 모든 데이터를 받아온 후, 프론트엔드에서 정렬 처리
    */
   const loadGroupMissions = useCallback(
     async (page: number = 0) => {
       try {
         setGroupLoading(true);
-        console.log('[MissionScreen] 미션 도감 로딩 시작... (서버 페이지:', page, ', 탭:', missionGroupTab, ')');
+        console.log('[MissionScreen] 미션 도감 로딩 시작... (탭:', missionGroupTab, ', 정렬:', missionSortBy, ')');
 
-        let missions: UnifiedMission[] = [];
-        let totalPages = 1;
-        let totalElements = 0;
+        let loadedGroupMissions: UnifiedMission[] = [];
+
+        // 모든 미션을 한 번에 받아옴 (서버 정렬 없이, 프론트에서 정렬)
+        const loadSize = 1000; // 충분히 큰 값으로 설정하여 모든 미션을 받아옴
 
         // 커스텀 미션 탭일 때: 모든 커스텀 미션 조회
         if (missionGroupTab === 'custom') {
           const customMissionsResult = await getCustomMissions({
-            page,
-            size: MISSION_COLLECTION_PAGE_SIZE,
+            page: 0,
+            size: loadSize,
           });
 
           if (!customMissionsResult.success || !customMissionsResult.data) {
@@ -561,18 +568,13 @@ export const useMissionScreenContainer = ({
             return;
           }
 
-          totalPages = customMissionsResult.data.totalPages || 1;
-          totalElements = customMissionsResult.data.totalElements || 0;
-
-          console.log('[MissionScreen] 커스텀 미션 페이징 정보:', {
-            currentPage: page,
-            totalPages,
-            totalElements,
+          console.log('[MissionScreen] 커스텀 미션 로드 완료:', {
+            totalElements: customMissionsResult.data.totalElements || 0,
             currentPageCount: customMissionsResult.data.content.length,
           });
 
           // 커스텀 미션을 UnifiedMission으로 변환 (모든 미션 표시, 잠금 없음)
-          missions = customMissionsResult.data.content.map(m => ({
+          loadedGroupMissions = customMissionsResult.data.content.map(m => ({
             id: m.id,
             title: m.title, // 커스텀 미션은 항상 제목 표시
             description: m.description, // 커스텀 미션은 항상 설명 표시
@@ -582,6 +584,7 @@ export const useMissionScreenContainer = ({
             expReward: m.expReward || 0,
             badgeDurationDays: m.badgeDurationDays || 0,
             participantCount: m.participantCount,
+            difficultyLevel: m.difficultyLevel,
             isCustom: true,
             creatorId: m.creatorId,
             creatorNickname: m.creatorNickname,
@@ -590,10 +593,10 @@ export const useMissionScreenContainer = ({
             isPublic: m.isPublic,
           }));
         } else {
-          // 공식 미션 탭일 때: 기존 로직 (사용자가 수행한 미션만)
+          // 공식 미션 탭일 때: 모든 공식 미션을 한 번에 받아옴 (서버 정렬 없이)
           const collectionResult = await getMissionCollection({
-            page,
-            size: MISSION_COLLECTION_PAGE_SIZE,
+            page: 0,
+            size: loadSize, // 모든 데이터를 받아옴
           });
 
           if (!collectionResult.success || !collectionResult.data) {
@@ -603,13 +606,8 @@ export const useMissionScreenContainer = ({
             return;
           }
 
-          totalPages = collectionResult.data.totalPages || 1;
-          totalElements = collectionResult.data.totalElements || 0;
-
-          console.log('[MissionScreen] 미션 도감 페이징 정보:', {
-            currentPage: page,
-            totalPages,
-            totalElements,
+          console.log('[MissionScreen] 공식 미션 로드 완료:', {
+            totalElements: collectionResult.data.totalElements || 0,
             currentPageCount: collectionResult.data.content.length,
           });
 
@@ -624,6 +622,7 @@ export const useMissionScreenContainer = ({
             expReward: m.expReward,
             badgeDurationDays: m.badgeDurationDays,
             participantCount: m.participantCount,
+            difficultyLevel: (m as any).difficultyLevel, // MissionCollectionItem에 없지만 백엔드에서 제공할 수 있음
             isCustom: m.missionType === 'CUSTOM',
             creatorId: m.creatorId,
             creatorNickname: m.creatorNickname,
@@ -633,21 +632,17 @@ export const useMissionScreenContainer = ({
           }));
 
           // 공식 미션만 필터링
-          missions = allMissions.filter(m => !m.isCustom);
+          loadedGroupMissions = allMissions.filter(m => !m.isCustom);
         }
 
-        // 서버 페이지 정보 저장
-        setTotalServerPages(totalPages);
+        // 프론트엔드에서 정렬은 sortedGroupMissions useMemo에서 처리
+        console.log('[MissionScreen] 미션 도감 로딩 완료:', loadedGroupMissions.length, '개 (프론트엔드 정렬 적용)');
 
-        console.log('[MissionScreen] 현재 페이지 미션 수:', missions.length);
-        console.log('[MissionScreen] 탭:', missionGroupTab, ', 미션 수:', missions.length);
-
-        setGroupMissions(missions);
-        console.log('[MissionScreen] 미션 도감 로딩 완료:', missions.length, '개');
-      } catch (error) {
-        console.error('[MissionScreen] 미션 도감 로딩 예외 발생:', error);
+        setGroupMissions(loadedGroupMissions);
+      } catch (err) {
+        console.error('[MissionScreen] 미션 도감 로딩 예외 발생:', err);
         showError(
-          error instanceof Error ? error : new Error('미션 도감을 불러오는 중 문제가 발생했습니다.'),
+          err instanceof Error ? err : new Error('미션 도감을 불러오는 중 문제가 발생했습니다.'),
           'MissionScreen.loadGroupMissions'
         );
         setGroupMissions([]);
@@ -671,14 +666,14 @@ export const useMissionScreenContainer = ({
         await loadMissions();
         // 미션 도감도 새로고침 (잠금 해제 반영)
         if (activeTab === 'missionGroup') {
-          await loadGroupMissions(currentServerPage);
+          await loadGroupMissions(0);
         }
         showSuccess('미션이 인증되었습니다!', '인증 완료');
       }
-    } catch (error) {
-      logError('인증 상태 확인 오류', error as Error);
+    } catch (err) {
+      logError('인증 상태 확인 오류', err as Error);
     }
-  }, [selectedMissionForVerification, loadMissions, activeTab, currentServerPage, loadGroupMissions, showSuccess]);
+  }, [selectedMissionForVerification, loadMissions, activeTab, currentClientPage, loadGroupMissions, showSuccess]);
 
   /**
    * 초기 마운트 시 및 activeTab 변경 시 나의 미션 로드
@@ -689,26 +684,179 @@ export const useMissionScreenContainer = ({
     }
   }, [activeTab, loadMissions]); // activeTab이 변경될 때마다 실행
 
+
   /**
-   * 탭 변경 시 미션 도감 로드
+   * 난이도 순서 값 (정렬용)
+   */
+  const getDifficultyOrder = useCallback((difficulty?: 'EASY' | 'MEDIUM' | 'HARD'): number => {
+    switch (difficulty) {
+      case 'EASY':
+        return 1;
+      case 'MEDIUM':
+        return 2;
+      case 'HARD':
+        return 3;
+      default:
+        return 0; // 난이도 없으면 가장 앞에
+    }
+  }, []);
+
+  /**
+   * 정렬된 미션 목록 계산 (프론트엔드 정렬)
+   * 서버에서 받은 모든 데이터를 프론트엔드에서 정렬 처리
+   * 기본순: 수행한 미션을 먼저, 미수행 미션을 나중에 (백엔드 정렬과 동일한 UX 유지)
+   * 
+   * 공식 미션에서 "내가 참여한 미션만 보기" 체크 시:
+   * - 참여한 미션만 필터링
+   * - 잠금된 미션(미참여)은 뒤로 이동
+   */
+  const sortedGroupMissions = useMemo(() => {
+    if (groupMissions.length === 0) {
+      return [];
+    }
+
+    let filtered = [...groupMissions];
+
+    // 공식 미션에서 "내가 참여한 미션만 보기" 체크 시 필터링
+    if (missionGroupTab === 'official' && showOnlyParticipated) {
+      // 참여한 미션만 필터링 (isAttempted === true)
+      filtered = filtered.filter(m => m.isAttempted === true);
+    }
+
+    let sorted = [...filtered];
+
+    // 1단계: 사용자 선택 정렬 옵션 적용 (참여 여부와 무관하게 정렬)
+    if (missionSortBy !== 'default') {
+      sorted.sort((a, b) => {
+        switch (missionSortBy) {
+          case 'participants':
+            // 참여자 수 내림차순 (많은 것부터 위로)
+            const aParticipants = Number(a.participantCount) || 0;
+            const bParticipants = Number(b.participantCount) || 0;
+            
+            if (bParticipants !== aParticipants) {
+              return bParticipants - aParticipants;
+            }
+            // 참여자 수가 같으면 ID로 정렬 (안정적인 정렬)
+            return b.id - a.id;
+          
+          case 'exp':
+            // EXP 내림차순 (높은 것부터 위로)
+            const aExp = Number(a.expReward) || 0;
+            const bExp = Number(b.expReward) || 0;
+            
+            if (bExp !== aExp) {
+              return bExp - aExp;
+            }
+            // EXP가 같으면 ID로 정렬 (안정적인 정렬)
+            return b.id - a.id;
+          
+          case 'difficulty':
+            // 난이도 순서: EASY(1) < MEDIUM(2) < HARD(3)
+            const aDifficultyOrder = getDifficultyOrder(a.difficultyLevel);
+            const bDifficultyOrder = getDifficultyOrder(b.difficultyLevel);
+            
+            if (aDifficultyOrder !== bDifficultyOrder) {
+              return aDifficultyOrder - bDifficultyOrder;
+            }
+            // 난이도가 같으면 ID로 정렬 (안정적인 정렬)
+            return b.id - a.id;
+          
+          default:
+            return 0;
+        }
+      });
+    }
+
+    // 2단계: 공식 미션에서 "내가 참여한 미션만 보기"가 체크되지 않은 경우, 잠금된 미션을 뒤로 이동
+    // (체크된 경우는 이미 필터링되어 있으므로 이 단계는 건너뜀)
+    if (missionGroupTab === 'official' && !showOnlyParticipated) {
+      sorted.sort((a, b) => {
+        // 참여한 미션(isAttempted=true)을 먼저, 잠금된 미션(isAttempted=false)을 뒤로
+        if (a.isAttempted !== b.isAttempted) {
+          return a.isAttempted ? -1 : 1;
+        }
+        // 같은 그룹 내에서는 기존 정렬 유지 (이미 정렬된 상태)
+        return 0;
+      });
+    } else if (missionSortBy === 'default') {
+      // 기본순: 수행한 미션을 먼저, 미수행 미션을 나중에 배치
+      sorted.sort((a, b) => {
+        // 수행한 미션(isAttempted=true)을 먼저
+        if (a.isAttempted !== b.isAttempted) {
+          return a.isAttempted ? -1 : 1;
+        }
+        // 같은 그룹 내에서는 ID 내림차순 (원본 순서 유지)
+        return b.id - a.id;
+      });
+    }
+    
+    return sorted;
+  }, [groupMissions, missionSortBy, getDifficultyOrder, missionGroupTab, showOnlyParticipated]);
+
+  /**
+   * 클라이언트 사이드 페이지네이션 계산
+   * 정렬된 미션 목록을 페이지별로 나눔
+   */
+  const paginatedGroupMissions = useMemo(() => {
+    const start = currentClientPage * MISSION_COLLECTION_PAGE_SIZE;
+    const end = start + MISSION_COLLECTION_PAGE_SIZE;
+    return sortedGroupMissions.slice(start, end);
+  }, [sortedGroupMissions, currentClientPage]);
+
+  /**
+   * 클라이언트 사이드 전체 페이지 수 계산
+   */
+  const totalClientPages = useMemo(() => {
+    return Math.ceil(sortedGroupMissions.length / MISSION_COLLECTION_PAGE_SIZE);
+  }, [sortedGroupMissions]);
+
+  /**
+   * 커스텀 미션 탭에서는 EXP순 정렬 옵션 제거
+   * 커스텀 미션 탭일 때 EXP 정렬이 선택되어 있으면 기본순으로 변경
+   */
+  useEffect(() => {
+    if (missionGroupTab === 'custom' && missionSortBy === 'exp') {
+      setMissionSortBy('default');
+    }
+  }, [missionGroupTab, missionSortBy]);
+
+  /**
+   * 탭 변경 시 미션 도감 초기화 및 로드
    */
   useEffect(() => {
     if (activeTab === 'missionGroup') {
-      setCurrentServerPage(0); // 서버 페이지 초기화
+      setCurrentClientPage(0); // 클라이언트 사이드 페이지 초기화
       setSelectedGroupMission(null);
+      setMissionSortBy('default'); // 정렬 초기화
+      setShowOnlyParticipated(false); // 체크박스 초기화
+      setGroupMissions([]); // 기존 데이터 초기화
       loadGroupMissions(0);
     }
   }, [activeTab, missionGroupTab, loadGroupMissions]);
 
   /**
-   * 서버 페이지 변경 시 미션 도감 로드
+   * 정렬 변경 또는 필터 변경 시 클라이언트 사이드 페이지 초기화
+   * 정렬은 sortedGroupMissions useMemo에서 자동으로 처리되므로 서버 재요청 불필요
    */
   useEffect(() => {
-    if (activeTab === 'missionGroup' && currentServerPage >= 0) {
-      loadGroupMissions(currentServerPage);
+    if (activeTab === 'missionGroup') {
+      // 정렬 변경 또는 필터 변경 시 클라이언트 사이드 페이지를 첫 페이지로 초기화
+      setCurrentClientPage(0);
+    }
+  }, [missionSortBy, showOnlyParticipated, activeTab]);
+
+  /**
+   * 탭 변경 시 미션 도감 로드 (초기 로드만)
+   * 페이지 변경은 클라이언트 사이드에서 처리하므로 서버 재요청 불필요
+   */
+  useEffect(() => {
+    if (activeTab === 'missionGroup' && groupMissions.length === 0) {
+      // 초기 로드만 수행 (이미 데이터가 있으면 재요청하지 않음)
+      loadGroupMissions(0);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentServerPage, activeTab]);
+  }, [activeTab, missionGroupTab]);
 
   /**
    * 화면 포커스 시 인증 상태 확인 및 미션 목록 새로고침
@@ -722,7 +870,7 @@ export const useMissionScreenContainer = ({
         loadMissions();
       } else if (activeTab === 'missionGroup') {
         // 미션 도감도 새로고침 (미션 완료 후 반영)
-        loadGroupMissions(currentServerPage);
+        loadGroupMissions(0);
       }
       // 인증 상태 확인
       if (selectedMissionForVerification) {
@@ -730,7 +878,7 @@ export const useMissionScreenContainer = ({
       }
     });
     return unsubscribe;
-  }, [navigation, selectedMissionForVerification, checkVerificationOnReturn, activeTab, loadMissions, currentServerPage, loadGroupMissions, currentMissionPage]);
+  }, [navigation, selectedMissionForVerification, checkVerificationOnReturn, activeTab, loadMissions, currentClientPage, loadGroupMissions, currentMissionPage]);
 
   /**
    * 미션 목록 로드 후 저장된 페이지 위치로 복원
@@ -871,6 +1019,13 @@ export const useMissionScreenContainer = ({
   }, []);
 
   /**
+   * 미션 정렬 변경 핸들러
+   */
+  const handleMissionSortChange = useCallback((sortBy: 'default' | 'participants' | 'exp' | 'difficulty') => {
+    setMissionSortBy(sortBy);
+  }, []);
+
+  /**
    * 미션 그룹 탭 변경 핸들러
    */
   const handleMissionGroupTabChange = useCallback((key: string) => {
@@ -878,10 +1033,17 @@ export const useMissionScreenContainer = ({
   }, []);
 
   /**
-   * 서버 페이지 변경 핸들러
+   * 클라이언트 사이드 페이지 변경 핸들러
    */
-  const handleServerPageChange = useCallback((page: number) => {
-    setCurrentServerPage(page);
+  const handleClientPageChange = useCallback((page: number) => {
+    setCurrentClientPage(page);
+  }, []);
+
+  /**
+   * "내가 참여한 미션만 보기" 체크박스 변경 핸들러
+   */
+  const handleShowOnlyParticipatedChange = useCallback((value: boolean) => {
+    setShowOnlyParticipated(value);
   }, []);
 
   return {
@@ -892,6 +1054,7 @@ export const useMissionScreenContainer = ({
     displayedMissions,
     completedMissions,
     totalMissions,
+    missionCounts,
     // Filters & Tabs
     selectedFilter,
     activeTab,
@@ -914,13 +1077,17 @@ export const useMissionScreenContainer = ({
     completedMissionForVerification,
     isLevelUp,
     // Mission Group
-    groupMissions,
+    groupMissions: paginatedGroupMissions,
     groupLoading,
     selectedGroupMission,
     setSelectedGroupMission,
-    currentServerPage,
-    totalServerPages,
+    currentClientPage,
+    totalClientPages,
     currentUserId,
+    missionSortBy,
+    handleMissionSortChange,
+    showOnlyParticipated,
+    handleShowOnlyParticipatedChange,
     // Pagination
     currentMissionPage,
     totalMissionPages,
@@ -942,7 +1109,7 @@ export const useMissionScreenContainer = ({
     handleTabChange,
     handleFilterChange,
     handleMissionGroupTabChange,
-    handleServerPageChange,
+    handleClientPageChange,
     onRefresh,
     onMissionPageChange,
     goToMissionPage,

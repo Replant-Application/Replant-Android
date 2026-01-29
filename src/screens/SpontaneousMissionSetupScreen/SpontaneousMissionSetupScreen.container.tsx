@@ -317,8 +317,8 @@ export const useSpontaneousMissionSetupScreenContainer = ({
                 if (safeNavigation && typeof safeNavigation.goBack === 'function') {
                   safeNavigation.goBack();
                 }
-              } catch (error) {
-                logError('뒤로가기 실패', error as Error);
+              } catch (err) {
+                logError('뒤로가기 실패', err as Error);
               }
             },
           });

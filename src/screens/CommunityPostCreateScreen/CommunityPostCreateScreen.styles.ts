@@ -3,7 +3,7 @@
  * 커뮤니티 게시글 작성 화면의 모든 스타일 정의
  */
 
-import { StyleSheet, Platform } from 'react-native';
+import { StyleSheet } from 'react-native';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
 import { createTextStyle, createTitleStyle, createButtonTextStyle } from '../../utils/styles/textStyles';
 import { inputStyles } from '../../utils/styles/commonStyles';

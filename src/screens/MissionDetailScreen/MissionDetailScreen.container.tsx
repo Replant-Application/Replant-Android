@@ -1,6 +1,6 @@
 /**
  * MissionDetailScreen 비즈니스 로직
- * 미션 상세 화면: 미션 정보 조회, 리뷰 조회/작성, 뱃지 확인
+ * 미션 상세 화면: 미션 정보 조회, 리뷰 조회/작성, 배지 확인
  */
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
@@ -92,7 +92,7 @@ export const useMissionDetailScreenContainer = ({ navigation, route }: MissionDe
   const [totalPages, setTotalPages] = useState(0);
   const [totalReviews, setTotalReviews] = useState(0);
 
-  // 뱃지 확인 및 후기 작성 상태
+  // 배지 확인 및 후기 작성 상태
   const [hasBadge, setHasBadge] = useState(false);
   const [hasWrittenReview, setHasWrittenReview] = useState(false);
   const [reviewContent, setReviewContent] = useState('');
@@ -189,7 +189,7 @@ export const useMissionDetailScreenContainer = ({ navigation, route }: MissionDe
   );
 
   /**
-   * 뱃지 소유 여부 확인
+   * 배지 소유 여부 확인
    */
   const checkBadgeOwnership = useCallback(async () => {
     if (!missionId) return;
@@ -203,7 +203,7 @@ export const useMissionDetailScreenContainer = ({ navigation, route }: MissionDe
       const result = await getMyBadges();
       if (result.success && result.data) {
         const badges = result.data.badges || [];
-        // 해당 미션에 대한 유효한 뱃지가 있는지 확인
+        // 해당 미션에 대한 유효한 배지가 있는지 확인
         const hasMissionBadge = badges.some((badge: Badge) => {
           if (isCustomMission) {
             // 커스텀 미션: customMission.id와 비교
@@ -216,7 +216,7 @@ export const useMissionDetailScreenContainer = ({ navigation, route }: MissionDe
         setHasBadge(hasMissionBadge);
       }
     } catch (error) {
-      console.error('뱃지 확인 실패:', error);
+      console.error('배지 확인 실패:', error);
     }
   }, [missionId]);
 
@@ -249,8 +249,8 @@ export const useMissionDetailScreenContainer = ({ navigation, route }: MissionDe
         // 리뷰 목록 새로고침
         await loadReviews(0, currentUserId);
       } else {
-        if (result.error?.includes('뱃지') || result.error?.includes('badge')) {
-          showError(new Error('이 미션을 완료하고 뱃지를 획득해야 후기를 작성할 수 있습니다.'), 'MissionDetailScreen.handleSubmitReview');
+        if (result.error?.includes('배지') || result.error?.includes('badge')) {
+          showError(new Error('이 미션을 완료하고 배지를 획득해야 후기를 작성할 수 있습니다.'), 'MissionDetailScreen.handleSubmitReview');
         } else {
           handleApiError(result, 'MissionDetailScreen.handleSubmitReview');
         }

@@ -7,7 +7,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { getActiveTodoLists, getTodoLists, canCreateNewTodoList } from '../../api/todolistApi';
 import { TodoList, CanCreateResponse } from '../../types/todolist';
 import { SCREEN_NAMES } from '../../utils/constants';
-import { normalizeDate } from '../../utils/dateUtils';
+import { filterTodayActiveTodoLists } from '../../utils/todolistUtils';
 
 interface TodoListScreenContainerProps {
   navigation: any;
@@ -34,42 +34,16 @@ export const useTodoListScreenContainer = ({ navigation, route }: TodoListScreen
         canCreateNewTodoList(),
       ]);
 
-      console.log('[TodoListScreen] getActiveTodoLists 응답:', JSON.stringify(activeResult, null, 2));
-
       if (activeResult.success && activeResult.data) {
-        console.log('[TodoListScreen] activeResult.data:', activeResult.data);
-        console.log('[TodoListScreen] activeResult.data 타입:', Array.isArray(activeResult.data) ? '배열' : typeof activeResult.data);
         const allActiveLists = Array.isArray(activeResult.data) ? activeResult.data : [];
 
         // 오늘 날짜인 투두리스트만 "진행중"에 표시
         // 과거 날짜의 미완료 투두리스트는 제외
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-
-        const todayActiveLists = allActiveLists.filter(todoList => {
-          if (!todoList.createdAt) return false;
-          
-          // 날짜 정규화 (배열 형태 처리)
-          const normalizedDate = normalizeDate(todoList.createdAt);
-          if (!normalizedDate) return false;
-          
-          const createdDate = new Date(normalizedDate);
-          if (isNaN(createdDate.getTime())) {
-            console.warn('[TodoListScreen] 잘못된 날짜 형식:', todoList.createdAt);
-            return false;
-          }
-          createdDate.setHours(0, 0, 0, 0);
-
-          // 오늘 날짜이고 완료되지 않은 투두리스트만
-          const isToday = createdDate.getTime() === today.getTime();
-          const isNotCompleted = todoList.status === 'ACTIVE' && todoList.completedCount < todoList.totalCount;
-
-          return isToday && isNotCompleted;
-        });
+        const todayActiveLists = filterTodayActiveTodoLists(allActiveLists, 'TodoListScreen');
 
         setActiveTodoLists(todayActiveLists);
       } else {
-        console.log('[TodoListScreen] activeResult 실패:', activeResult.error);
+        console.error('[TodoListScreen] activeResult 실패:', activeResult.error);
       }
 
       if (allResult.success && allResult.data) {
@@ -113,17 +87,30 @@ export const useTodoListScreenContainer = ({ navigation, route }: TodoListScreen
 
   /**
    * route.params.refresh가 있으면 데이터 새로고침
+   * route.params.activeTab이 있으면 해당 탭으로 복원
    */
   useEffect(() => {
     if (route?.params?.refresh) {
       // 백엔드 트랜잭션이 완료될 시간을 주기 위해 약간의 딜레이 추가
       const timer = setTimeout(() => {
-        console.log('[TodoListScreen] refresh 플래그 감지, 데이터 새로고침');
         loadData();
       }, 500);
       return () => clearTimeout(timer);
     }
   }, [route?.params?.refresh, loadData]);
+
+  /**
+   * route.params.activeTab이 있으면 해당 탭으로 복원
+   */
+  useEffect(() => {
+    if (route?.params?.activeTab) {
+      const tab = route.params.activeTab as 'active' | 'completed' | 'incomplete';
+      if (tab === 'active' || tab === 'completed' || tab === 'incomplete') {
+        console.log('[TodoListScreen] activeTab 복원:', tab);
+        setActiveTab(tab);
+      }
+    }
+  }, [route?.params?.activeTab]);
 
   /**
    * 새로고침 핸들러
@@ -146,9 +133,12 @@ export const useTodoListScreenContainer = ({ navigation, route }: TodoListScreen
    */
   const handleTodoListPress = useCallback(
     (todoList: TodoList) => {
-      navigation.navigate(SCREEN_NAMES.TODO_LIST_DETAIL, { todoListId: todoList.id });
+      navigation.navigate(SCREEN_NAMES.TODO_LIST_DETAIL, { 
+        todoListId: todoList.id,
+        activeTab: activeTab, // 현재 활성화된 탭 전달
+      });
     },
-    [navigation]
+    [navigation, activeTab]
   );
 
   /**

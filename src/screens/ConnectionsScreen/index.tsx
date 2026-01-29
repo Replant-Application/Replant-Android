@@ -194,7 +194,7 @@ const ConnectionsScreen: React.FC<ConnectionsScreenProps> = ({ navigation }) => 
         title="인연"
         leftButton={
           <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Text style={{ fontSize: 24 }}>←</Text>
+            <Text style={styles.backButtonText}>←</Text>
           </TouchableOpacity>
         }
       />

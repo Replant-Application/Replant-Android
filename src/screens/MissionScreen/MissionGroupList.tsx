@@ -3,7 +3,7 @@
  * 공식/커스텀 미션 목록을 표시하는 컴포넌트
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, Image, ScrollView, RefreshControl } from 'react-native';
 import { colors } from '../../utils/designTokens';
 import { EmptyState } from '../../components/ui';
@@ -21,6 +21,7 @@ interface UnifiedMission {
   expReward: number;
   badgeDurationDays: number;
   participantCount?: number;
+  difficultyLevel?: 'EASY' | 'MEDIUM' | 'HARD';
   isCustom: boolean;
   creatorId?: number;
   creatorNickname?: string;
@@ -41,10 +42,14 @@ interface MissionGroupListProps {
   currentServerPage: number;
   totalServerPages: number;
   refreshing?: boolean;
+  sortBy?: 'default' | 'participants' | 'exp' | 'difficulty';
+  showOnlyParticipated?: boolean; // 내가 참여한 미션만 보기 (공식 미션 전용)
   onMissionSelect: (mission: UnifiedMission | null) => void;
   onServerPageChange: (page: number) => void;
   onNavigateToCreate: () => void;
   onRefresh?: () => void;
+  onSortChange?: (sortBy: 'default' | 'participants' | 'exp' | 'difficulty') => void;
+  onShowOnlyParticipatedChange?: (value: boolean) => void; // 체크박스 변경 핸들러
   getVerificationTypeLabel: (type?: string) => string;
   getVerificationTypeIcon: (type?: string) => any;
   getMissionCategoryLabel: (category?: MissionCategory) => string;
@@ -58,44 +63,186 @@ const MissionGroupList: React.FC<MissionGroupListProps> = ({
   currentServerPage,
   totalServerPages,
   refreshing = false,
+  sortBy = 'default',
+  showOnlyParticipated = false,
   onMissionSelect,
   onServerPageChange,
   onNavigateToCreate,
   onRefresh,
+  onSortChange,
+  onShowOnlyParticipatedChange,
   getVerificationTypeLabel,
   getVerificationTypeIcon,
   getMissionCategoryLabel,
 }) => {
+  const [showSortDropdown, setShowSortDropdown] = useState(false);
+
   return (
-    <ScrollView
-      style={styles.content}
-      contentContainerStyle={styles.scrollContent}
-      refreshControl={
-        onRefresh ? (
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            colors={[colors.primary[500]]}
-            tintColor={colors.primary[500]}
-          />
-        ) : undefined
-      }
-    >
-      {/* 커스텀 미션 탭: 미션 만들기 버튼 */}
-      {missionGroupTab === 'custom' && (
-        <TouchableOpacity
-          style={styles.createMissionButton}
-          onPress={onNavigateToCreate}
-          activeOpacity={0.7}
-        >
-          <Image
-            source={require('../../assets/images/goal.png')}
-            style={styles.createMissionIcon}
-            resizeMode="contain"
-            accessibilityLabel="미션 만들기 아이콘"
-          />
-          <Text style={styles.createMissionText}>커스텀 미션 만들기</Text>
-        </TouchableOpacity>
+    <View style={styles.container}>
+      <ScrollView
+        style={styles.content}
+        contentContainerStyle={styles.scrollContent}
+        refreshControl={
+          onRefresh ? (
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              colors={[colors.primary[500]]}
+              tintColor={colors.primary[500]}
+            />
+          ) : undefined
+        }
+        onScrollBeginDrag={() => {
+          // 스크롤 시작 시 드롭다운 닫기
+          if (showSortDropdown) {
+            setShowSortDropdown(false);
+          }
+        }}
+      >
+      {/* 필터 및 정렬 컨트롤 (같은 가로 라인) */}
+      {missions.length > 0 && (
+        <View style={styles.filterSortRow}>
+          {/* 공식 미션: "참여한 미션" 체크박스 */}
+          {missionGroupTab === 'official' ? (
+            <TouchableOpacity
+              style={styles.filterCheckbox}
+              onPress={() => onShowOnlyParticipatedChange?.(!showOnlyParticipated)}
+              activeOpacity={0.7}
+              accessibilityRole="checkbox"
+              accessibilityLabel="참여한 미션"
+              accessibilityState={{ checked: showOnlyParticipated }}
+            >
+              <View style={[styles.checkbox, showOnlyParticipated && styles.checkboxChecked]}>
+                {showOnlyParticipated && (
+                  <Text style={styles.checkboxCheckmark}>✓</Text>
+                )}
+              </View>
+              <Text style={styles.filterCheckboxLabel}>참여한 미션</Text>
+            </TouchableOpacity>
+          ) : (
+            <View style={styles.filterCheckboxPlaceholder} />
+          )}
+
+          {/* 정렬 버튼 */}
+          <View style={styles.sortButtonWrapper}>
+            <TouchableOpacity
+              style={styles.sortButton}
+              onPress={() => setShowSortDropdown(!showSortDropdown)}
+              activeOpacity={0.7}
+              accessibilityRole="button"
+              accessibilityLabel="정렬 옵션"
+            >
+              <Text style={styles.sortButtonText}>
+                {sortBy === 'participants' ? '참여순' : 
+                 (sortBy === 'exp' && missionGroupTab === 'official') ? 'EXP순' : 
+                 sortBy === 'difficulty' ? '난이도순' : '기본순'}
+              </Text>
+              <Text style={styles.sortButtonArrow}>↑↓</Text>
+            </TouchableOpacity>
+          
+          {/* 드롭다운 메뉴 */}
+          {showSortDropdown && (
+            <View style={styles.sortDropdown}>
+              <TouchableOpacity
+                style={[
+                  styles.sortDropdownItem,
+                  sortBy === 'default' && styles.sortDropdownItemSelected,
+                ]}
+                onPress={() => {
+                  onSortChange?.('default');
+                  setShowSortDropdown(false);
+                }}
+                activeOpacity={0.7}
+              >
+                <Text
+                  style={[
+                    styles.sortDropdownItemText,
+                    sortBy === 'default' && styles.sortDropdownItemTextSelected,
+                  ]}
+                >
+                  기본순
+                </Text>
+                {sortBy === 'default' && (
+                  <Text style={styles.sortDropdownCheck}>✓</Text>
+                )}
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[
+                  styles.sortDropdownItem,
+                  sortBy === 'participants' && styles.sortDropdownItemSelected,
+                ]}
+                onPress={() => {
+                  onSortChange?.('participants');
+                  setShowSortDropdown(false);
+                }}
+                activeOpacity={0.7}
+              >
+                <Text
+                  style={[
+                    styles.sortDropdownItemText,
+                    sortBy === 'participants' && styles.sortDropdownItemTextSelected,
+                  ]}
+                >
+                  참여순
+                </Text>
+                {sortBy === 'participants' && (
+                  <Text style={styles.sortDropdownCheck}>✓</Text>
+                )}
+              </TouchableOpacity>
+              {missionGroupTab === 'official' && (
+                <TouchableOpacity
+                  style={[
+                    styles.sortDropdownItem,
+                    sortBy === 'exp' && styles.sortDropdownItemSelected,
+                  ]}
+                  onPress={() => {
+                    onSortChange?.('exp');
+                    setShowSortDropdown(false);
+                  }}
+                  activeOpacity={0.7}
+                >
+                  <Text
+                    style={[
+                      styles.sortDropdownItemText,
+                      sortBy === 'exp' && styles.sortDropdownItemTextSelected,
+                    ]}
+                  >
+                    EXP순
+                  </Text>
+                  {sortBy === 'exp' && (
+                    <Text style={styles.sortDropdownCheck}>✓</Text>
+                  )}
+                </TouchableOpacity>
+              )}
+              {missionGroupTab === 'official' && (
+                <TouchableOpacity
+                  style={[
+                    styles.sortDropdownItem,
+                    sortBy === 'difficulty' && styles.sortDropdownItemSelected,
+                  ]}
+                  onPress={() => {
+                    onSortChange?.('difficulty');
+                    setShowSortDropdown(false);
+                  }}
+                  activeOpacity={0.7}
+                >
+                  <Text
+                    style={[
+                      styles.sortDropdownItemText,
+                      sortBy === 'difficulty' && styles.sortDropdownItemTextSelected,
+                    ]}
+                  >
+                    난이도순
+                  </Text>
+                  {sortBy === 'difficulty' && (
+                    <Text style={styles.sortDropdownCheck}>✓</Text>
+                  )}
+                </TouchableOpacity>
+              )}
+            </View>
+          )}
+          </View>
+        </View>
       )}
 
       {missions.length === 0 ? (
@@ -166,6 +313,11 @@ const MissionGroupList: React.FC<MissionGroupListProps> = ({
 
                     <View style={styles.groupMissionFooter}>
                       <View style={styles.groupMissionStats}>
+                        <View style={styles.groupStatItem}>
+                          <Text style={styles.groupStatText}>
+                            참여 {mission.participantCount || 0}명
+                          </Text>
+                        </View>
                         {mission.expReward > 0 && (
                           <View style={styles.groupStatItem}>
                             <Image
@@ -177,17 +329,14 @@ const MissionGroupList: React.FC<MissionGroupListProps> = ({
                             <Text style={styles.groupStatText}>{mission.expReward} EXP</Text>
                           </View>
                         )}
-                        <View style={styles.groupStatItem}>
-                          <Image
-                            source={require('../../assets/images/high-five.png')}
-                            style={styles.groupStatIcon}
-                            resizeMode="contain"
-                            accessibilityLabel="참여자 아이콘"
-                          />
-                          <Text style={styles.groupStatText}>
-                            참여 {mission.participantCount || 0}명
-                          </Text>
-                        </View>
+                        {missionGroupTab === 'official' && mission.difficultyLevel && (
+                          <View style={styles.groupStatItem}>
+                            <Text style={styles.groupStatText}>
+                              {mission.difficultyLevel === 'EASY' ? '쉬움' : 
+                               mission.difficultyLevel === 'MEDIUM' ? '보통' : '어려움'}
+                            </Text>
+                          </View>
+                        )}
                       </View>
                     </View>
                   </TouchableOpacity>
@@ -252,12 +401,33 @@ const MissionGroupList: React.FC<MissionGroupListProps> = ({
                   resizeMode="contain"
                   accessibilityLabel="다음 서버 페이지"
                 />
-              </TouchableOpacity>
-            </View>
+            </TouchableOpacity>
+          </View>
           )}
         </>
       )}
-    </ScrollView>
+      </ScrollView>
+
+      {/* 커스텀 미션 탭: FAB 버튼 */}
+      {missionGroupTab === 'custom' && (
+        <TouchableOpacity
+          style={styles.fab}
+          onPress={onNavigateToCreate}
+          activeOpacity={0.8}
+          accessibilityRole="button"
+          accessibilityLabel="커스텀 미션 만들기"
+          accessibilityHint="새 커스텀 미션을 만듭니다"
+        >
+          <Image
+            source={require('../../assets/images/pencil.png')}
+            style={styles.fabIconImage}
+            resizeMode="contain"
+            accessibilityLabel="커스텀 미션 만들기 아이콘"
+            accessibilityElementsHidden={true}
+          />
+        </TouchableOpacity>
+      )}
+    </View>
   );
 };
 

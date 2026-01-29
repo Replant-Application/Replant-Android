@@ -56,6 +56,28 @@ export interface Colors {
     anxious: string;
     tired: string;
   };
+  overlay: {
+    dark: string;
+    medium: string;
+    light: string;
+    white: {
+      heavy: string;
+      medium: string;
+      light: string;
+    };
+  };
+  semantic: {
+    fg: {
+      brand: string;
+      error: string;
+      inverse: string;
+    };
+    bg: {
+      brand: string;
+      overlay: string;
+    };
+  };
+  brandAccent: string;
   black: string;
   white: string;
 }

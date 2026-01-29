@@ -64,8 +64,11 @@ android/local.properties
 # Rules
 .cursor/rules/
 
-
 # Keystore files
 *.keystore
 !android/app/debug.keystore
 keystore_base64.txt
+
+# Docs and Scripts
+docs/
+scripts/

@@ -165,7 +165,7 @@ const MissionSetCreateScreen: React.FC<MissionSetCreateScreenProps> = ({ navigat
           </View>
 
           {/* 여백 */}
-          <View style={{ height: 100 }} />
+          <View style={styles.spacer} />
         </ScrollView>
 
         {/* 생성 버튼 */}

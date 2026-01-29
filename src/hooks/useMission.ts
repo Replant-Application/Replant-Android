@@ -18,16 +18,15 @@ import { deleteMissionPhoto as deleteMissionPhotoService } from '../services/mis
 import { useUser } from '../contexts/UserContext';
 import { logError } from '../utils/logger';
 import { sortMissionsByTitle } from '../utils/missionUtils';
-import { Mission, MissionData, UseMissionReturn, MissionCompletionResult, ServiceResult, ExperienceResult, MissionCategory } from '../types';
+import { Mission, MissionData, UseMissionReturn, MissionCompletionResult, ServiceResult, ExperienceResult, MissionCategory, MissionStatus } from '../types';
 import {
-  getUserMissions,
   createCustomMission as createCustomMissionApi,
   updateCustomMission as updateCustomMissionApi,
   deleteCustomMission as deleteCustomMissionApi,
   Mission as ApiMission,
-  UserMission,
   MissionCategory as ApiMissionCategory,
   CreateMissionRequest,
+  UserMission,
 } from '../api/missionApi';
 import { uploadMissionVerifyPhoto } from '../api/fileApi';
 
@@ -73,38 +72,56 @@ const transformApiMission = (apiMission: ApiMission): Mission => {
 };
 
 /**
- * 백엔드 UserMission을 로컬 미션 형식으로 변환
+ * UserMission을 Mission 타입으로 변환
+ * getUserMissions API 응답을 미션 탭에서 사용할 수 있도록 변환
  */
-const transformUserMission = (userMission: UserMission): Mission => {
-  // mission 필드 사용 (통합됨)
-  const mission = userMission.mission || userMission.customMission;
-  if (!mission) {
-    throw new Error('UserMission has no mission data');
+const transformUserMissionToMission = (userMission: UserMission): Mission | null => {
+  try {
+    // mission 필드 사용 (통합됨)
+    // missionType이 OFFICIAL이면 mission, CUSTOM이면 customMission 사용
+    const mission = userMission.mission || userMission.customMission;
+    if (!mission) {
+      console.warn('[transformUserMissionToMission] UserMission에 mission 데이터가 없습니다:', userMission);
+      return null;
+    }
+
+    const isCustom = userMission.missionType === 'CUSTOM';
+    
+    // UserMission의 status를 그대로 사용 (ASSIGNED, PENDING, COMPLETED 등)
+    const status: MissionStatus = userMission.status;
+    
+    // completed는 COMPLETED 상태일 때만 true
+    const completed = userMission.status === 'COMPLETED';
+    
+    // verified는 COMPLETED 상태일 때만 true (인증 완료)
+    // PENDING 상태는 인증 대기 중이므로 verified = false
+    const verified = userMission.status === 'COMPLETED';
+
+    return {
+      id: userMission.id,
+      mission_id: isCustom ? `custom_${mission.id}` : mission.id.toString(),
+      user_mission_id: userMission.id,
+      title: mission.title,
+      description: mission.description || '',
+      emoji: getMissionEmoji(mission.title),
+      experience: isCustom ? 0 : (mission.expReward || 10),
+      category_id: (mission.category?.toLowerCase() as MissionCategory) || 'growth',
+      category: mission.category || 'DAILY_LIFE',
+      missionType: userMission.missionType,
+      status,
+      difficulty: 'medium' as const,
+      completed,
+      completed_at: userMission.completedAt || (completed ? userMission.verification?.verifiedAt : undefined),
+      created_at: userMission.assignedAt,
+      due_date: userMission.dueDate,
+      is_custom: isCustom,
+      verification_type: mission.verificationType || 'COMMUNITY',
+      verified,
+    };
+  } catch (e) {
+    console.error('[transformUserMissionToMission] 변환 실패:', e);
+    return null;
   }
-
-  const isCustom = userMission.missionType === 'CUSTOM';
-
-  return {
-    id: userMission.id,
-    mission_id: isCustom ? `custom_${mission.id}` : mission.id.toString(),
-    user_mission_id: userMission.id,
-    title: mission.title,
-    description: mission.description,
-    emoji: getMissionEmoji(mission.title),
-    experience: isCustom ? 0 : (mission.expReward || 10),
-    category_id: 'growth',
-    category: mission.category || 'DAILY_LIFE',
-    missionType: userMission.missionType,
-    status: userMission.status,
-    difficulty: 'medium' as const,
-    completed: userMission.status === 'COMPLETED',
-    completed_at: userMission.status === 'COMPLETED' ? userMission.verification?.verifiedAt : undefined,
-    created_at: userMission.assignedAt,
-    due_date: userMission.dueDate,
-    is_custom: isCustom,
-    verification_type: mission.verificationType || 'COMMUNITY',
-    verified: userMission.status === 'COMPLETED',
-  };
 };
 
 export const useMission = (
@@ -115,9 +132,8 @@ export const useMission = (
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  // 미션 데이터 로드 (백엔드 API 사용)
-  // GET /api/missions/my: 오늘 할당된 미션만 조회 (투두리스트용)
-  // 캘린더용 과거 미션 조회는 /api/missions/my/calendar/date 또는 /range 사용
+  // 미션 데이터 로드 (모든 상태의 미션 가져오기)
+  // 진행중(ASSIGNED), 인증대기(PENDING), 완료(COMPLETED) 상태의 모든 미션 조회
   const loadMissions = useCallback(async (): Promise<void> => {
     if (!currentNickname) return;
 
@@ -127,6 +143,7 @@ export const useMission = (
 
       const allMissions: Mission[] = [];
 
+<<<<<<< HEAD
       // 오늘 할당된 미션만 불러오기 (투두리스트에 추가된 미션들)
       // 백엔드 API: /api/missions/my는 assignedAt이 오늘인 미션만 반환
       // 상태: ASSIGNED, PENDING, COMPLETED 모두 포함 (오늘 할당된 것만)
@@ -161,18 +178,17 @@ export const useMission = (
             // 미션 데이터가 없는 경우 스킵
             logError('UserMission 변환 실패', e as Error, { userMissionId: um.id });
           }
-        });
-        
-        // 디버깅: 완료된 미션 수 확인
-        const completedCount = userMissionsResult.data.content.filter(
-          um => um.status === 'COMPLETED'
-        ).length;
-        console.log('[useMission] 로드된 미션:', {
-          total: userMissionsResult.data.content.length,
-          completed: completedCount,
-          assigned: userMissionsResult.data.content.filter(um => um.status === 'ASSIGNED').length,
-        });
+        }
       }
+
+      console.log('[useMission] 로드된 미션:', {
+        totalCount: allMissions.length,
+        completed: allMissions.filter(m => m.status === 'COMPLETED').length,
+        pending: allMissions.filter(m => m.status === 'PENDING').length,
+        assigned: allMissions.filter(m => m.status === 'ASSIGNED').length,
+        expired: allMissions.filter(m => m.status === 'EXPIRED').length,
+        failed: allMissions.filter(m => m.status === 'FAILED').length,
+      });
 
       // 정렬
       const sortedMissions = sortMissionsByTitle(allMissions);
@@ -355,6 +371,46 @@ export const useMission = (
         throw new Error('미션을 찾을 수 없습니다.');
       }
 
+      // 투두리스트 미션인 경우 completeTodoMission API 호출
+       
+      if (mission.todoListId) {
+        const { completeTodoMission } = await import('../api/todolistApi');
+        const numericMissionId = parseInt(mission.mission_id.replace(/^custom_/, ''), 10);
+        if (isNaN(numericMissionId)) {
+          throw new Error('미션 ID가 올바르지 않습니다.');
+        }
+        
+        const result = await completeTodoMission(mission.todoListId, numericMissionId);
+        if (!result.success) {
+          throw new Error(result.error || '미션 완료에 실패했습니다.');
+        }
+        
+        // 미션 목록 새로고침
+        await loadMissions();
+        
+        // 경험치 추가 (캐릭터 시스템과 연동)
+        const verificationType = mission.verification_type || 'COMMUNITY';
+        const isCustomMission = mission.missionType === 'CUSTOM' || mission.is_custom === true;
+        let experienceResult: ExperienceResult | null = null;
+
+        if (!isCustomMission && verificationType !== 'COMMUNITY') {
+          // 공식 미션이고 COMMUNITY 타입이 아닌 경우에만 즉시 XP 지급
+          if (addExperienceByCategory && mission.category_id) {
+            experienceResult = await addExperienceByCategory(mission.category_id, mission.experience);
+          }
+        }
+
+        return {
+          success: true,
+          experienceGained: experienceResult?.experienceGained || (verificationType === 'COMMUNITY' ? 0 : mission.experience),
+          levelUp: experienceResult?.levelUp || false,
+          newLevel: experienceResult?.newLevel,
+          unlocked: false,
+          pendingVerification: verificationType === 'COMMUNITY'
+        };
+      }
+
+      // 기존 로직 (로컬 스토리지 기반 - 하위 호환성 유지)
       const updatedMission: Mission = {
         ...mission,
         completed: true,
@@ -404,7 +460,7 @@ export const useMission = (
       logError('미션 완료 실패', completeError as Error, { missionId, photoUrl });
       return { success: false, experienceGained: 0, levelUp: false, error: (completeError as Error).message };
     }
-  }, [missions, addExperienceByCategory, currentNickname]);
+  }, [missions, addExperienceByCategory, currentNickname, loadMissions]);
 
   // 미션 완료 취소
   const uncompleteMission = useCallback(async (missionId: string): Promise<ServiceResult<void>> => {
@@ -504,14 +560,14 @@ export const useMission = (
         ? parseInt(missionId.replace('custom_', ''), 10)
         : parseInt(missionId, 10);
 
-      const updateData: Partial<CreateMissionRequest> = {
+      const updateRequest: Partial<CreateMissionRequest> = {
         title: missionData.title,
         description: missionData.description,
         isPublic: missionData.isPublic,
         expReward: missionData.experience,
       };
 
-      const result = await updateCustomMissionApi(numericId, updateData);
+      const result = await updateCustomMissionApi(numericId, updateRequest);
 
       if (result.success && result.data) {
         const updatedMission = transformApiMission(result.data);

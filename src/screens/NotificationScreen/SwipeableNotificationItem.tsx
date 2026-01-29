@@ -3,7 +3,6 @@ import {
   View,
   Text,
   TouchableOpacity,
-  Animated,
   Image,
 } from 'react-native';
 import { SwipeableNotificationItemProps } from '../../types/screens/notification';
@@ -13,18 +12,21 @@ import { ConfirmModal } from '../../components/ui';
 import { useSwipeableNotificationItemContainer } from './SwipeableNotificationItem.container';
 import { styles } from './SwipeableNotificationItem.styles';
 
+/** 두 문장 이상일 때 문장 끝(. ! ?) 뒤에 줄바꿈 삽입 */
+function contentWithLineBreaks(content: string): string {
+  if (!content || typeof content !== 'string') return content;
+  return content.replace(/([.!?])\s+/g, '$1\n').trim();
+}
+
 const SwipeableNotificationItem: React.FC<SwipeableNotificationItemProps> = ({ 
   item, 
   onPress, 
   onDelete 
 }) => {
-  // 비즈니스 로직은 Container에서 처리
   const {
-    translateX,
     isDeleting,
     showDeleteModal,
-    panResponder,
-    handleDelete,
+    handleLongPress,
     handleConfirmDelete,
     handleCancelDelete,
   } = useSwipeableNotificationItemContainer({ item, onDelete });
@@ -34,38 +36,19 @@ const SwipeableNotificationItem: React.FC<SwipeableNotificationItemProps> = ({
   }
 
   return (
-    <View style={styles.swipeContainer}>
-      {/* 삭제 버튼 (배경) */}
-      <View style={styles.deleteButtonContainer}>
-        <TouchableOpacity
-          style={styles.deleteButton}
-          onPress={handleDelete}
-          activeOpacity={0.8}
-        >
-          <Image
-            source={require('../../assets/images/trash.png')}
-            style={styles.deleteButtonIcon}
-            resizeMode="contain"
-            accessibilityLabel="삭제"
-          />
-        </TouchableOpacity>
-      </View>
-
-      {/* 알림 카드 (앞면) */}
-      <Animated.View
+    <View style={styles.itemContainer}>
+      <View
         style={[
           styles.notificationCard,
           !item.isRead && styles.unreadCard,
-          {
-            transform: [{ translateX }],
-          },
         ]}
-        {...panResponder.panHandlers}
       >
         <TouchableOpacity
           onPress={() => onPress(item)}
+          onLongPress={handleLongPress}
           activeOpacity={0.7}
           style={styles.cardTouchable}
+          accessibilityLabel={`${item.title}. 길게 누르면 삭제`}
         >
           <View style={styles.contentContainer}>
             <Image
@@ -82,15 +65,14 @@ const SwipeableNotificationItem: React.FC<SwipeableNotificationItemProps> = ({
                 </Text>
                 <Text style={styles.time}>{formatTimeAgo(item.createdAt)}</Text>
               </View>
-              <Text style={styles.content} numberOfLines={2}>
-                {item.content}
+              <Text style={styles.content} numberOfLines={4}>
+                {contentWithLineBreaks(item.content)}
               </Text>
             </View>
           </View>
         </TouchableOpacity>
-      </Animated.View>
+      </View>
 
-      {/* 삭제 확인 모달 */}
       <ConfirmModal
         visible={showDeleteModal}
         title="알림 삭제"
@@ -106,4 +88,3 @@ const SwipeableNotificationItem: React.FC<SwipeableNotificationItemProps> = ({
 };
 
 export default SwipeableNotificationItem;
-

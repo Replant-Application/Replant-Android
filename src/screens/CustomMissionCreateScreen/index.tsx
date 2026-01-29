@@ -10,7 +10,6 @@ import {
   Platform,
   Image,
 } from 'react-native';
-import DateTimePicker from '@react-native-community/datetimepicker';
 import { Button, Header, SectionTitle, FormCard } from '../../components/ui';
 import { colors, spacing } from '../../utils/designTokens';
 import { NavigationProp, RouteProp } from '@react-navigation/native';
@@ -19,7 +18,6 @@ import {
   useCustomMissionCreateScreenContainer,
   WORRY_TYPE_OPTIONS,
   MISSION_CATEGORY_OPTIONS,
-  VERIFICATION_TYPE_OPTIONS,
   CHALLENGE_DAYS_OPTIONS,
   DEADLINE_DAYS_OPTIONS,
 } from './CustomMissionCreateScreen.container';
@@ -39,7 +37,6 @@ const CustomMissionCreateScreen: React.FC<CustomMissionCreateScreenProps> = ({ n
     loading,
     worryType,
     category,
-    verificationType,
     isChallenge,
     challengeDays,
     deadlineDays,
@@ -51,17 +48,11 @@ const CustomMissionCreateScreen: React.FC<CustomMissionCreateScreenProps> = ({ n
     setDescription,
     setWorryType,
     setCategory,
-    setVerificationType,
     setIsChallenge,
     setChallengeDays,
     setDeadlineDays,
-    setShowStartTimePicker,
-    setShowEndTimePicker,
     handleSubmitMission,
     handleCancel,
-    handleStartTimeChange,
-    handleEndTimeChange,
-    formatTime,
   } = useCustomMissionCreateScreenContainer({ navigation, route });
 
   return (
@@ -162,76 +153,8 @@ const CustomMissionCreateScreen: React.FC<CustomMissionCreateScreenProps> = ({ n
 
         <FormCard>
           <SectionTitle title="인증 방식" size="lg" marginBottom={spacing[3]} />
-          <View style={styles.verificationContainer}>
-            {VERIFICATION_TYPE_OPTIONS.map((option) => (
-              <TouchableOpacity
-                key={option.id}
-                style={[
-                  styles.verificationButton,
-                  verificationType === option.id && styles.selectedVerification
-                ]}
-                onPress={() => setVerificationType(option.id)}
-              >
-                <View style={styles.verificationRow}>
-                  <Text style={styles.verificationEmoji}>{option.emoji}</Text>
-                  <Text style={[
-                    styles.verificationText,
-                    verificationType === option.id && styles.selectedVerificationText
-                  ]}>
-                    {option.name}
-                  </Text>
-                </View>
-                <Text style={styles.verificationDesc}>{option.description}</Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-
-          {/* 시간 미션일 때 시작/종료 시간 설정 */}
-          {verificationType === 'TIME' && (
-            <View style={styles.timeSettingContainer}>
-              <Text style={styles.timeSettingTitle}>인증 가능 시간대 설정</Text>
-              <View style={styles.timePickerRow}>
-                <View style={styles.timePickerItem}>
-                  <Text style={styles.timeLabel}>시작 시간</Text>
-                  <TouchableOpacity
-                    style={styles.timeButton}
-                    onPress={() => setShowStartTimePicker(true)}
-                  >
-                    <Text style={styles.timeButtonText}>{formatTime(startTime)}</Text>
-                  </TouchableOpacity>
-                  {showStartTimePicker && (
-                    <DateTimePicker
-                      value={startTime}
-                      mode="time"
-                      is24Hour={true}
-                      display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-                      onChange={handleStartTimeChange}
-                    />
-                  )}
-                </View>
-                <Text style={styles.timeSeparator}>~</Text>
-                <View style={styles.timePickerItem}>
-                  <Text style={styles.timeLabel}>종료 시간</Text>
-                  <TouchableOpacity
-                    style={styles.timeButton}
-                    onPress={() => setShowEndTimePicker(true)}
-                  >
-                    <Text style={styles.timeButtonText}>{formatTime(endTime)}</Text>
-                  </TouchableOpacity>
-                  {showEndTimePicker && (
-                    <DateTimePicker
-                      value={endTime}
-                      mode="time"
-                      is24Hour={true}
-                      display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-                      onChange={handleEndTimeChange}
-                    />
-                  )}
-                </View>
-              </View>
-              <Text style={styles.timeHint}>이 시간대에만 미션 인증이 가능합니다</Text>
-            </View>
-          )}
+          <Text style={styles.verificationFixedText}>커뮤니티 인증 (인증글 작성)</Text>
+          <Text style={styles.verificationFixedDesc}>미션 완료 시 인증글을 작성해 완료합니다.</Text>
         </FormCard>
 
         <FormCard>

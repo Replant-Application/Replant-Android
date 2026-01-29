@@ -119,12 +119,70 @@ export const styles = StyleSheet.create({
   imageSection: {
     marginBottom: spacing[4],
   },
-  previewImage: {
+  previewImageLarge: {
     width: '100%',
     height: 200,
     borderRadius: borderRadius.md,
     backgroundColor: colors.background.secondary,
     marginBottom: spacing[2],
+  },
+  imageContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    gap: spacing[2],
+  },
+  imagePreviewWrapper: {
+    position: 'relative',
+    width: 80,
+    height: 80,
+    borderRadius: borderRadius.base,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: colors.gray[300],
+  },
+  previewImage: {
+    width: '100%',
+    height: '100%',
+  },
+  addImageButton: {
+    width: 80,
+    height: 80,
+    backgroundColor: colors.white,
+    borderWidth: 1,
+    borderColor: colors.border.light,
+    borderStyle: 'dashed',
+    borderRadius: borderRadius.base,
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: spacing[1],
+  },
+  addImageIcon: {
+    width: 24,
+    height: 24,
+  },
+  addImageText: {
+    ...createTextStyle('xs', {
+      color: colors.primary[600],
+      fontWeight: typography.fontWeight.medium,
+    }),
+  },
+  removeImageButton: {
+    position: 'absolute',
+    top: 4,
+    right: 4,
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  removeImageText: {
+    color: colors.white,
+    fontSize: 16,
+    fontWeight: 'bold',
+    lineHeight: 18,
   },
   imageNote: {
     ...createTextStyle('xs', {

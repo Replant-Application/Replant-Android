@@ -94,8 +94,8 @@ const MissionInfoModal: React.FC<MissionInfoModalProps> = ({
               <Text style={styles.modalDetailLabel}>보상</Text>
               <Text style={styles.modalDetailValue}>
                 {mission.isCustom
-                  ? `뱃지 (${mission.badgeDurationDays}일)`
-                  : `${mission.expReward} EXP + 뱃지 (${mission.badgeDurationDays}일)`
+                  ? `배지 (${mission.badgeDurationDays}일)`
+                  : `${mission.expReward} EXP + 배지 (${mission.badgeDurationDays}일)`
                 }
               </Text>
             </View>

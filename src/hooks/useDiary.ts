@@ -252,8 +252,8 @@ export const useDiary = (): UseDiaryReturn => {
       }
 
       return { success: false, error: result.error || '해당 날짜의 다이어리를 찾을 수 없습니다.' };
-    } catch (error) {
-      return { success: false, error: (error as Error).message };
+    } catch (err) {
+      return { success: false, error: (err as Error).message };
     }
   }, [currentNickname, isLoggedIn]);
 

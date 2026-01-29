@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types/navigation';
-import { Header, Loading, RatingSelector } from '../../components/ui';
+import { Header, Loading } from '../../components/ui';
 import { useMissionSetDetailScreenContainer } from './MissionSetDetailScreen.container';
 import { styles } from './MissionSetDetailScreen.styles';
 
@@ -30,12 +30,8 @@ const MissionSetDetailScreen: React.FC<MissionSetDetailScreenProps> = ({ navigat
     loading,
     reviewRating,
     submittingReview,
-    showReviewForm,
     isOwner,
-    setReviewRating,
     handleSubmitReview,
-    handleOpenReviewForm,
-    handleCloseReviewForm,
     renderStars,
   } = useMissionSetDetailScreenContainer({ navigation, route });
 
@@ -127,61 +123,63 @@ const MissionSetDetailScreen: React.FC<MissionSetDetailScreenProps> = ({ navigat
           <View style={styles.reviewSection}>
             <Text style={styles.sectionTitle}>리뷰</Text>
 
-            {showReviewForm ? (
-              <View style={styles.reviewFormCard}>
-                <Text style={styles.reviewFormLabel}>별점을 선택해주세요</Text>
-                <RatingSelector rating={reviewRating} onRatingChange={setReviewRating} />
-                <View style={styles.reviewFormButtons}>
-                  <TouchableOpacity
-                    style={styles.cancelButton}
-                    onPress={handleCloseReviewForm}
-                    activeOpacity={0.7}
-                  >
-                    <Text style={styles.cancelButtonText}>취소</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={[styles.submitButton, submittingReview && styles.submitButtonDisabled]}
-                    onPress={handleSubmitReview}
-                    disabled={submittingReview || !reviewRating}
-                    activeOpacity={0.7}
-                  >
-                    <Text style={styles.submitButtonText}>
-                      {submittingReview 
-                        ? (myReview && myReview.id ? '수정 중...' : '등록 중...')
-                        : (myReview && myReview.id ? '수정' : '등록')}
-                    </Text>
-                  </TouchableOpacity>
+            {myReview && myReview.rating ? (
+              <View style={styles.myReviewCard}>
+                <View style={styles.myReviewHeader}>
+                  <Text style={styles.myReviewLabel}>내 리뷰</Text>
+                  <View style={styles.ratingSelector}>
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <TouchableOpacity
+                        key={star}
+                        onPress={() => {
+                          handleSubmitReview(star);
+                        }}
+                        disabled={submittingReview}
+                        activeOpacity={0.7}
+                      >
+                        <Text style={[
+                          styles.ratingStar,
+                          star <= myReview.rating && styles.ratingStarActive
+                        ]}>
+                          ★
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
                 </View>
               </View>
-            ) : myReview && myReview.rating ? (
-              <TouchableOpacity
-                style={styles.myReviewCard}
-                onPress={() => {
-                  console.log('[MissionSetDetail] My Review card pressed');
-                  handleOpenReviewForm();
-                }}
-                activeOpacity={0.7}
-                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-              >
-                <View style={styles.myReviewHeader} pointerEvents="none">
-                  <Text style={styles.myReviewLabel}>내 리뷰</Text>
-                  <Text style={styles.myReviewStars}>{renderStars(myReview.rating)}</Text>
-                </View>
-              </TouchableOpacity>
             ) : (
-              <TouchableOpacity
-                style={styles.writeReviewButton}
-                onPress={handleOpenReviewForm}
-                activeOpacity={0.7}
-              >
-                <Text style={styles.writeReviewButtonText}>리뷰 작성하기</Text>
-              </TouchableOpacity>
+              <View style={styles.reviewFormCard}>
+                <Text style={styles.reviewFormLabel}>별점을 선택해주세요</Text>
+                <View style={styles.ratingSelector}>
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <TouchableOpacity
+                      key={star}
+                      onPress={() => {
+                        handleSubmitReview(star);
+                      }}
+                      disabled={submittingReview}
+                      activeOpacity={0.7}
+                    >
+                      <Text style={[
+                        styles.ratingStar,
+                        star <= reviewRating && styles.ratingStarActive
+                      ]}>
+                        ★
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+                {submittingReview && (
+                  <Text style={styles.submittingText}>등록 중...</Text>
+                )}
+              </View>
             )}
           </View>
         )}
 
         {/* 여백 */}
-        <View style={{ height: 120 }} />
+        <View style={styles.spacer} />
       </ScrollView>
     </ImageBackground>
   );

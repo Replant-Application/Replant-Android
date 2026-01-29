@@ -31,7 +31,7 @@ const BadgeDetailScreen: React.FC<BadgeDetailScreenProps> = ({ navigation, route
     >
       <View style={styles.container}>
         <Header
-          title="뱃지 상세"
+          title="배지 상세"
           leftButton={
             <TouchableOpacity onPress={() => navigation.goBack()}>
               <Image
@@ -49,13 +49,13 @@ const BadgeDetailScreen: React.FC<BadgeDetailScreenProps> = ({ navigation, route
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
         >
-        {/* 뱃지 아이콘 */}
+        {/* 배지 아이콘 */}
         <View style={styles.badgeIconContainer}>
           <View style={[styles.badgeIcon, isExpired && styles.badgeIconExpired]}>
             <Image
               source={require('../../assets/images/check2.png')}
               style={styles.badgeImage}
-              accessibilityLabel="뱃지 아이콘"
+              accessibilityLabel="배지 아이콘"
               resizeMode="contain"
             />
           </View>
@@ -66,7 +66,7 @@ const BadgeDetailScreen: React.FC<BadgeDetailScreenProps> = ({ navigation, route
           )}
         </View>
 
-        {/* 뱃지 정보 */}
+        {/* 배지 정보 */}
         <View style={styles.infoCard}>
           <Text style={styles.badgeTitle}>{missionTitle}</Text>
           <Text style={styles.missionType}>{missionType}</Text>
@@ -93,9 +93,9 @@ const BadgeDetailScreen: React.FC<BadgeDetailScreenProps> = ({ navigation, route
           )}
         </View>
 
-        {/* 뱃지 혜택 안내 */}
+        {/* 배지 혜택 안내 */}
         <View style={styles.benefitCard}>
-          <Text style={styles.benefitTitle}>뱃지 혜택</Text>
+          <Text style={styles.benefitTitle}>배지 혜택</Text>
           <View style={styles.benefitItem}>
             <Text style={styles.benefitIcon}>✓</Text>
             <Text style={styles.benefitText}>해당 미션 후기 작성 가능</Text>

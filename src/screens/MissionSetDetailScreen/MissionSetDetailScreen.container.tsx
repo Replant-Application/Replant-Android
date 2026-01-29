@@ -35,7 +35,6 @@ export const useMissionSetDetailScreenContainer = ({ navigation, route }: Missio
   const [myReview, setMyReview] = useState<MissionSetReview | null>(null);
   const [reviewRating, setReviewRating] = useState(5);
   const [submittingReview, setSubmittingReview] = useState(false);
-  const [showReviewForm, setShowReviewForm] = useState(false);
 
   /**
    * 미션세트 상세 로딩
@@ -113,14 +112,15 @@ export const useMissionSetDetailScreenContainer = ({ navigation, route }: Missio
   /**
    * 리뷰 제출 (작성 또는 수정)
    */
-  const handleSubmitReview = useCallback(async () => {
+  const handleSubmitReview = useCallback(async (rating?: number) => {
     if (!missionSet) return;
 
+    const ratingToSubmit = rating ?? reviewRating;
     const isUpdate = myReview && myReview.id;
     setSubmittingReview(true);
     try {
       const reviewData = {
-        rating: reviewRating,
+        rating: ratingToSubmit,
       };
 
       let result;
@@ -134,8 +134,7 @@ export const useMissionSetDetailScreenContainer = ({ navigation, route }: Missio
 
       if (result.success && result.data) {
         setMyReview(result.data);
-        setShowReviewForm(false);
-        Alert.alert('완료', isUpdate ? '리뷰가 수정되었습니다.' : '리뷰가 등록되었습니다.');
+        setReviewRating(ratingToSubmit);
         // 미션세트 평점 갱신을 위해 다시 로딩
         loadMissionSetDetail();
       } else {
@@ -170,27 +169,6 @@ export const useMissionSetDetailScreenContainer = ({ navigation, route }: Missio
     return stars.join('');
   }, []);
 
-  /**
-   * 리뷰 작성 폼 열기
-   */
-  const handleOpenReviewForm = useCallback(() => {
-    console.log('[MissionSetDetail] handleOpenReviewForm called', { myReview, hasRating: myReview?.rating });
-    // 기존 리뷰가 있으면 그 값으로 폼 초기화
-    if (myReview && myReview.rating) {
-      setReviewRating(myReview.rating);
-    } else {
-      // 리뷰가 없으면 기본값으로 초기화
-      setReviewRating(5);
-    }
-    setShowReviewForm(true);
-  }, [myReview]);
-
-  /**
-   * 리뷰 작성 폼 닫기
-   */
-  const handleCloseReviewForm = useCallback(() => {
-    setShowReviewForm(false);
-  }, []);
 
   /**
    * 본인 미션세트인지 확인
@@ -207,14 +185,11 @@ export const useMissionSetDetailScreenContainer = ({ navigation, route }: Missio
     loading,
     reviewRating,
     submittingReview,
-    showReviewForm,
     isOwner,
     // Setters
     setReviewRating,
     // Handlers
     handleSubmitReview,
-    handleOpenReviewForm,
-    handleCloseReviewForm,
     // Utils
     renderStars,
   };

@@ -3,12 +3,15 @@
  * 미션 도감 목록 컴포넌트의 모든 스타일 정의
  */
 
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Platform } from 'react-native';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
 import { createTextStyle, createTitleStyle, createSecondaryTextStyle, createButtonTextStyle } from '../../utils/styles/textStyles';
 import { buttonStyles, cardStyles } from '../../utils/styles/commonStyles';
 
 export const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
   content: {
     flex: 1,
   },
@@ -16,11 +19,41 @@ export const styles = StyleSheet.create({
     padding: spacing[4],
     paddingBottom: spacing[20],
   },
+  fab: {
+    position: 'absolute',
+    bottom: 50,
+    right: 20,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: colors.primary[700],
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    zIndex: 100,
+  },
+  fabIconImage: {
+    width: 24,
+    height: 24,
+    tintColor: colors.white,
+  },
+  customMissionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing[2],
+    marginBottom: spacing[4],
+  },
   createMissionButton: {
     ...buttonStyles.primary(),
     flexDirection: 'row',
     gap: spacing[2],
-    marginBottom: spacing[4],
+    flex: 1,
+    paddingVertical: spacing[2],
+    minHeight: 40,
   },
   createMissionIcon: {
     width: 20,
@@ -29,6 +62,121 @@ export const styles = StyleSheet.create({
   },
   createMissionText: {
     ...createButtonTextStyle('base'),
+  },
+  filterSortRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: spacing[3],
+    marginTop: spacing[2],
+  },
+  filterCheckboxWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: spacing[3],
+    marginTop: spacing[2],
+  },
+  filterCheckbox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing[2],
+  },
+  filterCheckboxPlaceholder: {
+    flex: 1,
+  },
+  checkbox: {
+    width: 20,
+    height: 20,
+    borderRadius: borderRadius.sm,
+    borderWidth: 2,
+    borderColor: colors.gray[400],
+    backgroundColor: colors.white,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  checkboxChecked: {
+    backgroundColor: colors.primary[500],
+    borderColor: colors.primary[500],
+  },
+  checkboxCheckmark: {
+    color: colors.white,
+    fontSize: typography.fontSize.xs,
+    fontWeight: typography.fontWeight.bold,
+    lineHeight: typography.fontSize.xs,
+  },
+  filterCheckboxLabel: {
+    ...createTextStyle('sm', {
+      color: colors.text.primary,
+    }),
+  },
+  sortButtonWrapper: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    position: 'relative',
+    zIndex: 10,
+  },
+  sortButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing[1],
+    paddingVertical: spacing[3],
+    paddingHorizontal: spacing[2],
+  },
+  sortButtonText: {
+    ...createTextStyle('sm', {
+      color: colors.black,
+      fontWeight: typography.fontWeight.normal,
+    }),
+  },
+  sortButtonArrow: {
+    fontSize: typography.fontSize.base,
+    color: colors.black,
+    lineHeight: typography.fontSize.base,
+    fontWeight: typography.fontWeight.medium,
+  },
+  sortDropdown: {
+    position: 'absolute',
+    top: '100%',
+    right: 0,
+    marginTop: spacing[1],
+    backgroundColor: colors.background.primary,
+    borderRadius: borderRadius.sm,
+    borderWidth: 1,
+    borderColor: colors.gray[300],
+    minWidth: 120,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+    zIndex: 1000,
+  },
+  sortDropdownItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: spacing[2],
+    paddingHorizontal: spacing[3],
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border.light,
+  },
+  sortDropdownItemSelected: {
+    backgroundColor: colors.primary[50],
+  },
+  sortDropdownItemText: {
+    ...createTextStyle('sm', {
+      color: colors.text.primary,
+    }),
+  },
+  sortDropdownItemTextSelected: {
+    color: colors.primary[600],
+    fontWeight: typography.fontWeight.semibold,
+  },
+  sortDropdownCheck: {
+    fontSize: typography.fontSize.sm,
+    color: colors.primary[600],
+    fontWeight: typography.fontWeight.bold,
+    marginLeft: spacing[2],
   },
   serverPaginationContainer: {
     flexDirection: 'row',
@@ -65,7 +213,13 @@ export const styles = StyleSheet.create({
     tintColor: colors.gray[400],
   },
   serverPageInfo: {
-    ...createTitleStyle('base'),
+    ...createTitleStyle('base', {
+      fontWeight: typography.fontWeight.bold,
+      fontFamily: Platform.select({
+        ios: undefined,
+        android: typography.fontFamily.bold,
+      }),
+    }),
   },
   groupMissionList: {
     marginBottom: spacing[4],

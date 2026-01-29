@@ -4,7 +4,7 @@
  */
 
 import { StyleSheet, Dimensions } from 'react-native';
-import { colors, spacing, typography, borderRadius, shadows } from '../../utils/designTokens';
+import { colors, spacing, typography, borderRadius, shadows, layout } from '../../utils/designTokens';
 import { getOptimizedLineHeight } from '../../utils/styles/textStyles';
 import { createTextStyle, createTitleStyle, createBodyStyle, createSecondaryTextStyle, createButtonTextStyle } from '../../utils/styles/textStyles';
 
@@ -17,7 +17,7 @@ export const styles = StyleSheet.create({
     height: '100%',
   },
   modalContainerWelcome: {
-    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    backgroundColor: colors.overlay.dark,
     borderRadius: borderRadius.lg,
     padding: spacing[6],
     paddingVertical: spacing[8],
@@ -27,7 +27,7 @@ export const styles = StyleSheet.create({
     ...shadows.lg,
   },
   modalContainer: {
-    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    backgroundColor: colors.overlay.dark,
     borderRadius: borderRadius.lg,
     padding: spacing[3],
     marginHorizontal: spacing[4],
@@ -44,6 +44,9 @@ export const styles = StyleSheet.create({
       textAlign: 'left',
       marginBottom: spacing[1],
     }),
+  },
+  modalQuestionCenter: {
+    textAlign: 'center',
   },
   modalContent: {
     marginBottom: spacing[3],
@@ -75,10 +78,10 @@ export const styles = StyleSheet.create({
   sliderTrack: {
     width: '100%',
     height: 20,
-    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+    backgroundColor: colors.overlay.light,
     borderRadius: borderRadius.md,
     borderWidth: 2,
-    borderColor: 'rgba(255, 255, 255, 0.3)',
+    borderColor: colors.overlay.white.light,
     position: 'relative',
     marginVertical: spacing[3],
     justifyContent: 'center',
@@ -115,7 +118,7 @@ export const styles = StyleSheet.create({
     ...createTextStyle('2xl', {
       fontWeight: typography.fontWeight.bold,
       color: colors.white,
-      textShadowColor: 'rgba(0, 0, 0, 0.5)',
+      textShadowColor: colors.overlay.medium,
       textShadowOffset: { width: 0, height: 2 },
       textShadowRadius: 4,
     }),
@@ -168,7 +171,7 @@ export const styles = StyleSheet.create({
     paddingHorizontal: spacing[6],
     paddingVertical: spacing[2],
     borderRadius: borderRadius.xl,
-    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+    backgroundColor: colors.overlay.white.light,
     alignItems: 'center',
   },
   cancelButtonText: {
@@ -181,7 +184,7 @@ export const styles = StyleSheet.create({
     paddingHorizontal: spacing[6],
     paddingVertical: spacing[2],
     borderRadius: borderRadius.xl,
-    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+    backgroundColor: colors.overlay.white.light,
     alignItems: 'center',
   },
   skipButtonText: {
@@ -194,11 +197,11 @@ export const styles = StyleSheet.create({
     paddingHorizontal: spacing[6],
     paddingVertical: spacing[2],
     borderRadius: borderRadius.xl,
-    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+    backgroundColor: colors.overlay.white.light,
     alignItems: 'center',
   },
   confirmButtonDisabled: {
-    backgroundColor: 'rgba(75, 85, 99, 0.5)',
+    backgroundColor: colors.overlay.medium,
     opacity: 0.5,
   },
   confirmButtonText: {
@@ -234,12 +237,13 @@ export const styles = StyleSheet.create({
   backButtonIcon: {
     width: 24,
     height: 24,
+    tintColor: colors.white,
   },
   writeButton: {
     flex: 1,
     paddingVertical: spacing[3],
     borderRadius: borderRadius.lg,
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    backgroundColor: colors.overlay.white.medium,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -254,7 +258,7 @@ export const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: spacing[3],
     borderRadius: borderRadius.lg,
-    backgroundColor: 'rgba(55, 65, 81, 0.8)',
+    backgroundColor: colors.overlay.medium,
     alignItems: 'center',
   },
   viewButtonText: {
@@ -266,7 +270,7 @@ export const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: spacing[3],
     borderRadius: borderRadius.lg,
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    backgroundColor: colors.overlay.white.medium,
     alignItems: 'center',
   },
   nextButtonText: {
@@ -278,7 +282,7 @@ export const styles = StyleSheet.create({
   viewContainer: {
     flex: 1,
     paddingTop: spacing[8],
-    paddingHorizontal: spacing[5],
+    paddingHorizontal: layout.globalGutterLarge,
   },
   viewHeader: {
     flexDirection: 'row',
@@ -286,30 +290,6 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: spacing[8],
     marginBottom: spacing[2],
-  },
-  viewModeButtons: {
-    flexDirection: 'row',
-    backgroundColor: 'rgba(0, 0, 0, 0.3)',
-    borderRadius: borderRadius.lg,
-    padding: spacing[1],
-    gap: spacing[1],
-  },
-  viewModeButton: {
-    paddingHorizontal: spacing[4],
-    paddingVertical: spacing[2],
-    borderRadius: borderRadius.md,
-  },
-  viewModeButtonActive: {
-    backgroundColor: colors.primary[500],
-  },
-  viewModeButtonText: {
-    ...createTextStyle('sm', {
-      color: colors.white,
-      fontWeight: typography.fontWeight.medium,
-    }),
-  },
-  viewModeButtonTextActive: {
-    color: colors.white,
   },
   searchContainer: {
     flexDirection: 'row',
@@ -323,7 +303,7 @@ export const styles = StyleSheet.create({
     flex: 0,
     width: 300,
     position: 'relative',
-    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+    backgroundColor: colors.overlay.light,
     borderRadius: borderRadius.lg,
     borderWidth: 1,
     borderColor: colors.gray[700],
@@ -382,12 +362,13 @@ export const styles = StyleSheet.create({
     }),
   },
   diaryListItem: {
-    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    backgroundColor: colors.overlay.dark,
     borderRadius: borderRadius.lg,
     padding: spacing[4],
     marginBottom: spacing[2],
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.3)',
+    borderColor: colors.overlay.white.light,
+    opacity: 0.9,
   },
   diaryListItemContent: {
     width: '100%',
@@ -419,7 +400,8 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
   },
   diaryListItemTag: {
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    backgroundColor: colors.overlay.white.light,
+    opacity: 0.25,
     borderRadius: borderRadius.sm,
     paddingHorizontal: spacing[2],
     paddingVertical: spacing[1],
@@ -432,84 +414,6 @@ export const styles = StyleSheet.create({
   diaryListItemTagMore: {
     ...createTextStyle('xs', {
       color: colors.gray[400],
-    }),
-  },
-  bookPageInfo: {
-    ...createTextStyle('sm', {
-      color: colors.white,
-      fontWeight: typography.fontWeight.medium,
-    }),
-  },
-  topSection: {
-    alignItems: 'center',
-  },
-  bookContainer: {
-    alignItems: 'center',
-    marginTop: spacing[0],
-    position: 'relative',
-  },
-  bookImage: {
-    width: SCREEN_WIDTH * 0.8,
-    height: SCREEN_WIDTH * 0.7 * 1,
-  },
-  paperContainer: {
-    position: 'absolute',
-    top: SCREEN_WIDTH * 0.3,
-    left: SCREEN_WIDTH * 0.1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: SCREEN_WIDTH * 0.6,
-    height: SCREEN_WIDTH * 0.6 * 1.3,
-  },
-  paperImage: {
-    width: SCREEN_WIDTH * 0.5,
-    height: SCREEN_WIDTH * 0.6 * 1.1,
-  },
-  paperTextOverlay: {
-    position: 'absolute',
-    top: spacing[15],
-    left: 0,
-    right: 0,
-    alignItems: 'center',
-    paddingHorizontal: spacing[4],
-    zIndex: 2,
-  },
-  paperTitle: {
-    ...createBodyStyle('base', {
-      fontWeight: typography.fontWeight.medium,
-      color: colors.black,
-      marginBottom: spacing[2],
-    }),
-  },
-  paperDate: {
-    ...createBodyStyle('base', {
-      fontWeight: typography.fontWeight.medium,
-      color: colors.black,
-      textAlign: 'center',
-    }),
-  },
-  bookNavigation: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    right: 20,
-    alignItems: 'center',
-    marginTop: -spacing[8],
-    paddingHorizontal: spacing[26],
-    width: '110%',
-  },
-  navButton: {
-    padding: spacing[3],
-    borderRadius: borderRadius.full,
-    backgroundColor: colors.gray[800],
-    opacity: 0.8,
-  },
-  navButtonDisabled: {
-    opacity: 0.3,
-  },
-  navButtonText: {
-    ...createTextStyle('xl', {
-      color: colors.white,
-      fontWeight: typography.fontWeight.medium,
     }),
   },
   viewDetailButton: {
@@ -538,7 +442,7 @@ export const styles = StyleSheet.create({
   detailContainer: {
     flex: 1,
     paddingTop: spacing[8],
-    paddingHorizontal: spacing[5],
+    paddingHorizontal: layout.globalGutterLarge,
   },
   signboardContainer: {
     alignItems: 'center',

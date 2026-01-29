@@ -22,6 +22,10 @@ export const styles = StyleSheet.create({
   section: {
     marginBottom: spacing[5],
   },
+  /** 사용자 정보 섹션: 아래 여백 축소 */
+  userSection: {
+    marginBottom: spacing[3],
+  },
   /** 버전 바로 위 섹션(고객지원): 아래 여백 축소 */
   sectionBeforeVersion: {
     marginBottom: spacing[2],

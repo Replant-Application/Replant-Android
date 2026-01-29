@@ -16,9 +16,10 @@ import {
 import { NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../../types/navigation';
 import { MissionSetSimple } from '../../../api/todolistApi';
-import { Loading, EmptyState } from '../../../components/ui';
+import { Loading, EmptyState, ConfirmModal } from '../../../components/ui';
 import { colors } from '../../../utils/designTokens';
 import { SCREEN_NAMES } from '../../../utils/constants';
+import { useUser } from '../../../contexts/UserContext';
 import { styles as missionSetListStyles } from './MissionSetList.styles';
 import { styles as communityStyles } from '../CommunityScreen.styles';
 
@@ -32,6 +33,7 @@ interface MissionSetListProps {
   onRefresh: () => void;
   renderStars: (rating: number) => string;
   navigation: NavigationProp<RootStackParamList>;
+  onUnshare?: (missionSetId: number) => Promise<void>;
 }
 
 const MissionSetList: React.FC<MissionSetListProps> = ({
@@ -44,7 +46,35 @@ const MissionSetList: React.FC<MissionSetListProps> = ({
   onRefresh,
   renderStars,
   navigation,
+  onUnshare,
 }) => {
+  const { currentUserId } = useUser();
+  const [showUnshareModal, setShowUnshareModal] = React.useState(false);
+  const [selectedMissionSet, setSelectedMissionSet] = React.useState<MissionSetSimple | null>(null);
+  const [_unsharing, setUnsharing] = React.useState(false);
+
+  const handleUnsharePress = (missionSet: MissionSetSimple, e: any) => {
+    e.stopPropagation();
+    setSelectedMissionSet(missionSet);
+    setShowUnshareModal(true);
+  };
+
+  const handleUnshareConfirm = async () => {
+    if (!selectedMissionSet || !onUnshare) return;
+    setUnsharing(true);
+    try {
+      await onUnshare(selectedMissionSet.id);
+      setShowUnshareModal(false);
+      setSelectedMissionSet(null);
+    } finally {
+      setUnsharing(false);
+    }
+  };
+
+  const handleUnshareCancel = () => {
+    setShowUnshareModal(false);
+    setSelectedMissionSet(null);
+  };
   return (
     <>
       {/* 검색창과 필터 버튼 - 전체 게시판과 동일한 스타일 사용 */}
@@ -110,7 +140,9 @@ const MissionSetList: React.FC<MissionSetListProps> = ({
             />
           ) : (
             <View style={missionSetListStyles.missionSetList}>
-              {missionSets.map(missionSet => (
+              {missionSets.map(missionSet => {
+                const isOwner = currentUserId && missionSet.creatorId === currentUserId;
+                return (
                 <TouchableOpacity
                   key={missionSet.id}
                   style={missionSetListStyles.missionSetCard}
@@ -121,6 +153,22 @@ const MissionSetList: React.FC<MissionSetListProps> = ({
                     <Text style={missionSetListStyles.missionSetTitle} numberOfLines={1}>
                       {missionSet.title}
                     </Text>
+                    {isOwner && onUnshare && (
+                      <TouchableOpacity
+                        style={missionSetListStyles.deleteButton}
+                        onPress={(e) => handleUnsharePress(missionSet, e)}
+                        activeOpacity={0.7}
+                        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                      >
+                        <Image
+                          source={require('../../../assets/images/trash.png')}
+                          style={missionSetListStyles.deleteIcon}
+                          resizeMode="contain"
+                          accessibilityLabel="삭제 아이콘"
+                        />
+                        <Text style={missionSetListStyles.deleteText}>삭제</Text>
+                      </TouchableOpacity>
+                    )}
                   </View>
 
                   {missionSet.description && (
@@ -150,11 +198,24 @@ const MissionSetList: React.FC<MissionSetListProps> = ({
                     </View>
                   </View>
                 </TouchableOpacity>
-              ))}
+              );
+              })}
             </View>
           )}
         </ScrollView>
       )}
+
+      {/* 삭제 확인 모달 */}
+      <ConfirmModal
+        visible={showUnshareModal}
+        title="삭제"
+        message={selectedMissionSet ? `"${selectedMissionSet.title}"를 공유 게시판에서 삭제하시겠습니까?` : ''}
+        confirmText="삭제"
+        cancelText="취소"
+        onConfirm={handleUnshareConfirm}
+        onCancel={handleUnshareCancel}
+        confirmButtonColor={colors.error}
+      />
     </>
   );
 };

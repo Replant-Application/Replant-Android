@@ -16,7 +16,7 @@ export * from './missionApi';
 // 커뮤니티 API (자유 게시판)
 export * from './communityApi';
 
-// 뱃지 API
+// 배지 API
 export * from './badgeApi';
 
 // 유저 추천 API

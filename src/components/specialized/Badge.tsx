@@ -3,7 +3,7 @@ import { Image, ImageStyle } from 'react-native';
 import { styles } from './Badge.styles';
 
 interface BadgeProps {
-  tier?: 'bronze' | 'silver' | 'gold' | 'platinum' | 'diamond'; // 나중에 다른 등급 뱃지 이미지로 확장 가능
+  tier?: 'bronze' | 'silver' | 'gold' | 'platinum' | 'diamond'; // 나중에 다른 등급 배지 이미지로 확장 가능
   size?: 'sm' | 'md' | 'lg';
   style?: ImageStyle;
 }
@@ -42,7 +42,7 @@ const Badge: React.FC<BadgeProps> = ({ tier: _tier, size = 'md', style }) => {
         },
         style,
       ]}
-      accessibilityLabel="뱃지 아이콘"
+      accessibilityLabel="배지 아이콘"
       resizeMode="contain"
     />
   );

@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React from 'react';
 import {
   View,
   Text,
@@ -7,22 +7,16 @@ import {
   Dimensions,
   ImageBackground,
   Animated,
-  Modal,
   Image,
-  FlatList,
-  TextInput,
-  KeyboardAvoidingView,
-  Platform,
-  ActivityIndicator,
 } from 'react-native';
 import FastImage from 'react-native-fast-image';
-import { Loading, ErrorBoundary, AppHeader } from '../../components/ui';
+import { Loading, ErrorBoundary, AppHeader, AlertModal } from '../../components/ui';
 import { getCharacterImage } from '../../utils/characterUtils';
+import characterTemplates from '../../data/characterTemplates.json';
 import { HomeScreenProps } from '../../types/screens/home';
 import { SCREEN_NAMES } from '../../utils/constants';
 import { useHomeScreenContainer } from './HomeScreen.container';
 import { styles } from './HomeScreen.styles';
-import { styles as reantChatStyles } from '../ReantChatScreen/ReantChatScreen.styles';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -42,11 +36,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
     showSpeechBubble,
     speechBubbleAnim,
     speechBubbleMessage,
-    showChatInBottomSheet,
-    chatMessages,
-    reantChatLoading,
-    handleCloseChatInBottomSheet,
-    onSendChatMessage,
     heroHeightAnim,
     MIN_HERO_HEIGHT,
     MAX_HERO_HEIGHT,
@@ -59,15 +48,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
     handleDragHandlePress,
     handleTodoListPress,
   } = useHomeScreenContainer({ navigation, route });
-
-  const [chatInputText, setChatInputText] = useState('');
-  const chatFlatListRef = useRef<FlatList>(null);
-
-  useEffect(() => {
-    if (showChatInBottomSheet && chatMessages.length > 0) {
-      setTimeout(() => chatFlatListRef.current?.scrollToEnd({ animated: true }), 100);
-    }
-  }, [showChatInBottomSheet, chatMessages]);
 
   // 에러 처리
   if (characterError) {
@@ -102,19 +82,17 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
       >
         <AppHeader navigation={navigation} />
 
-        {/* 대화 시작하기 / 대화 종료하기 버튼 (채팅 열려 있으면 종료로 전환) */}
+        {/* 대화 시작하기 버튼 */}
         <View style={styles.startChatButtonContainer}>
           <TouchableOpacity
             style={styles.startChatButton}
-            onPress={showChatInBottomSheet ? handleCloseChatInBottomSheet : handleCharacterPress}
+            onPress={handleCharacterPress}
             activeOpacity={0.8}
             accessibilityRole="button"
-            accessibilityLabel={showChatInBottomSheet ? '대화 종료하기' : '대화 시작하기'}
-            accessibilityHint={showChatInBottomSheet ? '채팅을 종료합니다' : '리앤트와 대화를 시작합니다'}
+            accessibilityLabel="대화 시작하기"
+            accessibilityHint="리앤트와 대화를 시작합니다"
           >
-            <Text style={styles.startChatButtonText}>
-              {showChatInBottomSheet ? '💬 대화 종료하기' : '💬 대화 시작하기'}
-            </Text>
+            <Text style={styles.startChatButtonText}>💬 대화 시작하기</Text>
           </TouchableOpacity>
         </View>
 
@@ -135,7 +113,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
                 >
                   <Animated.View
                     style={[
-                      { width: '100%' },
+                      styles.speechBubbleAnimatedContainer,
                       {
                         opacity: speechBubbleAnim,
                         transform: [
@@ -200,45 +178,23 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
         </Animated.View>
 
         {/* 진화 모달 */}
-        <Modal
-          visible={showEvolutionModal}
-          transparent={true}
-          animationType="none"
-          onRequestClose={handleEvolutionModalClose}
-        >
-          <Animated.View style={[styles.evolutionModalOverlay, { opacity: evolutionFadeAnim }]}>
-            <TouchableOpacity
-              style={styles.evolutionModalContent}
-              activeOpacity={1}
-              onPress={handleEvolutionModalClose}
-              accessibilityRole="button"
-              accessibilityLabel="닫기"
-            >
-              <View style={styles.evolutionImageContainer}>
-                <FastImage
-                  source={require('../../assets/images/characters/transformation.gif')}
-                  style={styles.evolutionImage}
-                  resizeMode={FastImage.resizeMode.contain}
-                  accessibilityLabel="진화하는 캐릭터 애니메이션"
-                />
-              </View>
-              <View style={styles.evolutionSpeechBubble}>
-                <ImageBackground
-                  source={require('../../assets/images/conversation.png')}
-                  style={styles.evolutionSpeechBubbleImage}
-                  resizeMode="stretch"
-                  accessibilityElementsHidden={true}
-                >
-                  <View style={styles.evolutionSpeechTextContainer}>
-                    <Text style={styles.evolutionSpeechText} accessibilityRole="header">
-                      어라? 내 몸이 이상해요!
-                    </Text>
-                  </View>
-                </ImageBackground>
-              </View>
-            </TouchableOpacity>
-          </Animated.View>
-        </Modal>
+        {(() => {
+          const currentLevel = currentCharacter?.level || 1;
+          const levelInfo = (characterTemplates as any[]).find(t => t.level === currentLevel) || characterTemplates[0];
+          const levelName = levelInfo?.name || '캐릭터';
+          const levelDescription = levelInfo?.description || '';
+          
+          return (
+            <AlertModal
+              visible={showEvolutionModal}
+              title="레벨 업! +1"
+              message={`레벨 ${currentLevel} ${levelName}로 진화했어요!\n${levelDescription}`}
+              buttonText="확인"
+              onClose={handleEvolutionModalClose}
+              icon={getCharacterImage(currentLevel, 'default')}
+            />
+          );
+        })()}
 
         {/* 하단: 바텀 시트 스타일 */}
         <Animated.View
@@ -280,79 +236,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
             </View>
           </TouchableOpacity>
 
-          {showChatInBottomSheet ? (
-            <KeyboardAvoidingView
-                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-                style={{ flex: 1 }}
-                keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
-              >
-                <FlatList
-                  ref={chatFlatListRef}
-                  data={chatMessages}
-                  renderItem={({ item }) =>
-                    item.type === 'user' ? (
-                      <View style={reantChatStyles.userMessageContainer}>
-                        <View style={reantChatStyles.userMessageBubble}>
-                          <Text style={reantChatStyles.userMessageText}>{item.content}</Text>
-                        </View>
-                      </View>
-                    ) : null
-                  }
-                  keyExtractor={(item) => item.id}
-                  contentContainerStyle={[
-                    reantChatStyles.messagesList,
-                    chatMessages.length === 0 && { flexGrow: 0 },
-                  ]}
-                  showsVerticalScrollIndicator={false}
-                  scrollEnabled={chatMessages.length > 1}
-                  ListEmptyComponent={
-                    <View style={reantChatStyles.emptyContainer}>
-                      <Text style={reantChatStyles.emptyText}>
-                        {currentCharacter?.name || '리앤트'}에게 메시지를 보내보세요!
-                      </Text>
-                    </View>
-                  }
-                />
-                <View style={reantChatStyles.inputContainer}>
-                  <TextInput
-                    style={reantChatStyles.input}
-                    value={chatInputText}
-                    onChangeText={setChatInputText}
-                    placeholder="메시지를 입력하세요..."
-                    placeholderTextColor="#999"
-                    multiline
-                    maxLength={200}
-                    onSubmitEditing={() => {
-                      if (chatInputText.trim()) {
-                        onSendChatMessage(chatInputText.trim());
-                        setChatInputText('');
-                      }
-                    }}
-                    returnKeyType="send"
-                  />
-                  <TouchableOpacity
-                    style={[
-                      reantChatStyles.sendButton,
-                      (!chatInputText.trim() || reantChatLoading) && reantChatStyles.sendButtonDisabled,
-                    ]}
-                    onPress={() => {
-                      if (chatInputText.trim() && !reantChatLoading) {
-                        onSendChatMessage(chatInputText.trim());
-                        setChatInputText('');
-                      }
-                    }}
-                    disabled={!chatInputText.trim() || reantChatLoading}
-                    activeOpacity={0.7}
-                  >
-                    {reantChatLoading ? (
-                      <ActivityIndicator size="small" color="#fff" />
-                    ) : (
-                      <Text style={reantChatStyles.sendButtonText}>전송</Text>
-                    )}
-                  </TouchableOpacity>
-                </View>
-              </KeyboardAvoidingView>
-          ) : (
           <ScrollView
             style={styles.contentScroll}
             showsVerticalScrollIndicator={false}
@@ -390,15 +273,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
                     <Text style={styles.todoListArrow}>›</Text>
                   </TouchableOpacity>
 
-                  {(() => {
-                    const activeCount = (activeTodoLists || []).length;
-                    console.log('[HomeScreen] 렌더링 조건 체크:', {
-                      activeTodoListsCount: activeCount,
-                      hasCompletedTodoList: !!completedTodoList,
-                      completedTodoListId: completedTodoList?.id
-                    });
-                    return activeCount === 0;
-                  })() ? (
+                  {((activeTodoLists || []).length === 0) ? (
                     <View style={styles.emptyTodoListContainer}>
                       <Text style={styles.emptyTodoListText}>
                         아직 투두리스트가 없어요{'\n'}첫 투두리스트를 만들어볼까요?
@@ -427,7 +302,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
                     </View>
                   ) : (
                     <>
-                      {todoMissionsByTime.size > 0 && (
+                      {todoMissionsByTime.size > 0 ? (
                         <View style={styles.timeBasedMissions}>
                           {Array.from(todoMissionsByTime.entries()).map(([time, missions]) => (
                             <View key={time} style={styles.timeGroup}>
@@ -468,6 +343,19 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
                             </View>
                           ))}
                         </View>
+                      ) : (
+                        <View style={styles.emptyTodoListContainer}>
+                          <Text style={styles.emptyTodoListText}>
+                            투두리스트가 있지만{'\n'}표시할 미션이 없어요
+                          </Text>
+                          <TouchableOpacity
+                            style={styles.createTodoListButton}
+                            onPress={() => navigation.navigate(SCREEN_NAMES.TODO_LIST as any)}
+                            activeOpacity={0.7}
+                          >
+                            <Text style={styles.createTodoListButtonText}>투두리스트 보기</Text>
+                          </TouchableOpacity>
+                        </View>
                       )}
                     </>
                   )}
@@ -475,7 +363,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
               </>
             )}
           </ScrollView>
-          )}
         </Animated.View>
       </ImageBackground>
     </Animated.View>

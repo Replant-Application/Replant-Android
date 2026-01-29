@@ -4,17 +4,15 @@
  */
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import * as Location from 'expo-location';
 import { useErrorHandler } from '../../hooks/useErrorHandler';
 import { SCREEN_NAMES } from '../../utils/constants';
-import { getTodoListDetail, completeTodoMission, archiveTodoList, canCreateNewTodoList } from '../../api/todolistApi';
+import { getTodoListDetail, completeTodoMission, archiveTodoList, canCreateNewTodoList, updateMissionSet } from '../../api/todolistApi';
 import { TodoList, TodoMission } from '../../types/todolist';
+import { useUser } from '../../contexts/UserContext';
 import {
   getVerifications,
   getUserMissions,
   addSystemMissionToMyMissions,
-  verifyByGps,
-  verifyByTime,
 } from '../../api/missionApi';
 
 interface TodoListDetailScreenContainerProps {
@@ -22,12 +20,14 @@ interface TodoListDetailScreenContainerProps {
   route: {
     params: {
       todoListId: number | string;
+      activeTab?: 'active' | 'completed' | 'incomplete'; // 뒤로가기 시 복원할 탭
     };
   };
 }
 
 export const useTodoListDetailScreenContainer = ({ navigation, route }: TodoListDetailScreenContainerProps) => {
   const { todoListId } = route.params;
+  const { currentUserId } = useUser();
 
   const [showAlert, setShowAlert] = useState(false);
   const [alertTitle, setAlertTitle] = useState('');
@@ -63,28 +63,30 @@ export const useTodoListDetailScreenContainer = ({ navigation, route }: TodoList
   const [refreshing, setRefreshing] = useState(false);
   const [completingMissionId, setCompletingMissionId] = useState<number | null>(null);
   const [archiving, setArchiving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [canCreate, setCanCreate] = useState(false);
   const [showCompleteModal, setShowCompleteModal] = useState(false);
   const [hasShownCompleteModal, setHasShownCompleteModal] = useState(false);
+  const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false);
 
   /**
    * 모든 미션이 완료되었는지 확인
    */
-  const checkAllMissionsCompleted = useCallback((todoList: TodoList): boolean => {
-    return todoList.missions ? todoList.missions.every(mission => mission.isCompleted) : todoList.completedCount > 0 && todoList.completedCount === todoList.totalCount;
+  const checkAllMissionsCompleted = useCallback((targetTodoList: TodoList): boolean => {
+    return targetTodoList.missions ? targetTodoList.missions.every(mission => mission.isCompleted) : targetTodoList.completedCount > 0 && targetTodoList.completedCount === targetTodoList.totalCount;
   }, []);
 
   /**
    * 투두리스트가 오늘 생성되었는지 확인
    */
-  const checkIsTodayCreated = useCallback((todoList: TodoList): boolean => {
-    if (!todoList.createdAt) return false;
-    const createdDate = new Date(todoList.createdAt);
-    const today = new Date();
+  const checkIsTodayCreated = useCallback((targetTodoList: TodoList): boolean => {
+    if (!targetTodoList.createdAt) return false;
+    const createdDate = new Date(targetTodoList.createdAt);
+    const todayDate = new Date();
     return (
-      createdDate.getFullYear() === today.getFullYear() &&
-      createdDate.getMonth() === today.getMonth() &&
-      createdDate.getDate() === today.getDate()
+      createdDate.getFullYear() === todayDate.getFullYear() &&
+      createdDate.getMonth() === todayDate.getMonth() &&
+      createdDate.getDate() === todayDate.getDate()
     );
   }, []);
 
@@ -92,9 +94,9 @@ export const useTodoListDetailScreenContainer = ({ navigation, route }: TodoList
    * 완료 모달 표시 여부 확인 및 설정
    */
   const checkAndShowCompleteModal = useCallback(
-    (todoList: TodoList) => {
-      const allMissionsCompleted = checkAllMissionsCompleted(todoList);
-      const isTodayCreated = checkIsTodayCreated(todoList);
+    (targetTodoList: TodoList) => {
+      const allMissionsCompleted = checkAllMissionsCompleted(targetTodoList);
+      const isTodayCreated = checkIsTodayCreated(targetTodoList);
 
       if (allMissionsCompleted && isTodayCreated && !hasShownCompleteModal) {
         setShowCompleteModal(true);
@@ -120,15 +122,19 @@ export const useTodoListDetailScreenContainer = ({ navigation, route }: TodoList
       const [detailResult, canCreateResult] = await Promise.all([getTodoListDetail(id), canCreateNewTodoList()]);
 
       if (detailResult.success && detailResult.data) {
-        const todoList = detailResult.data;
-        setTodoList(todoList);
+        const loadedTodoList = detailResult.data;
+        // 디버깅: isVerified 필드 확인
+        if (loadedTodoList.missions) {
+          // 미션 데이터 처리
+        }
+        setTodoList(loadedTodoList);
 
         // 완료 모달 표시 확인
-        checkAndShowCompleteModal(todoList);
+        checkAndShowCompleteModal(loadedTodoList);
 
         // 필수 미션 중 인증 완료되었지만 아직 투두리스트에서 완료되지 않은 미션 확인
-        if (todoList.missions) {
-          const incompleteRequiredMissions = todoList.missions.filter(
+        if (loadedTodoList.missions) {
+          const incompleteRequiredMissions = loadedTodoList.missions.filter(
             mission => (mission.missionType === 'OFFICIAL' || mission.missionSource === 'RANDOM_OFFICIAL') && !mission.isCompleted
           );
 
@@ -144,10 +150,6 @@ export const useTodoListDetailScreenContainer = ({ navigation, route }: TodoList
               });
 
               if (verificationResult.success && verificationResult.data && verificationResult.data.content && verificationResult.data.content.length > 0) {
-                console.log('[TodoListDetailScreen] 인증 완료된 미션 발견:', {
-                  missionId: mission.missionId,
-                  missionTitle: mission.title,
-                });
                 hasVerifiedMission = true;
               }
             } catch (error) {
@@ -157,7 +159,6 @@ export const useTodoListDetailScreenContainer = ({ navigation, route }: TodoList
 
           // 인증 완료된 미션이 있으면 투두리스트를 다시 조회하여 최신 상태 반영
           if (hasVerifiedMission) {
-            console.log('[TodoListDetailScreen] 인증 완료된 미션이 있으므로 투두리스트 재조회');
             setTimeout(async () => {
               const refreshResult = await getTodoListDetail(id);
               if (refreshResult.success && refreshResult.data) {
@@ -237,7 +238,7 @@ export const useTodoListDetailScreenContainer = ({ navigation, route }: TodoList
 
   /**
    * 미션 완료 처리
-   * - 필수 미션: 인증 플로우(COMMUNITY→VerificationPostCreate, GPS/TIME→verify API)로 이동 후, GPS/TIME 성공 시 completeTodoMission
+   * - 공식 미션: 커뮤니티 인증(VerificationPostCreate)으로 이동
    * - 커스텀 미션: 즉시 completeTodoMission
    */
   const handleCompleteMission = useCallback(
@@ -253,60 +254,16 @@ export const useTodoListDetailScreenContainer = ({ navigation, route }: TodoList
             return;
           }
 
-          const vt = (mission.verificationType || '').toUpperCase();
-          if (vt === 'COMMUNITY') {
-            navigation.navigate(SCREEN_NAMES.VERIFICATION_POST_CREATE as any, {
-              userMissionId,
-              missionId: String(mission.missionId),
-              missionTitle: mission.title || '미션',
-              missionEmoji: '🎯',
-              photoUrl: undefined,
-            });
-            return;
-          }
-          if (vt === 'GPS') {
-            const { status } = await Location.requestForegroundPermissionsAsync();
-            if (status !== 'granted') {
-              showInfo('위치 권한이 필요합니다.', '권한 필요');
-              return;
-            }
-            const location = await Location.getCurrentPositionAsync({});
-            const result = await verifyByGps(userMissionId, location.coords.latitude, location.coords.longitude);
-            if (result.success) {
-              showSuccess(`+${result.data?.expReward || 50} EXP를 획득했습니다!`, 'GPS 인증 완료');
-              const completeRes = await completeTodoMission(Number(todoListId), mission.missionId);
-              if (completeRes.success && completeRes.data) {
-                setTodoList(completeRes.data);
-                checkAndShowCompleteModal(completeRes.data);
-              } else if (!completeRes.success) {
-                handleApiError(completeRes, 'TodoListDetailScreen.handleCompleteMission.GPS.complete');
-              }
-              const canCreateResult = await canCreateNewTodoList();
-              if (canCreateResult.success && canCreateResult.data) setCanCreate(canCreateResult.data.canCreate);
-            } else {
-              handleApiError(result, 'TodoListDetailScreen.handleCompleteMission.GPS');
-            }
-            return;
-          }
-          if (vt === 'TIME') {
-            const result = await verifyByTime(userMissionId);
-            if (result.success) {
-              showSuccess(`+${result.data?.expReward || 50} EXP를 획득했습니다!`, '시간 인증 완료');
-              const completeRes = await completeTodoMission(Number(todoListId), mission.missionId);
-              if (completeRes.success && completeRes.data) {
-                setTodoList(completeRes.data);
-                checkAndShowCompleteModal(completeRes.data);
-              } else if (!completeRes.success) {
-                handleApiError(completeRes, 'TodoListDetailScreen.handleCompleteMission.TIME.complete');
-              }
-              const canCreateResult = await canCreateNewTodoList();
-              if (canCreateResult.success && canCreateResult.data) setCanCreate(canCreateResult.data.canCreate);
-            } else {
-              handleApiError(result, 'TodoListDetailScreen.handleCompleteMission.TIME');
-            }
-            return;
-          }
-          showError(new Error('지원하지 않는 인증 방식입니다.'), 'TodoListDetailScreen.handleCompleteMission');
+          // 모든 미션은 커뮤니티 인증(인증글 작성)으로 통일
+          navigation.navigate(SCREEN_NAMES.VERIFICATION_POST_CREATE as any, {
+            userMissionId,
+            missionId: String(mission.missionId),
+            missionTitle: mission.title || '미션',
+            missionEmoji: '🎯',
+            photoUrl: undefined,
+            todoListId: Number(todoListId),
+          });
+          return;
         } catch (error) {
           showError(
             error instanceof Error ? error : new Error('인증을 시작하는 중 문제가 발생했습니다.'),
@@ -366,7 +323,13 @@ export const useTodoListDetailScreenContainer = ({ navigation, route }: TodoList
       const result = await archiveTodoList(Number(todoListId));
       if (result.success) {
         showSuccess('투두리스트가 보관되었습니다.');
-        navigation.goBack();
+        // activeTab이 있으면 해당 탭으로 복원
+        const activeTab = route.params?.activeTab;
+        if (activeTab) {
+          navigation.navigate(SCREEN_NAMES.TODO_LIST as any, { activeTab });
+        } else {
+          navigation.goBack();
+        }
       } else {
         handleApiError(result, 'TodoListDetailScreen.handleArchiveConfirm');
       }
@@ -375,7 +338,7 @@ export const useTodoListDetailScreenContainer = ({ navigation, route }: TodoList
     } finally {
       setArchiving(false);
     }
-  }, [todoListId, navigation, handleApiError, showError, showSuccess]);
+  }, [todoListId, navigation, route.params?.activeTab, handleApiError, showError, showSuccess]);
 
   /**
    * 보관 확인 모달: 취소
@@ -383,6 +346,56 @@ export const useTodoListDetailScreenContainer = ({ navigation, route }: TodoList
   const handleArchiveConfirmCancel = useCallback(() => {
     setShowArchiveConfirmModal(false);
   }, []);
+
+  /**
+   * 투두리스트 삭제 확인 모달 열기
+   */
+  const handleDelete = useCallback(() => {
+    setShowDeleteConfirmModal(true);
+  }, []);
+
+  /**
+   * 공유 해제 확인 모달: 공유 해제 실행 (isPublic을 false로 변경)
+   */
+  const handleDeleteConfirm = useCallback(async () => {
+    if (!todoList) return;
+    
+    setShowDeleteConfirmModal(false);
+    setDeleting(true);
+    try {
+      // isPublic만 false로 변경 (title, description은 그대로 유지)
+      const result = await updateMissionSet(Number(todoListId), {
+        title: todoList.title,
+        description: todoList.description || undefined,
+        isPublic: false,
+      });
+      if (result.success && result.data) {
+        showSuccess('커뮤니티 공유 게시판에서 제거되었습니다.');
+        // 투두리스트 정보 업데이트
+        loadData();
+      } else {
+        handleApiError(result, 'TodoListDetailScreen.handleDeleteConfirm');
+      }
+    } catch (error) {
+      showError(error instanceof Error ? error : new Error('공유 해제에 실패했습니다.'), 'TodoListDetailScreen.handleDeleteConfirm');
+    } finally {
+      setDeleting(false);
+    }
+  }, [todoListId, todoList, loadData, handleApiError, showError, showSuccess]);
+
+  /**
+   * 삭제 확인 모달: 취소
+   */
+  const handleDeleteConfirmCancel = useCallback(() => {
+    setShowDeleteConfirmModal(false);
+  }, []);
+
+  /**
+   * 본인이 만든 투두리스트인지 확인
+   */
+  const isOwner = useMemo(() => {
+    return todoList && currentUserId && todoList.creatorId === currentUserId;
+  }, [todoList, currentUserId]);
 
   /**
    * 새 투두리스트 생성 화면으로 이동
@@ -420,6 +433,8 @@ export const useTodoListDetailScreenContainer = ({ navigation, route }: TodoList
     refreshing,
     completingMissionId,
     archiving,
+    deleting,
+    isOwner,
     showCompleteModal,
     showAlert,
     alertTitle,
@@ -428,6 +443,10 @@ export const useTodoListDetailScreenContainer = ({ navigation, route }: TodoList
     showArchiveConfirmModal,
     handleArchiveConfirm,
     handleArchiveConfirmCancel,
+    showDeleteConfirmModal,
+    handleDelete,
+    handleDeleteConfirm,
+    handleDeleteConfirmCancel,
     // Progress
     ...progressData,
     // Handlers

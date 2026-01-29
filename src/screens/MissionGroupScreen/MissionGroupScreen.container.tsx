@@ -280,8 +280,8 @@ export const useMissionGroupScreenContainer = ({ navigation }: MissionGroupScree
         // 리뷰 목록 새로고침
         await loadReviews(selectedMission.id);
       } else {
-        if (result.error?.includes('뱃지') || result.error?.includes('badge')) {
-          showInfo('이 미션을 완료하고 뱃지를 획득해야 후기를 작성할 수 있습니다.', '후기 작성 불가');
+        if (result.error?.includes('배지') || result.error?.includes('badge')) {
+          showInfo('이 미션을 완료하고 배지를 획득해야 후기를 작성할 수 있습니다.', '후기 작성 불가');
         } else {
           handleApiError(result, 'MissionGroupScreen.handleSubmitReview');
         }

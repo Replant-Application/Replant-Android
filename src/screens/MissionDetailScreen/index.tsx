@@ -50,14 +50,10 @@ const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({ navigation, r
     handleSubmitReview,
     handleRefresh,
     loadMoreReviews,
-    handleCompleteCustom,
-    completingCustom,
     showAlert,
     alertTitle,
     alertMessage,
     handleCloseAlert,
-    showCompleteSuccessModal,
-    handleCloseCompleteSuccess,
   } = useMissionDetailScreenContainer({ navigation, route });
 
 
@@ -201,77 +197,61 @@ const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({ navigation, r
             </View>
             <View style={styles.statItem}>
               <Text style={styles.statValue}>{mission.badgeDurationDays}일</Text>
-              <Text style={styles.statLabel}>뱃지 유효기간</Text>
+              <Text style={styles.statLabel}>배지 유효기간</Text>
             </View>
           </View>
 
-          {/* 인증 방식 표시 */}
-          <View style={styles.verificationInfo}>
-            <Text style={styles.verificationLabel}>인증 방식</Text>
-            <Text style={styles.verificationValue}>
-              {mission.verificationType === 'GPS'
-                ? 'GPS 위치 인증'
-                : mission.verificationType === 'TIME'
-                ? `시간 인증 (${mission.requiredMinutes}분)`
-                : '커뮤니티 인증'}
-            </Text>
-          </View>
-
-          {/* 커스텀 미션 완료 버튼 */}
-          {mission.missionType === 'CUSTOM' && (
-            <TouchableOpacity
-              style={[styles.completeCustomButton, completingCustom && styles.completeCustomButtonDisabled]}
-              onPress={handleCompleteCustom}
-              disabled={completingCustom}
-              activeOpacity={0.7}
-            >
-              {completingCustom ? (
-                <ActivityIndicator size="small" color={colors.white} />
-              ) : (
-                <Text style={styles.completeCustomButtonText}>완료하기</Text>
-              )}
-            </TouchableOpacity>
+          {/* 인증 방식 표시 (커스텀 미션이 아닐 때만) - 모든 미션 커뮤니티 인증 통일 */}
+          {mission.missionType !== 'CUSTOM' && (
+            <View style={styles.verificationInfo}>
+              <Text style={styles.verificationLabel}>인증 방식</Text>
+              <Text style={styles.verificationValue}>커뮤니티 인증</Text>
+            </View>
           )}
         </View>
 
         {/* 후기 작성 섹션 */}
-        {/* 뱃지가 없는 경우 안내 메시지 */}
+        {/* 배지가 없는 경우 안내 메시지 */}
         {!hasBadge && (
           <View style={styles.noBadgeSection}>
             <Image
               source={require('../../assets/images/badge.png')}
               style={styles.noBadgeIcon}
               resizeMode="contain"
-              accessibilityLabel="뱃지 아이콘"
+              accessibilityLabel="배지 아이콘"
             />
             <Text style={styles.noBadgeTitle}>후기 작성 안내</Text>
             <Text style={styles.noBadgeDescription}>
-              이 미션을 완료하고 유효한 뱃지를 획득하면{'\n'}후기를 작성할 수 있습니다.
+              이 미션을 완료하고 유효한 배지를 획득하면{'\n'}후기를 작성할 수 있습니다.
             </Text>
           </View>
         )}
 
-        {/* 뱃지가 있고 이미 후기를 작성한 경우 */}
+        {/* 배지가 있고 이미 후기를 작성한 경우 */}
         {hasBadge && hasWrittenReview && (
           <View style={styles.alreadyWrittenSection}>
             <Text style={styles.alreadyWrittenIcon} />
             <Text style={styles.alreadyWrittenText}>
-              이 뱃지로 후기를 이미 작성하셨습니다.{'\n'}
+              이 배지로 후기를 이미 작성하셨습니다.{'\n'}
               다시 미션을 완료하면 새 후기를 작성할 수 있어요!
             </Text>
           </View>
         )}
 
-        {/* 뱃지가 있고 후기를 작성하지 않은 경우 */}
+        {/* 배지가 있고 후기를 작성하지 않은 경우 */}
         {hasBadge && !hasWrittenReview && (
           <View style={styles.writeReviewSection}>
             <Text style={styles.sectionTitle}>후기 작성</Text>
-            <Text style={styles.writeReviewHint}>
-              미션 뱃지를 보유하고 계시네요! 후기를 남겨주세요.
-            </Text>
+            <View style={styles.writeReviewHintContainer}>
+              <Text style={styles.writeReviewHint}>
+                미션 배지를 보유하고 계시네요!
+              </Text>
+              <Text style={styles.writeReviewHint}>
+                후기를 남겨주세요.
+              </Text>
+            </View>
             {/* 별점 선택 */}
             <View style={styles.ratingContainer}>
-              <Text style={styles.ratingLabel}>별점</Text>
               <View style={styles.starsContainer}>
                 {[1, 2, 3, 4, 5].map((star) => (
                   <TouchableOpacity
@@ -286,7 +266,6 @@ const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({ navigation, r
                   </TouchableOpacity>
                 ))}
               </View>
-              <Text style={styles.ratingValue}>{reviewRating}점</Text>
             </View>
             <TextInput
               style={styles.reviewInput}
@@ -352,13 +331,6 @@ const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({ navigation, r
         message={alertMessage}
         buttonText="확인"
         onClose={handleCloseAlert}
-      />
-      <AlertModal
-        visible={showCompleteSuccessModal}
-        title="성공"
-        message="미션을 완료했어요."
-        buttonText="확인"
-        onClose={handleCloseCompleteSuccess}
       />
     </ImageBackground>
   );

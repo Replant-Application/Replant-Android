@@ -138,19 +138,16 @@ export const styles = StyleSheet.create({
   },
   myReviewCard: {
     backgroundColor: colors.background.primary,
-    borderRadius: borderRadius.lg,
-    padding: spacing[4],
+    borderRadius: borderRadius.base,
+    padding: spacing[3],
     borderWidth: 1,
     borderColor: colors.primary[200],
     marginBottom: spacing[2],
-    minHeight: 60,
-    justifyContent: 'center',
   },
   myReviewHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: spacing[2],
   },
   myReviewLabel: {
     ...createTextStyle('sm', {
@@ -168,25 +165,26 @@ export const styles = StyleSheet.create({
     }),
   },
   reviewFormCard: {
-    ...cardStyles.base(),
     backgroundColor: colors.background.primary,
-    borderRadius: borderRadius.lg,
+    borderRadius: borderRadius.base,
+    padding: spacing[3],
     borderWidth: 1,
     borderColor: colors.border.light,
   },
   reviewFormLabel: {
     ...createSecondaryTextStyle('sm', {
       marginBottom: spacing[2],
+      textAlign: 'center',
     }),
   },
   ratingSelector: {
     flexDirection: 'row',
     justifyContent: 'center',
-    gap: spacing[2],
-    marginBottom: spacing[5],
+    gap: spacing[1],
+    marginBottom: spacing[2],
   },
   ratingStar: {
-    fontSize: 32,
+    fontSize: 24,
     color: colors.gray[300],
   },
   ratingStarActive: {
@@ -226,19 +224,10 @@ export const styles = StyleSheet.create({
   submitButtonText: {
     ...createButtonTextStyle('sm'),
   },
-  writeReviewButton: {
-    backgroundColor: colors.background.primary,
-    borderRadius: borderRadius.lg,
-    padding: spacing[4],
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: colors.primary[200],
-    borderStyle: 'dashed',
-  },
-  writeReviewButtonText: {
-    ...createTextStyle('sm', {
-      color: colors.primary[500],
-      fontWeight: typography.fontWeight.medium,
+  submittingText: {
+    ...createSecondaryTextStyle('xs', {
+      textAlign: 'center',
+      marginTop: spacing[1],
     }),
   },
   bottomContainer: {
@@ -251,5 +240,8 @@ export const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 255, 255, 0.95)',
     borderTopWidth: 1,
     borderTopColor: colors.border.light,
+  },
+  spacer: {
+    height: 120,
   },
 });

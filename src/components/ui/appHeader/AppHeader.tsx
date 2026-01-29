@@ -138,22 +138,6 @@ const AppHeader: React.FC<AppHeaderProps> = ({ navigation }) => {
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.menuItem}
-              onPress={() => handleMenuPress('CounselingSelect')}
-              activeOpacity={0.7}
-              accessibilityRole="button"
-              accessibilityLabel="상담"
-            >
-              <Image
-                source={require('../../../assets/images/hospital.png')}
-                style={styles.menuItemIcon}
-                resizeMode="contain"
-                accessibilityLabel="상담 아이콘"
-                accessibilityElementsHidden={true}
-              />
-              <Text style={styles.menuItemText}>상담</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.menuItem}
               onPress={() => handleMenuPress('Calendar')}
               activeOpacity={0.7}
               accessibilityRole="button"
@@ -170,22 +154,6 @@ const AppHeader: React.FC<AppHeaderProps> = ({ navigation }) => {
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.menuItem}
-              onPress={() => handleMenuPress('SoundSettings')}
-              activeOpacity={0.7}
-              accessibilityRole="button"
-              accessibilityLabel="사운드 설정"
-            >
-              <Image
-                source={require('../../../assets/images/sound.png')}
-                style={styles.menuItemIcon}
-                resizeMode="contain"
-                accessibilityLabel="사운드 설정 아이콘"
-                accessibilityElementsHidden={true}
-              />
-              <Text style={styles.menuItemText}>사운드 설정</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.menuItem}
               onPress={() => handleMenuPress('SpontaneousMissionSetup', { mode: 'edit' })}
               activeOpacity={0.7}
               accessibilityRole="button"
@@ -199,6 +167,38 @@ const AppHeader: React.FC<AppHeaderProps> = ({ navigation }) => {
                 accessibilityElementsHidden={true}
               />
               <Text style={styles.menuItemText}>돌발 미션 설정</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => handleMenuPress('SoundSettings')}
+              activeOpacity={0.7}
+              accessibilityRole="button"
+              accessibilityLabel="사운드"
+            >
+              <Image
+                source={require('../../../assets/images/sound.png')}
+                style={styles.menuItemIcon}
+                resizeMode="contain"
+                accessibilityLabel="사운드 아이콘"
+                accessibilityElementsHidden={true}
+              />
+              <Text style={styles.menuItemText}>사운드</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => handleMenuPress('CounselingSelect')}
+              activeOpacity={0.7}
+              accessibilityRole="button"
+              accessibilityLabel="상담 서비스"
+            >
+              <Image
+                source={require('../../../assets/images/hospital.png')}
+                style={styles.menuItemIcon}
+                resizeMode="contain"
+                accessibilityLabel="상담 서비스 아이콘"
+                accessibilityElementsHidden={true}
+              />
+              <Text style={styles.menuItemText}>상담 서비스</Text>
             </TouchableOpacity>
           </Animated.View>
         </TouchableOpacity>

@@ -44,6 +44,15 @@ const AlertModal: React.FC<AlertModalProps> = ({
     >
       <View style={styles.overlay}>
         <View style={styles.modalContainer}>
+          <TouchableOpacity
+            style={styles.closeButton}
+            onPress={onClose}
+            activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel="닫기"
+          >
+            <Text style={styles.closeButtonText}>✕</Text>
+          </TouchableOpacity>
           {icon && (
             <View style={styles.iconContainer}>
               <Image

@@ -38,3 +38,12 @@ export {
   loadingStyles,
   headerStyles,
 } from './componentStyles';
+
+// 레이아웃 스타일
+export {
+  screenContainer,
+  screenContent,
+  sectionContainer,
+  screenContainerLarge,
+  screenContentLarge,
+} from './layoutStyles';

@@ -10,7 +10,7 @@ import { useCharacter } from '../../hooks/useCharacter';
 import { SimpleDiaryData, Diary } from '../../types';
 import { formatDateYYYYMMDD } from '../../utils/dateUtils';
 import { DiaryStep } from '../../types/screens/diary';
-import { playButtonSound, playReadBookSound } from '../../utils/soundUtils';
+import { playButtonSound } from '../../utils/soundUtils';
 
 // 기분 값에 따른 그라데이션 색상 계산 (0: 연한 빨강 → 100: 진한 초록)
 const getMoodColor = (value: number): string => {
@@ -50,9 +50,7 @@ export const useDiaryScreenContainer = () => {
   const [emotionText, setEmotionText] = useState('');
   const [expressionText, setExpressionText] = useState('');
   const [selectedDiary, setSelectedDiary] = useState<(SimpleDiaryData & { id: string }) | null>(null);
-  const [viewingDiaryIndex, setViewingDiaryIndex] = useState(0);
   const [showEmptyMessage, setShowEmptyMessage] = useState(false);
-  const [viewMode, setViewMode] = useState<'book' | 'list'>('list');
   const [searchDate, setSearchDate] = useState('');
   const [refreshing, setRefreshing] = useState(false);
   const [searchingByDate, setSearchingByDate] = useState(false);
@@ -427,7 +425,7 @@ export const useDiaryScreenContainer = () => {
         } else {
           showAlertModal('알림', result.error || '해당 날짜에 작성한 일기가 없습니다.');
         }
-      } catch (error) {
+      } catch (err) {
         showAlertModal('오류', '일기 조회에 실패했습니다.');
       } finally {
         setSearchingByDate(false);
@@ -470,16 +468,6 @@ export const useDiaryScreenContainer = () => {
     setSearchingByDate(false);
   }, []);
 
-  /**
-   * 책 뷰에서 일기 상세 보기
-   */
-  const handleBookDetailView = useCallback(
-    async (diary: Diary | (SimpleDiaryData & { id: string })) => {
-      await playReadBookSound();
-      handleViewDetail(diary);
-    },
-    [handleViewDetail]
-  );
 
   return {
     // Data
@@ -499,9 +487,7 @@ export const useDiaryScreenContainer = () => {
     emotionText,
     expressionText,
     selectedDiary,
-    viewingDiaryIndex,
     showEmptyMessage,
-    viewMode,
     searchDate,
     refreshing,
     searchingByDate,
@@ -530,15 +516,12 @@ export const useDiaryScreenContainer = () => {
     handleDeleteCancel,
     handleAlertClose,
     handleSearchDateClear,
-    handleBookDetailView,
     onRefresh,
     setMoodValue,
     setFactorText,
     setEmotionText,
     setExpressionText,
-    setViewMode,
     setSearchDate,
-    setViewingDiaryIndex,
     // Utils
     getMoodColor,
     getStepMessage,

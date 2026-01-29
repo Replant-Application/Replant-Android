@@ -74,43 +74,19 @@ const TodoListCreateScreen: React.FC<TodoListCreateScreenProps> = ({ navigation 
     handleCreate,
     handleSetMissionTime,
     handleSaveTime,
-    handleRemoveTime,
+    handleSetDefaultTimeForAll,
+    isAllDay,
+    handleToggleAllDay,
     handleTodoListSuccessClose,
     handleTimePickerNext,
     handleTimePickerPrev,
     handleCloseTimePickerModal,
   } = useTodoListCreateScreenContainer({ navigation });
 
-  const renderIntroStep = () => (
-    <View style={styles.introContainer}>
-      <View style={styles.introContent}>
-        <View style={styles.introIconContainer}>
-          <Image 
-            source={require('../../assets/images/list.png')} 
-            style={styles.introIcon} 
-            resizeMode="contain" 
-            accessibilityLabel="투두리스트 아이콘"
-          />
-        </View>
-        <Text style={styles.introTitle}>나만의 투두리스트 만들기</Text>
-        <View style={styles.introDescriptionContainer}>
-          <Text style={styles.introDescription}>
-            공식 미션과 함께 원하는 미션을 추가해서{'\n'}
-            나만의 투두리스트를 자유롭게 만들어보세요!
-          </Text>
-        </View>
-      </View>
-
-      <TouchableOpacity style={styles.primaryButton} onPress={() => setCurrentStep('random')} activeOpacity={0.7}>
-        <Text style={styles.primaryButtonText}>시작하기</Text>
-      </TouchableOpacity>
-    </View>
-  );
-
   const renderRandomStep = () => (
     <View style={styles.stepContainer}>
       <View style={styles.stepHeader}>
-        <Text style={styles.stepTitle}>공식 미션</Text>
+        <Text style={styles.stepTitle}>Step 1. 공식 미션</Text>
         <Text style={styles.stepSubtitle}>3개의 공식 미션이 배정되었습니다</Text>
       </View>
 
@@ -123,11 +99,13 @@ const TodoListCreateScreen: React.FC<TodoListCreateScreenProps> = ({ navigation 
         <ScrollView style={styles.missionList} showsVerticalScrollIndicator={false}>
           {randomMissions.map((mission, index) => (
             <View key={mission.id} style={styles.missionCard}>
-              <View style={styles.missionNumber}>
-                <Text style={styles.missionNumberText}>{index + 1}</Text>
-              </View>
               <View style={styles.missionContent}>
-                <Text style={styles.missionTitle}>{mission.title}</Text>
+                <View style={styles.missionTitleContainer}>
+                  <View style={styles.missionNumber}>
+                    <Text style={styles.missionNumberText}>{index + 1}</Text>
+                  </View>
+                  <Text style={styles.missionTitle}>{mission.title}</Text>
+                </View>
                 <Text style={styles.missionDescription} numberOfLines={2}>
                   {mission.description}
                 </Text>
@@ -167,11 +145,8 @@ const TodoListCreateScreen: React.FC<TodoListCreateScreenProps> = ({ navigation 
       )}
 
       <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.secondaryButton} onPress={() => setCurrentStep('intro')} activeOpacity={0.7}>
-          <Text style={styles.secondaryButtonText}>이전</Text>
-        </TouchableOpacity>
         <TouchableOpacity
-          style={[styles.primaryButton, styles.buttonFlex]}
+          style={styles.primaryButton}
           onPress={() => setCurrentStep('custom')}
           disabled={loading || randomMissions.length === 0}
           activeOpacity={0.7}
@@ -185,7 +160,7 @@ const TodoListCreateScreen: React.FC<TodoListCreateScreenProps> = ({ navigation 
   const renderCustomStep = () => (
     <View style={styles.stepContainer}>
       <View style={styles.stepHeader}>
-        <Text style={styles.stepTitle}>미션 추가</Text>
+        <Text style={styles.stepTitle}>Step 2. 커스텀 미션</Text>
         <Text style={styles.stepSubtitle}>
           원하는 미션을 자유롭게 선택해주세요 ({selectedCustomMissions.length}개 선택됨)
         </Text>
@@ -258,10 +233,10 @@ const TodoListCreateScreen: React.FC<TodoListCreateScreenProps> = ({ navigation 
                 style={[styles.selectableMissionCard, isSelected && styles.selectableMissionCardSelected]}
                 onPress={() => handleCustomMissionToggle(mission.id)}
                 activeOpacity={0.7}
+                accessibilityRole="button"
+                accessibilityLabel={`${mission.title} ${isSelected ? '선택됨' : '선택하기'}`}
+                accessibilityState={{ selected: isSelected }}
               >
-                <View style={[styles.checkbox, isSelected && styles.checkboxSelected]}>
-                  {isSelected && <Text style={styles.checkmark}>✓</Text>}
-                </View>
                 <View style={styles.missionContent}>
                   <Text style={[styles.missionTitle, isSelected && styles.missionTitleSelected]}>{mission.title}</Text>
                   <Text style={styles.missionDescription} numberOfLines={2}>
@@ -271,14 +246,14 @@ const TodoListCreateScreen: React.FC<TodoListCreateScreenProps> = ({ navigation 
                     <Text style={styles.missionCategory}>{mission.category}</Text>
                     {mission.missionType !== 'CUSTOM' && (
                       <View style={styles.missionExpContainer}>
-                    <Image
-                      source={require('../../assets/images/sun.png')}
-                      style={styles.sunIcon}
-                      resizeMode="contain"
-                      accessibilityLabel="경험치 아이콘"
-                    />
-                    <Text style={styles.missionExp}>{mission.expReward} EXP</Text>
-                  </View>
+                        <Image
+                          source={require('../../assets/images/sun.png')}
+                          style={styles.sunIcon}
+                          resizeMode="contain"
+                          accessibilityLabel="경험치 아이콘"
+                        />
+                        <Text style={styles.missionExp}>{mission.expReward} EXP</Text>
+                      </View>
                     )}
                   </View>
                 </View>
@@ -298,9 +273,8 @@ const TodoListCreateScreen: React.FC<TodoListCreateScreenProps> = ({ navigation 
           <Text style={styles.secondaryButtonText}>이전</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={[styles.primaryButton, styles.buttonFlex, selectedCustomMissions.length === 0 && styles.buttonDisabled]}
+          style={[styles.primaryButton, styles.buttonFlex]}
           onPress={() => setCurrentStep('confirm')}
-          disabled={selectedCustomMissions.length === 0}
           activeOpacity={0.7}
         >
           <Text style={styles.primaryButtonText}>다음</Text>
@@ -318,7 +292,7 @@ const TodoListCreateScreen: React.FC<TodoListCreateScreenProps> = ({ navigation 
     return (
       <View style={styles.stepContainer}>
         <View style={styles.stepHeader}>
-          <Text style={styles.stepTitle}>나만의 투두리스트 작성</Text>
+          <Text style={styles.stepTitle}>Step 3. 나만의 투두리스트</Text>
           <Text style={styles.stepSubtitle}>오늘 하루의 커리큘럼을 정하세요</Text>
         </View>
 
@@ -353,7 +327,23 @@ const TodoListCreateScreen: React.FC<TodoListCreateScreenProps> = ({ navigation 
           </View>
 
           <View style={styles.missionsListSection}>
-            <Text style={styles.missionsListTitle}>미션을 시간대에 배치하세요</Text>
+            <View style={styles.missionsListTitleContainer}>
+              <Text style={styles.missionsListTitle}>미션을 시간대에 배치하세요</Text>
+              <TouchableOpacity
+                style={styles.allDayCheckboxRow}
+                onPress={handleToggleAllDay}
+                activeOpacity={0.7}
+                accessibilityRole="checkbox"
+                accessibilityLabel="하루종일"
+                accessibilityState={{ checked: isAllDay }}
+                accessibilityHint="모든 미션의 시간을 오전 12시부터 오후 11시 59분까지 일괄 설정합니다"
+              >
+                <View style={[styles.allDayCheckbox, isAllDay && styles.allDayCheckboxSelected]}>
+                  {isAllDay && <Text style={styles.allDayCheckmark}>✓</Text>}
+                </View>
+                <Text style={styles.allDayLabel}>하루 종일</Text>
+              </TouchableOpacity>
+            </View>
             {allMissions.map((mission) => {
               const missionRange = missionTimeRanges[mission.id];
               return (
@@ -362,9 +352,20 @@ const TodoListCreateScreen: React.FC<TodoListCreateScreenProps> = ({ navigation 
                   style={[styles.missionListItem, missionRange && styles.missionListItemSelected]}
                   onPress={() => handleSetMissionTime(mission.id)}
                   activeOpacity={0.7}
+                  accessibilityRole="button"
+                  accessibilityLabel={missionRange ? `${mission.title}, 시간 설정됨: ${missionRange.start} ~ ${missionRange.end}` : `${mission.title}, 시간 설정하기`}
+                  accessibilityHint="탭하여 이 미션의 시간대를 설정합니다"
+                  accessibilityState={{ selected: !!missionRange }}
                 >
                   <View style={styles.missionListItemContent}>
-                    <Text style={[styles.missionListItemTitle, missionRange && styles.missionListItemTitleSelected]}>{mission.title}</Text>
+                    <View style={styles.missionListItemTitleContainer}>
+                      {missionRange && (
+                        <Text style={styles.missionListItemTimeSlot}>
+                          {missionRange.start} ~ {missionRange.end}
+                        </Text>
+                      )}
+                      <Text style={styles.missionListItemTitle}>{mission.title}</Text>
+                    </View>
                     <Text style={styles.missionListItemDescription} numberOfLines={1}>
                       {mission.description}
                     </Text>
@@ -380,7 +381,6 @@ const TodoListCreateScreen: React.FC<TodoListCreateScreenProps> = ({ navigation 
                         <Text style={styles.missionListItemExp}>{mission.expReward} EXP</Text>
                       </View>
                     </View>
-                    {missionRange && <Text style={styles.missionListItemTimeSlot}>{missionRange.start} ~ {missionRange.end}</Text>}
                   </View>
                 </TouchableOpacity>
               );
@@ -408,16 +408,25 @@ const TodoListCreateScreen: React.FC<TodoListCreateScreenProps> = ({ navigation 
                     index === missionsWithTime.length - 1 && styles.timeMissionItemLast,
                   ]}
                 >
-                  <View style={styles.timeMissionHeader}>
-                    <Text style={styles.timeMissionTime}>
-                      {mission.range.start} ~ {mission.range.end}
-                    </Text>
-                  </View>
-                  <View style={styles.timeMissionContent}>
-                    <Text style={styles.timeMissionTitle} numberOfLines={2}>{mission.title}</Text>
-                    <TouchableOpacity style={styles.timeMissionRemoveButton} onPress={() => handleRemoveTime(mission.id)} activeOpacity={0.7}>
-                      <Text style={styles.timeMissionRemoveText}>×</Text>
-                    </TouchableOpacity>
+                  <View style={styles.timeMissionContentWrapper}>
+                    <View style={styles.timeMissionContent}>
+                      <Text style={styles.timeMissionTime}>
+                        {mission.range.start} ~ {mission.range.end}
+                      </Text>
+                      <Text style={styles.timeMissionTitle} numberOfLines={2}>{mission.title}</Text>
+                      <View style={styles.timeMissionMeta}>
+                        <Text style={styles.timeMissionCategory}>{mission.category}</Text>
+                        <View style={styles.timeMissionExpContainer}>
+                          <Image
+                            source={require('../../assets/images/sun.png')}
+                            style={styles.sunIcon}
+                            resizeMode="contain"
+                            accessibilityLabel="경험치 아이콘"
+                          />
+                          <Text style={styles.timeMissionExp}>{mission.expReward} EXP</Text>
+                        </View>
+                      </View>
+                    </View>
                   </View>
                 </View>
               ))
@@ -451,7 +460,7 @@ const TodoListCreateScreen: React.FC<TodoListCreateScreenProps> = ({ navigation 
             <TouchableOpacity
               activeOpacity={1}
               onPress={() => {}}
-              style={{ alignSelf: 'stretch', alignItems: 'center' }}
+              style={styles.emptyTouchable}
             >
               <View style={styles.modalShadowWrap}>
                 <View style={styles.timePickerModalContainer}>
@@ -475,14 +484,16 @@ const TodoListCreateScreen: React.FC<TodoListCreateScreenProps> = ({ navigation 
                             ]}
                             onSelect={(v) => { if (v === 'AM' || v === 'PM') setStartPeriod(v); }}
                             width={80}
+                            accessibilityLabel="시작 시간 오전 오후 선택"
                           />
                           <WheelPicker
                             value={startHour}
                             options={HOURS.map((h) => ({ label: `${h}`, value: h }))}
                             onSelect={(v) => setStartHour(v as number)}
                             width={60}
+                            accessibilityLabel="시작 시간 시 선택"
                           />
-                          <View style={styles.timeSeparator}>
+                          <View style={styles.timeSeparator} accessibilityElementsHidden={true}>
                             <Text style={styles.timeSeparatorText}>:</Text>
                           </View>
                           <WheelPicker
@@ -490,6 +501,7 @@ const TodoListCreateScreen: React.FC<TodoListCreateScreenProps> = ({ navigation 
                             options={MINUTES.map((m) => ({ label: m < 10 ? `0${m}` : `${m}`, value: m }))}
                             onSelect={(v) => setStartMinute(v as number)}
                             width={60}
+                            accessibilityLabel="시작 시간 분 선택"
                           />
                         </View>
                       </View>
@@ -515,14 +527,16 @@ const TodoListCreateScreen: React.FC<TodoListCreateScreenProps> = ({ navigation 
                             ]}
                             onSelect={(v) => { if (v === 'AM' || v === 'PM') setEndPeriod(v); }}
                             width={80}
+                            accessibilityLabel="종료 시간 오전 오후 선택"
                           />
                           <WheelPicker
                             value={endHour}
                             options={HOURS.map((h) => ({ label: `${h}`, value: h }))}
                             onSelect={(v) => setEndHour(v as number)}
                             width={60}
+                            accessibilityLabel="종료 시간 시 선택"
                           />
-                          <View style={styles.timeSeparator}>
+                          <View style={styles.timeSeparator} accessibilityElementsHidden={true}>
                             <Text style={styles.timeSeparatorText}>:</Text>
                           </View>
                           <WheelPicker
@@ -530,6 +544,7 @@ const TodoListCreateScreen: React.FC<TodoListCreateScreenProps> = ({ navigation 
                             options={MINUTES.map((m) => ({ label: m < 10 ? `0${m}` : `${m}`, value: m }))}
                             onSelect={(v) => setEndMinute(v as number)}
                             width={60}
+                            accessibilityLabel="종료 시간 분 선택"
                           />
                         </View>
                       </View>
@@ -552,10 +567,50 @@ const TodoListCreateScreen: React.FC<TodoListCreateScreenProps> = ({ navigation 
     );
   };
 
+  // 각 스텝에서 이전 스텝으로 가는 커스텀 뒤로가기 버튼
+  const getCustomBackButton = () => {
+    if (currentStep === 'custom') {
+      return (
+        <TouchableOpacity
+          onPress={() => setCurrentStep('random')}
+          activeOpacity={0.7}
+        >
+          <Image
+            source={require('../../assets/images/left.png')}
+            style={{ width: 24, height: 24 }}
+            resizeMode="contain"
+            accessibilityLabel="뒤로 가기"
+          />
+        </TouchableOpacity>
+      );
+    }
+    if (currentStep === 'confirm') {
+      return (
+        <TouchableOpacity
+          onPress={() => setCurrentStep('custom')}
+          activeOpacity={0.7}
+        >
+          <Image
+            source={require('../../assets/images/left.png')}
+            style={{ width: 24, height: 24 }}
+            resizeMode="contain"
+            accessibilityLabel="뒤로 가기"
+          />
+        </TouchableOpacity>
+      );
+    }
+    // random 스텝에서는 기본 navigation.goBack() 사용
+    return undefined;
+  };
+
   return (
     <ImageBackground source={require('../../assets/images/background.png')} style={styles.container} resizeMode="cover" accessibilityElementsHidden={true}>
-      <Header title="투두리스트 생성" showBackButton={true} navigation={navigation} />
-      {currentStep === 'intro' && renderIntroStep()}
+      <Header 
+        title="투두리스트 생성" 
+        showBackButton={true} 
+        navigation={navigation}
+        leftButton={getCustomBackButton()}
+      />
       {currentStep === 'random' && renderRandomStep()}
       {currentStep === 'custom' && renderCustomStep()}
       {currentStep === 'confirm' && renderConfirmStep()}

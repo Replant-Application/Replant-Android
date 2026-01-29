@@ -1,7 +1,7 @@
 /**
  * 졸업자 화면
  * - 졸업자(GRADUATE) 역할을 가진 사용자 전용 화면
- * - 멘토링 활동, 커뮤니티 기여 현황, 졸업 뱃지 표시
+ * - 멘토링 활동, 커뮤니티 기여 현황, 졸업 배지 표시
  */
 
 import React from 'react';
@@ -199,16 +199,16 @@ const GraduateScreen: React.FC<GraduateScreenProps> = ({ navigation }) => {
           </TouchableOpacity>
         </Card>
 
-        {/* 졸업자 뱃지 */}
+        {/* 졸업자 배지 */}
         <Card style={styles.badgeCard}>
           <View style={styles.badgeContent}>
             <View style={styles.badgeIcon}>
               <Text style={styles.badgeEmoji}>🎓</Text>
             </View>
-            <Text style={styles.badgeTitle}>졸업자 뱃지</Text>
+            <Text style={styles.badgeTitle}>졸업자 배지</Text>
             <Text style={styles.badgeDescription}>
               리플랜트 여정을 완료한 당신은 영원한 졸업생입니다.
-              이 뱃지는 당신의 성장과 노력을 증명합니다.
+              이 배지는 당신의 성장과 노력을 증명합니다.
             </Text>
             <View style={styles.badgeStats}>
               <Text style={styles.badgeStatText}>

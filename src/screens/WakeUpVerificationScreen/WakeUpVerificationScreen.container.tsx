@@ -223,10 +223,10 @@ export const useWakeUpVerificationScreenContainer = ({
       }
     } catch (error: any) {
       console.error('[WakeUpVerificationScreen] 미션 정보 로드 예외:', error);
-      const errorMessage = error?.message || error?.toString() || '알 수 없는 오류';
+      const caughtErrorMessage = error?.message || error?.toString() || '알 수 없는 오류';
 
       // 404 에러 체크
-      if (errorMessage.includes('404') || errorMessage.includes('찾을 수 없습니다')) {
+      if (caughtErrorMessage.includes('404') || caughtErrorMessage.includes('찾을 수 없습니다')) {
         setErrorMessage(
           `미션을 찾을 수 없습니다. (ID: ${userMissionId})\n이미 완료되었거나 삭제된 미션일 수 있습니다.`
         );

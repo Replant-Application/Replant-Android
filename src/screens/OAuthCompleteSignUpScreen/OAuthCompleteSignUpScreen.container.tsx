@@ -91,9 +91,9 @@ export const useOAuthCompleteSignUpScreenContainer = ({
   /**
    * 전화번호 유효성 검사
    */
-  const validatePhone = useCallback((phone: string): boolean => {
+  const validatePhone = useCallback((phoneValue: string): boolean => {
     const phoneRegex = /^01[016789][0-9]{7,8}$/;
-    return phoneRegex.test(phone.replace(/-/g, ''));
+    return phoneRegex.test(phoneValue.replace(/-/g, ''));
   }, []);
 
   /**

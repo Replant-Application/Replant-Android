@@ -59,7 +59,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
         showsVerticalScrollIndicator={false}
       >
         {/* 사용자 정보 섹션 */}
-        <View style={styles.section}>
+        <View style={[styles.section, styles.userSection]}>
           <View style={styles.userCard}>
             <View style={styles.userInfo}>
               {currentCharacter && (

@@ -4,7 +4,7 @@
  */
 
 import { StyleSheet, Dimensions, Platform } from 'react-native';
-import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
+import { colors, spacing, typography, borderRadius, layout } from '../../utils/designTokens';
 import { getOptimizedLineHeight } from '../../utils/styles/textStyles';
 import { createTextStyle, createTitleStyle, createBodyStyle, createSecondaryTextStyle, createButtonTextStyle } from '../../utils/styles/textStyles';
 import { buttonStyles, emptyStateStyles, modalStyles } from '../../utils/styles/commonStyles';
@@ -29,12 +29,12 @@ export const styles = StyleSheet.create({
     zIndex: 10,
   },
   startChatButton: {
-    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    backgroundColor: colors.overlay.white.heavy,
     paddingVertical: spacing[2],
     paddingHorizontal: spacing[4],
     borderRadius: borderRadius.full,
     borderWidth: 2,
-    borderColor: '#D4A574',
+    borderColor: colors.brandAccent,
     ...Platform.select({
       ios: {
         shadowColor: '#000',
@@ -77,6 +77,9 @@ export const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  speechBubbleAnimatedContainer: {
+    width: '100%',
+  },
   speechTextContainer: {
     position: 'absolute',
     left: 0,
@@ -118,12 +121,15 @@ export const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  keyboardAvoidingView: {
+    flex: 1,
+  },
   bottomSheet: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.white,
     borderTopLeftRadius: borderRadius.xl + 8,
     borderTopRightRadius: borderRadius.xl + 8,
-    borderColor: '#0E0F37',
+    borderColor: colors.gray[900],
     borderTopWidth: 12,
     borderLeftWidth: 12,
     borderRightWidth: 12,
@@ -173,7 +179,7 @@ export const styles = StyleSheet.create({
     flex: 1,
   },
   contentScrollContent: {
-    paddingHorizontal: spacing[4],
+    paddingHorizontal: layout.globalGutter,
     paddingBottom: 150,
     flexGrow: 1,
   },
@@ -212,7 +218,7 @@ export const styles = StyleSheet.create({
     }),
   },
   missionItem: {
-    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+    backgroundColor: colors.overlay.white.light,
     borderRadius: borderRadius.base,
     padding: spacing[2],
     marginBottom: spacing[1],
@@ -221,7 +227,7 @@ export const styles = StyleSheet.create({
   },
   missionItemCompleted: {
     opacity: 0.6,
-    backgroundColor: 'rgba(240, 240, 240, 0.8)',
+    backgroundColor: colors.gray[100],
   },
   missionItemTitle: {
     ...createTextStyle('sm', {
@@ -244,12 +250,12 @@ export const styles = StyleSheet.create({
     color: colors.text.tertiary,
   },
   todoListSection: {
-    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    backgroundColor: colors.overlay.white.heavy,
     borderRadius: borderRadius.base,
     padding: spacing[4],
     marginBottom: spacing[4],
     borderWidth: 2,
-    borderColor: '#D4A574',
+    borderColor: colors.brandAccent,
   },
   todoListHeader: {
     flexDirection: 'row',
@@ -295,7 +301,13 @@ export const styles = StyleSheet.create({
     minWidth: 120,
   },
   createTodoListButtonText: {
-    ...createButtonTextStyle('base'),
+    ...createButtonTextStyle('base', {
+      fontWeight: typography.fontWeight.bold,
+      fontFamily: Platform.select({
+        ios: undefined,
+        android: typography.fontFamily.regular,
+      }),
+    }),
   },
   completedTodoListContainer: {
     alignItems: 'center',
@@ -329,20 +341,35 @@ export const styles = StyleSheet.create({
   },
   evolutionModalOverlay: {
     ...modalStyles.overlay(),
-    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    backgroundColor: colors.overlay.dark,
   },
   evolutionModalContent: {
     width: '100%',
     height: '100%',
     justifyContent: 'center',
     alignItems: 'center',
+    flexDirection: 'column',
+  },
+  evolutionContentContainer: {
+    width: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: spacing[4],
+  },
+  evolutionTitle: {
+    ...createTextStyle('xl', {
+      fontWeight: typography.fontWeight.bold,
+      color: colors.text.primary,
+      lineHeight: getOptimizedLineHeight(typography.fontSize.xl),
+      textAlign: 'center',
+      marginBottom: spacing[6],
+    }),
   },
   evolutionImageContainer: {
-    width: SCREEN_WIDTH * 0.8,
-    height: SCREEN_WIDTH * 0.8,
+    width: SCREEN_WIDTH * 0.7,
+    height: SCREEN_WIDTH * 0.7,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: spacing[6],
   },
   evolutionImage: {
     width: '100%',
@@ -351,12 +378,13 @@ export const styles = StyleSheet.create({
   evolutionSpeechBubble: {
     width: SCREEN_WIDTH * 0.8,
     alignItems: 'center',
+    alignSelf: 'center',
   },
   evolutionSpeechBubbleImage: {
     width: '100%',
-    minHeight: 120,
+    minHeight: 100,
     paddingHorizontal: spacing[6],
-    paddingVertical: spacing[5],
+    paddingVertical: spacing[4],
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -366,10 +394,10 @@ export const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   evolutionSpeechText: {
-    ...createTextStyle('xl', {
-      fontWeight: typography.fontWeight.bold,
+    ...createTextStyle('base', {
+      fontWeight: typography.fontWeight.medium,
       color: colors.text.primary,
-      lineHeight: getOptimizedLineHeight(typography.fontSize.xl),
+      lineHeight: getOptimizedLineHeight(typography.fontSize.base),
       letterSpacing: 0,
       textAlign: 'center',
     }),

@@ -220,8 +220,8 @@ export const useVerificationPostDetailScreenContainer = ({
           }
         }
       }
-    } catch (error) {
-      console.error('[VerificationPostDetailScreen] 투두리스트 미션 완료 처리 중 오류:', error);
+    } catch (err) {
+      console.error('[VerificationPostDetailScreen] 투두리스트 미션 완료 처리 중 오류:', err);
     }
   }, []);
 
@@ -267,8 +267,8 @@ export const useVerificationPostDetailScreenContainer = ({
             if (post?.userMissionId) {
               try {
                 await completeTodoMissionForVerification(post.userMissionId);
-              } catch (error) {
-                console.error('[VerificationPostDetailScreen] 투두리스트 미션 완료 처리 실패:', error);
+              } catch (err) {
+                console.error('[VerificationPostDetailScreen] 투두리스트 미션 완료 처리 실패:', err);
               }
             }
           }
@@ -291,20 +291,25 @@ export const useVerificationPostDetailScreenContainer = ({
   const handleDeletePost = useCallback(() => {
     if (!post) return;
 
-    Alert.alert('인증글 삭제', '정말로 이 인증글을 삭제하시겠습니까?', [
-      { text: '취소', style: 'cancel' },
-      {
-        text: '삭제',
-        onPress: async () => {
-          const result = await deleteVerification(verificationId);
-          if (result.success) {
-            navigation.goBack();
-          } else {
-            showAlertModal('오류', result.error || '인증글 삭제에 실패했습니다.');
-          }
+    Alert.alert(
+      '인증글 삭제',
+      '인증글을 삭제하면\n미션이 실패 처리됩니다.',
+      [
+        { text: '취소', style: 'cancel' },
+        {
+          text: '삭제',
+          style: 'destructive',
+          onPress: async () => {
+            const result = await deleteVerification(verificationId);
+            if (result.success) {
+              navigation.goBack();
+            } else {
+              showAlertModal('오류', result.error || '인증글 삭제에 실패했습니다.');
+            }
+          },
         },
-      },
-    ]);
+      ]
+    );
   }, [post, verificationId, navigation, showAlertModal]);
 
   /**
@@ -427,7 +432,7 @@ export const useVerificationPostDetailScreenContainer = ({
   }, [post, verificationId, navigation, getMissionTitle]);
 
   /**
-   * 상태 뱃지 렌더링 함수
+   * 상태 배지 렌더링 함수
    */
   const getStatusBadge = useCallback(() => {
     if (!post) return null;

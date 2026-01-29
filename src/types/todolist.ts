@@ -22,6 +22,8 @@ export interface TodoMission {
   missionSource: MissionSource;
   scheduledStartTime?: string | null;
   scheduledEndTime?: string | null;
+  isVerified?: boolean; // 인증 완료 여부 (공식 미션의 경우만 의미 있음)
+  userMissionStatus?: string | null; // UserMission의 상태 (ASSIGNED, PENDING, COMPLETED)
 }
 
 export interface TodoList {
@@ -36,6 +38,9 @@ export interface TodoList {
   missions?: TodoMission[];
   createdAt: string;
   updatedAt?: string;
+  creatorId?: number;
+  creatorNickname?: string;
+  isPublic?: boolean;
 }
 
 export interface TodoListInitResponse {

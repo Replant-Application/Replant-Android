@@ -20,6 +20,7 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
     displayedMissions,
     completedMissions,
     totalMissions,
+    missionCounts,
     selectedFilter,
     activeTab,
     missionGroupTab,
@@ -41,8 +42,8 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
     groupMissions,
     groupLoading,
     selectedGroupMission,
-    currentServerPage,
-    totalServerPages,
+    currentClientPage,
+    totalClientPages,
     currentUserId,
     currentMissionPage,
     totalMissionPages,
@@ -63,11 +64,15 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
     handleTabChange,
     handleFilterChange,
     handleMissionGroupTabChange,
-    handleServerPageChange,
+    handleClientPageChange,
     setSelectedGroupMission,
     onRefresh,
     onMissionPageChange,
     goToMissionPage,
+    missionSortBy,
+    handleMissionSortChange,
+    showOnlyParticipated,
+    handleShowOnlyParticipatedChange,
     getVerificationTypeLabel,
     getVerificationTypeIcon,
     getMissionCategoryLabel,
@@ -173,9 +178,9 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
         {/* 진행중/인증대기/완료 탭 */}
         <SimpleTabBar
           tabs={[
-            { key: 'inProgress', label: '진행중' },
-            { key: 'pendingVerification', label: '인증 대기' },
-            { key: 'completed', label: '완료' },
+            { key: 'inProgress', label: '진행중', count: missionCounts?.inProgress || 0 },
+            { key: 'pendingVerification', label: '인증 대기', count: missionCounts?.pendingVerification || 0 },
+            { key: 'completed', label: '완료', count: missionCounts?.completed || 0 },
           ]}
           activeTab={selectedFilter}
           onTabChange={handleFilterChange}
@@ -230,6 +235,7 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
                         missionGroupTab: (activeTab as MissionTab) === 'missionGroup' ? missionGroupTab : undefined,
                         selectedFilter: (activeTab as MissionTab) === 'myMission' ? selectedFilter : undefined
                       })}
+                      selectedFilter={selectedFilter}
                     />
                   ))}
                 </View>
@@ -287,13 +293,17 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
               missionGroupTab={missionGroupTab}
               selectedMission={selectedGroupMission}
               currentUserId={currentUserId}
-              currentServerPage={currentServerPage}
-              totalServerPages={totalServerPages}
+              currentServerPage={currentClientPage}
+              totalServerPages={totalClientPages}
               refreshing={refreshing}
+              sortBy={missionSortBy}
+              showOnlyParticipated={showOnlyParticipated}
               onMissionSelect={(mission) => setSelectedGroupMission(mission)}
-              onServerPageChange={handleServerPageChange}
+              onServerPageChange={handleClientPageChange}
               onNavigateToCreate={() => navigation.navigate('CustomMissionCreate' as any)}
               onRefresh={onRefresh}
+              onSortChange={handleMissionSortChange}
+              onShowOnlyParticipatedChange={handleShowOnlyParticipatedChange}
               getVerificationTypeLabel={getVerificationTypeLabel}
               getVerificationTypeIcon={getVerificationTypeIcon}
               getMissionCategoryLabel={getMissionCategoryLabel}

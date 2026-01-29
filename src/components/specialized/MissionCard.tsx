@@ -18,6 +18,7 @@ interface MissionCardProps {
   disabled?: boolean;
   readonly?: boolean;
   style?: ViewStyle;
+  selectedFilter?: 'inProgress' | 'pendingVerification' | 'completed'; // 현재 선택된 필터
 }
 
 const MissionCard: React.FC<MissionCardProps> = ({
@@ -33,7 +34,8 @@ const MissionCard: React.FC<MissionCardProps> = ({
   loading = false,
   disabled = false,
   readonly = false,
-  style
+  style,
+  selectedFilter
 }) => {
   if (!mission) return null;
 
@@ -75,8 +77,9 @@ const MissionCard: React.FC<MissionCardProps> = ({
   // 접근성 라벨 생성
   const getAccessibilityLabel = () => {
     const categoryName = getCategoryName(mission.category_id || '');
+    const isCustom = mission.missionType === 'CUSTOM' || mission.is_custom === true;
     const status = mission.completed 
-      ? (mission.verified === true ? '인증완료' : '인증대기중')
+      ? (isCustom || mission.verified === true ? '인증완료' : '인증대기중')
       : '진행중';
     return `${categoryName} 미션, ${mission.title}, ${status}`;
   };
@@ -114,17 +117,27 @@ const MissionCard: React.FC<MissionCardProps> = ({
         <View style={styles.statusContainer}>
           {mission.completed ? (
             <>
-              {/* 인증 완료된 경우 */}
-              {mission.verified === true ? (
-                <View style={styles.verifiedBadge}>
-                  <Text style={styles.verifiedIcon}>✓</Text>
-                  <Text style={styles.verifiedText}>인증완료</Text>
-                </View>
-              ) : (
-                <View style={styles.pendingBadge}>
-                  <Text style={styles.pendingIcon}>⏳</Text>
-                  <Text style={styles.pendingVerificationText}>인증대기중</Text>
-                </View>
+              {/* 완료 탭에서는 인증완료 배지 표시하지 않음 */}
+              {selectedFilter === 'completed' ? null : (
+                <>
+                  {/* 커스텀 미션은 인증이 필요 없으므로 완료되면 바로 인증완료 표시 */}
+                  {mission.missionType === 'CUSTOM' || mission.is_custom === true ? (
+                    <View style={styles.verifiedBadge}>
+                      <Text style={styles.verifiedIcon}>✓</Text>
+                      <Text style={styles.verifiedText}>인증완료</Text>
+                    </View>
+                  ) : mission.verified === true ? (
+                    <View style={styles.verifiedBadge}>
+                      <Text style={styles.verifiedIcon}>✓</Text>
+                      <Text style={styles.verifiedText}>인증완료</Text>
+                    </View>
+                  ) : (
+                    <View style={styles.pendingBadge}>
+                      <Text style={styles.pendingIcon}>⏳</Text>
+                      <Text style={styles.pendingVerificationText}>인증대기중</Text>
+                    </View>
+                  )}
+                </>
               )}
             </>
           ) : (
@@ -219,8 +232,10 @@ const MissionCard: React.FC<MissionCardProps> = ({
           </TouchableOpacity>
         ) : (
           <View style={styles.actionButtonsContainer}>
-            {/* 후기 쓰기 버튼: 완료 후 표시 */}
-            {mission.completed && onWriteReview && (
+            {/* 후기 쓰기 버튼: 완료 후 표시 (커스텀 미션 제외) */}
+            {mission.completed && 
+             onWriteReview && 
+             !(mission.missionType === 'CUSTOM' || mission.is_custom === true) && (
               <TouchableOpacity
                 style={[styles.reviewButton]}
                 onPress={() => onWriteReview(mission.mission_id)}
@@ -231,7 +246,7 @@ const MissionCard: React.FC<MissionCardProps> = ({
                 accessibilityState={{ disabled }}
               >
                 <Image
-                  source={require('../../assets/images/edit.png')}
+                  source={require('../../assets/images/pencil.png')}
                   style={styles.reviewIcon}
                   resizeMode="contain"
                   accessibilityLabel="후기 쓰기 아이콘"

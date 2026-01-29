@@ -80,17 +80,17 @@ export const useSignUpScreenContainer = ({ onNavigate: _onNavigate }: SignUpScre
   /**
    * 이메일 유효성 검사
    */
-  const validateEmail = useCallback((email: string): boolean => {
+  const validateEmail = useCallback((emailValue: string): boolean => {
     const emailRegex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,6}$/;
-    return emailRegex.test(email);
+    return emailRegex.test(emailValue);
   }, []);
 
   /**
    * 전화번호 유효성 검사
    */
-  const validatePhone = useCallback((phone: string): boolean => {
+  const validatePhone = useCallback((phoneValue: string): boolean => {
     const phoneRegex = /^01[016789][0-9]{7,8}$/;
-    return phoneRegex.test(phone.replace(/-/g, ''));
+    return phoneRegex.test(phoneValue.replace(/-/g, ''));
   }, []);
 
   /**

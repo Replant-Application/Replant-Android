@@ -36,10 +36,11 @@ export const useTodoListCreateScreenContainer = ({ navigation }: TodoListCreateS
   );
   const { showError, showInfo, handleApiError } = useErrorHandler(errorHandlerOverrides);
 
-  const [currentStep, setCurrentStep] = useState<Step>('intro');
+  const [currentStep, setCurrentStep] = useState<Step>('random');
   const [randomMissions, setRandomMissions] = useState<MissionSimple[]>([]);
   const [customMissions, setCustomMissions] = useState<MissionSimple[]>([]);
   const [selectedCustomMissions, setSelectedCustomMissions] = useState<number[]>([]);
+  const [isAllDay, setIsAllDay] = useState(false);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [loading, setLoading] = useState(false);
@@ -65,6 +66,29 @@ export const useTodoListCreateScreenContainer = ({ navigation }: TodoListCreateS
 
   // 미션별 시간 범위 설정 (미션 ID -> { start: "HH:mm", end: "HH:mm" })
   const [missionTimeRanges, setMissionTimeRanges] = useState<Record<number, { start: string; end: string }>>({});
+
+  // 모든 미션이 하루종일로 설정되어 있는지 확인
+  useEffect(() => {
+    const defaultStart = convertTo24Hour(DEFAULT_START_TIME.period, DEFAULT_START_TIME.hour, DEFAULT_START_TIME.minute);
+    const defaultEnd = convertTo24Hour(DEFAULT_END_TIME.period, DEFAULT_END_TIME.hour, DEFAULT_END_TIME.minute);
+    
+    const allMissionsList = [
+      ...randomMissions,
+      ...customMissions.filter(m => selectedCustomMissions.includes(m.id)),
+    ];
+    
+    if (allMissionsList.length === 0) {
+      setIsAllDay(false);
+      return;
+    }
+    
+    const allHaveAllDayTime = allMissionsList.every(mission => {
+      const range = missionTimeRanges[mission.id];
+      return range && range.start === defaultStart && range.end === defaultEnd;
+    });
+    
+    setIsAllDay(allHaveAllDayTime);
+  }, [missionTimeRanges, randomMissions, customMissions, selectedCustomMissions, convertTo24Hour]);
 
   // 시간 설정 모달 상태
   const [showTimePickerModal, setShowTimePickerModal] = useState(false);
@@ -233,20 +257,6 @@ export const useTodoListCreateScreenContainer = ({ navigation }: TodoListCreateS
    * 투두리스트 생성
    */
   const handleCreate = useCallback(async () => {
-    if (selectedCustomMissions.length === 0) {
-      showInfo('최소 1개 이상의 미션을 자유롭게 추가해주세요.', '알림');
-      return;
-    }
-
-    // 모든 미션이 시간대 설정되었는지 확인
-    const allMissionIds = [...randomMissions.map(m => m.id), ...selectedCustomMissions];
-    const missionsWithoutTime = allMissionIds.filter(missionId => !missionTimeRanges[missionId]);
-
-    if (missionsWithoutTime.length > 0) {
-      setShowTimeRequiredModal(true);
-      return;
-    }
-
     setCreating(true);
     try {
       // missionSchedules 형식 변환: missionId를 문자열 키로 사용
@@ -377,6 +387,43 @@ export const useTodoListCreateScreenContainer = ({ navigation }: TodoListCreateS
   }, []);
 
   /**
+   * 모든 미션에 기본 시간대 일괄 설정 (00:00 ~ 23:59, 하루 종일)
+   */
+  const handleSetDefaultTimeForAll = useCallback(() => {
+    const defaultStart = convertTo24Hour(DEFAULT_START_TIME.period, DEFAULT_START_TIME.hour, DEFAULT_START_TIME.minute);
+    const defaultEnd = convertTo24Hour(DEFAULT_END_TIME.period, DEFAULT_END_TIME.hour, DEFAULT_END_TIME.minute);
+    
+    const newRanges: Record<number, { start: string; end: string }> = {};
+    // randomMissions의 모든 미션에 시간 설정
+    randomMissions.forEach(mission => {
+      newRanges[mission.id] = { start: defaultStart, end: defaultEnd };
+    });
+    // 선택된 커스텀 미션에도 시간 설정
+    const selectedMissions = customMissions.filter(m => selectedCustomMissions.includes(m.id));
+    selectedMissions.forEach(mission => {
+      newRanges[mission.id] = { start: defaultStart, end: defaultEnd };
+    });
+    
+    // 기존 시간대를 완전히 대체 (merge가 아닌 replace)
+    setMissionTimeRanges(newRanges);
+    setIsAllDay(true);
+  }, [randomMissions, customMissions, selectedCustomMissions, convertTo24Hour]);
+
+  /**
+   * 하루종일 체크박스 토글
+   */
+  const handleToggleAllDay = useCallback(() => {
+    if (isAllDay) {
+      // 체크 해제: 모든 시간대 제거
+      setMissionTimeRanges({});
+      setIsAllDay(false);
+    } else {
+      // 체크: 하루종일 설정
+      handleSetDefaultTimeForAll();
+    }
+  }, [isAllDay, handleSetDefaultTimeForAll]);
+
+  /**
    * 모든 미션 목록 (공식 + 커스텀)
    */
   const allMissions = useMemo(() => {
@@ -472,6 +519,9 @@ export const useTodoListCreateScreenContainer = ({ navigation }: TodoListCreateS
     handleSetMissionTime,
     handleSaveTime,
     handleRemoveTime,
+    handleSetDefaultTimeForAll,
+    isAllDay,
+    handleToggleAllDay,
     handleTodoListSuccessClose,
     handleTimePickerNext,
     handleTimePickerPrev,

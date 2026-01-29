@@ -61,6 +61,7 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation, route }) 
     shareConfirmMissionSet,
     handleShareConfirm,
     handleShareConfirmCancel,
+    handleUnshareMissionSet,
     renderStars,
   } = useCommunityScreenContainer({ navigation, route });
 
@@ -87,7 +88,7 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation, route }) 
         <SimpleTabBar
           tabs={[
             { key: 'all', label: '전체 게시판' },
-            { key: 'todo-share', label: '투두 공유' },
+            { key: 'todo-share', label: '투두리스트 공유' },
           ]}
           activeTab={activeTab}
           onTabChange={(key) => setActiveTab(key as CommunityTab)}
@@ -207,6 +208,7 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation, route }) 
           onRefresh={onRefresh}
           renderStars={renderStars}
           navigation={navigation}
+          onUnshare={handleUnshareMissionSet}
         />
       )}
 

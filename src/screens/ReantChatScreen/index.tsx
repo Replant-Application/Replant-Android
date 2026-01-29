@@ -9,16 +9,15 @@ import {
   Text,
   TouchableOpacity,
   TextInput,
-  FlatList,
   KeyboardAvoidingView,
   Platform,
   ImageBackground,
+  Image,
   Dimensions,
   Animated,
   ActivityIndicator,
 } from 'react-native';
 import FastImage from 'react-native-fast-image';
-import { ChatMessage, generateMessageId } from '../../utils/reantChatUtils';
 import { getCharacterImage } from '../../utils/characterUtils';
 import { useCharacter } from '../../hooks/useCharacter';
 import { sendChatMessage } from '../../api/chatApi';
@@ -44,56 +43,43 @@ const ReantChatScreen: React.FC<ReantChatScreenProps> = ({ navigation, route: _r
   const reantName = currentCharacter?.name || '리앤트';
 
   const [inputText, setInputText] = useState('');
-  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [showSpeechBubble, setShowSpeechBubble] = useState(true);
   const [currentReantMessage, setCurrentReantMessage] = useState<string>('');
   const [displayedMessage, setDisplayedMessage] = useState<string>('');
   const [backgroundType] = useState<'day' | 'night'>(getBackgroundImage());
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  
+  // 둥둥 떠다니는 사용자 메시지
+  const [floatingMessage, setFloatingMessage] = useState<string | null>(null);
+  const floatingAnim = useRef(new Animated.Value(0)).current;
 
-  const flatListRef = useRef<FlatList>(null);
   const speechBubbleAnim = useRef(new Animated.Value(0)).current;
-  const slideDownAnim = useRef(new Animated.Value(0)).current;
+  const screenFadeAnim = useRef(new Animated.Value(0)).current;
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const isClosingRef = useRef(false);
 
+  // 화면 진입 시 페이드 인
+  useEffect(() => {
+    Animated.timing(screenFadeAnim, {
+      toValue: 1,
+      duration: 200,
+      useNativeDriver: true,
+    }).start();
+  }, [screenFadeAnim]);
+
+  // 화면 퇴장 시 페이드 아웃
   const runExitAnimation = useCallback((onClosed?: () => void) => {
     if (isClosingRef.current) return;
     isClosingRef.current = true;
-    Animated.spring(slideDownAnim, {
-      toValue: 1,
+    Animated.timing(screenFadeAnim, {
+      toValue: 0,
+      duration: 200,
       useNativeDriver: true,
-      tension: 65,
-      friction: 11,
     }).start(() => {
       onClosed?.();
     });
-  }, [slideDownAnim]);
-
-  useEffect(() => {
-    slideDownAnim.setValue(1);
-    Animated.spring(slideDownAnim, {
-      toValue: 0,
-      useNativeDriver: true,
-      tension: 65,
-      friction: 11,
-    }).start();
-  }, [slideDownAnim]);
-
-  useEffect(() => {
-    if (!navigation?.setReantChatCloseHandler) return;
-
-    const handler = (onClosed?: () => void) => {
-      runExitAnimation(onClosed);
-    };
-
-    navigation.setReantChatCloseHandler(handler);
-
-    return () => {
-      navigation.setReantChatCloseHandler(null);
-    };
-  }, [navigation, runExitAnimation]);
+  }, [screenFadeAnim]);
 
   // 화면 진입 시 인사 메시지
   useEffect(() => {
@@ -154,13 +140,19 @@ const ReantChatScreen: React.FC<ReantChatScreenProps> = ({ navigation, route: _r
     };
   }, [currentReantMessage]);
 
-  useEffect(() => {
-    if (chatMessages.length > 0 && flatListRef.current) {
-      setTimeout(() => {
-        flatListRef.current?.scrollToEnd({ animated: true });
-      }, 100);
-    }
-  }, [chatMessages]);
+  // 둥둥 떠다니는 메시지 애니메이션 실행
+  const showFloatingMessage = useCallback((message: string) => {
+    setFloatingMessage(message);
+    floatingAnim.setValue(0);
+    
+    Animated.timing(floatingAnim, {
+      toValue: 1,
+      duration: 2000,
+      useNativeDriver: true,
+    }).start(() => {
+      setFloatingMessage(null);
+    });
+  }, [floatingAnim]);
 
   const handleSend = async () => {
     if (!inputText.trim() || !currentCharacter || isLoading) return;
@@ -169,14 +161,8 @@ const ReantChatScreen: React.FC<ReantChatScreenProps> = ({ navigation, route: _r
     setInputText('');
     setError(null);
 
-    const userMessage: ChatMessage = {
-      id: generateMessageId(),
-      type: 'user',
-      content: messageText,
-      timestamp: new Date(),
-    };
-
-    setChatMessages([userMessage]);
+    // 둥둥 떠다니는 메시지 표시
+    showFloatingMessage(messageText);
 
     setIsLoading(true);
     const result = await sendChatMessage(messageText);
@@ -208,30 +194,12 @@ const ReantChatScreen: React.FC<ReantChatScreenProps> = ({ navigation, route: _r
     });
   };
 
-  const renderMessage = ({ item }: { item: ChatMessage }) => {
-    if (item.type === 'user') {
-      return (
-        <View style={styles.userMessageContainer}>
-          <View style={styles.userMessageBubble}>
-            <Text style={styles.userMessageText}>{item.content}</Text>
-          </View>
-        </View>
-      );
-    }
-    return null;
-  };
-
   return (
     <Animated.View
       style={[
         styles.container,
         {
-          transform: [{
-            translateY: slideDownAnim.interpolate({
-              inputRange: [0, 1],
-              outputRange: [0, SCREEN_HEIGHT * 0.4],
-            }),
-          }],
+          opacity: screenFadeAnim,
         },
       ]}
     >
@@ -243,6 +211,7 @@ const ReantChatScreen: React.FC<ReantChatScreenProps> = ({ navigation, route: _r
         style={styles.background}
         resizeMode="cover"
       >
+        {/* 대화 종료하기 버튼 (상단 중앙) */}
         <View style={styles.topButtonContainer}>
           <TouchableOpacity
             style={styles.endChatButton}
@@ -253,127 +222,148 @@ const ReantChatScreen: React.FC<ReantChatScreenProps> = ({ navigation, route: _r
           </TouchableOpacity>
         </View>
 
-        <View style={styles.heroSection}>
-          {currentCharacter && (
-            <>
-              {showSpeechBubble && (
-                <Animated.View
-                  style={[
-                    styles.speechBubble,
-                    {
-                      opacity: speechBubbleAnim,
-                      transform: [
-                        {
-                          translateY: speechBubbleAnim.interpolate({
-                            inputRange: [0, 1],
-                            outputRange: [-10, 0],
-                          }),
-                        },
-                      ],
-                    },
-                  ]}
-                >
-                  <ImageBackground
-                    source={require('../../assets/images/conversation.png')}
-                    style={styles.speechBubbleImage}
-                    resizeMode="stretch"
+        {/* 키보드 반응형 영역 */}
+        <KeyboardAvoidingView
+          style={styles.keyboardAvoidingView}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+        >
+          <View style={styles.heroSection}>
+            {/* 둥둥 떠다니는 사용자 메시지 */}
+            {floatingMessage && (
+              <Animated.View
+                style={[
+                  styles.floatingMessageContainer,
+                  {
+                    opacity: floatingAnim.interpolate({
+                      inputRange: [0, 0.3, 0.7, 1],
+                      outputRange: [0, 1, 1, 0],
+                    }),
+                    transform: [
+                      {
+                        translateY: floatingAnim.interpolate({
+                          inputRange: [0, 1],
+                          outputRange: [50, -100],
+                        }),
+                      },
+                      {
+                        scale: floatingAnim.interpolate({
+                          inputRange: [0, 0.2, 0.8, 1],
+                          outputRange: [0.8, 1, 1, 0.9],
+                        }),
+                      },
+                    ],
+                  },
+                ]}
+              >
+                <View style={styles.floatingMessageBubble}>
+                  <Text style={styles.floatingMessageText}>{floatingMessage}</Text>
+                </View>
+              </Animated.View>
+            )}
+
+            {currentCharacter && (
+              <>
+                {/* 말풍선 */}
+                {showSpeechBubble && (
+                  <Animated.View
+                    style={[
+                      styles.speechBubble,
+                      {
+                        opacity: speechBubbleAnim,
+                        transform: [
+                          {
+                            translateY: speechBubbleAnim.interpolate({
+                              inputRange: [0, 1],
+                              outputRange: [-10, 0],
+                            }),
+                          },
+                        ],
+                      },
+                    ]}
                   >
-                    <View style={styles.speechTextContainer}>
-                      {isLoading ? (
-                        <View style={styles.loadingContainer}>
-                          <ActivityIndicator size="small" color="#666" />
-                          <Text style={styles.loadingText}>생각 중...</Text>
+                    {/* 3분할 말풍선: top + middle + bottom */}
+                    <View style={styles.speechBubbleContainer}>
+                      <Image
+                        source={require('../../assets/images/conversation_top.png')}
+                        style={styles.speechBubbleTop}
+                        resizeMode="stretch"
+                      />
+                      <ImageBackground
+                        source={require('../../assets/images/conversation_middle.png')}
+                        style={styles.speechBubbleMiddle}
+                        resizeMode="stretch"
+                      >
+                        <View style={styles.speechTextContainer}>
+                          {isLoading ? (
+                            <View style={styles.loadingContainer}>
+                              <ActivityIndicator size="small" color="#666" />
+                              <Text style={styles.loadingText}>생각 중...</Text>
+                            </View>
+                          ) : (
+                            <Text style={styles.speechText}>
+                              {displayedMessage || currentCharacter.description || '안녕하세요!'}
+                            </Text>
+                          )}
                         </View>
-                      ) : (
-                        <Text style={styles.speechText}>
-                          {displayedMessage || currentCharacter.description || '안녕하세요!'}
-                        </Text>
-                      )}
+                      </ImageBackground>
+                      <Image
+                        source={require('../../assets/images/conversation_bottom.png')}
+                        style={styles.speechBubbleBottom}
+                        resizeMode="stretch"
+                      />
                     </View>
-                  </ImageBackground>
-                </Animated.View>
-              )}
+                  </Animated.View>
+                )}
 
-              <View style={styles.characterImageContainer}>
-                <FastImage
-                  key={`character-${currentCharacter.level || 1}-happy`}
-                  source={getCharacterImage(currentCharacter.level || 1, 'happy')}
-                  style={styles.characterImage}
-                  resizeMode={FastImage.resizeMode.contain}
-                />
-              </View>
-            </>
-          )}
-        </View>
+                {/* 리앤트 캐릭터 */}
+                <View style={styles.characterImageContainer}>
+                  <FastImage
+                    key={`character-${currentCharacter.level || 1}-happy`}
+                    source={getCharacterImage(currentCharacter.level || 1, 'happy')}
+                    style={styles.characterImage}
+                    resizeMode={FastImage.resizeMode.contain}
+                  />
+                </View>
+              </>
+            )}
+          </View>
 
-        <View style={styles.chatSection}>
-          <View style={styles.dragHandleArea}>
-            <View style={styles.dragHandleContainer}>
-              <View style={styles.dragHandleDot} />
-              <View style={styles.dragHandleDot} />
-              <View style={styles.dragHandleDot} />
+          {/* 하단 입력창 */}
+          <View style={styles.inputContainer}>
+            {error && (
+              <Text style={styles.errorText}>⚠️ {error}</Text>
+            )}
+            <View style={styles.inputRow}>
+              <TextInput
+                style={styles.input}
+                value={inputText}
+                onChangeText={setInputText}
+                placeholder={`${reantName}에게 메시지를 보내보세요...`}
+                placeholderTextColor="#999"
+                multiline
+                maxLength={200}
+                onSubmitEditing={handleSend}
+                returnKeyType="send"
+              />
+              <TouchableOpacity
+                style={[
+                  styles.sendButton,
+                  (!inputText.trim() || isLoading) && styles.sendButtonDisabled,
+                ]}
+                onPress={handleSend}
+                disabled={!inputText.trim() || isLoading}
+                activeOpacity={0.7}
+              >
+                {isLoading ? (
+                  <ActivityIndicator size="small" color="#fff" />
+                ) : (
+                  <Text style={styles.sendButtonText}>전송</Text>
+                )}
+              </TouchableOpacity>
             </View>
           </View>
-
-          <KeyboardAvoidingView
-            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-            style={styles.messagesContainer}
-            keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
-          >
-            <FlatList
-              ref={flatListRef}
-              data={chatMessages}
-              renderItem={renderMessage}
-              keyExtractor={(item) => item.id}
-              contentContainerStyle={[
-                styles.messagesList,
-                chatMessages.length === 0 && { flexGrow: 0 },
-              ]}
-              showsVerticalScrollIndicator={false}
-              scrollEnabled={chatMessages.length > 1}
-              ListEmptyComponent={
-                <View style={styles.emptyContainer}>
-                  <Text style={styles.emptyText}>
-                    {error ? (
-                      `⚠️ ${error}`
-                    ) : (
-                      `${reantName}에게 메시지를 보내보세요!`
-                    )}
-                  </Text>
-                </View>
-              }
-            />
-          </KeyboardAvoidingView>
-
-          <View style={styles.inputContainer}>
-            <TextInput
-              style={styles.input}
-              value={inputText}
-              onChangeText={setInputText}
-              placeholder="메시지를 입력하세요..."
-              placeholderTextColor="#999"
-              multiline
-              maxLength={200}
-              onSubmitEditing={handleSend}
-              returnKeyType="send"
-            />
-            <TouchableOpacity
-              style={[
-                styles.sendButton,
-                (!inputText.trim() || isLoading) && styles.sendButtonDisabled,
-              ]}
-              onPress={handleSend}
-              disabled={!inputText.trim() || isLoading}
-              activeOpacity={0.7}
-            >
-              {isLoading ? (
-                <ActivityIndicator size="small" color="#fff" />
-              ) : (
-                <Text style={styles.sendButtonText}>전송</Text>
-              )}
-            </TouchableOpacity>
-          </View>
-        </View>
+        </KeyboardAvoidingView>
       </ImageBackground>
     </Animated.View>
   );

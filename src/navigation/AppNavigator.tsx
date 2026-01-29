@@ -143,15 +143,12 @@ const AppNavigator = () => {
 
   // 네비게이션 함수
   const navigate = useCallback(async (screenName: keyof RootStackParamList | string, params: any = {}) => {
-    console.log('[AppNavigator] navigate 호출:', screenName, params);
-    console.log('[AppNavigator] params 타입:', typeof params, 'params 내용:', JSON.stringify(params));
     try {
       // 메인 탭 간 전환은 히스토리 추가 없이 바로 전환
       if (currentScreen && isMainTabScreen(currentScreen) && isMainTabScreen(screenName as string)) {
         navigationParamsRef.current = params || {};
         setNavigationParams(params || {});
         setCurrentScreen(screenName as string);
-        console.log('[AppNavigator] 메인 탭 간 전환 - 히스토리 추가 안 함');
         return;
       }
       
@@ -180,8 +177,6 @@ const AppNavigator = () => {
       // params를 먼저 설정한 후 화면을 변경하여 race condition 방지
       setNavigationParams(params || {});
       setCurrentScreen(screenName as string);
-      console.log('[AppNavigator] navigate 완료:', screenName, 'params 설정됨:', params);
-      console.log('[AppNavigator] navigationParamsRef.current:', navigationParamsRef.current);
     } catch (error) {
       console.error('[AppNavigator] navigate 실패:', error);
     }
@@ -202,9 +197,6 @@ const AppNavigator = () => {
       setNavigationParams(nextParams);
       navigationParamsRef.current = nextParams;
       return;
-    }
-    if (__DEV__) {
-      console.log('[AppNavigator] goBack - 히스토리 없음, fallback 사용');
     }
     fallbackGoBack();
   }, [screenHistory, fallbackGoBack]);
@@ -265,36 +257,18 @@ const AppNavigator = () => {
         
         // 알림 화면이나 다른 상세 화면에 있으면 이동하지 않음
         if (currentScreen && currentScreen !== SCREEN_NAMES.LOGIN && !isMainTabScreen(currentScreen)) {
-          console.log('[AppNavigator] 상세 화면에 있음 - 체크 건너뛰기:', currentScreen);
           return;
         }
         
         // currentScreen이 이미 설정되어 있고 메인 탭 화면이면 건너뛰기 (이미 홈에 있음)
         // 단, 로그인 직후가 아닌 경우에만 (로그인 직후에는 currentScreen이 null이거나 로그인 화면일 수 있음)
         if (currentScreen && isMainTabScreen(currentScreen) && currentScreen !== SCREEN_NAMES.LOGIN) {
-          console.log('[AppNavigator] 이미 메인 탭 화면에 있음 - 체크 건너뛰기');
           return;
         }
         
         try {
           // 백엔드 API에서 돌발 미션 설정 조회
           const result = await getSpontaneousMissionSetup();
-          
-          console.log('[AppNavigator] 돌발 미션 설정 확인:', { 
-            success: result.success,
-            hasData: !!result.data,
-            hasWakeTime: !!result.data?.wakeTime,
-            hasSleepTime: !!result.data?.sleepTime,
-            hasBreakfastTime: !!result.data?.breakfastTime,
-            hasLunchTime: !!result.data?.lunchTime,
-            hasDinnerTime: !!result.data?.dinnerTime,
-            isCompleted: result.data?.isSpontaneousMissionSetupCompleted,
-            error: result.error,
-            currentScreen,
-            isLoggedIn,
-            isLoading,
-            isCheckingOnboarding
-          });
           
           // 신규 가입자 판단: DB에 설정이 없으면 신규 가입자
           // 설정이 있다는 것 = wakeTime, sleepTime, breakfastTime, lunchTime, dinnerTime 중 하나라도 있으면 기존 사용자
@@ -308,7 +282,6 @@ const AppNavigator = () => {
           
           if (!hasSetupData) {
             // DB에 설정이 없으면 신규 가입자 - 설문 화면으로 이동
-            console.log('[AppNavigator] 신규 가입자 (DB에 설정 없음) - 설문 화면으로 이동');
             try {
               setCurrentScreen(SCREEN_NAMES.SPONTANEOUS_MISSION_SETUP);
             } catch (error) {
@@ -318,7 +291,6 @@ const AppNavigator = () => {
             }
           } else {
             // DB에 설정이 있으면 기존 사용자 - 홈 화면으로 이동
-            console.log('[AppNavigator] 기존 사용자 (DB에 설정 있음) - 홈 화면으로 이동');
             try {
               setCurrentScreen(SCREEN_NAMES.HOME);
             } catch (error) {
@@ -328,7 +300,6 @@ const AppNavigator = () => {
         } catch (error) {
           console.error('[AppNavigator] Failed to check spontaneous mission setup:', error);
           // 에러 발생 시 설문 화면으로 이동 (신규 가입자로 간주)
-          console.log('[AppNavigator] ⚠️ 에러 발생 - 신규 가입자로 간주하여 설문 화면으로 이동');
           setCurrentScreen(SCREEN_NAMES.SPONTANEOUS_MISSION_SETUP);
         }
       }
@@ -336,7 +307,6 @@ const AppNavigator = () => {
 
     // 설문 화면에 있을 때는 절대 실행하지 않음
     if (currentScreen === SCREEN_NAMES.SPONTANEOUS_MISSION_SETUP) {
-      console.log('[AppNavigator] 설문 화면에 있음 - checkSpontaneousMissionSetup 건너뛰기');
       return;
     }
     
@@ -528,31 +498,22 @@ const AppNavigator = () => {
 
   // SSE 알림 수신 시 화면 라우팅 처리
   useEffect(() => {
-    console.log('[AppNavigator] 알림 체크:', { lastNotification: !!lastNotification, isLoggedIn });
-
     if (!lastNotification) {
       return;
     }
 
-    console.log('[AppNavigator] 알림 상세:', JSON.stringify(lastNotification, null, 2));
-
     // 이미 처리한 알림인지 확인
     const notificationId = lastNotification.id || lastNotification.notificationId;
     if (notificationId && notificationId === processedNotificationIdRef.current) {
-      console.log('[AppNavigator] 이미 처리한 알림:', notificationId);
       return;
     }
 
     const type = lastNotification.type || '';
     const title = lastNotification.title || '';
     const content = lastNotification.content || '';
-    console.log('[AppNavigator] 알림 타입:', type);
-    console.log('[AppNavigator] 알림 제목:', title);
-    console.log('[AppNavigator] 알림 내용:', content);
 
     // 업데이트 알림 처리 (APP_UPDATE) - 로그인 무관 (버전 체크 API와 정책 통일)
     if (type === 'APP_UPDATE') {
-      console.log('[AppNavigator] 업데이트 알림 수신 (FCM)');
       const data = lastNotification;
       const updateResult = {
         isRequired: data.isRequired === true || data.isRequired === 'true',
@@ -577,7 +538,6 @@ const AppNavigator = () => {
             const dismissedTime = parseInt(dismissedAt, 10);
             const hoursSinceDismissed = (Date.now() - dismissedTime) / (1000 * 60 * 60);
             if (hoursSinceDismissed < 24) {
-              console.log('[AppNavigator] FCM 선택 업데이트 - 24시간 내 "나중에" 선택, 표시 안 함');
               processedNotificationIdRef.current = notificationId || null;
               return;
             }
@@ -603,27 +563,12 @@ const AppNavigator = () => {
 
     // 기상 미션 알림 처리 (SPONTANEOUS_WAKE_UP)
     if (type === 'SPONTANEOUS_WAKE_UP') {
-      console.log('[AppNavigator] 기상 미션 알림 수신 (SSE/FCM)');
-      console.log('[AppNavigator] 알림 전체 데이터:', JSON.stringify(lastNotification, null, 2));
-      console.log('[AppNavigator] 알림 키:', Object.keys(lastNotification || {}));
-      
       // userMissionId 추출 (우선순위: userMissionId > referenceId)
       // FCM 알림의 경우 문자열로 올 수 있으므로 숫자로 변환 필요
       let userMissionId = lastNotification.userMissionId || lastNotification.referenceId;
       
-      console.log('[AppNavigator] 추출 전 userMissionId:', userMissionId);
-      console.log('[AppNavigator] userMissionId 타입:', typeof userMissionId);
-      console.log('[AppNavigator] lastNotification.userMissionId:', lastNotification.userMissionId);
-      console.log('[AppNavigator] lastNotification.referenceId:', lastNotification.referenceId);
-      
       if (!userMissionId) {
         console.error('[AppNavigator] ❌ userMissionId가 없습니다.');
-        console.error('[AppNavigator] 알림 데이터 구조:', {
-          hasUserMissionId: !!lastNotification.userMissionId,
-          hasReferenceId: !!lastNotification.referenceId,
-          notificationKeys: Object.keys(lastNotification || {}),
-          fullNotification: lastNotification
-        });
         return;
       }
 
@@ -631,8 +576,6 @@ const AppNavigator = () => {
       const missionId = typeof userMissionId === 'string' 
         ? (userMissionId.trim() ? Number(userMissionId.trim()) : null)
         : userMissionId;
-      
-      console.log('[AppNavigator] 변환 후 missionId:', missionId, '타입:', typeof missionId);
       
       if (!missionId || isNaN(missionId) || missionId === 0) {
         console.error('[AppNavigator] ❌ 유효하지 않은 userMissionId:', {
@@ -644,19 +587,12 @@ const AppNavigator = () => {
         });
         return;
       }
-
-      console.log('[AppNavigator] 기상 미션 인증 화면으로 이동, userMissionId:', missionId);
       
       // Context에 userMissionId 저장 (전역 상태로 관리) - 비동기 처리
-      setWakeUpMissionId(missionId).then(() => {
-        console.log('[AppNavigator] Context에 userMissionId 저장 완료:', missionId);
-      }).catch((error) => {
+      setWakeUpMissionId(missionId).catch((error) => {
         console.error('[AppNavigator] ❌ Context 저장 실패:', error);
         // Context 저장 실패해도 계속 진행
       });
-      
-      // 네비게이션 파라미터로도 전달 (이중 보장)
-      console.log('[AppNavigator] navigate 호출 전, params 객체:', { userMissionId: missionId });
       processedNotificationIdRef.current = notificationId || null;
       navigate(SCREEN_NAMES.WAKE_UP_VERIFICATION, { userMissionId: missionId });
       console.log('[AppNavigator] navigate 호출 후');
@@ -910,16 +846,6 @@ const AppNavigator = () => {
       name: currentScreen
     } as any;
     
-    // 디버깅: WAKE_UP_VERIFICATION 화면일 때 파라미터 로그
-    if (currentScreen === SCREEN_NAMES.WAKE_UP_VERIFICATION) {
-      console.log('[AppNavigator] WAKE_UP_VERIFICATION 화면 렌더링');
-      console.log('[AppNavigator] navigationParams (state):', navigationParams);
-      console.log('[AppNavigator] navigationParamsRef.current (ref):', navigationParamsRef.current);
-      console.log('[AppNavigator] routeParams (최종):', routeParams);
-      console.log('[AppNavigator] route.params:', route.params);
-      console.log('[AppNavigator] route.params.userMissionId:', route.params?.userMissionId);
-      console.log('[AppNavigator] route.params.userMissionId 타입:', typeof route.params?.userMissionId);
-    }
 
     switch (currentScreen) {
       case SCREEN_NAMES.HOME:
@@ -1197,7 +1123,6 @@ const styles = StyleSheet.create({
   },
   tabIconImageActive: {
     opacity: 1,
-    tintColor: colors.green[600],
   },
   tabLabel: {
     fontSize: typography.fontSize.xs,

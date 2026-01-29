@@ -152,6 +152,34 @@ export const colors: Colors = {
     anxious: '#b45309',
     tired: '#64748b',
   },
+
+  // Overlay colors
+  overlay: {
+    dark: 'rgba(0, 0, 0, 0.6)',
+    medium: 'rgba(0, 0, 0, 0.5)',
+    light: 'rgba(0, 0, 0, 0.4)',
+    white: {
+      heavy: 'rgba(255, 255, 255, 0.95)',
+      medium: 'rgba(255, 255, 255, 0.9)',
+      light: 'rgba(255, 255, 255, 0.8)',
+    },
+  },
+
+  // Semantic colors (토스 방식 참고)
+  semantic: {
+    fg: {
+      brand: '#89C17E', // primary[500]
+      error: '#ef4444', // red[500]
+      inverse: '#ffffff', // white
+    },
+    bg: {
+      brand: '#89C17E', // primary[500]
+      overlay: 'rgba(0, 0, 0, 0.6)', // overlay.dark
+    },
+  },
+
+  // Brand accent color (카드 테두리 등에 사용)
+  brandAccent: '#D4A574', // 브랜드 강조 색상
 };
 
 export const spacing: Spacing = {
@@ -272,5 +300,18 @@ export const components: ComponentStyles = {
       base: 16,
       lg: 20,
     },
+  },
+};
+
+/**
+ * 레이아웃 토큰 (토스 방식 참고)
+ * 화면 가장자리 간격을 일관되게 관리
+ */
+export const layout = {
+  globalGutter: spacing[4], // 16px - 화면 가장자리 기본 간격
+  globalGutterLarge: spacing[5], // 20px - 특수 화면용
+  screenPadding: {
+    horizontal: spacing[4],
+    vertical: spacing[4],
   },
 };

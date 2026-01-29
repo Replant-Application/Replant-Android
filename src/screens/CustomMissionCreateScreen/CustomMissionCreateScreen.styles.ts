@@ -160,6 +160,18 @@ export const styles = StyleSheet.create({
       marginTop: spacing[1],
     }),
   },
+  verificationFixedText: {
+    ...createBodyStyle('base', {
+      fontWeight: typography.fontWeight.medium,
+      color: colors.text.primary,
+    }),
+  },
+  verificationFixedDesc: {
+    ...createTextStyle('xs', {
+      color: colors.text.tertiary,
+      marginTop: spacing[1],
+    }),
+  },
   timeSettingContainer: {
     marginTop: spacing[4],
     padding: spacing[3],

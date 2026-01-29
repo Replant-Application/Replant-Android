@@ -16,21 +16,50 @@ export const styles = StyleSheet.create({
     ...modalStyles.content(),
     backgroundColor: colors.gray[800],
     width: 350,
+    position: 'relative',
+  },
+  closeButton: {
+    position: 'absolute',
+    top: spacing[3],
+    right: spacing[3],
+    width: 32,
+    height: 32,
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 10,
+  },
+  closeButtonText: {
+    fontSize: 18,
+    color: colors.white,
+    fontWeight: '600',
+    lineHeight: 20,
+  },
+  titleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: spacing[4],
+    gap: spacing[2],
+  },
+  title: {
+    ...createTitleStyle('xl', {
+      color: colors.white,
+      textAlign: 'center',
+      marginBottom: spacing[6],
+    }),
+  },
+  titleIcon: {
+    width: 28,
+    height: 28,
+    marginRight: -spacing[1],
   },
   iconContainer: {
     alignItems: 'center',
     marginBottom: spacing[4],
   },
   icon: {
-    width: 70,
-    height: 70,
-  },
-  title: {
-    ...createTitleStyle('xl', {
-      color: colors.white,
-      marginBottom: spacing[3],
-      textAlign: 'center',
-    }),
+    width: 160,
+    height: 160,
   },
   message: {
     ...createTextStyle('base', {

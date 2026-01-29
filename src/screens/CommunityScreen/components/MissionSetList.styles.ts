@@ -74,11 +74,27 @@ export const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: spacing[2],
+    gap: spacing[2],
   },
   missionSetTitle: {
     flex: 1,
-    ...createTitleStyle('lg', {
-      marginRight: spacing[2],
+    ...createTitleStyle('lg'),
+  },
+  deleteButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing[1],
+    paddingHorizontal: spacing[1.5],
+    paddingVertical: spacing[0.5],
+  },
+  deleteIcon: {
+    width: 14,
+    height: 14,
+  },
+  deleteText: {
+    ...createTextStyle('xs', {
+      color: colors.error,
+      fontWeight: typography.fontWeight.normal,
     }),
   },
   missionSetDescription: {
