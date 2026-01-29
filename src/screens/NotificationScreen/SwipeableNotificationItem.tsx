@@ -12,6 +12,12 @@ import { ConfirmModal } from '../../components/ui';
 import { useSwipeableNotificationItemContainer } from './SwipeableNotificationItem.container';
 import { styles } from './SwipeableNotificationItem.styles';
 
+/** 두 문장 이상일 때 문장 끝(. ! ?) 뒤에 줄바꿈 삽입 */
+function contentWithLineBreaks(content: string): string {
+  if (!content || typeof content !== 'string') return content;
+  return content.replace(/([.!?])\s+/g, '$1\n').trim();
+}
+
 const SwipeableNotificationItem: React.FC<SwipeableNotificationItemProps> = ({ 
   item, 
   onPress, 
@@ -59,8 +65,8 @@ const SwipeableNotificationItem: React.FC<SwipeableNotificationItemProps> = ({
                 </Text>
                 <Text style={styles.time}>{formatTimeAgo(item.createdAt)}</Text>
               </View>
-              <Text style={styles.content} numberOfLines={2}>
-                {item.content}
+              <Text style={styles.content} numberOfLines={4}>
+                {contentWithLineBreaks(item.content)}
               </Text>
             </View>
           </View>
