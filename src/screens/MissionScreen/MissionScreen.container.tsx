@@ -11,15 +11,12 @@ import { useErrorHandler } from '../../hooks/useErrorHandler';
 import { Mission } from '../../types';
 import {
   checkVerificationStatus,
-  verifyByGps,
-  verifyByTime,
   addSystemMissionToMyMissions,
   getCustomMissions,
   getMissionCollection,
   completeCustomMission,
   MissionCategory,
 } from '../../api/missionApi';
-import * as Location from 'expo-location';
 import { logError } from '../../utils/logger';
 import { MissionScreenProps, MissionFilter, MissionTab } from '../../types/screens/mission';
 import { getCurrentUser } from '../../services/authService';
@@ -441,59 +438,9 @@ export const useMissionScreenContainer = ({
           }
           break;
 
-        case 'GPS':
-          // GPS 인증
-          try {
-            if (!userMissionId) {
-              showError('미션 정보가 올바르지 않습니다.', 'MissionScreen.handleVerify.GPS');
-              return;
-            }
-
-            const { status } = await Location.requestForegroundPermissionsAsync();
-            if (status !== 'granted') {
-              showInfo('위치 권한이 필요합니다.', '권한 필요');
-              return;
-            }
-
-            const location = await Location.getCurrentPositionAsync({});
-            const result = await verifyByGps(userMissionId, location.coords.latitude, location.coords.longitude);
-
-            if (result.success) {
-              showSuccess(`+${result.data?.expReward || 50} EXP를 획득했습니다!`, 'GPS 인증 완료');
-              await loadMissions();
-            } else {
-              handleApiError(result, 'MissionScreen.handleVerify.GPS');
-            }
-          } catch (err) {
-            showError(
-              err instanceof Error ? err : new Error('GPS 인증 중 문제가 발생했습니다.'),
-              'MissionScreen.handleVerify.GPS'
-            );
-          }
-          break;
-
-        case 'TIME':
-          // 시간 인증
-          try {
-            if (!userMissionId) {
-              showError('미션 정보가 올바르지 않습니다.', 'MissionScreen.handleVerify.TIME');
-              return;
-            }
-
-            const result = await verifyByTime(userMissionId);
-
-            if (result.success) {
-              showSuccess(`+${result.data?.expReward || 50} EXP를 획득했습니다!`, '시간 인증 완료');
-              await loadMissions();
-            } else {
-              handleApiError(result, 'MissionScreen.handleVerify.TIME');
-            }
-          } catch (err) {
-            showError(
-              err instanceof Error ? err : new Error('시간 인증 중 문제가 발생했습니다.'),
-              'MissionScreen.handleVerify.TIME'
-            );
-          }
+        default:
+          // 모든 미션은 커뮤니티 인증으로 통일 (GPS/TIME은 사용 안 함)
+          showError('인증은 인증글 작성으로 진행해주세요.', 'MissionScreen.handleVerify');
           break;
       }
     },

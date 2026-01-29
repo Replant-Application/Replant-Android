@@ -201,17 +201,11 @@ const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({ navigation, r
             </View>
           </View>
 
-          {/* 인증 방식 표시 (커스텀 미션이 아닐 때만) */}
+          {/* 인증 방식 표시 (커스텀 미션이 아닐 때만) - 모든 미션 커뮤니티 인증 통일 */}
           {mission.missionType !== 'CUSTOM' && (
             <View style={styles.verificationInfo}>
               <Text style={styles.verificationLabel}>인증 방식</Text>
-              <Text style={styles.verificationValue}>
-                {mission.verificationType === 'GPS'
-                  ? 'GPS 위치 인증'
-                  : mission.verificationType === 'TIME'
-                  ? `시간 인증 (${mission.requiredMinutes}분)`
-                  : '커뮤니티 인증'}
-              </Text>
+              <Text style={styles.verificationValue}>커뮤니티 인증</Text>
             </View>
           )}
         </View>

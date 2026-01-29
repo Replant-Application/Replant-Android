@@ -20,7 +20,6 @@ import { RootStackParamList } from '../../types/navigation';
 import {
   useAdminMissionManageScreenContainer,
   MISSION_TYPES,
-  VERIFICATION_TYPES,
 } from './AdminMissionManageScreen.container';
 import { styles } from './AdminMissionManageScreen.styles';
 
@@ -223,77 +222,9 @@ const AdminMissionManageScreen: React.FC<AdminMissionManageScreenProps> = ({ nav
                 ))}
               </View>
 
-              {/* 인증 유형 */}
+              {/* 인증 유형: 모든 미션 커뮤니티 인증으로 통일 */}
               <Text style={styles.inputLabel}>인증 방법</Text>
-              <View style={styles.optionRow}>
-                {VERIFICATION_TYPES.map(type => (
-                  <TouchableOpacity
-                    key={type.value}
-                    style={[
-                      styles.optionButton,
-                      formData.verificationType === type.value && styles.optionButtonActive,
-                    ]}
-                    onPress={() => updateFormData({ verificationType: type.value as any })}
-                  >
-                    <Text
-                      style={[
-                        styles.optionButtonText,
-                        formData.verificationType === type.value && styles.optionButtonTextActive,
-                      ]}
-                    >
-                      {type.label}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-
-              {/* 시간 인증일 경우 */}
-              {formData.verificationType === 'TIME' && (
-                <>
-                  <Text style={styles.inputLabel}>필요 시간 (분)</Text>
-                  <TextInput
-                    style={styles.input}
-                    value={formData.requiredMinutes}
-                    onChangeText={text => updateFormData({ requiredMinutes: text })}
-                    placeholder="30"
-                    placeholderTextColor={colors.text.tertiary}
-                    keyboardType="numeric"
-                  />
-                </>
-              )}
-
-              {/* GPS 인증일 경우 */}
-              {formData.verificationType === 'GPS' && (
-                <>
-                  <Text style={styles.inputLabel}>위도</Text>
-                  <TextInput
-                    style={styles.input}
-                    value={formData.gpsLatitude}
-                    onChangeText={text => updateFormData({ gpsLatitude: text })}
-                    placeholder="37.5665"
-                    placeholderTextColor={colors.text.tertiary}
-                    keyboardType="decimal-pad"
-                  />
-                  <Text style={styles.inputLabel}>경도</Text>
-                  <TextInput
-                    style={styles.input}
-                    value={formData.gpsLongitude}
-                    onChangeText={text => updateFormData({ gpsLongitude: text })}
-                    placeholder="126.9780"
-                    placeholderTextColor={colors.text.tertiary}
-                    keyboardType="decimal-pad"
-                  />
-                  <Text style={styles.inputLabel}>허용 반경 (미터)</Text>
-                  <TextInput
-                    style={styles.input}
-                    value={formData.gpsRadiusMeters}
-                    onChangeText={text => updateFormData({ gpsRadiusMeters: text })}
-                    placeholder="100"
-                    placeholderTextColor={colors.text.tertiary}
-                    keyboardType="numeric"
-                  />
-                </>
-              )}
+              <Text style={styles.metaValue}>커뮤니티 인증</Text>
 
               {/* 경험치 */}
               <Text style={styles.inputLabel}>경험치 보상</Text>

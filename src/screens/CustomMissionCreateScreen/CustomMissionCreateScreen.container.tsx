@@ -4,7 +4,7 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-import { Alert, Platform, Dimensions } from 'react-native';
+import { Alert, Dimensions } from 'react-native';
 import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types/navigation';
 import { useMission } from '../../hooks/useMission';
@@ -90,16 +90,9 @@ export const useCustomMissionCreateScreenContainer = ({
   const [worryType, setWorryType] = useState<WorryType | null>(null);
   // 새로운 필드들
   const [category, setCategory] = useState<MissionCategoryOption>('DAILY_LIFE');
-  const [verificationType, setVerificationType] = useState<VerificationTypeOption>('COMMUNITY');
   const [isChallenge, setIsChallenge] = useState(false); // 챌린지 미션 여부
   const [challengeDays, setChallengeDays] = useState(7);
   const [deadlineDays, setDeadlineDays] = useState(3);
-
-  // 시간 미션용 상태
-  const [startTime, setStartTime] = useState<Date>(new Date());
-  const [endTime, setEndTime] = useState<Date>(new Date());
-  const [showStartTimePicker, setShowStartTimePicker] = useState(false);
-  const [showEndTimePicker, setShowEndTimePicker] = useState(false);
 
   /**
    * 수정 모드일 때 기존 데이터로 초기화
@@ -109,7 +102,6 @@ export const useCustomMissionCreateScreenContainer = ({
       setTitle(missionData.title || '');
       setDescription(missionData.description || '');
       setCategory((missionData.category as MissionCategoryOption) || 'DAILY_LIFE');
-      setVerificationType((missionData.verificationType as VerificationTypeOption) || 'COMMUNITY');
       setIsChallenge(missionData.isChallenge || false);
       setChallengeDays(missionData.challengeDays || 7);
       setDeadlineDays(missionData.deadlineDays || 3);
@@ -127,36 +119,6 @@ export const useCustomMissionCreateScreenContainer = ({
       setSelectedEmoji(generatedMission.emoji || '🎯');
     }
   }, [generatedMission, isEditMode]);
-
-  /**
-   * 시간 포맷팅 (HH:mm)
-   */
-  const formatTime = useCallback((date: Date): string => {
-    const hours = date.getHours().toString().padStart(2, '0');
-    const minutes = date.getMinutes().toString().padStart(2, '0');
-    return `${hours}:${minutes}`;
-  }, []);
-
-  /**
-   * 시간 선택 핸들러
-   */
-  const handleStartTimeChange = useCallback((_event: any, selectedDate?: Date) => {
-    if (Platform.OS === 'android') {
-      setShowStartTimePicker(false);
-    }
-    if (selectedDate) {
-      setStartTime(selectedDate);
-    }
-  }, []);
-
-  const handleEndTimeChange = useCallback((_event: any, selectedDate?: Date) => {
-    if (Platform.OS === 'android') {
-      setShowEndTimePicker(false);
-    }
-    if (selectedDate) {
-      setEndTime(selectedDate);
-    }
-  }, []);
 
   /**
    * 미션 생성/수정 제출
@@ -184,7 +146,7 @@ export const useCustomMissionCreateScreenContainer = ({
         // 백엔드 필수 필드들
         durationDays: isChallenge ? challengeDays : deadlineDays, // 미션 기간
         isPublic: true, // 기본값: 공개
-        verificationType: verificationType,
+        verificationType: 'COMMUNITY' as const,
         badgeDurationDays: isChallenge ? challengeDays : 7, // 배지 유효 기간
         worryType: worryType,
         // 새로운 필드들
@@ -192,9 +154,6 @@ export const useCustomMissionCreateScreenContainer = ({
         isChallenge: isChallenge, // 챌린지 미션 여부
         challengeDays: isChallenge ? challengeDays : undefined, // 챌린지 미션일 때만
         deadlineDays: isChallenge ? undefined : deadlineDays, // 일반 미션일 때만
-        // 시간 미션용 필드
-        startTime: verificationType === 'TIME' ? formatTime(startTime) : undefined,
-        endTime: verificationType === 'TIME' ? formatTime(endTime) : undefined,
       };
 
       let result;
@@ -235,12 +194,8 @@ export const useCustomMissionCreateScreenContainer = ({
     isChallenge,
     challengeDays,
     deadlineDays,
-    verificationType,
     worryType,
     category,
-    startTime,
-    endTime,
-    formatTime,
     isEditMode,
     editMissionId,
     createCustomMission,
@@ -258,7 +213,6 @@ export const useCustomMissionCreateScreenContainer = ({
     // Constants
     WORRY_TYPE_OPTIONS,
     MISSION_CATEGORY_OPTIONS,
-    VERIFICATION_TYPE_OPTIONS,
     CHALLENGE_DAYS_OPTIONS,
     DEADLINE_DAYS_OPTIONS,
     buttonWidth,
@@ -271,33 +225,20 @@ export const useCustomMissionCreateScreenContainer = ({
     loading,
     worryType,
     category,
-    verificationType,
     isChallenge,
     challengeDays,
     deadlineDays,
-    startTime,
-    endTime,
-    showStartTimePicker,
-    showEndTimePicker,
     // Setters
     setTitle,
     setDescription,
     setSelectedEmoji,
     setWorryType,
     setCategory,
-    setVerificationType,
     setIsChallenge,
     setChallengeDays,
     setDeadlineDays,
-    setStartTime,
-    setEndTime,
-    setShowStartTimePicker,
-    setShowEndTimePicker,
     // Handlers
     handleSubmitMission,
     handleCancel,
-    handleStartTimeChange,
-    handleEndTimeChange,
-    formatTime,
   };
 };

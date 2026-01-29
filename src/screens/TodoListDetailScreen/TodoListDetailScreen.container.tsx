@@ -4,7 +4,6 @@
  */
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import * as Location from 'expo-location';
 import { useErrorHandler } from '../../hooks/useErrorHandler';
 import { SCREEN_NAMES } from '../../utils/constants';
 import { getTodoListDetail, completeTodoMission, archiveTodoList, canCreateNewTodoList, updateMissionSet } from '../../api/todolistApi';
@@ -14,8 +13,6 @@ import {
   getVerifications,
   getUserMissions,
   addSystemMissionToMyMissions,
-  verifyByGps,
-  verifyByTime,
 } from '../../api/missionApi';
 
 interface TodoListDetailScreenContainerProps {
@@ -237,7 +234,7 @@ export const useTodoListDetailScreenContainer = ({ navigation, route }: TodoList
 
   /**
    * 미션 완료 처리
-   * - 공식 미션: 인증 플로우(COMMUNITY→VerificationPostCreate, GPS/TIME→verify API)로 이동 후, GPS/TIME 성공 시 completeTodoMission
+   * - 공식 미션: 커뮤니티 인증(VerificationPostCreate)으로 이동
    * - 커스텀 미션: 즉시 completeTodoMission
    */
   const handleCompleteMission = useCallback(
@@ -253,61 +250,16 @@ export const useTodoListDetailScreenContainer = ({ navigation, route }: TodoList
             return;
           }
 
-          const vt = (mission.verificationType || '').toUpperCase();
-          if (vt === 'COMMUNITY') {
-            navigation.navigate(SCREEN_NAMES.VERIFICATION_POST_CREATE as any, {
-              userMissionId,
-              missionId: String(mission.missionId),
-              missionTitle: mission.title || '미션',
-              missionEmoji: '🎯',
-              photoUrl: undefined,
-              todoListId: Number(todoListId), // 투두리스트 ID 전달
-            });
-            return;
-          }
-          if (vt === 'GPS') {
-            const { status } = await Location.requestForegroundPermissionsAsync();
-            if (status !== 'granted') {
-              showInfo('위치 권한이 필요합니다.', '권한 필요');
-              return;
-            }
-            const location = await Location.getCurrentPositionAsync({});
-            const result = await verifyByGps(userMissionId, location.coords.latitude, location.coords.longitude);
-            if (result.success) {
-              showSuccess(`+${result.data?.expReward || 50} EXP를 획득했습니다!`, 'GPS 인증 완료');
-              const completeRes = await completeTodoMission(Number(todoListId), mission.missionId);
-              if (completeRes.success && completeRes.data) {
-                setTodoList(completeRes.data);
-                checkAndShowCompleteModal(completeRes.data);
-              } else if (!completeRes.success) {
-                handleApiError(completeRes, 'TodoListDetailScreen.handleCompleteMission.GPS.complete');
-              }
-              const canCreateResult = await canCreateNewTodoList();
-              if (canCreateResult.success && canCreateResult.data) setCanCreate(canCreateResult.data.canCreate);
-            } else {
-              handleApiError(result, 'TodoListDetailScreen.handleCompleteMission.GPS');
-            }
-            return;
-          }
-          if (vt === 'TIME') {
-            const result = await verifyByTime(userMissionId);
-            if (result.success) {
-              showSuccess(`+${result.data?.expReward || 50} EXP를 획득했습니다!`, '시간 인증 완료');
-              const completeRes = await completeTodoMission(Number(todoListId), mission.missionId);
-              if (completeRes.success && completeRes.data) {
-                setTodoList(completeRes.data);
-                checkAndShowCompleteModal(completeRes.data);
-              } else if (!completeRes.success) {
-                handleApiError(completeRes, 'TodoListDetailScreen.handleCompleteMission.TIME.complete');
-              }
-              const canCreateResult = await canCreateNewTodoList();
-              if (canCreateResult.success && canCreateResult.data) setCanCreate(canCreateResult.data.canCreate);
-            } else {
-              handleApiError(result, 'TodoListDetailScreen.handleCompleteMission.TIME');
-            }
-            return;
-          }
-          showError(new Error('지원하지 않는 인증 방식입니다.'), 'TodoListDetailScreen.handleCompleteMission');
+          // 모든 미션은 커뮤니티 인증(인증글 작성)으로 통일
+          navigation.navigate(SCREEN_NAMES.VERIFICATION_POST_CREATE as any, {
+            userMissionId,
+            missionId: String(mission.missionId),
+            missionTitle: mission.title || '미션',
+            missionEmoji: '🎯',
+            photoUrl: undefined,
+            todoListId: Number(todoListId),
+          });
+          return;
         } catch (error) {
           showError(
             error instanceof Error ? error : new Error('인증을 시작하는 중 문제가 발생했습니다.'),
