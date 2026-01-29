@@ -72,6 +72,27 @@ export const styles = StyleSheet.create({
     ...createSecondaryTextStyle('sm'),
   },
 
+  filterSection: {
+    marginBottom: spacing[3],
+  },
+  onlyMyMissionsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: spacing[3],
+    paddingHorizontal: spacing[4],
+    backgroundColor: colors.overlay.white.medium,
+    borderRadius: borderRadius.md,
+    borderWidth: 1,
+    borderColor: colors.gray[200],
+  },
+  onlyMyMissionsLabel: {
+    ...createBodyStyle('base', {
+      fontWeight: typography.fontWeight.semibold,
+      color: colors.text.primary,
+    }),
+  },
+
   loadingContainer: { 
     ...loadingStyles.container() 
   },
@@ -127,6 +148,8 @@ export const styles = StyleSheet.create({
   missionDescription: {
     ...createSecondaryTextStyle('sm', {
       marginBottom: spacing[3],
+      color: colors.text.secondary,
+      lineHeight: getOptimizedLineHeight(typography.fontSize.sm) * 1.3,
     }),
   },
   missionMeta: { 

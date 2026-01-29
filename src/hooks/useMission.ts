@@ -23,6 +23,7 @@ import {
   createCustomMission as createCustomMissionApi,
   updateCustomMission as updateCustomMissionApi,
   deleteCustomMission as deleteCustomMissionApi,
+  getUserMissions,
   Mission as ApiMission,
   MissionCategory as ApiMissionCategory,
   CreateMissionRequest,
@@ -143,7 +144,6 @@ export const useMission = (
 
       const allMissions: Mission[] = [];
 
-<<<<<<< HEAD
       // 오늘 할당된 미션만 불러오기 (투두리스트에 추가된 미션들)
       // 백엔드 API: /api/missions/my는 assignedAt이 오늘인 미션만 반환
       // 상태: ASSIGNED, PENDING, COMPLETED 모두 포함 (오늘 할당된 것만)
@@ -172,13 +172,15 @@ export const useMission = (
             }
             
             // 정상적인 유저 미션만 변환
-            const mission = transformUserMission(um);
-            allMissions.push(mission);
+            const mission = transformUserMissionToMission(um);
+            if (mission) {
+              allMissions.push(mission);
+            }
           } catch (e) {
             // 미션 데이터가 없는 경우 스킵
             logError('UserMission 변환 실패', e as Error, { userMissionId: um.id });
           }
-        }
+        });
       }
 
       console.log('[useMission] 로드된 미션:', {

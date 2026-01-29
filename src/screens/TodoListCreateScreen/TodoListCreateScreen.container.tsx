@@ -40,6 +40,7 @@ export const useTodoListCreateScreenContainer = ({ navigation }: TodoListCreateS
   const [randomMissions, setRandomMissions] = useState<MissionSimple[]>([]);
   const [customMissions, setCustomMissions] = useState<MissionSimple[]>([]);
   const [selectedCustomMissions, setSelectedCustomMissions] = useState<number[]>([]);
+  const [onlyMyMissions, setOnlyMyMissions] = useState(false);
   const [isAllDay, setIsAllDay] = useState(false);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -130,12 +131,12 @@ export const useTodoListCreateScreenContainer = ({ navigation }: TodoListCreateS
   }, [handleApiError, showError]);
 
   /**
-   * 커스텀 미션 로드
+   * 커스텀 미션 로드 (onlyMyMissions=true면 내가 만든 미션만)
    */
   const loadCustomMissions = useCallback(async () => {
     setLoading(true);
     try {
-      const result = await getSelectableMissions();
+      const result = await getSelectableMissions(onlyMyMissions);
       if (result.success && result.data) {
         setCustomMissions(result.data);
       }
@@ -144,10 +145,10 @@ export const useTodoListCreateScreenContainer = ({ navigation }: TodoListCreateS
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [onlyMyMissions]);
 
   /**
-   * 단계 변경 시 데이터 로드
+   * 단계 변경 시 데이터 로드 (커스텀 단계에서는 onlyMyMissions 변경 시에도 재로드)
    */
   useEffect(() => {
     if (currentStep === 'random') {
@@ -155,7 +156,7 @@ export const useTodoListCreateScreenContainer = ({ navigation }: TodoListCreateS
     } else if (currentStep === 'custom') {
       loadCustomMissions();
     }
-  }, [currentStep, loadRandomMissions, loadCustomMissions]);
+  }, [currentStep, onlyMyMissions, loadRandomMissions, loadCustomMissions]);
 
   /**
    * 커스텀 미션 선택/해제
@@ -470,6 +471,8 @@ export const useTodoListCreateScreenContainer = ({ navigation }: TodoListCreateS
     // State
     currentStep,
     selectedCustomMissions,
+    onlyMyMissions,
+    setOnlyMyMissions,
     title,
     description,
     loading,

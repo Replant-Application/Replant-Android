@@ -9,6 +9,7 @@ import {
   ImageBackground,
   Image,
   Modal,
+  Switch,
 } from 'react-native';
 import { colors } from '../../utils/designTokens';
 import { Header, AlertModal, WheelPicker } from '../../components/ui';
@@ -26,6 +27,8 @@ const TodoListCreateScreen: React.FC<TodoListCreateScreenProps> = ({ navigation 
     missionsWithTime,
     currentStep,
     selectedCustomMissions,
+    onlyMyMissions,
+    setOnlyMyMissions,
     title,
     description,
     loading,
@@ -223,9 +226,26 @@ const TodoListCreateScreen: React.FC<TodoListCreateScreenProps> = ({ navigation 
           <ActivityIndicator size="large" color={colors.primary[500]} />
           <Text style={styles.loadingText}>미션을 불러오는 중...</Text>
         </View>
-      ) : customMissions.length > 0 ? (
-        <ScrollView style={styles.missionList} showsVerticalScrollIndicator={false}>
-          {customMissions.map((mission) => {
+      ) : (
+        <>
+          {/* 필터: 미션 목록 바로 위에 배치 */}
+          <View style={styles.filterSection}>
+            <View style={styles.onlyMyMissionsRow}>
+              <Text style={styles.onlyMyMissionsLabel}>내가 만든 미션만 보기</Text>
+              <Switch
+                value={onlyMyMissions}
+                onValueChange={setOnlyMyMissions}
+                trackColor={{ false: colors.gray[300], true: colors.primary[400] }}
+                thumbColor={colors.overlay.white.heavy}
+                accessibilityLabel="내가 만든 미션만 보기"
+                accessibilityState={{ checked: onlyMyMissions }}
+              />
+            </View>
+          </View>
+
+          {customMissions.length > 0 ? (
+            <ScrollView style={styles.missionList} showsVerticalScrollIndicator={false}>
+              {customMissions.map((mission) => {
             const isSelected = selectedCustomMissions.includes(mission.id);
             return (
               <TouchableOpacity
@@ -258,14 +278,22 @@ const TodoListCreateScreen: React.FC<TodoListCreateScreenProps> = ({ navigation 
                   </View>
                 </View>
               </TouchableOpacity>
-            );
-          })}
-        </ScrollView>
-      ) : (
-        <View style={styles.emptyContainer}>
-          <Text style={styles.emptyText}>선택 가능한 미션이 없습니다</Text>
-          <Text style={styles.emptySubtext}>미션 도감에서 커스텀 미션을 먼저 추가해주세요</Text>
-        </View>
+              );
+            })}
+            </ScrollView>
+          ) : (
+            <View style={styles.emptyContainer}>
+              <Text style={styles.emptyText}>
+                {onlyMyMissions ? '내가 만든 미션이 없습니다' : '선택 가능한 미션이 없습니다'}
+              </Text>
+              <Text style={styles.emptySubtext}>
+                {onlyMyMissions 
+                  ? '나만의 커스텀 미션을 먼저 생성해주세요' 
+                  : '미션 도감에서 커스텀 미션을 먼저 추가해주세요'}
+              </Text>
+            </View>
+          )}
+        </>
       )}
 
       <View style={styles.buttonContainer}>

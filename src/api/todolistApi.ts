@@ -116,9 +116,12 @@ export const initTodoList = async (): Promise<ServiceResult<TodoListInitResponse
 /**
  * 선택 가능한 미션 목록 조회 (공식 + 커스텀)
  * GET /api/todolists/selectable-missions
+ * @param onlyMine true면 내가 만든 커스텀 미션만 반환
  */
-export const getSelectableMissions = async (): Promise<ServiceResult<MissionSimple[]>> => {
-  return apiClient.get<MissionSimple[]>('/todolists/selectable-missions');
+export const getSelectableMissions = async (
+  onlyMine?: boolean
+): Promise<ServiceResult<MissionSimple[]>> => {
+  return apiClient.get<MissionSimple[]>('/todolists/selectable-missions', onlyMine ? { onlyMine: true } : undefined);
 };
 
 /**
