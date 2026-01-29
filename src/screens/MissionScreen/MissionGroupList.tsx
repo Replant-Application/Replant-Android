@@ -109,7 +109,7 @@ const MissionGroupList: React.FC<MissionGroupListProps> = ({
               onPress={() => onShowOnlyParticipatedChange?.(!showOnlyParticipated)}
               activeOpacity={0.7}
               accessibilityRole="checkbox"
-              accessibilityLabel="참여한 미션"
+              accessibilityLabel="잠금 해제된 미션만 보기"
               accessibilityState={{ checked: showOnlyParticipated }}
             >
               <View style={[styles.checkbox, showOnlyParticipated && styles.checkboxChecked]}>
@@ -117,7 +117,7 @@ const MissionGroupList: React.FC<MissionGroupListProps> = ({
                   <Text style={styles.checkboxCheckmark}>✓</Text>
                 )}
               </View>
-              <Text style={styles.filterCheckboxLabel}>참여한 미션</Text>
+              <Text style={styles.filterCheckboxLabel}>잠금 해제된 미션만 보기</Text>
             </TouchableOpacity>
           ) : (
             <View style={styles.filterCheckboxPlaceholder} />

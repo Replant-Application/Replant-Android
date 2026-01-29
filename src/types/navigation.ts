@@ -31,6 +31,7 @@ export type RootStackParamList = {
       isPublic?: boolean;
       worryType?: string;
     };
+    returnScreen?: 'TodoListCreate' | 'Mission'; // 돌아갈 화면 지정
   };
   CounselingSelect: undefined;
   PlacesSearch: undefined;
@@ -125,6 +126,9 @@ export type RootStackParamList = {
     userMissionId: number;
   };
   ReantChat: undefined;
+  TodoListCreate: {
+    activeStep?: 'random' | 'custom' | 'confirm'; // 돌아올 때 활성화할 단계
+  };
   MissionSetDetail: {
     missionSetId: number;
     returnScreen?: 'TodoList' | 'Community' | 'MissionSetList'; // 뒤로가기 시 복원할 화면

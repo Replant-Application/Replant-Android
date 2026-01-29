@@ -139,7 +139,8 @@ export const styles = StyleSheet.create({
   myReviewCard: {
     backgroundColor: colors.background.primary,
     borderRadius: borderRadius.base,
-    padding: spacing[3],
+    paddingVertical: spacing[2],
+    paddingHorizontal: spacing[3],
     borderWidth: 1,
     borderColor: colors.primary[200],
     marginBottom: spacing[2],

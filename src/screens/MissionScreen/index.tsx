@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, ScrollView, RefreshControl, ImageBackground, ActivityIndicator, Dimensions, FlatList } from 'react-native';
+import { View, Text, ScrollView, RefreshControl, ImageBackground, ActivityIndicator, Dimensions, FlatList, TouchableOpacity } from 'react-native';
 import { MissionCard, MissionVerificationModal, MissionProgressCard } from '../../components/specialized';
 import { Loading, ErrorBoundary, Header, EmptyState, ConfirmModal, SimpleTabBar, AlertModal } from '../../components/ui';
 import MissionInfoModal from './MissionInfoModal';
@@ -99,15 +99,34 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
 
       {/* 나의 미션 / 미션 도감 탭 */}
       <View style={styles.topTabContainer}>
-        <SimpleTabBar
-          tabs={[
-            { key: 'myMission', label: '나의 미션' },
-            { key: 'missionGroup', label: '미션 도감' },
-          ]}
-          activeTab={activeTab}
-          onTabChange={handleTabChange}
-          style={styles.topTabBar}
-        />
+        <View style={styles.missionTabContainer}>
+          <TouchableOpacity
+            style={[styles.missionTab, activeTab === 'myMission' && styles.missionTabActive]}
+            onPress={() => handleTabChange('myMission')}
+            activeOpacity={0.7}
+          >
+            <Text 
+              style={[styles.missionTabText, activeTab === 'myMission' && styles.missionTabTextActive]}
+              numberOfLines={1}
+              ellipsizeMode="tail"
+            >
+              나의 미션
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.missionTab, activeTab === 'missionGroup' && styles.missionTabActive]}
+            onPress={() => handleTabChange('missionGroup')}
+            activeOpacity={0.7}
+          >
+            <Text 
+              style={[styles.missionTabText, activeTab === 'missionGroup' && styles.missionTabTextActive]}
+              numberOfLines={1}
+              ellipsizeMode="tail"
+            >
+              미션 도감
+            </Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       {/* useErrorHandler 오류/성공/알림 → AlertModal */}
@@ -271,15 +290,34 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
         <>
           {/* 공식/커스텀 미션 탭 */}
           <View style={styles.groupTabContainer}>
-            <SimpleTabBar
-              tabs={[
-                { key: 'official', label: '공식 미션' },
-                { key: 'custom', label: '커스텀 미션' },
-              ]}
-              activeTab={missionGroupTab}
-              onTabChange={handleMissionGroupTabChange}
-              style={styles.groupTabBar}
-            />
+            <View style={styles.missionTabContainer}>
+              <TouchableOpacity
+                style={[styles.missionTab, missionGroupTab === 'official' && styles.missionTabActive]}
+                onPress={() => handleMissionGroupTabChange('official')}
+                activeOpacity={0.7}
+              >
+                <Text 
+                  style={[styles.missionTabText, missionGroupTab === 'official' && styles.missionTabTextActive]}
+                  numberOfLines={1}
+                  ellipsizeMode="tail"
+                >
+                  공식 미션
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.missionTab, missionGroupTab === 'custom' && styles.missionTabActive]}
+                onPress={() => handleMissionGroupTabChange('custom')}
+                activeOpacity={0.7}
+              >
+                <Text 
+                  style={[styles.missionTabText, missionGroupTab === 'custom' && styles.missionTabTextActive]}
+                  numberOfLines={1}
+                  ellipsizeMode="tail"
+                >
+                  커스텀 미션
+                </Text>
+              </TouchableOpacity>
+            </View>
           </View>
 
           {groupLoading ? (

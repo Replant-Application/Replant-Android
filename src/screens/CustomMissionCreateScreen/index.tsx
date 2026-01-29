@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 import {
   View,
   Text,
@@ -9,6 +9,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   Image,
+  ImageBackground,
 } from 'react-native';
 import { Button, Header, SectionTitle, FormCard } from '../../components/ui';
 import { colors, spacing } from '../../utils/designTokens';
@@ -16,10 +17,7 @@ import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types/navigation';
 import {
   useCustomMissionCreateScreenContainer,
-  WORRY_TYPE_OPTIONS,
   MISSION_CATEGORY_OPTIONS,
-  CHALLENGE_DAYS_OPTIONS,
-  DEADLINE_DAYS_OPTIONS,
 } from './CustomMissionCreateScreen.container';
 import { styles } from './CustomMissionCreateScreen.styles';
 
@@ -35,226 +33,95 @@ const CustomMissionCreateScreen: React.FC<CustomMissionCreateScreenProps> = ({ n
     title,
     description,
     loading,
-    worryType,
     category,
-    isChallenge,
-    challengeDays,
-    deadlineDays,
-    startTime,
-    endTime,
-    showStartTimePicker,
-    showEndTimePicker,
     setTitle,
     setDescription,
-    setWorryType,
     setCategory,
-    setIsChallenge,
-    setChallengeDays,
-    setDeadlineDays,
     handleSubmitMission,
     handleCancel,
+    MISSION_CATEGORY_OPTIONS,
   } = useCustomMissionCreateScreenContainer({ navigation, route });
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    <ImageBackground
+      source={require('../../assets/images/background.png')}
+      style={styles.backgroundImage}
+      resizeMode="cover"
+      accessibilityElementsHidden={true}
     >
-      {/* 헤더 */}
-      <Header
-        title={isEditMode ? "미션 수정" : "미션 만들기"}
-        leftButton={
-          <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Image
-              source={require('../../assets/images/left.png')}
-              style={styles.backButtonIcon}
-              resizeMode="contain"
-              accessibilityLabel="뒤로 가기"
+      <KeyboardAvoidingView
+        style={styles.container}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      >
+        {/* 헤더 */}
+        <Header
+          title={isEditMode ? "미션 수정" : "미션 만들기"}
+          leftButton={
+            <TouchableOpacity onPress={handleCancel}>
+              <Image
+                source={require('../../assets/images/left.png')}
+                style={styles.backButtonIcon}
+                resizeMode="contain"
+                accessibilityLabel="뒤로 가기"
+              />
+            </TouchableOpacity>
+          }
+        />
+
+        <ScrollView style={styles.content}>
+          <FormCard>
+            <SectionTitle title="미션 제목" size="lg" marginBottom={spacing[3]} />
+            <TextInput
+              style={styles.textInput}
+              value={title}
+              onChangeText={setTitle}
+              placeholder="미션 제목을 입력하세요"
+              placeholderTextColor={colors.text.secondary}
+              maxLength={50}
             />
-          </TouchableOpacity>
-        }
-      />
+          </FormCard>
 
-      <ScrollView style={styles.content}>
-        <FormCard>
-          <SectionTitle title="미션 제목" size="lg" marginBottom={spacing[3]} />
-          <TextInput
-            style={styles.textInput}
-            value={title}
-            onChangeText={setTitle}
-            placeholder="미션 제목을 입력하세요"
-            placeholderTextColor={colors.text.secondary}
-            maxLength={50}
-          />
-        </FormCard>
-
-        <FormCard>
-          <SectionTitle title="미션 설명" size="lg" marginBottom={spacing[3]} />
-          <TextInput
-            style={[styles.textInput, styles.textArea]}
-            value={description}
-            onChangeText={setDescription}
-            placeholder="미션에 대한 자세한 설명을 입력하세요"
-            placeholderTextColor={colors.text.secondary}
-            multiline
-            numberOfLines={4}
-            maxLength={200}
-          />
-        </FormCard>
-
-        <FormCard>
-          <SectionTitle title="고민 종류" size="lg" marginBottom={spacing[3]} />
-          <View style={styles.worryTypeContainer}>
-            {WORRY_TYPE_OPTIONS.map((option) => (
-              <TouchableOpacity
-                key={option.id}
-                style={[
-                  styles.worryTypeButton,
-                  worryType === option.id && styles.selectedWorryType
-                ]}
-                onPress={() => setWorryType(worryType === option.id ? null : option.id)}
-              >
-                <Text style={styles.worryTypeEmoji}>{option.emoji}</Text>
-                <Text style={[
-                  styles.worryTypeText,
-                  worryType === option.id && styles.selectedWorryTypeText
-                ]}>
-                  {option.name}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-          <Text style={styles.optionalHint}>선택 사항</Text>
-        </FormCard>
-
-        <FormCard>
-          <SectionTitle title="미션 카테고리" size="lg" marginBottom={spacing[3]} />
-          <View style={styles.categoryContainer}>
-            {MISSION_CATEGORY_OPTIONS.map((option) => (
-              <TouchableOpacity
-                key={option.id}
-                style={[
-                  styles.categoryButton,
-                  category === option.id && styles.selectedCategory
-                ]}
-                onPress={() => setCategory(option.id)}
-              >
-                <Text style={styles.categoryEmoji}>{option.emoji}</Text>
-                <Text style={[
-                  styles.categoryText,
-                  category === option.id && styles.selectedCategoryText
-                ]}>
-                  {option.name}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </FormCard>
-
-        <FormCard>
-          <SectionTitle title="인증 방식" size="lg" marginBottom={spacing[3]} />
-          <Text style={styles.verificationFixedText}>커뮤니티 인증 (인증글 작성)</Text>
-          <Text style={styles.verificationFixedDesc}>미션 완료 시 인증글을 작성해 완료합니다.</Text>
-        </FormCard>
-
-        <FormCard>
-          <SectionTitle title="미션 유형" size="lg" marginBottom={spacing[3]} />
-          <View style={styles.missionTypeToggle}>
-            <TouchableOpacity
-              style={[
-                styles.missionTypeButton,
-                !isChallenge && styles.selectedMissionType
-              ]}
-              onPress={() => setIsChallenge(false)}
-            >
-              <View style={styles.missionTypeRow}>
-                <Text style={styles.missionTypeEmoji}>📋</Text>
-                <Text style={[
-                  styles.missionTypeText,
-                  !isChallenge && styles.selectedMissionTypeText
-                ]}>
-                  일반 미션
-                </Text>
-              </View>
-              <Text style={styles.missionTypeDesc}>기한 내 1회 완료</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[
-                styles.missionTypeButton,
-                isChallenge && styles.selectedMissionType
-              ]}
-              onPress={() => setIsChallenge(true)}
-            >
-              <View style={styles.missionTypeRow}>
-                <Text style={styles.missionTypeEmoji}>🔥</Text>
-                <Text style={[
-                  styles.missionTypeText,
-                  isChallenge && styles.selectedMissionTypeText
-                ]}>
-                  챌린지 미션
-                </Text>
-              </View>
-              <Text style={styles.missionTypeDesc}>기간 동안 매일 인증</Text>
-            </TouchableOpacity>
-          </View>
-        </FormCard>
-
-        {isChallenge ? (
           <FormCard>
-            <SectionTitle title="챌린지 기간" size="lg" marginBottom={spacing[3]} />
-            <View style={styles.daysContainer}>
-              {CHALLENGE_DAYS_OPTIONS.map((option) => (
+            <SectionTitle title="미션 설명" size="lg" marginBottom={spacing[3]} />
+            <TextInput
+              style={[styles.textInput, styles.textArea]}
+              value={description}
+              onChangeText={setDescription}
+              placeholder="미션에 대한 자세한 설명을 입력하세요"
+              placeholderTextColor={colors.text.secondary}
+              multiline
+              numberOfLines={4}
+              maxLength={200}
+            />
+          </FormCard>
+
+          <FormCard>
+            <View style={styles.titleRow}>
+              <Text style={styles.categoryTitle}>미션 카테고리</Text>
+              <Text style={styles.optionalHintInline}>(선택 사항)</Text>
+            </View>
+            <View style={styles.worryTypeContainer}>
+              {MISSION_CATEGORY_OPTIONS.map((option) => (
                 <TouchableOpacity
                   key={option.id}
                   style={[
-                    styles.daysButton,
-                    challengeDays === option.id && styles.selectedDays
+                    styles.worryTypeButton,
+                    category === option.id && styles.selectedWorryType
                   ]}
-                  onPress={() => setChallengeDays(option.id)}
+                  onPress={() => setCategory(category === option.id ? null : option.id)}
                 >
-                  <View style={styles.daysRow}>
-                    <Text style={styles.daysEmoji}>{option.emoji}</Text>
-                    <Text style={[
-                      styles.daysText,
-                      challengeDays === option.id && styles.selectedDaysText
-                    ]}>
-                      {option.name}
-                    </Text>
-                  </View>
+                  <Text style={styles.worryTypeEmoji}>{option.emoji}</Text>
+                  <Text style={[
+                    styles.worryTypeText,
+                    category === option.id && styles.selectedWorryTypeText
+                  ]}>
+                    {option.name}
+                  </Text>
                 </TouchableOpacity>
               ))}
             </View>
-            <Text style={styles.optionalHint}>챌린지 기간 동안 매일 인증해야 합니다</Text>
           </FormCard>
-        ) : (
-          <FormCard>
-            <SectionTitle title="완료 기한" size="lg" marginBottom={spacing[3]} />
-            <View style={styles.daysContainer}>
-              {DEADLINE_DAYS_OPTIONS.map((option) => (
-                <TouchableOpacity
-                  key={option.id}
-                  style={[
-                    styles.daysButton,
-                    deadlineDays === option.id && styles.selectedDays
-                  ]}
-                  onPress={() => setDeadlineDays(option.id)}
-                >
-                  <View style={styles.daysRow}>
-                    <Text style={styles.daysEmoji}>{option.emoji}</Text>
-                    <Text style={[
-                      styles.daysText,
-                      deadlineDays === option.id && styles.selectedDaysText
-                    ]}>
-                      {option.name}
-                    </Text>
-                  </View>
-                </TouchableOpacity>
-              ))}
-            </View>
-            <Text style={styles.optionalHint}>미션 할당 후 이 기간 내에 완료해야 합니다</Text>
-          </FormCard>
-        )}
-      </ScrollView>
+        </ScrollView>
 
       <View style={styles.buttonContainer}>
         <Button
@@ -270,7 +137,8 @@ const CustomMissionCreateScreen: React.FC<CustomMissionCreateScreenProps> = ({ n
           disabled={loading}
         />
       </View>
-    </KeyboardAvoidingView>
+      </KeyboardAvoidingView>
+    </ImageBackground>
   );
 };
 
