@@ -300,8 +300,7 @@ export const styles = StyleSheet.create({
     gap: spacing[2],
   },
   searchInputContainer: {
-    flex: 0,
-    width: 300,
+    flex: 1,
     position: 'relative',
     backgroundColor: colors.overlay.light,
     borderRadius: borderRadius.lg,

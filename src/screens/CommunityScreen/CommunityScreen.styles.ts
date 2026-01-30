@@ -222,23 +222,22 @@ export const styles = StyleSheet.create({
     borderWidth: 1.5,
   },
   filterOptionText: {
-    ...createTextStyle('base', {
+    ...createTextStyle('xs', {
       fontWeight: typography.fontWeight.medium,
       color: colors.text.primary,
     }),
   },
   filterOptionTextActive: {
-    ...createTextStyle('base', {
+    ...createTextStyle('xs', {
       color: colors.white,
       fontWeight: typography.fontWeight.semibold,
     }),
   },
   filterOptionCheck: {
-    ...createTextStyle('base', {
+    ...createTextStyle('xs', {
       color: colors.white,
       fontWeight: typography.fontWeight.bold,
       marginLeft: spacing[2],
-      fontSize: 16,
     }),
   },
   modalApplyButton: {

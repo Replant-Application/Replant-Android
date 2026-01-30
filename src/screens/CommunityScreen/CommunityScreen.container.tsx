@@ -365,8 +365,12 @@ export const useCommunityScreenContainer = ({ navigation, route }: CommunityScre
         
         // 백엔드 응답을 프론트엔드 형식으로 변환
         // 백엔드는 postType(GENERAL|VERIFICATION)을 보냄 → category(일반|인증)로 변환해야 목록 태그가 올바르게 표시됨
+        // postType(camelCase) 또는 post_type(snake_case) 모두 처리. missionTag+status 있으면 인증글로 간주
         const transformedPosts: CommunityPost[] = newPosts.map((post: any) => {
-          const isVerification = post.postType === 'VERIFICATION';
+          const isVerification =
+            post.postType === 'VERIFICATION' ||
+            post.post_type === 'VERIFICATION' ||
+            (!!post.missionTag && (post.status === 'PENDING' || post.status === 'APPROVED'));
           return {
             id: String(post.id),
             post_id: String(post.id),
