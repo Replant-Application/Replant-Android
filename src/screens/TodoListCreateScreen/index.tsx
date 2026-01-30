@@ -76,6 +76,7 @@ const TodoListCreateScreen: React.FC<TodoListCreateScreenProps> = ({ navigation,
     setEndHour,
     setEndMinute,
     handleCustomMissionToggle,
+    handleNavigateToCustomMissionCreate,
     handleRerollMission,
     handleCreateMission,
     handleCreate,
@@ -181,7 +182,7 @@ const TodoListCreateScreen: React.FC<TodoListCreateScreenProps> = ({ navigation,
 
       <TouchableOpacity
         style={styles.createMissionButton}
-        onPress={() => navigation.navigate('CustomMissionCreate' as any, { returnScreen: 'TodoListCreate' })}
+        onPress={handleNavigateToCustomMissionCreate}
         activeOpacity={0.7}
         accessibilityRole="button"
         accessibilityLabel="나만의 커스텀 미션 생성"

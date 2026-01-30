@@ -62,6 +62,7 @@ export const useCustomMissionCreateScreenContainer = ({
 }: CustomMissionCreateScreenContainerProps) => {
   const generatedMission = route?.params?.generatedMission;
   const returnScreen = route?.params?.returnScreen;
+  const todoListRestoreState = (route?.params as any)?.todoListRestoreState;
   const screenWidth = Dimensions.get('window').width;
   // 화면 좌우 패딩(24*2=48) + Card 내부 패딩(spacing[4]*2=32) + 버튼 간 간격(spacing[2]*2=16)을 뺀 후 3등분
   const buttonWidth = (screenWidth - 48 - spacing[4] * 2 - spacing[2] * 2) / 3;
@@ -180,22 +181,27 @@ export const useCustomMissionCreateScreenContainer = ({
     setAlertModal(prev => ({ ...prev, visible: false }));
     if (wasSuccess) {
       if (returnScreen === 'TodoListCreate') {
-        // 투두리스트 만들기로 돌아갈 때 navigate + activeStep 사용 (goBack 시 상태 리셋 방지)
-        (navigation as any).navigate(SCREEN_NAMES.TODO_LIST_CREATE, { activeStep: 'custom' });
+        // 투두리스트 만들기로 돌아갈 때 activeStep + 복원 상태 전달 (공식 미션 등 유지)
+        (navigation as any).navigate(SCREEN_NAMES.TODO_LIST_CREATE, {
+          activeStep: 'custom',
+          todoListRestoreState: todoListRestoreState ?? undefined,
+        });
       } else {
         (navigation as any).navigate(ScreenNames.MISSION);
       }
     }
-  }, [alertModal.isSuccess, navigation, returnScreen]);
+  }, [alertModal.isSuccess, navigation, returnScreen, todoListRestoreState]);
 
   /**
    * 취소 버튼 핸들러
    */
   const handleCancel = useCallback(() => {
     if (returnScreen === 'TodoListCreate') {
-      // TodoListCreateScreen으로 돌아가면서 Step 2 (custom)로 설정
-      // navigate를 사용하여 파라미터 전달 (이미 스택에 있어도 파라미터 업데이트됨)
-      (navigation as any).navigate(SCREEN_NAMES.TODO_LIST_CREATE, { activeStep: 'custom' });
+      // TodoListCreateScreen으로 돌아가면서 Step 2 + 복원 상태 전달 (공식 미션 등 유지)
+      (navigation as any).navigate(SCREEN_NAMES.TODO_LIST_CREATE, {
+        activeStep: 'custom',
+        todoListRestoreState: todoListRestoreState ?? undefined,
+      });
     } else {
       // 미션 도감에서 왔으면 Mission 화면의 미션 도감 커스텀 미션 탭으로 이동
       // navigate를 사용하여 activeTab과 missionGroupTab을 명시적으로 전달
@@ -204,7 +210,7 @@ export const useCustomMissionCreateScreenContainer = ({
         missionGroupTab: 'custom' 
       });
     }
-  }, [navigation, returnScreen]);
+  }, [navigation, returnScreen, todoListRestoreState]);
 
   return {
     // Constants

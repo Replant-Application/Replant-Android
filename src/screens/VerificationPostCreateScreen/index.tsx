@@ -15,6 +15,7 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   ImageBackground,
+  Modal,
 } from 'react-native';
 import Slider from '@react-native-community/slider';
 import { Header, AlertModal } from '../../components/ui';
@@ -47,6 +48,10 @@ const VerificationPostCreateScreen: React.FC<VerificationPostCreateScreenProps> 
     setContent,
     handleRemoveImage,
     showPhotoOptions,
+    showPhotoOptionsModal,
+    closePhotoOptionsModal,
+    handleTakePhoto,
+    handleSelectPhoto,
     handleSubmitVerification,
     handleSuccessModalClose,
     handleAlreadyExistsModalClose,
@@ -310,6 +315,53 @@ const VerificationPostCreateScreen: React.FC<VerificationPostCreateScreenProps> 
         buttonText="확인"
         onClose={handleErrorModalClose}
       />
+
+      {/* 사진 추가 커스텀 모달 */}
+      <Modal
+        visible={showPhotoOptionsModal}
+        transparent
+        animationType="fade"
+        onRequestClose={closePhotoOptionsModal}
+      >
+        <View style={styles.photoOptionsOverlay}>
+          <View style={styles.photoOptionsModalContainer}>
+            <Text style={styles.photoOptionsTitle} accessibilityRole="header">사진 추가</Text>
+            <Text style={styles.photoOptionsMessage}>사진을 추가할 방법을 선택해주세요.</Text>
+            <View style={styles.photoOptionsButtonRow}>
+              <TouchableOpacity
+                style={[styles.photoOptionsButton, styles.photoOptionsCancelButton]}
+                onPress={closePhotoOptionsModal}
+                accessibilityRole="button"
+                accessibilityLabel="취소"
+              >
+                <Text style={styles.photoOptionsCancelButtonText}>취소</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.photoOptionsButton, styles.photoOptionsActionButton]}
+                onPress={() => {
+                  closePhotoOptionsModal();
+                  handleTakePhoto();
+                }}
+                accessibilityRole="button"
+                accessibilityLabel="카메라"
+              >
+                <Text style={styles.photoOptionsButtonText}>카메라</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.photoOptionsButton, styles.photoOptionsActionButton]}
+                onPress={() => {
+                  closePhotoOptionsModal();
+                  handleSelectPhoto();
+                }}
+                accessibilityRole="button"
+                accessibilityLabel="갤러리"
+              >
+                <Text style={styles.photoOptionsButtonText}>갤러리</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
       </KeyboardAvoidingView>
     </ImageBackground>
   );

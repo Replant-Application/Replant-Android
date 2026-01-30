@@ -4,7 +4,6 @@
  */
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { Alert } from 'react-native';
 import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types/navigation';
 import { createVerification, updateVerification, getVerification } from '../../api/missionApi';
@@ -65,6 +64,7 @@ export const useVerificationPostCreateScreenContainer = ({
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [showAlreadyExistsModal, setShowAlreadyExistsModal] = useState(false);
+  const [showPhotoOptionsModal, setShowPhotoOptionsModal] = useState(false);
   const [loadingData, setLoadingData] = useState(isEditMode);
   // 완료 정도 슬라이더 상태 (기본값 50%, 0~100% 5% 단위)
   const [completionRate, setCompletionRate] = useState(50);
@@ -267,15 +267,18 @@ export const useVerificationPostCreateScreenContainer = ({
   }, []);
 
   /**
-   * 사진 선택 옵션 표시
+   * 사진 선택 옵션 모달 표시
    */
   const showPhotoOptions = useCallback(() => {
-    Alert.alert('사진 추가', '사진을 추가할 방법을 선택해주세요.', [
-      { text: '취소', style: 'cancel' },
-      { text: '카메라', onPress: handleTakePhoto },
-      { text: '갤러리', onPress: handleSelectPhoto },
-    ]);
-  }, [handleTakePhoto, handleSelectPhoto]);
+    setShowPhotoOptionsModal(true);
+  }, []);
+
+  /**
+   * 사진 선택 옵션 모달 닫기
+   */
+  const closePhotoOptionsModal = useCallback(() => {
+    setShowPhotoOptionsModal(false);
+  }, []);
 
   /**
    * 인증글 작성 또는 수정
@@ -423,6 +426,7 @@ export const useVerificationPostCreateScreenContainer = ({
     loadingData,
     showSuccessModal,
     showAlreadyExistsModal,
+    showPhotoOptionsModal,
     showErrorModal,
     errorMessage,
     alertTitle,
@@ -434,6 +438,7 @@ export const useVerificationPostCreateScreenContainer = ({
     handleTakePhoto,
     handleRemoveImage,
     showPhotoOptions,
+    closePhotoOptionsModal,
     handleSubmitVerification,
     handleSuccessModalClose,
     handleAlreadyExistsModalClose,

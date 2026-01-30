@@ -2,7 +2,7 @@
  * 커뮤니티 게시글 상세 화면
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -15,7 +15,7 @@ import {
   ImageBackground,
 } from 'react-native';
 import { CommentCard } from '../../components/specialized';
-import { Loading, ErrorBoundary, EmptyState, Header, Card, AlertModal, ConfirmModal } from '../../components/ui';
+import { Loading, ErrorBoundary, EmptyState, Header, Card, AlertModal, ConfirmModal, FullScreenImageViewer } from '../../components/ui';
 import { colors } from '../../utils/designTokens';
 import { formatDateKorean } from '../../utils/dateUtils';
 import { NavigationProp, RouteProp } from '@react-navigation/native';
@@ -65,6 +65,8 @@ const CommunityPostDetailScreen: React.FC<CommunityPostDetailScreenProps> = ({ n
     handleCloseDeleteModal,
     handleCloseDeleteCommentModal,
   } = useCommunityPostDetailScreenContainer({ navigation, route });
+
+  const [selectedImageUri, setSelectedImageUri] = useState<string | null>(null);
 
   if (loading) {
     return <Loading text="게시글을 불러오는 중..." />;
@@ -208,13 +210,20 @@ const CommunityPostDetailScreen: React.FC<CommunityPostDetailScreenProps> = ({ n
           {post.images && post.images.length > 0 && (
             <View style={styles.imageContainer}>
               {post.images.map((image, index) => (
-                <Image 
-                  key={index} 
-                  source={{ uri: image }} 
-                  style={styles.image} 
-                  resizeMode="cover" 
-                  accessibilityLabel={`${post.title} 이미지 ${index + 1}`}
-                />
+                <TouchableOpacity
+                  key={index}
+                  onPress={() => setSelectedImageUri(image)}
+                  activeOpacity={0.9}
+                  accessibilityRole="imagebutton"
+                  accessibilityLabel={`${post.title} 이미지 ${index + 1} 자세히 보기`}
+                >
+                  <Image 
+                    source={{ uri: image }} 
+                    style={styles.image} 
+                    resizeMode="cover" 
+                    accessibilityLabel={`${post.title} 이미지 ${index + 1}`}
+                  />
+                </TouchableOpacity>
               ))}
             </View>
           )}
@@ -441,6 +450,11 @@ const CommunityPostDetailScreen: React.FC<CommunityPostDetailScreenProps> = ({ n
         onConfirm={handleConfirmDeleteComment}
         onCancel={handleCloseDeleteCommentModal}
         confirmButtonColor={colors.error}
+      />
+      <FullScreenImageViewer
+        visible={!!selectedImageUri}
+        imageUri={selectedImageUri}
+        onClose={() => setSelectedImageUri(null)}
       />
     </ImageBackground>
   );

@@ -169,6 +169,20 @@ export const useTodoListCreateScreenContainer = ({ navigation, route }: TodoList
   }, [route?.params?.activeStep]);
 
   /**
+   * 커스텀 미션 생성에서 돌아올 때 복원: 공식 미션·선택 상태·제목 등 유지
+   */
+  useEffect(() => {
+    const restore = (route?.params as any)?.todoListRestoreState;
+    if (!restore) return;
+    if (restore.randomMissions?.length) setRandomMissions(restore.randomMissions);
+    if (Array.isArray(restore.selectedCustomMissions)) setSelectedCustomMissions(restore.selectedCustomMissions);
+    if (restore.missionTimeRanges && typeof restore.missionTimeRanges === 'object') setMissionTimeRanges(restore.missionTimeRanges);
+    if (restore.title !== undefined) setTitle(restore.title);
+    if (restore.description !== undefined) setDescription(restore.description);
+    setCurrentStep('custom');
+  }, [(route?.params as any)?.todoListRestoreState]);
+
+  /**
    * 화면이 포커스될 때마다 route.params.activeStep 확인 (navigate로 파라미터가 업데이트된 경우 대응)
    */
   useEffect(() => {
@@ -214,6 +228,23 @@ export const useTodoListCreateScreenContainer = ({ navigation, route }: TodoList
       return [...prev, missionId];
     });
   }, []);
+
+  /**
+   * 커스텀 미션 생성 화면으로 이동 (진행 중인 공식 미션·선택 상태를 넘겨 돌아올 때 복원)
+   */
+  const handleNavigateToCustomMissionCreate = useCallback(() => {
+    const todoListRestoreState = {
+      randomMissions,
+      selectedCustomMissions: [...selectedCustomMissions],
+      missionTimeRanges: { ...missionTimeRanges },
+      title,
+      description,
+    };
+    (navigation as any).navigate(SCREEN_NAMES.CUSTOM_MISSION_CREATE, {
+      returnScreen: 'TodoListCreate',
+      todoListRestoreState,
+    });
+  }, [navigation, randomMissions, selectedCustomMissions, missionTimeRanges, title, description]);
 
   /**
    * 미션 리롤
@@ -558,6 +589,7 @@ export const useTodoListCreateScreenContainer = ({ navigation, route }: TodoList
     setEndMinute,
     // Handlers
     handleCustomMissionToggle,
+    handleNavigateToCustomMissionCreate,
     handleRerollMission,
     handleCreateMission,
     handleCreate,

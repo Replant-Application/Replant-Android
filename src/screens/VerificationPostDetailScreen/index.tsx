@@ -2,7 +2,7 @@
  * 인증글 상세 화면
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -15,7 +15,7 @@ import {
   RefreshControl,
 } from 'react-native';
 import { CommentCard } from '../../components/specialized';
-import { Loading, ErrorBoundary, EmptyState, AlertModal } from '../../components/ui';
+import { Loading, ErrorBoundary, EmptyState, AlertModal, FullScreenImageViewer } from '../../components/ui';
 import { colors } from '../../utils/designTokens';
 import { formatDateKorean } from '../../utils/dateUtils';
 import { NavigationProp, RouteProp } from '@react-navigation/native';
@@ -62,6 +62,8 @@ const VerificationPostDetailScreen: React.FC<VerificationPostDetailScreenProps> 
     getMissionTitle,
     currentUserId,
   } = useVerificationPostDetailScreenContainer({ navigation, route });
+
+  const [selectedImageUri, setSelectedImageUri] = useState<string | null>(null);
 
   // 상태 배지 렌더링
   const statusBadge = getStatusBadge();
@@ -171,13 +173,20 @@ const VerificationPostDetailScreen: React.FC<VerificationPostDetailScreenProps> 
           {post.imageUrls && post.imageUrls.length > 0 && (
             <View style={styles.imageContainer}>
               {post.imageUrls.map((imageUrl, index) => (
-                <Image 
-                  key={index} 
-                  source={{ uri: imageUrl }} 
-                  style={styles.image} 
-                  resizeMode="cover" 
-                  accessibilityLabel={`${post.title} 인증 이미지 ${index + 1}`}
-                />
+                <TouchableOpacity
+                  key={index}
+                  onPress={() => setSelectedImageUri(imageUrl)}
+                  activeOpacity={0.9}
+                  accessibilityRole="imagebutton"
+                  accessibilityLabel={`${post.title} 인증 이미지 ${index + 1} 자세히 보기`}
+                >
+                  <Image 
+                    source={{ uri: imageUrl }} 
+                    style={styles.image} 
+                    resizeMode="cover" 
+                    accessibilityLabel={`${post.title} 인증 이미지 ${index + 1}`}
+                  />
+                </TouchableOpacity>
               ))}
             </View>
           )}
@@ -395,6 +404,11 @@ const VerificationPostDetailScreen: React.FC<VerificationPostDetailScreenProps> 
         message={alertMessage}
         buttonText="확인"
         onClose={handleAlertClose}
+      />
+      <FullScreenImageViewer
+        visible={!!selectedImageUri}
+        imageUri={selectedImageUri}
+        onClose={() => setSelectedImageUri(null)}
       />
     </KeyboardAvoidingView>
   );

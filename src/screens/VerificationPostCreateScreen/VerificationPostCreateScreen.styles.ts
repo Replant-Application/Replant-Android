@@ -6,7 +6,7 @@
 import { StyleSheet } from 'react-native';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
 import { createTextStyle, createTitleStyle, createButtonTextStyle } from '../../utils/styles/textStyles';
-import { inputStyles } from '../../utils/styles/commonStyles';
+import { inputStyles, modalStyles } from '../../utils/styles/commonStyles';
 
 export const styles = StyleSheet.create({
   container: {
@@ -344,6 +344,54 @@ export const styles = StyleSheet.create({
   submitButtonText: {
     ...createButtonTextStyle('base', {
       fontWeight: typography.fontWeight.medium,
+    }),
+  },
+  // 사진 추가 커스텀 모달
+  photoOptionsOverlay: {
+    ...modalStyles.overlay(),
+  },
+  photoOptionsModalContainer: {
+    ...modalStyles.content(),
+    width: '85%',
+    maxWidth: 350,
+  },
+  photoOptionsTitle: {
+    ...createTitleStyle('lg', {
+      color: colors.text.primary,
+      marginBottom: spacing[2],
+      textAlign: 'center',
+    }),
+  },
+  photoOptionsMessage: {
+    ...createTextStyle('base', {
+      color: colors.text.secondary,
+      marginBottom: spacing[5],
+      textAlign: 'center',
+    }),
+  },
+  photoOptionsButtonRow: {
+    flexDirection: 'row',
+    gap: spacing[3],
+    width: '100%',
+  },
+  photoOptionsButton: {
+    flex: 1,
+    paddingVertical: spacing[3],
+    borderRadius: borderRadius.md,
+    alignItems: 'center',
+  },
+  photoOptionsCancelButton: {
+    backgroundColor: colors.gray[200],
+  },
+  photoOptionsActionButton: {
+    backgroundColor: colors.primary[600],
+  },
+  photoOptionsButtonText: {
+    ...createButtonTextStyle('base'),
+  },
+  photoOptionsCancelButtonText: {
+    ...createButtonTextStyle('base', {
+      color: colors.text.secondary,
     }),
   },
 });
