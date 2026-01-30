@@ -115,6 +115,8 @@ const CalendarScreen: React.FC<CalendarScreenProps> = ({ navigation }) => {
                         isSelected && styles.calendarDaySelected,
                       ]}
                       onPress={() => handleDatePress(dateString)}
+                      accessibilityRole="button"
+                      accessibilityLabel={`${dateString}, 미션 ${missionCount}개${isSelected ? ', 선택됨' : ''}`}
                     >
                       <Text
                         style={[

@@ -122,6 +122,8 @@ const MyMissionSetsScreen: React.FC<MyMissionSetsScreenProps> = ({ navigation })
                   style={styles.missionSetCard}
                   onPress={() => handleDetail(missionSet)}
                   activeOpacity={0.7}
+                  accessibilityRole="button"
+                  accessibilityLabel={`${missionSet.title}, ${missionSet.missionCount}개 미션`}
                 >
                   {/* 카드 헤더 */}
                   <View style={styles.cardHeader}>
@@ -152,12 +154,15 @@ const MyMissionSetsScreen: React.FC<MyMissionSetsScreenProps> = ({ navigation })
                         handleDelete(missionSet);
                       }}
                       hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                      accessibilityRole="button"
+                      accessibilityLabel="투두리스트 삭제"
                     >
                       <Image
                         source={require('../../assets/images/trash.png')}
                         style={styles.deleteIcon}
                         resizeMode="contain"
                         accessibilityLabel="삭제 아이콘"
+                        accessibilityElementsHidden={true}
                       />
                     </TouchableOpacity>
                   </View>

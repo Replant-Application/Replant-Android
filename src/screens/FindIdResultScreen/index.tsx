@@ -34,12 +34,14 @@ const FindIdResultScreen: React.FC<FindIdResultScreenProps> = ({ onNavigate, rou
           <TouchableOpacity
             onPress={handleGoBack}
             style={styles.backButton}
+            accessibilityRole="button"
+            accessibilityLabel="뒤로 가기"
           >
             <Image
               source={require('../../assets/images/left.png')}
               style={styles.backButtonIcon}
               resizeMode="contain"
-              accessibilityLabel="뒤로 가기"
+              accessibilityElementsHidden={true}
             />
           </TouchableOpacity>
         }
@@ -78,6 +80,8 @@ const FindIdResultScreen: React.FC<FindIdResultScreenProps> = ({ onNavigate, rou
         <TouchableOpacity
           onPress={handleGoToFindPassword}
           style={styles.linkButton}
+          accessibilityRole="button"
+          accessibilityLabel="비밀번호 찾기"
         >
           <Text style={styles.linkText}>비밀번호 찾기</Text>
         </TouchableOpacity>

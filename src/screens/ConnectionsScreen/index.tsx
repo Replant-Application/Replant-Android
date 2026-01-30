@@ -122,12 +122,16 @@ const ConnectionsScreen: React.FC<ConnectionsScreenProps> = ({ navigation }) => 
         <TouchableOpacity
           style={[styles.actionButton, styles.rejectButton]}
           onPress={() => handleRejectRecommendation(item.id)}
+          accessibilityRole="button"
+          accessibilityLabel="다음에"
         >
           <Text style={styles.rejectButtonText}>다음에</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.actionButton, styles.acceptButton]}
           onPress={() => handleAcceptRecommendation(item.id)}
+          accessibilityRole="button"
+          accessibilityLabel="인연 맺기"
         >
           <Text style={styles.acceptButtonText}>인연 맺기</Text>
         </TouchableOpacity>
@@ -139,6 +143,8 @@ const ConnectionsScreen: React.FC<ConnectionsScreenProps> = ({ navigation }) => 
     <TouchableOpacity
       style={styles.chatRoomCard}
       onPress={() => handleOpenChat(item.id)}
+      accessibilityRole="button"
+      accessibilityLabel={`${item.otherUser.nickname}와의 채팅방, ${item.lastMessage?.content ? '마지막 메시지' : '대화를 시작해보세요'}`}
     >
       <View style={styles.avatarContainer}>
         {item.otherUser.profileImg ? (

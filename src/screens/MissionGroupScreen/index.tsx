@@ -84,12 +84,12 @@ const MissionGroupScreen: React.FC<MissionGroupScreenProps> = ({ navigation }) =
         <Header
           title="미션 도감"
           leftButton={
-            <TouchableOpacity onPress={() => navigation.goBack()}>
+            <TouchableOpacity onPress={() => navigation.goBack()} accessibilityRole="button" accessibilityLabel="뒤로 가기">
               <Image
                 source={require('../../assets/images/left.png')}
                 style={styles.backButtonIcon}
                 resizeMode="contain"
-                accessibilityLabel="뒤로 가기"
+                accessibilityElementsHidden={true}
               />
             </TouchableOpacity>
           }
@@ -98,12 +98,14 @@ const MissionGroupScreen: React.FC<MissionGroupScreenProps> = ({ navigation }) =
               <TouchableOpacity
                 onPress={handleCreateCustomMission}
                 style={styles.createButton}
+                accessibilityRole="button"
+                accessibilityLabel="미션 생성"
               >
                 <Image
                   source={require('../../assets/images/pencil.png')}
                   style={styles.createButtonIcon}
                   resizeMode="contain"
-                  accessibilityLabel="미션 생성"
+                  accessibilityElementsHidden={true}
                 />
               </TouchableOpacity>
             ) : undefined

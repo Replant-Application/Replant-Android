@@ -137,6 +137,8 @@ const MissionSetListScreen: React.FC<MissionSetListScreenProps> = ({ navigation 
                   style={styles.missionSetCard}
                   onPress={() => navigation.navigate(SCREEN_NAMES.MISSION_SET_DETAIL as any, { missionSetId: todoList.id, returnScreen: 'MissionSetList' })}
                   activeOpacity={0.7}
+                  accessibilityRole="button"
+                  accessibilityLabel={`${todoList.title}, ${todoList.missionCount}개 미션, by ${todoList.creatorNickname}`}
                 >
                   {/* 카드 헤더 */}
                   <View style={styles.cardHeader}>
