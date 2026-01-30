@@ -155,6 +155,8 @@ const PostCard: React.FC<PostCardProps> = ({
             style={styles.menuOverlay}
             activeOpacity={1}
             onPress={() => setShowMenu(false)}
+            accessibilityRole="button"
+            accessibilityLabel="메뉴 닫기"
           />
           <View style={styles.menuContainer}>
             {canEditDelete && (

@@ -55,6 +55,8 @@ const TodoListScreen: React.FC<Props> = ({ navigation, route }) => {
         style={styles.todoListCard}
         onPress={() => handleTodoListPress(todoList)}
         activeOpacity={0.7}
+        accessibilityRole="button"
+        accessibilityLabel={`${todoList.title}, ${statusText}, ${progressPercent}%`}
       >
         <View style={styles.cardHeader}>
           <Text style={styles.cardTitle} numberOfLines={1}>
