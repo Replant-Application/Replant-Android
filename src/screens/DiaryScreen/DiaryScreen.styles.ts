@@ -312,6 +312,7 @@ export const styles = StyleSheet.create({
     paddingVertical: spacing[2],
     paddingLeft: spacing[3],
     paddingRight: spacing[10], // X 버튼 공간 확보
+    textAlignVertical: 'center', // Android: 입력 텍스트 상하 가운데
     ...createTextStyle('base', {
       color: colors.white,
     }),
