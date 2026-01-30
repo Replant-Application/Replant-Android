@@ -43,12 +43,18 @@ const CalendarScreen: React.FC<CalendarScreenProps> = ({ navigation }) => {
             navigation={navigation}
             leftButton={
               navigation?.goBack ? (
-                <TouchableOpacity onPress={() => navigation.goBack?.()} activeOpacity={0.7}>
+                <TouchableOpacity
+                  onPress={() => navigation.goBack?.()}
+                  activeOpacity={0.7}
+                  accessibilityRole="button"
+                  accessibilityLabel="뒤로 가기"
+                >
                   <Image
                     source={require('../../assets/images/left.png')}
                     style={styles.backButtonIcon}
                     resizeMode="contain"
                     accessibilityLabel="뒤로 가기"
+                    accessibilityElementsHidden={true}
                   />
                 </TouchableOpacity>
               ) : undefined
@@ -58,13 +64,23 @@ const CalendarScreen: React.FC<CalendarScreenProps> = ({ navigation }) => {
             {/* 캘린더 */}
             <Card style={styles.calendarCard}>
               <View style={styles.calendarHeader}>
-                <TouchableOpacity onPress={() => changeMonth('prev')} style={styles.monthButton}>
+                <TouchableOpacity
+                  onPress={() => changeMonth('prev')}
+                  style={styles.monthButton}
+                  accessibilityRole="button"
+                  accessibilityLabel="이전 달"
+                >
                   <Text style={styles.monthButtonText}>‹</Text>
                 </TouchableOpacity>
                 <Text style={styles.monthYearText}>
                   {currentYear}년 {monthNames[currentMonth]}
                 </Text>
-                <TouchableOpacity onPress={() => changeMonth('next')} style={styles.monthButton}>
+                <TouchableOpacity
+                  onPress={() => changeMonth('next')}
+                  style={styles.monthButton}
+                  accessibilityRole="button"
+                  accessibilityLabel="다음 달"
+                >
                   <Text style={styles.monthButtonText}>›</Text>
                 </TouchableOpacity>
               </View>

@@ -193,7 +193,11 @@ const ConnectionsScreen: React.FC<ConnectionsScreenProps> = ({ navigation }) => 
       <Header
         title="인연"
         leftButton={
-          <TouchableOpacity onPress={() => navigation.goBack()}>
+          <TouchableOpacity
+            onPress={() => navigation.goBack()}
+            accessibilityRole="button"
+            accessibilityLabel="뒤로 가기"
+          >
             <Text style={styles.backButtonText}>←</Text>
           </TouchableOpacity>
         }

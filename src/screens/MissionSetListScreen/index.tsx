@@ -61,22 +61,33 @@ const MissionSetListScreen: React.FC<MissionSetListScreenProps> = ({ navigation 
         <Header
           title="투두 공유"
           leftButton={
-            <TouchableOpacity onPress={() => navigation.goBack()}>
+            <TouchableOpacity
+              onPress={() => navigation.goBack()}
+              accessibilityRole="button"
+              accessibilityLabel="뒤로 가기"
+            >
               <Image
                 source={require('../../assets/images/left.png')}
                 style={styles.backButtonIcon}
                 resizeMode="contain"
                 accessibilityLabel="뒤로 가기"
+                accessibilityElementsHidden={true}
               />
             </TouchableOpacity>
           }
           rightButton={
-            <TouchableOpacity onPress={openShareModal} style={styles.shareButton}>
+            <TouchableOpacity
+              onPress={openShareModal}
+              style={styles.shareButton}
+              accessibilityRole="button"
+              accessibilityLabel="투두리스트 공유"
+            >
               <Image
                 source={require('../../assets/images/pencil.png')}
                 style={styles.shareButtonIcon}
                 resizeMode="contain"
                 accessibilityLabel="공유"
+                accessibilityElementsHidden={true}
               />
             </TouchableOpacity>
           }

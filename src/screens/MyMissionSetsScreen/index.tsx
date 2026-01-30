@@ -52,12 +52,17 @@ const MyMissionSetsScreen: React.FC<MyMissionSetsScreenProps> = ({ navigation })
         <Header
           title="내 투두리스트"
           leftButton={
-            <TouchableOpacity onPress={() => navigation.goBack()}>
+            <TouchableOpacity
+              onPress={() => navigation.goBack()}
+              accessibilityRole="button"
+              accessibilityLabel="뒤로 가기"
+            >
               <Image
                 source={require('../../assets/images/left.png')}
                 style={styles.backButtonIcon}
                 resizeMode="contain"
                 accessibilityLabel="뒤로 가기"
+                accessibilityElementsHidden={true}
               />
             </TouchableOpacity>
           }
@@ -65,12 +70,15 @@ const MyMissionSetsScreen: React.FC<MyMissionSetsScreenProps> = ({ navigation })
             <TouchableOpacity
               onPress={handleCreate}
               style={styles.createButton}
+              accessibilityRole="button"
+              accessibilityLabel="새 투두리스트 만들기"
             >
               <Image
                 source={require('../../assets/images/pencil.png')}
                 style={styles.createButtonIcon}
                 resizeMode="contain"
                 accessibilityLabel="새 투두리스트 만들기"
+                accessibilityElementsHidden={true}
               />
             </TouchableOpacity>
           }
