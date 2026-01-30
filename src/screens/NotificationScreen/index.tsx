@@ -96,6 +96,9 @@ const NotificationScreen: React.FC<NotificationScreenProps> = ({ navigation }) =
           <TouchableOpacity
             style={[styles.filterTab, filter === 'all' && styles.filterTabActive]}
             onPress={() => handleFilterChange('all')}
+            accessibilityRole="tab"
+            accessibilityLabel={filter === 'all' ? '전체, 선택됨' : '전체'}
+            accessibilityState={{ selected: filter === 'all' }}
           >
             <Text style={[styles.filterText, filter === 'all' && styles.filterTextActive]}>
               전체
@@ -104,6 +107,9 @@ const NotificationScreen: React.FC<NotificationScreenProps> = ({ navigation }) =
           <TouchableOpacity
             style={[styles.filterTab, filter === 'unread' && styles.filterTabActive]}
             onPress={() => handleFilterChange('unread')}
+            accessibilityRole="tab"
+            accessibilityLabel={filter === 'unread' ? `읽지 않음, 선택됨${unreadCount > 0 ? ` ${unreadCount}건` : ''}` : `읽지 않음${unreadCount > 0 ? ` ${unreadCount}건` : ''}`}
+            accessibilityState={{ selected: filter === 'unread' }}
           >
             <Text style={[styles.filterText, filter === 'unread' && styles.filterTextActive]}>
               읽지 않음 {unreadCount > 0 && `(${unreadCount})`}

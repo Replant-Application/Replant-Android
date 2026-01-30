@@ -136,6 +136,9 @@ const MissionSetDetailScreen: React.FC<MissionSetDetailScreenProps> = ({ navigat
                         }}
                         disabled={submittingReview}
                         activeOpacity={0.7}
+                        accessibilityRole="button"
+                        accessibilityLabel={`별점 ${star}점`}
+                        accessibilityState={{ selected: star <= myReview.rating }}
                       >
                         <Text style={[
                           styles.ratingStar,
@@ -160,6 +163,9 @@ const MissionSetDetailScreen: React.FC<MissionSetDetailScreenProps> = ({ navigat
                       }}
                       disabled={submittingReview}
                       activeOpacity={0.7}
+                      accessibilityRole="button"
+                      accessibilityLabel={`별점 ${star}점`}
+                      accessibilityState={{ selected: star <= reviewRating }}
                     >
                       <Text style={[
                         styles.ratingStar,

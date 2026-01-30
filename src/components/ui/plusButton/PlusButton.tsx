@@ -26,6 +26,8 @@ const PlusButton: React.FC<PlusButtonProps> = ({
       onPress={onPress}
       style={[styles.container, { width: size, height: size }, style]}
       activeOpacity={0.7}
+      accessibilityRole="button"
+      accessibilityLabel="추가"
     >
       <View
         style={[

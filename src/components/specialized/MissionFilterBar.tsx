@@ -29,6 +29,9 @@ export const MissionFilterBar: React.FC<MissionFilterBarProps> = ({
             selectedFilter === filter.key && styles.filterButtonActive,
           ]}
           onPress={() => onFilterChange(filter.key)}
+          accessibilityRole="button"
+          accessibilityLabel={filter.label}
+          accessibilityState={{ selected: selectedFilter === filter.key }}
         >
           <Text
             style={[

@@ -128,6 +128,9 @@ const OAuthCompleteSignUpScreen: React.FC<OAuthCompleteSignUpScreenProps> = ({
                   gender === 'MALE' && styles.genderButtonSelected,
                 ]}
                 onPress={() => handleGenderSelect('MALE')}
+                accessibilityRole="button"
+                accessibilityLabel="남성"
+                accessibilityState={{ selected: gender === 'MALE' }}
               >
                 <Text
                   style={[
@@ -144,6 +147,9 @@ const OAuthCompleteSignUpScreen: React.FC<OAuthCompleteSignUpScreenProps> = ({
                   gender === 'FEMALE' && styles.genderButtonSelected,
                 ]}
                 onPress={() => handleGenderSelect('FEMALE')}
+                accessibilityRole="button"
+                accessibilityLabel="여성"
+                accessibilityState={{ selected: gender === 'FEMALE' }}
               >
                 <Text
                   style={[
@@ -163,6 +169,8 @@ const OAuthCompleteSignUpScreen: React.FC<OAuthCompleteSignUpScreenProps> = ({
             <TouchableOpacity
               style={styles.dropdownButton}
               onPress={handleToggleRegionModal}
+              accessibilityRole="button"
+              accessibilityLabel={regionName ? `지역 ${regionName}` : '지역 선택'}
             >
               <Text
                 style={[styles.dropdownButtonText, !regionName && styles.dropdownPlaceholder]}
@@ -187,6 +195,9 @@ const OAuthCompleteSignUpScreen: React.FC<OAuthCompleteSignUpScreenProps> = ({
                         region === item.code && styles.dropdownListItemSelected,
                       ]}
                       onPress={() => handleRegionSelect(item.code, item.name)}
+                      accessibilityRole="button"
+                      accessibilityLabel={item.name}
+                      accessibilityState={{ selected: region === item.code }}
                     >
                       <Text
                         style={[
@@ -209,6 +220,8 @@ const OAuthCompleteSignUpScreen: React.FC<OAuthCompleteSignUpScreenProps> = ({
             <TouchableOpacity
               style={styles.dropdownButton}
               onPress={handleToggleBirthYearModal}
+              accessibilityRole="button"
+              accessibilityLabel={birthYear ? `출생연도 ${birthYear}년` : '출생연도 선택'}
             >
               <Text
                 style={[styles.dropdownButtonText, !birthYear && styles.dropdownPlaceholder]}
@@ -233,6 +246,9 @@ const OAuthCompleteSignUpScreen: React.FC<OAuthCompleteSignUpScreenProps> = ({
                         birthYear === item && styles.dropdownListItemSelected,
                       ]}
                       onPress={() => handleBirthYearSelect(item)}
+                      accessibilityRole="button"
+                      accessibilityLabel={`${item}년`}
+                      accessibilityState={{ selected: birthYear === item }}
                     >
                       <Text
                         style={[

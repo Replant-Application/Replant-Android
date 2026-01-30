@@ -358,6 +358,9 @@ const ReantChatScreen: React.FC<ReantChatScreenProps> = ({ navigation, route: _r
                 onPress={handleSend}
                 disabled={!inputText.trim() || isLoading}
                 activeOpacity={0.7}
+                accessibilityRole="button"
+                accessibilityLabel="전송"
+                accessibilityState={{ disabled: !inputText.trim() || isLoading }}
               >
                 {isLoading ? (
                   <ActivityIndicator size="small" color="#fff" />

@@ -211,6 +211,8 @@ const VerificationPostCreateScreen: React.FC<VerificationPostCreateScreenProps> 
                   <TouchableOpacity
                     style={styles.removeImageButton}
                     onPress={() => handleRemoveImage(index)}
+                    accessibilityRole="button"
+                    accessibilityLabel={`인증 사진 ${index + 1} 제거`}
                   >
                     <Text style={styles.removeImageText}>×</Text>
                   </TouchableOpacity>
@@ -226,6 +228,9 @@ const VerificationPostCreateScreen: React.FC<VerificationPostCreateScreenProps> 
               ]}
               onPress={showPhotoOptions}
               disabled={uploadingPhoto}
+              accessibilityRole="button"
+              accessibilityLabel="사진 추가"
+              accessibilityState={{ disabled: uploadingPhoto }}
             >
               {uploadingPhoto ? (
                 <ActivityIndicator color={colors.primary[500]} />
@@ -261,6 +266,9 @@ const VerificationPostCreateScreen: React.FC<VerificationPostCreateScreenProps> 
           ]}
           onPress={handleSubmitVerification}
           disabled={loading || loadingData || !content.trim()}
+          accessibilityRole="button"
+          accessibilityLabel={isEditMode ? '인증글 수정' : '인증글 작성'}
+          accessibilityState={{ disabled: loading || loadingData || !content.trim() }}
         >
           {loading ? (
             <ActivityIndicator color={colors.white} />

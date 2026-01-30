@@ -99,6 +99,8 @@ const MyProgressDetailScreen: React.FC<MyProgressDetailScreenProps> = ({ navigat
                       style={styles.badgeItem}
                       onPress={() => handleBadgePress(badge)}
                       activeOpacity={0.7}
+                      accessibilityRole="button"
+                      accessibilityLabel={`${missionTitle} 배지${badge.remainingDays !== undefined ? `, D-${badge.remainingDays}` : ''}`}
                     >
                       <View style={styles.badgeIcon}>
                         <Image

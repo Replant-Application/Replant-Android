@@ -65,6 +65,8 @@ const AdminDashboardScreen: React.FC<AdminDashboardScreenProps> = ({ navigation 
                     key={user.id}
                     style={styles.userItem}
                     onPress={() => handleUserPress(user.id)}
+                    accessibilityRole="button"
+                    accessibilityLabel={`${user.nickname || '사용자'} 상세`}
                   >
                     <View style={styles.userInfo}>
                       <Text style={styles.userNickname}>{user.nickname}</Text>

@@ -171,12 +171,14 @@ const GraduateScreen: React.FC<GraduateScreenProps> = ({ navigation }) => {
           <TouchableOpacity
             style={styles.actionButton}
             onPress={handleGoToQnA}
+            accessibilityRole="button"
+            accessibilityLabel="Q&A 답변하기"
           >
             <Image
               source={require('../../assets/images/say.png')}
               style={styles.actionIconImage}
               resizeMode="contain"
-              accessibilityLabel="댓글 아이콘"
+              accessibilityElementsHidden={true}
             />
             <View style={styles.actionContent}>
               <Text style={styles.actionTitle}>Q&A 답변하기</Text>
@@ -188,6 +190,8 @@ const GraduateScreen: React.FC<GraduateScreenProps> = ({ navigation }) => {
           <TouchableOpacity
             style={styles.actionButton}
             onPress={handleGoToShareExperience}
+            accessibilityRole="button"
+            accessibilityLabel="경험담 공유하기"
           >
             <Text style={styles.actionIcon}>📝</Text>
             <View style={styles.actionContent}>

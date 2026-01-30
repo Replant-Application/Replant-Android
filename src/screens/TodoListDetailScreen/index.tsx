@@ -68,6 +68,9 @@ const TodoListDetailScreen: React.FC<Props> = ({ navigation, route }) => {
         onPress={() => canComplete && handleCompleteMission(mission)}
         disabled={mission.isCompleted || isCompleting || todoList?.status !== 'ACTIVE'}
         activeOpacity={0.7}
+        accessibilityRole="button"
+        accessibilityLabel={mission.isCompleted ? `${mission.title}, 완료됨` : mission.title}
+        accessibilityState={{ disabled: mission.isCompleted || isCompleting || todoList?.status !== 'ACTIVE' }}
       >
         <TouchableOpacity
           style={[
@@ -77,6 +80,9 @@ const TodoListDetailScreen: React.FC<Props> = ({ navigation, route }) => {
           onPress={() => canComplete && handleCompleteMission(mission)}
           disabled={mission.isCompleted || isCompleting || todoList?.status !== 'ACTIVE'}
           activeOpacity={0.7}
+          accessibilityRole="button"
+          accessibilityLabel={mission.isCompleted ? '완료됨' : '미션 완료하기'}
+          accessibilityState={{ disabled: mission.isCompleted || isCompleting || todoList?.status !== 'ACTIVE' }}
         >
           {isCompleting ? (
             <ActivityIndicator size="small" color={colors.white} />
@@ -233,6 +239,8 @@ const TodoListDetailScreen: React.FC<Props> = ({ navigation, route }) => {
                   style={styles.deleteButton}
                   onPress={handleDelete}
                   activeOpacity={0.7}
+                  accessibilityRole="button"
+                  accessibilityLabel="공유 해제"
                 >
                   <Text style={styles.deleteButtonText}>공유 해제</Text>
                 </TouchableOpacity>

@@ -101,6 +101,8 @@ const ReantChatBottomSheet: React.FC<ReantChatBottomSheetProps> = ({
         style={styles.overlay}
         activeOpacity={1}
         onPress={onClose}
+        accessibilityRole="button"
+        accessibilityLabel="배경을 눌러 닫기"
       >
         <Animated.View
           style={[

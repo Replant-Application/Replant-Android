@@ -136,6 +136,8 @@ const ContributorDashboardScreen: React.FC<ContributorDashboardScreenProps> = ({
                   <TouchableOpacity
                     style={styles.acceptButton}
                     onPress={() => handleAcceptRequest(request.id)}
+                    accessibilityRole="button"
+                    accessibilityLabel="상담 시작하기"
                   >
                     <Text style={styles.acceptButtonText}>상담 시작하기</Text>
                   </TouchableOpacity>
@@ -155,6 +157,8 @@ const ContributorDashboardScreen: React.FC<ContributorDashboardScreenProps> = ({
                 key={session.id}
                 style={styles.sessionItem}
                 onPress={() => handleSessionPress(session)}
+                accessibilityRole="button"
+                accessibilityLabel={`${session.userName}와의 상담`}
               >
                 <View style={styles.sessionAvatar}>
                   <Text style={styles.sessionAvatarText}>
@@ -220,6 +224,8 @@ const ContributorDashboardScreen: React.FC<ContributorDashboardScreenProps> = ({
           <TouchableOpacity
             style={styles.resourceButton}
             onPress={openResourceModal}
+            accessibilityRole="button"
+            accessibilityLabel="상담 자료실 열기"
           >
             <Text style={styles.resourceButtonText}>상담 자료실 열기</Text>
           </TouchableOpacity>
@@ -232,18 +238,22 @@ const ContributorDashboardScreen: React.FC<ContributorDashboardScreenProps> = ({
             <TouchableOpacity
               style={styles.actionItem}
               onPress={handleGoToQnA}
+              accessibilityRole="button"
+              accessibilityLabel="Q&A 답변"
             >
               <Image
                 source={require('../../assets/images/say.png')}
                 style={styles.actionIconImage}
                 resizeMode="contain"
-                accessibilityLabel="댓글 아이콘"
+                accessibilityElementsHidden={true}
               />
               <Text style={styles.actionLabel}>Q&A 답변</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.actionItem}
               onPress={handleGoToShareInfo}
+              accessibilityRole="button"
+              accessibilityLabel="정보 공유"
             >
               <Text style={styles.actionIcon}>📝</Text>
               <Text style={styles.actionLabel}>정보 공유</Text>
@@ -251,6 +261,8 @@ const ContributorDashboardScreen: React.FC<ContributorDashboardScreenProps> = ({
             <TouchableOpacity
               style={styles.actionItem}
               onPress={handleOpenCounselingJournal}
+              accessibilityRole="button"
+              accessibilityLabel="상담 일지"
             >
               <Text style={styles.actionIcon}>📓</Text>
               <Text style={styles.actionLabel}>상담 일지</Text>
@@ -258,6 +270,8 @@ const ContributorDashboardScreen: React.FC<ContributorDashboardScreenProps> = ({
             <TouchableOpacity
               style={styles.actionItem}
               onPress={handleOpenActivityReport}
+              accessibilityRole="button"
+              accessibilityLabel="활동 보고"
             >
               <Text style={styles.actionIcon}>📊</Text>
               <Text style={styles.actionLabel}>활동 보고</Text>

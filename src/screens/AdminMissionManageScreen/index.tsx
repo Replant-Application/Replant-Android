@@ -73,6 +73,9 @@ const AdminMissionManageScreen: React.FC<AdminMissionManageScreenProps> = ({ nav
                   filter === filterOption && styles.filterButtonActive,
                 ]}
                 onPress={() => handleFilterChange(filterOption)}
+                accessibilityRole="button"
+                accessibilityLabel={filterOption === 'all' ? '전체' : filterOption === 'active' ? '활성' : '비활성'}
+                accessibilityState={{ selected: filter === filterOption }}
               >
                 <Text
                   style={[
@@ -146,6 +149,8 @@ const AdminMissionManageScreen: React.FC<AdminMissionManageScreenProps> = ({ nav
                   <TouchableOpacity
                     style={styles.actionButton}
                     onPress={() => handleToggleActive(mission.id)}
+                    accessibilityRole="button"
+                    accessibilityLabel={mission.isActive ? '비활성화' : '활성화'}
                   >
                     <Text style={styles.actionButtonText}>
                       {mission.isActive ? '비활성화' : '활성화'}
@@ -154,12 +159,16 @@ const AdminMissionManageScreen: React.FC<AdminMissionManageScreenProps> = ({ nav
                   <TouchableOpacity
                     style={[styles.actionButton, styles.editButton]}
                     onPress={() => openEditModal(mission)}
+                    accessibilityRole="button"
+                    accessibilityLabel="수정"
                   >
                     <Text style={styles.editButtonText}>수정</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={[styles.actionButton, styles.deleteButton]}
                     onPress={() => handleDeleteMission(mission.id)}
+                    accessibilityRole="button"
+                    accessibilityLabel="삭제"
                   >
                     <Text style={styles.deleteButtonText}>삭제</Text>
                   </TouchableOpacity>
@@ -215,6 +224,9 @@ const AdminMissionManageScreen: React.FC<AdminMissionManageScreenProps> = ({ nav
                       formData.type === type.value && styles.optionButtonActive,
                     ]}
                     onPress={() => updateFormData({ type: type.value as any })}
+                    accessibilityRole="button"
+                    accessibilityLabel={type.label}
+                    accessibilityState={{ selected: formData.type === type.value }}
                   >
                     <Text
                       style={[
@@ -258,6 +270,9 @@ const AdminMissionManageScreen: React.FC<AdminMissionManageScreenProps> = ({ nav
               <TouchableOpacity
                 style={styles.checkboxRow}
                 onPress={() => updateFormData({ isActive: !formData.isActive })}
+                accessibilityRole="checkbox"
+                accessibilityLabel="활성화 상태로 저장"
+                accessibilityState={{ checked: formData.isActive }}
               >
                 <View
                   style={[
