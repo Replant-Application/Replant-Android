@@ -323,11 +323,11 @@ export const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   submitButton: {
-    backgroundColor: colors.primary[500],
+    backgroundColor: colors.primary[700],
     paddingVertical: spacing[3],
     borderRadius: borderRadius.base,
     alignItems: 'center',
-    shadowColor: colors.primary[500],
+    shadowColor: colors.primary[700],
     shadowOffset: {
       width: 0,
       height: 2,

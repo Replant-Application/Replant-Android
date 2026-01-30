@@ -325,7 +325,7 @@ const TodoListDetailScreen: React.FC<Props> = ({ navigation, route }) => {
       <AlertModal
         visible={showCompleteModal}
         title="오늘의 투두 완료!"
-        message="모든 미션을 완료했습니다. 오늘의 투두는 끝났어요! 내일 다시 새로운 투두리스트를 작성해보세요."
+        message={"모든 미션을 완료했습니다.\n오늘의 투두는 끝났어요!"}
         buttonText="확인"
         onClose={handleCompleteModalClose}
       />

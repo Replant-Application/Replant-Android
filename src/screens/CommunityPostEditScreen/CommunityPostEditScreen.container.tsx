@@ -67,10 +67,8 @@ export const useCommunityPostEditScreenContainer = ({
     if (post) {
       setTitle(post.title);
       setContent(post.content);
-      // 일반 게시글인 경우 이미지 초기화
-      if (post.category !== '인증') {
-        setImages(post.images || []);
-      }
+      // 모든 게시글(일반/인증) 이미지 초기화 — 수정 화면에서 사진 추가 가능
+      setImages(post.images || []);
     }
   }, [post]);
 
