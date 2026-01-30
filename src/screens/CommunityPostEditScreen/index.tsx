@@ -204,6 +204,8 @@ const CommunityPostEditScreen: React.FC<CommunityPostEditScreenProps> = ({ navig
                   <TouchableOpacity
                     style={styles.removeImageButton}
                     onPress={() => handleRemoveImage(index)}
+                    accessibilityRole="button"
+                    accessibilityLabel={`사진 ${index + 1} 제거`}
                   >
                     <Text style={styles.removeImageText}>×</Text>
                   </TouchableOpacity>
@@ -214,6 +216,9 @@ const CommunityPostEditScreen: React.FC<CommunityPostEditScreenProps> = ({ navig
                   style={styles.addImageButton}
                   onPress={handleSelectImage}
                   disabled={uploadingImage}
+                  accessibilityRole="button"
+                  accessibilityLabel="사진 추가"
+                  accessibilityState={{ disabled: uploadingImage }}
                 >
                   {uploadingImage ? (
                     <ActivityIndicator color={colors.primary[500]} />

@@ -124,6 +124,8 @@ const CommunityPostDetailScreen: React.FC<CommunityPostDetailScreenProps> = ({ n
                 style={styles.postActionButton}
                 onPress={handleEditPost}
                 hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                accessibilityRole="button"
+                accessibilityLabel="게시글 수정"
               >
                 <Image
                   source={require('../../assets/images/pencil.png')}
@@ -137,6 +139,8 @@ const CommunityPostDetailScreen: React.FC<CommunityPostDetailScreenProps> = ({ n
                 style={styles.postActionButton}
                 onPress={handleDeletePost}
                 hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                accessibilityRole="button"
+                accessibilityLabel="게시글 삭제"
               >
                 <Image
                   source={require('../../assets/images/trash.png')}
@@ -216,7 +220,12 @@ const CommunityPostDetailScreen: React.FC<CommunityPostDetailScreenProps> = ({ n
           )}
 
           <View style={styles.actions}>
-            <TouchableOpacity style={styles.actionButton} onPress={handleLike}>
+            <TouchableOpacity
+              style={styles.actionButton}
+              onPress={handleLike}
+              accessibilityRole="button"
+              accessibilityLabel={post.is_liked ? `좋아요 취소, ${post.like_count}명이 좋아요` : `좋아요, ${post.like_count}명이 좋아요`}
+            >
               {post.is_liked ? (
                 <Text style={styles.actionIcon}>❤️</Text>
               ) : (
@@ -271,12 +280,16 @@ const CommunityPostDetailScreen: React.FC<CommunityPostDetailScreenProps> = ({ n
                           <TouchableOpacity
                             style={styles.editCommentButton}
                             onPress={handleCancelEdit}
+                            accessibilityRole="button"
+                            accessibilityLabel="취소"
                           >
                             <Text style={styles.editCommentButtonText}>취소</Text>
                           </TouchableOpacity>
                           <TouchableOpacity
                             style={[styles.editCommentButton, styles.editCommentButtonSave]}
                             onPress={handleUpdateComment}
+                            accessibilityRole="button"
+                            accessibilityLabel="저장"
                           >
                             <Text
                               style={[
@@ -312,17 +325,23 @@ const CommunityPostDetailScreen: React.FC<CommunityPostDetailScreenProps> = ({ n
                                 value={editingContent}
                                 onChangeText={setEditingContent}
                                 multiline
+                                accessibilityLabel="답글 수정"
+                                accessibilityHint="수정할 답글 내용을 입력하세요"
                               />
                               <View style={styles.editCommentActions}>
                                 <TouchableOpacity
                                   style={styles.editCommentButton}
                                   onPress={handleCancelEdit}
+                                  accessibilityRole="button"
+                                  accessibilityLabel="취소"
                                 >
                                   <Text style={styles.editCommentButtonText}>취소</Text>
                                 </TouchableOpacity>
                                 <TouchableOpacity
                                   style={[styles.editCommentButton, styles.editCommentButtonSave]}
                                   onPress={handleUpdateComment}
+                                  accessibilityRole="button"
+                                  accessibilityLabel="저장"
                                 >
                                   <Text
                                     style={[
@@ -361,7 +380,12 @@ const CommunityPostDetailScreen: React.FC<CommunityPostDetailScreenProps> = ({ n
               <Text style={styles.replyingToText}>
                 @{replyingToComment.nickname}님에게 답글 작성 중
               </Text>
-              <TouchableOpacity onPress={handleCancelReply} style={styles.cancelReplyButton}>
+              <TouchableOpacity
+                onPress={handleCancelReply}
+                style={styles.cancelReplyButton}
+                accessibilityRole="button"
+                accessibilityLabel="답글 취소"
+              >
                 <Text style={styles.cancelReplyText}>X</Text>
               </TouchableOpacity>
             </View>
@@ -381,6 +405,9 @@ const CommunityPostDetailScreen: React.FC<CommunityPostDetailScreenProps> = ({ n
               style={[styles.submitButton, !commentContent.trim() && styles.submitButtonDisabled]}
               onPress={handleSubmitComment}
               disabled={!commentContent.trim()}
+              accessibilityRole="button"
+              accessibilityLabel={replyingToComment ? '답글 등록' : '댓글 등록'}
+              accessibilityState={{ disabled: !commentContent.trim() }}
             >
               <Text style={styles.submitButtonText}>{replyingToComment ? '답글' : '등록'}</Text>
             </TouchableOpacity>

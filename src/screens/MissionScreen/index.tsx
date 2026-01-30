@@ -301,6 +301,9 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
                 style={[styles.missionTab, missionGroupTab === 'official' && styles.missionTabActive]}
                 onPress={() => handleMissionGroupTabChange('official')}
                 activeOpacity={0.7}
+                accessibilityRole="tab"
+                accessibilityLabel={missionGroupTab === 'official' ? '공식 미션, 선택됨' : '공식 미션'}
+                accessibilityState={{ selected: missionGroupTab === 'official' }}
               >
                 <Text 
                   style={[styles.missionTabText, missionGroupTab === 'official' && styles.missionTabTextActive]}
@@ -314,6 +317,9 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
                 style={[styles.missionTab, missionGroupTab === 'custom' && styles.missionTabActive]}
                 onPress={() => handleMissionGroupTabChange('custom')}
                 activeOpacity={0.7}
+                accessibilityRole="tab"
+                accessibilityLabel={missionGroupTab === 'custom' ? '커스텀 미션, 선택됨' : '커스텀 미션'}
+                accessibilityState={{ selected: missionGroupTab === 'custom' }}
               >
                 <Text 
                   style={[styles.missionTabText, missionGroupTab === 'custom' && styles.missionTabTextActive]}
