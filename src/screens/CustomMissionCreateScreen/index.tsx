@@ -11,7 +11,7 @@ import {
   Image,
   ImageBackground,
 } from 'react-native';
-import { Button, Header, SectionTitle, FormCard } from '../../components/ui';
+import { Button, Header, SectionTitle, FormCard, AlertModal } from '../../components/ui';
 import { colors, spacing } from '../../utils/designTokens';
 import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types/navigation';
@@ -34,11 +34,13 @@ const CustomMissionCreateScreen: React.FC<CustomMissionCreateScreenProps> = ({ n
     description,
     loading,
     category,
+    alertModal,
     setTitle,
     setDescription,
     setCategory,
     handleSubmitMission,
     handleCancel,
+    handleAlertClose,
     MISSION_CATEGORY_OPTIONS,
   } = useCustomMissionCreateScreenContainer({ navigation, route });
 
@@ -92,7 +94,7 @@ const CustomMissionCreateScreen: React.FC<CustomMissionCreateScreenProps> = ({ n
               style={[styles.textInput, styles.textArea]}
               value={description}
               onChangeText={setDescription}
-              placeholder="미션에 대한 자세한 설명을 입력하세요"
+              placeholder="미션 설명을 입력하세요"
               placeholderTextColor={colors.text.secondary}
               multiline
               numberOfLines={4}
@@ -146,6 +148,14 @@ const CustomMissionCreateScreen: React.FC<CustomMissionCreateScreenProps> = ({ n
         />
       </View>
       </KeyboardAvoidingView>
+
+      <AlertModal
+        visible={alertModal.visible}
+        title={alertModal.title}
+        message={alertModal.message}
+        buttonText="확인"
+        onClose={handleAlertClose}
+      />
     </ImageBackground>
   );
 };

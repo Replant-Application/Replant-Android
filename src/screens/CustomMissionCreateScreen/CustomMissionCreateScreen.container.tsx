@@ -4,7 +4,7 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-import { Alert, Dimensions } from 'react-native';
+import { Dimensions } from 'react-native';
 import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types/navigation';
 import { updateCustomMission, createCustomMission as createCustomMissionApi, CreateMissionRequest, MissionCategory } from '../../api/missionApi';
@@ -75,6 +75,12 @@ export const useCustomMissionCreateScreenContainer = ({
   const [description, setDescription] = useState('');
   const [loading, setLoading] = useState(false);
   const [category, setCategory] = useState<MissionCategory | null>(null);
+  const [alertModal, setAlertModal] = useState<{
+    visible: boolean;
+    title: string;
+    message: string;
+    isSuccess: boolean;
+  }>({ visible: false, title: '', message: '', isSuccess: false });
 
   /**
    * 수정 모드일 때 기존 데이터로 초기화
@@ -102,12 +108,12 @@ export const useCustomMissionCreateScreenContainer = ({
    */
   const handleSubmitMission = useCallback(async () => {
     if (!title.trim()) {
-      Alert.alert('오류', '미션 제목을 입력해주세요.');
+      setAlertModal({ visible: true, title: '오류', message: '미션 제목을 입력해주세요.', isSuccess: false });
       return;
     }
 
     if (!description.trim()) {
-      Alert.alert('오류', '미션 설명을 입력해주세요.');
+      setAlertModal({ visible: true, title: '오류', message: '미션 설명을 입력해주세요.', isSuccess: false });
       return;
     }
 
@@ -137,32 +143,27 @@ export const useCustomMissionCreateScreenContainer = ({
       }
 
       if (result.success) {
-        Alert.alert(
-          '성공!',
-          isEditMode ? '미션이 수정되었습니다!' : '나만의 미션이 생성되었습니다!',
-          [
-            {
-              text: '확인',
-              onPress: () => {
-                if (returnScreen === 'TodoListCreate') {
-                  // TodoListCreateScreen으로 돌아가기
-                  navigation.goBack();
-                } else {
-                  // 기본적으로 Mission 화면으로 이동
-                  (navigation as any).navigate(ScreenNames.MISSION);
-                }
-              },
-            },
-          ]
-        );
+        setAlertModal({
+          visible: true,
+          title: '성공!',
+          message: isEditMode ? '미션이 수정되었습니다!' : '나만의 미션이 생성되었습니다!',
+          isSuccess: true,
+        });
       } else {
-        Alert.alert(
-          '오류',
-          result.error || (isEditMode ? '미션 수정에 실패했습니다.' : '미션 생성에 실패했습니다.')
-        );
+        setAlertModal({
+          visible: true,
+          title: '오류',
+          message: result.error || (isEditMode ? '미션 수정에 실패했습니다.' : '미션 생성에 실패했습니다.'),
+          isSuccess: false,
+        });
       }
     } catch (error) {
-      Alert.alert('오류', isEditMode ? '미션 수정 중 오류가 발생했습니다.' : '미션 생성 중 오류가 발생했습니다.');
+      setAlertModal({
+        visible: true,
+        title: '오류',
+        message: isEditMode ? '미션 수정 중 오류가 발생했습니다.' : '미션 생성 중 오류가 발생했습니다.',
+        isSuccess: false,
+      });
     } finally {
       setLoading(false);
     }
@@ -172,8 +173,20 @@ export const useCustomMissionCreateScreenContainer = ({
     category,
     isEditMode,
     editMissionId,
-    navigation,
   ]);
+
+  const handleAlertClose = useCallback(() => {
+    const wasSuccess = alertModal.isSuccess;
+    setAlertModal(prev => ({ ...prev, visible: false }));
+    if (wasSuccess) {
+      if (returnScreen === 'TodoListCreate') {
+        // 투두리스트 만들기로 돌아갈 때 navigate + activeStep 사용 (goBack 시 상태 리셋 방지)
+        (navigation as any).navigate(SCREEN_NAMES.TODO_LIST_CREATE, { activeStep: 'custom' });
+      } else {
+        (navigation as any).navigate(ScreenNames.MISSION);
+      }
+    }
+  }, [alertModal.isSuccess, navigation, returnScreen]);
 
   /**
    * 취소 버튼 핸들러
@@ -204,6 +217,7 @@ export const useCustomMissionCreateScreenContainer = ({
     description,
     loading,
     category,
+    alertModal,
     // Setters
     setTitle,
     setDescription,
@@ -211,5 +225,6 @@ export const useCustomMissionCreateScreenContainer = ({
     // Handlers
     handleSubmitMission,
     handleCancel,
+    handleAlertClose,
   };
 };

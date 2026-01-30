@@ -913,7 +913,7 @@ const AppNavigator = () => {
       case SCREEN_NAMES.TODO_LIST:
         return <TodoListScreen navigation={navigation} route={route} />;
       case SCREEN_NAMES.TODO_LIST_CREATE:
-        return <TodoListCreateScreen navigation={navigation} />;
+        return <TodoListCreateScreen navigation={navigation} route={route} />;
       case SCREEN_NAMES.TODO_LIST_DETAIL:
         return <TodoListDetailScreen navigation={navigation} route={route} />;
       case SCREEN_NAMES.SPONTANEOUS_MISSION_SETUP:

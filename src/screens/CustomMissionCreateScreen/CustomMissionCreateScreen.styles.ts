@@ -41,14 +41,14 @@ export const styles = StyleSheet.create({
     }),
     includeFontPadding: false,
     backgroundColor: colors.background.primary,
-    textAlignVertical: 'top',
+    textAlignVertical: 'center', // 미션 제목: 한 줄 입력 필드 상하 중앙 정렬
     height: 48, // 고정 높이 설정 (포커스해도 크기 변경 안됨)
     minHeight: 48, // 최소 높이 설정
     maxHeight: 48, // 최대 높이 설정
   },
   textArea: {
     height: 100,
-    textAlignVertical: 'top',
+    textAlignVertical: 'top', // 미션 설명: 여러 줄이라 위쪽 정렬 유지
   },
   worryTypeContainer: {
     flexDirection: 'row',
@@ -440,6 +440,6 @@ export const styles = StyleSheet.create({
     color: colors.text.secondary,
   },
   createButton: {
-    backgroundColor: colors.primary[500],
+    backgroundColor: colors.primary[700],
   },
 });
