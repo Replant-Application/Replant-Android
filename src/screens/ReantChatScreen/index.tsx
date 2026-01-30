@@ -339,7 +339,7 @@ const ReantChatScreen: React.FC<ReantChatScreenProps> = ({ navigation, route: _r
                 style={styles.input}
                 value={inputText}
                 onChangeText={setInputText}
-                placeholder={`${reantName}에게 메시지를 보내보세요...`}
+                placeholder="메시지 입력..."
                 placeholderTextColor="#999"
                 multiline
                 maxLength={200}
