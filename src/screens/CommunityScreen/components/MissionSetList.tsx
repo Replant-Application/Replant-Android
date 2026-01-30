@@ -148,6 +148,8 @@ const MissionSetList: React.FC<MissionSetListProps> = ({
                   style={missionSetListStyles.missionSetCard}
                   onPress={() => navigation.navigate(SCREEN_NAMES.MISSION_SET_DETAIL as any, { missionSetId: missionSet.id, returnScreen: 'Community', activeTab: 'todo-share' })}
                   activeOpacity={0.7}
+                  accessibilityRole="button"
+                  accessibilityLabel={`${missionSet.title}, ${missionSet.missionCount}개 미션, by ${missionSet.creatorNickname}`}
                 >
                   <View style={missionSetListStyles.missionSetCardHeader}>
                     <Text style={missionSetListStyles.missionSetTitle} numberOfLines={1}>
@@ -159,12 +161,14 @@ const MissionSetList: React.FC<MissionSetListProps> = ({
                         onPress={(e) => handleUnsharePress(missionSet, e)}
                         activeOpacity={0.7}
                         hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                        accessibilityRole="button"
+                        accessibilityLabel="투두리스트 공유 해제"
                       >
                         <Image
                           source={require('../../../assets/images/trash.png')}
                           style={missionSetListStyles.deleteIcon}
                           resizeMode="contain"
-                          accessibilityLabel="삭제 아이콘"
+                          accessibilityElementsHidden={true}
                         />
                         <Text style={missionSetListStyles.deleteText}>삭제</Text>
                       </TouchableOpacity>
