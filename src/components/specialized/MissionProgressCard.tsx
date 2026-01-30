@@ -40,20 +40,19 @@ export const MissionProgressCard: React.FC<MissionProgressCardProps> = ({
           onPress={onBadgePress}
           activeOpacity={0.7}
           accessibilityRole="button"
-          accessibilityLabel="미션 배지"
-          accessibilityHint="나의 배지 목록을 봅니다"
+          accessibilityLabel="미션 배지 보기"
+          accessibilityHint="나의 미션 배지 목록을 봅니다"
         >
-          <View style={styles.badgeIconContainer}>
+          <View style={styles.badgeIconContainer} accessibilityElementsHidden={true}>
             <Image
               source={require('../../assets/images/badge.png')}
               style={styles.badgeIcon}
               resizeMode="contain"
-              accessibilityLabel="배지 아이콘"
               accessibilityElementsHidden={true}
             />
           </View>
-          <Text style={styles.badgeButtonText}>미션 배지</Text>
-          <Text style={styles.badgeArrow}>›</Text>
+          <Text style={styles.badgeButtonText} accessibilityElementsHidden={true}>미션 배지</Text>
+          <Text style={styles.badgeArrow} accessibilityElementsHidden={true}>›</Text>
         </TouchableOpacity>
       </View>
     </Card>
