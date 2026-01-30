@@ -1,17 +1,11 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <!-- Base application theme -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
-        <item name="android:statusBarColor">@color/colorPrimaryDark</item>
-        <item name="android:navigationBarColor">@color/colorPrimaryDark</item>
-        <item name="android:windowLightStatusBar">true</item>
-        <item name="android:forceDarkAllowed">false</item>
-    </style>
-
-    <!-- Splash Screen Theme -->
-    <style name="Theme.App.SplashScreen" parent="AppTheme">
-        <item name="android:windowBackground">@color/splashscreen_background</item>
-        <item name="android:windowFullscreen">false</item>
-        <item name="android:windowContentOverlay">@null</item>
-    </style>
+<resources xmlns:tools="http://schemas.android.com/tools">
+  <style name="AppTheme" parent="Theme.AppCompat.DayNight.NoActionBar">
+    <item name="android:enforceNavigationBarContrast" tools:targetApi="29">true</item>
+    <item name="android:editTextBackground">@drawable/rn_edit_text_material</item>
+    <item name="colorPrimary">@color/colorPrimary</item>
+    <item name="android:statusBarColor">#ffffff</item>
+  </style>
+  <style name="Theme.App.SplashScreen" parent="AppTheme">
+    <item name="android:windowBackground">@drawable/ic_launcher_background</item>
+  </style>
 </resources>

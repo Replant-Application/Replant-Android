@@ -3,6 +3,4 @@
   <color name="iconBackground">#ffffff</color>
   <color name="colorPrimary">#023c69</color>
   <color name="colorPrimaryDark">#ffffff</color>
-  <!-- 알림 아이콘 색상 -->
-  <color name="notification_icon_color">#9EF2FF</color>
 </resources>
