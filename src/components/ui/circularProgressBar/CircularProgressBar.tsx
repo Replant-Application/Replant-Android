@@ -75,8 +75,14 @@ const CircularProgressBar: React.FC<CircularProgressBarProps> = ({
     return `M ${startX} ${startY} A ${radius} ${radius} 0 ${largeArcFlag} 1 ${endX} ${endY}`;
   }, [percentage, size, strokeWidth, isComplete]);
 
+  const accessibilityLabel = `나의 진행률, ${total}개 중 ${current}개 미션 완료, ${Math.round(percentage)}%`;
+
   return (
-    <View style={[styles.container, { width: size, height: size }]}>
+    <View
+      style={[styles.container, { width: size, height: size }]}
+      accessibilityLabel={accessibilityLabel}
+      accessibilityRole="none"
+    >
       {/* SVG 원형 진행률 바 */}
       <Svg width={size} height={size} style={styles.svg}>
         {/* 배경 원 */}

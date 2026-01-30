@@ -104,6 +104,9 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
             style={[styles.missionTab, activeTab === 'myMission' && styles.missionTabActive]}
             onPress={() => handleTabChange('myMission')}
             activeOpacity={0.7}
+            accessibilityRole="tab"
+            accessibilityLabel={activeTab === 'myMission' ? '나의 미션, 선택됨' : '나의 미션'}
+            accessibilityState={{ selected: activeTab === 'myMission' }}
           >
             <Text 
               style={[styles.missionTabText, activeTab === 'myMission' && styles.missionTabTextActive]}
@@ -117,6 +120,9 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
             style={[styles.missionTab, activeTab === 'missionGroup' && styles.missionTabActive]}
             onPress={() => handleTabChange('missionGroup')}
             activeOpacity={0.7}
+            accessibilityRole="tab"
+            accessibilityLabel={activeTab === 'missionGroup' ? '미션 도감, 선택됨' : '미션 도감'}
+            accessibilityState={{ selected: activeTab === 'missionGroup' }}
           >
             <Text 
               style={[styles.missionTabText, activeTab === 'missionGroup' && styles.missionTabTextActive]}
