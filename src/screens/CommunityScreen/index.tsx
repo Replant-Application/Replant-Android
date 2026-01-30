@@ -209,6 +209,9 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation, route }) 
                   onPress={handlePreviousPage}
                   disabled={currentPage === 0}
                   activeOpacity={0.7}
+                  accessibilityRole="button"
+                  accessibilityLabel="이전 페이지"
+                  accessibilityState={{ disabled: currentPage === 0 }}
                 >
                   <Text style={[styles.paginationButtonText, currentPage === 0 && styles.paginationButtonTextDisabled]}>
                     이전
@@ -224,6 +227,9 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation, route }) 
                   onPress={handleNextPage}
                   disabled={currentPage >= totalPages - 1}
                   activeOpacity={0.7}
+                  accessibilityRole="button"
+                  accessibilityLabel="다음 페이지"
+                  accessibilityState={{ disabled: currentPage >= totalPages - 1 }}
                 >
                   <Text style={[styles.paginationButtonText, currentPage >= totalPages - 1 && styles.paginationButtonTextDisabled]}>
                     다음
@@ -391,6 +397,9 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation, route }) 
                 trackColor={{ false: '#E0E0E0', true: '#8B6F47' }}
                 thumbColor={onlyMyPosts ? '#FFFFFF' : '#F4F3F4'}
                 ios_backgroundColor="#E0E0E0"
+                accessibilityRole="switch"
+                accessibilityLabel="내가 쓴 게시글만 보기"
+                accessibilityState={{ checked: onlyMyPosts }}
               />
             </View>
 

@@ -106,6 +106,9 @@ const MissionSetCreateScreen: React.FC<MissionSetCreateScreenProps> = ({ navigat
                 onValueChange={setIsPublic}
                 trackColor={{ false: colors.gray[300], true: colors.primary[300] }}
                 thumbColor={isPublic ? colors.primary[500] : colors.gray[100]}
+                accessibilityRole="switch"
+                accessibilityLabel="투두리스트 공개"
+                accessibilityState={{ checked: isPublic }}
               />
             </View>
           </View>
