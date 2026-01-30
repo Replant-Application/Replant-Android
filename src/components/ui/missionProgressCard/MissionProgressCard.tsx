@@ -32,7 +32,12 @@ const MissionProgressCard: React.FC<MissionProgressCardProps> = ({
       <View style={styles.header}>
         <Text style={styles.title}>나의 진행률</Text>
         {onHomePress && (
-          <TouchableOpacity onPress={onHomePress} activeOpacity={0.7}>
+          <TouchableOpacity
+            onPress={onHomePress}
+            activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel="홈으로 이동"
+          >
             <Text style={styles.homeIcon}>🏠</Text>
           </TouchableOpacity>
         )}

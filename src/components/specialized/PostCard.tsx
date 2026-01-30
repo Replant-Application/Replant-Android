@@ -159,12 +159,22 @@ const PostCard: React.FC<PostCardProps> = ({
           <View style={styles.menuContainer}>
             {canEditDelete && (
               <>
-                <TouchableOpacity style={styles.menuItem} onPress={handleEdit}>
+                <TouchableOpacity
+                  style={styles.menuItem}
+                  onPress={handleEdit}
+                  accessibilityRole="button"
+                  accessibilityLabel="수정"
+                >
                   <Text style={styles.menuItemIcon}>✏️</Text>
                   <Text style={styles.menuItemText}>수정</Text>
                 </TouchableOpacity>
                 <View style={styles.menuDivider} />
-                <TouchableOpacity style={styles.menuItem} onPress={handleDelete}>
+                <TouchableOpacity
+                  style={styles.menuItem}
+                  onPress={handleDelete}
+                  accessibilityRole="button"
+                  accessibilityLabel="삭제"
+                >
                   <Text style={styles.menuItemIcon}>🗑️</Text>
                   <Text style={[styles.menuItemText, styles.deleteText]}>삭제</Text>
                 </TouchableOpacity>
@@ -173,7 +183,12 @@ const PostCard: React.FC<PostCardProps> = ({
             {!isOwnPost && onHide && (
               <>
                 {canEditDelete && <View style={styles.menuDivider} />}
-                <TouchableOpacity style={styles.menuItem} onPress={handleHide}>
+                <TouchableOpacity
+                  style={styles.menuItem}
+                  onPress={handleHide}
+                  accessibilityRole="button"
+                  accessibilityLabel="숨기기"
+                >
                   <Text style={styles.menuItemIcon}>🚫</Text>
                   <Text style={styles.menuItemText}>숨기기</Text>
                 </TouchableOpacity>

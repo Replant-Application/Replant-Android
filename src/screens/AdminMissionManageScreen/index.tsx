@@ -85,7 +85,13 @@ const AdminMissionManageScreen: React.FC<AdminMissionManageScreenProps> = ({ nav
               </TouchableOpacity>
             ))}
           </View>
-          <TouchableOpacity style={styles.addButton} onPress={openAddModal}>
+          <TouchableOpacity
+            style={styles.addButton}
+            onPress={openAddModal}
+            accessibilityRole="button"
+            accessibilityLabel="미션 추가"
+            accessibilityHint="새 미션을 추가합니다"
+          >
             <Text style={styles.addButtonText}>+ 미션 추가</Text>
           </TouchableOpacity>
         </View>

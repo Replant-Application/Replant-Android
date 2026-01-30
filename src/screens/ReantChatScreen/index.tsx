@@ -217,6 +217,9 @@ const ReantChatScreen: React.FC<ReantChatScreenProps> = ({ navigation, route: _r
             style={styles.endChatButton}
             onPress={handleClose}
             activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel="대화 종료하기"
+            accessibilityHint="홈으로 돌아갑니다"
           >
             <Text style={styles.endChatButtonText}>← 대화 종료하기</Text>
           </TouchableOpacity>
@@ -323,6 +326,7 @@ const ReantChatScreen: React.FC<ReantChatScreenProps> = ({ navigation, route: _r
                     source={getCharacterImage(currentCharacter.level || 1, 'happy')}
                     style={styles.characterImage}
                     resizeMode={FastImage.resizeMode.contain}
+                    accessibilityLabel={`${currentCharacter.name || '리앤트'} 캐릭터, 레벨 ${currentCharacter.level || 1}`}
                   />
                 </View>
               </>
