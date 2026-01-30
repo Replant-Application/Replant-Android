@@ -57,6 +57,8 @@ const NicknameScreen: React.FC<NicknameScreenProps> = ({ onNavigate }) => {
         <TouchableOpacity
           onPress={handleGoBackToSocialLogin}
           style={styles.backToSocialButton}
+          accessibilityRole="button"
+          accessibilityLabel="소셜 로그인으로 돌아가기"
         >
           <Text style={styles.backToSocialText}>소셜 로그인으로 돌아가기</Text>
         </TouchableOpacity>

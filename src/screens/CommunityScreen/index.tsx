@@ -281,6 +281,7 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation, route }) 
           accessibilityRole="button"
           accessibilityLabel="투두리스트 공유"
           accessibilityHint="내 투두리스트를 공유합니다"
+          accessibilityState={{ disabled: myMissionSetsLoading }}
           disabled={myMissionSetsLoading}
         >
           <Image
@@ -300,11 +301,13 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation, route }) 
         animationType="fade"
         onRequestClose={handleFilterModalClose}
       >
-        <View style={styles.modalOverlay}>
+          <View style={styles.modalOverlay}>
           <TouchableOpacity
             style={styles.modalOverlayTouchable}
             activeOpacity={1}
             onPress={handleFilterModalClose}
+            accessibilityRole="button"
+            accessibilityLabel="필터 모달 닫기"
           />
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle} accessibilityRole="header">필터 선택</Text>
@@ -417,6 +420,8 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation, route }) 
             style={styles.modalOverlayTouchable}
             activeOpacity={1}
             onPress={handleMissionSetFilterModalClose}
+            accessibilityRole="button"
+            accessibilityLabel="정렬 선택 모달 닫기"
           />
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle} accessibilityRole="header">정렬 선택</Text>

@@ -81,12 +81,18 @@ const VerificationPostDetailScreen: React.FC<VerificationPostDetailScreenProps> 
       keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
     >
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          style={styles.backButton}
+          accessibilityRole="button"
+          accessibilityLabel="뒤로 가기"
+        >
           <Image
             source={require('../../assets/images/left.png')}
             style={styles.backButtonIcon}
             resizeMode="contain"
             accessibilityLabel="뒤로 가기"
+            accessibilityElementsHidden={true}
           />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>인증글</Text>
@@ -181,15 +187,19 @@ const VerificationPostDetailScreen: React.FC<VerificationPostDetailScreenProps> 
               style={[styles.voteButton, post.myVote === 'APPROVE' && styles.voteButtonActive, isAuthor && styles.voteButtonDisabled]}
               onPress={() => handleVote('APPROVE')}
               disabled={isAuthor}
+              accessibilityRole="button"
+              accessibilityLabel={post.myVote === 'APPROVE' ? `좋아요 취소, ${post.approveCount}개` : `좋아요, ${post.approveCount}개`}
+              accessibilityState={{ selected: post.myVote === 'APPROVE', disabled: isAuthor }}
             >
               {post.myVote === 'APPROVE' ? (
-                <Text style={[styles.voteIcon, isAuthor && styles.voteIconDisabled]}>❤️</Text>
+                <Text style={[styles.voteIcon, isAuthor && styles.voteIconDisabled]} accessibilityElementsHidden={true}>❤️</Text>
               ) : (
                 <Image
                   source={require('../../assets/images/heart.png')}
                   style={styles.voteIconImage}
                   resizeMode="contain"
                   accessibilityLabel="좋아요 아이콘"
+                  accessibilityElementsHidden={true}
                 />
               )}
               <Text style={[styles.voteText, post.myVote === 'APPROVE' && styles.voteTextActive, isAuthor && styles.voteTextDisabled]}>
@@ -197,22 +207,33 @@ const VerificationPostDetailScreen: React.FC<VerificationPostDetailScreenProps> 
               </Text>
             </TouchableOpacity>
 
-            <View style={styles.actionButton}>
+            <View style={styles.actionButton} accessibilityRole="text" accessibilityLabel={`댓글 ${post.commentCount || comments.length}개`}>
               <Image
                 source={require('../../assets/images/say.png')}
                 style={styles.actionIconImage}
                 resizeMode="contain"
                 accessibilityLabel="댓글 아이콘"
+                accessibilityElementsHidden={true}
               />
               <Text style={styles.actionText}>{post.commentCount || comments.length}</Text>
             </View>
 
             {isAuthor && post.status === 'PENDING' && (
               <>
-                <TouchableOpacity style={styles.actionButton} onPress={handleEditPost}>
+                <TouchableOpacity
+                  style={styles.actionButton}
+                  onPress={handleEditPost}
+                  accessibilityRole="button"
+                  accessibilityLabel="수정"
+                >
                   <Text style={styles.actionText}>✏️ 수정</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.actionButton} onPress={handleDeletePost}>
+                <TouchableOpacity
+                  style={styles.actionButton}
+                  onPress={handleDeletePost}
+                  accessibilityRole="button"
+                  accessibilityLabel="삭제"
+                >
                   <Text style={[styles.actionText, styles.deleteText]}>🗑️ 삭제</Text>
                 </TouchableOpacity>
               </>
@@ -241,12 +262,19 @@ const VerificationPostDetailScreen: React.FC<VerificationPostDetailScreenProps> 
                           multiline
                         />
                         <View style={styles.editCommentActions}>
-                          <TouchableOpacity style={styles.editCommentButton} onPress={handleCancelEdit}>
+                          <TouchableOpacity
+                            style={styles.editCommentButton}
+                            onPress={handleCancelEdit}
+                            accessibilityRole="button"
+                            accessibilityLabel="취소"
+                          >
                             <Text style={styles.editCommentButtonText}>취소</Text>
                           </TouchableOpacity>
                           <TouchableOpacity
                             style={[styles.editCommentButton, styles.editCommentButtonSave]}
                             onPress={handleUpdateComment}
+                            accessibilityRole="button"
+                            accessibilityLabel="저장"
                           >
                             <Text style={[styles.editCommentButtonText, styles.editCommentButtonTextSave]}>
                               저장
@@ -280,12 +308,19 @@ const VerificationPostDetailScreen: React.FC<VerificationPostDetailScreenProps> 
                                 multiline
                               />
                               <View style={styles.editCommentActions}>
-                                <TouchableOpacity style={styles.editCommentButton} onPress={handleCancelEdit}>
+                                <TouchableOpacity
+                                  style={styles.editCommentButton}
+                                  onPress={handleCancelEdit}
+                                  accessibilityRole="button"
+                                  accessibilityLabel="취소"
+                                >
                                   <Text style={styles.editCommentButtonText}>취소</Text>
                                 </TouchableOpacity>
                                 <TouchableOpacity
                                   style={[styles.editCommentButton, styles.editCommentButtonSave]}
                                   onPress={handleUpdateComment}
+                                  accessibilityRole="button"
+                                  accessibilityLabel="저장"
                                 >
                                   <Text style={[styles.editCommentButtonText, styles.editCommentButtonTextSave]}>
                                     저장
@@ -321,7 +356,12 @@ const VerificationPostDetailScreen: React.FC<VerificationPostDetailScreenProps> 
             <Text style={styles.replyingToText}>
               @{replyingToComment.nickname}님에게 답글 작성 중
             </Text>
-            <TouchableOpacity onPress={handleCancelReply} style={styles.cancelReplyButton}>
+            <TouchableOpacity
+              onPress={handleCancelReply}
+              style={styles.cancelReplyButton}
+              accessibilityRole="button"
+              accessibilityLabel="답글 취소"
+            >
               <Text style={styles.cancelReplyText}>X</Text>
             </TouchableOpacity>
           </View>
@@ -339,6 +379,9 @@ const VerificationPostDetailScreen: React.FC<VerificationPostDetailScreenProps> 
             style={[styles.submitButton, !commentContent.trim() && styles.submitButtonDisabled]}
             onPress={handleSubmitComment}
             disabled={!commentContent.trim()}
+            accessibilityRole="button"
+            accessibilityLabel={replyingToComment ? '답글 등록' : '댓글 등록'}
+            accessibilityState={{ disabled: !commentContent.trim() }}
           >
             <Text style={styles.submitButtonText}>{replyingToComment ? '답글' : '등록'}</Text>
           </TouchableOpacity>

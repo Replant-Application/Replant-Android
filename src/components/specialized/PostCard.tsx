@@ -216,14 +216,22 @@ const PostCard: React.FC<PostCardProps> = ({
             {/* 인증 상태 배지 - 인증 게시글(category === '인증')일 때만 표시 */}
             {post.category === '인증' && (
               post.verified === true ? (
-                <View style={styles.verifiedBadge}>
-                  <Text style={styles.verifiedIcon}>✓</Text>
-                  <Text style={styles.verifiedText}>인증완료</Text>
+                <View
+                  style={styles.verifiedBadge}
+                  accessibilityLabel="인증완료"
+                  accessibilityRole="text"
+                >
+                  <Text style={styles.verifiedIcon} accessibilityElementsHidden={true}>✓</Text>
+                  <Text style={styles.verifiedText} accessibilityElementsHidden={true}>인증완료</Text>
                 </View>
               ) : post.verified === false ? (
-                <View style={styles.pendingBadge}>
-                  <Text style={styles.pendingIcon}>⏳</Text>
-                  <Text style={styles.pendingText}>인증대기</Text>
+                <View
+                  style={styles.pendingBadge}
+                  accessibilityLabel="인증대기"
+                  accessibilityRole="text"
+                >
+                  <Text style={styles.pendingIcon} accessibilityElementsHidden={true}>⏳</Text>
+                  <Text style={styles.pendingText} accessibilityElementsHidden={true}>인증대기</Text>
                 </View>
               ) : null
             )}

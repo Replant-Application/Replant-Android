@@ -57,12 +57,17 @@ const CustomMissionCreateScreen: React.FC<CustomMissionCreateScreenProps> = ({ n
         <Header
           title={isEditMode ? "미션 수정" : "미션 만들기"}
           leftButton={
-            <TouchableOpacity onPress={handleCancel}>
+            <TouchableOpacity
+              onPress={handleCancel}
+              accessibilityRole="button"
+              accessibilityLabel="뒤로 가기"
+            >
               <Image
                 source={require('../../assets/images/left.png')}
                 style={styles.backButtonIcon}
                 resizeMode="contain"
                 accessibilityLabel="뒤로 가기"
+                accessibilityElementsHidden={true}
               />
             </TouchableOpacity>
           }
@@ -109,8 +114,11 @@ const CustomMissionCreateScreen: React.FC<CustomMissionCreateScreenProps> = ({ n
                     category === option.id && styles.selectedWorryType
                   ]}
                   onPress={() => setCategory(category === option.id ? null : option.id)}
+                  accessibilityRole="button"
+                  accessibilityLabel={option.name}
+                  accessibilityState={{ selected: category === option.id }}
                 >
-                  <Text style={styles.worryTypeEmoji}>{option.emoji}</Text>
+                  <Text style={styles.worryTypeEmoji} accessibilityElementsHidden={true}>{option.emoji}</Text>
                   <Text style={[
                     styles.worryTypeText,
                     category === option.id && styles.selectedWorryTypeText

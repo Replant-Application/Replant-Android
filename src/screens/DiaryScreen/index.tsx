@@ -88,12 +88,18 @@ const DiaryScreen: React.FC = () => {
       >
         <View style={styles.detailContainer}>
           <View style={styles.viewHeader}>
-            <TouchableOpacity style={styles.backButton} onPress={handleBack}>
+            <TouchableOpacity
+              style={styles.backButton}
+              onPress={handleBack}
+              accessibilityRole="button"
+              accessibilityLabel="뒤로 가기"
+            >
               <Image
                 source={require('../../assets/images/left.png')}
                 style={styles.backButtonIcon}
                 resizeMode="contain"
                 accessibilityLabel="뒤로 가기"
+                accessibilityElementsHidden={true}
               />
             </TouchableOpacity>
           </View>
@@ -171,12 +177,16 @@ const DiaryScreen: React.FC = () => {
               <TouchableOpacity 
                 style={styles.backToListButton}
                 onPress={handleBack}
+                accessibilityRole="button"
+                accessibilityLabel="목록으로"
               >
                 <Text style={styles.backToListButtonText}>목록으로</Text>
               </TouchableOpacity>
               <TouchableOpacity 
                 style={styles.deleteButton}
                 onPress={() => handleDeleteDiary(selectedDiary.id)}
+                accessibilityRole="button"
+                accessibilityLabel="삭제하기"
               >
                 <Text style={styles.deleteButtonText}>삭제하기</Text>
               </TouchableOpacity>
@@ -216,12 +226,18 @@ const DiaryScreen: React.FC = () => {
       >
         <View style={styles.viewContainer}>
           <View style={styles.viewHeader}>
-            <TouchableOpacity style={styles.backButton} onPress={handleBack}>
+            <TouchableOpacity
+              style={styles.backButton}
+              onPress={handleBack}
+              accessibilityRole="button"
+              accessibilityLabel="뒤로 가기"
+            >
               <Image
                 source={require('../../assets/images/left.png')}
                 style={styles.backButtonIcon}
                 resizeMode="contain"
                 accessibilityLabel="뒤로 가기"
+                accessibilityElementsHidden={true}
               />
             </TouchableOpacity>
           </View>
@@ -246,6 +262,8 @@ const DiaryScreen: React.FC = () => {
                     <TouchableOpacity
                       style={styles.searchClearButton}
                       onPress={handleSearchDateClear}
+                      accessibilityRole="button"
+                      accessibilityLabel="검색 초기화"
                     >
                       <Text style={styles.searchClearText}>✕</Text>
                     </TouchableOpacity>
@@ -255,6 +273,9 @@ const DiaryScreen: React.FC = () => {
                   style={[styles.searchButton, !searchDate.trim() && styles.searchButtonDisabled]}
                   onPress={() => handleSearchByDate(searchDate)}
                   disabled={searchingByDate || !searchDate.trim()}
+                  accessibilityRole="button"
+                  accessibilityLabel="날짜로 조회"
+                  accessibilityState={{ disabled: searchingByDate || !searchDate.trim() }}
                 >
                   <Text style={styles.searchButtonText}>조회</Text>
                 </TouchableOpacity>
@@ -276,6 +297,8 @@ const DiaryScreen: React.FC = () => {
                           style={styles.diaryListItem}
                           onPress={() => handleViewDetail(diary)}
                           activeOpacity={0.7}
+                          accessibilityRole="button"
+                          accessibilityLabel={`${formatDateKorean(item.date)} 일기, ${(diary.content || '').slice(0, 30)}${(diary.content || '').length > 30 ? '…' : ''}`}
                         >
                           <View style={styles.diaryListItemContent}>
                             <View style={styles.diaryListItemHeader}>
@@ -478,6 +501,8 @@ const DiaryScreen: React.FC = () => {
             <TouchableOpacity 
               style={styles.writeButton}
               onPress={handleStartWriting}
+              accessibilityRole="button"
+              accessibilityLabel="일기 작성하기"
             >
               <Text style={styles.writeButtonText}>일기 작성하기</Text>
             </TouchableOpacity>
@@ -485,6 +510,8 @@ const DiaryScreen: React.FC = () => {
               <TouchableOpacity 
                 style={styles.viewButton}
                 onPress={handleViewDiaries}
+                accessibilityRole="button"
+                accessibilityLabel="일기 보기"
               >
                 <Text style={styles.viewButtonText}>일기 보기</Text>
               </TouchableOpacity>
