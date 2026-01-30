@@ -196,6 +196,7 @@ export const styles = StyleSheet.create({
     backgroundColor: colors.background.secondary,
     borderRadius: borderRadius.base,
     fontSize: typography.fontSize.sm,
+    color: colors.text.primary,
     minHeight: 80,
     textAlignVertical: 'top',
     marginBottom: spacing[3],

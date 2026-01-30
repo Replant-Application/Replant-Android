@@ -333,6 +333,7 @@ export const styles = StyleSheet.create({
   reviewInput: {
     ...inputStyles.base(),
     backgroundColor: colors.background.secondary,
+    color: colors.text.primary,
     minHeight: 100,
     marginBottom: spacing[3],
     borderWidth: 1,

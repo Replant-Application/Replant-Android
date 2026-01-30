@@ -213,6 +213,7 @@ export const styles = StyleSheet.create({
     borderRadius: borderRadius.md,
     padding: spacing[3],
     fontSize: typography.fontSize.base,
+    color: colors.text.primary,
     borderWidth: 1,
     borderColor: colors.gray[300],
     marginBottom: spacing[3],

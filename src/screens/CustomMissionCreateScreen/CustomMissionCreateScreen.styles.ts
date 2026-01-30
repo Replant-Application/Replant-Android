@@ -34,6 +34,7 @@ export const styles = StyleSheet.create({
     borderRadius: borderRadius.md,
     padding: spacing[3],
     fontSize: typography.fontSize.base,
+    color: colors.text.primary,
     fontFamily: Platform.select({
       ios: undefined, // iOS는 기본 시스템 폰트 사용
       android: typography.fontFamily.regular, // Android는 커스텀 폰트 사용

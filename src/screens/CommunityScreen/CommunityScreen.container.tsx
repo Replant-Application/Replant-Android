@@ -364,30 +364,35 @@ export const useCommunityScreenContainer = ({ navigation, route }: CommunityScre
         const newPosts = result.data.content || [];
         
         // 백엔드 응답을 프론트엔드 형식으로 변환
-        const transformedPosts: CommunityPost[] = newPosts.map((post: any) => ({
-          id: String(post.id),
-          post_id: String(post.id),
-          mission_id: post.missionTag?.id ? String(post.missionTag.id) : '',
-          mission_title: post.missionTag?.title || '',
-          mission_emoji: '🎯',
-          title: post.title || '',
-          content: post.content || '',
-          author: String(post.userId),
-          author_id: String(post.userId),
-          userId: post.userId,
-          author_nickname: post.userNickname || '알 수 없음',
-          created_at: post.createdAt || new Date().toISOString(),
-          updated_at: post.updatedAt || post.createdAt || new Date().toISOString(),
-          like_count: post.likeCount || 0,
-          comment_count: post.commentCount || 0,
-          scrap_count: 0,
-          images: post.imageUrls || [],
-          category: post.category || '일반',
-          is_liked: post.isLiked || false,
-          is_scrapped: false, // 스크랩은 로컬에서 관리
-          verified: post.verified || false,
-          isAuthor: post.isAuthor || false,
-        }));
+        // 백엔드는 postType(GENERAL|VERIFICATION)을 보냄 → category(일반|인증)로 변환해야 목록 태그가 올바르게 표시됨
+        const transformedPosts: CommunityPost[] = newPosts.map((post: any) => {
+          const isVerification = post.postType === 'VERIFICATION';
+          return {
+            id: String(post.id),
+            post_id: String(post.id),
+            mission_id: post.missionTag?.id ? String(post.missionTag.id) : '',
+            mission_title: post.missionTag?.title || '',
+            mission_emoji: isVerification ? '' : '🎯',
+            title: post.title || '',
+            content: post.content || '',
+            author: String(post.userId),
+            author_id: String(post.userId),
+            userId: post.userId,
+            author_nickname: post.userNickname || '알 수 없음',
+            created_at: post.createdAt || new Date().toISOString(),
+            updated_at: post.updatedAt || post.createdAt || new Date().toISOString(),
+            like_count: post.likeCount || 0,
+            comment_count: post.commentCount || 0,
+            scrap_count: 0,
+            images: post.imageUrls || [],
+            category: isVerification ? '인증' : '일반',
+            is_liked: post.isLiked || false,
+            is_scrapped: false, // 스크랩은 로컬에서 관리
+            verified: isVerification ? post.status === 'APPROVED' : undefined,
+            isAuthor: post.isAuthor || false,
+            completionRate: post.completionRate,
+          };
+        });
 
         setPosts(transformedPosts);
         setTotalPages(result.data.totalPages || 1);

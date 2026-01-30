@@ -39,7 +39,9 @@ export const styles = StyleSheet.create({
   },
   searchInput: {
     flex: 1,
-    ...createTextStyle('base'),
+    ...createTextStyle('base', {
+      color: colors.text.primary,
+    }),
   },
   filterButton: {
     width: 44,

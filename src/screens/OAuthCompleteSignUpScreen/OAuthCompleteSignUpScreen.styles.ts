@@ -155,7 +155,9 @@ export const styles = StyleSheet.create({
     backgroundColor: colors.primary[50],
   },
   dropdownListItemText: {
-    ...createTextStyle('sm'),
+    ...createTextStyle('sm', {
+      color: colors.text.primary,
+    }),
   },
   dropdownListItemTextSelected: {
     color: colors.primary[600],

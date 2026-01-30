@@ -353,7 +353,9 @@ export const styles = StyleSheet.create({
   },
   textInput: {
     ...inputStyles.base(),
-    ...createTextStyle('sm'),
+    ...createTextStyle('sm', {
+      color: colors.text.primary,
+    }),
     backgroundColor: colors.overlay.white.heavy,
     fontFamily: Platform.select({
       ios: undefined,

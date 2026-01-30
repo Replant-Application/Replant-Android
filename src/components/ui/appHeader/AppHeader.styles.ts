@@ -90,7 +90,9 @@ export const styles = StyleSheet.create({
     position: 'relative',
   },
   iconText: {
-    ...createTextStyle('base'),
+    ...createTextStyle('base', {
+      color: colors.text.primary,
+    }),
   },
   iconImage: {
     width: 36,

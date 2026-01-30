@@ -84,6 +84,7 @@ export const styles = StyleSheet.create({
     paddingHorizontal: RESPONSIVE_INPUT_PADDING_H,
     paddingVertical: RESPONSIVE_INPUT_PADDING_V,
     ...createTextStyle('sm', {
+      color: colors.text.primary,
       height: RESPONSIVE_INPUT_HEIGHT,
       lineHeight: 22,
       letterSpacing: 1,
@@ -120,6 +121,7 @@ export const styles = StyleSheet.create({
   },
   checkboxLabel: {
     ...createTextStyle('sm', {
+      color: colors.text.primary,
       lineHeight: 22,
     }),
   },

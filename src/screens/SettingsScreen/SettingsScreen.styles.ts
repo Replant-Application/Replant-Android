@@ -90,6 +90,7 @@ export const styles = StyleSheet.create({
     ...inputStyles.base(),
     padding: spacing[3],
     fontSize: typography.fontSize.base,
+    color: colors.text.primary,
     textAlignVertical: 'center',
     height: 48,
     paddingVertical: 0,
