@@ -5,13 +5,22 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, ActivityIndicator, ImageBackground, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, ActivityIndicator, ImageBackground, Image, Alert } from 'react-native';
 import { Header } from '../../components/ui';
 import { useUser } from '../../contexts/UserContext';
 import { updateMyInfo } from '../../api/userApi';
 import type { MissionCategoryType } from '../../types';
-import { colors, spacing } from '../../utils/designTokens';
+import { colors } from '../../utils/designTokens';
 import { styles, CATEGORY_OPTIONS, getCategoryLabel } from './CategorySelectScreen.styles';
+
+const CATEGORY_ICONS: Record<string, number> = {
+  DAILY_LIFE: require('../../assets/images/home.png'),
+  GROWTH: require('../../assets/images/goal.png'),
+  EXERCISE: require('../../assets/images/traning.png'),
+  STUDY: require('../../assets/images/books.png'),
+  HEALTH: require('../../assets/images/health.png'),
+  RELATIONSHIP: require('../../assets/images/heart.png'),
+};
 
 interface CategorySelectScreenProps {
   onBack?: () => void;
@@ -66,65 +75,76 @@ const CategorySelectScreen: React.FC<CategorySelectScreenProps> = ({ onBack, onC
   return (
     <ImageBackground
       source={require('../../assets/images/background.png')}
-      style={[
-        styles.container,
-        { backgroundColor: 'transparent' },
-        onBack && { paddingTop: spacing[10] },
-      ]}
+      style={[styles.container, { backgroundColor: 'transparent' }]}
       resizeMode="cover"
       accessibilityElementsHidden={true}
     >
-      {onBack && (
-        <Header
-          showBackButton={true}
-          navigation={{ goBack: onBack }}
-          style={{ paddingTop: 0 }}
-        />
-      )}
-      <View style={onBack ? { marginTop: spacing[8] } : undefined}>
-        <Text style={styles.title}>관심 있는 분야를 골라주세요</Text>
+      <Header
+        title="미션 카테고리 변경"
+        showBackButton={!!onBack}
+        navigation={onBack ? { goBack: onBack } : undefined}
+      />
+      <View style={styles.content}>
         <Text style={styles.subtitle}>
           해당 분야의 미션이 매일 추천돼요.
         </Text>
-        <View style={styles.list}>
-        {CATEGORY_OPTIONS.map((key) => {
-          const isSelected = selected.includes(key);
-          return (
+        <View style={styles.categoryCard}>
+          <View style={styles.list}>
+            {CATEGORY_OPTIONS.map((key) => {
+              const isSelected = selected.includes(key);
+              const icon = CATEGORY_ICONS[key];
+              return (
+                <View key={key} style={styles.categoryButtonWrap}>
+                  <TouchableOpacity
+                    style={[styles.categoryButton, isSelected && styles.optionSelected]}
+                    onPress={() => toggle(key)}
+                    disabled={loading}
+                    accessibilityRole="button"
+                    accessibilityLabel={`${getCategoryLabel(key)} 카테고리 ${isSelected ? '해제' : '선택'}`}
+                  >
+                    {icon != null && (
+                      <Image source={icon} style={styles.categoryButtonIcon} resizeMode="contain" />
+                    )}
+                    <Text style={[styles.categoryButtonText, isSelected && styles.optionTextSelected]}>
+                      {getCategoryLabel(key)}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              );
+            })}
+          </View>
+          <View style={styles.selectAllSection}>
             <TouchableOpacity
-              key={key}
-              style={[styles.categoryButton, isSelected && styles.optionSelected]}
-              onPress={() => toggle(key)}
+              style={[
+                styles.selectAllButton,
+                selected.length === CATEGORY_OPTIONS.length && styles.optionSelected,
+                loading && styles.selectAllButtonDisabled,
+              ]}
+              onPress={toggleSelectAll}
               disabled={loading}
               accessibilityRole="button"
-              accessibilityLabel={`${getCategoryLabel(key)} 카테고리 ${isSelected ? '해제' : '선택'}`}
+              accessibilityLabel="모두 선택"
             >
-              <Text style={[styles.categoryButtonText, isSelected && styles.optionTextSelected]}>
-                {getCategoryLabel(key)}
+              <Text style={[
+                styles.categoryButtonText,
+                selected.length === CATEGORY_OPTIONS.length && styles.optionTextSelected,
+              ]}>
+                모두 선택
               </Text>
             </TouchableOpacity>
-          );
-        })}
-      </View>
-      <TouchableOpacity
-        style={[styles.categoryButton, styles.selectAllButtonMargin, loading && styles.selectAllButtonDisabled]}
-        onPress={toggleSelectAll}
-        disabled={loading}
-        accessibilityRole="button"
-        accessibilityLabel="모두 선택"
-      >
-        <Text style={styles.selectAllButtonText}>모두 선택</Text>
-      </TouchableOpacity>
-      <TouchableOpacity
-        style={[styles.completeButton, selected.length === 0 && styles.completeButtonDisabled]}
-        onPress={handleComplete}
-        disabled={selected.length === 0 || loading}
-        accessibilityRole="button"
-        accessibilityLabel="선택 완료"
-      >
-        <Text style={styles.completeButtonText}>
-          선택 완료 ({selected.length}개)
-        </Text>
-      </TouchableOpacity>
+          </View>
+        </View>
+        <TouchableOpacity
+          style={[styles.completeButton, selected.length === 0 && styles.completeButtonDisabled]}
+          onPress={handleComplete}
+          disabled={selected.length === 0 || loading}
+          accessibilityRole="button"
+          accessibilityLabel="선택 완료"
+        >
+          <Text style={styles.completeButtonText}>
+            선택 완료 ({selected.length}개)
+          </Text>
+        </TouchableOpacity>
       </View>
       {loading && (
         <View style={styles.loadingOverlay}>

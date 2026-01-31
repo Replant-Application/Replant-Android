@@ -5,7 +5,7 @@
 
 import { StyleSheet, Platform } from 'react-native';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
-import { createTextStyle, createTitleStyle, createButtonTextStyle } from '../../utils/styles/textStyles';
+import { createTextStyle, createButtonTextStyle } from '../../utils/styles/textStyles';
 
 const CATEGORY_LABELS: Record<string, string> = {
   DAILY_LIFE: '일상',
@@ -31,15 +31,10 @@ export const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background.primary,
-    padding: spacing[4],
-    paddingTop: spacing[16],
   },
-  title: {
-    ...createTitleStyle('lg', {
-      color: colors.text.primary,
-      textAlign: 'center',
-      marginBottom: spacing[2],
-    }),
+  /** 캘린더 화면과 동일한 본문 영역 패딩 */
+  content: {
+    padding: spacing[5],
   },
   subtitle: {
     ...createTextStyle('sm', {
@@ -48,23 +43,58 @@ export const styles = StyleSheet.create({
       marginBottom: spacing[4],
     }),
   },
+  /** 카테고리 영역 카드 (연한 배경 + 둥근 모서리) */
+  categoryCard: {
+    backgroundColor: 'rgba(255, 255, 255, 0.7)',
+    borderRadius: borderRadius.xl,
+    padding: spacing[4],
+    marginBottom: spacing[4],
+    borderWidth: 1,
+    borderColor: colors.border.light,
+  },
+  /** 2열 그리드 */
   list: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: spacing[3],
   },
-  // 일상·성장·운동·학습·건강·관계·모두 선택 공통 버튼 스타일
+  /** 그리드 한 칸 (50% - gap 고려) */
+  categoryButtonWrap: {
+    width: '47%',
+  },
   categoryButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.white,
+    paddingVertical: spacing[4],
+    paddingHorizontal: spacing[3],
+    borderRadius: borderRadius.xl,
+    borderWidth: 2,
+    borderColor: colors.border.light,
+    gap: spacing[2],
+  },
+  categoryButtonIcon: {
+    width: 24,
+    height: 24,
+  },
+  selectAllSection: {
+    marginTop: spacing[4],
+    paddingTop: spacing[4],
+    borderTopWidth: 1,
+    borderTopColor: colors.border.light,
+  },
+  selectAllButton: {
     alignSelf: 'stretch',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
     backgroundColor: colors.white,
     paddingVertical: spacing[3],
     paddingHorizontal: spacing[3],
-    borderRadius: borderRadius.lg,
-    borderWidth: 1,
+    borderRadius: borderRadius.xl,
+    borderWidth: 2,
     borderColor: colors.border.light,
-    alignItems: 'center',
-  },
-  selectAllButtonMargin: {
-    marginTop: spacing[4],
-    marginBottom: spacing[2],
   },
   selectAllButtonDisabled: {
     opacity: 0.6,
@@ -79,19 +109,15 @@ export const styles = StyleSheet.create({
       android: typography.fontFamily.regular,
     }),
   },
-  selectAllButtonText: {
-    ...createTextStyle('base', {
-      color: colors.primary[600],
-      fontWeight: typography.fontWeight.medium,
-    }),
-    fontFamily: Platform.select({
-      ios: undefined,
-      android: typography.fontFamily.regular,
-    }),
-  },
   optionSelected: {
     borderColor: colors.primary[500],
     backgroundColor: colors.primary[50],
+    borderWidth: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    elevation: 2,
   },
   optionTextSelected: {
     color: colors.primary[600],
