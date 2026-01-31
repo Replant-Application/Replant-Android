@@ -66,10 +66,13 @@ export const styles = StyleSheet.create({
     paddingTop: spacing[2],
   },
   characterImageContainer: {
-    width: SCREEN_WIDTH * 0.55,
-    height: SCREEN_WIDTH * 0.55,
+    width: SCREEN_WIDTH * 0.8,
+    height: SCREEN_WIDTH * 0.8,
     justifyContent: 'center',
     alignItems: 'center',
+    position: 'absolute',
+    bottom: 0,
+    alignSelf: 'center',
   },
   characterImage: {
     width: '100%',
@@ -207,6 +210,7 @@ export const styles = StyleSheet.create({
     maxHeight: 100,
     ...createTextStyle('sm', {
       fontWeight: typography.fontWeight.normal,
+      color: colors.text.primary,
     }),
     marginRight: spacing[2],
   },
