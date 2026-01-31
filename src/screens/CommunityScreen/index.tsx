@@ -282,8 +282,6 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation, route }) 
           navigation={navigation}
           onMissionSetPress={onMissionSetPress}
           onUnshare={handleUnshareMissionSet}
-          onTodoListLike={handleTodoListLike}
-          likingMissionSetId={likingMissionSetId}
         />
       )}
 
