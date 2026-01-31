@@ -6,7 +6,7 @@ import { getStorageKeys, initializeUserData } from '../services';
 import { getDeviceId } from '../services/storage';
 import { logError, logUserAction } from '../utils/logger';
 import { executeWithErrorHandling } from '../utils/errorHandler';
-import { User } from '../types';
+import { User, MissionCategoryType } from '../types';
 import { checkAutoLogin, getUserInfo, clearAuthData, saveUserInfo } from '../utils/tokenStorage';
 import { apiClient } from '../api/client';
 import { initializeGoogleSignIn } from '../services/googleSignIn';
@@ -106,11 +106,13 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         // 서버에서 실제 사용자 정보 가져오기 (createdAt 포함)
         let serverCreatedAt: string | null = null;
         let serverUserId: number | null = null;
+        let serverPreferredCategories: MissionCategoryType[] | null = null;
         try {
           const myInfoResult = await getMyInfo();
           if (myInfoResult.success && myInfoResult.data) {
             serverCreatedAt = myInfoResult.data.createdAt;
             serverUserId = myInfoResult.data.id;
+            serverPreferredCategories = myInfoResult.data.preferredMissionCategories ?? null;
             // tokenStorage에도 createdAt과 id 저장
             await saveUserInfo({
               ...storedUserInfo,
@@ -135,6 +137,9 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
           if (serverCreatedAt) {
             userData.createdAt = serverCreatedAt;
           }
+          if (serverPreferredCategories !== undefined && serverPreferredCategories !== null) {
+            userData.preferredMissionCategories = serverPreferredCategories;
+          }
           await AsyncStorage.setItem(storageKeys.USER, JSON.stringify(userData));
         } else {
           // 서버에서 가져온 createdAt이 있으면 사용, 없으면 tokenStorage의 createdAt 사용, 둘 다 없으면 현재 시간 사용
@@ -144,7 +149,8 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
             nickname,
             id: actualUserId ? `user_${actualUserId}` : `user_${Date.now()}`,
             createdAt,
-            role
+            role,
+            ...(serverPreferredCategories != null && serverPreferredCategories.length > 0 && { preferredMissionCategories: serverPreferredCategories }),
           };
           await AsyncStorage.setItem(storageKeys.USER, JSON.stringify(userData));
         }
@@ -258,14 +264,16 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         ? JSON.parse(await AsyncStorage.getItem(storageKeys.USER) || 'null')
         : null;
 
-      // 서버에서 실제 사용자 정보 가져오기 (createdAt 포함)
+      // 서버에서 실제 사용자 정보 가져오기 (createdAt, preferredMissionCategories 포함)
       let serverCreatedAt: string | null = null;
       let serverUserId: number | null = null;
+      let serverPreferredCategories: MissionCategoryType[] | null = null;
       try {
         const myInfoResult = await getMyInfo();
         if (myInfoResult.success && myInfoResult.data) {
           serverCreatedAt = myInfoResult.data.createdAt;
           serverUserId = myInfoResult.data.id;
+          serverPreferredCategories = myInfoResult.data.preferredMissionCategories ?? null;
           // tokenStorage에도 createdAt과 id 저장
           if (storedUserInfo) {
             await saveUserInfo({
@@ -291,6 +299,10 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         // 서버에서 가져온 createdAt이 있으면 업데이트 (실제 가입일 사용)
         if (serverCreatedAt) {
           existingUserData.createdAt = serverCreatedAt;
+        }
+        // 서버에서 가져온 선호 카테고리 동기화 (getMyInfo 성공 시에만)
+        if (serverPreferredCategories != null) {
+          existingUserData.preferredMissionCategories = serverPreferredCategories;
         }
         await AsyncStorage.setItem(storageKeys.USER, JSON.stringify(existingUserData));
         setUser(existingUserData);
@@ -324,7 +336,8 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         nickname,
         id: userId,
         createdAt,
-        role
+        role,
+        ...(serverPreferredCategories != null && serverPreferredCategories.length > 0 && { preferredMissionCategories: serverPreferredCategories }),
       };
 
       // User 객체를 스토리지에 저장
@@ -475,14 +488,16 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
           ? JSON.parse(await AsyncStorage.getItem(storageKeys.USER) || 'null')
           : null;
 
-        // 서버에서 실제 사용자 정보 가져오기 (createdAt 포함)
+        // 서버에서 실제 사용자 정보 가져오기 (createdAt, preferredMissionCategories 포함)
         let serverCreatedAt: string | null = null;
         let serverUserId: number | null = null;
+        let serverPreferredCategories: MissionCategoryType[] | null = null;
         try {
           const myInfoResult = await getMyInfo();
           if (myInfoResult.success && myInfoResult.data) {
             serverCreatedAt = myInfoResult.data.createdAt;
             serverUserId = myInfoResult.data.id;
+            serverPreferredCategories = myInfoResult.data.preferredMissionCategories ?? null;
             // tokenStorage에도 createdAt과 id 저장
             if (storedUserInfo) {
               await saveUserInfo({
@@ -507,12 +522,17 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
             nickname: storedUserInfo.nickname,
             id: actualUserId ? `user_${actualUserId}` : `user_${Date.now()}`,
             createdAt,
-            role
+            role,
+            ...(serverPreferredCategories != null && serverPreferredCategories.length > 0 && { preferredMissionCategories: serverPreferredCategories }),
           };
           await AsyncStorage.setItem(storageKeys.USER, JSON.stringify(userData));
         }
 
         if (userData) {
+          // 서버에서 가져온 preferredMissionCategories 동기화
+          if (serverPreferredCategories !== undefined && serverPreferredCategories !== null) {
+            userData.preferredMissionCategories = serverPreferredCategories;
+          }
           // tokenStorage의 role 정보로 동기화
           if (storedUserInfo?.role) {
             const backendRole = storedUserInfo.role.toLowerCase();

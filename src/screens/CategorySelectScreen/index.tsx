@@ -1,0 +1,96 @@
+/**
+ * 관심 분야 선택 화면 (다중 선택)
+ * 앱 첫 실행(로그인 후) 한 번 표시되며, 고른 분야의 미션이 매일 추천됩니다.
+ * 설정 > 미션 카테고리 변경에서 나중에 수정 가능.
+ */
+
+import React, { useState, useEffect } from 'react';
+import { View, Text, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { useUser } from '../../contexts/UserContext';
+import { updateMyInfo } from '../../api/userApi';
+import type { MissionCategoryType } from '../../types';
+import { colors } from '../../utils/designTokens';
+import { styles, CATEGORY_OPTIONS, getCategoryLabel } from './CategorySelectScreen.styles';
+
+interface CategorySelectScreenProps {
+  onComplete: () => void;
+}
+
+const CategorySelectScreen: React.FC<CategorySelectScreenProps> = ({ onComplete }) => {
+  const { user, refreshUser } = useUser();
+  const [selected, setSelected] = useState<MissionCategoryType[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  // 기존 선택값 복원 (설정에서 들어온 경우)
+  useEffect(() => {
+    if (user?.preferredMissionCategories?.length) {
+      setSelected([...user.preferredMissionCategories]);
+    }
+  }, [user?.preferredMissionCategories]);
+
+  const toggle = (key: MissionCategoryType) => {
+    setSelected((prev) =>
+      prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]
+    );
+  };
+
+  const handleComplete = async () => {
+    if (selected.length === 0 || loading) return;
+    setLoading(true);
+    try {
+      const result = await updateMyInfo({ preferredMissionCategories: selected });
+      if (result.success) {
+        await refreshUser();
+        onComplete();
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <View style={styles.container}>
+      <Text style={styles.title}>관심 있는 분야를 골라주세요</Text>
+      <Text style={styles.subtitle}>
+        고른 분야의 미션이 매일 추천돼요.{'\n'}하나만 골라도 되고, 여러 개·전부 골라도 됩니다.
+      </Text>
+      <View style={styles.list}>
+        {CATEGORY_OPTIONS.map((key) => {
+          const isSelected = selected.includes(key);
+          return (
+            <TouchableOpacity
+              key={key}
+              style={[styles.option, isSelected && styles.optionSelected]}
+              onPress={() => toggle(key)}
+              disabled={loading}
+              accessibilityRole="button"
+              accessibilityLabel={`${getCategoryLabel(key)} 카테고리 ${isSelected ? '해제' : '선택'}`}
+            >
+              <Text style={[styles.optionText, isSelected && styles.optionTextSelected]}>
+                {getCategoryLabel(key)}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
+      </View>
+      <TouchableOpacity
+        style={[styles.completeButton, selected.length === 0 && styles.completeButtonDisabled]}
+        onPress={handleComplete}
+        disabled={selected.length === 0 || loading}
+        accessibilityRole="button"
+        accessibilityLabel="선택 완료"
+      >
+        <Text style={styles.completeButtonText}>
+          선택 완료 ({selected.length}개)
+        </Text>
+      </TouchableOpacity>
+      {loading && (
+        <View style={styles.loadingOverlay}>
+          <ActivityIndicator size="large" color={colors.primary[500]} />
+        </View>
+      )}
+    </View>
+  );
+};
+
+export default CategorySelectScreen;

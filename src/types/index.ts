@@ -199,6 +199,8 @@ export interface User {
   nickname: string;
   createdAt?: string; // 가입일
   role?: string; // 사용자 역할 (user, admin 등)
+  /** 필수 미션용 선호 카테고리 (다중 선택, 빈 배열이면 미선택) */
+  preferredMissionCategories?: MissionCategoryType[] | null;
 }
 
 // Diary 관련 타입

@@ -62,10 +62,11 @@ import OAuthCompleteSignUpScreen from '../screens/OAuthCompleteSignUpScreen';
 import SpontaneousMissionSetupScreen from '../screens/SpontaneousMissionSetupScreen';
 import WakeUpVerificationScreen from '../screens/WakeUpVerificationScreen';
 import ReantChatScreen from '../screens/ReantChatScreen';
+import CategorySelectScreen from '../screens/CategorySelectScreen';
 
 // 간단한 상태 기반 네비게이션 (React Navigation 없이)
 const AppNavigator = () => {
-  const { isLoggedIn, isLoading, logout: userLogout } = useUser();
+  const { isLoggedIn, isLoading, user, refreshUser, logout: userLogout } = useUser();
   const { lastNotification } = useSse();
   const { setWakeUpMissionId } = useWakeUpMission();
   const [currentScreen, setCurrentScreen] = useState<string | null>(null);
@@ -133,6 +134,8 @@ const AppNavigator = () => {
     } else if (currentScreen === SCREEN_NAMES.WAKE_UP_VERIFICATION) {
       setCurrentScreen(SCREEN_NAMES.HOME);
     } else if (currentScreen === SCREEN_NAMES.SPONTANEOUS_MISSION_SETUP) {
+      setCurrentScreen(SCREEN_NAMES.HOME);
+    } else if (currentScreen === SCREEN_NAMES.CATEGORY_SELECT) {
       setCurrentScreen(SCREEN_NAMES.HOME);
     } else {
       setCurrentScreen(SCREEN_NAMES.HOME);
@@ -247,8 +250,11 @@ const AppNavigator = () => {
 
   // 로그인 상태 변경 감지 - 로그인 성공 시 돌발 미션 설정 확인 후 화면 전환
   useEffect(() => {
-    const checkSpontaneousMissionSetup = async () => {
+    const checkCategoryAndSpontaneousMissionSetup = async () => {
       if (isLoggedIn && !isLoading && !isCheckingOnboarding) {
+        if (currentScreen === SCREEN_NAMES.CATEGORY_SELECT) {
+          return;
+        }
         // 설문 화면에 있으면 절대 다른 화면으로 이동하지 않음 (완료 버튼을 눌러야만 이동)
         if (currentScreen === SCREEN_NAMES.SPONTANEOUS_MISSION_SETUP) {
           console.log('[AppNavigator] 설문 화면에 있음 - 모든 체크 건너뛰기 (완료 전까지 이동 금지)');
@@ -263,6 +269,13 @@ const AppNavigator = () => {
         // currentScreen이 이미 설정되어 있고 메인 탭 화면이면 건너뛰기 (이미 홈에 있음)
         // 단, 로그인 직후가 아닌 경우에만 (로그인 직후에는 currentScreen이 null이거나 로그인 화면일 수 있음)
         if (currentScreen && isMainTabScreen(currentScreen) && currentScreen !== SCREEN_NAMES.LOGIN) {
+          return;
+        }
+        
+        // 선호 카테고리를 선택하지 않은 경우 카테고리 선택 화면으로 이동
+        const hasCategories = user?.preferredMissionCategories && user.preferredMissionCategories.length > 0;
+        if (user && !hasCategories) {
+          setCurrentScreen(SCREEN_NAMES.CATEGORY_SELECT);
           return;
         }
         
@@ -305,13 +318,12 @@ const AppNavigator = () => {
       }
     };
 
-    // 설문 화면에 있을 때는 절대 실행하지 않음
-    if (currentScreen === SCREEN_NAMES.SPONTANEOUS_MISSION_SETUP) {
+    if (currentScreen === SCREEN_NAMES.SPONTANEOUS_MISSION_SETUP || currentScreen === SCREEN_NAMES.CATEGORY_SELECT) {
       return;
     }
     
-    checkSpontaneousMissionSetup();
-  }, [isLoggedIn, isLoading, isCheckingOnboarding, currentScreen, isMainTabScreen]);
+    checkCategoryAndSpontaneousMissionSetup();
+  }, [isLoggedIn, isLoading, isCheckingOnboarding, currentScreen, isMainTabScreen, user?.preferredMissionCategories]);
 
   // AsyncStorage 변경 감지 (설정 완료 후 홈으로 이동)
   // 주의: 이 useEffect는 완료 후에만 실행되도록 설문 화면에서 직접 호출하지 않음
@@ -916,6 +928,33 @@ const AppNavigator = () => {
         return <TodoListCreateScreen navigation={navigation} route={route} />;
       case SCREEN_NAMES.TODO_LIST_DETAIL:
         return <TodoListDetailScreen navigation={navigation} route={route} />;
+      case SCREEN_NAMES.CATEGORY_SELECT: {
+        const fromSettings = (route?.params as any)?.fromSettings === true;
+        return (
+          <CategorySelectScreen
+            onComplete={async () => {
+              await refreshUser();
+              if (fromSettings) {
+                setCurrentScreen(SCREEN_NAMES.SETTINGS);
+                return;
+              }
+              try {
+                const result = await getSpontaneousMissionSetup();
+                const hasSetupData = result.success && result.data && (
+                  result.data.wakeTime ||
+                  result.data.sleepTime ||
+                  result.data.breakfastTime ||
+                  result.data.lunchTime ||
+                  result.data.dinnerTime
+                );
+                setCurrentScreen(hasSetupData ? SCREEN_NAMES.HOME : SCREEN_NAMES.SPONTANEOUS_MISSION_SETUP);
+              } catch {
+                setCurrentScreen(SCREEN_NAMES.HOME);
+              }
+            }}
+          />
+        );
+      }
       case SCREEN_NAMES.SPONTANEOUS_MISSION_SETUP:
         try {
           return <SpontaneousMissionSetupScreen navigation={navigation} route={route} />;
