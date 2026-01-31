@@ -9,6 +9,8 @@ import {
   Text,
   ScrollView,
   ImageBackground,
+  TouchableOpacity,
+  Image,
 } from 'react-native';
 import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types/navigation';
@@ -26,6 +28,9 @@ const MissionSetDetailScreen: React.FC<MissionSetDetailScreenProps> = ({ navigat
   const {
     missionSet,
     loading,
+    liking,
+    handleLike,
+    handleUnlike,
   } = useMissionSetDetailScreenContainer({ navigation, route });
 
   if (loading) {
@@ -83,6 +88,31 @@ const MissionSetDetailScreen: React.FC<MissionSetDetailScreenProps> = ({ navigat
             {missionSet.creatorNickname && (
               <Text style={styles.creator}>BY {missionSet.creatorNickname}</Text>
             )}
+          </View>
+
+          <View style={styles.statsRow}>
+            <TouchableOpacity
+              style={styles.likeButton}
+              onPress={() => (missionSet.isLiked ? handleUnlike() : handleLike())}
+              disabled={liking}
+              activeOpacity={0.7}
+              accessibilityRole="button"
+              accessibilityLabel={missionSet.isLiked ? '좋아요 취소' : '좋아요'}
+              accessibilityState={{ disabled: liking }}
+            >
+              <View style={styles.likeContainer}>
+                <Image
+                  source={require('../../assets/images/heart.png')}
+                  style={[styles.likeIcon, missionSet.isLiked && styles.likeIconActive]}
+                  resizeMode="contain"
+                  accessibilityLabel="좋아요"
+                  accessibilityElementsHidden={true}
+                />
+                <Text style={[styles.likeCount, missionSet.isLiked && styles.likeCountActive]}>
+                  {missionSet.likeCount ?? 0}
+                </Text>
+              </View>
+            </TouchableOpacity>
           </View>
         </View>
 

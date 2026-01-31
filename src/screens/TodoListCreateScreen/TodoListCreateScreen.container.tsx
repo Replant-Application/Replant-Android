@@ -34,7 +34,7 @@ export const useTodoListCreateScreenContainer = ({ navigation, route }: TodoList
     }),
     []
   );
-  const { showError, showInfo: _showInfo, handleApiError } = useErrorHandler(errorHandlerOverrides);
+  const { showError, handleApiError } = useErrorHandler(errorHandlerOverrides);
 
   const [currentStep, setCurrentStep] = useState<Step>(route?.params?.activeStep || 'random');
   const [randomMissions, setRandomMissions] = useState<MissionSimple[]>([]);

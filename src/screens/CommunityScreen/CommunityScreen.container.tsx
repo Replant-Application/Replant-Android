@@ -3,7 +3,7 @@
  * 커뮤니티 게시판 목록 화면: 게시글 조회, 필터링, 미션세트 공유
  */
 
-import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
+import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useErrorHandler } from '../../hooks/useErrorHandler';
 import { CommunityPost } from '../../types';
 import { logError } from '../../utils/logger';

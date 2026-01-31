@@ -108,7 +108,7 @@ export const useMissionScreenContainer = ({
     }),
     []
   );
-  const { showError, showSuccess, showInfo: _showInfo, handleApiError, showConfirm } = useErrorHandler(errorHandlerOverrides);
+  const { showError, showSuccess, handleApiError, showConfirm } = useErrorHandler(errorHandlerOverrides);
 
   const handleConfirmModalConfirm = useCallback(() => {
     const fn = confirmCallbackRef.current;

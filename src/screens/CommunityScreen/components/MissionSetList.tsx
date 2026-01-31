@@ -194,18 +194,43 @@ const MissionSetList: React.FC<MissionSetListProps> = ({
                   </View>
 
                   <View style={missionSetListStyles.missionSetFooter}>
-                    <View style={missionSetListStyles.likeContainer}>
-                      <Image
-                        source={require('../../../assets/images/heart.png')}
-                        style={[missionSetListStyles.likeIcon, missionSet.isLiked && missionSetListStyles.likeIconActive]}
-                        resizeMode="contain"
-                        accessibilityLabel="좋아요 아이콘"
-                        accessibilityElementsHidden={true}
-                      />
-                      <Text style={[missionSetListStyles.likeCount, missionSet.isLiked && missionSetListStyles.likeCountActive]}>
-                        {missionSet.likeCount ?? 0}
-                      </Text>
-                    </View>
+                    {onTodoListLike ? (
+                      <TouchableOpacity
+                        style={missionSetListStyles.likeContainer}
+                        onPress={() => {
+                          if (likingMissionSetId !== missionSet.id) onTodoListLike(missionSet.id, !!missionSet.isLiked);
+                        }}
+                        disabled={likingMissionSetId === missionSet.id}
+                        activeOpacity={0.7}
+                        accessibilityRole="button"
+                        accessibilityLabel={missionSet.isLiked ? '좋아요 취소' : '좋아요'}
+                        accessibilityState={{ disabled: likingMissionSetId === missionSet.id }}
+                      >
+                        <Image
+                          source={require('../../../assets/images/heart.png')}
+                          style={[missionSetListStyles.likeIcon, missionSet.isLiked && missionSetListStyles.likeIconActive]}
+                          resizeMode="contain"
+                          accessibilityLabel="좋아요 아이콘"
+                          accessibilityElementsHidden={true}
+                        />
+                        <Text style={[missionSetListStyles.likeCount, missionSet.isLiked && missionSetListStyles.likeCountActive]}>
+                          {missionSet.likeCount ?? 0}
+                        </Text>
+                      </TouchableOpacity>
+                    ) : (
+                      <View style={missionSetListStyles.likeContainer}>
+                        <Image
+                          source={require('../../../assets/images/heart.png')}
+                          style={[missionSetListStyles.likeIcon, missionSet.isLiked && missionSetListStyles.likeIconActive]}
+                          resizeMode="contain"
+                          accessibilityLabel="좋아요 아이콘"
+                          accessibilityElementsHidden={true}
+                        />
+                        <Text style={[missionSetListStyles.likeCount, missionSet.isLiked && missionSetListStyles.likeCountActive]}>
+                          {missionSet.likeCount ?? 0}
+                        </Text>
+                      </View>
+                    )}
                   </View>
                 </TouchableOpacity>
               );

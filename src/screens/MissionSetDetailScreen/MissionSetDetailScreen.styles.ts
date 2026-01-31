@@ -90,6 +90,9 @@ export const styles = StyleSheet.create({
       color: colors.text.tertiary,
     }),
   },
+  likeCountActive: {
+    color: colors.primary[600],
+  },
   missionSection: {
     marginBottom: spacing[4],
   },
