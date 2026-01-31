@@ -5,7 +5,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, ActivityIndicator, ImageBackground } from 'react-native';
+import { View, Text, TouchableOpacity, ActivityIndicator, ImageBackground, Alert } from 'react-native';
 import { Header } from '../../components/ui';
 import { useUser } from '../../contexts/UserContext';
 import { updateMyInfo } from '../../api/userApi';
@@ -23,9 +23,9 @@ const CategorySelectScreen: React.FC<CategorySelectScreenProps> = ({ onBack, onC
   const [selected, setSelected] = useState<MissionCategoryType[]>([]);
   const [loading, setLoading] = useState(false);
 
-  // 기존 선택값 복원 (설정에서 들어온 경우)
+  // 기존 선택값 복원 (설정에서 들어온 경우, 서버에 저장된 값과 동기화)
   useEffect(() => {
-    if (user?.preferredMissionCategories?.length) {
+    if (user?.preferredMissionCategories != null) {
       setSelected([...user.preferredMissionCategories]);
     }
   }, [user?.preferredMissionCategories]);
@@ -52,6 +52,11 @@ const CategorySelectScreen: React.FC<CategorySelectScreenProps> = ({ onBack, onC
       if (result.success) {
         await refreshUser();
         onComplete();
+      } else {
+        Alert.alert(
+          '저장 실패',
+          result.error || '미션 카테고리 저장에 실패했습니다. 네트워크를 확인한 뒤 다시 시도해주세요.'
+        );
       }
     } finally {
       setLoading(false);

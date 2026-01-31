@@ -61,6 +61,8 @@ const DiaryScreen: React.FC = () => {
     handleAlertClose,
     handleSearchDateClear,
     onRefresh,
+    adjustMoodDown,
+    adjustMoodUp,
     setFactorText,
     setEmotionText,
     setExpressionText,
@@ -447,9 +449,9 @@ const DiaryScreen: React.FC = () => {
             <View style={styles.moodContainer}>
               <Text
                 style={styles.sliderLabel}
-                accessibilityLabel={`현재 기분 ${moodValue}점. 0은 매우 좋지 않음, 100은 매우 좋음입니다.`}
+                accessibilityLabel={`현재 기분 ${Math.round(moodValue)}점. 0은 매우 좋지 않음, 100은 매우 좋음입니다.`}
               >
-                현재 기분: {moodValue}점
+                현재 기분: {Math.round(moodValue)}점
               </Text>
               <View 
                 ref={sliderRef}
@@ -459,7 +461,7 @@ const DiaryScreen: React.FC = () => {
                 accessibilityRole="adjustable"
                 accessibilityLabel="기분 슬라이더. 왼쪽 끝은 매우 좋지 않음 0점, 오른쪽 끝은 매우 좋음 100점입니다."
                 accessibilityHint="좌우로 드래그하여 기분 점수를 변경한 뒤, 선택 완료 버튼을 누르면 다음 단계로 갑니다."
-                accessibilityValue={{ min: 0, max: 100, now: moodValue }}
+                accessibilityValue={{ min: 0, max: 100, now: Math.round(moodValue) }}
               >
                 <View style={[
                   styles.sliderFill, 
@@ -473,6 +475,27 @@ const DiaryScreen: React.FC = () => {
               <View style={styles.sliderLabels} accessibilityElementsHidden={true}>
                 <Text style={styles.sliderLabel}>매우 좋지 않음</Text>
                 <Text style={styles.sliderLabel}>매우 좋음</Text>
+              </View>
+              {/* 기분 조절 버튼: TalkBack/에뮬레이터에서 드래그 대신 사용 */}
+              <View style={styles.sliderButtons}>
+                <TouchableOpacity
+                  style={styles.sliderButton}
+                  onPress={adjustMoodDown}
+                  accessibilityRole="button"
+                  accessibilityLabel="기분 10점 낮추기"
+                  accessibilityHint="탭하면 기분 점수가 10 낮아집니다"
+                >
+                  <Text style={styles.sliderButtonText}>− 낮춤</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.sliderButton}
+                  onPress={adjustMoodUp}
+                  accessibilityRole="button"
+                  accessibilityLabel="기분 10점 높이기"
+                  accessibilityHint="탭하면 기분 점수가 10 올라갑니다"
+                >
+                  <Text style={styles.sliderButtonText}>+ 높임</Text>
+                </TouchableOpacity>
               </View>
             </View>
           )}

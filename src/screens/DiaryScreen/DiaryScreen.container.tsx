@@ -232,7 +232,7 @@ export const useDiaryScreenContainer = () => {
 
       const diaryData: SimpleDiaryData = {
         date: dateString,
-        mood: moodValue,
+        mood: Math.round(moodValue),
         emotions: allEmotions,
         emotionFactors: allFactors,
         content: expressionText.trim(),
@@ -316,6 +316,16 @@ export const useDiaryScreenContainer = () => {
    */
   const toggleFactor = useCallback((factor: string) => {
     setSelectedFactors(prev => (prev.includes(factor) ? prev.filter(f => f !== factor) : [...prev, factor]));
+  }, []);
+
+  /** 기분 슬라이더: 10점 낮춤 (TalkBack/마우스 대안) */
+  const adjustMoodDown = useCallback(() => {
+    setMoodValue(prev => Math.max(0, Math.min(100, prev - 10)));
+  }, []);
+
+  /** 기분 슬라이더: 10점 높임 (TalkBack/마우스 대안) */
+  const adjustMoodUp = useCallback(() => {
+    setMoodValue(prev => Math.max(0, Math.min(100, prev + 10)));
   }, []);
 
   /**
@@ -518,6 +528,8 @@ export const useDiaryScreenContainer = () => {
     handleSearchDateClear,
     onRefresh,
     setMoodValue,
+    adjustMoodDown,
+    adjustMoodUp,
     setFactorText,
     setEmotionText,
     setExpressionText,

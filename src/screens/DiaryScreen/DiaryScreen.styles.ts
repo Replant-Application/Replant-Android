@@ -114,6 +114,26 @@ export const styles = StyleSheet.create({
       color: colors.gray[300],
     }),
   },
+  sliderButtons: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: spacing[3],
+    marginTop: spacing[3],
+  },
+  sliderButton: {
+    paddingVertical: spacing[2],
+    paddingHorizontal: spacing[4],
+    borderRadius: borderRadius.md,
+    backgroundColor: colors.gray[700],
+    borderWidth: 1,
+    borderColor: colors.gray[600],
+  },
+  sliderButtonText: {
+    ...createTextStyle('sm', {
+      color: colors.white,
+      fontWeight: typography.fontWeight.medium,
+    }),
+  },
   sliderValue: {
     ...createTextStyle('2xl', {
       fontWeight: typography.fontWeight.bold,
