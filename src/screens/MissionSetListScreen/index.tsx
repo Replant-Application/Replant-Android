@@ -137,7 +137,7 @@ const MissionSetListScreen: React.FC<MissionSetListScreenProps> = ({ navigation 
                   onPress={() => navigation.navigate(SCREEN_NAMES.MISSION_SET_DETAIL as any, { missionSetId: todoList.id, returnScreen: 'MissionSetList' })}
                   activeOpacity={0.7}
                   accessibilityRole="button"
-                  accessibilityLabel={`${todoList.title}, ${todoList.missionCount}개 미션, by ${todoList.creatorNickname}`}
+                  accessibilityLabel={`${todoList.title}, by ${todoList.creatorNickname}`}
                 >
                   {/* 카드 헤더 */}
                   <View style={styles.cardHeader}>
@@ -171,15 +171,6 @@ const MissionSetListScreen: React.FC<MissionSetListScreenProps> = ({ navigation 
                   {/* 카드 푸터 */}
                   <View style={styles.cardFooter}>
                     <View style={styles.statsRow}>
-                      <View style={styles.statItem}>
-                        <Image
-                          source={require('../../assets/images/goal.png')}
-                          style={styles.statIcon}
-                          resizeMode="contain"
-                          accessibilityLabel="미션 아이콘"
-                        />
-                        <Text style={styles.statText}>{todoList.missionCount}개</Text>
-                      </View>
                       <View style={styles.statItem}>
                         <Image
                           source={require('../../assets/images/heart.png')}
@@ -254,9 +245,6 @@ const MissionSetListScreen: React.FC<MissionSetListScreenProps> = ({ navigation 
                             </Text>
                           )}
                           <View style={styles.modalItemInfoRow}>
-                            <Text style={styles.modalItemMissionCount}>
-                              {item.totalCount}개 미션
-                            </Text>
                             {item.status === 'COMPLETED' && (
                               <View style={styles.completedBadge}>
                                 <Text style={styles.completedBadgeText}>완료</Text>

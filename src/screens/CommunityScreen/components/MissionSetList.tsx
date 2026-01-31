@@ -151,7 +151,7 @@ const MissionSetList: React.FC<MissionSetListProps> = ({
                   onPress={() => navigation.navigate(SCREEN_NAMES.MISSION_SET_DETAIL as any, { missionSetId: missionSet.id, returnScreen: 'Community', activeTab: 'todo-share' })}
                   activeOpacity={0.7}
                   accessibilityRole="button"
-                  accessibilityLabel={`${missionSet.title}, ${missionSet.missionCount}개 미션, by ${missionSet.creatorNickname}`}
+                  accessibilityLabel={`${missionSet.title}, by ${missionSet.creatorNickname}`}
                 >
                   <View style={missionSetListStyles.missionSetCardHeader}>
                     <Text style={missionSetListStyles.missionSetTitle} numberOfLines={1}>
@@ -186,10 +186,6 @@ const MissionSetList: React.FC<MissionSetListProps> = ({
                   <View style={missionSetListStyles.missionSetMeta}>
                     <Text style={missionSetListStyles.metaText}>
                       by {missionSet.creatorNickname}
-                    </Text>
-                    <Text style={missionSetListStyles.metaDot}>·</Text>
-                    <Text style={missionSetListStyles.metaText}>
-                      {missionSet.missionCount}개 미션
                     </Text>
                   </View>
 

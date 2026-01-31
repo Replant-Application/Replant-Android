@@ -22,7 +22,7 @@ import { toggleLike as toggleLikeService } from '../../services/communityService
 import { useUser } from '../../contexts/UserContext';
 import { CommunityScreenProps, CommunityTab, VerificationFilter } from '../../types/screens/community';
 
-const DEBUG_COMMUNITY_LOADING = true; // 커뮤니티 로딩 디버깅 (원인 파악 후 false로)
+const DEBUG_COMMUNITY_LOADING = false; // 커뮤니티 로딩 디버깅 (원인 파악 후 false로)
 
 export const useCommunityScreenContainer = ({ navigation, route }: CommunityScreenProps) => {
   const { currentNickname, currentUserId } = useUser();
@@ -457,20 +457,15 @@ export const useCommunityScreenContainer = ({ navigation, route }: CommunityScre
 
   /**
    * 초기 로드
+   * - 전체 게시판 탭일 때만 게시글 로드
+   * - 이미 로드된 게시글이 있으면 탭 전환 시 재요청하지 않음 (투두공유 ↔ 전체 전환 시 렉 완화)
    */
   useEffect(() => {
     const shouldLoad = activeTab === 'all' && currentNickname;
-    if (DEBUG_COMMUNITY_LOADING) {
-      console.log('[CommunityScreen] 초기로드 useEffect', {
-        activeTab,
-        currentNickname: currentNickname ?? null,
-        shouldLoad,
-      });
-    }
-    if (shouldLoad) {
-      loadPosts(0);
-    }
-  }, [activeTab, currentNickname, loadPosts]);
+    if (!shouldLoad) return;
+    if (posts.length > 0) return; // 캐시된 목록이 있으면 API 재호출 생략
+    loadPosts(0);
+  }, [activeTab, currentNickname, loadPosts, posts.length]);
 
   /**
    * Pull-to-Refresh 핸들러

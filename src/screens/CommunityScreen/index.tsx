@@ -541,9 +541,6 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation, route }) 
                           {missionSet.description}
                         </Text>
                       )}
-                      <Text style={styles.shareModalItemMeta}>
-                        {missionSet.missionCount}개 미션
-                      </Text>
                     </View>
                     <View style={styles.shareModalItemAction}>
                       {sharingId === missionSet.id ? (

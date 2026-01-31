@@ -122,7 +122,7 @@ const MyMissionSetsScreen: React.FC<MyMissionSetsScreenProps> = ({ navigation })
                   onPress={() => handleDetail(missionSet)}
                   activeOpacity={0.7}
                   accessibilityRole="button"
-                  accessibilityLabel={`${missionSet.title}, ${missionSet.missionCount}개 미션`}
+                  accessibilityLabel={`${missionSet.title}`}
                 >
                   {/* 카드 헤더 */}
                   <View style={styles.cardHeader}>
@@ -175,17 +175,6 @@ const MyMissionSetsScreen: React.FC<MyMissionSetsScreenProps> = ({ navigation })
 
                   {/* 카드 푸터 */}
                   <View style={styles.cardFooter}>
-                    <View style={styles.statsRow}>
-                      <View style={styles.statItem}>
-                        <Image
-                          source={require('../../assets/images/goal.png')}
-                          style={styles.statIcon}
-                          resizeMode="contain"
-                          accessibilityLabel="미션 아이콘"
-                        />
-                        <Text style={styles.statText}>{missionSet.missionCount}개 미션</Text>
-                      </View>
-                    </View>
                     {missionSet.isPublic && (
                       <View style={styles.likeContainer}>
                         <Image
