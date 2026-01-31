@@ -426,8 +426,14 @@ const DiaryScreen: React.FC = () => {
           },
         ]}
       >
-        {/* 질문 */}
-        <Text style={[styles.modalQuestion, currentStep === 'confirm' && styles.modalQuestionCenter]}>{getStepMessage()}</Text>
+        {/* 질문 - 스크린 리더가 단계별 안내를 읽을 수 있도록 */}
+        <Text
+          style={[styles.modalQuestion, currentStep === 'confirm' && styles.modalQuestionCenter]}
+          accessibilityRole="header"
+          accessibilityLabel={currentStep === 'mood' ? '현재 기분이 어떤가요? 슬라이더로 0에서 100 사이 점수를 선택하세요. 왼쪽은 매우 좋지 않음, 오른쪽은 매우 좋음입니다.' : undefined}
+        >
+          {getStepMessage()}
+        </Text>
 
         {/* 단계별 컨텐츠 */}
         <View style={
@@ -439,10 +445,21 @@ const DiaryScreen: React.FC = () => {
         }>
           {currentStep === 'mood' && (
             <View style={styles.moodContainer}>
+              <Text
+                style={styles.sliderLabel}
+                accessibilityLabel={`현재 기분 ${moodValue}점. 0은 매우 좋지 않음, 100은 매우 좋음입니다.`}
+              >
+                현재 기분: {moodValue}점
+              </Text>
               <View 
                 ref={sliderRef}
                 style={styles.sliderTrack}
                 {...panResponder.panHandlers}
+                accessible={true}
+                accessibilityRole="adjustable"
+                accessibilityLabel="기분 슬라이더. 왼쪽 끝은 매우 좋지 않음 0점, 오른쪽 끝은 매우 좋음 100점입니다."
+                accessibilityHint="좌우로 드래그하여 기분 점수를 변경한 뒤, 선택 완료 버튼을 누르면 다음 단계로 갑니다."
+                accessibilityValue={{ min: 0, max: 100, now: moodValue }}
               >
                 <View style={[
                   styles.sliderFill, 
@@ -450,10 +467,10 @@ const DiaryScreen: React.FC = () => {
                     width: `${moodValue}%`,
                     backgroundColor: getMoodColor(moodValue)
                   }
-                ]} />
-                <View style={[styles.sliderThumb, { left: `${moodValue}%` }]} />
+                ]} accessibilityElementsHidden={true} />
+                <View style={[styles.sliderThumb, { left: `${moodValue}%` }]} accessibilityElementsHidden={true} />
               </View>
-              <View style={styles.sliderLabels}>
+              <View style={styles.sliderLabels} accessibilityElementsHidden={true}>
                 <Text style={styles.sliderLabel}>매우 좋지 않음</Text>
                 <Text style={styles.sliderLabel}>매우 좋음</Text>
               </View>
@@ -488,8 +505,10 @@ const DiaryScreen: React.FC = () => {
                 placeholderTextColor={colors.text.tertiary}
                 multiline={true}
                 textAlignVertical="top"
-                accessibilityLabel="감정 직접 입력"
-                accessibilityHint="감정을 직접 입력하세요"
+                autoComplete="off"
+                textContentType="none"
+                accessibilityLabel="감정 표현 직접 입력"
+                accessibilityHint="감정을 직접 입력하세요. 자동완성 기능이 비활성화되어 있습니다"
               />
             </View>
           )}

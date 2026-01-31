@@ -22,6 +22,16 @@ export const styles = StyleSheet.create({
   container: {
     width: '100%',
   },
+  summaryContainer: {
+    marginBottom: spacing[2],
+    paddingHorizontal: CONTAINER_PADDING,
+  },
+  summaryLabel: {
+    ...createTextStyle('xs', { color: colors.gray[400], marginBottom: spacing[1] }),
+  },
+  summaryText: {
+    ...createTextStyle('sm', { color: colors.white, fontWeight: typography.fontWeight.medium }),
+  },
   emotionsContainer: {
     maxHeight: 400,
     marginBottom: spacing[3],
