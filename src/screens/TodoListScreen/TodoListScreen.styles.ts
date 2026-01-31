@@ -39,6 +39,9 @@ export const styles = StyleSheet.create({
     borderColor: '#D4A574',
     borderStyle: 'dashed',
   },
+  createButtonDisabled: {
+    opacity: 0.5,
+  },
   createButtonIcon: {
     fontSize: 32,
     color: '#8B6F47',
@@ -65,6 +68,14 @@ export const styles = StyleSheet.create({
   },
   createButtonSubtitle: {
     ...createSecondaryTextStyle('sm', {
+      color: '#8B6F47',
+    }),
+  },
+  /** 생성 버튼 아래 안내 문구 (하루 1회 제한) */
+  createNotice: {
+    marginTop: spacing[2],
+    marginBottom: spacing[4],
+    ...createSecondaryTextStyle('xs', {
       color: '#8B6F47',
     }),
   },
