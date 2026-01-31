@@ -323,10 +323,10 @@ const ContributorDashboardScreen: React.FC<ContributorDashboardScreenProps> = ({
                   <Text style={styles.resourceDesc}>긴급 상황 판단 및 대응 방법</Text>
                 </View>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.resourceItem} accessibilityRole="none" accessibilityLabel="쉬었음 청년 이해하기, 니트족 청년의 심리와 특성">
+              <TouchableOpacity style={styles.resourceItem} accessibilityRole="none" accessibilityLabel="은둔형 외톨이 이해하기, 니트족 청년의 심리와 특성">
                 <Text style={styles.resourceIcon}>🧠</Text>
                 <View style={styles.resourceContent}>
-                  <Text style={styles.resourceTitle}>쉬었음 청년 이해하기</Text>
+                  <Text style={styles.resourceTitle}>은둔형 외톨이 이해하기</Text>
                   <Text style={styles.resourceDesc}>니트족 청년의 심리와 특성</Text>
                 </View>
               </TouchableOpacity>
