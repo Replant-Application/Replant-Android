@@ -70,7 +70,6 @@ export const useMissionScreenContainer = ({
     error,
     deleteMissionPhoto,
     completeMissionWithPhoto,
-    uncompleteMission,
     loadMissions,
   } = useMission(addExperienceByCategory);
   const [showAlert, setShowAlert] = useState(false);
@@ -109,7 +108,7 @@ export const useMissionScreenContainer = ({
     }),
     []
   );
-  const { showError, showSuccess, showInfo, handleApiError, showConfirm } = useErrorHandler(errorHandlerOverrides);
+  const { showError, showSuccess, showInfo: _showInfo, handleApiError, showConfirm } = useErrorHandler(errorHandlerOverrides);
 
   const handleConfirmModalConfirm = useCallback(() => {
     const fn = confirmCallbackRef.current;
@@ -445,7 +444,7 @@ export const useMissionScreenContainer = ({
           break;
       }
     },
-    [navigation, loadMissions, showError, handleApiError, showInfo, showSuccess]
+    [navigation, loadMissions, showError, handleApiError]
   );
 
   /**
@@ -548,7 +547,7 @@ export const useMissionScreenContainer = ({
         );
       }
     },
-    [uncompleteCustomMission, loadMissions, showSuccess, showError, handleApiError]
+    [loadMissions, showSuccess, showError, handleApiError]
   );
 
   /**
@@ -556,7 +555,7 @@ export const useMissionScreenContainer = ({
    * 서버에서는 정렬 없이 모든 데이터를 받아온 후, 프론트엔드에서 정렬 처리
    */
   const loadGroupMissions = useCallback(
-    async (page: number = 0) => {
+    async (_page: number = 0) => {
       try {
         setGroupLoading(true);
         console.log('[MissionScreen] 미션 도감 로딩 시작... (탭:', missionGroupTab, ', 정렬:', missionSortBy, ')');
@@ -662,7 +661,7 @@ export const useMissionScreenContainer = ({
         setGroupLoading(false);
       }
     },
-    [missionGroupTab, handleApiError, showError]
+    [missionGroupTab, missionSortBy, handleApiError, showError]
   );
 
   /**
@@ -685,7 +684,7 @@ export const useMissionScreenContainer = ({
     } catch (err) {
       logError('인증 상태 확인 오류', err as Error);
     }
-  }, [selectedMissionForVerification, loadMissions, activeTab, currentClientPage, loadGroupMissions, showSuccess]);
+  }, [selectedMissionForVerification, loadMissions, activeTab, loadGroupMissions, showSuccess]);
 
   /**
    * 초기 마운트 시 및 activeTab 변경 시 나의 미션 로드

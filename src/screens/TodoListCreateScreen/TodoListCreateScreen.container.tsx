@@ -34,7 +34,7 @@ export const useTodoListCreateScreenContainer = ({ navigation, route }: TodoList
     }),
     []
   );
-  const { showError, showInfo, handleApiError } = useErrorHandler(errorHandlerOverrides);
+  const { showError, showInfo: _showInfo, handleApiError } = useErrorHandler(errorHandlerOverrides);
 
   const [currentStep, setCurrentStep] = useState<Step>(route?.params?.activeStep || 'random');
   const [randomMissions, setRandomMissions] = useState<MissionSimple[]>([]);
@@ -171,8 +171,9 @@ export const useTodoListCreateScreenContainer = ({ navigation, route }: TodoList
   /**
    * 커스텀 미션 생성에서 돌아올 때 복원: 공식 미션·선택 상태·제목 등 유지
    */
+  const todoListRestoreState = (route?.params as any)?.todoListRestoreState;
   useEffect(() => {
-    const restore = (route?.params as any)?.todoListRestoreState;
+    const restore = todoListRestoreState;
     if (!restore) return;
     if (restore.randomMissions?.length) setRandomMissions(restore.randomMissions);
     if (Array.isArray(restore.selectedCustomMissions)) setSelectedCustomMissions(restore.selectedCustomMissions);
@@ -180,7 +181,7 @@ export const useTodoListCreateScreenContainer = ({ navigation, route }: TodoList
     if (restore.title !== undefined) setTitle(restore.title);
     if (restore.description !== undefined) setDescription(restore.description);
     setCurrentStep('custom');
-  }, [(route?.params as any)?.todoListRestoreState]);
+  }, [todoListRestoreState]);
 
   /**
    * 화면이 포커스될 때마다 route.params.activeStep 확인 (navigate로 파라미터가 업데이트된 경우 대응)
@@ -233,7 +234,7 @@ export const useTodoListCreateScreenContainer = ({ navigation, route }: TodoList
    * 커스텀 미션 생성 화면으로 이동 (진행 중인 공식 미션·선택 상태를 넘겨 돌아올 때 복원)
    */
   const handleNavigateToCustomMissionCreate = useCallback(() => {
-    const todoListRestoreState = {
+    const restorePayload = {
       randomMissions,
       selectedCustomMissions: [...selectedCustomMissions],
       missionTimeRanges: { ...missionTimeRanges },
@@ -242,7 +243,7 @@ export const useTodoListCreateScreenContainer = ({ navigation, route }: TodoList
     };
     (navigation as any).navigate(SCREEN_NAMES.CUSTOM_MISSION_CREATE, {
       returnScreen: 'TodoListCreate',
-      todoListRestoreState,
+      todoListRestoreState: restorePayload,
     });
   }, [navigation, randomMissions, selectedCustomMissions, missionTimeRanges, title, description]);
 
@@ -374,7 +375,7 @@ export const useTodoListCreateScreenContainer = ({ navigation, route }: TodoList
     } finally {
       setCreating(false);
     }
-  }, [selectedCustomMissions, randomMissions, missionTimeRanges, title, description, showInfo, handleApiError, showError]);
+  }, [selectedCustomMissions, randomMissions, missionTimeRanges, title, description, handleApiError, showError]);
 
   /**
    * 미션 시간 설정

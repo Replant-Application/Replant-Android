@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { View, Text, Modal, TouchableOpacity, Image } from 'react-native';
+import { Text, Modal, TouchableOpacity, Image } from 'react-native';
 import { styles } from './FullScreenImageViewer.styles';
 
 interface FullScreenImageViewerProps {

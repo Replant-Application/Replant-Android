@@ -13,7 +13,6 @@ import {
   Platform,
   ImageBackground,
   Image,
-  Dimensions,
   Animated,
   ActivityIndicator,
 } from 'react-native';
@@ -23,8 +22,6 @@ import { useCharacter } from '../../hooks/useCharacter';
 import { sendChatMessage } from '../../api/chatApi';
 import { SCREEN_NAMES } from '../../utils/constants';
 import { styles } from './ReantChatScreen.styles';
-
-const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 // 추천 메시지 (은둔형 외톨이 등 응원·대화 유도) — 두 개만
 const RECOMMENDED_MESSAGES = [
@@ -46,8 +43,6 @@ interface ReantChatScreenProps {
 const ReantChatScreen: React.FC<ReantChatScreenProps> = ({ navigation, route: _route }) => {
   const { characters } = useCharacter();
   const currentCharacter = characters.length > 0 ? characters[0] : null;
-  const reantName = currentCharacter?.name || '리앤트';
-
   const [inputText, setInputText] = useState('');
   const [showSpeechBubble, setShowSpeechBubble] = useState(true);
   const [currentReantMessage, setCurrentReantMessage] = useState<string>('');

@@ -21,7 +21,7 @@ import {
 } from 'react-native';
 import { useOverlay } from '../../contexts/OverlayContext';
 import { getNotifications, markNotificationAsRead } from '../../api/notificationApi';
-import { getUserMission, getCurrentSpontaneousMissions, getCurrentWakeupMission } from '../../api/missionApi';
+import { getCurrentSpontaneousMissions, getCurrentWakeupMission } from '../../api/missionApi';
 import { getMealLogDetail } from '../../api/mealLogApi';
 import { formatTimeAgo } from '../../utils/dateUtils';
 import { SCREEN_NAMES } from '../../utils/constants';

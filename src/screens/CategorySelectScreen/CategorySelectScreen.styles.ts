@@ -32,6 +32,9 @@ export const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.background.primary,
   },
+  containerTransparent: {
+    backgroundColor: 'transparent',
+  },
   /** 캘린더 화면과 동일한 본문 영역 패딩 */
   content: {
     padding: spacing[5],

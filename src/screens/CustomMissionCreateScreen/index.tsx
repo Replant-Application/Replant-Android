@@ -15,10 +15,7 @@ import { Button, Header, SectionTitle, FormCard, AlertModal } from '../../compon
 import { colors, spacing } from '../../utils/designTokens';
 import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types/navigation';
-import {
-  useCustomMissionCreateScreenContainer,
-  MISSION_CATEGORY_OPTIONS,
-} from './CustomMissionCreateScreen.container';
+import { useCustomMissionCreateScreenContainer } from './CustomMissionCreateScreen.container';
 import { styles } from './CustomMissionCreateScreen.styles';
 
 interface CustomMissionCreateScreenProps {
@@ -41,7 +38,7 @@ const CustomMissionCreateScreen: React.FC<CustomMissionCreateScreenProps> = ({ n
     handleSubmitMission,
     handleCancel,
     handleAlertClose,
-    MISSION_CATEGORY_OPTIONS,
+    MISSION_CATEGORY_OPTIONS: categoryOptions,
   } = useCustomMissionCreateScreenContainer({ navigation, route });
 
   return (
@@ -108,7 +105,7 @@ const CustomMissionCreateScreen: React.FC<CustomMissionCreateScreenProps> = ({ n
               <Text style={styles.optionalHintInline}>(선택 사항)</Text>
             </View>
             <View style={styles.worryTypeContainer}>
-              {MISSION_CATEGORY_OPTIONS.map((option) => (
+              {categoryOptions.map((option) => (
                 <TouchableOpacity
                   key={option.id}
                   style={[

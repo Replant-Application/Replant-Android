@@ -76,7 +76,7 @@ export const useHomeScreenContainer = ({ navigation, route }: HomeScreenContaine
   const [characterEmotion, setCharacterEmotion] = useState<'default' | 'happy'>('default');
 
   // 히어로 섹션 접힘 상태
-  const [isHeroCollapsed, setIsHeroCollapsed] = useState(false);
+  const [_isHeroCollapsed, setIsHeroCollapsed] = useState(false);
 
   // 진화 모달 상태
   const [showEvolutionModal, setShowEvolutionModal] = useState(false);

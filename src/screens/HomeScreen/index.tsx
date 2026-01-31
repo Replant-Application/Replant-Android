@@ -41,7 +41,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
     MAX_HERO_HEIGHT,
     panResponder,
     showEvolutionModal,
-    evolutionFadeAnim,
     loadData,
     handleCharacterPress,
     handleEvolutionModalClose,

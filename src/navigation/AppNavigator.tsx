@@ -323,7 +323,7 @@ const AppNavigator = () => {
     }
     
     checkCategoryAndSpontaneousMissionSetup();
-  }, [isLoggedIn, isLoading, isCheckingOnboarding, currentScreen, isMainTabScreen, user?.preferredMissionCategories]);
+  }, [isLoggedIn, isLoading, isCheckingOnboarding, currentScreen, isMainTabScreen, user, user?.preferredMissionCategories]);
 
   // AsyncStorage 변경 감지 (설정 완료 후 홈으로 이동)
   // 주의: 이 useEffect는 완료 후에만 실행되도록 설문 화면에서 직접 호출하지 않음

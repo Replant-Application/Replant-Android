@@ -14,6 +14,10 @@ export const styles = StyleSheet.create({
   container: { 
     flex: 1 
   },
+  icon24: {
+    width: 24,
+    height: 24,
+  },
 
   introContainer: { 
     flex: 1, 

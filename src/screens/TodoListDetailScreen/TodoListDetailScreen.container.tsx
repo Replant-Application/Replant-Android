@@ -57,7 +57,7 @@ export const useTodoListDetailScreenContainer = ({ navigation, route }: TodoList
     }),
     []
   );
-  const { showError, showSuccess, showInfo, handleApiError } = useErrorHandler(errorHandlerOverrides);
+  const { showError, showSuccess, showInfo: _showInfo, handleApiError } = useErrorHandler(errorHandlerOverrides);
 
   const [todoList, setTodoList] = useState<TodoList | null>(null);
   const [loading, setLoading] = useState(true);
@@ -302,8 +302,6 @@ export const useTodoListDetailScreenContainer = ({ navigation, route }: TodoList
       checkAndShowCompleteModal,
       handleApiError,
       showError,
-      showSuccess,
-      showInfo,
     ]
   );
 

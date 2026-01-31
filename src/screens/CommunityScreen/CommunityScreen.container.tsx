@@ -560,8 +560,8 @@ export const useCommunityScreenContainer = ({ navigation, route }: CommunityScre
           setAlertMessage(result.error || '좋아요 처리에 실패했습니다.');
           setShowAlert(true);
         }
-      } catch (error) {
-        logError('좋아요 토글 실패', error as Error, { postId, currentNickname });
+      } catch (err) {
+        logError('좋아요 토글 실패', err as Error, { postId, currentNickname });
         setAlertTitle('오류');
         setAlertMessage('좋아요 처리 중 문제가 발생했습니다.');
         setShowAlert(true);

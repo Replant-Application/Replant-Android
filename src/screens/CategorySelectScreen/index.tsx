@@ -75,7 +75,7 @@ const CategorySelectScreen: React.FC<CategorySelectScreenProps> = ({ onBack, onC
   return (
     <ImageBackground
       source={require('../../assets/images/background.png')}
-      style={[styles.container, { backgroundColor: 'transparent' }]}
+      style={[styles.container, styles.containerTransparent]}
       resizeMode="cover"
       accessibilityElementsHidden={true}
     >

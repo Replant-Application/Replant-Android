@@ -63,7 +63,6 @@ const TodoListCreateScreen: React.FC<TodoListCreateScreenProps> = ({ navigation,
     setCurrentStep,
     setTitle,
     setDescription,
-    setShowCreateForm,
     setNewMissionTitle,
     setNewMissionDescription,
     setShowMissionSuccessModal,
@@ -82,7 +81,6 @@ const TodoListCreateScreen: React.FC<TodoListCreateScreenProps> = ({ navigation,
     handleCreate,
     handleSetMissionTime,
     handleSaveTime,
-    handleSetDefaultTimeForAll,
     isAllDay,
     handleToggleAllDay,
     handleTodoListSuccessClose,
@@ -728,7 +726,7 @@ const TodoListCreateScreen: React.FC<TodoListCreateScreenProps> = ({ navigation,
         >
           <Image
             source={require('../../assets/images/left.png')}
-            style={{ width: 24, height: 24 }}
+            style={styles.icon24}
             resizeMode="contain"
             accessibilityLabel="뒤로 가기"
             accessibilityElementsHidden={true}
@@ -746,7 +744,7 @@ const TodoListCreateScreen: React.FC<TodoListCreateScreenProps> = ({ navigation,
         >
           <Image
             source={require('../../assets/images/left.png')}
-            style={{ width: 24, height: 24 }}
+            style={styles.icon24}
             resizeMode="contain"
             accessibilityLabel="뒤로 가기"
             accessibilityElementsHidden={true}
