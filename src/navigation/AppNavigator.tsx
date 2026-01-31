@@ -932,6 +932,7 @@ const AppNavigator = () => {
         const fromSettings = (route?.params as any)?.fromSettings === true;
         return (
           <CategorySelectScreen
+            onBack={fromSettings ? () => setCurrentScreen(SCREEN_NAMES.SETTINGS) : undefined}
             onComplete={async () => {
               await refreshUser();
               if (fromSettings) {

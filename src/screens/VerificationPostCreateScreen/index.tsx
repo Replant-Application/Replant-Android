@@ -293,7 +293,7 @@ const VerificationPostCreateScreen: React.FC<VerificationPostCreateScreenProps> 
         message={
           isEditMode
             ? '인증글이 수정되었습니다.'
-            : '인증글이 등록되었습니다. 다른 사용자들의 좋아요를 받으면 미션이 인증됩니다!'
+            : '인증글이 등록되었습니다.\n좋아요를 받으면 인증이 완료됩니다!'
         }
         onClose={handleSuccessModalClose}
       />

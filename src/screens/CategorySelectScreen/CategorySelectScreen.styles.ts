@@ -48,20 +48,36 @@ export const styles = StyleSheet.create({
       marginBottom: spacing[4],
     }),
   },
-  selectAllButton: {
+  list: {
+    gap: spacing[3],
+  },
+  // 일상·성장·운동·학습·건강·관계·모두 선택 공통 버튼 스타일
+  categoryButton: {
     alignSelf: 'stretch',
     backgroundColor: colors.white,
     paddingVertical: spacing[3],
-    paddingHorizontal: spacing[4],
-    marginTop: spacing[4],
-    marginBottom: spacing[4],
+    paddingHorizontal: spacing[3],
     borderRadius: borderRadius.lg,
     borderWidth: 1,
     borderColor: colors.border.light,
     alignItems: 'center',
   },
+  selectAllButtonMargin: {
+    marginTop: spacing[4],
+    marginBottom: spacing[2],
+  },
   selectAllButtonDisabled: {
     opacity: 0.6,
+  },
+  categoryButtonText: {
+    ...createTextStyle('base', {
+      color: colors.text.primary,
+      fontWeight: typography.fontWeight.medium,
+    }),
+    fontFamily: Platform.select({
+      ios: undefined,
+      android: typography.fontFamily.regular,
+    }),
   },
   selectAllButtonText: {
     ...createTextStyle('base', {
@@ -73,45 +89,28 @@ export const styles = StyleSheet.create({
       android: typography.fontFamily.regular,
     }),
   },
-  list: {
-    gap: spacing[3],
-  },
-  option: {
-    backgroundColor: colors.white,
-    paddingVertical: spacing[4],
-    paddingHorizontal: spacing[4],
-    borderRadius: borderRadius.lg,
-    borderWidth: 1,
-    borderColor: colors.border.light,
-    alignItems: 'center',
-  },
   optionSelected: {
     borderColor: colors.primary[500],
     backgroundColor: colors.primary[50],
-  },
-  optionText: {
-    ...createTextStyle('base', {
-      color: colors.text.primary,
-      fontWeight: typography.fontWeight.medium,
-    }),
-    fontFamily: Platform.select({
-      ios: undefined,
-      android: typography.fontFamily.regular,
-    }),
   },
   optionTextSelected: {
     color: colors.primary[600],
     fontWeight: typography.fontWeight.semibold,
   },
   completeButton: {
-    marginTop: spacing[6],
+    alignSelf: 'stretch',
+    marginTop: spacing[3],
     backgroundColor: colors.primary[500],
-    paddingVertical: spacing[4],
+    borderColor: colors.primary[500],
+    paddingVertical: spacing[3],
+    paddingHorizontal: spacing[3],
     borderRadius: borderRadius.lg,
+    borderWidth: 1,
     alignItems: 'center',
   },
   completeButtonDisabled: {
     backgroundColor: colors.border.light,
+    borderColor: colors.border.light,
     opacity: 0.7,
   },
   completeButtonText: {

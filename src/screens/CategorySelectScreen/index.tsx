@@ -6,17 +6,19 @@
 
 import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, ActivityIndicator, ImageBackground } from 'react-native';
+import { Header } from '../../components/ui';
 import { useUser } from '../../contexts/UserContext';
 import { updateMyInfo } from '../../api/userApi';
 import type { MissionCategoryType } from '../../types';
-import { colors } from '../../utils/designTokens';
+import { colors, spacing } from '../../utils/designTokens';
 import { styles, CATEGORY_OPTIONS, getCategoryLabel } from './CategorySelectScreen.styles';
 
 interface CategorySelectScreenProps {
+  onBack?: () => void;
   onComplete: () => void;
 }
 
-const CategorySelectScreen: React.FC<CategorySelectScreenProps> = ({ onComplete }) => {
+const CategorySelectScreen: React.FC<CategorySelectScreenProps> = ({ onBack, onComplete }) => {
   const { user, refreshUser } = useUser();
   const [selected, setSelected] = useState<MissionCategoryType[]>([]);
   const [loading, setLoading] = useState(false);
@@ -59,27 +61,39 @@ const CategorySelectScreen: React.FC<CategorySelectScreenProps> = ({ onComplete 
   return (
     <ImageBackground
       source={require('../../assets/images/background.png')}
-      style={[styles.container, { backgroundColor: 'transparent' }]}
+      style={[
+        styles.container,
+        { backgroundColor: 'transparent' },
+        onBack && { paddingTop: spacing[10] },
+      ]}
       resizeMode="cover"
       accessibilityElementsHidden={true}
     >
-      <Text style={styles.title}>관심 있는 분야를 골라주세요</Text>
-      <Text style={styles.subtitle}>
-        해당 분야의 미션이 매일 추천돼요.
-      </Text>
-      <View style={styles.list}>
+      {onBack && (
+        <Header
+          showBackButton={true}
+          navigation={{ goBack: onBack }}
+          style={{ paddingTop: 0 }}
+        />
+      )}
+      <View style={onBack ? { marginTop: spacing[8] } : undefined}>
+        <Text style={styles.title}>관심 있는 분야를 골라주세요</Text>
+        <Text style={styles.subtitle}>
+          해당 분야의 미션이 매일 추천돼요.
+        </Text>
+        <View style={styles.list}>
         {CATEGORY_OPTIONS.map((key) => {
           const isSelected = selected.includes(key);
           return (
             <TouchableOpacity
               key={key}
-              style={[styles.option, isSelected && styles.optionSelected]}
+              style={[styles.categoryButton, isSelected && styles.optionSelected]}
               onPress={() => toggle(key)}
               disabled={loading}
               accessibilityRole="button"
               accessibilityLabel={`${getCategoryLabel(key)} 카테고리 ${isSelected ? '해제' : '선택'}`}
             >
-              <Text style={[styles.optionText, isSelected && styles.optionTextSelected]}>
+              <Text style={[styles.categoryButtonText, isSelected && styles.optionTextSelected]}>
                 {getCategoryLabel(key)}
               </Text>
             </TouchableOpacity>
@@ -87,7 +101,7 @@ const CategorySelectScreen: React.FC<CategorySelectScreenProps> = ({ onComplete 
         })}
       </View>
       <TouchableOpacity
-        style={[styles.selectAllButton, loading && styles.selectAllButtonDisabled]}
+        style={[styles.categoryButton, styles.selectAllButtonMargin, loading && styles.selectAllButtonDisabled]}
         onPress={toggleSelectAll}
         disabled={loading}
         accessibilityRole="button"
@@ -106,6 +120,7 @@ const CategorySelectScreen: React.FC<CategorySelectScreenProps> = ({ onComplete 
           선택 완료 ({selected.length}개)
         </Text>
       </TouchableOpacity>
+      </View>
       {loading && (
         <View style={styles.loadingOverlay}>
           <ActivityIndicator size="large" color={colors.primary[500]} />
