@@ -3,7 +3,7 @@
  * 커뮤니티 게시판 목록 화면: 게시글 조회, 필터링, 미션세트 공유
  */
 
-import { useState, useMemo, useCallback, useEffect } from 'react';
+import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useErrorHandler } from '../../hooks/useErrorHandler';
 import { CommunityPost } from '../../types';
 import { logError } from '../../utils/logger';
@@ -13,6 +13,8 @@ import {
   searchPublicTodoLists,
   getMyMissionSets,
   updateMissionSet,
+  likeTodoList,
+  unlikeTodoList,
   MissionSetSimple,
 } from '../../api/todolistApi';
 import { getPosts as getPostsApi } from '../../api/communityApi';
@@ -20,9 +22,22 @@ import { toggleLike as toggleLikeService } from '../../services/communityService
 import { useUser } from '../../contexts/UserContext';
 import { CommunityScreenProps, CommunityTab, VerificationFilter } from '../../types/screens/community';
 
+const DEBUG_COMMUNITY_LOADING = true; // 커뮤니티 로딩 디버깅 (원인 파악 후 false로)
+
 export const useCommunityScreenContainer = ({ navigation, route }: CommunityScreenProps) => {
-  const { currentNickname } = useUser();
-  
+  const { currentNickname, currentUserId } = useUser();
+
+  const debugMountRef = useRef({ mountedAt: Date.now(), logCount: 0 });
+  debugMountRef.current.logCount += 1;
+  if (DEBUG_COMMUNITY_LOADING && debugMountRef.current.logCount <= 5) {
+    console.log('[CommunityScreen] render', {
+      renderCount: debugMountRef.current.logCount,
+      currentNickname: currentNickname ?? null,
+      currentUserId: currentUserId ?? null,
+      msSinceMount: Date.now() - debugMountRef.current.mountedAt,
+    });
+  }
+
   // 페이지네이션 상태
   const [posts, setPosts] = useState<CommunityPost[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -107,6 +122,7 @@ export const useCommunityScreenContainer = ({ navigation, route }: CommunityScre
   const [myMissionSets, setMyMissionSets] = useState<MissionSetSimple[]>([]);
   const [myMissionSetsLoading, setMyMissionSetsLoading] = useState(false);
   const [sharingId, setSharingId] = useState<number | null>(null);
+  const [likingMissionSetId, setLikingMissionSetId] = useState<number | null>(null);
 
   /**
    * 검색어 디바운싱 (300ms)
@@ -326,10 +342,45 @@ export const useCommunityScreenContainer = ({ navigation, route }: CommunityScre
   }, [showSuccess, handleApiError, showError, loadMissionSets]);
 
   /**
+   * 투두리스트 공유 목록에서 좋아요 토글 (상세 진입 없이)
+   */
+  const handleTodoListLike = useCallback(async (missionSetId: number, currentIsLiked: boolean) => {
+    setLikingMissionSetId(missionSetId);
+    try {
+      const result = currentIsLiked
+        ? await unlikeTodoList(missionSetId)
+        : await likeTodoList(missionSetId);
+      if (result.success) {
+        await loadMissionSets();
+      } else {
+        handleApiError(result, 'CommunityScreen.handleTodoListLike');
+      }
+    } catch (err) {
+      logError('좋아요 토글 실패', err as Error);
+      showError(
+        err instanceof Error ? err : new Error('좋아요 처리에 실패했습니다.'),
+        'CommunityScreen.handleTodoListLike'
+      );
+    } finally {
+      setLikingMissionSetId(null);
+    }
+  }, [loadMissionSets, handleApiError, showError]);
+
+  /**
    * 게시글 목록 로드 (페이지네이션)
    */
   const loadPosts = useCallback(async (page: number = 0) => {
-    if (!currentNickname) return;
+    if (!currentNickname) {
+      if (DEBUG_COMMUNITY_LOADING) {
+        console.log('[CommunityScreen] loadPosts(0) 스킵: currentNickname 없음');
+      }
+      return;
+    }
+
+    const apiStart = Date.now();
+    if (DEBUG_COMMUNITY_LOADING && page === 0) {
+      console.log('[CommunityScreen] loadPosts(0) 시작', { currentNickname });
+    }
 
     try {
       if (page === 0) {
@@ -338,7 +389,15 @@ export const useCommunityScreenContainer = ({ navigation, route }: CommunityScre
       setError(null);
 
       const result = await getPostsApi({ page, size: PAGE_SIZE });
-      
+
+      if (DEBUG_COMMUNITY_LOADING && page === 0) {
+        console.log('[CommunityScreen] getPostsApi 응답', {
+          ms: Date.now() - apiStart,
+          success: result.success,
+          postCount: result.data?.content?.length ?? 0,
+        });
+      }
+
       if (result.success && result.data) {
         const newPosts = result.data.content || [];
         
@@ -388,6 +447,11 @@ export const useCommunityScreenContainer = ({ navigation, route }: CommunityScre
       setError((loadError as Error).message);
     } finally {
       setLoading(false);
+      if (DEBUG_COMMUNITY_LOADING && page === 0) {
+        console.log('[CommunityScreen] loadPosts(0) 완료, setLoading(false)', {
+          totalMs: Date.now() - apiStart,
+        });
+      }
     }
   }, [currentNickname]);
 
@@ -395,7 +459,15 @@ export const useCommunityScreenContainer = ({ navigation, route }: CommunityScre
    * 초기 로드
    */
   useEffect(() => {
-    if (activeTab === 'all' && currentNickname) {
+    const shouldLoad = activeTab === 'all' && currentNickname;
+    if (DEBUG_COMMUNITY_LOADING) {
+      console.log('[CommunityScreen] 초기로드 useEffect', {
+        activeTab,
+        currentNickname: currentNickname ?? null,
+        shouldLoad,
+      });
+    }
+    if (shouldLoad) {
       loadPosts(0);
     }
   }, [activeTab, currentNickname, loadPosts]);
@@ -673,5 +745,7 @@ export const useCommunityScreenContainer = ({ navigation, route }: CommunityScre
     handleShareConfirm,
     handleShareConfirmCancel,
     handleUnshareMissionSet,
+    handleTodoListLike,
+    likingMissionSetId,
   };
 };

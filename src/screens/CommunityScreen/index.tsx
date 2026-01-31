@@ -69,6 +69,8 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation, route }) 
     handleShareConfirm,
     handleShareConfirmCancel,
     handleUnshareMissionSet,
+    handleTodoListLike,
+    likingMissionSetId,
   } = useCommunityScreenContainer({ navigation, route });
 
   if (loading) {
@@ -253,6 +255,8 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation, route }) 
           onRefresh={onRefresh}
           navigation={navigation}
           onUnshare={handleUnshareMissionSet}
+          onTodoListLike={handleTodoListLike}
+          likingMissionSetId={likingMissionSetId}
         />
       )}
 

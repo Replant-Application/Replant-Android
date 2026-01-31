@@ -33,6 +33,8 @@ interface MissionSetListProps {
   onRefresh: () => void;
   navigation: NavigationProp<RootStackParamList>;
   onUnshare?: (missionSetId: number) => Promise<void>;
+  onTodoListLike?: (missionSetId: number, currentIsLiked: boolean) => Promise<void>;
+  likingMissionSetId?: number | null;
 }
 
 const MissionSetList: React.FC<MissionSetListProps> = ({
@@ -45,6 +47,8 @@ const MissionSetList: React.FC<MissionSetListProps> = ({
   onRefresh,
   navigation,
   onUnshare,
+  onTodoListLike,
+  likingMissionSetId,
 }) => {
   const { currentUserId } = useUser();
   const [showUnshareModal, setShowUnshareModal] = React.useState(false);
@@ -74,7 +78,7 @@ const MissionSetList: React.FC<MissionSetListProps> = ({
     setSelectedMissionSet(null);
   };
   return (
-    <>
+    <View style={missionSetListStyles.root}>
       {/* 검색창과 필터 버튼 - 전체 게시판과 동일한 스타일 사용 */}
       <View style={communityStyles.filterContainer}>
         <View style={communityStyles.searchRow}>
@@ -193,12 +197,14 @@ const MissionSetList: React.FC<MissionSetListProps> = ({
                     <View style={missionSetListStyles.likeContainer}>
                       <Image
                         source={require('../../../assets/images/heart.png')}
-                        style={missionSetListStyles.likeIcon}
+                        style={[missionSetListStyles.likeIcon, missionSet.isLiked && missionSetListStyles.likeIconActive]}
                         resizeMode="contain"
                         accessibilityLabel="좋아요 아이콘"
                         accessibilityElementsHidden={true}
                       />
-                      <Text style={missionSetListStyles.likeCount}>{missionSet.likeCount ?? 0}</Text>
+                      <Text style={[missionSetListStyles.likeCount, missionSet.isLiked && missionSetListStyles.likeCountActive]}>
+                        {missionSet.likeCount ?? 0}
+                      </Text>
                     </View>
                   </View>
                 </TouchableOpacity>
@@ -220,7 +226,7 @@ const MissionSetList: React.FC<MissionSetListProps> = ({
         onCancel={handleUnshareCancel}
         confirmButtonColor={colors.error}
       />
-    </>
+    </View>
   );
 };
 

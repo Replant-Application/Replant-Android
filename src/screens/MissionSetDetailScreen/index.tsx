@@ -8,12 +8,11 @@ import {
   View,
   Text,
   ScrollView,
-  TouchableOpacity,
-  Image,
   ImageBackground,
 } from 'react-native';
 import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types/navigation';
+import { formatDateKorean } from '../../utils/dateUtils';
 import { Header, Loading } from '../../components/ui';
 import { useMissionSetDetailScreenContainer } from './MissionSetDetailScreen.container';
 import { styles } from './MissionSetDetailScreen.styles';
@@ -27,10 +26,6 @@ const MissionSetDetailScreen: React.FC<MissionSetDetailScreenProps> = ({ navigat
   const {
     missionSet,
     loading,
-    liking,
-    isOwner,
-    handleLike,
-    handleUnlike,
   } = useMissionSetDetailScreenContainer({ navigation, route });
 
   if (loading) {
@@ -40,12 +35,6 @@ const MissionSetDetailScreen: React.FC<MissionSetDetailScreenProps> = ({ navigat
   if (!missionSet) {
     return null;
   }
-
-  const detail = missionSet as { isLiked?: boolean; likeCount?: number; isPublic?: boolean };
-  const isLiked = detail.isLiked ?? false;
-  const likeCount = detail.likeCount ?? 0;
-  const isPublic = detail.isPublic ?? false;
-  const canLike = !isOwner && isPublic;
 
   return (
     <ImageBackground
@@ -83,40 +72,17 @@ const MissionSetDetailScreen: React.FC<MissionSetDetailScreenProps> = ({ navigat
           )}
 
           <View style={styles.metaRow}>
-            <Text style={styles.creator}>by {missionSet.creatorNickname}</Text>
-            <Text style={styles.metaDot}>·</Text>
-            <Text style={styles.missionCount}>{missionSet.missionCount}개 미션</Text>
-          </View>
-
-          <View style={styles.statsRow}>
-            <View style={styles.likeContainer}>
-              {canLike ? (
-                <TouchableOpacity
-                  onPress={isLiked ? handleUnlike : handleLike}
-                  disabled={liking}
-                  style={styles.likeButton}
-                  accessibilityRole="button"
-                  accessibilityLabel={isLiked ? '좋아요 취소' : '좋아요'}
-                >
-                  <Image
-                    source={require('../../assets/images/heart.png')}
-                    style={[styles.likeIcon, isLiked && styles.likeIconActive]}
-                    resizeMode="contain"
-                    accessibilityLabel="좋아요 아이콘"
-                    accessibilityElementsHidden={true}
-                  />
-                </TouchableOpacity>
-              ) : (
-                <Image
-                  source={require('../../assets/images/heart.png')}
-                  style={styles.likeIcon}
-                  resizeMode="contain"
-                  accessibilityLabel="좋아요 아이콘"
-                  accessibilityElementsHidden={true}
-                />
-              )}
-              <Text style={styles.likeCount}>{likeCount}</Text>
-            </View>
+            {missionSet.createdAt && (
+              <Text style={styles.createdAt}>
+                {formatDateKorean(missionSet.createdAt)}
+              </Text>
+            )}
+            {missionSet.createdAt && missionSet.creatorNickname && (
+              <Text style={styles.metaDot}> · </Text>
+            )}
+            {missionSet.creatorNickname && (
+              <Text style={styles.creator}>BY {missionSet.creatorNickname}</Text>
+            )}
           </View>
         </View>
 
@@ -134,7 +100,22 @@ const MissionSetDetailScreen: React.FC<MissionSetDetailScreenProps> = ({ navigat
                   <View style={styles.missionNumber}>
                     <Text style={styles.missionNumberText}>{index + 1}</Text>
                   </View>
-                  <Text style={styles.missionTitle}>{mission.missionTitle}</Text>
+                  <View style={styles.missionTitleRow}>
+                    <Text style={styles.missionTitle}>{mission.missionTitle}</Text>
+                    {mission.isCompletedByCreator !== undefined && (
+                      <View style={[
+                        styles.creatorStatusBadge,
+                        mission.isCompletedByCreator ? styles.creatorStatusCompleted : styles.creatorStatusIncomplete,
+                      ]}>
+                        <Text style={[
+                          styles.creatorStatusText,
+                          mission.isCompletedByCreator ? styles.creatorStatusTextCompleted : styles.creatorStatusTextIncomplete,
+                        ]}>
+                          {mission.isCompletedByCreator ? '완료' : '미완료'}
+                        </Text>
+                      </View>
+                    )}
+                  </View>
                 </View>
               ))}
             </View>

@@ -55,7 +55,7 @@ export const styles = StyleSheet.create({
     textAlign: 'left',
     ...createTextStyle('xs', {
       color: 'rgba(255, 255, 255, 0.65)',
-      fontWeight: typography.fontWeight.regular,
+      fontWeight: typography.fontWeight.normal,
       lineHeight: getOptimizedLineHeight(typography.fontSize.xs) * 1.3,
     }),
   },

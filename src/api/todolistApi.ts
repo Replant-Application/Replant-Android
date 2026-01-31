@@ -26,6 +26,8 @@ export interface MissionSetMission {
   missionId: number;
   missionTitle: string;
   displayOrder: number;
+  /** 공유한 사용자(작성자)가 해당 미션을 완료했는지 여부 (공개 상세에서만 사용) */
+  isCompletedByCreator?: boolean;
 }
 
 export interface MissionSetSimple {

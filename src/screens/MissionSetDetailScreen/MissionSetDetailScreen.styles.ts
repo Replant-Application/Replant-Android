@@ -26,7 +26,7 @@ export const styles = StyleSheet.create({
     borderColor: colors.border.light,
   },
   title: {
-    ...createTitleStyle('xl', {
+    ...createTitleStyle('lg', {
       fontWeight: typography.fontWeight.semibold,
       marginBottom: spacing[2],
     }),
@@ -54,6 +54,11 @@ export const styles = StyleSheet.create({
   },
   missionCount: {
     ...createTextStyle('sm', {
+      color: colors.text.tertiary,
+    }),
+  },
+  createdAt: {
+    ...createSecondaryTextStyle('sm', {
       color: colors.text.tertiary,
     }),
   },
@@ -120,9 +125,41 @@ export const styles = StyleSheet.create({
       color: colors.primary[600],
     }),
   },
+  missionTitleRow: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing[2],
+  },
   missionTitle: {
     flex: 1,
     ...createBodyStyle('base'),
+  },
+  creatorStatusBadge: {
+    paddingVertical: spacing[1],
+    paddingHorizontal: spacing[2],
+    borderRadius: borderRadius.base,
+  },
+  creatorStatusCompleted: {
+    backgroundColor: colors.primary[50],
+    borderWidth: 1,
+    borderColor: colors.primary[300],
+  },
+  creatorStatusIncomplete: {
+    backgroundColor: colors.gray[100],
+    borderWidth: 1,
+    borderColor: colors.gray[300],
+  },
+  creatorStatusText: {
+    ...createTextStyle('xs', {
+      fontWeight: typography.fontWeight.medium,
+    }),
+  },
+  creatorStatusTextCompleted: {
+    color: colors.primary[600],
+  },
+  creatorStatusTextIncomplete: {
+    color: colors.text.tertiary,
   },
   emptyMissions: {
     ...emptyStateStyles.container(),

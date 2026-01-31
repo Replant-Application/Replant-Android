@@ -142,6 +142,8 @@ export interface PublicMissionInfo {
   verificationType: string;
   expReward: number;
   displayOrder: number;
+  /** 공유한 사용자(작성자)가 해당 미션을 완료했는지 여부 */
+  isCompletedByCreator?: boolean;
 }
 
 export interface PublicTodoListDetail extends PublicTodoList {

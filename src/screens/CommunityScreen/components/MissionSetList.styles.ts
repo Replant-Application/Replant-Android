@@ -9,6 +9,9 @@ import { createTextStyle, createTitleStyle, createSecondaryTextStyle } from '../
 import { cardStyles } from '../../../utils/styles/commonStyles';
 
 export const styles = StyleSheet.create({
+  root: {
+    flex: 1,
+  },
   filterContainer: {
     paddingHorizontal: spacing[4],
     paddingTop: spacing[3],
@@ -132,11 +135,19 @@ export const styles = StyleSheet.create({
   likeIcon: {
     width: 20,
     height: 20,
-    tintColor: colors.gray[400],
+    tintColor: colors.error,
+  },
+  likeIconActive: {
+    tintColor: colors.error,
   },
   likeCount: {
     ...createTextStyle('sm', {
-      color: colors.text.tertiary,
+      color: colors.text.secondary,
+      fontWeight: typography.fontWeight.medium,
     }),
+  },
+  likeCountActive: {
+    color: colors.primary[600],
+    fontWeight: typography.fontWeight.normal,
   },
 });
