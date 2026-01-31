@@ -34,7 +34,7 @@ export const createTextStyle = (
     fontSize: fontSizeValue,
     fontFamily: Platform.select({
       ios: undefined, // iOS는 기본 시스템 폰트 사용
-      android: typography.fontFamily.regular, // Android는 커스텀 폰트 사용
+      android: typography.fontFamily.regular, // Android만 커스텀 폰트 (Neo-Regular)
     }),
     fontWeight: typography.fontWeight.medium, // 기본 medium ('500')
     includeFontPadding: false,

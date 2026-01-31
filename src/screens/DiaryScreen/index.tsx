@@ -479,22 +479,24 @@ const DiaryScreen: React.FC = () => {
               {/* 기분 조절 버튼: TalkBack/에뮬레이터에서 드래그 대신 사용 */}
               <View style={styles.sliderButtons}>
                 <TouchableOpacity
-                  style={styles.sliderButton}
+                  style={[styles.sliderButton, styles.sliderButtonMinus]}
                   onPress={adjustMoodDown}
+                  activeOpacity={0.85}
                   accessibilityRole="button"
                   accessibilityLabel="기분 10점 낮추기"
                   accessibilityHint="탭하면 기분 점수가 10 낮아집니다"
                 >
-                  <Text style={styles.sliderButtonText}>− 낮춤</Text>
+                  <Text style={styles.sliderButtonText} accessibilityElementsHidden={true}>−</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
-                  style={styles.sliderButton}
+                  style={[styles.sliderButton, styles.sliderButtonPlus]}
                   onPress={adjustMoodUp}
+                  activeOpacity={0.85}
                   accessibilityRole="button"
                   accessibilityLabel="기분 10점 높이기"
                   accessibilityHint="탭하면 기분 점수가 10 올라갑니다"
                 >
-                  <Text style={styles.sliderButtonText}>+ 높임</Text>
+                  <Text style={styles.sliderButtonText} accessibilityElementsHidden={true}>+</Text>
                 </TouchableOpacity>
               </View>
             </View>

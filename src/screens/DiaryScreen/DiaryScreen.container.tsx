@@ -4,7 +4,7 @@
  */
 
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
-import { Animated, PanResponder } from 'react-native';
+import { Animated, PanResponder, AccessibilityInfo } from 'react-native';
 import { useDiary } from '../../hooks/useDiary';
 import { useCharacter } from '../../hooks/useCharacter';
 import { SimpleDiaryData, Diary } from '../../types';
@@ -318,15 +318,19 @@ export const useDiaryScreenContainer = () => {
     setSelectedFactors(prev => (prev.includes(factor) ? prev.filter(f => f !== factor) : [...prev, factor]));
   }, []);
 
-  /** 기분 슬라이더: 10점 낮춤 (TalkBack/마우스 대안) */
+  /** 기분 슬라이더: 10점 낮춤 (TalkBack/마우스 대안). 탭 시 VoiceOver로 갱신된 점수 안내 */
   const adjustMoodDown = useCallback(() => {
-    setMoodValue(prev => Math.max(0, Math.min(100, prev - 10)));
-  }, []);
+    const newValue = Math.max(0, Math.min(100, moodValue - 10));
+    setMoodValue(newValue);
+    AccessibilityInfo.announceForAccessibility(`현재 기분 ${newValue}점`);
+  }, [moodValue]);
 
-  /** 기분 슬라이더: 10점 높임 (TalkBack/마우스 대안) */
+  /** 기분 슬라이더: 10점 높임 (TalkBack/마우스 대안). 탭 시 VoiceOver로 갱신된 점수 안내 */
   const adjustMoodUp = useCallback(() => {
-    setMoodValue(prev => Math.max(0, Math.min(100, prev + 10)));
-  }, []);
+    const newValue = Math.max(0, Math.min(100, moodValue + 10));
+    setMoodValue(newValue);
+    AccessibilityInfo.announceForAccessibility(`현재 기분 ${newValue}점`);
+  }, [moodValue]);
 
   /**
    * 일기 보기 모드로 전환

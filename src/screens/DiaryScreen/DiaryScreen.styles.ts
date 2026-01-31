@@ -3,7 +3,7 @@
  * 일기 화면의 모든 스타일 정의
  */
 
-import { StyleSheet, Dimensions } from 'react-native';
+import { StyleSheet, Dimensions, Platform } from 'react-native';
 import { colors, spacing, typography, borderRadius, shadows, layout } from '../../utils/designTokens';
 import { getOptimizedLineHeight } from '../../utils/styles/textStyles';
 import { createTextStyle, createTitleStyle, createBodyStyle, createSecondaryTextStyle, createButtonTextStyle } from '../../utils/styles/textStyles';
@@ -117,22 +117,40 @@ export const styles = StyleSheet.create({
   sliderButtons: {
     flexDirection: 'row',
     justifyContent: 'center',
-    gap: spacing[3],
-    marginTop: spacing[3],
+    alignItems: 'center',
+    gap: spacing[4],
+    marginTop: spacing[4],
   },
   sliderButton: {
-    paddingVertical: spacing[2],
-    paddingHorizontal: spacing[4],
-    borderRadius: borderRadius.md,
-    backgroundColor: colors.gray[700],
-    borderWidth: 1,
-    borderColor: colors.gray[600],
+    width: 48,
+    minHeight: 48,
+    paddingVertical: spacing[1],
+    borderRadius: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 0,
+    ...shadows.sm,
+  },
+  sliderButtonMinus: {
+    backgroundColor: colors.red[500],
+    borderWidth: 1.5,
+    borderColor: colors.red[400],
+  },
+  sliderButtonPlus: {
+    backgroundColor: colors.primary[500],
+    borderWidth: 1.5,
+    borderColor: colors.primary[400],
   },
   sliderButtonText: {
-    ...createTextStyle('sm', {
-      color: colors.white,
-      fontWeight: typography.fontWeight.medium,
+    fontSize: 28,
+    fontFamily: Platform.select({
+      ios: undefined,
+      android: typography.fontFamily.bold,
     }),
+    fontWeight: '700' as const,
+    color: colors.white,
+    lineHeight: 30,
+    textAlign: 'center',
   },
   sliderValue: {
     ...createTextStyle('2xl', {
