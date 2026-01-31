@@ -281,17 +281,13 @@ const PostCard: React.FC<PostCardProps> = ({
             accessibilityLabel={post.is_liked ? `좋아요 취소, ${post.like_count}개` : `좋아요, ${post.like_count}개`}
             accessibilityState={{ selected: post.is_liked }}
           >
-            {post.is_liked ? (
-              <Text style={[styles.statIcon, styles.likedIcon]}>❤️</Text>
-            ) : (
-              <Image
-                source={require('../../assets/images/heart.png')}
-                style={styles.statIconImage}
-                resizeMode="contain"
-                accessibilityLabel="좋아요 아이콘"
-                accessibilityElementsHidden={true}
-              />
-            )}
+            <Image
+              source={require('../../assets/images/heart.png')}
+              style={styles.statIconImage}
+              resizeMode="contain"
+              accessibilityLabel="좋아요 아이콘"
+              accessibilityElementsHidden={true}
+            />
             <Text style={[styles.statText, post.is_liked && styles.statTextActive]}>
               {post.like_count}
             </Text>

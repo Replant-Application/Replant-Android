@@ -235,16 +235,12 @@ const CommunityPostDetailScreen: React.FC<CommunityPostDetailScreenProps> = ({ n
               accessibilityRole="button"
               accessibilityLabel={post.is_liked ? `좋아요 취소, ${post.like_count}명이 좋아요` : `좋아요, ${post.like_count}명이 좋아요`}
             >
-              {post.is_liked ? (
-                <Text style={styles.actionIcon}>❤️</Text>
-              ) : (
-                <Image
-                  source={require('../../assets/images/heart.png')}
-                  style={styles.actionIconImage}
-                  resizeMode="contain"
-                  accessibilityLabel="좋아요 아이콘"
-                />
-              )}
+              <Image
+                source={require('../../assets/images/heart.png')}
+                style={styles.actionIconImage}
+                resizeMode="contain"
+                accessibilityLabel="좋아요 아이콘"
+              />
               <Text style={styles.actionText}>{post.like_count}</Text>
             </TouchableOpacity>
 

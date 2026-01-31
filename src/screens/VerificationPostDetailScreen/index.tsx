@@ -200,17 +200,13 @@ const VerificationPostDetailScreen: React.FC<VerificationPostDetailScreenProps> 
               accessibilityLabel={post.myVote === 'APPROVE' ? `좋아요 취소, ${post.approveCount}개` : `좋아요, ${post.approveCount}개`}
               accessibilityState={{ selected: post.myVote === 'APPROVE', disabled: isAuthor }}
             >
-              {post.myVote === 'APPROVE' ? (
-                <Text style={[styles.voteIcon, isAuthor && styles.voteIconDisabled]} accessibilityElementsHidden={true}>❤️</Text>
-              ) : (
-                <Image
-                  source={require('../../assets/images/heart.png')}
-                  style={styles.voteIconImage}
-                  resizeMode="contain"
-                  accessibilityLabel="좋아요 아이콘"
-                  accessibilityElementsHidden={true}
-                />
-              )}
+              <Image
+                source={require('../../assets/images/heart.png')}
+                style={styles.voteIconImage}
+                resizeMode="contain"
+                accessibilityLabel="좋아요 아이콘"
+                accessibilityElementsHidden={true}
+              />
               <Text style={[styles.voteText, post.myVote === 'APPROVE' && styles.voteTextActive, isAuthor && styles.voteTextDisabled]}>
                 {post.approveCount}
               </Text>
