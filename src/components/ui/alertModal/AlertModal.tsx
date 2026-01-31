@@ -31,8 +31,9 @@ const AlertModal: React.FC<AlertModalProps> = ({
   onClose,
   icon,
 }) => {
-  // message가 문자열이 아닌 경우 문자열로 변환
-  const messageText = typeof message === 'string' ? message : String(message || '');
+  // message가 문자열이 아닌 경우 문자열로 변환, 리터럴 '\n'은 실제 줄바꿈으로 변환
+  const rawMessage = typeof message === 'string' ? message : String(message || '');
+  const messageText = rawMessage.replace(/\\n/g, '\n');
   const titleText = typeof title === 'string' ? title : String(title || '');
 
   return (
