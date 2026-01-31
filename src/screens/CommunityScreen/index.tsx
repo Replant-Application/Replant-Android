@@ -4,8 +4,8 @@
  */
 
 import React from 'react';
-import { View, Text, ScrollView, TouchableOpacity, TextInput, Image, Modal, RefreshControl, ImageBackground, ActivityIndicator, Switch, Platform } from 'react-native';
-import { spacing, typography } from '../../utils/designTokens';
+import { View, Text, ScrollView, TouchableOpacity, TextInput, Image, Modal, RefreshControl, ImageBackground, ActivityIndicator, Switch } from 'react-native';
+import { spacing } from '../../utils/designTokens';
 import { PostCard } from '../../components/specialized';
 import { Loading, ErrorBoundary, EmptyState, SimpleTabBar, Header, AlertModal, ConfirmModal } from '../../components/ui';
 import { colors } from '../../utils/designTokens';

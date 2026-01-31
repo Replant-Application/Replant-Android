@@ -43,7 +43,6 @@ const MissionSetList: React.FC<MissionSetListProps> = ({
   onFilterPress,
   refreshing,
   onRefresh,
-  renderStars,
   navigation,
   onUnshare,
 }) => {
