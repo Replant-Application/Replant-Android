@@ -331,6 +331,22 @@ const MissionCard: React.FC<MissionCardProps> = ({
                 </Text>
               </TouchableOpacity>
             )}
+            {/* 커스텀 미션 완료 후 인증 취소 버튼 */}
+            {mission.completed &&
+              (mission.missionType === 'CUSTOM' || mission.is_custom === true) &&
+              _onUncomplete && (
+              <TouchableOpacity
+                style={[styles.actionButton, styles.uncompleteButton]}
+                onPress={() => _onUncomplete(mission.mission_id)}
+                disabled={disabled}
+                activeOpacity={disabled ? 1 : 0.7}
+                accessibilityRole="button"
+                accessibilityLabel="인증 취소"
+                accessibilityState={{ disabled }}
+              >
+                <Text style={[styles.actionText, styles.uncompleteText]}>인증 취소</Text>
+              </TouchableOpacity>
+            )}
           </View>
         )}
       </View>

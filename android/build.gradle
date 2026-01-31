@@ -18,6 +18,8 @@ allprojects {
     google()
     mavenCentral()
     maven { url 'https://www.jitpack.io' }
+    // 카카오 SDK (react-native-seoul/kakao-login)
+    maven { url 'https://devrepo.kakao.com/nexus/content/groups/public/' }
   }
 }
 

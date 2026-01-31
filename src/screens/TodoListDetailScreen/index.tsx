@@ -50,6 +50,7 @@ const TodoListDetailScreen: React.FC<Props> = ({ navigation, route }) => {
     actualTotalCount,
     progressPercent,
     handleCompleteMission,
+    handleUncompleteMission,
     handleCompleteModalClose,
     onRefresh,
   } = useTodoListDetailScreenContainer({ navigation, route });
@@ -58,6 +59,12 @@ const TodoListDetailScreen: React.FC<Props> = ({ navigation, route }) => {
   const renderMissionItem = (mission: TodoMission) => {
     const isCompleting = completingMissionId === mission.missionId;
     const canComplete = !mission.isCompleted && todoList?.status === 'ACTIVE';
+    const isCustomMission = mission.missionType === 'CUSTOM' || mission.missionSource === 'CUSTOM_SELECTED';
+    const canUncomplete = mission.isCompleted && isCustomMission && todoList?.status === 'ACTIVE';
+    const handlePress = () => {
+      if (canComplete) handleCompleteMission(mission);
+      else if (canUncomplete) handleUncompleteMission(mission);
+    };
 
     return (
       <TouchableOpacity
@@ -65,24 +72,24 @@ const TodoListDetailScreen: React.FC<Props> = ({ navigation, route }) => {
           styles.missionItem,
           mission.isCompleted && styles.missionItemCompleted,
         ]}
-        onPress={() => canComplete && handleCompleteMission(mission)}
-        disabled={mission.isCompleted || isCompleting || todoList?.status !== 'ACTIVE'}
+        onPress={handlePress}
+        disabled={!canComplete && !canUncomplete || isCompleting || todoList?.status !== 'ACTIVE'}
         activeOpacity={0.7}
         accessibilityRole="button"
-        accessibilityLabel={mission.isCompleted ? `${mission.title}, 완료됨` : mission.title}
-        accessibilityState={{ disabled: mission.isCompleted || isCompleting || todoList?.status !== 'ACTIVE' }}
+        accessibilityLabel={mission.isCompleted ? (canUncomplete ? `${mission.title}, 완료됨. 다시 누르면 인증 취소` : `${mission.title}, 완료됨`) : mission.title}
+        accessibilityState={{ disabled: !canComplete && !canUncomplete || isCompleting || todoList?.status !== 'ACTIVE' }}
       >
         <TouchableOpacity
           style={[
             styles.missionCheckbox,
             mission.isCompleted && styles.missionCheckboxCompleted,
           ]}
-          onPress={() => canComplete && handleCompleteMission(mission)}
-          disabled={mission.isCompleted || isCompleting || todoList?.status !== 'ACTIVE'}
+          onPress={handlePress}
+          disabled={!canComplete && !canUncomplete || isCompleting || todoList?.status !== 'ACTIVE'}
           activeOpacity={0.7}
           accessibilityRole="button"
-          accessibilityLabel={mission.isCompleted ? '완료됨' : '미션 완료하기'}
-          accessibilityState={{ disabled: mission.isCompleted || isCompleting || todoList?.status !== 'ACTIVE' }}
+          accessibilityLabel={mission.isCompleted ? (canUncomplete ? '완료됨, 다시 누르면 인증 취소' : '완료됨') : '미션 완료하기'}
+          accessibilityState={{ disabled: !canComplete && !canUncomplete || isCompleting || todoList?.status !== 'ACTIVE' }}
         >
           {isCompleting ? (
             <ActivityIndicator size="small" color={colors.white} />

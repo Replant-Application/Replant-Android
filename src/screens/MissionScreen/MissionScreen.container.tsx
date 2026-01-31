@@ -15,6 +15,7 @@ import {
   getCustomMissions,
   getMissionCollection,
   completeCustomMission,
+  uncompleteCustomMission,
   MissionCategory,
 } from '../../api/missionApi';
 import { logError } from '../../utils/logger';
@@ -523,12 +524,23 @@ export const useMissionScreenContainer = ({
   }, [routeParams?.activeTab, routeParams?.selectedFilter]);
 
   /**
-   * 미션 완료 취소
+   * 커스텀 미션 인증 취소 (다시 체크 시 완료 해제)
    */
   const handleMissionUncomplete = useCallback(
     async (missionId: string) => {
+      const numericId = parseInt(missionId.replace(/^custom_/, ''), 10);
+      if (isNaN(numericId)) {
+        showError('미션 ID가 올바르지 않습니다.', 'MissionScreen.handleMissionUncomplete');
+        return;
+      }
       try {
-        await uncompleteMission(missionId);
+        const result = await uncompleteCustomMission(numericId);
+        if (result.success) {
+          showSuccess('인증이 취소되었어요.');
+          await loadMissions();
+        } else {
+          handleApiError(result, 'MissionScreen.handleMissionUncomplete');
+        }
       } catch (uncompleteError) {
         showError(
           uncompleteError instanceof Error ? uncompleteError : new Error('미션 완료 취소에 실패했습니다.'),
@@ -536,7 +548,7 @@ export const useMissionScreenContainer = ({
         );
       }
     },
-    [uncompleteMission, showError]
+    [uncompleteCustomMission, loadMissions, showSuccess, showError, handleApiError]
   );
 
   /**

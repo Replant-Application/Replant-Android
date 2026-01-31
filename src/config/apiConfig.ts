@@ -100,6 +100,7 @@ export const API_CONFIG = {
       add: '/missions/my',
       addCustom: '/missions/my/custom',
       completeCustom: '/missions/my/complete-custom/:missionId',
+      cancelCustom: '/missions/my/cancel-custom/:missionId',
       verify: '/missions/my/:userMissionId/verify',
       history: '/missions/my/history',
       // 캘린더 조회

@@ -528,6 +528,15 @@ export const completeCustomMission = async (missionId: number): Promise<ServiceR
 };
 
 /**
+ * 커스텀 미션 인증 취소 (다시 체크 시 완료 해제)
+ * PUT /api/missions/my/cancel-custom/{missionId}
+ */
+export const uncompleteCustomMission = async (missionId: number): Promise<ServiceResult<UserMission>> => {
+  const endpoint = API_CONFIG.endpoints.userMission.cancelCustom.replace(':missionId', String(missionId));
+  return apiClient.put<UserMission>(endpoint);
+};
+
+/**
  * 미션 인증 (GPS/TIME)
  * POST /api/missions/my/{userMissionId}/verify
  * 인증 필요
