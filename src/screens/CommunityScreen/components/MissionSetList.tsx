@@ -33,6 +33,8 @@ interface MissionSetListProps {
   refreshing: boolean;
   onRefresh: () => void;
   navigation: NavigationProp<RootStackParamList>;
+  /** 있으면 카드 클릭 시 이 콜백만 호출 (모달로 상세 표시용) */
+  onMissionSetPress?: (missionSetId: number) => void;
   onUnshare?: (missionSetId: number) => Promise<void>;
   onTodoListLike?: (missionSetId: number, currentIsLiked: boolean) => Promise<void>;
   likingMissionSetId?: number | null;
@@ -47,6 +49,7 @@ const MissionSetList: React.FC<MissionSetListProps> = ({
   refreshing,
   onRefresh,
   navigation,
+  onMissionSetPress,
   onUnshare,
   onTodoListLike,
   likingMissionSetId,
@@ -149,7 +152,14 @@ const MissionSetList: React.FC<MissionSetListProps> = ({
                 <TouchableOpacity
                   key={missionSet.id}
                   style={missionSetListStyles.missionSetCard}
-                  onPress={() => navigation.navigate(SCREEN_NAMES.MISSION_SET_DETAIL as any, { missionSetId: missionSet.id, returnScreen: 'Community', activeTab: 'todo-share' })}
+                  onPress={() => {
+                  if (onMissionSetPress) {
+                    onMissionSetPress(missionSet.id);
+                  } else {
+                    const nav = (navigation as any).navigateNoHistory ?? navigation.navigate;
+                    nav(SCREEN_NAMES.MISSION_SET_DETAIL, { missionSetId: missionSet.id, returnScreen: 'Community', activeTab: 'todo-share', fromCommunity: true });
+                  }
+                }}
                   activeOpacity={0.7}
                   accessibilityRole="button"
                   accessibilityLabel={`${missionSet.title}, BY ${missionSet.creatorNickname}`}

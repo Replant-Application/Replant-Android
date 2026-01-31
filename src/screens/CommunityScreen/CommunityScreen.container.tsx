@@ -87,6 +87,9 @@ export const useCommunityScreenContainer = ({ navigation, route }: CommunityScre
   const [showShareConfirmModal, setShowShareConfirmModal] = useState(false);
   const [shareConfirmMissionSet, setShareConfirmMissionSet] = useState<MissionSetSimple | null>(null);
 
+  // 미션세트 상세 모달 (투두리스트 공유 탭에서 카드 클릭 시)
+  const [selectedMissionSetId, setSelectedMissionSetId] = useState<number | null>(null);
+
   const errorHandlerOverrides = useMemo(
     () => ({
       onShowError: (t: string, m: string) => {
@@ -742,5 +745,9 @@ export const useCommunityScreenContainer = ({ navigation, route }: CommunityScre
     handleUnshareMissionSet,
     handleTodoListLike,
     likingMissionSetId,
+    // 미션세트 상세 모달
+    selectedMissionSetId,
+    onMissionSetPress: setSelectedMissionSetId,
+    closeMissionSetDetailModal: () => setSelectedMissionSetId(null),
   };
 };

@@ -3,8 +3,8 @@
  * 일반 게시글 + 인증글(VerificationPost) 통합 표시
  */
 
-import React from 'react';
-import { View, Text, ScrollView, TouchableOpacity, TextInput, Image, Modal, RefreshControl, ImageBackground, ActivityIndicator, Switch } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import { View, Text, ScrollView, TouchableOpacity, TextInput, Image, Modal, RefreshControl, ImageBackground, ActivityIndicator, Switch, Animated } from 'react-native';
 import { spacing } from '../../utils/designTokens';
 import { formatDateKorean } from '../../utils/dateUtils';
 import { PostCard } from '../../components/specialized';
@@ -13,10 +13,15 @@ import { colors } from '../../utils/designTokens';
 import { CommunityScreenProps, CommunityTab, VerificationFilter } from '../../types/screens/community';
 import { FILTER_OPTIONS } from '../../constants/screens/community';
 import MissionSetList from './components/MissionSetList';
+import MissionSetDetailScreen from '../MissionSetDetailScreen';
 import { useCommunityScreenContainer } from './CommunityScreen.container';
 import { styles } from './CommunityScreen.styles';
 
+const FADE_DURATION = 150;
+
 const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation, route }) => {
+  const missionSetFadeAnim = useRef(new Animated.Value(1)).current;
+
   // 비즈니스 로직은 Container에서 처리
   const {
     loading,
@@ -72,7 +77,27 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation, route }) 
     handleUnshareMissionSet,
     handleTodoListLike,
     likingMissionSetId,
+    selectedMissionSetId,
+    onMissionSetPress,
+    closeMissionSetDetailModal,
   } = useCommunityScreenContainer({ navigation, route });
+
+  useEffect(() => {
+    if (selectedMissionSetId != null) missionSetFadeAnim.setValue(1);
+  }, [selectedMissionSetId]);
+
+  const handleCloseMissionSetModal = () => {
+    Animated.timing(missionSetFadeAnim, {
+      toValue: 0,
+      duration: FADE_DURATION,
+      useNativeDriver: true,
+    }).start(({ finished }) => {
+      if (finished) {
+        closeMissionSetDetailModal();
+        missionSetFadeAnim.setValue(1);
+      }
+    });
+  };
 
   if (loading) {
     return <Loading text="게시글을 불러오는 중..." />;
@@ -255,6 +280,7 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation, route }) 
           refreshing={refreshing}
           onRefresh={onRefresh}
           navigation={navigation}
+          onMissionSetPress={onMissionSetPress}
           onUnshare={handleUnshareMissionSet}
           onTodoListLike={handleTodoListLike}
           likingMissionSetId={likingMissionSetId}
@@ -302,6 +328,25 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation, route }) 
           />
         </TouchableOpacity>
       )}
+
+      {/* 미션세트 상세 모달 (열림/닫힘 모두 페이드) */}
+      <Modal
+        visible={selectedMissionSetId != null}
+        animationType="fade"
+        onRequestClose={handleCloseMissionSetModal}
+      >
+        {selectedMissionSetId != null && (
+          <Animated.View style={{ flex: 1, opacity: missionSetFadeAnim }}>
+            <MissionSetDetailScreen
+              navigation={{
+                ...navigation,
+                goBack: handleCloseMissionSetModal,
+              } as any}
+              route={{ params: { missionSetId: selectedMissionSetId } } as any}
+            />
+          </Animated.View>
+        )}
+      </Modal>
 
       {/* 필터 모달 */}
       <Modal
