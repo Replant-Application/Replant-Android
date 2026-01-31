@@ -65,7 +65,7 @@ export const styles = StyleSheet.create({
   statsRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingTop: spacing[3],
+    paddingTop: spacing[1],
     borderTopWidth: 1,
     borderTopColor: colors.border.light,
   },
@@ -80,10 +80,10 @@ export const styles = StyleSheet.create({
   likeIcon: {
     width: 20,
     height: 20,
-    tintColor: colors.gray[400],
+    tintColor: colors.error,
   },
   likeIconActive: {
-    tintColor: colors.error[500],
+    tintColor: colors.error,
   },
   likeCount: {
     ...createTextStyle('sm', {

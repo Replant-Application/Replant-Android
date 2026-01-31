@@ -132,16 +132,10 @@ const MissionSetDetailScreen: React.FC<MissionSetDetailScreenProps> = ({ navigat
                   </View>
                   <View style={styles.missionTitleRow}>
                     <Text style={styles.missionTitle}>{mission.missionTitle}</Text>
-                    {mission.isCompletedByCreator !== undefined && (
-                      <View style={[
-                        styles.creatorStatusBadge,
-                        mission.isCompletedByCreator ? styles.creatorStatusCompleted : styles.creatorStatusIncomplete,
-                      ]}>
-                        <Text style={[
-                          styles.creatorStatusText,
-                          mission.isCompletedByCreator ? styles.creatorStatusTextCompleted : styles.creatorStatusTextIncomplete,
-                        ]}>
-                          {mission.isCompletedByCreator ? '완료' : '미완료'}
+                    {mission.isCompletedByCreator === true && (
+                      <View style={[styles.creatorStatusBadge, styles.creatorStatusCompleted]}>
+                        <Text style={[styles.creatorStatusText, styles.creatorStatusTextCompleted]}>
+                          완료
                         </Text>
                       </View>
                     )}
