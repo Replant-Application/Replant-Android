@@ -32,7 +32,7 @@ export const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.background.primary,
     padding: spacing[4],
-    paddingTop: spacing[8],
+    paddingTop: spacing[16],
   },
   title: {
     ...createTitleStyle('lg', {
@@ -45,7 +45,32 @@ export const styles = StyleSheet.create({
     ...createTextStyle('sm', {
       color: colors.text.secondary,
       textAlign: 'center',
-      marginBottom: spacing[6],
+      marginBottom: spacing[4],
+    }),
+  },
+  selectAllButton: {
+    alignSelf: 'stretch',
+    backgroundColor: colors.white,
+    paddingVertical: spacing[3],
+    paddingHorizontal: spacing[4],
+    marginTop: spacing[4],
+    marginBottom: spacing[4],
+    borderRadius: borderRadius.lg,
+    borderWidth: 1,
+    borderColor: colors.border.light,
+    alignItems: 'center',
+  },
+  selectAllButtonDisabled: {
+    opacity: 0.6,
+  },
+  selectAllButtonText: {
+    ...createTextStyle('base', {
+      color: colors.primary[600],
+      fontWeight: typography.fontWeight.medium,
+    }),
+    fontFamily: Platform.select({
+      ios: undefined,
+      android: typography.fontFamily.regular,
     }),
   },
   list: {

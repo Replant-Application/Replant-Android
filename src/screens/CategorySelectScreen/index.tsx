@@ -5,7 +5,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, TouchableOpacity, ActivityIndicator, ImageBackground } from 'react-native';
 import { useUser } from '../../contexts/UserContext';
 import { updateMyInfo } from '../../api/userApi';
 import type { MissionCategoryType } from '../../types';
@@ -34,6 +34,14 @@ const CategorySelectScreen: React.FC<CategorySelectScreenProps> = ({ onComplete 
     );
   };
 
+  const toggleSelectAll = () => {
+    if (selected.length === CATEGORY_OPTIONS.length) {
+      setSelected([]);
+    } else {
+      setSelected([...CATEGORY_OPTIONS] as MissionCategoryType[]);
+    }
+  };
+
   const handleComplete = async () => {
     if (selected.length === 0 || loading) return;
     setLoading(true);
@@ -49,10 +57,15 @@ const CategorySelectScreen: React.FC<CategorySelectScreenProps> = ({ onComplete 
   };
 
   return (
-    <View style={styles.container}>
+    <ImageBackground
+      source={require('../../assets/images/background.png')}
+      style={[styles.container, { backgroundColor: 'transparent' }]}
+      resizeMode="cover"
+      accessibilityElementsHidden={true}
+    >
       <Text style={styles.title}>관심 있는 분야를 골라주세요</Text>
       <Text style={styles.subtitle}>
-        고른 분야의 미션이 매일 추천돼요.{'\n'}하나만 골라도 되고, 여러 개·전부 골라도 됩니다.
+        해당 분야의 미션이 매일 추천돼요.
       </Text>
       <View style={styles.list}>
         {CATEGORY_OPTIONS.map((key) => {
@@ -74,6 +87,15 @@ const CategorySelectScreen: React.FC<CategorySelectScreenProps> = ({ onComplete 
         })}
       </View>
       <TouchableOpacity
+        style={[styles.selectAllButton, loading && styles.selectAllButtonDisabled]}
+        onPress={toggleSelectAll}
+        disabled={loading}
+        accessibilityRole="button"
+        accessibilityLabel="모두 선택"
+      >
+        <Text style={styles.selectAllButtonText}>모두 선택</Text>
+      </TouchableOpacity>
+      <TouchableOpacity
         style={[styles.completeButton, selected.length === 0 && styles.completeButtonDisabled]}
         onPress={handleComplete}
         disabled={selected.length === 0 || loading}
@@ -89,7 +111,7 @@ const CategorySelectScreen: React.FC<CategorySelectScreenProps> = ({ onComplete 
           <ActivityIndicator size="large" color={colors.primary[500]} />
         </View>
       )}
-    </View>
+    </ImageBackground>
   );
 };
 
