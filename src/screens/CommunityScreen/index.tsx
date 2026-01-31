@@ -6,6 +6,7 @@
 import React from 'react';
 import { View, Text, ScrollView, TouchableOpacity, TextInput, Image, Modal, RefreshControl, ImageBackground, ActivityIndicator, Switch } from 'react-native';
 import { spacing } from '../../utils/designTokens';
+import { formatDateKorean } from '../../utils/dateUtils';
 import { PostCard } from '../../components/specialized';
 import { Loading, ErrorBoundary, EmptyState, SimpleTabBar, Header, AlertModal, ConfirmModal } from '../../components/ui';
 import { colors } from '../../utils/designTokens';
@@ -539,6 +540,11 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation, route }) 
                       {missionSet.description && (
                         <Text style={styles.shareModalItemDesc} numberOfLines={1}>
                           {missionSet.description}
+                        </Text>
+                      )}
+                      {missionSet.createdAt && (
+                        <Text style={styles.shareModalItemMeta}>
+                          {formatDateKorean(missionSet.createdAt)}
                         </Text>
                       )}
                     </View>

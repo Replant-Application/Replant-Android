@@ -20,6 +20,7 @@ import { NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types/navigation';
 import { Header, Loading, EmptyState } from '../../components/ui';
 import { colors, spacing } from '../../utils/designTokens';
+import { formatDateKorean } from '../../utils/dateUtils';
 import { SCREEN_NAMES } from '../../utils/constants';
 import { useMissionSetListScreenContainer } from './MissionSetListScreen.container';
 import { styles } from './MissionSetListScreen.styles';
@@ -137,7 +138,7 @@ const MissionSetListScreen: React.FC<MissionSetListScreenProps> = ({ navigation 
                   onPress={() => navigation.navigate(SCREEN_NAMES.MISSION_SET_DETAIL as any, { missionSetId: todoList.id, returnScreen: 'MissionSetList' })}
                   activeOpacity={0.7}
                   accessibilityRole="button"
-                  accessibilityLabel={`${todoList.title}, by ${todoList.creatorNickname}`}
+                  accessibilityLabel={`${todoList.title}, BY ${todoList.creatorNickname}`}
                 >
                   {/* 카드 헤더 */}
                   <View style={styles.cardHeader}>
@@ -164,13 +165,18 @@ const MissionSetListScreen: React.FC<MissionSetListScreenProps> = ({ navigation 
                   {/* 작성자 정보 */}
                   <View style={styles.authorInfo}>
                     <Text style={styles.authorText}>
-                      by {todoList.creatorNickname}
+                      BY {todoList.creatorNickname}
                     </Text>
                   </View>
 
                   {/* 카드 푸터 */}
                   <View style={styles.cardFooter}>
                     <View style={styles.statsRow}>
+                      {todoList.createdAt && (
+                        <Text style={styles.createdAtText}>
+                          {formatDateKorean(todoList.createdAt)}
+                        </Text>
+                      )}
                       <View style={styles.statItem}>
                         <Image
                           source={require('../../assets/images/heart.png')}
@@ -245,6 +251,11 @@ const MissionSetListScreen: React.FC<MissionSetListScreenProps> = ({ navigation 
                             </Text>
                           )}
                           <View style={styles.modalItemInfoRow}>
+                            {item.createdAt && (
+                              <Text style={styles.modalItemMissionCount}>
+                                {formatDateKorean(item.createdAt)}
+                              </Text>
+                            )}
                             {item.status === 'COMPLETED' && (
                               <View style={styles.completedBadge}>
                                 <Text style={styles.completedBadgeText}>완료</Text>

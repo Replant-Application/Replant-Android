@@ -129,6 +129,11 @@ export const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: colors.border.light,
   },
+  createdAtText: {
+    ...createSecondaryTextStyle('sm', {
+      color: colors.text.tertiary,
+    }),
+  },
   statsRow: {
     flexDirection: 'row',
     gap: spacing[4],

@@ -19,6 +19,7 @@ import { MissionSetSimple } from '../../../api/todolistApi';
 import { Loading, EmptyState, ConfirmModal } from '../../../components/ui';
 import { colors } from '../../../utils/designTokens';
 import { SCREEN_NAMES } from '../../../utils/constants';
+import { formatDateKorean } from '../../../utils/dateUtils';
 import { useUser } from '../../../contexts/UserContext';
 import { styles as missionSetListStyles } from './MissionSetList.styles';
 import { styles as communityStyles } from '../CommunityScreen.styles';
@@ -151,7 +152,7 @@ const MissionSetList: React.FC<MissionSetListProps> = ({
                   onPress={() => navigation.navigate(SCREEN_NAMES.MISSION_SET_DETAIL as any, { missionSetId: missionSet.id, returnScreen: 'Community', activeTab: 'todo-share' })}
                   activeOpacity={0.7}
                   accessibilityRole="button"
-                  accessibilityLabel={`${missionSet.title}, by ${missionSet.creatorNickname}`}
+                  accessibilityLabel={`${missionSet.title}, BY ${missionSet.creatorNickname}`}
                 >
                   <View style={missionSetListStyles.missionSetCardHeader}>
                     <Text style={missionSetListStyles.missionSetTitle} numberOfLines={1}>
@@ -184,9 +185,19 @@ const MissionSetList: React.FC<MissionSetListProps> = ({
                   )}
 
                   <View style={missionSetListStyles.missionSetMeta}>
-                    <Text style={missionSetListStyles.metaText}>
-                      by {missionSet.creatorNickname}
-                    </Text>
+                    {missionSet.createdAt && (
+                      <Text style={missionSetListStyles.metaText}>
+                        {formatDateKorean(missionSet.createdAt)}
+                      </Text>
+                    )}
+                    {missionSet.createdAt && missionSet.creatorNickname && (
+                      <Text style={missionSetListStyles.metaDot}>·</Text>
+                    )}
+                    {missionSet.creatorNickname && (
+                      <Text style={missionSetListStyles.metaText}>
+                        BY {missionSet.creatorNickname}
+                      </Text>
+                    )}
                   </View>
 
                   <View style={missionSetListStyles.missionSetFooter}>

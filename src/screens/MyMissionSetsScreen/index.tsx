@@ -17,6 +17,7 @@ import { NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types/navigation';
 import { Header, Loading, EmptyState } from '../../components/ui';
 import { colors, spacing } from '../../utils/designTokens';
+import { formatDateKorean } from '../../utils/dateUtils';
 import { useMyMissionSetsScreenContainer } from './MyMissionSetsScreen.container';
 import { styles } from './MyMissionSetsScreen.styles';
 
@@ -175,6 +176,11 @@ const MyMissionSetsScreen: React.FC<MyMissionSetsScreenProps> = ({ navigation })
 
                   {/* 카드 푸터 */}
                   <View style={styles.cardFooter}>
+                    {missionSet.createdAt && (
+                      <Text style={styles.createdAtText}>
+                        {formatDateKorean(missionSet.createdAt)}
+                      </Text>
+                    )}
                     {missionSet.isPublic && (
                       <View style={styles.likeContainer}>
                         <Image
