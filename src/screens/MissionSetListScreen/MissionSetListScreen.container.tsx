@@ -168,27 +168,6 @@ export const useMissionSetListScreenContainer = ({
     );
   }, [loadPublicTodoLists]);
 
-  /**
-   * 별점 렌더링
-   */
-  const renderStars = useCallback((rating: number) => {
-    const fullStars = Math.floor(rating);
-    const hasHalfStar = rating - fullStars >= 0.5;
-    const stars = [];
-
-    for (let i = 0; i < 5; i++) {
-      if (i < fullStars) {
-        stars.push('★');
-      } else if (i === fullStars && hasHalfStar) {
-        stars.push('☆');
-      } else {
-        stars.push('☆');
-      }
-    }
-
-    return stars.join('');
-  }, []);
-
   return {
     publicTodoLists,
     loading,
@@ -202,6 +181,5 @@ export const useMissionSetListScreenContainer = ({
     openShareModal,
     closeShareModal,
     handleShare,
-    renderStars,
   };
 };

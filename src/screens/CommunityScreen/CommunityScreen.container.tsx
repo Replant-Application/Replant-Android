@@ -176,10 +176,10 @@ export const useCommunityScreenContainer = ({ navigation, route }: CommunityScre
           description: todo.description || undefined,
           creatorId: todo.creatorId || 0,
           creatorNickname: todo.creatorNickname || '알 수 없음',
-          isPublic: true, // 공개 투두리스트이므로 항상 true
+          isPublic: true,
           missionCount: todo.missionCount || todo.totalCount || 0,
-          averageRating: todo.averageRating || 0,
-          reviewCount: todo.reviewCount ?? 0,
+          likeCount: todo.likeCount ?? 0,
+          isLiked: todo.isLiked ?? false,
           createdAt: todo.createdAt,
         }));
         setMissionSets(transformed);
@@ -229,10 +229,10 @@ export const useCommunityScreenContainer = ({ navigation, route }: CommunityScre
           description: todo.description || undefined,
           creatorId: todo.creatorId || 0,
           creatorNickname: todo.creatorNickname || '알 수 없음',
-          isPublic: publicTodoListIds.has(todo.id), // 공개 목록에 포함되어 있으면 true
-          missionCount: todo.totalCount || 0, // totalCount를 missionCount로 사용
-          averageRating: todo.averageRating || 0,
-          reviewCount: todo.reviewCount ?? 0,
+          isPublic: publicTodoListIds.has(todo.id),
+          missionCount: todo.totalCount || 0,
+          likeCount: todo.likeCount ?? 0,
+          isLiked: todo.isLiked ?? false,
           createdAt: todo.createdAt,
         }));
         
@@ -324,27 +324,6 @@ export const useCommunityScreenContainer = ({ navigation, route }: CommunityScre
       );
     }
   }, [showSuccess, handleApiError, showError, loadMissionSets]);
-
-  /**
-   * 별점 렌더링
-   */
-  const renderStars = useCallback((rating: number) => {
-    const fullStars = Math.floor(rating);
-    const hasHalfStar = rating - fullStars >= 0.5;
-    const stars = [];
-
-    for (let i = 0; i < 5; i++) {
-      if (i < fullStars) {
-        stars.push('★');
-      } else if (i === fullStars && hasHalfStar) {
-        stars.push('☆');
-      } else {
-        stars.push('☆');
-      }
-    }
-
-    return stars.join('');
-  }, []);
 
   /**
    * 게시글 목록 로드 (페이지네이션)
@@ -694,7 +673,5 @@ export const useCommunityScreenContainer = ({ navigation, route }: CommunityScre
     handleShareConfirm,
     handleShareConfirmCancel,
     handleUnshareMissionSet,
-    // Utils
-    renderStars,
   };
 };

@@ -43,7 +43,6 @@ const MissionSetListScreen: React.FC<MissionSetListScreenProps> = ({ navigation 
     openShareModal,
     closeShareModal,
     handleShare,
-    renderStars,
   } = useMissionSetListScreenContainer({ navigation });
 
   if (loading) {
@@ -183,21 +182,14 @@ const MissionSetListScreen: React.FC<MissionSetListScreenProps> = ({ navigation 
                       </View>
                       <View style={styles.statItem}>
                         <Image
-                          source={require('../../assets/images/high-five.png')}
-                          style={styles.statIcon}
+                          source={require('../../assets/images/heart.png')}
+                          style={styles.likeIcon}
                           resizeMode="contain"
-                          accessibilityLabel="참여자 아이콘"
+                          accessibilityLabel="좋아요 아이콘"
+                          accessibilityElementsHidden={true}
                         />
-                        <Text style={styles.statText}>{todoList.reviewCount ?? 0}명</Text>
+                        <Text style={styles.statText}>좋아요 {todoList.likeCount ?? 0}명</Text>
                       </View>
-                    </View>
-                    <View style={styles.ratingContainer}>
-                      <Text style={styles.stars}>
-                        {renderStars(todoList.averageRating || 0)}
-                      </Text>
-                      <Text style={styles.ratingText}>
-                        {(todoList.averageRating || 0).toFixed(1)}
-                      </Text>
                     </View>
                   </View>
                 </TouchableOpacity>

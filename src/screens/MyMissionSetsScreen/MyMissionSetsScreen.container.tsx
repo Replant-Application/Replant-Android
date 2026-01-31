@@ -102,20 +102,6 @@ export const useMyMissionSetsScreenContainer = ({
     navigation.navigate(SCREEN_NAMES.MISSION_SET_CREATE as any);
   }, [navigation]);
 
-  /**
-   * 별점 렌더링
-   */
-  const renderStars = useCallback((rating: number) => {
-    const fullStars = Math.floor(rating);
-    const stars = [];
-
-    for (let i = 0; i < 5; i++) {
-      stars.push(i < fullStars ? '★' : '☆');
-    }
-
-    return stars.join('');
-  }, []);
-
   return {
     missionSets,
     loading,
@@ -124,6 +110,5 @@ export const useMyMissionSetsScreenContainer = ({
     handleDelete,
     handleDetail,
     handleCreate,
-    renderStars,
   };
 };

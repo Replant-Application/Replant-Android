@@ -34,7 +34,6 @@ const MyMissionSetsScreen: React.FC<MyMissionSetsScreenProps> = ({ navigation })
     handleDelete,
     handleDetail,
     handleCreate,
-    renderStars,
   } = useMyMissionSetsScreenContainer({ navigation });
 
   if (loading) {
@@ -188,13 +187,15 @@ const MyMissionSetsScreen: React.FC<MyMissionSetsScreenProps> = ({ navigation })
                       </View>
                     </View>
                     {missionSet.isPublic && (
-                      <View style={styles.ratingContainer}>
-                        <Text style={styles.stars}>
-                          {renderStars(missionSet.averageRating || 0)}
-                        </Text>
-                        <Text style={styles.ratingText}>
-                          {(missionSet.averageRating || 0).toFixed(1)}
-                        </Text>
+                      <View style={styles.likeContainer}>
+                        <Image
+                          source={require('../../assets/images/heart.png')}
+                          style={styles.likeIcon}
+                          resizeMode="contain"
+                          accessibilityLabel="좋아요 아이콘"
+                          accessibilityElementsHidden={true}
+                        />
+                        <Text style={styles.likeCount}>{missionSet.likeCount ?? 0}</Text>
                       </View>
                     )}
                   </View>

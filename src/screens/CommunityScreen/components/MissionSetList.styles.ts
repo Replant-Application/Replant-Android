@@ -124,23 +124,19 @@ export const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
   },
-  ratingContainer: {
+  likeContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing[1],
+    gap: spacing[2],
   },
-  stars: {
-    ...createTextStyle('sm', {
-      color: colors.warning,
-    }),
+  likeIcon: {
+    width: 20,
+    height: 20,
+    tintColor: colors.gray[400],
   },
-  ratingText: {
-    ...createSecondaryTextStyle('xs'),
-  },
-  reviewCount: {
+  likeCount: {
     ...createTextStyle('sm', {
       color: colors.text.tertiary,
-      marginLeft: spacing[1],
     }),
   },
 });

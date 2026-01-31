@@ -31,7 +31,6 @@ interface MissionSetListProps {
   onFilterPress: () => void;
   refreshing: boolean;
   onRefresh: () => void;
-  renderStars: (rating: number) => string;
   navigation: NavigationProp<RootStackParamList>;
   onUnshare?: (missionSetId: number) => Promise<void>;
 }
@@ -192,13 +191,15 @@ const MissionSetList: React.FC<MissionSetListProps> = ({
                   </View>
 
                   <View style={missionSetListStyles.missionSetFooter}>
-                    <View style={missionSetListStyles.ratingContainer}>
-                      <Text style={missionSetListStyles.stars}>
-                        {renderStars(missionSet.averageRating || 0)}
-                      </Text>
-                      <Text style={missionSetListStyles.reviewCount}>
-                        ({missionSet.reviewCount ?? 0})
-                      </Text>
+                    <View style={missionSetListStyles.likeContainer}>
+                      <Image
+                        source={require('../../../assets/images/heart.png')}
+                        style={missionSetListStyles.likeIcon}
+                        resizeMode="contain"
+                        accessibilityLabel="좋아요 아이콘"
+                        accessibilityElementsHidden={true}
+                      />
+                      <Text style={missionSetListStyles.likeCount}>{missionSet.likeCount ?? 0}</Text>
                     </View>
                   </View>
                 </TouchableOpacity>

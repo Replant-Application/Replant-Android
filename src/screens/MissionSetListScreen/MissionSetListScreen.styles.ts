@@ -126,18 +126,10 @@ export const styles = StyleSheet.create({
       fontWeight: typography.fontWeight.medium,
     }),
   },
-  ratingContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing[1],
-  },
-  stars: {
-    ...createTextStyle('sm', {
-      color: colors.warning,
-    }),
-  },
-  ratingText: {
-    ...createSecondaryTextStyle('xs'),
+  likeIcon: {
+    width: 20,
+    height: 20,
+    tintColor: colors.gray[400],
   },
   shareButton: {
     padding: spacing[2],

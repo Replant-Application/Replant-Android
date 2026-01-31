@@ -129,8 +129,8 @@ export interface PublicTodoList {
   creatorId: number;
   creatorNickname: string;
   missionCount: number;
-  averageRating: number;    // 평균 별점
-  reviewCount: number;      // 리뷰 수
+  likeCount: number;       // 좋아요 수
+  isLiked?: boolean;       // 현재 사용자 좋아요 여부
   createdAt: string;
 }
 
@@ -147,20 +147,6 @@ export interface PublicMissionInfo {
 export interface PublicTodoListDetail extends PublicTodoList {
   missions: PublicMissionInfo[];
   updatedAt: string;
-}
-
-export interface TodoListReview {
-  id: number;
-  todoListId: number;
-  userId: number;
-  userNickname: string;
-  rating: number;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface ReviewRequest {
-  rating: number;
 }
 
 export interface PageResponse<T> {

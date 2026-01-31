@@ -69,7 +69,6 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation, route }) 
     handleShareConfirm,
     handleShareConfirmCancel,
     handleUnshareMissionSet,
-    renderStars,
   } = useCommunityScreenContainer({ navigation, route });
 
   if (loading) {
@@ -252,7 +251,6 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation, route }) 
           onFilterPress={() => setShowMissionSetFilterModal(true)}
           refreshing={refreshing}
           onRefresh={onRefresh}
-          renderStars={renderStars}
           navigation={navigation}
           onUnshare={handleUnshareMissionSet}
         />

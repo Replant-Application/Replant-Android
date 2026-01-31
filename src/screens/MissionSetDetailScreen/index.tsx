@@ -1,6 +1,6 @@
 /**
  * 미션세트 상세 화면
- * 미션세트의 미션 목록 확인 및 리뷰 기능
+ * 미션세트의 미션 목록 확인 및 좋아요
  */
 
 import React from 'react';
@@ -9,6 +9,7 @@ import {
   Text,
   ScrollView,
   TouchableOpacity,
+  Image,
   ImageBackground,
 } from 'react-native';
 import { NavigationProp, RouteProp } from '@react-navigation/native';
@@ -23,18 +24,13 @@ interface MissionSetDetailScreenProps {
 }
 
 const MissionSetDetailScreen: React.FC<MissionSetDetailScreenProps> = ({ navigation, route }) => {
-  // 비즈니스 로직은 Container에서 처리
   const {
     missionSet,
-    myReview,
     loading,
-    reviewRating,
-    submittingReview,
+    liking,
     isOwner,
-    setReviewRating,
-    handleSubmitReview,
-    handleDeleteReview,
-    renderStars,
+    handleLike,
+    handleUnlike,
   } = useMissionSetDetailScreenContainer({ navigation, route });
 
   if (loading) {
@@ -45,6 +41,12 @@ const MissionSetDetailScreen: React.FC<MissionSetDetailScreenProps> = ({ navigat
     return null;
   }
 
+  const detail = missionSet as { isLiked?: boolean; likeCount?: number; isPublic?: boolean };
+  const isLiked = detail.isLiked ?? false;
+  const likeCount = detail.likeCount ?? 0;
+  const isPublic = detail.isPublic ?? false;
+  const canLike = !isOwner && isPublic;
+
   return (
     <ImageBackground
       source={require('../../assets/images/background.png')}
@@ -52,31 +54,27 @@ const MissionSetDetailScreen: React.FC<MissionSetDetailScreenProps> = ({ navigat
       resizeMode="cover"
       accessibilityElementsHidden={true}
     >
-      <Header 
-        title="투두리스트 상세" 
-        showBackButton={true} 
+      <Header
+        title="투두리스트 상세"
+        showBackButton={true}
         navigation={{
           ...navigation,
           goBack: () => {
-            // returnScreen이 있으면 해당 화면으로 복원
             const returnScreen = route.params?.returnScreen;
             if (returnScreen) {
               const navParams: any = {};
-              // Community로 돌아갈 때 activeTab 전달
               if (returnScreen === 'Community' && route.params?.activeTab) {
                 navParams.activeTab = route.params.activeTab;
               }
               navigation.navigate(returnScreen as any, navParams);
             } else {
-              // 기본 동작: 이전 화면으로 돌아가기
               navigation.goBack?.();
             }
           },
-        }} 
+        }}
       />
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        {/* 헤더 정보 */}
         <View style={styles.headerCard}>
           <Text style={styles.title}>{missionSet.title}</Text>
 
@@ -91,14 +89,37 @@ const MissionSetDetailScreen: React.FC<MissionSetDetailScreenProps> = ({ navigat
           </View>
 
           <View style={styles.statsRow}>
-            <View style={styles.ratingContainer}>
-              <Text style={styles.stars}>{renderStars(missionSet.averageRating || 0)}</Text>
-              <Text style={styles.reviewCount}>({missionSet.reviewCount ?? 0})</Text>
+            <View style={styles.likeContainer}>
+              {canLike ? (
+                <TouchableOpacity
+                  onPress={isLiked ? handleUnlike : handleLike}
+                  disabled={liking}
+                  style={styles.likeButton}
+                  accessibilityRole="button"
+                  accessibilityLabel={isLiked ? '좋아요 취소' : '좋아요'}
+                >
+                  <Image
+                    source={require('../../assets/images/heart.png')}
+                    style={[styles.likeIcon, isLiked && styles.likeIconActive]}
+                    resizeMode="contain"
+                    accessibilityLabel="좋아요 아이콘"
+                    accessibilityElementsHidden={true}
+                  />
+                </TouchableOpacity>
+              ) : (
+                <Image
+                  source={require('../../assets/images/heart.png')}
+                  style={styles.likeIcon}
+                  resizeMode="contain"
+                  accessibilityLabel="좋아요 아이콘"
+                  accessibilityElementsHidden={true}
+                />
+              )}
+              <Text style={styles.likeCount}>{likeCount}</Text>
             </View>
           </View>
         </View>
 
-        {/* 미션 목록 */}
         <View style={styles.missionSection}>
           <Text style={styles.sectionTitle}>포함된 미션</Text>
 
@@ -120,100 +141,10 @@ const MissionSetDetailScreen: React.FC<MissionSetDetailScreenProps> = ({ navigat
           )}
         </View>
 
-        {/* 리뷰 섹션 */}
-        {!isOwner && (missionSet as any).isPublic && (
-          <View style={styles.reviewSection}>
-            <Text style={styles.sectionTitle}>리뷰</Text>
-
-            {myReview && myReview.rating ? (
-              <View style={styles.myReviewCard}>
-                <View style={styles.myReviewHeader}>
-                  <Text style={styles.myReviewLabel}>내 리뷰</Text>
-                  <TouchableOpacity
-                    onPress={handleDeleteReview}
-                    disabled={submittingReview}
-                    style={styles.reviewCancelButton}
-                    accessibilityRole="button"
-                    accessibilityLabel="리뷰 취소"
-                  >
-                    <Text style={styles.reviewCancelButtonText}>리뷰 취소</Text>
-                  </TouchableOpacity>
-                </View>
-                <View style={styles.ratingSelector}>
-                  <TouchableOpacity
-                    onPress={handleDeleteReview}
-                    disabled={submittingReview}
-                    style={styles.ratingOptionZero}
-                    accessibilityRole="button"
-                    accessibilityLabel="선택 안 함"
-                  >
-                    <Text style={styles.ratingOptionZeroText}>선택 안 함</Text>
-                  </TouchableOpacity>
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <TouchableOpacity
-                      key={star}
-                      onPress={() => handleSubmitReview(star)}
-                      disabled={submittingReview}
-                      activeOpacity={0.7}
-                      accessibilityRole="button"
-                      accessibilityLabel={`별점 ${star}점`}
-                      accessibilityState={{ selected: star <= myReview.rating }}
-                    >
-                      <Text style={[
-                        styles.ratingStar,
-                        star <= myReview.rating && styles.ratingStarActive
-                      ]}>
-                        ★
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              </View>
-            ) : (
-              <View style={styles.reviewFormCard}>
-                <Text style={styles.reviewFormLabel}>별점을 선택해주세요</Text>
-                <View style={styles.ratingSelector}>
-                  <TouchableOpacity
-                    onPress={() => setReviewRating(0)}
-                    style={[styles.ratingOptionZero, reviewRating === 0 && styles.ratingOptionZeroActive]}
-                    accessibilityRole="button"
-                    accessibilityLabel="선택 안 함"
-                  >
-                    <Text style={styles.ratingOptionZeroText}>선택 안 함</Text>
-                  </TouchableOpacity>
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <TouchableOpacity
-                      key={star}
-                      onPress={() => handleSubmitReview(star)}
-                      disabled={submittingReview}
-                      activeOpacity={0.7}
-                      accessibilityRole="button"
-                      accessibilityLabel={`별점 ${star}점`}
-                      accessibilityState={{ selected: star <= reviewRating }}
-                    >
-                      <Text style={[
-                        styles.ratingStar,
-                        star <= reviewRating && styles.ratingStarActive
-                      ]}>
-                        ★
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-                {submittingReview && (
-                  <Text style={styles.submittingText}>등록 중...</Text>
-                )}
-              </View>
-            )}
-          </View>
-        )}
-
-        {/* 여백 */}
         <View style={styles.spacer} />
       </ScrollView>
     </ImageBackground>
   );
 };
-
 
 export default MissionSetDetailScreen;
