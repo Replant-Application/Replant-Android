@@ -167,6 +167,29 @@ export const styles = StyleSheet.create({
       textAlign: 'center',
     }),
   },
+  // 추천 메시지 칩 (입력창 위)
+  recommendedChipsContainer: {
+    flexDirection: 'column',
+    gap: spacing[2],
+    marginBottom: spacing[3],
+  },
+  recommendedChip: {
+    alignSelf: 'stretch',
+    backgroundColor: colors.background.secondary,
+    borderRadius: borderRadius.full,
+    paddingVertical: spacing[2],
+    paddingHorizontal: spacing[4],
+    borderWidth: 1,
+    borderColor: colors.border.light,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  recommendedChipText: {
+    ...createTextStyle('xs', {
+      color: colors.text.secondary,
+      fontWeight: typography.fontWeight.medium,
+    }),
+  },
   // 4. 하단 입력창 - 둥근 모서리 + 키보드 반응형
   inputContainer: {
     marginHorizontal: spacing[3],

@@ -26,6 +26,12 @@ import { styles } from './ReantChatScreen.styles';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
+// 추천 메시지 (은둔형 외톨이 등 응원·대화 유도) — 두 개만
+const RECOMMENDED_MESSAGES = [
+  '나를 응원하는 말을 해줘',
+  '오늘 하루 잘 보내고 싶어',
+];
+
 // 시간대별 배경 이미지 결정
 const getBackgroundImage = (): 'day' | 'night' => {
   const hour = new Date().getHours();
@@ -338,6 +344,20 @@ const ReantChatScreen: React.FC<ReantChatScreenProps> = ({ navigation, route: _r
             {error && (
               <Text style={styles.errorText}>⚠️ {error}</Text>
             )}
+            <View style={styles.recommendedChipsContainer}>
+              {RECOMMENDED_MESSAGES.map((msg) => (
+                <TouchableOpacity
+                  key={msg}
+                  style={styles.recommendedChip}
+                  onPress={() => setInputText(msg)}
+                  activeOpacity={0.7}
+                  accessibilityRole="button"
+                  accessibilityLabel={`추천 메시지: ${msg}`}
+                >
+                  <Text style={styles.recommendedChipText}>{msg}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
             <View style={styles.inputRow}>
               <TextInput
                 style={styles.input}
