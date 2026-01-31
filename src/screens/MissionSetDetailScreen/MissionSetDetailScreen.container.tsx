@@ -12,6 +12,7 @@ import {
   MissionSetDetail,
   createReview,
   updateReview,
+  deleteReview,
   getMyReview,
   MissionSetReview,
 } from '../../api/todolistApi';
@@ -33,7 +34,7 @@ export const useMissionSetDetailScreenContainer = ({ navigation, route }: Missio
 
   // 리뷰 관련 상태
   const [myReview, setMyReview] = useState<MissionSetReview | null>(null);
-  const [reviewRating, setReviewRating] = useState(5);
+  const [reviewRating, setReviewRating] = useState(0); // 0 = 선택 없음
   const [submittingReview, setSubmittingReview] = useState(false);
 
   /**
@@ -110,12 +111,15 @@ export const useMissionSetDetailScreenContainer = ({ navigation, route }: Missio
   }, [loadMissionSetDetail, loadMyReview]);
 
   /**
-   * 리뷰 제출 (작성 또는 수정)
+   * 리뷰 제출 (작성 또는 수정) — 1~5점만. 0은 handleDeleteReview로 처리.
    */
   const handleSubmitReview = useCallback(async (rating?: number) => {
     if (!missionSet) return;
+    if (rating !== undefined && rating < 1) return; // 0은 제출하지 않음
 
     const ratingToSubmit = rating ?? reviewRating;
+    if (ratingToSubmit < 1) return;
+
     const isUpdate = myReview && myReview.id;
     setSubmittingReview(true);
     try {
@@ -125,17 +129,14 @@ export const useMissionSetDetailScreenContainer = ({ navigation, route }: Missio
 
       let result;
       if (isUpdate) {
-        // 기존 리뷰가 있으면 수정
         result = await updateReview(myReview.id, reviewData);
       } else {
-        // 리뷰가 없으면 새로 작성
         result = await createReview(missionSet.id, reviewData);
       }
 
       if (result.success && result.data) {
         setMyReview(result.data);
         setReviewRating(ratingToSubmit);
-        // 미션세트 평점 갱신을 위해 다시 로딩
         loadMissionSetDetail();
       } else {
         Alert.alert('오류', result.error || (isUpdate ? '리뷰 수정에 실패했습니다.' : '리뷰 등록에 실패했습니다.'));
@@ -147,6 +148,29 @@ export const useMissionSetDetailScreenContainer = ({ navigation, route }: Missio
       setSubmittingReview(false);
     }
   }, [missionSet, myReview, reviewRating, loadMissionSetDetail]);
+
+  /**
+   * 리뷰 취소 (삭제) — 이미 남긴 리뷰를 삭제하거나 0점(선택 없음)으로 돌리기
+   */
+  const handleDeleteReview = useCallback(async () => {
+    if (!myReview?.id) return;
+    setSubmittingReview(true);
+    try {
+      const result = await deleteReview(myReview.id);
+      if (result.success) {
+        setMyReview(null);
+        setReviewRating(0);
+        loadMissionSetDetail();
+      } else {
+        Alert.alert('오류', result.error || '리뷰 취소에 실패했습니다.');
+      }
+    } catch (error) {
+      logError('리뷰 삭제 실패', error as Error);
+      Alert.alert('오류', '리뷰 취소 중 문제가 발생했습니다.');
+    } finally {
+      setSubmittingReview(false);
+    }
+  }, [myReview, loadMissionSetDetail]);
 
   /**
    * 별점 렌더링
@@ -190,6 +214,7 @@ export const useMissionSetDetailScreenContainer = ({ navigation, route }: Missio
     setReviewRating,
     // Handlers
     handleSubmitReview,
+    handleDeleteReview,
     // Utils
     renderStars,
   };

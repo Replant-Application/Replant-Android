@@ -31,7 +31,9 @@ const MissionSetDetailScreen: React.FC<MissionSetDetailScreenProps> = ({ navigat
     reviewRating,
     submittingReview,
     isOwner,
+    setReviewRating,
     handleSubmitReview,
+    handleDeleteReview,
     renderStars,
   } = useMissionSetDetailScreenContainer({ navigation, route });
 
@@ -127,40 +129,62 @@ const MissionSetDetailScreen: React.FC<MissionSetDetailScreenProps> = ({ navigat
               <View style={styles.myReviewCard}>
                 <View style={styles.myReviewHeader}>
                   <Text style={styles.myReviewLabel}>내 리뷰</Text>
-                  <View style={styles.ratingSelector}>
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <TouchableOpacity
-                        key={star}
-                        onPress={() => {
-                          handleSubmitReview(star);
-                        }}
-                        disabled={submittingReview}
-                        activeOpacity={0.7}
-                        accessibilityRole="button"
-                        accessibilityLabel={`별점 ${star}점`}
-                        accessibilityState={{ selected: star <= myReview.rating }}
-                      >
-                        <Text style={[
-                          styles.ratingStar,
-                          star <= myReview.rating && styles.ratingStarActive
-                        ]}>
-                          ★
-                        </Text>
-                      </TouchableOpacity>
-                    ))}
-                  </View>
+                  <TouchableOpacity
+                    onPress={handleDeleteReview}
+                    disabled={submittingReview}
+                    style={styles.reviewCancelButton}
+                    accessibilityRole="button"
+                    accessibilityLabel="리뷰 취소"
+                  >
+                    <Text style={styles.reviewCancelButtonText}>리뷰 취소</Text>
+                  </TouchableOpacity>
+                </View>
+                <View style={styles.ratingSelector}>
+                  <TouchableOpacity
+                    onPress={handleDeleteReview}
+                    disabled={submittingReview}
+                    style={styles.ratingOptionZero}
+                    accessibilityRole="button"
+                    accessibilityLabel="선택 안 함"
+                  >
+                    <Text style={styles.ratingOptionZeroText}>선택 안 함</Text>
+                  </TouchableOpacity>
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <TouchableOpacity
+                      key={star}
+                      onPress={() => handleSubmitReview(star)}
+                      disabled={submittingReview}
+                      activeOpacity={0.7}
+                      accessibilityRole="button"
+                      accessibilityLabel={`별점 ${star}점`}
+                      accessibilityState={{ selected: star <= myReview.rating }}
+                    >
+                      <Text style={[
+                        styles.ratingStar,
+                        star <= myReview.rating && styles.ratingStarActive
+                      ]}>
+                        ★
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
                 </View>
               </View>
             ) : (
               <View style={styles.reviewFormCard}>
                 <Text style={styles.reviewFormLabel}>별점을 선택해주세요</Text>
                 <View style={styles.ratingSelector}>
+                  <TouchableOpacity
+                    onPress={() => setReviewRating(0)}
+                    style={[styles.ratingOptionZero, reviewRating === 0 && styles.ratingOptionZeroActive]}
+                    accessibilityRole="button"
+                    accessibilityLabel="선택 안 함"
+                  >
+                    <Text style={styles.ratingOptionZeroText}>선택 안 함</Text>
+                  </TouchableOpacity>
                   {[1, 2, 3, 4, 5].map((star) => (
                     <TouchableOpacity
                       key={star}
-                      onPress={() => {
-                        handleSubmitReview(star);
-                      }}
+                      onPress={() => handleSubmitReview(star)}
                       disabled={submittingReview}
                       activeOpacity={0.7}
                       accessibilityRole="button"

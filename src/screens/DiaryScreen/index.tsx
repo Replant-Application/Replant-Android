@@ -541,26 +541,31 @@ const DiaryScreen: React.FC = () => {
 
         {/* 버튼 */}
         {currentStep === 'welcome' ? (
-          <View style={styles.modalButtons}>
-            <TouchableOpacity 
-              style={styles.writeButton}
-              onPress={handleStartWriting}
-              accessibilityRole="button"
-              accessibilityLabel="일기 작성하기"
-            >
-              <Text style={styles.writeButtonText}>일기 작성하기</Text>
-            </TouchableOpacity>
-            {diaries.length > 0 && (
+          <>
+            <View style={styles.modalButtons}>
               <TouchableOpacity 
-                style={styles.viewButton}
-                onPress={handleViewDiaries}
+                style={styles.writeButton}
+                onPress={handleStartWriting}
                 accessibilityRole="button"
-                accessibilityLabel="일기 보기"
+                accessibilityLabel="일기 작성하기"
               >
-                <Text style={styles.viewButtonText}>일기 보기</Text>
+                <Text style={styles.writeButtonText}>일기 작성하기</Text>
               </TouchableOpacity>
-            )}
-          </View>
+              {diaries.length > 0 && (
+                <TouchableOpacity 
+                  style={styles.viewButton}
+                  onPress={handleViewDiaries}
+                  accessibilityRole="button"
+                  accessibilityLabel="일기 보기"
+                >
+                  <Text style={styles.viewButtonText}>일기 보기</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+            <Text style={styles.welcomeNotice} accessibilityRole="summary" accessibilityLabel="안내: 일기는 하루에 한 번만 작성할 수 있습니다.">
+              * 일기는 하루에 한번만 작성 가능해요
+            </Text>
+          </>
         ) : currentStep === 'expression' ? (
           <View style={[styles.modalButtons, styles.modalButtonsExpression]}>
             <TouchableOpacity 

@@ -20,7 +20,7 @@ export const styles = StyleSheet.create({
     backgroundColor: colors.overlay.dark,
     borderRadius: borderRadius.lg,
     padding: spacing[6],
-    paddingVertical: spacing[8],
+    paddingVertical: spacing[5],
     marginHorizontal: spacing[4],
     marginTop: spacing[20],
     minHeight: 180,
@@ -47,6 +47,17 @@ export const styles = StyleSheet.create({
   },
   modalQuestionCenter: {
     textAlign: 'center',
+  },
+  /** 버튼 아래 경고/안내 문구 (작은 글씨) */
+  welcomeNotice: {
+    marginTop: spacing[6],
+    marginBottom: spacing[1],
+    textAlign: 'left',
+    ...createTextStyle('xs', {
+      color: 'rgba(255, 255, 255, 0.65)',
+      fontWeight: typography.fontWeight.regular,
+      lineHeight: getOptimizedLineHeight(typography.fontSize.xs) * 1.3,
+    }),
   },
   modalContent: {
     marginBottom: spacing[3],

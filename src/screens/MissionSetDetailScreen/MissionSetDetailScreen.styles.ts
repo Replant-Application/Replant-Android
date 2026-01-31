@@ -191,6 +191,31 @@ export const styles = StyleSheet.create({
   ratingStarActive: {
     color: colors.warning,
   },
+  reviewCancelButton: {
+    paddingVertical: spacing[1],
+    paddingHorizontal: spacing[2],
+  },
+  reviewCancelButtonText: {
+    ...createSecondaryTextStyle('xs', {
+      color: colors.error[500],
+    }),
+  },
+  ratingOptionZero: {
+    paddingVertical: spacing[1],
+    paddingHorizontal: spacing[2],
+    borderRadius: borderRadius.base,
+    justifyContent: 'center',
+    minWidth: 56,
+    alignItems: 'center',
+  },
+  ratingOptionZeroActive: {
+    backgroundColor: colors.primary[100],
+  },
+  ratingOptionZeroText: {
+    ...createSecondaryTextStyle('xs', {
+      color: colors.text.secondary,
+    }),
+  },
   reviewInput: {
     ...inputStyles.base(),
     backgroundColor: colors.background.secondary,
