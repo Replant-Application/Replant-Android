@@ -21,7 +21,7 @@ import {
 } from 'react-native';
 import { useOverlay } from '../../contexts/OverlayContext';
 import { getNotifications, markNotificationAsRead } from '../../api/notificationApi';
-import { getUserMission, getCurrentSpontaneousMissions, getCurrentWakeupMission } from '../../api/missionApi';
+import { getCurrentSpontaneousMissions, getCurrentWakeupMission } from '../../api/missionApi';
 import { getMealLogDetail } from '../../api/mealLogApi';
 import { formatTimeAgo } from '../../utils/dateUtils';
 import { SCREEN_NAMES } from '../../utils/constants';
@@ -309,7 +309,6 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
               missionEmoji: '🍽️',
             });
           } else if (type === 'SPONTANEOUS_DIARY') {
-<<<<<<< HEAD
             // 감성일기 미션 → 현재 진행 중인 미션 확인
             const currentMissionsResult = await getCurrentSpontaneousMissions();
             

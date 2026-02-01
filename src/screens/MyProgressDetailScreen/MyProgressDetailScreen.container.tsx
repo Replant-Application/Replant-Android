@@ -19,7 +19,6 @@ export const useMyProgressDetailScreenContainer = ({ navigation }: MyProgressDet
   const [badgesLoading, setBadgesLoading] = useState(true);
 
   /**
-<<<<<<< HEAD
    * UserMission을 Mission 타입으로 변환
    */
   const transformUserMissionToMission = useCallback((userMission: UserMission): Mission | null => {
