@@ -50,4 +50,5 @@ export const SCREEN_NAMES: Record<string, string> = {
   SPONTANEOUS_MISSION_SETUP: 'SpontaneousMissionSetup',
   WAKE_UP_VERIFICATION: 'WakeUpVerification',
   REANT_CHAT: 'ReantChat',
+  CATEGORY_SELECT: 'CategorySelect',
 } as const;

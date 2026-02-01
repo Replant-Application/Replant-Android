@@ -19,6 +19,9 @@ const RatingSelector: React.FC<RatingSelectorProps> = ({ rating, onRatingChange 
           key={star} 
           onPress={() => onRatingChange(star)} 
           activeOpacity={0.7}
+          accessibilityRole="button"
+          accessibilityLabel={`별점 ${star}점`}
+          accessibilityState={{ selected: star <= rating }}
         >
           <Text style={[styles.star, star <= rating && styles.starActive]}>
             ★

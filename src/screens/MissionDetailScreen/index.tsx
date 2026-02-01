@@ -259,6 +259,9 @@ const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({ navigation, r
                     onPress={() => setReviewRating(star)}
                     activeOpacity={0.7}
                     style={styles.starButton}
+                    accessibilityRole="button"
+                    accessibilityLabel={`별점 ${star}점`}
+                    accessibilityState={{ selected: star <= reviewRating }}
                   >
                     <Text style={styles.starText}>
                       {star <= reviewRating ? '★' : '☆'}
@@ -285,6 +288,9 @@ const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({ navigation, r
               onPress={handleSubmitReview}
               disabled={!reviewContent.trim() || submittingReview}
               activeOpacity={0.7}
+              accessibilityRole="button"
+              accessibilityLabel="후기 등록"
+              accessibilityState={{ disabled: !reviewContent.trim() || submittingReview }}
             >
               {submittingReview ? (
                 <ActivityIndicator size="small" color={colors.white} />
@@ -315,6 +321,8 @@ const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({ navigation, r
                 <TouchableOpacity
                   style={styles.loadMoreButton}
                   onPress={loadMoreReviews}
+                  accessibilityRole="button"
+                  accessibilityLabel="후기 더 보기"
                 >
                   <Text style={styles.loadMoreText}>더 보기</Text>
                 </TouchableOpacity>

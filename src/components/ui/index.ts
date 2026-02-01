@@ -15,6 +15,7 @@ export { default as ProgressBar } from './progressBar';
 export { default as SectionTitle } from './sectionTitle';
 export { default as ConfirmModal } from './confirmModal';
 export { default as AlertModal } from './alertModal';
+export { default as FullScreenImageViewer } from './fullScreenImageViewer';
 export { default as UpdateModal } from './updateModal';
 export { TabBar } from './tabBar';
 export type { TabItem, TabBarProps } from './tabBar';

@@ -31,6 +31,15 @@ export type RootStackParamList = {
       isPublic?: boolean;
       worryType?: string;
     };
+    returnScreen?: 'TodoListCreate' | 'Mission'; // 돌아갈 화면 지정
+    /** 투두리스트 생성 화면에서 넘어온 경우, 돌아갈 때 복원할 상태 */
+    todoListRestoreState?: {
+      randomMissions: Array<{ id: number; title: string; description: string; missionType: string; verificationType: string; category: string; expReward: number }>;
+      selectedCustomMissions: number[];
+      missionTimeRanges?: Record<number, { start: string; end: string }>;
+      title?: string;
+      description?: string;
+    };
   };
   CounselingSelect: undefined;
   PlacesSearch: undefined;
@@ -125,6 +134,20 @@ export type RootStackParamList = {
     userMissionId: number;
   };
   ReantChat: undefined;
+  TodoList: {
+    refresh?: boolean; // 새로고침 여부
+  };
+  TodoListCreate: {
+    activeStep?: 'random' | 'custom' | 'confirm'; // 돌아올 때 활성화할 단계
+    /** 커스텀 미션 생성에서 돌아올 때 복원할 상태 (공식 미션 등 유지) */
+    todoListRestoreState?: {
+      randomMissions: Array<{ id: number; title: string; description: string; missionType: string; verificationType: string; category: string; expReward: number }>;
+      selectedCustomMissions: number[];
+      missionTimeRanges?: Record<number, { start: string; end: string }>;
+      title?: string;
+      description?: string;
+    };
+  };
   MissionSetDetail: {
     missionSetId: number;
     returnScreen?: 'TodoList' | 'Community' | 'MissionSetList'; // 뒤로가기 시 복원할 화면

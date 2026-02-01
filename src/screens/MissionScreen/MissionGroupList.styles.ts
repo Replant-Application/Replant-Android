@@ -17,6 +17,7 @@ export const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: spacing[4],
+    paddingTop: spacing[2],
     paddingBottom: spacing[20],
   },
   fab: {
@@ -68,7 +69,7 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     marginBottom: spacing[3],
-    marginTop: spacing[2],
+    marginTop: spacing[1],
   },
   filterCheckboxWrapper: {
     flexDirection: 'row',

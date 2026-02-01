@@ -4,7 +4,7 @@
  */
 
 import { StyleSheet, Platform } from 'react-native';
-import { typography } from '../../../utils/designTokens';
+import { colors, typography } from '../../../utils/designTokens';
 import { createTextStyle } from '../../../utils/styles/textStyles';
 
 export const styles = StyleSheet.create({
@@ -17,15 +17,23 @@ export const styles = StyleSheet.create({
     includeFontPadding: false,
   },
   sm: {
-    ...createTextStyle('sm'),
+    ...createTextStyle('sm', {
+      color: colors.text.primary,
+    }),
   },
   base: {
-    ...createTextStyle('base'),
+    ...createTextStyle('base', {
+      color: colors.text.primary,
+    }),
   },
   lg: {
-    ...createTextStyle('lg'),
+    ...createTextStyle('lg', {
+      color: colors.text.primary,
+    }),
   },
   xl: {
-    ...createTextStyle('xl'),
+    ...createTextStyle('xl', {
+      color: colors.text.primary,
+    }),
   },
 });

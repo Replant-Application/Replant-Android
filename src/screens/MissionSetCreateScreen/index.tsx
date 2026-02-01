@@ -106,6 +106,9 @@ const MissionSetCreateScreen: React.FC<MissionSetCreateScreenProps> = ({ navigat
                 onValueChange={setIsPublic}
                 trackColor={{ false: colors.gray[300], true: colors.primary[300] }}
                 thumbColor={isPublic ? colors.primary[500] : colors.gray[100]}
+                accessibilityRole="switch"
+                accessibilityLabel="투두리스트 공개"
+                accessibilityState={{ checked: isPublic }}
               />
             </View>
           </View>
@@ -141,6 +144,9 @@ const MissionSetCreateScreen: React.FC<MissionSetCreateScreenProps> = ({ navigat
                       ]}
                       onPress={() => toggleMission(missionId)}
                       activeOpacity={0.7}
+                      accessibilityRole="button"
+                      accessibilityLabel={getMissionTitle(userMission)}
+                      accessibilityState={{ selected: isSelected }}
                     >
                       <View style={[
                         styles.checkbox,
@@ -178,6 +184,9 @@ const MissionSetCreateScreen: React.FC<MissionSetCreateScreenProps> = ({ navigat
             onPress={handleCreate}
             disabled={!title.trim() || selectedMissionIds.length === 0 || submitting}
             activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel={submitting ? '생성 중' : '투두리스트 만들기'}
+            accessibilityState={{ disabled: !title.trim() || selectedMissionIds.length === 0 || submitting }}
           >
             <Text style={styles.createButtonText}>
               {submitting ? '생성 중...' : '투두리스트 만들기'}

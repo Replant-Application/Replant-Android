@@ -3,6 +3,7 @@ node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+build-auto.ps1
 
 # Expo
 .expo/
@@ -72,3 +73,4 @@ keystore_base64.txt
 # Docs and Scripts
 docs/
 scripts/
+builds/

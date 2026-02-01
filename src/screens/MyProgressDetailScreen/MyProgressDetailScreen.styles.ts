@@ -115,6 +115,39 @@ export const styles = StyleSheet.create({
       color: colors.primary[600],
     }),
   },
+  paginationRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing[4],
+    marginTop: spacing[4],
+    paddingTop: spacing[4],
+  },
+  pageButton: {
+    paddingVertical: spacing[2],
+    paddingHorizontal: spacing[4],
+    borderRadius: borderRadius.lg,
+    backgroundColor: colors.primary[100],
+  },
+  pageButtonDisabled: {
+    backgroundColor: colors.gray[100],
+    opacity: 0.7,
+  },
+  pageButtonText: {
+    ...createTextStyle('sm', {
+      fontWeight: typography.fontWeight.medium,
+      color: colors.primary[600],
+    }),
+  },
+  pageButtonTextDisabled: {
+    color: colors.gray[400],
+  },
+  pageIndicatorText: {
+    ...createTextStyle('sm', {
+      fontWeight: typography.fontWeight.medium,
+      color: colors.text.secondary,
+    }),
+  },
   pageContainer: {
     width: SCREEN_WIDTH - spacing[8],
     alignItems: 'center',

@@ -13,8 +13,8 @@ export interface SoundSettings {
 
 /** 접근성 3.4: 3초 이상 배경음 자동재생 금지. 기본 OFF, 설정에서 켜기 전까지 재생하지 않음 */
 const DEFAULT_SETTINGS: SoundSettings = {
-  effectVolume: 1.0,
-  backgroundVolume: 0,
+  effectVolume: 0.5, // 기본값 50%
+  backgroundVolume: 0.5, // 기본값 50%
 };
 
 /**

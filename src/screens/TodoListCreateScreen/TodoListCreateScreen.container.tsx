@@ -12,7 +12,7 @@ import { createCustomMission, CreateMissionRequest } from '../../api/missionApi'
 import { Step, TodoListCreateScreenProps, TimePeriod } from '../../types/screens/todolist';
 import { DEFAULT_START_TIME, DEFAULT_END_TIME } from '../../constants/screens/todolist';
 
-export const useTodoListCreateScreenContainer = ({ navigation }: TodoListCreateScreenProps) => {
+export const useTodoListCreateScreenContainer = ({ navigation, route }: TodoListCreateScreenProps) => {
   // 오류/알림용 AlertModal (useErrorHandler overrides)
   const [showAlert, setShowAlert] = useState(false);
   const [alertTitle, setAlertTitle] = useState('');
@@ -34,12 +34,15 @@ export const useTodoListCreateScreenContainer = ({ navigation }: TodoListCreateS
     }),
     []
   );
-  const { showError, showInfo, handleApiError } = useErrorHandler(errorHandlerOverrides);
+  const { showError, handleApiError } = useErrorHandler(errorHandlerOverrides);
 
-  const [currentStep, setCurrentStep] = useState<Step>('random');
+  const [currentStep, setCurrentStep] = useState<Step>(route?.params?.activeStep || 'random');
   const [randomMissions, setRandomMissions] = useState<MissionSimple[]>([]);
   const [customMissions, setCustomMissions] = useState<MissionSimple[]>([]);
   const [selectedCustomMissions, setSelectedCustomMissions] = useState<number[]>([]);
+  const [onlyMyMissions, setOnlyMyMissions] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showFilterModal, setShowFilterModal] = useState(false);
   const [isAllDay, setIsAllDay] = useState(false);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -66,6 +69,16 @@ export const useTodoListCreateScreenContainer = ({ navigation }: TodoListCreateS
 
   // 미션별 시간 범위 설정 (미션 ID -> { start: "HH:mm", end: "HH:mm" })
   const [missionTimeRanges, setMissionTimeRanges] = useState<Record<number, { start: string; end: string }>>({});
+
+  /**
+   * 12시간 형식을 24시간 형식으로 변환
+   */
+  const convertTo24Hour = useCallback((period: TimePeriod, hour: number, minute: number): string => {
+    let hours24 = hour;
+    if (period === 'PM' && hour !== 12) hours24 = hour + 12;
+    else if (period === 'AM' && hour === 12) hours24 = 0;
+    return `${String(hours24).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
+  }, []);
 
   // 모든 미션이 하루종일로 설정되어 있는지 확인
   useEffect(() => {
@@ -130,12 +143,12 @@ export const useTodoListCreateScreenContainer = ({ navigation }: TodoListCreateS
   }, [handleApiError, showError]);
 
   /**
-   * 커스텀 미션 로드
+   * 커스텀 미션 로드 (onlyMyMissions=true면 내가 만든 미션만, searchQuery로 검색)
    */
   const loadCustomMissions = useCallback(async () => {
     setLoading(true);
     try {
-      const result = await getSelectableMissions();
+      const result = await getSelectableMissions(onlyMyMissions, searchQuery);
       if (result.success && result.data) {
         setCustomMissions(result.data);
       }
@@ -144,10 +157,43 @@ export const useTodoListCreateScreenContainer = ({ navigation }: TodoListCreateS
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [onlyMyMissions, searchQuery]);
 
   /**
-   * 단계 변경 시 데이터 로드
+   * route.params.activeStep이 변경되면 currentStep 업데이트
+   */
+  useEffect(() => {
+    if (route?.params?.activeStep) {
+      setCurrentStep(route.params.activeStep);
+    }
+  }, [route?.params?.activeStep]);
+
+  /**
+   * 커스텀 미션 생성에서 돌아올 때 복원: 공식 미션·선택 상태·제목 등 유지
+   */
+  const todoListRestoreState = (route?.params as any)?.todoListRestoreState;
+  useEffect(() => {
+    const restore = todoListRestoreState;
+    if (!restore) return;
+    if (restore.randomMissions?.length) setRandomMissions(restore.randomMissions);
+    if (Array.isArray(restore.selectedCustomMissions)) setSelectedCustomMissions(restore.selectedCustomMissions);
+    if (restore.missionTimeRanges && typeof restore.missionTimeRanges === 'object') setMissionTimeRanges(restore.missionTimeRanges);
+    if (restore.title !== undefined) setTitle(restore.title);
+    if (restore.description !== undefined) setDescription(restore.description);
+    setCurrentStep('custom');
+  }, [todoListRestoreState]);
+
+  /**
+   * 화면이 포커스될 때마다 route.params.activeStep 확인 (navigate로 파라미터가 업데이트된 경우 대응)
+   */
+  useEffect(() => {
+    if (route?.params?.activeStep === 'custom') {
+      setCurrentStep('custom');
+    }
+  }, [route?.params?.activeStep]);
+
+  /**
+   * 단계 변경 시 데이터 로드 (커스텀 단계에서는 onlyMyMissions나 searchQuery 변경 시에도 재로드)
    */
   useEffect(() => {
     if (currentStep === 'random') {
@@ -155,7 +201,24 @@ export const useTodoListCreateScreenContainer = ({ navigation }: TodoListCreateS
     } else if (currentStep === 'custom') {
       loadCustomMissions();
     }
-  }, [currentStep, loadRandomMissions, loadCustomMissions]);
+  }, [currentStep, onlyMyMissions, searchQuery, loadRandomMissions, loadCustomMissions]);
+
+  /**
+   * 화면 포커스 시 커스텀 미션 목록 새로고침 및 Step 2로 설정 (CustomMissionCreateScreen에서 돌아올 때)
+   */
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      // route.params.activeStep이 'custom'이면 Step 2로 설정
+      if (route?.params?.activeStep === 'custom') {
+        setCurrentStep('custom');
+        loadCustomMissions();
+      } else if (currentStep === 'custom') {
+        loadCustomMissions();
+      }
+    });
+
+    return unsubscribe;
+  }, [navigation, route?.params?.activeStep, currentStep, loadCustomMissions]);
 
   /**
    * 커스텀 미션 선택/해제
@@ -166,6 +229,23 @@ export const useTodoListCreateScreenContainer = ({ navigation }: TodoListCreateS
       return [...prev, missionId];
     });
   }, []);
+
+  /**
+   * 커스텀 미션 생성 화면으로 이동 (진행 중인 공식 미션·선택 상태를 넘겨 돌아올 때 복원)
+   */
+  const handleNavigateToCustomMissionCreate = useCallback(() => {
+    const restorePayload = {
+      randomMissions,
+      selectedCustomMissions: [...selectedCustomMissions],
+      missionTimeRanges: { ...missionTimeRanges },
+      title,
+      description,
+    };
+    (navigation as any).navigate(SCREEN_NAMES.CUSTOM_MISSION_CREATE, {
+      returnScreen: 'TodoListCreate',
+      todoListRestoreState: restorePayload,
+    });
+  }, [navigation, randomMissions, selectedCustomMissions, missionTimeRanges, title, description]);
 
   /**
    * 미션 리롤
@@ -295,17 +375,7 @@ export const useTodoListCreateScreenContainer = ({ navigation }: TodoListCreateS
     } finally {
       setCreating(false);
     }
-  }, [selectedCustomMissions, randomMissions, missionTimeRanges, title, description, showInfo, handleApiError, showError]);
-
-  /**
-   * 12시간 형식을 24시간 형식으로 변환
-   */
-  const convertTo24Hour = useCallback((period: TimePeriod, hour: number, minute: number): string => {
-    let hours24 = hour;
-    if (period === 'PM' && hour !== 12) hours24 = hour + 12;
-    else if (period === 'AM' && hour === 12) hours24 = 0;
-    return `${String(hours24).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
-  }, []);
+  }, [selectedCustomMissions, randomMissions, missionTimeRanges, title, description, handleApiError, showError]);
 
   /**
    * 미션 시간 설정
@@ -423,6 +493,7 @@ export const useTodoListCreateScreenContainer = ({ navigation }: TodoListCreateS
     }
   }, [isAllDay, handleSetDefaultTimeForAll]);
 
+
   /**
    * 모든 미션 목록 (공식 + 커스텀)
    */
@@ -453,7 +524,7 @@ export const useTodoListCreateScreenContainer = ({ navigation }: TodoListCreateS
    */
   const handleTodoListSuccessClose = useCallback(() => {
     setShowTodoListSuccessModal(false);
-    navigation.navigate(SCREEN_NAMES.TODO_LIST, { refresh: true });
+    navigation.navigate('TodoList' as any, { refresh: true });
   }, [navigation]);
 
   return {
@@ -470,6 +541,12 @@ export const useTodoListCreateScreenContainer = ({ navigation }: TodoListCreateS
     // State
     currentStep,
     selectedCustomMissions,
+    onlyMyMissions,
+    setOnlyMyMissions,
+    searchQuery,
+    setSearchQuery,
+    showFilterModal,
+    setShowFilterModal,
     title,
     description,
     loading,
@@ -513,6 +590,7 @@ export const useTodoListCreateScreenContainer = ({ navigation }: TodoListCreateS
     setEndMinute,
     // Handlers
     handleCustomMissionToggle,
+    handleNavigateToCustomMissionCreate,
     handleRerollMission,
     handleCreateMission,
     handleCreate,

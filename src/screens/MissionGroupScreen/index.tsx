@@ -84,12 +84,12 @@ const MissionGroupScreen: React.FC<MissionGroupScreenProps> = ({ navigation }) =
         <Header
           title="미션 도감"
           leftButton={
-            <TouchableOpacity onPress={() => navigation.goBack()}>
+            <TouchableOpacity onPress={() => navigation.goBack()} accessibilityRole="button" accessibilityLabel="뒤로 가기">
               <Image
                 source={require('../../assets/images/left.png')}
                 style={styles.backButtonIcon}
                 resizeMode="contain"
-                accessibilityLabel="뒤로 가기"
+                accessibilityElementsHidden={true}
               />
             </TouchableOpacity>
           }
@@ -98,12 +98,14 @@ const MissionGroupScreen: React.FC<MissionGroupScreenProps> = ({ navigation }) =
               <TouchableOpacity
                 onPress={handleCreateCustomMission}
                 style={styles.createButton}
+                accessibilityRole="button"
+                accessibilityLabel="미션 생성"
               >
                 <Image
                   source={require('../../assets/images/pencil.png')}
                   style={styles.createButtonIcon}
                   resizeMode="contain"
-                  accessibilityLabel="미션 생성"
+                  accessibilityElementsHidden={true}
                 />
               </TouchableOpacity>
             ) : undefined
@@ -160,6 +162,9 @@ const MissionGroupScreen: React.FC<MissionGroupScreenProps> = ({ navigation }) =
                     ]}
                     onPress={() => handleMissionSelect(mission)}
                     activeOpacity={0.7}
+                    accessibilityRole="button"
+                    accessibilityLabel={mission.isCompleted === false ? '미션 제목 숨김' : mission.title}
+                    accessibilityState={{ selected: selectedMission?.id === mission.id }}
                   >
                     <View style={styles.missionHeader}>
                       <View style={styles.missionInfo}>
@@ -271,6 +276,8 @@ const MissionGroupScreen: React.FC<MissionGroupScreenProps> = ({ navigation }) =
                           style={styles.detailButton}
                           onPress={() => handleViewMissionDetail(selectedMission)}
                           activeOpacity={0.7}
+                          accessibilityRole="button"
+                          accessibilityLabel="미션 상세 보기"
                         >
                           <Text style={styles.detailButtonText}>미션 상세 보기</Text>
                         </TouchableOpacity>
@@ -337,6 +344,8 @@ const MissionGroupScreen: React.FC<MissionGroupScreenProps> = ({ navigation }) =
                 style={styles.loadMoreButton}
                 onPress={loadMore}
                 activeOpacity={0.7}
+                accessibilityRole="button"
+                accessibilityLabel="더 보기"
               >
                 <Text style={styles.loadMoreButtonText}>더 보기</Text>
               </TouchableOpacity>

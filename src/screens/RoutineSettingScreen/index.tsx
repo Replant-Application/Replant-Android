@@ -126,6 +126,8 @@ const RoutineSettingScreen: React.FC<RoutineSettingScreenProps> = ({ navigation 
                   <TouchableOpacity
                     style={styles.historyButton}
                     onPress={() => handleViewHistory(config)}
+                    accessibilityRole="button"
+                    accessibilityLabel="기록 보기"
                   >
                     <Text style={styles.historyButtonText}>기록</Text>
                   </TouchableOpacity>
@@ -156,6 +158,8 @@ const RoutineSettingScreen: React.FC<RoutineSettingScreenProps> = ({ navigation 
                       <TouchableOpacity
                         style={styles.timeDisplay}
                         onPress={() => setShowTimeStartPicker(true)}
+                        accessibilityRole="button"
+                        accessibilityLabel={`시간 선택, ${editTimeStart.getHours().toString().padStart(2, '0')}시 ${editTimeStart.getMinutes().toString().padStart(2, '0')}분`}
                       >
                         <Text style={styles.timeText}>
                           {editTimeStart.getHours().toString().padStart(2, '0')}:
@@ -182,6 +186,8 @@ const RoutineSettingScreen: React.FC<RoutineSettingScreenProps> = ({ navigation 
                         <TouchableOpacity
                           style={styles.timeDisplay}
                           onPress={() => setShowTimeStartPicker(true)}
+                          accessibilityRole="button"
+                          accessibilityLabel={`시작 시간 선택, ${editTimeStart.getHours().toString().padStart(2, '0')}시 ${editTimeStart.getMinutes().toString().padStart(2, '0')}분`}
                         >
                           <Text style={styles.timeText}>
                             {editTimeStart.getHours().toString().padStart(2, '0')}:
@@ -204,6 +210,8 @@ const RoutineSettingScreen: React.FC<RoutineSettingScreenProps> = ({ navigation 
                         <TouchableOpacity
                           style={styles.timeDisplay}
                           onPress={() => setShowTimeEndPicker(true)}
+                          accessibilityRole="button"
+                          accessibilityLabel={`종료 시간 선택, ${editTimeEnd.getHours().toString().padStart(2, '0')}시 ${editTimeEnd.getMinutes().toString().padStart(2, '0')}분`}
                         >
                           <Text style={styles.timeText}>
                             {editTimeEnd.getHours().toString().padStart(2, '0')}:
@@ -238,6 +246,8 @@ const RoutineSettingScreen: React.FC<RoutineSettingScreenProps> = ({ navigation 
                         <TouchableOpacity
                           style={styles.mapButton}
                           onPress={handleSearchLocation}
+                          accessibilityRole="button"
+                          accessibilityLabel="지도에서 위치 검색"
                         >
                           <Text style={styles.mapButtonText}>🗺️ 지도</Text>
                         </TouchableOpacity>
@@ -271,6 +281,9 @@ const RoutineSettingScreen: React.FC<RoutineSettingScreenProps> = ({ navigation 
                       onValueChange={setNotificationEnabled}
                       trackColor={{ false: colors.gray[300], true: colors.primary[300] }}
                       thumbColor={notificationEnabled ? colors.primary[500] : colors.gray[100]}
+                      accessibilityRole="switch"
+                      accessibilityLabel="알림 받기"
+                      accessibilityState={{ checked: notificationEnabled }}
                     />
                   </View>
 
@@ -279,6 +292,8 @@ const RoutineSettingScreen: React.FC<RoutineSettingScreenProps> = ({ navigation 
                     <TouchableOpacity
                       style={styles.cancelButton}
                       onPress={cancelEditing}
+                      accessibilityRole="button"
+                      accessibilityLabel="취소"
                     >
                       <Text style={styles.cancelButtonText}>취소</Text>
                     </TouchableOpacity>
@@ -286,6 +301,9 @@ const RoutineSettingScreen: React.FC<RoutineSettingScreenProps> = ({ navigation 
                       style={[styles.saveButton, isSaving && styles.saveButtonDisabled]}
                       onPress={() => handleSave(config)}
                       disabled={isSaving}
+                      accessibilityRole="button"
+                      accessibilityLabel={isSaving ? '저장 중' : '저장'}
+                      accessibilityState={{ disabled: isSaving }}
                     >
                       {isSaving ? (
                         <ActivityIndicator size="small" color="#fff" />
@@ -300,6 +318,8 @@ const RoutineSettingScreen: React.FC<RoutineSettingScreenProps> = ({ navigation 
                 <TouchableOpacity
                   style={styles.valueContainer}
                   onPress={() => startEditing(config)}
+                  accessibilityRole="button"
+                  accessibilityLabel={`편집, ${getDisplayValue(routine, config)}`}
                 >
                   <Text style={[
                     styles.valueText,
@@ -307,7 +327,7 @@ const RoutineSettingScreen: React.FC<RoutineSettingScreenProps> = ({ navigation 
                   ]}>
                     {getDisplayValue(routine, config)}
                   </Text>
-                  <Text style={styles.editIcon}>›</Text>
+                  <Text style={styles.editIcon} accessibilityElementsHidden={true}>›</Text>
                 </TouchableOpacity>
               )}
 
@@ -321,6 +341,8 @@ const RoutineSettingScreen: React.FC<RoutineSettingScreenProps> = ({ navigation 
                   <TouchableOpacity
                     style={styles.deleteButton}
                     onPress={() => handleDelete(routine.id, routine.title || config.name)}
+                    accessibilityRole="button"
+                    accessibilityLabel="삭제"
                   >
                     <Text style={styles.deleteButtonText}>삭제</Text>
                   </TouchableOpacity>

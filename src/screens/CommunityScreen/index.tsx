@@ -3,18 +3,25 @@
  * 일반 게시글 + 인증글(VerificationPost) 통합 표시
  */
 
-import React from 'react';
-import { View, Text, ScrollView, TouchableOpacity, TextInput, Image, Modal, RefreshControl, ImageBackground, ActivityIndicator } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import { View, Text, ScrollView, TouchableOpacity, TextInput, Image, Modal, RefreshControl, ImageBackground, ActivityIndicator, Switch, Animated } from 'react-native';
+import { spacing } from '../../utils/designTokens';
+import { formatDateKorean } from '../../utils/dateUtils';
 import { PostCard } from '../../components/specialized';
 import { Loading, ErrorBoundary, EmptyState, SimpleTabBar, Header, AlertModal, ConfirmModal } from '../../components/ui';
 import { colors } from '../../utils/designTokens';
 import { CommunityScreenProps, CommunityTab, VerificationFilter } from '../../types/screens/community';
 import { FILTER_OPTIONS } from '../../constants/screens/community';
 import MissionSetList from './components/MissionSetList';
+import MissionSetDetailScreen from '../MissionSetDetailScreen';
 import { useCommunityScreenContainer } from './CommunityScreen.container';
 import { styles } from './CommunityScreen.styles';
 
+const FADE_DURATION = 150;
+
 const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation, route }) => {
+  const missionSetFadeAnim = useRef(new Animated.Value(1)).current;
+
   // 비즈니스 로직은 Container에서 처리
   const {
     loading,
@@ -28,6 +35,7 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation, route }) 
     showFilterModal,
     refreshing,
     verificationFilter,
+    onlyMyPosts,
     showAlert,
     alertTitle,
     alertMessage,
@@ -43,6 +51,7 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation, route }) 
     setActiveTab,
     setShowFilterModal,
     setVerificationFilter,
+    setOnlyMyPosts,
     setMissionSetSearchQuery,
     setMissionSetSortBy,
     setShowMissionSetFilterModal,
@@ -57,13 +66,38 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation, route }) 
     handleShareModalClose,
     handleCreatePost,
     onRefresh,
+    currentPage,
+    totalPages,
+    handleNextPage,
+    handlePreviousPage,
     showShareConfirmModal,
     shareConfirmMissionSet,
     handleShareConfirm,
     handleShareConfirmCancel,
     handleUnshareMissionSet,
-    renderStars,
+    handleTodoListLike,
+    likingMissionSetId,
+    selectedMissionSetId,
+    onMissionSetPress,
+    closeMissionSetDetailModal,
   } = useCommunityScreenContainer({ navigation, route });
+
+  useEffect(() => {
+    if (selectedMissionSetId != null) missionSetFadeAnim.setValue(1);
+  }, [selectedMissionSetId]);
+
+  const handleCloseMissionSetModal = () => {
+    Animated.timing(missionSetFadeAnim, {
+      toValue: 0,
+      duration: FADE_DURATION,
+      useNativeDriver: true,
+    }).start(({ finished }) => {
+      if (finished) {
+        closeMissionSetDetailModal();
+        missionSetFadeAnim.setValue(1);
+      }
+    });
+  };
 
   if (loading) {
     return <Loading text="게시글을 불러오는 중..." />;
@@ -127,7 +161,7 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation, route }) 
               accessibilityRole="button"
               accessibilityLabel="필터"
               accessibilityHint="게시글 필터 옵션 열기"
-              accessibilityState={{ selected: verificationFilter !== 'all' || filter !== 'all' }}
+              accessibilityState={{ selected: verificationFilter !== 'all' || filter !== 'all' || onlyMyPosts }}
             >
               <Image
                 source={require('../../assets/images/filter.png')}
@@ -136,7 +170,7 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation, route }) 
                 accessibilityLabel="필터 아이콘"
                 accessibilityElementsHidden={true}
               />
-              {(verificationFilter !== 'all' || filter !== 'all') && (
+              {(verificationFilter !== 'all' || filter !== 'all' || onlyMyPosts) && (
                 <View style={styles.filterBadge} accessibilityElementsHidden={true} />
               )}
             </TouchableOpacity>
@@ -181,17 +215,56 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation, route }) 
             description="미션을 완료하고 커뮤니티에 공유해보세요!"
           />
         ) : (
-          <View style={styles.postsList}>
-            {filteredPosts.map(post => (
-              <PostCard
-                key={post.post_id}
-                post={post}
-                onPress={handlePostPress}
-                onLike={handleLike}
-                onHide={handleHidePost}
-              />
-            ))}
-          </View>
+          <>
+            <View style={styles.postsList}>
+              {filteredPosts.map(post => (
+                <PostCard
+                  key={post.post_id}
+                  post={post}
+                  onPress={handlePostPress}
+                  onLike={handleLike}
+                  onHide={handleHidePost}
+                />
+              ))}
+            </View>
+            
+            {/* 페이지네이션 */}
+            {totalPages > 1 && (
+              <View style={styles.paginationContainer}>
+                <TouchableOpacity
+                  style={[styles.paginationButton, currentPage === 0 && styles.paginationButtonDisabled]}
+                  onPress={handlePreviousPage}
+                  disabled={currentPage === 0}
+                  activeOpacity={0.7}
+                  accessibilityRole="button"
+                  accessibilityLabel="이전 페이지"
+                  accessibilityState={{ disabled: currentPage === 0 }}
+                >
+                  <Text style={[styles.paginationButtonText, currentPage === 0 && styles.paginationButtonTextDisabled]}>
+                    이전
+                  </Text>
+                </TouchableOpacity>
+                
+                <Text style={styles.paginationInfo}>
+                  {currentPage + 1} / {totalPages}
+                </Text>
+                
+                <TouchableOpacity
+                  style={[styles.paginationButton, currentPage >= totalPages - 1 && styles.paginationButtonDisabled]}
+                  onPress={handleNextPage}
+                  disabled={currentPage >= totalPages - 1}
+                  activeOpacity={0.7}
+                  accessibilityRole="button"
+                  accessibilityLabel="다음 페이지"
+                  accessibilityState={{ disabled: currentPage >= totalPages - 1 }}
+                >
+                  <Text style={[styles.paginationButtonText, currentPage >= totalPages - 1 && styles.paginationButtonTextDisabled]}>
+                    다음
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            )}
+          </>
         )}
       </ScrollView>
       )}
@@ -206,8 +279,8 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation, route }) 
           onFilterPress={() => setShowMissionSetFilterModal(true)}
           refreshing={refreshing}
           onRefresh={onRefresh}
-          renderStars={renderStars}
           navigation={navigation}
+          onMissionSetPress={onMissionSetPress}
           onUnshare={handleUnshareMissionSet}
         />
       )}
@@ -241,6 +314,7 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation, route }) 
           accessibilityRole="button"
           accessibilityLabel="투두리스트 공유"
           accessibilityHint="내 투두리스트를 공유합니다"
+          accessibilityState={{ disabled: myMissionSetsLoading }}
           disabled={myMissionSetsLoading}
         >
           <Image
@@ -253,6 +327,25 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation, route }) 
         </TouchableOpacity>
       )}
 
+      {/* 미션세트 상세 모달 (열림/닫힘 모두 페이드) */}
+      <Modal
+        visible={selectedMissionSetId != null}
+        animationType="fade"
+        onRequestClose={handleCloseMissionSetModal}
+      >
+        {selectedMissionSetId != null && (
+          <Animated.View style={{ flex: 1, opacity: missionSetFadeAnim }}>
+            <MissionSetDetailScreen
+              navigation={{
+                ...navigation,
+                goBack: handleCloseMissionSetModal,
+              } as any}
+              route={{ params: { missionSetId: selectedMissionSetId } } as any}
+            />
+          </Animated.View>
+        )}
+      </Modal>
+
       {/* 필터 모달 */}
       <Modal
         visible={showFilterModal}
@@ -260,11 +353,13 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation, route }) 
         animationType="fade"
         onRequestClose={handleFilterModalClose}
       >
-        <View style={styles.modalOverlay}>
+          <View style={styles.modalOverlay}>
           <TouchableOpacity
             style={styles.modalOverlayTouchable}
             activeOpacity={1}
             onPress={handleFilterModalClose}
+            accessibilityRole="button"
+            accessibilityLabel="필터 모달 닫기"
           />
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle} accessibilityRole="header">필터 선택</Text>
@@ -303,7 +398,7 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation, route }) 
             </View>
 
             {/* 인증 상태 필터 */}
-            <Text style={styles.modalSectionTitle}>인증 상태</Text>
+            <Text style={[styles.modalSectionTitle, { marginTop: spacing[5] }]}>인증 상태</Text>
             <View style={styles.filterOptionRow}>
               {[
                 { key: 'all', label: '전체' },
@@ -339,6 +434,21 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation, route }) 
               ))}
             </View>
 
+            {/* 내가 쓴 게시글만 보기 */}
+            <View style={[styles.filterOptionRow, { marginTop: spacing[6] }]}>
+              <Text style={styles.filterOptionLabel}>내가 쓴 게시글만 보기</Text>
+              <Switch
+                value={onlyMyPosts}
+                onValueChange={setOnlyMyPosts}
+                trackColor={{ false: '#E0E0E0', true: '#8B6F47' }}
+                thumbColor={onlyMyPosts ? '#FFFFFF' : '#F4F3F4'}
+                ios_backgroundColor="#E0E0E0"
+                accessibilityRole="switch"
+                accessibilityLabel="내가 쓴 게시글만 보기"
+                accessibilityState={{ checked: onlyMyPosts }}
+              />
+            </View>
+
             {/* 적용 버튼 */}
             <TouchableOpacity
               style={styles.modalApplyButton}
@@ -365,6 +475,8 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation, route }) 
             style={styles.modalOverlayTouchable}
             activeOpacity={1}
             onPress={handleMissionSetFilterModalClose}
+            accessibilityRole="button"
+            accessibilityLabel="정렬 선택 모달 닫기"
           />
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle} accessibilityRole="header">정렬 선택</Text>
@@ -473,9 +585,11 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation, route }) 
                           {missionSet.description}
                         </Text>
                       )}
-                      <Text style={styles.shareModalItemMeta}>
-                        {missionSet.missionCount}개 미션
-                      </Text>
+                      {missionSet.createdAt && (
+                        <Text style={styles.shareModalItemMeta}>
+                          {formatDateKorean(missionSet.createdAt)}
+                        </Text>
+                      )}
                     </View>
                     <View style={styles.shareModalItemAction}>
                       {sharingId === missionSet.id ? (

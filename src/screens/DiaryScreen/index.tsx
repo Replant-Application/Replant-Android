@@ -61,6 +61,8 @@ const DiaryScreen: React.FC = () => {
     handleAlertClose,
     handleSearchDateClear,
     onRefresh,
+    adjustMoodDown,
+    adjustMoodUp,
     setFactorText,
     setEmotionText,
     setExpressionText,
@@ -88,12 +90,18 @@ const DiaryScreen: React.FC = () => {
       >
         <View style={styles.detailContainer}>
           <View style={styles.viewHeader}>
-            <TouchableOpacity style={styles.backButton} onPress={handleBack}>
+            <TouchableOpacity
+              style={styles.backButton}
+              onPress={handleBack}
+              accessibilityRole="button"
+              accessibilityLabel="뒤로 가기"
+            >
               <Image
                 source={require('../../assets/images/left.png')}
                 style={styles.backButtonIcon}
                 resizeMode="contain"
                 accessibilityLabel="뒤로 가기"
+                accessibilityElementsHidden={true}
               />
             </TouchableOpacity>
           </View>
@@ -171,12 +179,16 @@ const DiaryScreen: React.FC = () => {
               <TouchableOpacity 
                 style={styles.backToListButton}
                 onPress={handleBack}
+                accessibilityRole="button"
+                accessibilityLabel="목록으로"
               >
                 <Text style={styles.backToListButtonText}>목록으로</Text>
               </TouchableOpacity>
               <TouchableOpacity 
                 style={styles.deleteButton}
                 onPress={() => handleDeleteDiary(selectedDiary.id)}
+                accessibilityRole="button"
+                accessibilityLabel="삭제하기"
               >
                 <Text style={styles.deleteButtonText}>삭제하기</Text>
               </TouchableOpacity>
@@ -216,12 +228,18 @@ const DiaryScreen: React.FC = () => {
       >
         <View style={styles.viewContainer}>
           <View style={styles.viewHeader}>
-            <TouchableOpacity style={styles.backButton} onPress={handleBack}>
+            <TouchableOpacity
+              style={styles.backButton}
+              onPress={handleBack}
+              accessibilityRole="button"
+              accessibilityLabel="뒤로 가기"
+            >
               <Image
                 source={require('../../assets/images/left.png')}
                 style={styles.backButtonIcon}
                 resizeMode="contain"
                 accessibilityLabel="뒤로 가기"
+                accessibilityElementsHidden={true}
               />
             </TouchableOpacity>
           </View>
@@ -246,6 +264,8 @@ const DiaryScreen: React.FC = () => {
                     <TouchableOpacity
                       style={styles.searchClearButton}
                       onPress={handleSearchDateClear}
+                      accessibilityRole="button"
+                      accessibilityLabel="검색 초기화"
                     >
                       <Text style={styles.searchClearText}>✕</Text>
                     </TouchableOpacity>
@@ -255,6 +275,9 @@ const DiaryScreen: React.FC = () => {
                   style={[styles.searchButton, !searchDate.trim() && styles.searchButtonDisabled]}
                   onPress={() => handleSearchByDate(searchDate)}
                   disabled={searchingByDate || !searchDate.trim()}
+                  accessibilityRole="button"
+                  accessibilityLabel="날짜로 조회"
+                  accessibilityState={{ disabled: searchingByDate || !searchDate.trim() }}
                 >
                   <Text style={styles.searchButtonText}>조회</Text>
                 </TouchableOpacity>
@@ -276,6 +299,8 @@ const DiaryScreen: React.FC = () => {
                           style={styles.diaryListItem}
                           onPress={() => handleViewDetail(diary)}
                           activeOpacity={0.7}
+                          accessibilityRole="button"
+                          accessibilityLabel={`${formatDateKorean(item.date)} 일기, ${(diary.content || '').slice(0, 30)}${(diary.content || '').length > 30 ? '…' : ''}`}
                         >
                           <View style={styles.diaryListItemContent}>
                             <View style={styles.diaryListItemHeader}>
@@ -403,8 +428,14 @@ const DiaryScreen: React.FC = () => {
           },
         ]}
       >
-        {/* 질문 */}
-        <Text style={[styles.modalQuestion, currentStep === 'confirm' && styles.modalQuestionCenter]}>{getStepMessage()}</Text>
+        {/* 질문 - 스크린 리더가 단계별 안내를 읽을 수 있도록 */}
+        <Text
+          style={[styles.modalQuestion, currentStep === 'confirm' && styles.modalQuestionCenter]}
+          accessibilityRole="header"
+          accessibilityLabel={currentStep === 'mood' ? '현재 기분이 어떤가요? 슬라이더로 0에서 100 사이 점수를 선택하세요. 왼쪽은 매우 좋지 않음, 오른쪽은 매우 좋음입니다.' : undefined}
+        >
+          {getStepMessage()}
+        </Text>
 
         {/* 단계별 컨텐츠 */}
         <View style={
@@ -416,10 +447,21 @@ const DiaryScreen: React.FC = () => {
         }>
           {currentStep === 'mood' && (
             <View style={styles.moodContainer}>
+              <Text
+                style={styles.sliderLabel}
+                accessibilityLabel={`현재 기분 ${Math.round(moodValue)}점. 0은 매우 좋지 않음, 100은 매우 좋음입니다.`}
+              >
+                현재 기분: {Math.round(moodValue)}점
+              </Text>
               <View 
                 ref={sliderRef}
                 style={styles.sliderTrack}
                 {...panResponder.panHandlers}
+                accessible={true}
+                accessibilityRole="adjustable"
+                accessibilityLabel="기분 슬라이더. 왼쪽 끝은 매우 좋지 않음 0점, 오른쪽 끝은 매우 좋음 100점입니다."
+                accessibilityHint="좌우로 드래그하여 기분 점수를 변경한 뒤, 선택 완료 버튼을 누르면 다음 단계로 갑니다."
+                accessibilityValue={{ min: 0, max: 100, now: Math.round(moodValue) }}
               >
                 <View style={[
                   styles.sliderFill, 
@@ -427,12 +469,35 @@ const DiaryScreen: React.FC = () => {
                     width: `${moodValue}%`,
                     backgroundColor: getMoodColor(moodValue)
                   }
-                ]} />
-                <View style={[styles.sliderThumb, { left: `${moodValue}%` }]} />
+                ]} accessibilityElementsHidden={true} />
+                <View style={[styles.sliderThumb, { left: `${moodValue}%` }]} accessibilityElementsHidden={true} />
               </View>
-              <View style={styles.sliderLabels}>
+              <View style={styles.sliderLabels} accessibilityElementsHidden={true}>
                 <Text style={styles.sliderLabel}>매우 좋지 않음</Text>
                 <Text style={styles.sliderLabel}>매우 좋음</Text>
+              </View>
+              {/* 기분 조절 버튼: TalkBack/에뮬레이터에서 드래그 대신 사용 */}
+              <View style={styles.sliderButtons}>
+                <TouchableOpacity
+                  style={[styles.sliderButton, styles.sliderButtonMinus]}
+                  onPress={adjustMoodDown}
+                  activeOpacity={0.85}
+                  accessibilityRole="button"
+                  accessibilityLabel="기분 10점 낮추기"
+                  accessibilityHint="탭하면 기분 점수가 10 낮아집니다"
+                >
+                  <Text style={styles.sliderButtonText} accessibilityElementsHidden={true}>−</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.sliderButton, styles.sliderButtonPlus]}
+                  onPress={adjustMoodUp}
+                  activeOpacity={0.85}
+                  accessibilityRole="button"
+                  accessibilityLabel="기분 10점 높이기"
+                  accessibilityHint="탭하면 기분 점수가 10 올라갑니다"
+                >
+                  <Text style={styles.sliderButtonText} accessibilityElementsHidden={true}>+</Text>
+                </TouchableOpacity>
               </View>
             </View>
           )}
@@ -465,8 +530,10 @@ const DiaryScreen: React.FC = () => {
                 placeholderTextColor={colors.text.tertiary}
                 multiline={true}
                 textAlignVertical="top"
-                accessibilityLabel="감정 직접 입력"
-                accessibilityHint="감정을 직접 입력하세요"
+                autoComplete="off"
+                textContentType="none"
+                accessibilityLabel="감정 표현 직접 입력"
+                accessibilityHint="감정을 직접 입력하세요. 자동완성 기능이 비활성화되어 있습니다"
               />
             </View>
           )}
@@ -474,22 +541,31 @@ const DiaryScreen: React.FC = () => {
 
         {/* 버튼 */}
         {currentStep === 'welcome' ? (
-          <View style={styles.modalButtons}>
-            <TouchableOpacity 
-              style={styles.writeButton}
-              onPress={handleStartWriting}
-            >
-              <Text style={styles.writeButtonText}>일기 작성하기</Text>
-            </TouchableOpacity>
-            {diaries.length > 0 && (
+          <>
+            <View style={styles.modalButtons}>
               <TouchableOpacity 
-                style={styles.viewButton}
-                onPress={handleViewDiaries}
+                style={styles.writeButton}
+                onPress={handleStartWriting}
+                accessibilityRole="button"
+                accessibilityLabel="일기 작성하기"
               >
-                <Text style={styles.viewButtonText}>일기 보기</Text>
+                <Text style={styles.writeButtonText}>일기 작성하기</Text>
               </TouchableOpacity>
-            )}
-          </View>
+              {diaries.length > 0 && (
+                <TouchableOpacity 
+                  style={styles.viewButton}
+                  onPress={handleViewDiaries}
+                  accessibilityRole="button"
+                  accessibilityLabel="일기 보기"
+                >
+                  <Text style={styles.viewButtonText}>일기 보기</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+            <Text style={styles.welcomeNotice} accessibilityRole="summary" accessibilityLabel="안내: 일기는 하루에 한 번만 작성할 수 있습니다.">
+              * 일기는 하루에 한번만 작성 가능해요
+            </Text>
+          </>
         ) : currentStep === 'expression' ? (
           <View style={[styles.modalButtons, styles.modalButtonsExpression]}>
             <TouchableOpacity 

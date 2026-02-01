@@ -48,7 +48,9 @@ export const styles = StyleSheet.create({
     ...dropdownStyles.listItemSelected(),
   },
   dropdownListItemText: {
-    ...createTextStyle('base'),
+    ...createTextStyle('base', {
+      color: colors.text.primary,
+    }),
   },
   dropdownListItemTextSelected: {
     ...createTextStyle('base', {

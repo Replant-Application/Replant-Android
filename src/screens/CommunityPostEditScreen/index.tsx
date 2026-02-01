@@ -34,7 +34,6 @@ const CommunityPostEditScreen: React.FC<CommunityPostEditScreenProps> = ({ navig
     loading,
     isAuthor,
     isVerificationPost,
-    isGeneralPost,
     title,
     content,
     images,
@@ -188,65 +187,54 @@ const CommunityPostEditScreen: React.FC<CommunityPostEditScreenProps> = ({ navig
           />
         </View>
 
-        {/* 사진 수정 (일반 게시글만) */}
-        {isGeneralPost && (
-          <View style={styles.inputSection}>
-            <Text style={styles.label}>사진 (선택)</Text>
-            <View style={styles.imageContainer}>
-              {images.map((imageUrl, index) => (
-                <View key={index} style={styles.imagePreviewWrapper}>
-                  <Image 
-                    source={{ uri: imageUrl }} 
-                    style={styles.previewImage} 
-                    resizeMode="cover" 
-                    accessibilityLabel="이미지 미리보기"
-                  />
-                  <TouchableOpacity
-                    style={styles.removeImageButton}
-                    onPress={() => handleRemoveImage(index)}
-                  >
-                    <Text style={styles.removeImageText}>×</Text>
-                  </TouchableOpacity>
-                </View>
-              ))}
-              {images.length < 3 && (
+        {/* 사진 (일반/인증 모두 표시, 추가·삭제 가능) */}
+        <View style={styles.inputSection}>
+          <Text style={styles.label}>사진 (선택)</Text>
+          <View style={styles.imageContainer}>
+            {images.map((imageUrl, index) => (
+              <View key={index} style={styles.imagePreviewWrapper}>
+                <Image 
+                  source={{ uri: imageUrl }} 
+                  style={styles.previewImage} 
+                  resizeMode="cover" 
+                  accessibilityLabel="이미지 미리보기"
+                />
                 <TouchableOpacity
-                  style={styles.addImageButton}
-                  onPress={handleSelectImage}
-                  disabled={uploadingImage}
+                  style={styles.removeImageButton}
+                  onPress={() => handleRemoveImage(index)}
+                  accessibilityRole="button"
+                  accessibilityLabel={`사진 ${index + 1} 제거`}
                 >
-                  {uploadingImage ? (
-                    <ActivityIndicator color={colors.primary[500]} />
-                  ) : (
-                    <>
-                      <Image
-                        source={require('../../assets/images/camera.png')}
-                        style={styles.addImageIcon}
-                        resizeMode="contain"
-                        accessibilityLabel="이미지 추가 아이콘"
-                      />
-                      <Text style={styles.addImageText}>사진 추가</Text>
-                    </>
-                  )}
+                  <Text style={styles.removeImageText}>×</Text>
                 </TouchableOpacity>
-              )}
-            </View>
+              </View>
+            ))}
+            {images.length < 3 && (
+              <TouchableOpacity
+                style={styles.addImageButton}
+                onPress={handleSelectImage}
+                disabled={uploadingImage}
+                accessibilityRole="button"
+                accessibilityLabel="사진 추가"
+                accessibilityState={{ disabled: uploadingImage }}
+              >
+                {uploadingImage ? (
+                  <ActivityIndicator color={colors.primary[500]} />
+                ) : (
+                  <>
+                    <Image
+                      source={require('../../assets/images/camera.png')}
+                      style={styles.addImageIcon}
+                      resizeMode="contain"
+                      accessibilityLabel="이미지 추가 아이콘"
+                    />
+                    <Text style={styles.addImageText}>사진 추가</Text>
+                  </>
+                )}
+              </TouchableOpacity>
+            )}
           </View>
-        )}
-
-        {/* 미션 인증 사진 표시 (수정 불가) */}
-        {isVerificationPost && post.images && post.images.length > 0 && (
-          <View style={styles.imageSection}>
-            <Text style={styles.label}>인증 사진</Text>
-            <Image 
-              source={{ uri: post.images[0] }} 
-              style={styles.previewImageLarge} 
-              resizeMode="cover" 
-              accessibilityLabel="인증 사진"
-            />
-            <Text style={styles.imageNote}>인증 사진은 수정할 수 없습니다.</Text>
-          </View>
-        )}
+        </View>
 
         {/* 수정 버튼 */}
         <View style={styles.buttonContainer}>

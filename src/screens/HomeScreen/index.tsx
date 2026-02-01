@@ -41,7 +41,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
     MAX_HERO_HEIGHT,
     panResponder,
     showEvolutionModal,
-    evolutionFadeAnim,
     loadData,
     handleCharacterPress,
     handleEvolutionModalClose,
@@ -248,7 +247,13 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
             ) : dataError ? (
               <View style={styles.errorContainer}>
                 <Text style={styles.errorText}>{dataError}</Text>
-                <TouchableOpacity style={styles.retryButton} onPress={loadData}>
+                <TouchableOpacity
+                  style={styles.retryButton}
+                  onPress={loadData}
+                  accessibilityRole="button"
+                  accessibilityLabel="다시 시도"
+                  accessibilityHint="데이터를 다시 불러옵니다"
+                >
                   <Text style={styles.retryButtonText}>다시 시도</Text>
                 </TouchableOpacity>
               </View>
@@ -260,8 +265,11 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
                     style={styles.todoListHeader}
                     onPress={() => navigation.navigate(SCREEN_NAMES.TODO_LIST as any)}
                     activeOpacity={0.7}
+                    accessibilityRole="button"
+                    accessibilityLabel="나의 투두리스트"
+                    accessibilityHint="투두리스트 화면으로 이동합니다"
                   >
-                    <View style={styles.todoListHeaderLeft}>
+                    <View style={styles.todoListHeaderLeft} accessibilityElementsHidden={true}>
                       <Image
                         source={require('../../assets/images/list.png')}
                         style={styles.todoListIcon}
@@ -282,6 +290,9 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
                         style={styles.createTodoListButton}
                         onPress={() => navigation.navigate(SCREEN_NAMES.TODO_LIST_CREATE as any)}
                         activeOpacity={0.7}
+                        accessibilityRole="button"
+                        accessibilityLabel="만들러 가기"
+                        accessibilityHint="첫 투두리스트를 만듭니다"
                       >
                         <Text style={styles.createTodoListButtonText}>만들러 가기</Text>
                       </TouchableOpacity>
@@ -318,6 +329,14 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
                                     ]}
                                     onPress={() => handleTodoListPress(item.todoListTitle)}
                                     activeOpacity={0.7}
+                                    accessibilityRole="button"
+                                    accessibilityLabel={
+                                      isCompleted
+                                        ? `${item.mission.title}, 완료됨, ${item.todoListTitle}`
+                                        : `${item.mission.title}, ${item.todoListTitle}`
+                                    }
+                                    accessibilityState={{ selected: false }}
+                                    accessibilityHint="탭하면 해당 투두리스트로 이동합니다"
                                   >
                                     <Text 
                                       style={[
@@ -352,6 +371,9 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
                             style={styles.createTodoListButton}
                             onPress={() => navigation.navigate(SCREEN_NAMES.TODO_LIST as any)}
                             activeOpacity={0.7}
+                            accessibilityRole="button"
+                            accessibilityLabel="투두리스트 보기"
+                            accessibilityHint="투두리스트 목록으로 이동합니다"
                           >
                             <Text style={styles.createTodoListButtonText}>투두리스트 보기</Text>
                           </TouchableOpacity>

@@ -4,7 +4,7 @@
 
 import { apiClient } from './client';
 import { API_CONFIG } from '../config/apiConfig';
-import { ServiceResult } from '../types';
+import { ServiceResult, type MissionCategoryType } from '../types';
 
 /**
  * 고민 종류 (미션 필터링용)
@@ -38,11 +38,11 @@ export interface MyInfoResponse {
   worryType?: WorryType;
   region?: string;
   preferredPlaceType?: PlaceType;
+  /** 필수 미션용 선호 카테고리 (다중 선택) */
+  preferredMissionCategories?: MissionCategoryType[] | null;
 }
 
-/**
- * 내 정보 수정 요청
- */
+/** 내 정보 수정 요청 */
 export interface UpdateMyInfoRequest {
   nickname?: string;
   birthDate?: string; // ISO 8601 형식 (YYYY-MM-DD)
@@ -52,6 +52,7 @@ export interface UpdateMyInfoRequest {
   worryType?: WorryType;
   region?: string;
   preferredPlaceType?: PlaceType;
+  preferredMissionCategories?: MissionCategoryType[] | null;
 }
 
 /**
@@ -69,6 +70,7 @@ export interface UpdateMyInfoResponse {
   worryType?: WorryType;
   region?: string;
   preferredPlaceType?: PlaceType;
+  preferredMissionCategories?: MissionCategoryType[] | null;
 }
 
 /**

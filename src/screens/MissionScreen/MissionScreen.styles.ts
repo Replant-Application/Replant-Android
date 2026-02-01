@@ -3,8 +3,8 @@
  * 미션 화면의 모든 스타일 정의
  */
 
-import { StyleSheet, Dimensions } from 'react-native';
-import { colors, spacing, borderRadius, layout } from '../../utils/designTokens';
+import { StyleSheet, Dimensions, Platform } from 'react-native';
+import { colors, spacing, borderRadius, layout, typography } from '../../utils/designTokens';
 import { createTextStyle, createTitleStyle, createBodyStyle, createSecondaryTextStyle, createButtonTextStyle } from '../../utils/styles/textStyles';
 import { loadingStyles } from '../../utils/styles/componentStyles';
 
@@ -15,12 +15,54 @@ export const styles = StyleSheet.create({
     flex: 1,
   },
   topTabContainer: {
-    paddingHorizontal: spacing[3],
+    paddingHorizontal: spacing[4],
     paddingTop: spacing[2],
     paddingBottom: spacing[1],
   },
   topTabBar: {
     marginBottom: 0,
+  },
+  missionTabContainer: {
+    flexDirection: 'row',
+    backgroundColor: '#F5F5F0',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#A68B6F',
+    paddingVertical: 2.5,
+    paddingHorizontal: 3,
+    gap: 2,
+  },
+  missionTab: {
+    flex: 1,
+    paddingVertical: 10,
+    paddingHorizontal: spacing[4],
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 6,
+    backgroundColor: 'transparent',
+  },
+  missionTabActive: {
+    backgroundColor: '#8B6F47',
+  },
+  missionTabText: {
+    ...createTextStyle('sm', {
+      color: colors.text.primary,
+      fontWeight: typography.fontWeight.medium,
+      fontFamily: Platform.select({
+        ios: undefined,
+        android: typography.fontFamily.regular,
+      }),
+    }),
+  },
+  missionTabTextActive: {
+    ...createTextStyle('sm', {
+      color: colors.white,
+      fontWeight: typography.fontWeight.medium,
+      fontFamily: Platform.select({
+        ios: undefined,
+        android: typography.fontFamily.regular,
+      }),
+    }),
   },
   title: {
     ...createTitleStyle('2xl', {
@@ -50,7 +92,7 @@ export const styles = StyleSheet.create({
   groupTabContainer: {
     paddingHorizontal: spacing[3],
     paddingTop: spacing[1],
-    paddingBottom: spacing[1],
+    paddingBottom: 0,
   },
   groupTabBar: {
     marginBottom: 0,

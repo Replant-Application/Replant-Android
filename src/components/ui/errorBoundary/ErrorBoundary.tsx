@@ -28,7 +28,13 @@ const ErrorBoundary: React.FC<ErrorBoundaryProps> = ({
       <Text style={styles.title}>오류가 발생했습니다</Text>
       <Text style={styles.message}>{errorMessage}</Text>
       {onRetry && (
-        <TouchableOpacity style={styles.retryButton} onPress={onRetry}>
+        <TouchableOpacity
+          style={styles.retryButton}
+          onPress={onRetry}
+          accessibilityRole="button"
+          accessibilityLabel="다시 시도"
+          accessibilityHint="오류 발생 후 재시도합니다"
+        >
           <Text style={styles.retryText}>다시 시도</Text>
         </TouchableOpacity>
       )}

@@ -3,7 +3,7 @@
  * 투두리스트 생성 화면의 모든 스타일 정의
  */
 
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Platform } from 'react-native';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
 import { getOptimizedLineHeight } from '../../utils/styles/textStyles';
 import { createTextStyle, createTitleStyle, createBodyStyle, createSecondaryTextStyle, createButtonTextStyle } from '../../utils/styles/textStyles';
@@ -13,6 +13,10 @@ import { loadingStyles } from '../../utils/styles/componentStyles';
 export const styles = StyleSheet.create({
   container: { 
     flex: 1 
+  },
+  icon24: {
+    width: 24,
+    height: 24,
   },
 
   introContainer: { 
@@ -72,6 +76,137 @@ export const styles = StyleSheet.create({
     ...createSecondaryTextStyle('sm'),
   },
 
+  filterSection: {
+    marginBottom: spacing[3],
+  },
+  onlyMyMissionsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: spacing[3],
+    paddingHorizontal: spacing[4],
+    backgroundColor: colors.overlay.white.medium,
+    borderRadius: borderRadius.md,
+    borderWidth: 1,
+    borderColor: colors.gray[200],
+  },
+  onlyMyMissionsLabel: {
+    ...createBodyStyle('base', {
+      fontWeight: typography.fontWeight.semibold,
+      color: colors.text.primary,
+    }),
+  },
+
+  // 검색창과 필터 버튼
+  searchRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing[2],
+    marginBottom: spacing[3],
+  },
+  searchContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.background.secondary,
+    borderRadius: borderRadius.lg,
+    paddingHorizontal: spacing[3],
+    paddingVertical: spacing[2],
+    borderWidth: 1,
+    borderColor: '#D4A574',
+  },
+  searchIcon: {
+    width: 20,
+    height: 20,
+    marginRight: spacing[2],
+    tintColor: colors.text.tertiary,
+  },
+  searchInput: {
+    flex: 1,
+    ...createBodyStyle('base', {
+      color: colors.text.primary,
+    }),
+    padding: 0,
+  },
+  filterButton: {
+    backgroundColor: '#8B6F47',
+    borderRadius: borderRadius.lg,
+    paddingHorizontal: spacing[3],
+    paddingVertical: spacing[3],
+    width: 48,
+    height: 48,
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative',
+    borderWidth: 1,
+    borderColor: '#D4A574',
+  },
+  filterIcon: {
+    width: 26,
+    height: 26,
+    tintColor: colors.white,
+  },
+  filterBadge: {
+    position: 'absolute',
+    top: 4,
+    right: 4,
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: colors.error,
+    borderWidth: 2,
+    borderColor: colors.white,
+  },
+
+  // 필터 모달
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  filterModalContent: {
+    backgroundColor: colors.overlay.white.heavy,
+    borderRadius: borderRadius.xl,
+    padding: spacing[5],
+    width: '85%',
+    maxWidth: 400,
+  },
+  filterModalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: spacing[3],
+  },
+  filterModalTitle: {
+    ...createTitleStyle('lg', {
+      fontWeight: typography.fontWeight.bold,
+      fontFamily: Platform.select({
+        ios: undefined,
+        android: typography.fontFamily.bold,
+      }),
+    }),
+  },
+  filterModalClose: {
+    ...createTextStyle('xl', {
+      color: colors.text.secondary,
+      fontWeight: typography.fontWeight.bold,
+    }),
+  },
+  filterOptionRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: spacing[3],
+    gap: spacing[4],
+  },
+  filterOptionLabel: {
+    ...createBodyStyle('base', {
+      fontWeight: typography.fontWeight.medium,
+      color: colors.text.primary,
+    }),
+  },
+
   loadingContainer: { 
     ...loadingStyles.container() 
   },
@@ -127,6 +262,8 @@ export const styles = StyleSheet.create({
   missionDescription: {
     ...createSecondaryTextStyle('sm', {
       marginBottom: spacing[3],
+      color: colors.text.secondary,
+      lineHeight: getOptimizedLineHeight(typography.fontSize.sm) * 1.3,
     }),
   },
   missionMeta: { 
@@ -220,8 +357,14 @@ export const styles = StyleSheet.create({
   },
   textInput: {
     ...inputStyles.base(),
-    ...createTextStyle('sm'),
+    ...createTextStyle('sm', {
+      color: colors.text.primary,
+    }),
     backgroundColor: colors.overlay.white.heavy,
+    fontFamily: Platform.select({
+      ios: undefined,
+      android: typography.fontFamily.regular,
+    }),
   },
   textArea: { 
     height: 100, 
@@ -351,12 +494,6 @@ export const styles = StyleSheet.create({
   },
   timeMissionHeader: { 
     marginBottom: spacing[1], 
-  },
-  timeMissionTime: {
-    ...createTextStyle('sm', {
-      fontWeight: typography.fontWeight.bold,
-      color: colors.primary[600],
-    }),
   },
   timeMissionContentWrapper: {
     flexDirection: 'row',

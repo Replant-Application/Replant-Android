@@ -47,6 +47,8 @@ const CounselingSelectScreen: React.FC<CounselingSelectScreenProps> = ({ navigat
                 style={styles.counselingCardContent}
                 onPress={handleFindCenter}
                 activeOpacity={0.7}
+                accessibilityRole="button"
+                accessibilityLabel="상담 센터 찾기"
               >
                 <View style={styles.cardIcon}>
                   <Image

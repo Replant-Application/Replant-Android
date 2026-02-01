@@ -40,12 +40,15 @@ const Header: React.FC<HeaderProps> = ({
       <TouchableOpacity
         onPress={() => navigation?.goBack?.()}
         activeOpacity={0.7}
+        accessibilityRole="button"
+        accessibilityLabel="뒤로 가기"
       >
         <Image
           source={require('../../../assets/images/left.png')}
           style={styles.backButtonIcon}
           resizeMode="contain"
           accessibilityLabel="뒤로 가기"
+          accessibilityElementsHidden={true}
         />
       </TouchableOpacity>
     );

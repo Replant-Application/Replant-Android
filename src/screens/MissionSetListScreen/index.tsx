@@ -20,6 +20,7 @@ import { NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types/navigation';
 import { Header, Loading, EmptyState } from '../../components/ui';
 import { colors, spacing } from '../../utils/designTokens';
+import { formatDateKorean } from '../../utils/dateUtils';
 import { SCREEN_NAMES } from '../../utils/constants';
 import { useMissionSetListScreenContainer } from './MissionSetListScreen.container';
 import { styles } from './MissionSetListScreen.styles';
@@ -43,7 +44,6 @@ const MissionSetListScreen: React.FC<MissionSetListScreenProps> = ({ navigation 
     openShareModal,
     closeShareModal,
     handleShare,
-    renderStars,
   } = useMissionSetListScreenContainer({ navigation });
 
   if (loading) {
@@ -61,22 +61,33 @@ const MissionSetListScreen: React.FC<MissionSetListScreenProps> = ({ navigation 
         <Header
           title="투두 공유"
           leftButton={
-            <TouchableOpacity onPress={() => navigation.goBack()}>
+            <TouchableOpacity
+              onPress={() => navigation.goBack()}
+              accessibilityRole="button"
+              accessibilityLabel="뒤로 가기"
+            >
               <Image
                 source={require('../../assets/images/left.png')}
                 style={styles.backButtonIcon}
                 resizeMode="contain"
                 accessibilityLabel="뒤로 가기"
+                accessibilityElementsHidden={true}
               />
             </TouchableOpacity>
           }
           rightButton={
-            <TouchableOpacity onPress={openShareModal} style={styles.shareButton}>
+            <TouchableOpacity
+              onPress={openShareModal}
+              style={styles.shareButton}
+              accessibilityRole="button"
+              accessibilityLabel="투두리스트 공유"
+            >
               <Image
                 source={require('../../assets/images/pencil.png')}
                 style={styles.shareButtonIcon}
                 resizeMode="contain"
                 accessibilityLabel="공유"
+                accessibilityElementsHidden={true}
               />
             </TouchableOpacity>
           }
@@ -126,6 +137,8 @@ const MissionSetListScreen: React.FC<MissionSetListScreenProps> = ({ navigation 
                   style={styles.missionSetCard}
                   onPress={() => navigation.navigate(SCREEN_NAMES.MISSION_SET_DETAIL as any, { missionSetId: todoList.id, returnScreen: 'MissionSetList' })}
                   activeOpacity={0.7}
+                  accessibilityRole="button"
+                  accessibilityLabel={`${todoList.title}, BY ${todoList.creatorNickname}`}
                 >
                   {/* 카드 헤더 */}
                   <View style={styles.cardHeader}>
@@ -152,39 +165,28 @@ const MissionSetListScreen: React.FC<MissionSetListScreenProps> = ({ navigation 
                   {/* 작성자 정보 */}
                   <View style={styles.authorInfo}>
                     <Text style={styles.authorText}>
-                      by {todoList.creatorNickname}
+                      BY {todoList.creatorNickname}
                     </Text>
                   </View>
 
                   {/* 카드 푸터 */}
                   <View style={styles.cardFooter}>
                     <View style={styles.statsRow}>
+                      {todoList.createdAt && (
+                        <Text style={styles.createdAtText}>
+                          {formatDateKorean(todoList.createdAt)}
+                        </Text>
+                      )}
                       <View style={styles.statItem}>
                         <Image
-                          source={require('../../assets/images/goal.png')}
-                          style={styles.statIcon}
+                          source={require('../../assets/images/heart.png')}
+                          style={styles.likeIcon}
                           resizeMode="contain"
-                          accessibilityLabel="미션 아이콘"
+                          accessibilityLabel="좋아요 아이콘"
+                          accessibilityElementsHidden={true}
                         />
-                        <Text style={styles.statText}>{todoList.missionCount}개</Text>
+                        <Text style={styles.statText}>좋아요 {todoList.likeCount ?? 0}명</Text>
                       </View>
-                      <View style={styles.statItem}>
-                        <Image
-                          source={require('../../assets/images/high-five.png')}
-                          style={styles.statIcon}
-                          resizeMode="contain"
-                          accessibilityLabel="참여자 아이콘"
-                        />
-                        <Text style={styles.statText}>{todoList.reviewCount ?? 0}명</Text>
-                      </View>
-                    </View>
-                    <View style={styles.ratingContainer}>
-                      <Text style={styles.stars}>
-                        {renderStars(todoList.averageRating || 0)}
-                      </Text>
-                      <Text style={styles.ratingText}>
-                        {(todoList.averageRating || 0).toFixed(1)}
-                      </Text>
                     </View>
                   </View>
                 </TouchableOpacity>
@@ -249,9 +251,11 @@ const MissionSetListScreen: React.FC<MissionSetListScreenProps> = ({ navigation 
                             </Text>
                           )}
                           <View style={styles.modalItemInfoRow}>
-                            <Text style={styles.modalItemMissionCount}>
-                              {item.totalCount}개 미션
-                            </Text>
+                            {item.createdAt && (
+                              <Text style={styles.modalItemMissionCount}>
+                                {formatDateKorean(item.createdAt)}
+                              </Text>
+                            )}
                             {item.status === 'COMPLETED' && (
                               <View style={styles.completedBadge}>
                                 <Text style={styles.completedBadgeText}>완료</Text>

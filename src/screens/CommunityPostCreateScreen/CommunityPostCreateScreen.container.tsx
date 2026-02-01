@@ -28,8 +28,7 @@ export const useCommunityPostCreateScreenContainer = ({
   const postType = params.type || 'VERIFICATION'; // GENERAL or VERIFICATION
   const isGeneralPost = postType === 'GENERAL';
   const userMissionId = params.userMissionId; // 인증글 작성 시 필요한 UserMission ID (하위 호환성)
-  const spontaneousMissionId = params.spontaneousMissionId || params.referenceId; // 돌발 미션 ID (spontaneous_mission의 ID)
-  const mealLogId = params.mealLogId; // 식사 로그 ID (MEAL_LOG 타입 알림에서 사용)
+  const spontaneousMissionId = params.spontaneousMissionId || (params as any).referenceId; // 돌발 미션 ID (spontaneous_mission의 ID)
   const missionId = params.missionId || '';
   const missionTitle = isGeneralPost ? '자유게시판' : params.missionTitle || '미션';
   const missionEmoji = isGeneralPost ? '📝' : params.missionEmoji || '🎯';

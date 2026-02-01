@@ -15,6 +15,7 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   ImageBackground,
+  Modal,
 } from 'react-native';
 import Slider from '@react-native-community/slider';
 import { Header, AlertModal } from '../../components/ui';
@@ -47,6 +48,10 @@ const VerificationPostCreateScreen: React.FC<VerificationPostCreateScreenProps> 
     setContent,
     handleRemoveImage,
     showPhotoOptions,
+    showPhotoOptionsModal,
+    closePhotoOptionsModal,
+    handleTakePhoto,
+    handleSelectPhoto,
     handleSubmitVerification,
     handleSuccessModalClose,
     handleAlreadyExistsModalClose,
@@ -74,12 +79,12 @@ const VerificationPostCreateScreen: React.FC<VerificationPostCreateScreenProps> 
       <Header
         title={isEditMode ? "인증글 수정" : "인증글 작성"}
         leftButton={
-          <TouchableOpacity onPress={() => navigation.goBack()}>
+          <TouchableOpacity onPress={() => navigation.goBack()} accessibilityRole="button" accessibilityLabel="뒤로 가기">
             <Image
               source={require('../../assets/images/left.png')}
               style={styles.backButtonIcon}
               resizeMode="contain"
-              accessibilityLabel="뒤로 가기"
+              accessibilityElementsHidden={true}
             />
           </TouchableOpacity>
         }
@@ -211,6 +216,8 @@ const VerificationPostCreateScreen: React.FC<VerificationPostCreateScreenProps> 
                   <TouchableOpacity
                     style={styles.removeImageButton}
                     onPress={() => handleRemoveImage(index)}
+                    accessibilityRole="button"
+                    accessibilityLabel={`인증 사진 ${index + 1} 제거`}
                   >
                     <Text style={styles.removeImageText}>×</Text>
                   </TouchableOpacity>
@@ -226,6 +233,9 @@ const VerificationPostCreateScreen: React.FC<VerificationPostCreateScreenProps> 
               ]}
               onPress={showPhotoOptions}
               disabled={uploadingPhoto}
+              accessibilityRole="button"
+              accessibilityLabel="사진 추가"
+              accessibilityState={{ disabled: uploadingPhoto }}
             >
               {uploadingPhoto ? (
                 <ActivityIndicator color={colors.primary[500]} />
@@ -261,6 +271,9 @@ const VerificationPostCreateScreen: React.FC<VerificationPostCreateScreenProps> 
           ]}
           onPress={handleSubmitVerification}
           disabled={loading || loadingData || !content.trim()}
+          accessibilityRole="button"
+          accessibilityLabel={isEditMode ? '인증글 수정' : '인증글 작성'}
+          accessibilityState={{ disabled: loading || loadingData || !content.trim() }}
         >
           {loading ? (
             <ActivityIndicator color={colors.white} />
@@ -280,7 +293,7 @@ const VerificationPostCreateScreen: React.FC<VerificationPostCreateScreenProps> 
         message={
           isEditMode
             ? '인증글이 수정되었습니다.'
-            : '인증글이 등록되었습니다. 다른 사용자들의 좋아요를 받으면 미션이 인증됩니다!'
+            : '인증글이 등록되었습니다.\n좋아요를 받으면 인증이 완료됩니다!'
         }
         onClose={handleSuccessModalClose}
       />
@@ -302,6 +315,53 @@ const VerificationPostCreateScreen: React.FC<VerificationPostCreateScreenProps> 
         buttonText="확인"
         onClose={handleErrorModalClose}
       />
+
+      {/* 사진 추가 커스텀 모달 */}
+      <Modal
+        visible={showPhotoOptionsModal}
+        transparent
+        animationType="fade"
+        onRequestClose={closePhotoOptionsModal}
+      >
+        <View style={styles.photoOptionsOverlay}>
+          <View style={styles.photoOptionsModalContainer}>
+            <Text style={styles.photoOptionsTitle} accessibilityRole="header">사진 추가</Text>
+            <Text style={styles.photoOptionsMessage}>사진을 추가할 방법을 선택해주세요.</Text>
+            <View style={styles.photoOptionsButtonRow}>
+              <TouchableOpacity
+                style={[styles.photoOptionsButton, styles.photoOptionsCancelButton]}
+                onPress={closePhotoOptionsModal}
+                accessibilityRole="button"
+                accessibilityLabel="취소"
+              >
+                <Text style={styles.photoOptionsCancelButtonText}>취소</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.photoOptionsButton, styles.photoOptionsActionButton]}
+                onPress={() => {
+                  closePhotoOptionsModal();
+                  handleTakePhoto();
+                }}
+                accessibilityRole="button"
+                accessibilityLabel="카메라"
+              >
+                <Text style={styles.photoOptionsButtonText}>카메라</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.photoOptionsButton, styles.photoOptionsActionButton]}
+                onPress={() => {
+                  closePhotoOptionsModal();
+                  handleSelectPhoto();
+                }}
+                accessibilityRole="button"
+                accessibilityLabel="갤러리"
+              >
+                <Text style={styles.photoOptionsButtonText}>갤러리</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
       </KeyboardAvoidingView>
     </ImageBackground>
   );

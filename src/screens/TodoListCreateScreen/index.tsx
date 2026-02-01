@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 import {
   View,
   Text,
@@ -9,6 +9,7 @@ import {
   ImageBackground,
   Image,
   Modal,
+  Switch,
 } from 'react-native';
 import { colors } from '../../utils/designTokens';
 import { Header, AlertModal, WheelPicker } from '../../components/ui';
@@ -17,7 +18,7 @@ import { HOURS, MINUTES } from '../../constants/screens/todolist';
 import { useTodoListCreateScreenContainer } from './TodoListCreateScreen.container';
 import { styles } from './TodoListCreateScreen.styles';
 
-const TodoListCreateScreen: React.FC<TodoListCreateScreenProps> = ({ navigation }) => {
+const TodoListCreateScreen: React.FC<TodoListCreateScreenProps> = ({ navigation, route }) => {
   // 비즈니스 로직은 Container에서 처리
   const {
     randomMissions,
@@ -26,6 +27,12 @@ const TodoListCreateScreen: React.FC<TodoListCreateScreenProps> = ({ navigation 
     missionsWithTime,
     currentStep,
     selectedCustomMissions,
+    onlyMyMissions,
+    setOnlyMyMissions,
+    searchQuery,
+    setSearchQuery,
+    showFilterModal,
+    setShowFilterModal,
     title,
     description,
     loading,
@@ -56,7 +63,6 @@ const TodoListCreateScreen: React.FC<TodoListCreateScreenProps> = ({ navigation 
     setCurrentStep,
     setTitle,
     setDescription,
-    setShowCreateForm,
     setNewMissionTitle,
     setNewMissionDescription,
     setShowMissionSuccessModal,
@@ -69,19 +75,19 @@ const TodoListCreateScreen: React.FC<TodoListCreateScreenProps> = ({ navigation 
     setEndHour,
     setEndMinute,
     handleCustomMissionToggle,
+    handleNavigateToCustomMissionCreate,
     handleRerollMission,
     handleCreateMission,
     handleCreate,
     handleSetMissionTime,
     handleSaveTime,
-    handleSetDefaultTimeForAll,
     isAllDay,
     handleToggleAllDay,
     handleTodoListSuccessClose,
     handleTimePickerNext,
     handleTimePickerPrev,
     handleCloseTimePickerModal,
-  } = useTodoListCreateScreenContainer({ navigation });
+  } = useTodoListCreateScreenContainer({ navigation, route });
 
   const renderRandomStep = () => (
     <View style={styles.stepContainer}>
@@ -127,6 +133,9 @@ const TodoListCreateScreen: React.FC<TodoListCreateScreenProps> = ({ navigation 
                 onPress={() => handleRerollMission(index)}
                 disabled={rerollingMissionIndex === index}
                 activeOpacity={0.7}
+                accessibilityRole="button"
+                accessibilityLabel="미션 다시 뽑기"
+                accessibilityState={{ disabled: rerollingMissionIndex === index }}
               >
                 {rerollingMissionIndex === index ? (
                   <ActivityIndicator size="small" color={colors.primary[500]} />
@@ -150,6 +159,9 @@ const TodoListCreateScreen: React.FC<TodoListCreateScreenProps> = ({ navigation 
           onPress={() => setCurrentStep('custom')}
           disabled={loading || randomMissions.length === 0}
           activeOpacity={0.7}
+          accessibilityRole="button"
+          accessibilityLabel="다음"
+          accessibilityState={{ disabled: loading || randomMissions.length === 0 }}
         >
           <Text style={styles.primaryButtonText}>다음</Text>
         </TouchableOpacity>
@@ -168,10 +180,12 @@ const TodoListCreateScreen: React.FC<TodoListCreateScreenProps> = ({ navigation 
 
       <TouchableOpacity
         style={styles.createMissionButton}
-        onPress={() => setShowCreateForm(!showCreateForm)}
+        onPress={handleNavigateToCustomMissionCreate}
         activeOpacity={0.7}
+        accessibilityRole="button"
+        accessibilityLabel="나만의 커스텀 미션 생성"
       >
-        <Text style={styles.createMissionButtonText}>{showCreateForm ? '취소' : '나만의 커스텀 미션 생성'}</Text>
+        <Text style={styles.createMissionButtonText}>나만의 커스텀 미션 생성</Text>
       </TouchableOpacity>
 
       {showCreateForm && (
@@ -212,20 +226,68 @@ const TodoListCreateScreen: React.FC<TodoListCreateScreenProps> = ({ navigation 
             onPress={handleCreateMission}
             disabled={creatingMission}
             activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel={creatingMission ? '미션 생성 중' : '미션 생성'}
+            accessibilityState={{ disabled: creatingMission }}
           >
             {creatingMission ? <ActivityIndicator size="small" color={colors.white} /> : <Text style={styles.primaryButtonText}>미션 생성</Text>}
           </TouchableOpacity>
         </View>
       )}
 
+      {/* 검색창과 필터 버튼 */}
+      <View style={styles.searchRow}>
+        <View style={styles.searchContainer}>
+          <Image
+            source={require('../../assets/images/search.png')}
+            style={styles.searchIcon}
+            resizeMode="contain"
+            accessibilityLabel="검색 아이콘"
+            accessibilityElementsHidden={true}
+          />
+          <TextInput
+            style={styles.searchInput}
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            placeholder="미션 검색..."
+            placeholderTextColor={colors.text.tertiary}
+            accessibilityLabel="미션 검색"
+            accessibilityHint="미션을 검색하려면 입력하세요"
+            allowFontScaling={true}
+          />
+        </View>
+        <TouchableOpacity
+          style={styles.filterButton}
+          onPress={() => setShowFilterModal(true)}
+          activeOpacity={0.7}
+          accessibilityRole="button"
+          accessibilityLabel="필터"
+          accessibilityHint="필터 옵션 열기"
+          accessibilityState={{ selected: onlyMyMissions }}
+        >
+          <Image
+            source={require('../../assets/images/filter.png')}
+            style={styles.filterIcon}
+            resizeMode="contain"
+            accessibilityLabel="필터 아이콘"
+            accessibilityElementsHidden={true}
+          />
+          {onlyMyMissions && (
+            <View style={styles.filterBadge} accessibilityElementsHidden={true} />
+          )}
+        </TouchableOpacity>
+      </View>
+
       {loading ? (
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={colors.primary[500]} />
           <Text style={styles.loadingText}>미션을 불러오는 중...</Text>
         </View>
-      ) : customMissions.length > 0 ? (
-        <ScrollView style={styles.missionList} showsVerticalScrollIndicator={false}>
-          {customMissions.map((mission) => {
+      ) : (
+        <>
+          {customMissions.length > 0 ? (
+            <ScrollView style={styles.missionList} showsVerticalScrollIndicator={false}>
+              {customMissions.map((mission) => {
             const isSelected = selectedCustomMissions.includes(mission.id);
             return (
               <TouchableOpacity
@@ -258,24 +320,93 @@ const TodoListCreateScreen: React.FC<TodoListCreateScreenProps> = ({ navigation 
                   </View>
                 </View>
               </TouchableOpacity>
-            );
-          })}
-        </ScrollView>
-      ) : (
-        <View style={styles.emptyContainer}>
-          <Text style={styles.emptyText}>선택 가능한 미션이 없습니다</Text>
-          <Text style={styles.emptySubtext}>미션 도감에서 커스텀 미션을 먼저 추가해주세요</Text>
-        </View>
+              );
+            })}
+            </ScrollView>
+          ) : (
+            <View style={styles.emptyContainer}>
+              <Text style={styles.emptyText}>
+                {searchQuery.trim() 
+                  ? '검색 결과가 없습니다' 
+                  : onlyMyMissions 
+                    ? '내가 만든 미션이 없습니다' 
+                    : '선택 가능한 미션이 없습니다'}
+              </Text>
+              <Text style={styles.emptySubtext}>
+                {searchQuery.trim()
+                  ? '다른 검색어를 시도해보세요'
+                  : onlyMyMissions 
+                    ? '나만의 커스텀 미션을 먼저 생성해주세요' 
+                    : '미션 도감에서 커스텀 미션을 먼저 추가해주세요'}
+              </Text>
+            </View>
+          )}
+        </>
       )}
 
+      {/* 필터 모달 */}
+      <Modal
+        visible={showFilterModal}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setShowFilterModal(false)}
+      >
+        <TouchableOpacity
+          style={styles.modalOverlay}
+          activeOpacity={1}
+          onPress={() => setShowFilterModal(false)}
+          accessibilityRole="button"
+          accessibilityLabel="필터 모달 닫기"
+        >
+          <TouchableOpacity
+            activeOpacity={1}
+            onPress={(e) => e.stopPropagation()}
+            accessibilityRole="none"
+          >
+            <View style={styles.filterModalContent}>
+              <View style={styles.filterModalHeader}>
+                <Text style={styles.filterModalTitle}>필터</Text>
+                <TouchableOpacity
+                  onPress={() => setShowFilterModal(false)}
+                  activeOpacity={0.7}
+                  accessibilityRole="button"
+                  accessibilityLabel="필터 모달 닫기"
+                >
+                  <Text style={styles.filterModalClose}>✕</Text>
+                </TouchableOpacity>
+              </View>
+              <View style={styles.filterOptionRow}>
+                <Text style={styles.filterOptionLabel}>내가 만든 미션만 보기</Text>
+                <Switch
+                  value={onlyMyMissions}
+                  onValueChange={setOnlyMyMissions}
+                  trackColor={{ false: colors.gray[300], true: colors.primary[400] }}
+                  thumbColor={colors.overlay.white.heavy}
+                  accessibilityLabel="내가 만든 미션만 보기"
+                  accessibilityState={{ checked: onlyMyMissions }}
+                />
+              </View>
+            </View>
+          </TouchableOpacity>
+        </TouchableOpacity>
+      </Modal>
+
       <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.secondaryButton} onPress={() => setCurrentStep('random')} activeOpacity={0.7}>
+        <TouchableOpacity
+          style={styles.secondaryButton}
+          onPress={() => setCurrentStep('random')}
+          activeOpacity={0.7}
+          accessibilityRole="button"
+          accessibilityLabel="이전"
+        >
           <Text style={styles.secondaryButtonText}>이전</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.primaryButton, styles.buttonFlex]}
           onPress={() => setCurrentStep('confirm')}
           activeOpacity={0.7}
+          accessibilityRole="button"
+          accessibilityLabel="다음"
         >
           <Text style={styles.primaryButtonText}>다음</Text>
         </TouchableOpacity>
@@ -437,10 +568,24 @@ const TodoListCreateScreen: React.FC<TodoListCreateScreenProps> = ({ navigation 
         </ScrollView>
 
         <View style={styles.buttonContainer}>
-          <TouchableOpacity style={styles.secondaryButton} onPress={() => setCurrentStep('custom')} activeOpacity={0.7}>
+          <TouchableOpacity
+            style={styles.secondaryButton}
+            onPress={() => setCurrentStep('custom')}
+            activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel="이전"
+          >
             <Text style={styles.secondaryButtonText}>이전</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={[styles.primaryButton, styles.buttonFlex]} onPress={handleCreate} disabled={creating} activeOpacity={0.7}>
+          <TouchableOpacity
+            style={[styles.primaryButton, styles.buttonFlex]}
+            onPress={handleCreate}
+            disabled={creating}
+            activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel={creating ? '생성 중' : '생성하기'}
+            accessibilityState={{ disabled: creating }}
+          >
             {creating ? <ActivityIndicator size="small" color={colors.white} /> : <Text style={styles.primaryButtonText}>생성하기</Text>}
           </TouchableOpacity>
         </View>
@@ -456,6 +601,8 @@ const TodoListCreateScreen: React.FC<TodoListCreateScreenProps> = ({ navigation 
             style={styles.timePickerModalOverlay}
             activeOpacity={1}
             onPress={handleCloseTimePickerModal}
+            accessibilityRole="button"
+            accessibilityLabel="시간 설정 모달 닫기"
           >
             <TouchableOpacity
               activeOpacity={1}
@@ -574,12 +721,15 @@ const TodoListCreateScreen: React.FC<TodoListCreateScreenProps> = ({ navigation 
         <TouchableOpacity
           onPress={() => setCurrentStep('random')}
           activeOpacity={0.7}
+          accessibilityRole="button"
+          accessibilityLabel="뒤로 가기"
         >
           <Image
             source={require('../../assets/images/left.png')}
-            style={{ width: 24, height: 24 }}
+            style={styles.icon24}
             resizeMode="contain"
             accessibilityLabel="뒤로 가기"
+            accessibilityElementsHidden={true}
           />
         </TouchableOpacity>
       );
@@ -589,12 +739,15 @@ const TodoListCreateScreen: React.FC<TodoListCreateScreenProps> = ({ navigation 
         <TouchableOpacity
           onPress={() => setCurrentStep('custom')}
           activeOpacity={0.7}
+          accessibilityRole="button"
+          accessibilityLabel="뒤로 가기"
         >
           <Image
             source={require('../../assets/images/left.png')}
-            style={{ width: 24, height: 24 }}
+            style={styles.icon24}
             resizeMode="contain"
             accessibilityLabel="뒤로 가기"
+            accessibilityElementsHidden={true}
           />
         </TouchableOpacity>
       );

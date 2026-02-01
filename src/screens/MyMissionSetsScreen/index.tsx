@@ -17,6 +17,7 @@ import { NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types/navigation';
 import { Header, Loading, EmptyState } from '../../components/ui';
 import { colors, spacing } from '../../utils/designTokens';
+import { formatDateKorean } from '../../utils/dateUtils';
 import { useMyMissionSetsScreenContainer } from './MyMissionSetsScreen.container';
 import { styles } from './MyMissionSetsScreen.styles';
 
@@ -34,7 +35,6 @@ const MyMissionSetsScreen: React.FC<MyMissionSetsScreenProps> = ({ navigation })
     handleDelete,
     handleDetail,
     handleCreate,
-    renderStars,
   } = useMyMissionSetsScreenContainer({ navigation });
 
   if (loading) {
@@ -52,12 +52,17 @@ const MyMissionSetsScreen: React.FC<MyMissionSetsScreenProps> = ({ navigation })
         <Header
           title="내 투두리스트"
           leftButton={
-            <TouchableOpacity onPress={() => navigation.goBack()}>
+            <TouchableOpacity
+              onPress={() => navigation.goBack()}
+              accessibilityRole="button"
+              accessibilityLabel="뒤로 가기"
+            >
               <Image
                 source={require('../../assets/images/left.png')}
                 style={styles.backButtonIcon}
                 resizeMode="contain"
                 accessibilityLabel="뒤로 가기"
+                accessibilityElementsHidden={true}
               />
             </TouchableOpacity>
           }
@@ -65,12 +70,15 @@ const MyMissionSetsScreen: React.FC<MyMissionSetsScreenProps> = ({ navigation })
             <TouchableOpacity
               onPress={handleCreate}
               style={styles.createButton}
+              accessibilityRole="button"
+              accessibilityLabel="새 투두리스트 만들기"
             >
               <Image
                 source={require('../../assets/images/pencil.png')}
                 style={styles.createButtonIcon}
                 resizeMode="contain"
                 accessibilityLabel="새 투두리스트 만들기"
+                accessibilityElementsHidden={true}
               />
             </TouchableOpacity>
           }
@@ -114,6 +122,8 @@ const MyMissionSetsScreen: React.FC<MyMissionSetsScreenProps> = ({ navigation })
                   style={styles.missionSetCard}
                   onPress={() => handleDetail(missionSet)}
                   activeOpacity={0.7}
+                  accessibilityRole="button"
+                  accessibilityLabel={`${missionSet.title}`}
                 >
                   {/* 카드 헤더 */}
                   <View style={styles.cardHeader}>
@@ -144,12 +154,15 @@ const MyMissionSetsScreen: React.FC<MyMissionSetsScreenProps> = ({ navigation })
                         handleDelete(missionSet);
                       }}
                       hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                      accessibilityRole="button"
+                      accessibilityLabel="투두리스트 삭제"
                     >
                       <Image
                         source={require('../../assets/images/trash.png')}
                         style={styles.deleteIcon}
                         resizeMode="contain"
                         accessibilityLabel="삭제 아이콘"
+                        accessibilityElementsHidden={true}
                       />
                     </TouchableOpacity>
                   </View>
@@ -163,25 +176,21 @@ const MyMissionSetsScreen: React.FC<MyMissionSetsScreenProps> = ({ navigation })
 
                   {/* 카드 푸터 */}
                   <View style={styles.cardFooter}>
-                    <View style={styles.statsRow}>
-                      <View style={styles.statItem}>
-                        <Image
-                          source={require('../../assets/images/goal.png')}
-                          style={styles.statIcon}
-                          resizeMode="contain"
-                          accessibilityLabel="미션 아이콘"
-                        />
-                        <Text style={styles.statText}>{missionSet.missionCount}개 미션</Text>
-                      </View>
-                    </View>
+                    {missionSet.createdAt && (
+                      <Text style={styles.createdAtText}>
+                        {formatDateKorean(missionSet.createdAt)}
+                      </Text>
+                    )}
                     {missionSet.isPublic && (
-                      <View style={styles.ratingContainer}>
-                        <Text style={styles.stars}>
-                          {renderStars(missionSet.averageRating || 0)}
-                        </Text>
-                        <Text style={styles.ratingText}>
-                          {(missionSet.averageRating || 0).toFixed(1)}
-                        </Text>
+                      <View style={styles.likeContainer}>
+                        <Image
+                          source={require('../../assets/images/heart.png')}
+                          style={styles.likeIcon}
+                          resizeMode="contain"
+                          accessibilityLabel="좋아요 아이콘"
+                          accessibilityElementsHidden={true}
+                        />
+                        <Text style={styles.likeCount}>{missionSet.likeCount ?? 0}</Text>
                       </View>
                     )}
                   </View>

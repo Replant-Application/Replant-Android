@@ -75,12 +75,15 @@ const CommentCard: React.FC<CommentCardProps> = ({
               style={styles.actionButton}
               onPress={() => onReply(comment)}
               activeOpacity={0.7}
+              accessibilityRole="button"
+              accessibilityLabel="답글"
             >
               <Image
                 source={require('../../assets/images/say.png')}
                 style={styles.replyIcon}
                 resizeMode="contain"
                 accessibilityLabel="답글 아이콘"
+                accessibilityElementsHidden={true}
               />
               <Text style={styles.replyText}>답글</Text>
             </TouchableOpacity>
@@ -92,12 +95,15 @@ const CommentCard: React.FC<CommentCardProps> = ({
               style={styles.actionButton}
               onPress={() => onEdit(comment)}
               activeOpacity={0.7}
+              accessibilityRole="button"
+              accessibilityLabel="수정"
             >
               <Image
                 source={require('../../assets/images/pencil.png')}
                 style={styles.actionIcon}
                 resizeMode="contain"
                 accessibilityLabel="수정 아이콘"
+                accessibilityElementsHidden={true}
               />
               <Text style={styles.editText}>수정</Text>
             </TouchableOpacity>
@@ -108,12 +114,15 @@ const CommentCard: React.FC<CommentCardProps> = ({
               style={styles.actionButton}
               onPress={() => onDelete(comment.comment_id)}
               activeOpacity={0.7}
+              accessibilityRole="button"
+              accessibilityLabel="삭제"
             >
               <Image
                 source={require('../../assets/images/trash.png')}
                 style={styles.actionIcon}
                 resizeMode="contain"
                 accessibilityLabel="삭제 아이콘"
+                accessibilityElementsHidden={true}
               />
               <Text style={styles.deleteText}>삭제</Text>
             </TouchableOpacity>
@@ -125,6 +134,8 @@ const CommentCard: React.FC<CommentCardProps> = ({
               style={styles.actionButton}
               onPress={handleHide}
               activeOpacity={0.7}
+              accessibilityRole="button"
+              accessibilityLabel="숨기기"
             >
               <Text style={styles.hideText}>🚫 숨기기</Text>
             </TouchableOpacity>

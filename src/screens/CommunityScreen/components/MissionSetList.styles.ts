@@ -9,6 +9,9 @@ import { createTextStyle, createTitleStyle, createSecondaryTextStyle } from '../
 import { cardStyles } from '../../../utils/styles/commonStyles';
 
 export const styles = StyleSheet.create({
+  root: {
+    flex: 1,
+  },
   filterContainer: {
     paddingHorizontal: spacing[4],
     paddingTop: spacing[3],
@@ -39,7 +42,9 @@ export const styles = StyleSheet.create({
   },
   searchInput: {
     flex: 1,
-    ...createTextStyle('base'),
+    ...createTextStyle('base', {
+      color: colors.text.primary,
+    }),
   },
   filterButton: {
     width: 44,
@@ -121,24 +126,32 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    marginTop: spacing[2],
+    paddingTop: spacing[2],
+    borderTopWidth: 1,
+    borderTopColor: colors.border.light,
   },
-  ratingContainer: {
+  likeContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing[1],
+    gap: spacing[2],
   },
-  stars: {
+  likeIcon: {
+    width: 20,
+    height: 20,
+    tintColor: colors.error,
+  },
+  likeIconActive: {
+    tintColor: colors.error,
+  },
+  likeCount: {
     ...createTextStyle('sm', {
-      color: colors.warning,
+      color: colors.text.secondary,
+      fontWeight: typography.fontWeight.medium,
     }),
   },
-  ratingText: {
-    ...createSecondaryTextStyle('xs'),
-  },
-  reviewCount: {
-    ...createTextStyle('sm', {
-      color: colors.text.tertiary,
-      marginLeft: spacing[1],
-    }),
+  likeCountActive: {
+    color: colors.primary[600],
+    fontWeight: typography.fontWeight.normal,
   },
 });

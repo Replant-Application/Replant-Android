@@ -39,6 +39,9 @@ const BirthYearSelector: React.FC<BirthYearSelectorProps> = ({
           }
           onModalToggle();
         }}
+        accessibilityRole="button"
+        accessibilityLabel={birthYear ? `출생연도 ${birthYear}년` : '출생연도 선택'}
+        accessibilityHint="탭하면 출생연도 목록이 열립니다"
       >
         <Text style={[
           styles.dropdownButtonText,
@@ -46,7 +49,7 @@ const BirthYearSelector: React.FC<BirthYearSelectorProps> = ({
         ]}>
           {birthYear ? `${birthYear}년` : '출생연도를 선택해주세요'}
         </Text>
-        <Text style={styles.dropdownArrow}>▼</Text>
+        <Text style={styles.dropdownArrow} accessibilityElementsHidden={true}>▼</Text>
       </TouchableOpacity>
       {showModal && (
         <View style={styles.dropdownList}>
@@ -70,6 +73,9 @@ const BirthYearSelector: React.FC<BirthYearSelectorProps> = ({
                     onErrorClear();
                   }
                 }}
+                accessibilityRole="button"
+                accessibilityLabel={`${item}년`}
+                accessibilityState={{ selected: birthYear === item }}
               >
                 <Text style={[
                   styles.dropdownListItemText,

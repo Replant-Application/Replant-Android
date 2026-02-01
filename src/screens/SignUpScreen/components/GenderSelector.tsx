@@ -35,6 +35,9 @@ const GenderSelector: React.FC<GenderSelectorProps> = ({
               onErrorClear();
             }
           }}
+          accessibilityRole="button"
+          accessibilityLabel="남성"
+          accessibilityState={{ selected: gender === 'MALE' }}
         >
           <Text style={[
             styles.genderButtonText,
@@ -52,6 +55,9 @@ const GenderSelector: React.FC<GenderSelectorProps> = ({
               onErrorClear();
             }
           }}
+          accessibilityRole="button"
+          accessibilityLabel="여성"
+          accessibilityState={{ selected: gender === 'FEMALE' }}
         >
           <Text style={[
             styles.genderButtonText,

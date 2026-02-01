@@ -39,6 +39,9 @@ const RegionSelector: React.FC<RegionSelectorProps> = ({
           }
           onModalToggle();
         }}
+        accessibilityRole="button"
+        accessibilityLabel={regionName ? `지역 ${regionName}` : '지역 선택'}
+        accessibilityHint="탭하면 지역 목록이 열립니다"
       >
         <Text style={[
           styles.dropdownButtonText,
@@ -46,7 +49,7 @@ const RegionSelector: React.FC<RegionSelectorProps> = ({
         ]}>
           {regionName || '지역을 선택해주세요'}
         </Text>
-        <Text style={styles.dropdownArrow}>▼</Text>
+        <Text style={styles.dropdownArrow} accessibilityElementsHidden={true}>▼</Text>
       </TouchableOpacity>
       {showModal && (
         <View style={styles.dropdownList}>
@@ -70,6 +73,9 @@ const RegionSelector: React.FC<RegionSelectorProps> = ({
                     onErrorClear();
                   }
                 }}
+                accessibilityRole="button"
+                accessibilityLabel={item.name}
+                accessibilityState={{ selected: region === item.code }}
               >
                 <Text style={[
                   styles.dropdownListItemText,

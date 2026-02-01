@@ -181,6 +181,8 @@ const SpontaneousMissionSetupScreen: React.FC<SpontaneousMissionSetupScreenProps
                 style={styles.prevButton}
                 onPress={handlePrev}
                 activeOpacity={0.7}
+                accessibilityRole="button"
+                accessibilityLabel="이전"
               >
                 <Text style={styles.prevButtonText}>이전</Text>
               </TouchableOpacity>
@@ -194,6 +196,9 @@ const SpontaneousMissionSetupScreen: React.FC<SpontaneousMissionSetupScreenProps
               onPress={handleNext}
               disabled={loading}
               activeOpacity={0.7}
+              accessibilityRole="button"
+              accessibilityLabel={loading ? (isEditMode ? '수정 중' : '저장 중') : (currentStep === STEPS.length - 1 ? (isEditMode ? '수정 완료' : '완료') : '다음')}
+              accessibilityState={{ disabled: loading }}
             >
               <Text style={styles.nextButtonText}>
                 {loading

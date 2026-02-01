@@ -2,10 +2,14 @@
  * TodoListCreateScreen 타입 정의
  */
 
+import { NavigationProp, RouteProp } from '@react-navigation/native';
+import { RootStackParamList } from '../navigation';
+
 export type Step = 'random' | 'custom' | 'confirm';
 
 export interface TodoListCreateScreenProps {
-  navigation: any;
+  navigation: NavigationProp<RootStackParamList>;
+  route?: RouteProp<RootStackParamList, 'TodoListCreate'>;
 }
 
 export type TimePeriod = 'AM' | 'PM';

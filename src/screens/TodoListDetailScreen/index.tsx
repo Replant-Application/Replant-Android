@@ -50,6 +50,7 @@ const TodoListDetailScreen: React.FC<Props> = ({ navigation, route }) => {
     actualTotalCount,
     progressPercent,
     handleCompleteMission,
+    handleUncompleteMission,
     handleCompleteModalClose,
     onRefresh,
   } = useTodoListDetailScreenContainer({ navigation, route });
@@ -58,6 +59,12 @@ const TodoListDetailScreen: React.FC<Props> = ({ navigation, route }) => {
   const renderMissionItem = (mission: TodoMission) => {
     const isCompleting = completingMissionId === mission.missionId;
     const canComplete = !mission.isCompleted && todoList?.status === 'ACTIVE';
+    const isCustomMission = mission.missionType === 'CUSTOM' || mission.missionSource === 'CUSTOM_SELECTED';
+    const canUncomplete = mission.isCompleted && isCustomMission && todoList?.status === 'ACTIVE';
+    const handlePress = () => {
+      if (canComplete) handleCompleteMission(mission);
+      else if (canUncomplete) handleUncompleteMission(mission);
+    };
 
     return (
       <TouchableOpacity
@@ -65,18 +72,24 @@ const TodoListDetailScreen: React.FC<Props> = ({ navigation, route }) => {
           styles.missionItem,
           mission.isCompleted && styles.missionItemCompleted,
         ]}
-        onPress={() => canComplete && handleCompleteMission(mission)}
-        disabled={mission.isCompleted || isCompleting || todoList?.status !== 'ACTIVE'}
+        onPress={handlePress}
+        disabled={!canComplete && !canUncomplete || isCompleting || todoList?.status !== 'ACTIVE'}
         activeOpacity={0.7}
+        accessibilityRole="button"
+        accessibilityLabel={mission.isCompleted ? (canUncomplete ? `${mission.title}, 완료됨. 다시 누르면 인증 취소` : `${mission.title}, 완료됨`) : mission.title}
+        accessibilityState={{ disabled: !canComplete && !canUncomplete || isCompleting || todoList?.status !== 'ACTIVE' }}
       >
         <TouchableOpacity
           style={[
             styles.missionCheckbox,
             mission.isCompleted && styles.missionCheckboxCompleted,
           ]}
-          onPress={() => canComplete && handleCompleteMission(mission)}
-          disabled={mission.isCompleted || isCompleting || todoList?.status !== 'ACTIVE'}
+          onPress={handlePress}
+          disabled={!canComplete && !canUncomplete || isCompleting || todoList?.status !== 'ACTIVE'}
           activeOpacity={0.7}
+          accessibilityRole="button"
+          accessibilityLabel={mission.isCompleted ? (canUncomplete ? '완료됨, 다시 누르면 인증 취소' : '완료됨') : '미션 완료하기'}
+          accessibilityState={{ disabled: !canComplete && !canUncomplete || isCompleting || todoList?.status !== 'ACTIVE' }}
         >
           {isCompleting ? (
             <ActivityIndicator size="small" color={colors.white} />
@@ -233,6 +246,8 @@ const TodoListDetailScreen: React.FC<Props> = ({ navigation, route }) => {
                   style={styles.deleteButton}
                   onPress={handleDelete}
                   activeOpacity={0.7}
+                  accessibilityRole="button"
+                  accessibilityLabel="공유 해제"
                 >
                   <Text style={styles.deleteButtonText}>공유 해제</Text>
                 </TouchableOpacity>
@@ -317,7 +332,7 @@ const TodoListDetailScreen: React.FC<Props> = ({ navigation, route }) => {
       <AlertModal
         visible={showCompleteModal}
         title="오늘의 투두 완료!"
-        message="모든 미션을 완료했습니다. 오늘의 투두는 끝났어요! 내일 다시 새로운 투두리스트를 작성해보세요."
+        message={"모든 미션을 완료했습니다.\n오늘의 투두는 끝났어요!"}
         buttonText="확인"
         onClose={handleCompleteModalClose}
       />

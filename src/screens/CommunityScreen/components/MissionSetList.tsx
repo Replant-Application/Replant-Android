@@ -19,6 +19,7 @@ import { MissionSetSimple } from '../../../api/todolistApi';
 import { Loading, EmptyState, ConfirmModal } from '../../../components/ui';
 import { colors } from '../../../utils/designTokens';
 import { SCREEN_NAMES } from '../../../utils/constants';
+import { formatDateKorean } from '../../../utils/dateUtils';
 import { useUser } from '../../../contexts/UserContext';
 import { styles as missionSetListStyles } from './MissionSetList.styles';
 import { styles as communityStyles } from '../CommunityScreen.styles';
@@ -31,9 +32,12 @@ interface MissionSetListProps {
   onFilterPress: () => void;
   refreshing: boolean;
   onRefresh: () => void;
-  renderStars: (rating: number) => string;
   navigation: NavigationProp<RootStackParamList>;
+  /** 있으면 카드 클릭 시 이 콜백만 호출 (모달로 상세 표시용) */
+  onMissionSetPress?: (missionSetId: number) => void;
   onUnshare?: (missionSetId: number) => Promise<void>;
+  onTodoListLike?: (missionSetId: number, currentIsLiked: boolean) => Promise<void>;
+  likingMissionSetId?: number | null;
 }
 
 const MissionSetList: React.FC<MissionSetListProps> = ({
@@ -44,9 +48,11 @@ const MissionSetList: React.FC<MissionSetListProps> = ({
   onFilterPress,
   refreshing,
   onRefresh,
-  renderStars,
   navigation,
+  onMissionSetPress,
   onUnshare,
+  onTodoListLike,
+  likingMissionSetId,
 }) => {
   const { currentUserId } = useUser();
   const [showUnshareModal, setShowUnshareModal] = React.useState(false);
@@ -76,7 +82,7 @@ const MissionSetList: React.FC<MissionSetListProps> = ({
     setSelectedMissionSet(null);
   };
   return (
-    <>
+    <View style={missionSetListStyles.root}>
       {/* 검색창과 필터 버튼 - 전체 게시판과 동일한 스타일 사용 */}
       <View style={communityStyles.filterContainer}>
         <View style={communityStyles.searchRow}>
@@ -146,8 +152,17 @@ const MissionSetList: React.FC<MissionSetListProps> = ({
                 <TouchableOpacity
                   key={missionSet.id}
                   style={missionSetListStyles.missionSetCard}
-                  onPress={() => navigation.navigate(SCREEN_NAMES.MISSION_SET_DETAIL as any, { missionSetId: missionSet.id, returnScreen: 'Community', activeTab: 'todo-share' })}
+                  onPress={() => {
+                  if (onMissionSetPress) {
+                    onMissionSetPress(missionSet.id);
+                  } else {
+                    const nav = (navigation as any).navigateNoHistory ?? navigation.navigate;
+                    nav(SCREEN_NAMES.MISSION_SET_DETAIL, { missionSetId: missionSet.id, returnScreen: 'Community', activeTab: 'todo-share', fromCommunity: true });
+                  }
+                }}
                   activeOpacity={0.7}
+                  accessibilityRole="button"
+                  accessibilityLabel={`${missionSet.title}, BY ${missionSet.creatorNickname}`}
                 >
                   <View style={missionSetListStyles.missionSetCardHeader}>
                     <Text style={missionSetListStyles.missionSetTitle} numberOfLines={1}>
@@ -159,12 +174,14 @@ const MissionSetList: React.FC<MissionSetListProps> = ({
                         onPress={(e) => handleUnsharePress(missionSet, e)}
                         activeOpacity={0.7}
                         hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                        accessibilityRole="button"
+                        accessibilityLabel="투두리스트 공유 해제"
                       >
                         <Image
                           source={require('../../../assets/images/trash.png')}
                           style={missionSetListStyles.deleteIcon}
                           resizeMode="contain"
-                          accessibilityLabel="삭제 아이콘"
+                          accessibilityElementsHidden={true}
                         />
                         <Text style={missionSetListStyles.deleteText}>삭제</Text>
                       </TouchableOpacity>
@@ -178,24 +195,59 @@ const MissionSetList: React.FC<MissionSetListProps> = ({
                   )}
 
                   <View style={missionSetListStyles.missionSetMeta}>
-                    <Text style={missionSetListStyles.metaText}>
-                      by {missionSet.creatorNickname}
-                    </Text>
-                    <Text style={missionSetListStyles.metaDot}>·</Text>
-                    <Text style={missionSetListStyles.metaText}>
-                      {missionSet.missionCount}개 미션
-                    </Text>
+                    {missionSet.createdAt && (
+                      <Text style={missionSetListStyles.metaText}>
+                        {formatDateKorean(missionSet.createdAt)}
+                      </Text>
+                    )}
+                    {missionSet.createdAt && missionSet.creatorNickname && (
+                      <Text style={missionSetListStyles.metaDot}>·</Text>
+                    )}
+                    {missionSet.creatorNickname && (
+                      <Text style={missionSetListStyles.metaText}>
+                        BY {missionSet.creatorNickname}
+                      </Text>
+                    )}
                   </View>
 
                   <View style={missionSetListStyles.missionSetFooter}>
-                    <View style={missionSetListStyles.ratingContainer}>
-                      <Text style={missionSetListStyles.stars}>
-                        {renderStars(missionSet.averageRating || 0)}
-                      </Text>
-                      <Text style={missionSetListStyles.reviewCount}>
-                        ({missionSet.reviewCount ?? 0})
-                      </Text>
-                    </View>
+                    {onTodoListLike ? (
+                      <TouchableOpacity
+                        style={missionSetListStyles.likeContainer}
+                        onPress={() => {
+                          if (likingMissionSetId !== missionSet.id) onTodoListLike(missionSet.id, !!missionSet.isLiked);
+                        }}
+                        disabled={likingMissionSetId === missionSet.id}
+                        activeOpacity={0.7}
+                        accessibilityRole="button"
+                        accessibilityLabel={missionSet.isLiked ? '좋아요 취소' : '좋아요'}
+                        accessibilityState={{ disabled: likingMissionSetId === missionSet.id }}
+                      >
+                        <Image
+                          source={require('../../../assets/images/heart.png')}
+                          style={[missionSetListStyles.likeIcon, missionSet.isLiked && missionSetListStyles.likeIconActive]}
+                          resizeMode="contain"
+                          accessibilityLabel="좋아요 아이콘"
+                          accessibilityElementsHidden={true}
+                        />
+                        <Text style={[missionSetListStyles.likeCount, missionSet.isLiked && missionSetListStyles.likeCountActive]}>
+                          {missionSet.likeCount ?? 0}
+                        </Text>
+                      </TouchableOpacity>
+                    ) : (
+                      <View style={missionSetListStyles.likeContainer}>
+                        <Image
+                          source={require('../../../assets/images/heart.png')}
+                          style={[missionSetListStyles.likeIcon, missionSet.isLiked && missionSetListStyles.likeIconActive]}
+                          resizeMode="contain"
+                          accessibilityLabel="좋아요 아이콘"
+                          accessibilityElementsHidden={true}
+                        />
+                        <Text style={[missionSetListStyles.likeCount, missionSet.isLiked && missionSetListStyles.likeCountActive]}>
+                          {missionSet.likeCount ?? 0}
+                        </Text>
+                      </View>
+                    )}
                   </View>
                 </TouchableOpacity>
               );
@@ -216,7 +268,7 @@ const MissionSetList: React.FC<MissionSetListProps> = ({
         onCancel={handleUnshareCancel}
         confirmButtonColor={colors.error}
       />
-    </>
+    </View>
   );
 };
 

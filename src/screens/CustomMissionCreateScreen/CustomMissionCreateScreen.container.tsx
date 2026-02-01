@@ -4,30 +4,18 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-import { Alert, Dimensions } from 'react-native';
+import { Dimensions } from 'react-native';
 import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types/navigation';
-import { useMission } from '../../hooks/useMission';
-import { WorryType } from '../../api/userApi';
-import { updateCustomMission } from '../../api/missionApi';
+import { updateCustomMission, createCustomMission as createCustomMissionApi, CreateMissionRequest, MissionCategory } from '../../api/missionApi';
 import { ScreenNames } from '../../types';
 import { spacing } from '../../utils/designTokens';
+import { SCREEN_NAMES } from '../../utils/constants';
 
 interface CustomMissionCreateScreenContainerProps {
   navigation: NavigationProp<RootStackParamList>;
   route?: RouteProp<RootStackParamList, 'CustomMissionCreate'>;
 }
-
-// 고민 종류 옵션
-export const WORRY_TYPE_OPTIONS: { id: WorryType; name: string; emoji: string }[] = [
-  { id: 'RE_EMPLOYMENT', name: '재취업', emoji: '💼' },
-  { id: 'JOB_PREPARATION', name: '취업준비', emoji: '📝' },
-  { id: 'ENTRANCE_EXAM', name: '입시', emoji: '📚' },
-  { id: 'ADVANCEMENT', name: '진학', emoji: '🎓' },
-  { id: 'RETURN_TO_SCHOOL', name: '복학', emoji: '🏫' },
-  { id: 'RELATIONSHIP', name: '연애', emoji: '💕' },
-  { id: 'SELF_MANAGEMENT', name: '자기관리', emoji: '🧘' },
-];
 
 // 미션 카테고리 옵션
 export type MissionCategoryOption = 'DAILY_LIFE' | 'GROWTH' | 'EXERCISE' | 'STUDY' | 'HEALTH' | 'RELATIONSHIP';
@@ -72,8 +60,9 @@ export const useCustomMissionCreateScreenContainer = ({
   navigation,
   route,
 }: CustomMissionCreateScreenContainerProps) => {
-  const { createCustomMission } = useMission();
   const generatedMission = route?.params?.generatedMission;
+  const returnScreen = route?.params?.returnScreen;
+  const todoListRestoreState = (route?.params as any)?.todoListRestoreState;
   const screenWidth = Dimensions.get('window').width;
   // 화면 좌우 패딩(24*2=48) + Card 내부 패딩(spacing[4]*2=32) + 버튼 간 간격(spacing[2]*2=16)을 뺀 후 3등분
   const buttonWidth = (screenWidth - 48 - spacing[4] * 2 - spacing[2] * 2) / 3;
@@ -85,14 +74,14 @@ export const useCustomMissionCreateScreenContainer = ({
 
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [selectedEmoji, setSelectedEmoji] = useState('🎯');
   const [loading, setLoading] = useState(false);
-  const [worryType, setWorryType] = useState<WorryType | null>(null);
-  // 새로운 필드들
-  const [category, setCategory] = useState<MissionCategoryOption>('DAILY_LIFE');
-  const [isChallenge, setIsChallenge] = useState(false); // 챌린지 미션 여부
-  const [challengeDays, setChallengeDays] = useState(7);
-  const [deadlineDays, setDeadlineDays] = useState(3);
+  const [category, setCategory] = useState<MissionCategory | null>(null);
+  const [alertModal, setAlertModal] = useState<{
+    visible: boolean;
+    title: string;
+    message: string;
+    isSuccess: boolean;
+  }>({ visible: false, title: '', message: '', isSuccess: false });
 
   /**
    * 수정 모드일 때 기존 데이터로 초기화
@@ -101,11 +90,7 @@ export const useCustomMissionCreateScreenContainer = ({
     if (isEditMode && missionData) {
       setTitle(missionData.title || '');
       setDescription(missionData.description || '');
-      setCategory((missionData.category as MissionCategoryOption) || 'DAILY_LIFE');
-      setIsChallenge(missionData.isChallenge || false);
-      setChallengeDays(missionData.challengeDays || 7);
-      setDeadlineDays(missionData.deadlineDays || 3);
-      setWorryType((missionData.worryType as WorryType) || null);
+      setCategory((missionData.category as MissionCategory) || null);
     }
   }, [isEditMode, missionData]);
 
@@ -116,7 +101,6 @@ export const useCustomMissionCreateScreenContainer = ({
     if (generatedMission && !isEditMode) {
       setTitle(generatedMission.title || '');
       setDescription(generatedMission.description || '');
-      setSelectedEmoji(generatedMission.emoji || '🎯');
     }
   }, [generatedMission, isEditMode]);
 
@@ -125,120 +109,128 @@ export const useCustomMissionCreateScreenContainer = ({
    */
   const handleSubmitMission = useCallback(async () => {
     if (!title.trim()) {
-      Alert.alert('오류', '미션 제목을 입력해주세요.');
+      setAlertModal({ visible: true, title: '오류', message: '미션 제목을 입력해주세요.', isSuccess: false });
       return;
     }
 
     if (!description.trim()) {
-      Alert.alert('오류', '미션 설명을 입력해주세요.');
+      setAlertModal({ visible: true, title: '오류', message: '미션 설명을 입력해주세요.', isSuccess: false });
       return;
     }
 
     try {
       setLoading(true);
 
-      // 백엔드 API 형식에 맞게 데이터 구성
-      const missionPayload = {
+      // 투두리스트와 동일하게 하드코딩된 값 사용
+      const request: CreateMissionRequest = {
         title: title.trim(),
         description: description.trim(),
-        emoji: selectedEmoji,
-        experience: 0, // 커스텀 미션은 경험치 지급 없음
-        // 백엔드 필수 필드들
-        durationDays: isChallenge ? challengeDays : deadlineDays, // 미션 기간
-        isPublic: true, // 기본값: 공개
+        category: (category || 'DAILY_LIFE') as MissionCategory, // 선택한 카테고리 또는 기본값
         verificationType: 'COMMUNITY' as const,
-        badgeDurationDays: isChallenge ? challengeDays : 7, // 배지 유효 기간
-        worryType: worryType,
-        // 새로운 필드들
-        category: category, // 미션 카테고리
-        isChallenge: isChallenge, // 챌린지 미션 여부
-        challengeDays: isChallenge ? challengeDays : undefined, // 챌린지 미션일 때만
-        deadlineDays: isChallenge ? undefined : deadlineDays, // 일반 미션일 때만
+        expReward: 50,
+        badgeDurationDays: 7,
+        durationDays: 3,
+        isPublic: true,
+        deadlineDays: 3,
       };
 
       let result;
       if (isEditMode && editMissionId) {
         // 수정 모드: updateCustomMission 호출
-        result = await updateCustomMission(editMissionId, missionPayload);
+        result = await updateCustomMission(editMissionId, request);
       } else {
-        // 생성 모드: createCustomMission 호출
-        result = await createCustomMission(missionPayload);
+        // 생성 모드: createCustomMission API 직접 호출 (투두리스트와 동일)
+        result = await createCustomMissionApi(request);
       }
 
       if (result.success) {
-        Alert.alert(
-          '성공!',
-          isEditMode ? '미션이 수정되었습니다!' : '나만의 미션이 생성되었습니다!',
-          [
-            {
-              text: '확인',
-              onPress: () => (navigation as any).navigate(ScreenNames.MISSION),
-            },
-          ]
-        );
+        setAlertModal({
+          visible: true,
+          title: '성공!',
+          message: isEditMode ? '미션이 수정되었습니다!' : '나만의 미션이 생성되었습니다!',
+          isSuccess: true,
+        });
       } else {
-        Alert.alert(
-          '오류',
-          result.error || (isEditMode ? '미션 수정에 실패했습니다.' : '미션 생성에 실패했습니다.')
-        );
+        setAlertModal({
+          visible: true,
+          title: '오류',
+          message: result.error || (isEditMode ? '미션 수정에 실패했습니다.' : '미션 생성에 실패했습니다.'),
+          isSuccess: false,
+        });
       }
     } catch (error) {
-      Alert.alert('오류', isEditMode ? '미션 수정 중 오류가 발생했습니다.' : '미션 생성 중 오류가 발생했습니다.');
+      setAlertModal({
+        visible: true,
+        title: '오류',
+        message: isEditMode ? '미션 수정 중 오류가 발생했습니다.' : '미션 생성 중 오류가 발생했습니다.',
+        isSuccess: false,
+      });
     } finally {
       setLoading(false);
     }
   }, [
     title,
     description,
-    selectedEmoji,
-    isChallenge,
-    challengeDays,
-    deadlineDays,
-    worryType,
     category,
     isEditMode,
     editMissionId,
-    createCustomMission,
-    navigation,
   ]);
+
+  const handleAlertClose = useCallback(() => {
+    const wasSuccess = alertModal.isSuccess;
+    setAlertModal(prev => ({ ...prev, visible: false }));
+    if (wasSuccess) {
+      if (returnScreen === 'TodoListCreate') {
+        // 투두리스트 만들기로 돌아갈 때 activeStep + 복원 상태 전달 (공식 미션 등 유지)
+        (navigation as any).navigate(SCREEN_NAMES.TODO_LIST_CREATE, {
+          activeStep: 'custom',
+          todoListRestoreState: todoListRestoreState ?? undefined,
+        });
+      } else {
+        (navigation as any).navigate(ScreenNames.MISSION);
+      }
+    }
+  }, [alertModal.isSuccess, navigation, returnScreen, todoListRestoreState]);
 
   /**
    * 취소 버튼 핸들러
    */
   const handleCancel = useCallback(() => {
-    (navigation as any).navigate(ScreenNames.MISSION);
-  }, [navigation]);
+    if (returnScreen === 'TodoListCreate') {
+      // TodoListCreateScreen으로 돌아가면서 Step 2 + 복원 상태 전달 (공식 미션 등 유지)
+      (navigation as any).navigate(SCREEN_NAMES.TODO_LIST_CREATE, {
+        activeStep: 'custom',
+        todoListRestoreState: todoListRestoreState ?? undefined,
+      });
+    } else {
+      // 미션 도감에서 왔으면 Mission 화면의 미션 도감 커스텀 미션 탭으로 이동
+      // navigate를 사용하여 activeTab과 missionGroupTab을 명시적으로 전달
+      (navigation as any).navigate(ScreenNames.MISSION, { 
+        activeTab: 'missionGroup',
+        missionGroupTab: 'custom' 
+      });
+    }
+  }, [navigation, returnScreen, todoListRestoreState]);
 
   return {
     // Constants
-    WORRY_TYPE_OPTIONS,
     MISSION_CATEGORY_OPTIONS,
-    CHALLENGE_DAYS_OPTIONS,
-    DEADLINE_DAYS_OPTIONS,
     buttonWidth,
     // Route params
     isEditMode,
     // State
     title,
     description,
-    selectedEmoji,
     loading,
-    worryType,
     category,
-    isChallenge,
-    challengeDays,
-    deadlineDays,
+    alertModal,
     // Setters
     setTitle,
     setDescription,
-    setSelectedEmoji,
-    setWorryType,
     setCategory,
-    setIsChallenge,
-    setChallengeDays,
-    setDeadlineDays,
     // Handlers
     handleSubmitMission,
     handleCancel,
+    handleAlertClose,
   };
 };

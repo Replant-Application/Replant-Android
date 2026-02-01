@@ -11,7 +11,7 @@ import {
   deleteNotification,
   type Notification as NotificationType
 } from '../../api/notificationApi';
-import { getUserMission, getCurrentSpontaneousMissions, getCurrentWakeupMission } from '../../api/missionApi';
+import { getCurrentSpontaneousMissions, getCurrentWakeupMission } from '../../api/missionApi';
 import { getMealLogDetail } from '../../api/mealLogApi';
 import { SCREEN_NAMES } from '../../utils/constants';
 import { useSse } from '../../contexts/SseContext';

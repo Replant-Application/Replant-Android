@@ -101,6 +101,8 @@ const ReantChatBottomSheet: React.FC<ReantChatBottomSheetProps> = ({
         style={styles.overlay}
         activeOpacity={1}
         onPress={onClose}
+        accessibilityRole="button"
+        accessibilityLabel="배경을 눌러 닫기"
       >
         <Animated.View
           style={[
@@ -110,7 +112,7 @@ const ReantChatBottomSheet: React.FC<ReantChatBottomSheetProps> = ({
             },
           ]}
         >
-          <TouchableOpacity activeOpacity={1} onPress={(e) => e.stopPropagation()}>
+          <TouchableOpacity activeOpacity={1} onPress={(e) => e.stopPropagation()} accessibilityRole="none" accessibilityLabel="">
             {/* 드래그 핸들 */}
             <View style={styles.dragHandle}>
               <View style={styles.dragHandleBar} />

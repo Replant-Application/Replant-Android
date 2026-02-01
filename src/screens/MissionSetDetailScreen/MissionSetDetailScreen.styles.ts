@@ -6,8 +6,8 @@
 import { StyleSheet } from 'react-native';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
 import { getOptimizedLineHeight } from '../../utils/styles/textStyles';
-import { createTextStyle, createTitleStyle, createBodyStyle, createSecondaryTextStyle, createButtonTextStyle } from '../../utils/styles/textStyles';
-import { buttonStyles, inputStyles, cardStyles, emptyStateStyles } from '../../utils/styles/commonStyles';
+import { createTextStyle, createTitleStyle, createBodyStyle, createSecondaryTextStyle } from '../../utils/styles/textStyles';
+import { cardStyles, emptyStateStyles } from '../../utils/styles/commonStyles';
 
 export const styles = StyleSheet.create({
   container: {
@@ -26,7 +26,7 @@ export const styles = StyleSheet.create({
     borderColor: colors.border.light,
   },
   title: {
-    ...createTitleStyle('xl', {
+    ...createTitleStyle('lg', {
       fontWeight: typography.fontWeight.semibold,
       marginBottom: spacing[2],
     }),
@@ -57,30 +57,41 @@ export const styles = StyleSheet.create({
       color: colors.text.tertiary,
     }),
   },
+  createdAt: {
+    ...createSecondaryTextStyle('sm', {
+      color: colors.text.tertiary,
+    }),
+  },
   statsRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingTop: spacing[3],
+    paddingTop: spacing[1],
     borderTopWidth: 1,
     borderTopColor: colors.border.light,
   },
-  ratingContainer: {
+  likeContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing[1],
+    gap: spacing[2],
   },
-  stars: {
-    fontSize: typography.fontSize.base,
-    color: colors.warning,
+  likeButton: {
+    padding: spacing[1],
   },
-  ratingText: {
-    ...createSecondaryTextStyle('sm'),
+  likeIcon: {
+    width: 20,
+    height: 20,
+    tintColor: colors.error,
   },
-  reviewCount: {
+  likeIconActive: {
+    tintColor: colors.error,
+  },
+  likeCount: {
     ...createTextStyle('sm', {
       color: colors.text.tertiary,
-      marginLeft: spacing[1],
     }),
+  },
+  likeCountActive: {
+    color: colors.primary[600],
   },
   missionSection: {
     marginBottom: spacing[4],
@@ -117,9 +128,41 @@ export const styles = StyleSheet.create({
       color: colors.primary[600],
     }),
   },
+  missionTitleRow: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing[2],
+  },
   missionTitle: {
     flex: 1,
     ...createBodyStyle('base'),
+  },
+  creatorStatusBadge: {
+    paddingVertical: spacing[1],
+    paddingHorizontal: spacing[2],
+    borderRadius: borderRadius.base,
+  },
+  creatorStatusCompleted: {
+    backgroundColor: colors.primary[50],
+    borderWidth: 1,
+    borderColor: colors.primary[300],
+  },
+  creatorStatusIncomplete: {
+    backgroundColor: colors.gray[100],
+    borderWidth: 1,
+    borderColor: colors.gray[300],
+  },
+  creatorStatusText: {
+    ...createTextStyle('xs', {
+      fontWeight: typography.fontWeight.medium,
+    }),
+  },
+  creatorStatusTextCompleted: {
+    color: colors.primary[600],
+  },
+  creatorStatusTextIncomplete: {
+    color: colors.text.tertiary,
   },
   emptyMissions: {
     ...emptyStateStyles.container(),
@@ -132,114 +175,6 @@ export const styles = StyleSheet.create({
     ...createTextStyle('sm', {
       color: colors.text.tertiary,
     }),
-  },
-  reviewSection: {
-    marginBottom: spacing[4],
-  },
-  myReviewCard: {
-    backgroundColor: colors.background.primary,
-    borderRadius: borderRadius.base,
-    padding: spacing[3],
-    borderWidth: 1,
-    borderColor: colors.primary[200],
-    marginBottom: spacing[2],
-  },
-  myReviewHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  myReviewLabel: {
-    ...createTextStyle('sm', {
-      fontWeight: typography.fontWeight.medium,
-      color: colors.primary[600],
-    }),
-  },
-  myReviewStars: {
-    fontSize: typography.fontSize.base,
-    color: colors.warning,
-  },
-  myReviewContent: {
-    ...createSecondaryTextStyle('sm', {
-      lineHeight: getOptimizedLineHeight(typography.fontSize.sm) * 1.4,
-    }),
-  },
-  reviewFormCard: {
-    backgroundColor: colors.background.primary,
-    borderRadius: borderRadius.base,
-    padding: spacing[3],
-    borderWidth: 1,
-    borderColor: colors.border.light,
-  },
-  reviewFormLabel: {
-    ...createSecondaryTextStyle('sm', {
-      marginBottom: spacing[2],
-      textAlign: 'center',
-    }),
-  },
-  ratingSelector: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: spacing[1],
-    marginBottom: spacing[2],
-  },
-  ratingStar: {
-    fontSize: 24,
-    color: colors.gray[300],
-  },
-  ratingStarActive: {
-    color: colors.warning,
-  },
-  reviewInput: {
-    ...inputStyles.base(),
-    backgroundColor: colors.background.secondary,
-    borderRadius: borderRadius.base,
-    fontSize: typography.fontSize.sm,
-    minHeight: 80,
-    textAlignVertical: 'top',
-    marginBottom: spacing[3],
-  },
-  reviewFormButtons: {
-    flexDirection: 'row',
-    gap: spacing[2],
-  },
-  cancelButton: {
-    ...buttonStyles.secondary(),
-    flex: 1,
-    paddingVertical: spacing[2],
-  },
-  cancelButtonText: {
-    ...createButtonTextStyle('sm', {
-      color: colors.text.secondary,
-    }),
-  },
-  submitButton: {
-    ...buttonStyles.primary(),
-    flex: 1,
-    paddingVertical: spacing[2],
-  },
-  submitButtonDisabled: {
-    backgroundColor: colors.gray[300],
-  },
-  submitButtonText: {
-    ...createButtonTextStyle('sm'),
-  },
-  submittingText: {
-    ...createSecondaryTextStyle('xs', {
-      textAlign: 'center',
-      marginTop: spacing[1],
-    }),
-  },
-  bottomContainer: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    padding: spacing[4],
-    paddingBottom: spacing[6],
-    backgroundColor: 'rgba(255, 255, 255, 0.95)',
-    borderTopWidth: 1,
-    borderTopColor: colors.border.light,
   },
   spacer: {
     height: 120,

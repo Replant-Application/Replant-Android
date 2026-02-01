@@ -7,6 +7,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useErrorHandler } from '../../hooks/useErrorHandler';
 import { SCREEN_NAMES } from '../../utils/constants';
 import { getTodoListDetail, completeTodoMission, archiveTodoList, canCreateNewTodoList, updateMissionSet } from '../../api/todolistApi';
+import { uncompleteCustomMission } from '../../api/missionApi';
 import { TodoList, TodoMission } from '../../types/todolist';
 import { useUser } from '../../contexts/UserContext';
 import {
@@ -56,7 +57,7 @@ export const useTodoListDetailScreenContainer = ({ navigation, route }: TodoList
     }),
     []
   );
-  const { showError, showSuccess, showInfo, handleApiError } = useErrorHandler(errorHandlerOverrides);
+  const { showError, showSuccess, handleApiError } = useErrorHandler(errorHandlerOverrides);
 
   const [todoList, setTodoList] = useState<TodoList | null>(null);
   const [loading, setLoading] = useState(true);
@@ -301,9 +302,33 @@ export const useTodoListDetailScreenContainer = ({ navigation, route }: TodoList
       checkAndShowCompleteModal,
       handleApiError,
       showError,
-      showSuccess,
-      showInfo,
     ]
+  );
+
+  /**
+   * 커스텀 미션 인증 취소 (다시 체크 누르면 완료 해제)
+   */
+  const handleUncompleteMission = useCallback(
+    async (mission: TodoMission) => {
+      const isCustom = mission.missionType === 'CUSTOM' || mission.missionSource === 'CUSTOM_SELECTED';
+      if (!isCustom || !mission.isCompleted) return;
+      setCompletingMissionId(mission.missionId);
+      try {
+        const result = await uncompleteCustomMission(mission.missionId);
+        if (result.success) {
+          showSuccess('인증이 취소되었어요.');
+          const detailResult = await getTodoListDetail(Number(todoListId));
+          if (detailResult.success && detailResult.data) setTodoList(detailResult.data);
+        } else {
+          handleApiError(result, 'TodoListDetailScreen.handleUncompleteMission');
+        }
+      } catch (error) {
+        showError(error instanceof Error ? error : new Error('인증 취소에 실패했습니다.'), 'TodoListDetailScreen.handleUncompleteMission');
+      } finally {
+        setCompletingMissionId(null);
+      }
+    },
+    [todoListId, handleApiError, showError, showSuccess]
   );
 
   /**
@@ -451,6 +476,7 @@ export const useTodoListDetailScreenContainer = ({ navigation, route }: TodoList
     ...progressData,
     // Handlers
     handleCompleteMission,
+    handleUncompleteMission,
     handleArchive,
     handleCreateNew,
     handleCompleteModalClose,

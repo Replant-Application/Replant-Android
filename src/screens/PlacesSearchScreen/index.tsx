@@ -47,12 +47,17 @@ const PlacesSearchScreen: React.FC<PlacesSearchScreenProps> = ({ navigation }) =
         <Header
           title="근처 상담센터"
           leftButton={
-            <TouchableOpacity onPress={handleGoBack}>
+            <TouchableOpacity
+              onPress={handleGoBack}
+              accessibilityRole="button"
+              accessibilityLabel="뒤로 가기"
+            >
               <Image
                 source={require('../../assets/images/left.png')}
                 style={styles.backButtonIcon}
                 resizeMode="contain"
                 accessibilityLabel="뒤로 가기"
+                accessibilityElementsHidden={true}
               />
             </TouchableOpacity>
           }
@@ -85,6 +90,9 @@ const PlacesSearchScreen: React.FC<PlacesSearchScreenProps> = ({ navigation }) =
                 selectedFilter === filter.key && styles.filterChipActive,
               ]}
               onPress={() => handleFilterChange(filter.key)}
+              accessibilityRole="button"
+              accessibilityLabel={filter.label}
+              accessibilityState={{ selected: selectedFilter === filter.key }}
             >
               <Text
                 style={[
@@ -111,6 +119,9 @@ const PlacesSearchScreen: React.FC<PlacesSearchScreenProps> = ({ navigation }) =
                 selectedRegion === region.id && styles.regionChipActive,
               ]}
               onPress={() => handleRegionChange(region.id)}
+              accessibilityRole="button"
+              accessibilityLabel={region.name}
+              accessibilityState={{ selected: selectedRegion === region.id }}
             >
               <Text
                 style={[

@@ -1,8 +1,6 @@
 apply plugin: "com.android.application"
 apply plugin: "org.jetbrains.kotlin.android"
 apply plugin: "com.facebook.react"
-// Add the Google services Gradle plugin
-apply plugin: "com.google.gms.google-services"
 
 def projectRoot = rootDir.getAbsoluteFile().getParentFile().getAbsolutePath()
 
@@ -11,13 +9,16 @@ def projectRoot = rootDir.getAbsoluteFile().getParentFile().getAbsolutePath()
  * By default you don't need to apply any configuration, just uncomment the lines you need.
  */
 react {
-    entryFile = file("$projectRoot/index.js")
-    root = file("$projectRoot")
+    entryFile = file(["node", "-e", "require('expo/scripts/resolveAppEntry')", projectRoot, "android", "absolute"].execute(null, rootDir).text.trim())
     reactNativeDir = new File(["node", "--print", "require.resolve('react-native/package.json')"].execute(null, rootDir).text.trim()).getParentFile().getAbsoluteFile()
     hermesCommand = new File(["node", "--print", "require.resolve('react-native/package.json')"].execute(null, rootDir).text.trim()).getParentFile().getAbsolutePath() + "/sdks/hermesc/%OS-BIN%/hermesc"
     codegenDir = new File(["node", "--print", "require.resolve('@react-native/codegen/package.json', { paths: [require.resolve('react-native/package.json')] })"].execute(null, rootDir).text.trim()).getParentFile().getAbsoluteFile()
 
     enableBundleCompression = (findProperty('android.enableBundleCompression') ?: false).toBoolean()
+    // Use Expo CLI to bundle the app, this ensures the Metro config
+    // works correctly with Expo projects.
+    cliFile = new File(["node", "--print", "require.resolve('@expo/cli', { paths: [require.resolve('expo/package.json')] })"].execute(null, rootDir).text.trim())
+    bundleCommand = "export:embed"
 
     /* Folders */
      //   The root of your project, i.e. where "package.json" lives. Default is '../..'
@@ -91,8 +92,8 @@ android {
         applicationId 'com.anonymous.replantmobileapp'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 40
-        versionName "0.0.40"
+        versionCode 105
+        versionName "1.0.5"
 
         buildConfigField "String", "REACT_NATIVE_RELEASE_LEVEL", "\"${findProperty('reactNativeReleaseLevel') ?: 'stable'}\""
     }
@@ -104,22 +105,10 @@ android {
             keyPassword 'android'
         }
         release {
-            // CI/CD 환경변수 또는 local.properties에서 읽기
-            def keystorePropertiesFile = rootProject.file("local.properties")
-            def keystoreProperties = new Properties()
-            if (keystorePropertiesFile.exists()) {
-                keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
-            }
-            
-            def keystoreFile = keystoreProperties['RELEASE_STORE_FILE']
-            if (keystoreFile) {
-                storeFile file(keystoreFile.startsWith('/') ? keystoreFile : rootProject.file(keystoreFile))
-            } else {
-                storeFile file('replant-release-key.keystore')
-            }
-            storePassword keystoreProperties['RELEASE_STORE_PASSWORD'] ?: ''
-            keyAlias keystoreProperties['RELEASE_KEY_ALIAS'] ?: 'replant-key'
-            keyPassword keystoreProperties['RELEASE_KEY_PASSWORD'] ?: ''
+            storeFile file('replant-release-key.keystore')
+            storePassword 'replant2025'
+            keyAlias 'replant-key'
+            keyPassword 'replant2025'
         }
     }
     buildTypes {
@@ -171,15 +160,6 @@ dependencies {
     // The version of react-native is set by the React Native Gradle Plugin
     implementation("com.facebook.react:react-android")
 
-    // Import the Firebase BoM
-    implementation platform('com.google.firebase:firebase-bom:34.7.0')
-
-    // Firebase Cloud Messaging
-    implementation 'com.google.firebase:firebase-messaging'
-
-    // Firebase Analytics (optional)
-    implementation 'com.google.firebase:firebase-analytics'
-
     def isGifEnabled = (findProperty('expo.gif.enabled') ?: "") == "true";
     def isWebpEnabled = (findProperty('expo.webp.enabled') ?: "") == "true";
     def isWebpAnimatedEnabled = (findProperty('expo.webp.animated') ?: "") == "true";
@@ -200,7 +180,13 @@ dependencies {
 
     if (hermesEnabled.toBoolean()) {
         implementation("com.facebook.react:hermes-android")
-    } else {
-        implementation jscFlavor
+    } else {        implementation jscFlavor
     }
+
+    // Firebase
+    implementation platform('com.google.firebase:firebase-bom:33.7.0')
+    implementation 'com.google.firebase:firebase-messaging'
+    implementation 'com.google.firebase:firebase-analytics'
 }
+
+apply plugin: 'com.google.gms.google-services'

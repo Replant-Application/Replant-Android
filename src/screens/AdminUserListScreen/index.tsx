@@ -53,6 +53,9 @@ const AdminUserListScreen: React.FC<AdminUserListScreenProps> = ({ navigation })
           <TouchableOpacity
             style={[styles.filterButton, filter === 'all' && styles.filterButtonActive]}
             onPress={() => handleFilterChange('all')}
+            accessibilityRole="button"
+            accessibilityLabel="전체"
+            accessibilityState={{ selected: filter === 'all' }}
           >
             <Text style={[styles.filterText, filter === 'all' && styles.filterTextActive]}>
               전체
@@ -61,6 +64,9 @@ const AdminUserListScreen: React.FC<AdminUserListScreenProps> = ({ navigation })
           <TouchableOpacity
             style={[styles.filterButton, filter === 'active' && styles.filterButtonActive]}
             onPress={() => handleFilterChange('active')}
+            accessibilityRole="button"
+            accessibilityLabel="활성"
+            accessibilityState={{ selected: filter === 'active' }}
           >
             <Text style={[styles.filterText, filter === 'active' && styles.filterTextActive]}>
               활성
@@ -69,6 +75,9 @@ const AdminUserListScreen: React.FC<AdminUserListScreenProps> = ({ navigation })
           <TouchableOpacity
             style={[styles.filterButton, filter === 'inactive' && styles.filterButtonActive]}
             onPress={() => handleFilterChange('inactive')}
+            accessibilityRole="button"
+            accessibilityLabel="비활성"
+            accessibilityState={{ selected: filter === 'inactive' }}
           >
             <Text style={[styles.filterText, filter === 'inactive' && styles.filterTextActive]}>
               비활성
@@ -90,6 +99,8 @@ const AdminUserListScreen: React.FC<AdminUserListScreenProps> = ({ navigation })
                 key={user.id}
                 style={styles.userCard}
                 onPress={() => handleUserPress(user.id)}
+                accessibilityRole="button"
+                accessibilityLabel={`${user.nickname || '사용자'} 상세`}
               >
                 <View style={styles.userCardContent}>
                   <View style={styles.userCardHeader}>

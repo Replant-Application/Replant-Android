@@ -356,6 +356,7 @@ export const styles = StyleSheet.create({
     ...inputStyles.base(),
     backgroundColor: colors.gray[50],
     borderRadius: borderRadius.lg,
+    color: colors.text.primary,
     minHeight: 150,
     marginBottom: spacing[4],
     borderWidth: 1,

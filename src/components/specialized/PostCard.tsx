@@ -86,7 +86,8 @@ const PostCard: React.FC<PostCardProps> = ({
 
   // 접근성 라벨 생성
   const getAccessibilityLabel = () => {
-    let label = `${post.author_nickname}의 게시글, ${post.title}`;
+    const authorName = post.author_nickname || '익명';
+    let label = `${authorName}의 게시글, ${post.title}`;
     if (post.mission_title) {
       label += `, ${post.mission_title} 미션`;
     }
@@ -113,11 +114,11 @@ const PostCard: React.FC<PostCardProps> = ({
         <View style={styles.authorInfo}>
           <View style={styles.authorAvatar}>
             <Text style={styles.authorAvatarText}>
-              {post.author_nickname.charAt(0).toUpperCase()}
+              {(post.author_nickname || '익').charAt(0).toUpperCase()}
             </Text>
           </View>
           <View style={styles.authorNameContainer}>
-            <Text style={styles.authorName}>{post.author_nickname}</Text>
+            <Text style={styles.authorName}>{post.author_nickname || '익명'}</Text>
             {post.category && (
               <View style={styles.categoryBadge}>
                 <Text style={styles.categoryText}>{post.category}</Text>
@@ -154,16 +155,28 @@ const PostCard: React.FC<PostCardProps> = ({
             style={styles.menuOverlay}
             activeOpacity={1}
             onPress={() => setShowMenu(false)}
+            accessibilityRole="button"
+            accessibilityLabel="메뉴 닫기"
           />
           <View style={styles.menuContainer}>
             {canEditDelete && (
               <>
-                <TouchableOpacity style={styles.menuItem} onPress={handleEdit}>
+                <TouchableOpacity
+                  style={styles.menuItem}
+                  onPress={handleEdit}
+                  accessibilityRole="button"
+                  accessibilityLabel="수정"
+                >
                   <Text style={styles.menuItemIcon}>✏️</Text>
                   <Text style={styles.menuItemText}>수정</Text>
                 </TouchableOpacity>
                 <View style={styles.menuDivider} />
-                <TouchableOpacity style={styles.menuItem} onPress={handleDelete}>
+                <TouchableOpacity
+                  style={styles.menuItem}
+                  onPress={handleDelete}
+                  accessibilityRole="button"
+                  accessibilityLabel="삭제"
+                >
                   <Text style={styles.menuItemIcon}>🗑️</Text>
                   <Text style={[styles.menuItemText, styles.deleteText]}>삭제</Text>
                 </TouchableOpacity>
@@ -172,7 +185,12 @@ const PostCard: React.FC<PostCardProps> = ({
             {!isOwnPost && onHide && (
               <>
                 {canEditDelete && <View style={styles.menuDivider} />}
-                <TouchableOpacity style={styles.menuItem} onPress={handleHide}>
+                <TouchableOpacity
+                  style={styles.menuItem}
+                  onPress={handleHide}
+                  accessibilityRole="button"
+                  accessibilityLabel="숨기기"
+                >
                   <Text style={styles.menuItemIcon}>🚫</Text>
                   <Text style={styles.menuItemText}>숨기기</Text>
                 </TouchableOpacity>
@@ -200,14 +218,22 @@ const PostCard: React.FC<PostCardProps> = ({
             {/* 인증 상태 배지 - 인증 게시글(category === '인증')일 때만 표시 */}
             {post.category === '인증' && (
               post.verified === true ? (
-                <View style={styles.verifiedBadge}>
-                  <Text style={styles.verifiedIcon}>✓</Text>
-                  <Text style={styles.verifiedText}>인증완료</Text>
+                <View
+                  style={styles.verifiedBadge}
+                  accessibilityLabel="인증완료"
+                  accessibilityRole="text"
+                >
+                  <Text style={styles.verifiedIcon} accessibilityElementsHidden={true}>✓</Text>
+                  <Text style={styles.verifiedText} accessibilityElementsHidden={true}>인증완료</Text>
                 </View>
               ) : post.verified === false ? (
-                <View style={styles.pendingBadge}>
-                  <Text style={styles.pendingIcon}>⏳</Text>
-                  <Text style={styles.pendingText}>인증대기</Text>
+                <View
+                  style={styles.pendingBadge}
+                  accessibilityLabel="인증대기"
+                  accessibilityRole="text"
+                >
+                  <Text style={styles.pendingIcon} accessibilityElementsHidden={true}>⏳</Text>
+                  <Text style={styles.pendingText} accessibilityElementsHidden={true}>인증대기</Text>
                 </View>
               ) : null
             )}
@@ -255,17 +281,13 @@ const PostCard: React.FC<PostCardProps> = ({
             accessibilityLabel={post.is_liked ? `좋아요 취소, ${post.like_count}개` : `좋아요, ${post.like_count}개`}
             accessibilityState={{ selected: post.is_liked }}
           >
-            {post.is_liked ? (
-              <Text style={[styles.statIcon, styles.likedIcon]}>❤️</Text>
-            ) : (
-              <Image
-                source={require('../../assets/images/heart.png')}
-                style={styles.statIconImage}
-                resizeMode="contain"
-                accessibilityLabel="좋아요 아이콘"
-                accessibilityElementsHidden={true}
-              />
-            )}
+            <Image
+              source={require('../../assets/images/heart.png')}
+              style={styles.statIconImage}
+              resizeMode="contain"
+              accessibilityLabel="좋아요 아이콘"
+              accessibilityElementsHidden={true}
+            />
             <Text style={[styles.statText, post.is_liked && styles.statTextActive]}>
               {post.like_count}
             </Text>

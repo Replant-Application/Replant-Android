@@ -90,8 +90,14 @@ export const styles = StyleSheet.create({
     borderRadius: borderRadius.md,
     padding: spacing[3],
     fontSize: typography.fontSize.base,
+    color: colors.text.primary,
     height: 48,
     textAlignVertical: 'center',
+    fontFamily: Platform.select({
+      ios: undefined,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
   },
   titleInputDisabled: {
     backgroundColor: colors.gray[100],
@@ -113,8 +119,14 @@ export const styles = StyleSheet.create({
     borderRadius: borderRadius.md,
     padding: spacing[3],
     fontSize: typography.fontSize.base,
+    color: colors.text.primary,
     minHeight: 150,
     textAlignVertical: 'top',
+    fontFamily: Platform.select({
+      ios: undefined,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
   },
   imageSection: {
     marginBottom: spacing[4],
@@ -146,8 +158,9 @@ export const styles = StyleSheet.create({
     height: '100%',
   },
   addImageButton: {
-    width: 80,
-    height: 80,
+    width: '100%',
+    minHeight: 80,
+    paddingVertical: spacing[3],
     backgroundColor: colors.white,
     borderWidth: 1,
     borderColor: colors.border.light,

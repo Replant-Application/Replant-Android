@@ -3,7 +3,7 @@
  * 일기 화면의 모든 스타일 정의
  */
 
-import { StyleSheet, Dimensions } from 'react-native';
+import { StyleSheet, Dimensions, Platform } from 'react-native';
 import { colors, spacing, typography, borderRadius, shadows, layout } from '../../utils/designTokens';
 import { getOptimizedLineHeight } from '../../utils/styles/textStyles';
 import { createTextStyle, createTitleStyle, createBodyStyle, createSecondaryTextStyle, createButtonTextStyle } from '../../utils/styles/textStyles';
@@ -20,7 +20,7 @@ export const styles = StyleSheet.create({
     backgroundColor: colors.overlay.dark,
     borderRadius: borderRadius.lg,
     padding: spacing[6],
-    paddingVertical: spacing[8],
+    paddingVertical: spacing[5],
     marginHorizontal: spacing[4],
     marginTop: spacing[20],
     minHeight: 180,
@@ -47,6 +47,17 @@ export const styles = StyleSheet.create({
   },
   modalQuestionCenter: {
     textAlign: 'center',
+  },
+  /** 버튼 아래 경고/안내 문구 (작은 글씨) */
+  welcomeNotice: {
+    marginTop: spacing[6],
+    marginBottom: spacing[1],
+    textAlign: 'left',
+    ...createTextStyle('xs', {
+      color: 'rgba(255, 255, 255, 0.65)',
+      fontWeight: typography.fontWeight.normal,
+      lineHeight: getOptimizedLineHeight(typography.fontSize.xs) * 1.3,
+    }),
   },
   modalContent: {
     marginBottom: spacing[3],
@@ -113,6 +124,44 @@ export const styles = StyleSheet.create({
     ...createTextStyle('sm', {
       color: colors.gray[300],
     }),
+  },
+  sliderButtons: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: spacing[4],
+    marginTop: spacing[4],
+  },
+  sliderButton: {
+    width: 48,
+    minHeight: 48,
+    paddingVertical: spacing[1],
+    borderRadius: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 0,
+    ...shadows.sm,
+  },
+  sliderButtonMinus: {
+    backgroundColor: colors.red[500],
+    borderWidth: 1.5,
+    borderColor: colors.red[400],
+  },
+  sliderButtonPlus: {
+    backgroundColor: colors.primary[500],
+    borderWidth: 1.5,
+    borderColor: colors.primary[400],
+  },
+  sliderButtonText: {
+    fontSize: 28,
+    fontFamily: Platform.select({
+      ios: undefined,
+      android: typography.fontFamily.bold,
+    }),
+    fontWeight: '700' as const,
+    color: colors.white,
+    lineHeight: 30,
+    textAlign: 'center',
   },
   sliderValue: {
     ...createTextStyle('2xl', {
@@ -300,8 +349,7 @@ export const styles = StyleSheet.create({
     gap: spacing[2],
   },
   searchInputContainer: {
-    flex: 0,
-    width: 300,
+    flex: 1,
     position: 'relative',
     backgroundColor: colors.overlay.light,
     borderRadius: borderRadius.lg,
@@ -313,6 +361,7 @@ export const styles = StyleSheet.create({
     paddingVertical: spacing[2],
     paddingLeft: spacing[3],
     paddingRight: spacing[10], // X 버튼 공간 확보
+    textAlignVertical: 'center', // Android: 입력 텍스트 상하 가운데
     ...createTextStyle('base', {
       color: colors.white,
     }),

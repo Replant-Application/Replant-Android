@@ -161,6 +161,8 @@ const CommunityPostCreateScreen: React.FC<CommunityPostCreateScreenProps> = ({ n
                   <TouchableOpacity
                     style={styles.removeImageButton}
                     onPress={() => handleRemoveImage(index)}
+                    accessibilityRole="button"
+                    accessibilityLabel="이미지 삭제"
                   >
                     <Text style={styles.removeImageText}>×</Text>
                   </TouchableOpacity>
@@ -171,6 +173,9 @@ const CommunityPostCreateScreen: React.FC<CommunityPostCreateScreenProps> = ({ n
                   style={styles.addImageButton}
                   onPress={handleSelectImage}
                   disabled={uploadingImage}
+                  accessibilityRole="button"
+                  accessibilityLabel="사진 추가"
+                  accessibilityState={{ disabled: uploadingImage }}
                 >
                   {uploadingImage ? (
                     <ActivityIndicator color={colors.primary[500]} />
@@ -221,6 +226,8 @@ const CommunityPostCreateScreen: React.FC<CommunityPostCreateScreenProps> = ({ n
                     <TouchableOpacity
                       style={styles.removeImageButton}
                       onPress={() => handleRemoveImage(index)}
+                      accessibilityRole="button"
+                      accessibilityLabel="이미지 삭제"
                     >
                       <Text style={styles.removeImageText}>×</Text>
                     </TouchableOpacity>
@@ -231,6 +238,9 @@ const CommunityPostCreateScreen: React.FC<CommunityPostCreateScreenProps> = ({ n
                     style={styles.addImageButtonSmall}
                     onPress={handleSelectImage}
                     disabled={uploadingImage}
+                    accessibilityRole="button"
+                    accessibilityLabel="사진 추가"
+                    accessibilityState={{ disabled: uploadingImage }}
                   >
                     {uploadingImage ? (
                       <ActivityIndicator color={colors.primary[500]} size="small" />
@@ -288,6 +298,9 @@ const CommunityPostCreateScreen: React.FC<CommunityPostCreateScreenProps> = ({ n
           onPress={handleCreatePost}
           disabled={loading || !content.trim()}
           activeOpacity={0.7}
+          accessibilityRole="button"
+          accessibilityLabel={loading ? '작성 중' : '게시글 등록'}
+          accessibilityState={{ disabled: loading || !content.trim() }}
         >
           <Text style={styles.submitButtonText}>
             {loading ? '작성 중...' : '게시글 등록'}

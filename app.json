@@ -1,38 +1,38 @@
-{
-  "expo": {
-    "name": "ReplantMobileApp",
-    "slug": "replant-mobile-app",
-    "version": "0.0.41",
-    "orientation": "portrait",
-    "icon": "./logo/1024.png",
-    "splash": {
-      "image": "./logo/1024.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
-    },
-    "android": {
-      "package": "com.anonymous.replantmobileapp",
-      "adaptiveIcon": {
-        "foregroundImage": "./logo/play_store_512.png",
-        "backgroundColor": "#ffffff"
-      },
-      "versionCode": 41
-    },
-    "ios": {
-      "bundleIdentifier": "com.anonymous.replantmobileapp"
-    },
-    "main": "index.js",
-    "plugins": [
-      [
-        "expo-font",
-        {
-          "fonts": [
-            "./src/assets/fonts/Neo-Regular.ttf",
-            "./src/assets/fonts/Maplestory Bold.ttf",
-            "./src/assets/fonts/Maplestory Light.ttf"
-          ]
-        }
-      ]
-    ]
-  }
+﻿{
+    "expo":  {
+                 "name":  "ReplantMobileApp",
+                 "slug":  "replant-mobile-app",
+                 "version":  "1.0.5",
+                 "orientation":  "portrait",
+                 "icon":  "./logo/1024.png",
+                 "splash":  {
+                                "image":  "./logo/1024.png",
+                                "resizeMode":  "contain",
+                                "backgroundColor":  "#ffffff"
+                            },
+                 "android":  {
+                                 "package":  "com.anonymous.replantmobileapp",
+                                 "adaptiveIcon":  {
+                                                      "foregroundImage":  "./logo/play_store_512.png",
+                                                      "backgroundColor":  "#ffffff"
+                                                  },
+                                 "versionCode":  105
+                             },
+                 "ios":  {
+                             "bundleIdentifier":  "com.anonymous.replantmobileapp"
+                         },
+                 "main":  "index.js",
+                 "plugins":  [
+                                 [
+                                     "expo-font",
+                                     {
+                                         "fonts":  [
+                                                       "./src/assets/fonts/Neo-Regular.ttf",
+                                                       "./src/assets/fonts/Maplestory Bold.ttf",
+                                                       "./src/assets/fonts/Maplestory Light.ttf"
+                                                   ]
+                                     }
+                                 ]
+                             ]
+             }
 }

@@ -88,6 +88,9 @@ const AdminUserEditScreen: React.FC<AdminUserEditScreenProps> = ({ navigation, r
               <TouchableOpacity
                 style={[styles.roleButton, role === 'user' && styles.roleButtonActive]}
                 onPress={() => handleRoleChange('user')}
+                accessibilityRole="button"
+                accessibilityLabel="사용자"
+                accessibilityState={{ selected: role === 'user' }}
               >
                 <Text style={[styles.roleButtonText, role === 'user' && styles.roleButtonTextActive]}>
                   사용자
@@ -96,6 +99,9 @@ const AdminUserEditScreen: React.FC<AdminUserEditScreenProps> = ({ navigation, r
               <TouchableOpacity
                 style={[styles.roleButton, role === 'admin' && styles.roleButtonActive]}
                 onPress={() => handleRoleChange('admin')}
+                accessibilityRole="button"
+                accessibilityLabel="관리자"
+                accessibilityState={{ selected: role === 'admin' }}
               >
                 <Text style={[styles.roleButtonText, role === 'admin' && styles.roleButtonTextActive]}>
                   관리자

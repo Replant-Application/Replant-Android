@@ -1,7 +1,7 @@
 /**
  * 인연 화면
  * 유저 추천 및 채팅방 목록을 보여주는 화면
- * 쉬었음 청년들이 서로 연결되어 함께 성장할 수 있도록 도와줍니다.
+ * 은둔형 외톨이들이 서로 연결되어 함께 성장할 수 있도록 도와줍니다.
  */
 
 import React from 'react';
@@ -122,12 +122,16 @@ const ConnectionsScreen: React.FC<ConnectionsScreenProps> = ({ navigation }) => 
         <TouchableOpacity
           style={[styles.actionButton, styles.rejectButton]}
           onPress={() => handleRejectRecommendation(item.id)}
+          accessibilityRole="button"
+          accessibilityLabel="다음에"
         >
           <Text style={styles.rejectButtonText}>다음에</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.actionButton, styles.acceptButton]}
           onPress={() => handleAcceptRecommendation(item.id)}
+          accessibilityRole="button"
+          accessibilityLabel="인연 맺기"
         >
           <Text style={styles.acceptButtonText}>인연 맺기</Text>
         </TouchableOpacity>
@@ -139,6 +143,8 @@ const ConnectionsScreen: React.FC<ConnectionsScreenProps> = ({ navigation }) => 
     <TouchableOpacity
       style={styles.chatRoomCard}
       onPress={() => handleOpenChat(item.id)}
+      accessibilityRole="button"
+      accessibilityLabel={`${item.otherUser.nickname}와의 채팅방, ${item.lastMessage?.content ? '마지막 메시지' : '대화를 시작해보세요'}`}
     >
       <View style={styles.avatarContainer}>
         {item.otherUser.profileImg ? (
@@ -193,7 +199,11 @@ const ConnectionsScreen: React.FC<ConnectionsScreenProps> = ({ navigation }) => 
       <Header
         title="인연"
         leftButton={
-          <TouchableOpacity onPress={() => navigation.goBack()}>
+          <TouchableOpacity
+            onPress={() => navigation.goBack()}
+            accessibilityRole="button"
+            accessibilityLabel="뒤로 가기"
+          >
             <Text style={styles.backButtonText}>←</Text>
           </TouchableOpacity>
         }

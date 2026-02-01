@@ -53,6 +53,9 @@ const MissionPagination: React.FC<MissionPaginationProps> = ({
                 currentPage === index && styles.pageIndicatorActive,
               ]}
               onPress={() => onPageChange(index)}
+              accessibilityRole="button"
+              accessibilityLabel={`${index + 1}페이지로 이동${currentPage === index ? ', 현재 페이지' : ''}`}
+              accessibilityState={{ selected: currentPage === index }}
             />
           ))}
         </View>

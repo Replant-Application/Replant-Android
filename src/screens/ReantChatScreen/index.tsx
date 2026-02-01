@@ -13,7 +13,6 @@ import {
   Platform,
   ImageBackground,
   Image,
-  Dimensions,
   Animated,
   ActivityIndicator,
 } from 'react-native';
@@ -24,7 +23,11 @@ import { sendChatMessage } from '../../api/chatApi';
 import { SCREEN_NAMES } from '../../utils/constants';
 import { styles } from './ReantChatScreen.styles';
 
-const { height: SCREEN_HEIGHT } = Dimensions.get('window');
+// 추천 메시지 (은둔형 외톨이 등 응원·대화 유도) — 두 개만
+const RECOMMENDED_MESSAGES = [
+  '나를 응원하는 말을 해줘',
+  '오늘 하루 잘 보내고 싶어',
+];
 
 // 시간대별 배경 이미지 결정
 const getBackgroundImage = (): 'day' | 'night' => {
@@ -40,8 +43,6 @@ interface ReantChatScreenProps {
 const ReantChatScreen: React.FC<ReantChatScreenProps> = ({ navigation, route: _route }) => {
   const { characters } = useCharacter();
   const currentCharacter = characters.length > 0 ? characters[0] : null;
-  const reantName = currentCharacter?.name || '리앤트';
-
   const [inputText, setInputText] = useState('');
   const [showSpeechBubble, setShowSpeechBubble] = useState(true);
   const [currentReantMessage, setCurrentReantMessage] = useState<string>('');
@@ -217,6 +218,9 @@ const ReantChatScreen: React.FC<ReantChatScreenProps> = ({ navigation, route: _r
             style={styles.endChatButton}
             onPress={handleClose}
             activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel="대화 종료하기"
+            accessibilityHint="홈으로 돌아갑니다"
           >
             <Text style={styles.endChatButtonText}>← 대화 종료하기</Text>
           </TouchableOpacity>
@@ -323,6 +327,7 @@ const ReantChatScreen: React.FC<ReantChatScreenProps> = ({ navigation, route: _r
                     source={getCharacterImage(currentCharacter.level || 1, 'happy')}
                     style={styles.characterImage}
                     resizeMode={FastImage.resizeMode.contain}
+                    accessibilityLabel={`${currentCharacter.name || '리앤트'} 캐릭터, 레벨 ${currentCharacter.level || 1}`}
                   />
                 </View>
               </>
@@ -334,12 +339,26 @@ const ReantChatScreen: React.FC<ReantChatScreenProps> = ({ navigation, route: _r
             {error && (
               <Text style={styles.errorText}>⚠️ {error}</Text>
             )}
+            <View style={styles.recommendedChipsContainer}>
+              {RECOMMENDED_MESSAGES.map((msg) => (
+                <TouchableOpacity
+                  key={msg}
+                  style={styles.recommendedChip}
+                  onPress={() => setInputText(msg)}
+                  activeOpacity={0.7}
+                  accessibilityRole="button"
+                  accessibilityLabel={`추천 메시지: ${msg}`}
+                >
+                  <Text style={styles.recommendedChipText}>{msg}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
             <View style={styles.inputRow}>
               <TextInput
                 style={styles.input}
                 value={inputText}
                 onChangeText={setInputText}
-                placeholder={`${reantName}에게 메시지를 보내보세요...`}
+                placeholder="메시지 입력..."
                 placeholderTextColor="#999"
                 multiline
                 maxLength={200}
@@ -354,6 +373,9 @@ const ReantChatScreen: React.FC<ReantChatScreenProps> = ({ navigation, route: _r
                 onPress={handleSend}
                 disabled={!inputText.trim() || isLoading}
                 activeOpacity={0.7}
+                accessibilityRole="button"
+                accessibilityLabel="전송"
+                accessibilityState={{ disabled: !inputText.trim() || isLoading }}
               >
                 {isLoading ? (
                   <ActivityIndicator size="small" color="#fff" />

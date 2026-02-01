@@ -129,8 +129,8 @@ export interface PublicTodoList {
   creatorId: number;
   creatorNickname: string;
   missionCount: number;
-  averageRating: number;    // 평균 별점
-  reviewCount: number;      // 리뷰 수
+  likeCount: number;       // 좋아요 수
+  isLiked?: boolean;       // 현재 사용자 좋아요 여부
   createdAt: string;
 }
 
@@ -142,25 +142,15 @@ export interface PublicMissionInfo {
   verificationType: string;
   expReward: number;
   displayOrder: number;
+  /** 공유한 사용자(작성자)가 해당 미션을 완료했는지 여부 (API는 isCompleted 로 내려줄 수 있음) */
+  isCompletedByCreator?: boolean;
+  /** 백엔드 API 응답 필드명 - isCompletedByCreator 로 매핑해서 사용 */
+  isCompleted?: boolean;
 }
 
 export interface PublicTodoListDetail extends PublicTodoList {
   missions: PublicMissionInfo[];
   updatedAt: string;
-}
-
-export interface TodoListReview {
-  id: number;
-  todoListId: number;
-  userId: number;
-  userNickname: string;
-  rating: number;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface ReviewRequest {
-  rating: number;
 }
 
 export interface PageResponse<T> {

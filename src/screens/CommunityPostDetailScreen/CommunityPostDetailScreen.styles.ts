@@ -71,6 +71,7 @@ export const styles = StyleSheet.create({
   },
   authorName: {
     ...createTextStyle('sm', {
+      color: colors.text.primary,
       fontWeight: typography.fontWeight.bold,
       fontFamily: Platform.select({
         ios: undefined,
@@ -318,6 +319,7 @@ export const styles = StyleSheet.create({
     backgroundColor: colors.background.secondary,
     borderRadius: borderRadius.base,
     fontSize: typography.fontSize.sm,
+    color: colors.text.primary,
     minHeight: 60,
     marginBottom: spacing[1],
     textAlignVertical: 'top',
@@ -395,6 +397,7 @@ export const styles = StyleSheet.create({
     borderRadius: borderRadius.base,
     padding: spacing[2],
     ...createTextStyle('sm', {
+      color: colors.text.primary,
       maxHeight: 40,
       borderWidth: 1,
       borderColor: colors.border.light,

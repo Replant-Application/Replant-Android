@@ -74,8 +74,21 @@ const EmotionSelectionStep: React.FC<EmotionSelectionStepProps> = ({
     return rows;
   };
 
+  const summaryParts = [...selectedEmotions];
+  if (customEmotion.trim()) summaryParts.push(customEmotion.trim());
+  const summaryLabel = summaryParts.length > 0
+    ? `선택된 감정: ${summaryParts.join(', ')}. 탭하여 선택 해제할 수 있습니다.`
+    : '선택된 감정이 없습니다. 아래에서 선택하거나 직접 입력하세요.';
+
   return (
     <View style={styles.container}>
+      {/* 선택된 감정 요약: 어떤 걸 선택했는지 확인 가능 */}
+      <View style={styles.summaryContainer} accessibilityRole="summary" accessibilityLabel={summaryLabel}>
+        <Text style={styles.summaryLabel}>선택된 감정</Text>
+        <Text style={styles.summaryText}>
+          {summaryParts.length > 0 ? summaryParts.join(', ') : '없음'}
+        </Text>
+      </View>
       {/* 감정 선택 버튼들 */}
       <ScrollView 
         style={styles.emotionsContainer}

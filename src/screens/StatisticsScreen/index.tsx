@@ -94,12 +94,18 @@ const StatisticsScreen: React.FC<StatisticsScreenProps> = ({ navigation }) => {
             navigation={navigation}
             leftButton={
               navigation?.goBack ? (
-                <TouchableOpacity onPress={() => navigation.goBack()} activeOpacity={0.7}>
+                <TouchableOpacity
+                  onPress={() => navigation.goBack()}
+                  activeOpacity={0.7}
+                  accessibilityRole="button"
+                  accessibilityLabel="뒤로 가기"
+                >
                   <Image
                     source={require('../../assets/images/left.png')}
                     style={styles.backButtonIcon}
                     resizeMode="contain"
                     accessibilityLabel="뒤로 가기"
+                    accessibilityElementsHidden={true}
                   />
                 </TouchableOpacity>
               ) : undefined
@@ -115,6 +121,8 @@ const StatisticsScreen: React.FC<StatisticsScreenProps> = ({ navigation }) => {
                     style={styles.dateArrow}
                     onPress={() => changeMonth('prev')}
                     activeOpacity={0.7}
+                    accessibilityRole="button"
+                    accessibilityLabel="이전 달"
                   >
                     <Text style={styles.arrowText}>‹</Text>
                   </TouchableOpacity>
@@ -125,6 +133,8 @@ const StatisticsScreen: React.FC<StatisticsScreenProps> = ({ navigation }) => {
                     style={styles.dateArrow}
                     onPress={() => changeMonth('next')}
                     activeOpacity={0.7}
+                    accessibilityRole="button"
+                    accessibilityLabel="다음 달"
                   >
                     <Text style={styles.arrowText}>›</Text>
                   </TouchableOpacity>
@@ -137,6 +147,9 @@ const StatisticsScreen: React.FC<StatisticsScreenProps> = ({ navigation }) => {
                   style={[styles.tab, activeTab === 'monthly' && styles.tabActive]}
                   onPress={() => handleTabChange('monthly')}
                   activeOpacity={0.7}
+                  accessibilityRole="tab"
+                  accessibilityLabel={activeTab === 'monthly' ? '월간, 선택됨' : '월간'}
+                  accessibilityState={{ selected: activeTab === 'monthly' }}
                 >
                   <Text style={[styles.tabText, activeTab === 'monthly' && styles.tabTextActive]}>
                     월간
@@ -146,6 +159,9 @@ const StatisticsScreen: React.FC<StatisticsScreenProps> = ({ navigation }) => {
                   style={[styles.tab, activeTab === 'weekly' && styles.tabActive]}
                   onPress={() => handleTabChange('weekly')}
                   activeOpacity={0.7}
+                  accessibilityRole="tab"
+                  accessibilityLabel={activeTab === 'weekly' ? '주간, 선택됨' : '주간'}
+                  accessibilityState={{ selected: activeTab === 'weekly' }}
                 >
                   <Text style={[styles.tabText, activeTab === 'weekly' && styles.tabTextActive]}>
                     주간
@@ -170,12 +186,16 @@ const StatisticsScreen: React.FC<StatisticsScreenProps> = ({ navigation }) => {
                       ]}
                       onPress={() => handleCategoryChange(filter.id)}
                       activeOpacity={0.7}
+                      accessibilityRole="button"
+                      accessibilityLabel={filter.label}
+                      accessibilityState={{ selected: selectedCategory === filter.id }}
                     >
                       <Image
                         source={filter.icon}
                         style={styles.categoryIcon}
                         resizeMode="contain"
                         accessibilityLabel={`${filter.label} 카테고리 아이콘`}
+                        accessibilityElementsHidden={true}
                       />
                       <Text
                         style={[

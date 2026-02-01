@@ -136,6 +136,8 @@ const ContributorDashboardScreen: React.FC<ContributorDashboardScreenProps> = ({
                   <TouchableOpacity
                     style={styles.acceptButton}
                     onPress={() => handleAcceptRequest(request.id)}
+                    accessibilityRole="button"
+                    accessibilityLabel="상담 시작하기"
                   >
                     <Text style={styles.acceptButtonText}>상담 시작하기</Text>
                   </TouchableOpacity>
@@ -155,6 +157,8 @@ const ContributorDashboardScreen: React.FC<ContributorDashboardScreenProps> = ({
                 key={session.id}
                 style={styles.sessionItem}
                 onPress={() => handleSessionPress(session)}
+                accessibilityRole="button"
+                accessibilityLabel={`${session.userName}와의 상담`}
               >
                 <View style={styles.sessionAvatar}>
                   <Text style={styles.sessionAvatarText}>
@@ -220,6 +224,8 @@ const ContributorDashboardScreen: React.FC<ContributorDashboardScreenProps> = ({
           <TouchableOpacity
             style={styles.resourceButton}
             onPress={openResourceModal}
+            accessibilityRole="button"
+            accessibilityLabel="상담 자료실 열기"
           >
             <Text style={styles.resourceButtonText}>상담 자료실 열기</Text>
           </TouchableOpacity>
@@ -232,18 +238,22 @@ const ContributorDashboardScreen: React.FC<ContributorDashboardScreenProps> = ({
             <TouchableOpacity
               style={styles.actionItem}
               onPress={handleGoToQnA}
+              accessibilityRole="button"
+              accessibilityLabel="Q&A 답변"
             >
               <Image
                 source={require('../../assets/images/say.png')}
                 style={styles.actionIconImage}
                 resizeMode="contain"
-                accessibilityLabel="댓글 아이콘"
+                accessibilityElementsHidden={true}
               />
               <Text style={styles.actionLabel}>Q&A 답변</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.actionItem}
               onPress={handleGoToShareInfo}
+              accessibilityRole="button"
+              accessibilityLabel="정보 공유"
             >
               <Text style={styles.actionIcon}>📝</Text>
               <Text style={styles.actionLabel}>정보 공유</Text>
@@ -251,6 +261,8 @@ const ContributorDashboardScreen: React.FC<ContributorDashboardScreenProps> = ({
             <TouchableOpacity
               style={styles.actionItem}
               onPress={handleOpenCounselingJournal}
+              accessibilityRole="button"
+              accessibilityLabel="상담 일지"
             >
               <Text style={styles.actionIcon}>📓</Text>
               <Text style={styles.actionLabel}>상담 일지</Text>
@@ -258,6 +270,8 @@ const ContributorDashboardScreen: React.FC<ContributorDashboardScreenProps> = ({
             <TouchableOpacity
               style={styles.actionItem}
               onPress={handleOpenActivityReport}
+              accessibilityRole="button"
+              accessibilityLabel="활동 보고"
             >
               <Text style={styles.actionIcon}>📊</Text>
               <Text style={styles.actionLabel}>활동 보고</Text>
@@ -283,36 +297,36 @@ const ContributorDashboardScreen: React.FC<ContributorDashboardScreenProps> = ({
             <SectionTitle title="상담 자료실" size="lg" marginBottom={spacing[4]} accessibilityRole="header" />
 
             <ScrollView style={styles.resourceList}>
-              <TouchableOpacity style={styles.resourceItem}>
+              <TouchableOpacity style={styles.resourceItem} accessibilityRole="none" accessibilityLabel="동기면담 기법 가이드, 변화 동기를 이끌어내는 상담 기법">
                 <Text style={styles.resourceIcon}>📖</Text>
                 <View style={styles.resourceContent}>
                   <Text style={styles.resourceTitle}>동기면담 기법 가이드</Text>
                   <Text style={styles.resourceDesc}>변화 동기를 이끌어내는 상담 기법</Text>
                 </View>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.resourceItem}>
+              <TouchableOpacity style={styles.resourceItem} accessibilityRole="none" accessibilityLabel="경청과 공감 실습, 효과적인 경청 기술 연습">
                 <Text style={styles.resourceIcon}>📋</Text>
                 <View style={styles.resourceContent}>
                   <Text style={styles.resourceTitle}>경청과 공감 실습</Text>
                   <Text style={styles.resourceDesc}>효과적인 경청 기술 연습</Text>
                 </View>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.resourceItem}>
+              <TouchableOpacity style={styles.resourceItem} accessibilityRole="none" accessibilityLabel="위기 상황 대응 매뉴얼, 긴급 상황 판단 및 대응 방법">
                 <Image
                   source={require('../../assets/images/warning.png')}
                   style={styles.resourceIconImage}
                   resizeMode="contain"
-                  accessibilityLabel="경고 아이콘"
+                  accessibilityElementsHidden={true}
                 />
                 <View style={styles.resourceContent}>
                   <Text style={styles.resourceTitle}>위기 상황 대응 매뉴얼</Text>
                   <Text style={styles.resourceDesc}>긴급 상황 판단 및 대응 방법</Text>
                 </View>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.resourceItem}>
+              <TouchableOpacity style={styles.resourceItem} accessibilityRole="none" accessibilityLabel="은둔형 외톨이 이해하기, 니트족 청년의 심리와 특성">
                 <Text style={styles.resourceIcon}>🧠</Text>
                 <View style={styles.resourceContent}>
-                  <Text style={styles.resourceTitle}>쉬었음 청년 이해하기</Text>
+                  <Text style={styles.resourceTitle}>은둔형 외톨이 이해하기</Text>
                   <Text style={styles.resourceDesc}>니트족 청년의 심리와 특성</Text>
                 </View>
               </TouchableOpacity>

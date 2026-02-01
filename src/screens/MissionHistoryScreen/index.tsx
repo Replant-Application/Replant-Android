@@ -43,7 +43,11 @@ const MissionHistoryScreen: React.FC<MissionHistoryScreenProps> = ({ navigation 
     if (!mission) return null;
 
     return (
-      <TouchableOpacity style={styles.missionCard}>
+      <TouchableOpacity
+        style={styles.missionCard}
+        accessibilityRole="none"
+        accessibilityLabel={`${mission.title}, ${getStatusText(item.status)}`}
+      >
         <View style={styles.missionHeader}>
           <View style={[styles.statusBadge, { backgroundColor: getStatusColor(item.status) }]}>
             <Text style={styles.statusText}>{getStatusText(item.status)}</Text>
@@ -85,7 +89,11 @@ const MissionHistoryScreen: React.FC<MissionHistoryScreenProps> = ({ navigation 
       <Header
         title="미션 이력"
         leftButton={
-          <TouchableOpacity onPress={() => navigation.goBack()}>
+          <TouchableOpacity
+            onPress={() => navigation.goBack()}
+            accessibilityRole="button"
+            accessibilityLabel="뒤로 가기"
+          >
             <Text style={styles.backButtonText}>←</Text>
           </TouchableOpacity>
         }

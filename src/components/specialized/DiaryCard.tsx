@@ -76,6 +76,8 @@ const DiaryCard: React.FC<DiaryCardProps> = ({
             style={styles.actionButton}
             onPress={() => onEdit?.(diary)}
             activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel="수정"
           >
             <Text style={styles.editText}>✏️ 수정</Text>
           </TouchableOpacity>
@@ -84,6 +86,8 @@ const DiaryCard: React.FC<DiaryCardProps> = ({
             style={styles.actionButton}
             onPress={() => onDelete?.(diary.id)}
             activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel="삭제"
           >
             <Text style={styles.deleteText}>🗑️ 삭제</Text>
           </TouchableOpacity>

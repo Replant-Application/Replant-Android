@@ -304,6 +304,7 @@ export const styles = StyleSheet.create({
     backgroundColor: colors.background.secondary,
     borderRadius: borderRadius.base,
     fontSize: typography.fontSize.sm,
+    color: colors.text.primary,
     minHeight: 60,
     marginBottom: spacing[1],
   },
@@ -379,6 +380,7 @@ export const styles = StyleSheet.create({
     borderRadius: borderRadius.base,
     padding: spacing[2],
     ...createTextStyle('sm', {
+      color: colors.text.primary,
       maxHeight: 80,
       borderWidth: 1,
       borderColor: colors.border.light,

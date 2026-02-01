@@ -109,7 +109,7 @@ const MissionGroupList: React.FC<MissionGroupListProps> = ({
               onPress={() => onShowOnlyParticipatedChange?.(!showOnlyParticipated)}
               activeOpacity={0.7}
               accessibilityRole="checkbox"
-              accessibilityLabel="참여한 미션"
+              accessibilityLabel="잠금 해제된 미션만 보기"
               accessibilityState={{ checked: showOnlyParticipated }}
             >
               <View style={[styles.checkbox, showOnlyParticipated && styles.checkboxChecked]}>
@@ -117,7 +117,7 @@ const MissionGroupList: React.FC<MissionGroupListProps> = ({
                   <Text style={styles.checkboxCheckmark}>✓</Text>
                 )}
               </View>
-              <Text style={styles.filterCheckboxLabel}>참여한 미션</Text>
+              <Text style={styles.filterCheckboxLabel}>잠금 해제된 미션만 보기</Text>
             </TouchableOpacity>
           ) : (
             <View style={styles.filterCheckboxPlaceholder} />
@@ -153,6 +153,9 @@ const MissionGroupList: React.FC<MissionGroupListProps> = ({
                   setShowSortDropdown(false);
                 }}
                 activeOpacity={0.7}
+                accessibilityRole="button"
+                accessibilityLabel={sortBy === 'default' ? '기본순, 선택됨' : '기본순으로 정렬'}
+                accessibilityState={{ selected: sortBy === 'default' }}
               >
                 <Text
                   style={[
@@ -176,6 +179,9 @@ const MissionGroupList: React.FC<MissionGroupListProps> = ({
                   setShowSortDropdown(false);
                 }}
                 activeOpacity={0.7}
+                accessibilityRole="button"
+                accessibilityLabel={sortBy === 'participants' ? '참여순, 선택됨' : '참여순으로 정렬'}
+                accessibilityState={{ selected: sortBy === 'participants' }}
               >
                 <Text
                   style={[
@@ -200,6 +206,9 @@ const MissionGroupList: React.FC<MissionGroupListProps> = ({
                     setShowSortDropdown(false);
                   }}
                   activeOpacity={0.7}
+                  accessibilityRole="button"
+                  accessibilityLabel={sortBy === 'exp' ? 'EXP순, 선택됨' : 'EXP순으로 정렬'}
+                  accessibilityState={{ selected: sortBy === 'exp' }}
                 >
                   <Text
                     style={[
@@ -225,6 +234,9 @@ const MissionGroupList: React.FC<MissionGroupListProps> = ({
                     setShowSortDropdown(false);
                   }}
                   activeOpacity={0.7}
+                  accessibilityRole="button"
+                  accessibilityLabel={sortBy === 'difficulty' ? '난이도순, 선택됨' : '난이도순으로 정렬'}
+                  accessibilityState={{ selected: sortBy === 'difficulty' }}
                 >
                   <Text
                     style={[
@@ -270,6 +282,10 @@ const MissionGroupList: React.FC<MissionGroupListProps> = ({
                       );
                     }}
                     activeOpacity={0.7}
+                    accessibilityRole="button"
+                    accessibilityLabel={`${mission.title} 미션${selectedMission?.id === mission.id ? ', 선택됨' : ''}`}
+                    accessibilityState={{ selected: selectedMission?.id === mission.id }}
+                    accessibilityHint="미션 정보를 봅니다"
                   >
                     <View style={styles.groupMissionHeader}>
                       <View style={styles.groupMissionInfo}>

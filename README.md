@@ -6,7 +6,7 @@
 ![Node.js](https://img.shields.io/badge/Node.js-20+-339933?logo=node.js&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-green)
 
-> **은둔형 외톨이의 사회복귀를 돕는 앱** - 쉬었음 청년들을 위한 일상 회복 플랫폼
+> **은둔형 외톨이의 사회복귀를 돕는 앱** - 은둔형 외톨이를 위한 일상 회복 플랫폼
 
 ---
 

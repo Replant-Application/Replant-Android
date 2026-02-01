@@ -122,28 +122,68 @@ const MissionCard: React.FC<MissionCardProps> = ({
                 <>
                   {/* 커스텀 미션은 인증이 필요 없으므로 완료되면 바로 인증완료 표시 */}
                   {mission.missionType === 'CUSTOM' || mission.is_custom === true ? (
-                    <View style={styles.verifiedBadge}>
-                      <Text style={styles.verifiedIcon}>✓</Text>
-                      <Text style={styles.verifiedText}>인증완료</Text>
+                    <View 
+                      style={styles.verifiedBadge}
+                      accessibilityLabel="인증완료"
+                      accessibilityRole="text"
+                    >
+                      <Text 
+                        style={styles.verifiedIcon}
+                        accessibilityElementsHidden={true}
+                      >✓</Text>
+                      <Text 
+                        style={styles.verifiedText}
+                        accessibilityElementsHidden={true}
+                      >인증완료</Text>
                     </View>
                   ) : mission.verified === true ? (
-                    <View style={styles.verifiedBadge}>
-                      <Text style={styles.verifiedIcon}>✓</Text>
-                      <Text style={styles.verifiedText}>인증완료</Text>
+                    <View 
+                      style={styles.verifiedBadge}
+                      accessibilityLabel="인증완료"
+                      accessibilityRole="text"
+                    >
+                      <Text 
+                        style={styles.verifiedIcon}
+                        accessibilityElementsHidden={true}
+                      >✓</Text>
+                      <Text 
+                        style={styles.verifiedText}
+                        accessibilityElementsHidden={true}
+                      >인증완료</Text>
                     </View>
                   ) : (
-                    <View style={styles.pendingBadge}>
-                      <Text style={styles.pendingIcon}>⏳</Text>
-                      <Text style={styles.pendingVerificationText}>인증대기중</Text>
+                    <View 
+                      style={styles.pendingBadge}
+                      accessibilityLabel="인증대기중"
+                      accessibilityRole="text"
+                    >
+                      <Text 
+                        style={styles.pendingIcon}
+                        accessibilityElementsHidden={true}
+                      >⏳</Text>
+                      <Text 
+                        style={styles.pendingVerificationText}
+                        accessibilityElementsHidden={true}
+                      >인증대기중</Text>
                     </View>
                   )}
                 </>
               )}
             </>
           ) : (
-            <View style={styles.inProgressBadge}>
-              <Text style={styles.inProgressIcon}>▶</Text>
-              <Text style={styles.pendingText}>진행중</Text>
+            <View 
+              style={styles.inProgressBadge}
+              accessibilityLabel="진행중"
+              accessibilityRole="text"
+            >
+              <Text 
+                style={styles.inProgressIcon}
+                accessibilityElementsHidden={true}
+              >▶</Text>
+              <Text 
+                style={styles.pendingText}
+                accessibilityElementsHidden={true}
+              >진행중</Text>
             </View>
           )}
         </View>
@@ -289,6 +329,22 @@ const MissionCard: React.FC<MissionCardProps> = ({
                 >
                   {loading ? '처리중...' : disabled ? '비활성화' : '인증'}
                 </Text>
+              </TouchableOpacity>
+            )}
+            {/* 커스텀 미션 완료 후 인증 취소 버튼 */}
+            {mission.completed &&
+              (mission.missionType === 'CUSTOM' || mission.is_custom === true) &&
+              _onUncomplete && (
+              <TouchableOpacity
+                style={[styles.actionButton, styles.uncompleteButton]}
+                onPress={() => _onUncomplete(mission.mission_id)}
+                disabled={disabled}
+                activeOpacity={disabled ? 1 : 0.7}
+                accessibilityRole="button"
+                accessibilityLabel="인증 취소"
+                accessibilityState={{ disabled }}
+              >
+                <Text style={[styles.actionText, styles.uncompleteText]}>인증 취소</Text>
               </TouchableOpacity>
             )}
           </View>

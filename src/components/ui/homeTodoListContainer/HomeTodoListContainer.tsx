@@ -30,6 +30,7 @@ export const HomeTodoListContainer: React.FC<HomeTodoListContainerProps> = ({
             style={styles.icon} 
             resizeMode="contain" 
             accessibilityLabel="투두리스트 아이콘"
+            accessibilityElementsHidden={true}
           />
           <Text style={styles.title}>{title}</Text>
         </View>

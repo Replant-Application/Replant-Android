@@ -3,8 +3,7 @@
  * 커뮤니티 게시판 목록 화면: 게시글 조회, 필터링, 미션세트 공유
  */
 
-import { useState, useMemo, useCallback, useEffect } from 'react';
-import { useCommunity } from '../../hooks/useCommunity';
+import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useErrorHandler } from '../../hooks/useErrorHandler';
 import { CommunityPost } from '../../types';
 import { logError } from '../../utils/logger';
@@ -14,12 +13,38 @@ import {
   searchPublicTodoLists,
   getMyMissionSets,
   updateMissionSet,
+  likeTodoList,
+  unlikeTodoList,
   MissionSetSimple,
 } from '../../api/todolistApi';
+import { getPosts as getPostsApi } from '../../api/communityApi';
+import { toggleLike as toggleLikeService } from '../../services/communityService';
+import { useUser } from '../../contexts/UserContext';
 import { CommunityScreenProps, CommunityTab, VerificationFilter } from '../../types/screens/community';
 
+const DEBUG_COMMUNITY_LOADING = false; // 커뮤니티 로딩 디버깅 (원인 파악 후 false로)
+
 export const useCommunityScreenContainer = ({ navigation, route }: CommunityScreenProps) => {
-  const { posts, loading, error, toggleLike, loadPosts } = useCommunity();
+  const { currentNickname, currentUserId } = useUser();
+
+  const debugMountRef = useRef({ mountedAt: Date.now(), logCount: 0 });
+  debugMountRef.current.logCount += 1;
+  if (DEBUG_COMMUNITY_LOADING && debugMountRef.current.logCount <= 5) {
+    console.log('[CommunityScreen] render', {
+      renderCount: debugMountRef.current.logCount,
+      currentNickname: currentNickname ?? null,
+      currentUserId: currentUserId ?? null,
+      msSinceMount: Date.now() - debugMountRef.current.mountedAt,
+    });
+  }
+
+  // 페이지네이션 상태
+  const [posts, setPosts] = useState<CommunityPost[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState<number>(0);
+  const [totalPages, setTotalPages] = useState<number>(1);
+  const PAGE_SIZE = 20;
 
   // activeTab 초기값 설정 (유효성 검사 포함)
   const getInitialActiveTab = (): CommunityTab => {
@@ -46,6 +71,9 @@ export const useCommunityScreenContainer = ({ navigation, route }: CommunityScre
 
   // 인증 필터 상태
   const [verificationFilter, setVerificationFilter] = useState<VerificationFilter>('all');
+  
+  // 내가 쓴 게시글만 보기 필터
+  const [onlyMyPosts, setOnlyMyPosts] = useState<boolean>(false);
 
   // 숨긴 게시글 ID 목록
   const [hiddenPostIds, setHiddenPostIds] = useState<string[]>([]);
@@ -58,6 +86,9 @@ export const useCommunityScreenContainer = ({ navigation, route }: CommunityScre
   // 공유 확인 ConfirmModal
   const [showShareConfirmModal, setShowShareConfirmModal] = useState(false);
   const [shareConfirmMissionSet, setShareConfirmMissionSet] = useState<MissionSetSimple | null>(null);
+
+  // 미션세트 상세 모달 (투두리스트 공유 탭에서 카드 클릭 시)
+  const [selectedMissionSetId, setSelectedMissionSetId] = useState<number | null>(null);
 
   const errorHandlerOverrides = useMemo(
     () => ({
@@ -94,6 +125,7 @@ export const useCommunityScreenContainer = ({ navigation, route }: CommunityScre
   const [myMissionSets, setMyMissionSets] = useState<MissionSetSimple[]>([]);
   const [myMissionSetsLoading, setMyMissionSetsLoading] = useState(false);
   const [sharingId, setSharingId] = useState<number | null>(null);
+  const [likingMissionSetId, setLikingMissionSetId] = useState<number | null>(null);
 
   /**
    * 검색어 디바운싱 (300ms)
@@ -163,10 +195,10 @@ export const useCommunityScreenContainer = ({ navigation, route }: CommunityScre
           description: todo.description || undefined,
           creatorId: todo.creatorId || 0,
           creatorNickname: todo.creatorNickname || '알 수 없음',
-          isPublic: true, // 공개 투두리스트이므로 항상 true
+          isPublic: true,
           missionCount: todo.missionCount || todo.totalCount || 0,
-          averageRating: todo.averageRating || 0,
-          reviewCount: todo.reviewCount ?? 0,
+          likeCount: todo.likeCount ?? 0,
+          isLiked: todo.isLiked ?? false,
           createdAt: todo.createdAt,
         }));
         setMissionSets(transformed);
@@ -216,10 +248,10 @@ export const useCommunityScreenContainer = ({ navigation, route }: CommunityScre
           description: todo.description || undefined,
           creatorId: todo.creatorId || 0,
           creatorNickname: todo.creatorNickname || '알 수 없음',
-          isPublic: publicTodoListIds.has(todo.id), // 공개 목록에 포함되어 있으면 true
-          missionCount: todo.totalCount || 0, // totalCount를 missionCount로 사용
-          averageRating: todo.averageRating || 0,
-          reviewCount: todo.reviewCount ?? 0,
+          isPublic: publicTodoListIds.has(todo.id),
+          missionCount: todo.totalCount || 0,
+          likeCount: todo.likeCount ?? 0,
+          isLiked: todo.isLiked ?? false,
           createdAt: todo.createdAt,
         }));
         
@@ -313,25 +345,130 @@ export const useCommunityScreenContainer = ({ navigation, route }: CommunityScre
   }, [showSuccess, handleApiError, showError, loadMissionSets]);
 
   /**
-   * 별점 렌더링
+   * 투두리스트 공유 목록에서 좋아요 토글 (상세 진입 없이)
    */
-  const renderStars = useCallback((rating: number) => {
-    const fullStars = Math.floor(rating);
-    const hasHalfStar = rating - fullStars >= 0.5;
-    const stars = [];
-
-    for (let i = 0; i < 5; i++) {
-      if (i < fullStars) {
-        stars.push('★');
-      } else if (i === fullStars && hasHalfStar) {
-        stars.push('☆');
+  const handleTodoListLike = useCallback(async (missionSetId: number, currentIsLiked: boolean) => {
+    setLikingMissionSetId(missionSetId);
+    try {
+      const result = currentIsLiked
+        ? await unlikeTodoList(missionSetId)
+        : await likeTodoList(missionSetId);
+      if (result.success) {
+        await loadMissionSets();
       } else {
-        stars.push('☆');
+        handleApiError(result, 'CommunityScreen.handleTodoListLike');
       }
+    } catch (err) {
+      logError('좋아요 토글 실패', err as Error);
+      showError(
+        err instanceof Error ? err : new Error('좋아요 처리에 실패했습니다.'),
+        'CommunityScreen.handleTodoListLike'
+      );
+    } finally {
+      setLikingMissionSetId(null);
+    }
+  }, [loadMissionSets, handleApiError, showError]);
+
+  /**
+   * 게시글 목록 로드 (페이지네이션)
+   */
+  const loadPosts = useCallback(async (page: number = 0) => {
+    if (!currentNickname) {
+      if (DEBUG_COMMUNITY_LOADING) {
+        console.log('[CommunityScreen] loadPosts(0) 스킵: currentNickname 없음');
+      }
+      return;
     }
 
-    return stars.join('');
-  }, []);
+    const apiStart = Date.now();
+    if (DEBUG_COMMUNITY_LOADING && page === 0) {
+      console.log('[CommunityScreen] loadPosts(0) 시작', { currentNickname });
+    }
+
+    try {
+      if (page === 0) {
+        setLoading(true);
+      }
+      setError(null);
+
+      const result = await getPostsApi({ page, size: PAGE_SIZE });
+
+      if (DEBUG_COMMUNITY_LOADING && page === 0) {
+        console.log('[CommunityScreen] getPostsApi 응답', {
+          ms: Date.now() - apiStart,
+          success: result.success,
+          postCount: result.data?.content?.length ?? 0,
+        });
+      }
+
+      if (result.success && result.data) {
+        const newPosts = result.data.content || [];
+        
+        // 백엔드 응답을 프론트엔드 형식으로 변환
+        // 백엔드는 postType(GENERAL|VERIFICATION)을 보냄 → category(일반|인증)로 변환해야 목록 태그가 올바르게 표시됨
+        // postType(camelCase) 또는 post_type(snake_case) 모두 처리. missionTag+status 있으면 인증글로 간주
+        const transformedPosts: CommunityPost[] = newPosts.map((post: any) => {
+          const isVerification =
+            post.postType === 'VERIFICATION' ||
+            post.post_type === 'VERIFICATION' ||
+            (!!post.missionTag && (post.status === 'PENDING' || post.status === 'APPROVED'));
+          return {
+            id: String(post.id),
+            post_id: String(post.id),
+            mission_id: post.missionTag?.id ? String(post.missionTag.id) : '',
+            mission_title: post.missionTag?.title || '',
+            mission_emoji: isVerification ? '' : '🎯',
+            title: post.title || '',
+            content: post.content || '',
+            author: String(post.userId),
+            author_id: String(post.userId),
+            userId: post.userId,
+            author_nickname: post.userNickname || '알 수 없음',
+            created_at: post.createdAt || new Date().toISOString(),
+            updated_at: post.updatedAt || post.createdAt || new Date().toISOString(),
+            like_count: post.likeCount || 0,
+            comment_count: post.commentCount || 0,
+            scrap_count: 0,
+            images: post.imageUrls || [],
+            category: isVerification ? '인증' : '일반',
+            is_liked: post.isLiked || false,
+            is_scrapped: false, // 스크랩은 로컬에서 관리
+            verified: isVerification ? post.status === 'APPROVED' : undefined,
+            isAuthor: post.isAuthor || false,
+            completionRate: post.completionRate,
+          };
+        });
+
+        setPosts(transformedPosts);
+        setTotalPages(result.data.totalPages || 1);
+        setCurrentPage(page);
+      } else {
+        setError(result.error || '게시글을 불러오는데 실패했습니다.');
+      }
+    } catch (loadError) {
+      logError('게시글 목록 로드 실패', loadError as Error, { currentNickname, page });
+      setError((loadError as Error).message);
+    } finally {
+      setLoading(false);
+      if (DEBUG_COMMUNITY_LOADING && page === 0) {
+        console.log('[CommunityScreen] loadPosts(0) 완료, setLoading(false)', {
+          totalMs: Date.now() - apiStart,
+        });
+      }
+    }
+  }, [currentNickname]);
+
+  /**
+   * 초기 로드
+   * - 전체 게시판 탭일 때만 게시글 로드
+   * - 이미 로드된 게시글이 있으면 탭 전환 시 재요청하지 않음 (투두공유 ↔ 전체 전환 시 렉 완화)
+   */
+  useEffect(() => {
+    const shouldLoad = activeTab === 'all' && currentNickname;
+    if (!shouldLoad) return;
+    if (posts.length > 0) return; // 캐시된 목록이 있으면 API 재호출 생략
+    loadPosts(0);
+  }, [activeTab, currentNickname, loadPosts, posts.length]);
 
   /**
    * Pull-to-Refresh 핸들러
@@ -340,7 +477,8 @@ export const useCommunityScreenContainer = ({ navigation, route }: CommunityScre
     setRefreshing(true);
     try {
       if (activeTab === 'all') {
-        await loadPosts();
+        setCurrentPage(0);
+        await loadPosts(0);
       } else {
         await loadMissionSets();
       }
@@ -350,6 +488,24 @@ export const useCommunityScreenContainer = ({ navigation, route }: CommunityScre
   }, [loadPosts, loadMissionSets, activeTab]);
 
   /**
+   * 다음 페이지로 이동
+   */
+  const handleNextPage = useCallback(() => {
+    if (currentPage < totalPages - 1) {
+      loadPosts(currentPage + 1);
+    }
+  }, [currentPage, totalPages, loadPosts]);
+
+  /**
+   * 이전 페이지로 이동
+   */
+  const handlePreviousPage = useCallback(() => {
+    if (currentPage > 0) {
+      loadPosts(currentPage - 1);
+    }
+  }, [currentPage, loadPosts]);
+
+  /**
    * 검색 및 필터링 (디바운싱된 검색어 사용)
    */
   const filteredPosts = useMemo(() => {
@@ -357,6 +513,11 @@ export const useCommunityScreenContainer = ({ navigation, route }: CommunityScre
 
     // 숨긴 글 필터링
     allPosts = allPosts.filter(post => !hiddenPostIds.includes(post.post_id));
+
+    // 내가 쓴 게시글만 보기 필터
+    if (onlyMyPosts) {
+      allPosts = allPosts.filter(post => post.isAuthor === true);
+    }
 
     // 인증 필터 적용 (category가 '인증'인 게시글만 필터링)
     if (verificationFilter === 'pending') {
@@ -394,7 +555,7 @@ export const useCommunityScreenContainer = ({ navigation, route }: CommunityScre
     }
 
     return allPosts;
-  }, [posts, debouncedSearchQuery, filter, verificationFilter, hiddenPostIds]);
+  }, [posts, debouncedSearchQuery, filter, verificationFilter, hiddenPostIds, onlyMyPosts]);
 
   /**
    * 게시글 숨기기 처리
@@ -434,15 +595,49 @@ export const useCommunityScreenContainer = ({ navigation, route }: CommunityScre
    */
   const handleLike = useCallback(
     async (postId: string) => {
-      const result = await toggleLike(postId);
-      // 내 게시글에는 좋아요를 누를 수 없음 에러 처리
-      if (!result.success && result.error === '내 게시글에는 좋아요를 누를 수 없습니다.') {
+      if (!currentNickname) return;
+
+      // 해당 게시글 찾기
+      const targetPost = posts.find(p => p.post_id === postId);
+
+      // 내 게시글에는 좋아요를 누를 수 없음
+      if (targetPost?.isAuthor === true) {
         setAlertTitle('알림');
         setAlertMessage('내 게시글에는 좋아요를 누를 수 없습니다.');
         setShowAlert(true);
+        return;
+      }
+
+      try {
+        const result = await toggleLikeService(postId, currentNickname);
+
+        if (result.success && result.data) {
+          // 로컬 상태 업데이트
+          setPosts(prev =>
+            prev.map(p => {
+              if (p.post_id === postId) {
+                return {
+                  ...p,
+                  is_liked: result.data!.isLiked,
+                  like_count: result.data!.likeCount,
+                };
+              }
+              return p;
+            })
+          );
+        } else if (!result.success) {
+          setAlertTitle('오류');
+          setAlertMessage(result.error || '좋아요 처리에 실패했습니다.');
+          setShowAlert(true);
+        }
+      } catch (err) {
+        logError('좋아요 토글 실패', err as Error, { postId, currentNickname });
+        setAlertTitle('오류');
+        setAlertMessage('좋아요 처리 중 문제가 발생했습니다.');
+        setShowAlert(true);
       }
     },
-    [toggleLike]
+    [currentNickname, posts]
   );
 
   /**
@@ -502,6 +697,7 @@ export const useCommunityScreenContainer = ({ navigation, route }: CommunityScre
     showFilterModal,
     refreshing,
     verificationFilter,
+    onlyMyPosts,
     hiddenPostIds,
     showAlert,
     alertTitle,
@@ -519,6 +715,7 @@ export const useCommunityScreenContainer = ({ navigation, route }: CommunityScre
     setActiveTab,
     setShowFilterModal,
     setVerificationFilter,
+    setOnlyMyPosts,
     setMissionSetSearchQuery,
     setMissionSetSortBy,
     setShowMissionSetFilterModal,
@@ -535,13 +732,22 @@ export const useCommunityScreenContainer = ({ navigation, route }: CommunityScre
     handleShareModalClose,
     handleCreatePost,
     onRefresh,
+    // 페이지네이션
+    currentPage,
+    totalPages,
+    handleNextPage,
+    handlePreviousPage,
     // 공유 확인 ConfirmModal
     showShareConfirmModal,
     shareConfirmMissionSet,
     handleShareConfirm,
     handleShareConfirmCancel,
     handleUnshareMissionSet,
-    // Utils
-    renderStars,
+    handleTodoListLike,
+    likingMissionSetId,
+    // 미션세트 상세 모달
+    selectedMissionSetId,
+    onMissionSetPress: setSelectedMissionSetId,
+    closeMissionSetDetailModal: () => setSelectedMissionSetId(null),
   };
 };

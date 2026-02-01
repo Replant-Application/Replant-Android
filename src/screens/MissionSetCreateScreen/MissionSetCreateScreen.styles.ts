@@ -39,6 +39,7 @@ export const styles = StyleSheet.create({
     ...inputStyles.base(),
     backgroundColor: colors.background.primary,
     borderRadius: borderRadius.lg,
+    color: colors.text.primary,
   },
   textArea: {
     height: 100,

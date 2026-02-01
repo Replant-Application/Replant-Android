@@ -29,9 +29,14 @@ const MyProgressDetailScreen: React.FC<MyProgressDetailScreenProps> = ({ navigat
   const {
     refreshing,
     validBadges,
+    displayedBadges,
     badgesLoading,
+    currentPage,
+    totalPages,
     onRefresh,
     handleBadgePress,
+    handleNextPage,
+    handlePrevPage,
   } = useMyProgressDetailScreenContainer({ navigation });
 
   return (
@@ -45,12 +50,12 @@ const MyProgressDetailScreen: React.FC<MyProgressDetailScreenProps> = ({ navigat
         <Header
           title="배지"
           leftButton={
-            <TouchableOpacity onPress={() => navigation.goBack()}>
+            <TouchableOpacity onPress={() => navigation.goBack()} accessibilityRole="button" accessibilityLabel="뒤로 가기">
               <Image
                 source={require('../../assets/images/left.png')}
                 style={styles.backButtonIcon}
                 resizeMode="contain"
-                accessibilityLabel="뒤로 가기"
+                accessibilityElementsHidden={true}
               />
             </TouchableOpacity>
           }
@@ -89,8 +94,9 @@ const MyProgressDetailScreen: React.FC<MyProgressDetailScreenProps> = ({ navigat
                 <Text style={styles.emptySubtext}>미션을 완료하고 배지를 획득해보세요!</Text>
               </View>
             ) : (
+              <>
               <View style={styles.badgeGrid}>
-                {validBadges.map((badge) => {
+                {displayedBadges.map((badge) => {
                   const missionTitle = badge.mission?.title || badge.customMission?.title || '미션';
 
                   return (
@@ -99,6 +105,8 @@ const MyProgressDetailScreen: React.FC<MyProgressDetailScreenProps> = ({ navigat
                       style={styles.badgeItem}
                       onPress={() => handleBadgePress(badge)}
                       activeOpacity={0.7}
+                      accessibilityRole="button"
+                      accessibilityLabel={`${missionTitle} 배지${badge.remainingDays !== undefined ? `, D-${badge.remainingDays}` : ''}`}
                     >
                       <View style={styles.badgeIcon}>
                         <Image
@@ -118,6 +126,39 @@ const MyProgressDetailScreen: React.FC<MyProgressDetailScreenProps> = ({ navigat
                   );
                 })}
               </View>
+
+              {totalPages > 1 && (
+                <View style={styles.paginationRow}>
+                  <TouchableOpacity
+                    style={[styles.pageButton, currentPage === 0 && styles.pageButtonDisabled]}
+                    onPress={handlePrevPage}
+                    disabled={currentPage === 0}
+                    activeOpacity={0.7}
+                    accessibilityRole="button"
+                    accessibilityLabel="이전 페이지"
+                  >
+                    <Text style={[styles.pageButtonText, currentPage === 0 && styles.pageButtonTextDisabled]}>
+                      이전
+                    </Text>
+                  </TouchableOpacity>
+                  <Text style={styles.pageIndicatorText}>
+                    {currentPage + 1} / {totalPages}
+                  </Text>
+                  <TouchableOpacity
+                    style={[styles.pageButton, currentPage >= totalPages - 1 && styles.pageButtonDisabled]}
+                    onPress={handleNextPage}
+                    disabled={currentPage >= totalPages - 1}
+                    activeOpacity={0.7}
+                    accessibilityRole="button"
+                    accessibilityLabel="다음 페이지"
+                  >
+                    <Text style={[styles.pageButtonText, currentPage >= totalPages - 1 && styles.pageButtonTextDisabled]}>
+                      다음
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+              </>
             )}
           </View>
         </ScrollView>

@@ -23,6 +23,7 @@ import {
   createCustomMission as createCustomMissionApi,
   updateCustomMission as updateCustomMissionApi,
   deleteCustomMission as deleteCustomMissionApi,
+  getUserMissions,
   Mission as ApiMission,
   MissionCategory as ApiMissionCategory,
   CreateMissionRequest,
@@ -171,8 +172,10 @@ export const useMission = (
             }
             
             // 정상적인 유저 미션만 변환
-            const mission = transformUserMission(um);
-            allMissions.push(mission);
+            const mission = transformUserMissionToMission(um);
+            if (mission) {
+              allMissions.push(mission);
+            }
           } catch (e) {
             // 미션 데이터가 없는 경우 스킵
             logError('UserMission 변환 실패', e as Error, { userMissionId: um.id });

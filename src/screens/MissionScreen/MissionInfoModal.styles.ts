@@ -62,13 +62,16 @@ export const styles = StyleSheet.create({
     width: '100%',
   },
   modalDetailLabel: {
-    ...createSecondaryTextStyle('sm', {
+    ...createSecondaryTextStyle('base', {
       fontWeight: typography.fontWeight.medium,
       marginBottom: spacing[1],
+      color: colors.text.primary, // 진한 색상으로 변경
     }),
   },
   modalDetailValue: {
-    ...createTextStyle('base'),
+    ...createTextStyle('sm', {
+      color: colors.text.secondary,
+    }),
   },
   modalButtonRow: {
     flexDirection: 'row',
