@@ -162,6 +162,7 @@ interface BackendPostResponse {
   userId: number;
   userNickname: string;
   userProfileImg?: string;
+  userReantLevel?: number; // 작성자 리앤트 레벨 (캐릭터 이미지 표시용)
   missionTag?: {
     id: number;
     title: string;
@@ -273,6 +274,7 @@ const transformBackendPost = (post: BackendPostResponse): CommunityPost => {
     verified,  // 인증 완료 여부
     status: post.status,
     completionRate: post.completionRate, // 완료 정도
+    authorReantLevel: post.userReantLevel != null ? post.userReantLevel : undefined, // 작성자 캐릭터 레벨 (상세/목록 공통)
   };
 };
 
