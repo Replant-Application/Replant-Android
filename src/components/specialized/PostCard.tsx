@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, Image, ViewStyle, Alert } from 'react-nat
 import { styles } from './PostCard.styles';
 import { CommunityPost } from '../../types';
 import { formatTimeAgo } from '../../utils/dateUtils';
-import { getCharacterImage } from '../../utils/characterUtils';
+import { getCharacterImageStatic } from '../../utils/characterUtils';
 
 interface PostCardProps {
   post: CommunityPost;
@@ -116,7 +116,7 @@ const PostCard: React.FC<PostCardProps> = ({
           <View style={styles.authorAvatar}>
             {post.authorReantLevel != null && post.authorReantLevel >= 1 ? (
               <Image
-                source={getCharacterImage(Math.min(post.authorReantLevel, 6), 'default')}
+                source={getCharacterImageStatic(Math.min(post.authorReantLevel, 6))}
                 style={styles.authorAvatarImage}
                 resizeMode="contain"
                 accessibilityLabel={`${post.author_nickname || '작성자'} 캐릭터`}

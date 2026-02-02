@@ -2,7 +2,30 @@
  * 캐릭터 관련 유틸리티 함수
  */
 
-// 레벨별 캐릭터 이미지 가져오기
+/**
+ * 레벨별 캐릭터 정적 이미지 (PNG) - 프로필/리스트용, GIF 대신 사용하여 렉 방지
+ */
+export const getCharacterImageStatic = (level: number) => {
+  const levelFolder = `level${Math.min(level, 6)}`;
+  switch (levelFolder) {
+    case 'level1':
+      return require('../assets/images/characters/level1/default.png');
+    case 'level2':
+      return require('../assets/images/characters/level2/default.png');
+    case 'level3':
+      return require('../assets/images/characters/level3/default.png');
+    case 'level4':
+      return require('../assets/images/characters/level4/default.png');
+    case 'level5':
+      return require('../assets/images/characters/level5/default.png');
+    case 'level6':
+      return require('../assets/images/characters/level6/default.png');
+    default:
+      return require('../assets/images/characters/level1/default.png');
+  }
+};
+
+// 레벨별 캐릭터 이미지 가져오기 (GIF, 애니메이션)
 export const getCharacterImage = (level: number, emotion: string = 'default') => {
   const levelFolder = `level${Math.min(level, 6)}`;
   switch (levelFolder) {

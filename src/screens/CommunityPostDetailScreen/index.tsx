@@ -18,7 +18,7 @@ import { CommentCard } from '../../components/specialized';
 import { Loading, ErrorBoundary, EmptyState, Header, Card, AlertModal, ConfirmModal, FullScreenImageViewer } from '../../components/ui';
 import { colors } from '../../utils/designTokens';
 import { formatDateKorean } from '../../utils/dateUtils';
-import { getCharacterImage } from '../../utils/characterUtils';
+import { getCharacterImageStatic } from '../../utils/characterUtils';
 import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types/navigation';
 import { useCommunityPostDetailScreenContainer } from './CommunityPostDetailScreen.container';
@@ -192,7 +192,7 @@ const CommunityPostDetailScreen: React.FC<CommunityPostDetailScreenProps> = ({ n
               <View style={styles.authorAvatar}>
                 {post.authorReantLevel != null && post.authorReantLevel >= 1 ? (
                   <Image
-                    source={getCharacterImage(Math.min(post.authorReantLevel, 6), 'default')}
+                    source={getCharacterImageStatic(Math.min(post.authorReantLevel, 6))}
                     style={styles.authorAvatarImage}
                     resizeMode="contain"
                     accessibilityLabel={`${post.author_nickname || '작성자'} 캐릭터`}
