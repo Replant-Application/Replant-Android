@@ -47,6 +47,7 @@ export const styles = StyleSheet.create({
   },
   sectionTitle: {
     ...createTitleStyle('lg', {
+      color: colors.text.primary,
       fontWeight: typography.fontWeight.medium,
     }),
   },
@@ -104,6 +105,7 @@ export const styles = StyleSheet.create({
   },
   badgeTitle: {
     ...createTextStyle('xs', {
+      color: colors.text.primary,
       fontWeight: typography.fontWeight.medium,
       textAlign: 'center',
       marginBottom: spacing[1],
