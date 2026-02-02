@@ -73,7 +73,39 @@ const CommunityPostDetailScreen: React.FC<CommunityPostDetailScreenProps> = ({ n
   }
 
   if (error || !post) {
-    return <ErrorBoundary error={error || '게시글을 찾을 수 없습니다.'} />;
+    const displayError = error || '게시글을 찾을 수 없습니다.';
+    const isPrivateAccess =
+      typeof displayError === 'string' &&
+      (displayError.includes('비공개') ||
+        /403|접근|forbidden/i.test(displayError));
+
+    if (isPrivateAccess) {
+      return (
+        <ImageBackground
+          source={require('../../assets/images/background.png')}
+          style={styles.backgroundImage}
+          resizeMode="cover"
+          accessibilityElementsHidden={true}
+        >
+          <View style={styles.container}>
+            <Header
+              title="게시글"
+              navigation={navigation}
+              showBorder={false}
+              titleStyle={styles.headerTitle}
+            />
+            <View style={styles.privateAccessContainer}>
+              <Text style={styles.privateAccessTitle}>비공개 글입니다</Text>
+              <Text style={styles.privateAccessMessage}>
+                작성자만 볼 수 있는 글입니다.
+              </Text>
+            </View>
+          </View>
+        </ImageBackground>
+      );
+    }
+
+    return <ErrorBoundary error={displayError} />;
   }
 
   return (

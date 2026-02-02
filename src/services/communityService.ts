@@ -38,6 +38,7 @@ export const createPost = async (
       content: postData.content,
       missionId: !isNaN(missionIdNum as number) ? missionIdNum : undefined,
       imageUrls: postData.images || [],
+      isPublic: postData.isPublic !== false,
     });
 
     if (result.success && result.data) {
@@ -76,10 +77,12 @@ export const updatePost = async (
       title?: string;
       content?: string;
       imageUrls?: string[];
+      isPublic?: boolean;
     } = {
       title: updateDataParam.title,
       content: updateDataParam.content,
       imageUrls: updateDataParam.images,
+      isPublic: updateDataParam.isPublic,
     };
     
     // missionId가 있으면 추가 (미션 태그가 있는 경우)
@@ -172,6 +175,7 @@ interface BackendPostResponse {
   likeCount: number;
   isLiked: boolean;
   isAuthor?: boolean; // 본인 게시글 여부 (백엔드에서 제공, userId 기반)
+  isPublic?: boolean; // 공개 여부 (일반 게시글만)
   createdAt: string;
   updatedAt?: string;
   // 인증글 전용 필드
@@ -265,7 +269,9 @@ const transformBackendPost = (post: BackendPostResponse): CommunityPost => {
     category: post.postType === 'VERIFICATION' ? '인증' : '일반',
     is_liked: post.isLiked || false,
     isAuthor: post.isAuthor, // 백엔드에서 제공하는 본인 게시글 여부 (userId 기반)
+    isPublic: post.isPublic !== false, // 공개 여부 (일반 게시글만)
     verified,  // 인증 완료 여부
+    status: post.status,
     completionRate: post.completionRate, // 완료 정도
   };
 };
@@ -346,10 +352,13 @@ export const getPost = async (
       };
     }
 
-    return null;
+    // 403 비공개 글 등 API 에러 시 throw하여 상세 화면에서 안내 메시지 표시
+    const message = result.error || '게시글을 불러올 수 없습니다.';
+    throw new Error(message);
   } catch (error) {
     logError('게시글 상세 조회 실패', error as Error, { postId, nickname });
-    return null;
+    if (error instanceof Error) throw error;
+    throw new Error('게시글을 불러올 수 없습니다.');
   }
 };
 

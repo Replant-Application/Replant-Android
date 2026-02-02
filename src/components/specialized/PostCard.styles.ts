@@ -63,6 +63,18 @@ export const styles = StyleSheet.create({
       fontWeight: typography.fontWeight.normal,
     }),
   },
+  privateBadge: {
+    backgroundColor: colors.gray[200],
+    paddingHorizontal: spacing[2],
+    paddingVertical: 2,
+    borderRadius: borderRadius.base,
+  },
+  privateBadgeText: {
+    ...createTextStyle('xs', {
+      color: colors.text.secondary,
+      fontWeight: typography.fontWeight.normal,
+    }),
+  },
   date: {
     ...createSecondaryTextStyle('xs', {
       color: colors.text.tertiary,

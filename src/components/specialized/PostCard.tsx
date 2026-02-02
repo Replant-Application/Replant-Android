@@ -124,6 +124,11 @@ const PostCard: React.FC<PostCardProps> = ({
                 <Text style={styles.categoryText}>{post.category}</Text>
               </View>
             )}
+            {isOwnPost && post.isPublic === false && (
+              <View style={styles.privateBadge}>
+                <Text style={styles.privateBadgeText}>비공개</Text>
+              </View>
+            )}
           </View>
         </View>
         <View style={styles.headerRight}>

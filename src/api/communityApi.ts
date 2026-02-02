@@ -39,6 +39,7 @@ export interface Post {
   likeCount?: number;
   isLiked?: boolean;
   isAuthor?: boolean; // 본인 게시글 여부 (백엔드에서 제공, userId 기반)
+  isPublic?: boolean; // 공개 여부 (일반 게시글만, false = 비공개)
   createdAt: string;
   updatedAt?: string;
 }
@@ -56,6 +57,7 @@ export interface CreatePostRequest {
   title: string;
   content: string;
   imageUrls: string[];
+  isPublic?: boolean; // 공개 여부 (일반 게시글만, false = 비공개)
 }
 
 export interface UpdatePostRequest {
@@ -63,6 +65,7 @@ export interface UpdatePostRequest {
   title?: string;
   content?: string;
   imageUrls?: string[];
+  isPublic?: boolean; // 공개 여부 (일반 게시글만)
 }
 
 export interface Comment {

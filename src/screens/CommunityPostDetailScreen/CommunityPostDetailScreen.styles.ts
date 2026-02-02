@@ -32,6 +32,25 @@ export const styles = StyleSheet.create({
     }),
     includeFontPadding: false,
   },
+  privateAccessContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: spacing[6],
+  },
+  privateAccessTitle: {
+    ...createTextStyle('xl', {
+      fontWeight: typography.fontWeight.semibold,
+      color: colors.text.primary,
+      marginBottom: spacing[2],
+    }),
+  },
+  privateAccessMessage: {
+    ...createBodyStyle('base', {
+      color: colors.text.secondary,
+      textAlign: 'center',
+    }),
+  },
   postContainer: {
     marginBottom: spacing[5],
     ...shadows.sm,
