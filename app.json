@@ -1,9 +1,10 @@
-﻿{
+{
     "expo":  {
                  "name":  "ReplantMobileApp",
                  "slug":  "replant-mobile-app",
                  "version":  "1.0.5",
                  "orientation":  "portrait",
+                 "userInterfaceStyle": "light",
                  "icon":  "./logo/1024.png",
                  "splash":  {
                                 "image":  "./logo/1024.png",
@@ -12,6 +13,7 @@
                             },
                  "android":  {
                                  "package":  "com.anonymous.replantmobileapp",
+                                 "userInterfaceStyle": "light",
                                  "adaptiveIcon":  {
                                                       "foregroundImage":  "./logo/play_store_512.png",
                                                       "backgroundColor":  "#ffffff"
@@ -19,7 +21,8 @@
                                  "versionCode":  105
                              },
                  "ios":  {
-                             "bundleIdentifier":  "com.anonymous.replantmobileapp"
+                             "bundleIdentifier":  "com.anonymous.replantmobileapp",
+                             "userInterfaceStyle": "light"
                          },
                  "main":  "index.js",
                  "plugins":  [

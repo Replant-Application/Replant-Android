@@ -353,6 +353,7 @@ export const styles = StyleSheet.create({
       fontWeight: typography.fontWeight.medium,
       marginBottom: spacing[2],
       fontFamily: typography.fontFamily.regular,
+      color: colors.text.primary,
     }),
   },
   textInput: {
@@ -509,6 +510,7 @@ export const styles = StyleSheet.create({
       fontWeight: typography.fontWeight.medium,
       marginTop: spacing[1],
       marginBottom: spacing[2],
+      color: colors.text.primary,
     }),
   },
   timeMissionMeta: {

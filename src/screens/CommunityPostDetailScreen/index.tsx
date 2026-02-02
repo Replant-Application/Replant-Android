@@ -217,34 +217,38 @@ const CommunityPostDetailScreen: React.FC<CommunityPostDetailScreenProps> = ({ n
             </View>
           </View>
 
-          <View style={styles.missionInfo}>
-            <Image
-              source={require('../../assets/images/goal.png')}
-              style={styles.missionEmojiImage}
-              resizeMode="contain"
-              accessibilityLabel="미션 아이콘"
-            />
-            <Text style={styles.missionTitle}>
-              {post.mission_title || '미션'}
-              {post.category === '인증' && post.completionRate !== undefined && post.completionRate !== null && (
-                ` (${post.completionRate}%)`
+          {/* 미션 관련 게시글(인증글 또는 mission_id/mission_title 있음)일 때만 미션 영역 표시. 일반 게시글은 미션에 국한되지 않음. */}
+          {(post.category === '인증' ||
+            (post.mission_id && post.mission_id !== 'undefined') ||
+            (post.mission_title && post.mission_title.trim() !== '')) && (
+            <View style={styles.missionInfo}>
+              <Image
+                source={require('../../assets/images/goal.png')}
+                style={styles.missionEmojiImage}
+                resizeMode="contain"
+                accessibilityLabel="미션 아이콘"
+              />
+              <Text style={styles.missionTitle}>
+                {post.mission_title || '미션'}
+                {post.category === '인증' && post.completionRate !== undefined && post.completionRate !== null && (
+                  ` (${post.completionRate}%)`
+                )}
+              </Text>
+              {post.category === '인증' && (
+                post.verified === true ? (
+                  <View style={styles.verifiedBadge}>
+                    <Text style={styles.verifiedIcon}>✓</Text>
+                    <Text style={styles.verifiedText}>인증완료</Text>
+                  </View>
+                ) : post.verified === false ? (
+                  <View style={styles.pendingBadge}>
+                    <Text style={styles.pendingIcon}>⏳</Text>
+                    <Text style={styles.pendingText}>인증대기</Text>
+                  </View>
+                ) : null
               )}
-            </Text>
-            {/* 인증 상태 배지 - 인증 게시글(category === '인증')일 때만 표시 */}
-            {post.category === '인증' && (
-              post.verified === true ? (
-                <View style={styles.verifiedBadge}>
-                  <Text style={styles.verifiedIcon}>✓</Text>
-                  <Text style={styles.verifiedText}>인증완료</Text>
-                </View>
-              ) : post.verified === false ? (
-                <View style={styles.pendingBadge}>
-                  <Text style={styles.pendingIcon}>⏳</Text>
-                  <Text style={styles.pendingText}>인증대기</Text>
-                </View>
-              ) : null
-            )}
-          </View>
+            </View>
+          )}
 
           <Text style={styles.title}>{post.title}</Text>
           <Text style={styles.contentText}>{post.content}</Text>
