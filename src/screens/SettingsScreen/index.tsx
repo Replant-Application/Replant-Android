@@ -182,7 +182,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
             />
             <View style={styles.divider} />
             <SettingItem
-              icon={require('../../assets/images/calendar.png')}
+              icon={require('../../assets/images/goal.png')}
               title="미션 카테고리 변경"
               onPress={() => navigation?.navigate('CategorySelect' as any, { fromSettings: true })}
             />

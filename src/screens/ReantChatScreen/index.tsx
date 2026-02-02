@@ -98,7 +98,7 @@ const ReantChatScreen: React.FC<ReantChatScreenProps> = ({ navigation, route: _r
           useNativeDriver: true,
         }).start();
       } else {
-        setCurrentReantMessage('안녕하세요! 오늘도 화이팅! 😊');
+        setCurrentReantMessage('안녕! 오늘도 화이팅! 😊');
         setShowSpeechBubble(true);
         Animated.timing(speechBubbleAnim, {
           toValue: 1,
@@ -179,7 +179,7 @@ const ReantChatScreen: React.FC<ReantChatScreenProps> = ({ navigation, route: _r
       }).start();
     } else {
       setError(result.error || '메시지 전송에 실패했습니다.');
-      setCurrentReantMessage('잠깐 멍해졌어요... 다시 말해줄래요? 🤔');
+      setCurrentReantMessage('멍... 다시 말해줄래요? 🤔');
       setShowSpeechBubble(true);
       Animated.timing(speechBubbleAnim, {
         toValue: 1,

@@ -176,7 +176,7 @@ const AppHeader: React.FC<AppHeaderProps> = ({ navigation }) => {
               accessibilityLabel="미션 카테고리 변경"
             >
               <Image
-                source={require('../../../assets/images/calendar.png')}
+                source={require('../../../assets/images/goal.png')}
                 style={styles.menuItemIcon}
                 resizeMode="contain"
                 accessibilityLabel="미션 카테고리 변경 아이콘"
