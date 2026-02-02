@@ -396,9 +396,13 @@ const AppNavigator = () => {
     };
   }, []);
 
+  // 업데이트 모달 기능 비활성화 (오류 대응, 재활성화 시 true로 변경)
+  const SHOW_UPDATE_MODAL_FEATURE = false;
+
   // 앱 버전 체크 (앱 시작 시 한 번만)
   useEffect(() => {
     const checkAppVersion = async () => {
+      if (!SHOW_UPDATE_MODAL_FEATURE) return;
       try {
         console.log('[AppNavigator] 버전 체크 시작');
         const result = await checkUpdateRequired();
@@ -524,8 +528,10 @@ const AppNavigator = () => {
     const title = lastNotification.title || '';
     const content = lastNotification.content || '';
 
-    // 업데이트 알림 처리 (APP_UPDATE) - 로그인 무관 (버전 체크 API와 정책 통일)
+    // 업데이트 알림 처리 (APP_UPDATE) - 기능 비활성화 시 모달 미표시
     if (type === 'APP_UPDATE') {
+      processedNotificationIdRef.current = notificationId || null;
+      if (!SHOW_UPDATE_MODAL_FEATURE) return;
       const data = lastNotification;
       const updateResult = {
         isRequired: data.isRequired === true || data.isRequired === 'true',
@@ -537,7 +543,6 @@ const AppNavigator = () => {
       if (updateResult.isRequired) {
         setUpdateInfo(updateResult);
         setUpdateModalVisible(true);
-        processedNotificationIdRef.current = notificationId || null;
         return;
       }
 
@@ -550,7 +555,6 @@ const AppNavigator = () => {
             const dismissedTime = parseInt(dismissedAt, 10);
             const hoursSinceDismissed = (Date.now() - dismissedTime) / (1000 * 60 * 60);
             if (hoursSinceDismissed < 24) {
-              processedNotificationIdRef.current = notificationId || null;
               return;
             }
             await AsyncStorage.removeItem(dismissedKey);
