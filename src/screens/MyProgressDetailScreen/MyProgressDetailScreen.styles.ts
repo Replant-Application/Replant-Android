@@ -129,20 +129,20 @@ export const styles = StyleSheet.create({
     paddingVertical: spacing[2],
     paddingHorizontal: spacing[4],
     borderRadius: borderRadius.lg,
-    backgroundColor: colors.primary[100],
+    backgroundColor: colors.primary[300],
   },
   pageButtonDisabled: {
-    backgroundColor: colors.gray[100],
-    opacity: 0.7,
+    backgroundColor: colors.gray[200],
+    opacity: 0.8,
   },
   pageButtonText: {
     ...createTextStyle('sm', {
-      fontWeight: typography.fontWeight.medium,
-      color: colors.primary[600],
+      fontWeight: typography.fontWeight.bold,
+      color: colors.primary[700],
     }),
   },
   pageButtonTextDisabled: {
-    color: colors.gray[400],
+    color: colors.gray[500],
   },
   pageIndicatorText: {
     ...createTextStyle('sm', {

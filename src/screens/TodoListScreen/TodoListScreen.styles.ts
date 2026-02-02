@@ -231,9 +231,13 @@ export const styles = StyleSheet.create({
   emptyText: {
     ...emptyStateStyles.text(),
     marginBottom: spacing[2],
+    fontWeight: typography.fontWeight.bold,
+    color: colors.text.primary,
   },
   emptySubtext: {
     ...emptyStateStyles.subtext(),
+    fontWeight: typography.fontWeight.medium,
+    color: colors.text.secondary,
   },
   infoContainer: {
     backgroundColor: 'rgba(255, 255, 255, 0.9)',
