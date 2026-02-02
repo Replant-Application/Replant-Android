@@ -9,19 +9,19 @@ export const getCharacterImageStatic = (level: number) => {
   const levelFolder = `level${Math.min(level, 6)}`;
   switch (levelFolder) {
     case 'level1':
-      return require('../assets/images/characters/level1/default.png');
+      return require('../assets/images/characters/level1/default_static.png');
     case 'level2':
-      return require('../assets/images/characters/level2/default.png');
+      return require('../assets/images/characters/level2/default_static.png');
     case 'level3':
-      return require('../assets/images/characters/level3/default.png');
+      return require('../assets/images/characters/level3/default_static.png');
     case 'level4':
-      return require('../assets/images/characters/level4/default.png');
+      return require('../assets/images/characters/level4/default_static.png');
     case 'level5':
-      return require('../assets/images/characters/level5/default.png');
+      return require('../assets/images/characters/level5/default_static.png');
     case 'level6':
-      return require('../assets/images/characters/level6/default.png');
+      return require('../assets/images/characters/level6/default_static.png');
     default:
-      return require('../assets/images/characters/level1/default.png');
+      return require('../assets/images/characters/level1/default_static.png');
   }
 };
 
