@@ -170,6 +170,22 @@ const AppHeader: React.FC<AppHeaderProps> = ({ navigation }) => {
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.menuItem}
+              onPress={() => handleMenuPress('CategorySelect', { fromSettings: true })}
+              activeOpacity={0.7}
+              accessibilityRole="button"
+              accessibilityLabel="미션 카테고리 변경"
+            >
+              <Image
+                source={require('../../../assets/images/calendar.png')}
+                style={styles.menuItemIcon}
+                resizeMode="contain"
+                accessibilityLabel="미션 카테고리 변경 아이콘"
+                accessibilityElementsHidden={true}
+              />
+              <Text style={styles.menuItemText}>미션 카테고리 변경</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.menuItem}
               onPress={() => handleMenuPress('SoundSettings')}
               activeOpacity={0.7}
               accessibilityRole="button"
