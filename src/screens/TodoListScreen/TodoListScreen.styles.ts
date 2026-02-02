@@ -87,18 +87,44 @@ export const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: '#D4A574',
   },
+  /** 제목과 ⋯ 버튼이 같은 가로선에 오도록 상단 정렬 + 동일 줄높이 */
   cardHeader: {
     flexDirection: 'row',
+    flexWrap: 'nowrap',
     justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     marginBottom: spacing[2],
   },
   cardTitle: {
     ...createBodyStyle('base', {
       fontWeight: typography.fontWeight.medium,
       flex: 1,
+      minWidth: 0,
       marginRight: spacing[2],
+      lineHeight: 24,
     }),
+  },
+  menuButton: {
+    flexShrink: 0,
+    width: 32,
+    height: 24,
+    marginRight: -spacing[2],
+    marginTop: -2,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  /** 세로로 쌓인 점 세 개 (⋮) */
+  verticalDots: {
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    height: 14,
+  },
+  verticalDot: {
+    width: 4,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: colors.text.secondary,
   },
   statusBadge: {
     paddingVertical: spacing[1],

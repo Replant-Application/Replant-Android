@@ -4,7 +4,8 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-import { getActiveTodoLists, getTodoLists, canCreateNewTodoList } from '../../api/todolistApi';
+import { Alert } from 'react-native';
+import { getActiveTodoLists, getTodoLists, canCreateNewTodoList, deleteMissionSet } from '../../api/todolistApi';
 import { TodoList, CanCreateResponse } from '../../types/todolist';
 import { SCREEN_NAMES } from '../../utils/constants';
 import { filterTodayActiveTodoLists } from '../../utils/todolistUtils';
@@ -22,6 +23,8 @@ export const useTodoListScreenContainer = ({ navigation, route }: TodoListScreen
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [activeTab, setActiveTab] = useState<'active' | 'completed' | 'incomplete'>('active');
+  const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false);
+  const [todoListToDelete, setTodoListToDelete] = useState<TodoList | null>(null);
 
   /**
    * 데이터 로드
@@ -142,6 +145,38 @@ export const useTodoListScreenContainer = ({ navigation, route }: TodoListScreen
   );
 
   /**
+   * 투두리스트 삭제 확인 모달 열기 (⋯ 메뉴에서 호출)
+   */
+  const handleDeleteTodoList = useCallback((todoList: TodoList) => {
+    setTodoListToDelete(todoList);
+    setShowDeleteConfirmModal(true);
+  }, []);
+
+  /**
+   * 삭제 확인 모달: 삭제 실행
+   */
+  const handleDeleteConfirm = useCallback(async () => {
+    if (!todoListToDelete) return;
+    setShowDeleteConfirmModal(false);
+    const target = todoListToDelete;
+    setTodoListToDelete(null);
+    const result = await deleteMissionSet(target.id);
+    if (result.success) {
+      loadData();
+    } else {
+      Alert.alert('오류', result.error || '삭제에 실패했습니다.');
+    }
+  }, [todoListToDelete, loadData]);
+
+  /**
+   * 삭제 확인 모달: 취소
+   */
+  const handleDeleteConfirmCancel = useCallback(() => {
+    setShowDeleteConfirmModal(false);
+    setTodoListToDelete(null);
+  }, []);
+
+  /**
    * 현재 탭에 따른 목록 반환
    */
   const currentList = activeTab === 'active' ? activeTodoLists : activeTab === 'completed' ? completedTodoLists : incompleteTodoLists;
@@ -162,6 +197,10 @@ export const useTodoListScreenContainer = ({ navigation, route }: TodoListScreen
     // Handlers
     handleCreateTodoList,
     handleTodoListPress,
+    handleDeleteTodoList,
+    showDeleteConfirmModal,
+    handleDeleteConfirm,
+    handleDeleteConfirmCancel,
     onRefresh,
   };
 };
