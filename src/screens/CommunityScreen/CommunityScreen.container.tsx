@@ -435,6 +435,7 @@ export const useCommunityScreenContainer = ({ navigation, route }: CommunityScre
             is_scrapped: false, // 스크랩은 로컬에서 관리
             verified: isVerification ? post.status === 'APPROVED' : undefined,
             isAuthor: post.isAuthor || false,
+            isPublic: post.isPublic !== false, // 백엔드: false = 비공개, null/true = 공개. 본인 비공개글에만 '비공개' 마크 표시용
             completionRate: post.completionRate,
           };
         });
