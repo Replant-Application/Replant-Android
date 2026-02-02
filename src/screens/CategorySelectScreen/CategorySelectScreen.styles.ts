@@ -84,8 +84,8 @@ export const styles = StyleSheet.create({
   selectAllSection: {
     marginTop: spacing[4],
     paddingTop: spacing[4],
-    borderTopWidth: 1,
-    borderTopColor: colors.border.light,
+    borderTopWidth: 2,
+    borderTopColor: colors.border.medium,
   },
   selectAllButton: {
     alignSelf: 'stretch',
@@ -114,23 +114,27 @@ export const styles = StyleSheet.create({
   },
   optionSelected: {
     borderColor: colors.primary[500],
-    backgroundColor: colors.primary[50],
+    backgroundColor: colors.primary[100],
     borderWidth: 2,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
+    shadowOpacity: 0.12,
     shadowRadius: 4,
-    elevation: 2,
+    elevation: 3,
   },
   optionTextSelected: {
-    color: colors.primary[600],
-    fontWeight: typography.fontWeight.semibold,
+    color: colors.primary[700],
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: Platform.select({
+      ios: undefined,
+      android: typography.fontFamily.bold,
+    }),
   },
   completeButton: {
     alignSelf: 'stretch',
     marginTop: spacing[3],
-    backgroundColor: colors.primary[500],
-    borderColor: colors.primary[500],
+    backgroundColor: colors.primary[600],
+    borderColor: colors.primary[600],
     paddingVertical: spacing[3],
     paddingHorizontal: spacing[3],
     borderRadius: borderRadius.lg,
@@ -143,10 +147,10 @@ export const styles = StyleSheet.create({
     opacity: 0.7,
   },
   completeButtonText: {
-    ...createButtonTextStyle('base', { color: colors.white }),
+    ...createButtonTextStyle('base', { color: colors.white, fontWeight: typography.fontWeight.bold }),
     fontFamily: Platform.select({
       ios: undefined,
-      android: typography.fontFamily.regular,
+      android: typography.fontFamily.bold,
     }),
   },
   loadingOverlay: {

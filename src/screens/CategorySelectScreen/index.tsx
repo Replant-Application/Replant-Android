@@ -86,7 +86,7 @@ const CategorySelectScreen: React.FC<CategorySelectScreenProps> = ({ onBack, onC
       />
       <View style={styles.content}>
         <Text style={styles.subtitle}>
-          해당 분야의 미션이 매일 추천돼요.
+          선택한 분야의 미션이 매일 추천돼요.
         </Text>
         <View style={styles.categoryCard}>
           <View style={styles.list}>
