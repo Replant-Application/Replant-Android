@@ -34,7 +34,7 @@ export const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 255, 255, 0.95)',
     borderRadius: borderRadius.base,
     padding: spacing[4],
-    marginBottom: spacing[4],
+    marginBottom: spacing[3],
     borderWidth: 2,
     borderColor: '#D4A574',
     borderStyle: 'dashed',
@@ -220,7 +220,8 @@ export const styles = StyleSheet.create({
   },
   emptyContainer: {
     ...emptyStateStyles.container(),
-    paddingVertical: spacing[12],
+    paddingTop: spacing[6],
+    paddingBottom: spacing[12],
   },
   emptyIcon: {
     width: 48,
