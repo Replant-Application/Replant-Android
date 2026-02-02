@@ -4,7 +4,7 @@
  */
 
 import React, { useEffect, useRef } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, TextInput, Image, Modal, RefreshControl, ImageBackground, ActivityIndicator, Switch, Animated } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, TextInput, Image, Modal, RefreshControl, ImageBackground, ActivityIndicator, Animated } from 'react-native';
 import { spacing } from '../../utils/designTokens';
 import { formatDateKorean } from '../../utils/dateUtils';
 import { PostCard } from '../../components/specialized';
@@ -402,8 +402,8 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation, route }) 
             <View style={styles.filterOptionRow}>
               {[
                 { key: 'all', label: '전체' },
-                { key: 'pending', label: '인증대기' },
-                { key: 'approved', label: '인증완료' },
+                { key: 'pending', label: '대기' },
+                { key: 'approved', label: '완료' },
               ].map((option) => (
                 <TouchableOpacity
                   key={option.key}
@@ -435,19 +435,21 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation, route }) 
             </View>
 
             {/* 내가 쓴 게시글만 보기 */}
-            <View style={[styles.filterOptionRow, { marginTop: spacing[6] }]}>
+            <TouchableOpacity
+              style={[styles.filterCheckboxRow, { marginTop: spacing[6] }]}
+              onPress={() => setOnlyMyPosts(!onlyMyPosts)}
+              activeOpacity={0.7}
+              accessibilityRole="checkbox"
+              accessibilityLabel="내가 쓴 게시글만 보기"
+              accessibilityState={{ checked: onlyMyPosts }}
+            >
               <Text style={styles.filterOptionLabel}>내가 쓴 게시글만 보기</Text>
-              <Switch
-                value={onlyMyPosts}
-                onValueChange={setOnlyMyPosts}
-                trackColor={{ false: '#E0E0E0', true: '#8B6F47' }}
-                thumbColor={onlyMyPosts ? '#FFFFFF' : '#F4F3F4'}
-                ios_backgroundColor="#E0E0E0"
-                accessibilityRole="switch"
-                accessibilityLabel="내가 쓴 게시글만 보기"
-                accessibilityState={{ checked: onlyMyPosts }}
-              />
-            </View>
+              <View style={[styles.filterCheckboxBox, onlyMyPosts && styles.filterCheckboxBoxChecked]}>
+                {onlyMyPosts && (
+                  <Text style={styles.filterCheckboxCheckmark}>✓</Text>
+                )}
+              </View>
+            </TouchableOpacity>
 
             {/* 적용 버튼 */}
             <TouchableOpacity

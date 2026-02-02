@@ -200,6 +200,33 @@ export const styles = StyleSheet.create({
     paddingVertical: spacing[3],
     gap: spacing[4],
   },
+  filterCheckboxRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: spacing[3],
+    gap: spacing[3],
+  },
+  filterCheckboxBox: {
+    width: 22,
+    height: 22,
+    borderRadius: borderRadius.sm,
+    borderWidth: 2,
+    borderColor: colors.gray[400],
+    backgroundColor: colors.white,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  filterCheckboxBoxChecked: {
+    backgroundColor: colors.primary[500],
+    borderColor: colors.primary[500],
+  },
+  filterCheckboxCheckmark: {
+    color: colors.white,
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.bold,
+    lineHeight: typography.fontSize.sm,
+  },
   filterOptionLabel: {
     ...createBodyStyle('base', {
       fontWeight: typography.fontWeight.medium,
@@ -409,12 +436,12 @@ export const styles = StyleSheet.create({
   createMissionButton: { 
     backgroundColor: colors.primary[700], 
     borderRadius: borderRadius.md, 
-    paddingVertical: spacing[1], 
+    paddingVertical: spacing[2], 
     paddingHorizontal: spacing[4], 
     alignItems: 'center', 
     justifyContent: 'center', 
     marginBottom: spacing[3], 
-    minHeight: 36 
+    minHeight: 44 
   },
   createMissionButtonText: {
     ...createButtonTextStyle('base'),

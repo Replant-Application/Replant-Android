@@ -5,7 +5,7 @@
 
 import { StyleSheet, Platform } from 'react-native';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
-import { createTextStyle, createTitleStyle, createBodyStyle, createSecondaryTextStyle, createButtonTextStyle } from '../../utils/styles/textStyles';
+import { createTextStyle, createTitleStyle, createBodyStyle, createSecondaryTextStyle, createButtonTextStyle, getOptimizedLineHeight } from '../../utils/styles/textStyles';
 import { modalStyles, emptyStateStyles, buttonStyles } from '../../utils/styles/commonStyles';
 
 export const styles = StyleSheet.create({
@@ -167,12 +167,17 @@ export const styles = StyleSheet.create({
       textAlign: 'center',
     }),
   },
+  /** '필터 선택' 제목과 동일한 커스텀 폰트(Neo-Regular) 적용 */
   modalSectionTitle: {
     ...createTextStyle('sm', {
       fontWeight: typography.fontWeight.bold,
       color: colors.text.secondary,
       marginTop: spacing[3],
-      marginBottom: spacing[2],
+      marginBottom: spacing[4],
+      fontFamily: Platform.select({
+        ios: undefined,
+        android: typography.fontFamily.regular,
+      }),
     }),
   },
   filterOption: {
@@ -203,12 +208,39 @@ export const styles = StyleSheet.create({
     }),
     flex: 1,
   },
+  filterCheckboxRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: spacing[2],
+    gap: spacing[3],
+  },
+  filterCheckboxBox: {
+    width: 22,
+    height: 22,
+    borderRadius: borderRadius.sm,
+    borderWidth: 2,
+    borderColor: colors.gray[400],
+    backgroundColor: colors.white,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  filterCheckboxBoxChecked: {
+    backgroundColor: colors.primary[500],
+    borderColor: colors.primary[500],
+  },
+  filterCheckboxCheckmark: {
+    color: colors.white,
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.bold,
+    lineHeight: typography.fontSize.sm,
+  },
   filterOptionHorizontal: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: spacing[1],
+    paddingVertical: spacing[3],
     paddingHorizontal: spacing[2],
     borderRadius: borderRadius.lg,
     backgroundColor: colors.background.secondary,
@@ -221,17 +253,22 @@ export const styles = StyleSheet.create({
     borderColor: colors.primary[500],
     borderWidth: 1.5,
   },
+  /** 최신순/인기순/전체 등 - '필터 선택'과 동일한 커스텀 폰트(Neo-Regular) 항상 적용 */
   filterOptionText: {
-    ...createTextStyle('xs', {
-      fontWeight: typography.fontWeight.medium,
-      color: colors.text.primary,
-    }),
+    fontSize: typography.fontSize.xs,
+    fontWeight: typography.fontWeight.bold,
+    color: colors.text.primary,
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
+    fontFamily: Platform.select({ ios: undefined, android: typography.fontFamily.regular }),
   },
   filterOptionTextActive: {
-    ...createTextStyle('xs', {
-      color: colors.white,
-      fontWeight: typography.fontWeight.semibold,
-    }),
+    fontSize: typography.fontSize.xs,
+    fontWeight: typography.fontWeight.bold,
+    color: colors.white,
+    includeFontPadding: false,
+    lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
+    fontFamily: Platform.select({ ios: undefined, android: typography.fontFamily.regular }),
   },
   filterOptionCheck: {
     ...createTextStyle('xs', {
@@ -243,7 +280,8 @@ export const styles = StyleSheet.create({
   modalApplyButton: {
     ...buttonStyles.primary(),
     marginTop: spacing[4],
-    paddingVertical: spacing[1],
+    paddingVertical: spacing[2],
+    minHeight: 44,
     borderRadius: borderRadius.lg,
   },
   modalApplyButtonText: {

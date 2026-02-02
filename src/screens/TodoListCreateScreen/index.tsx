@@ -9,7 +9,6 @@ import {
   ImageBackground,
   Image,
   Modal,
-  Switch,
 } from 'react-native';
 import { colors } from '../../utils/designTokens';
 import { Header, AlertModal, WheelPicker } from '../../components/ui';
@@ -375,17 +374,21 @@ const TodoListCreateScreen: React.FC<TodoListCreateScreenProps> = ({ navigation,
                   <Text style={styles.filterModalClose}>✕</Text>
                 </TouchableOpacity>
               </View>
-              <View style={styles.filterOptionRow}>
+              <TouchableOpacity
+                style={styles.filterCheckboxRow}
+                onPress={() => setOnlyMyMissions(!onlyMyMissions)}
+                activeOpacity={0.7}
+                accessibilityRole="checkbox"
+                accessibilityLabel="내가 만든 미션만 보기"
+                accessibilityState={{ checked: onlyMyMissions }}
+              >
                 <Text style={styles.filterOptionLabel}>내가 만든 미션만 보기</Text>
-                <Switch
-                  value={onlyMyMissions}
-                  onValueChange={setOnlyMyMissions}
-                  trackColor={{ false: colors.gray[300], true: colors.primary[400] }}
-                  thumbColor={colors.overlay.white.heavy}
-                  accessibilityLabel="내가 만든 미션만 보기"
-                  accessibilityState={{ checked: onlyMyMissions }}
-                />
-              </View>
+                <View style={[styles.filterCheckboxBox, onlyMyMissions && styles.filterCheckboxBoxChecked]}>
+                  {onlyMyMissions && (
+                    <Text style={styles.filterCheckboxCheckmark}>✓</Text>
+                  )}
+                </View>
+              </TouchableOpacity>
             </View>
           </TouchableOpacity>
         </TouchableOpacity>
