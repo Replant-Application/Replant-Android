@@ -30,6 +30,7 @@ export const useCommunityPostEditScreenContainer = ({
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [images, setImages] = useState<string[]>([]);
+  const [isPublic, setIsPublic] = useState(true); // 일반글만: 공개(true) / 비공개(false)
   const [uploadingImage, setUploadingImage] = useState(false);
   const [saving, setSaving] = useState(false);
 
@@ -67,8 +68,8 @@ export const useCommunityPostEditScreenContainer = ({
     if (post) {
       setTitle(post.title);
       setContent(post.content);
-      // 모든 게시글(일반/인증) 이미지 초기화 — 수정 화면에서 사진 추가 가능
       setImages(post.images || []);
+      setIsPublic(post.isPublic !== false);
     }
   }, [post]);
 
@@ -176,14 +177,15 @@ export const useCommunityPostEditScreenContainer = ({
         title?: string;
         content?: string;
         images?: string[];
+        isPublic?: boolean;
       } = {
         title: updateTitle,
         content: content.trim(),
       };
 
-      // 일반 게시글인 경우 이미지도 함께 전송
       if (isGeneralPost) {
         updateData.images = images;
+        updateData.isPublic = isPublic;
       }
 
       const result = await updatePost(post.post_id, updateData);
@@ -198,7 +200,7 @@ export const useCommunityPostEditScreenContainer = ({
     } finally {
       setSaving(false);
     }
-  }, [content, title, images, post, isVerificationPost, isGeneralPost, updatePost, showAlertModal]);
+  }, [content, title, images, isPublic, post, isVerificationPost, isGeneralPost, updatePost, showAlertModal]);
 
   /**
    * 권한 확인 및 네비게이션 처리
@@ -218,6 +220,8 @@ export const useCommunityPostEditScreenContainer = ({
     title,
     content,
     images,
+    isPublic,
+    setIsPublic,
     uploadingImage,
     saving,
     setTitle,

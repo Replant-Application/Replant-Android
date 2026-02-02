@@ -2,7 +2,7 @@
  * 커뮤니티 게시글 수정 화면
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -15,7 +15,7 @@ import {
   TouchableOpacity,
   ActivityIndicator,
 } from 'react-native';
-import { Button, Header, AlertModal } from '../../components/ui';
+import { Button, Header, AlertModal, FullScreenImageViewer } from '../../components/ui';
 import { colors } from '../../utils/designTokens';
 import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types/navigation';
@@ -34,9 +34,12 @@ const CommunityPostEditScreen: React.FC<CommunityPostEditScreenProps> = ({ navig
     loading,
     isAuthor,
     isVerificationPost,
+    isGeneralPost,
     title,
     content,
     images,
+    isPublic,
+    setIsPublic,
     uploadingImage,
     saving,
     setTitle,
@@ -51,6 +54,8 @@ const CommunityPostEditScreen: React.FC<CommunityPostEditScreenProps> = ({ navig
     showSuccessModal,
     handleSuccessModalClose,
   } = useCommunityPostEditScreenContainer({ navigation, route });
+
+  const [selectedImageUri, setSelectedImageUri] = useState<string | null>(null);
 
   if (loading || !post) {
     return (
@@ -130,14 +135,36 @@ const CommunityPostEditScreen: React.FC<CommunityPostEditScreenProps> = ({ navig
         />
 
         <ScrollView style={styles.content} keyboardShouldPersistTaps="handled">
-        {/* 미션 정보 표시 (수정 불가) */}
-        <View style={styles.missionInfo}>
-          <Text style={styles.missionEmoji}>{post.mission_emoji || '🎯'}</Text>
-          <View style={styles.missionTextContainer}>
-            <Text style={styles.missionLabel}>완료한 미션</Text>
-            <Text style={styles.missionTitle}>{post.mission_title || '미션'}</Text>
+        {/* 인증글만: 완료한 미션 표시 (수정 불가) */}
+        {!isGeneralPost && (
+          <View style={styles.missionInfo}>
+            <Text style={styles.missionEmoji}>{post.mission_emoji || '🎯'}</Text>
+            <View style={styles.missionTextContainer}>
+              <Text style={styles.missionLabel}>완료한 미션</Text>
+              <Text style={styles.missionTitle}>{post.mission_title || '미션'}</Text>
+            </View>
           </View>
-        </View>
+        )}
+
+        {/* 일반글만: 비공개 전환 (제목 위, 작성 화면과 동일 순서) */}
+        {isGeneralPost && (
+          <View style={styles.inputSection}>
+            <TouchableOpacity
+              style={styles.privateCheckboxRow}
+              onPress={() => setIsPublic(!isPublic)}
+              activeOpacity={0.7}
+              accessibilityRole="checkbox"
+              accessibilityLabel="비공개로 작성"
+              accessibilityState={{ checked: !isPublic }}
+              accessibilityHint="체크하면 작성자만 볼 수 있는 비공개 글로 전환됩니다"
+            >
+              <Text style={styles.privateCheckboxLabel}>비공개로 작성</Text>
+              <View style={[styles.privateCheckbox, !isPublic && styles.privateCheckboxSelected]}>
+                {!isPublic && <Text style={styles.privateCheckmark}>✓</Text>}
+              </View>
+            </TouchableOpacity>
+          </View>
+        )}
 
         {/* 제목 입력 */}
         <View style={styles.inputSection}>
@@ -170,21 +197,28 @@ const CommunityPostEditScreen: React.FC<CommunityPostEditScreenProps> = ({ navig
           )}
         </View>
 
-        {/* 내용 입력 */}
+        {/* 내용 입력 - 노트 스타일 (작성 화면과 동일) */}
         <View style={styles.inputSection}>
           <Text style={styles.label}>내용 *</Text>
-          <TextInput
+          <View style={styles.contentInputWrapper}>
+            <View style={styles.noteLines}>
+              {[...Array(6)].map((_, i) => (
+                <View key={i} style={styles.noteLine} />
+              ))}
+            </View>
+            <TextInput
             style={styles.contentInput}
             value={content}
             onChangeText={setContent}
             placeholder="내용을 입력하세요..."
             placeholderTextColor={colors.text.tertiary}
             multiline
-            numberOfLines={8}
+            numberOfLines={7}
             textAlignVertical="top"
             accessibilityLabel="내용"
             accessibilityHint="게시글 내용을 입력하세요"
           />
+          </View>
         </View>
 
         {/* 사진 (일반/인증 모두 표시, 추가·삭제 가능) */}
@@ -193,12 +227,20 @@ const CommunityPostEditScreen: React.FC<CommunityPostEditScreenProps> = ({ navig
           <View style={styles.imageContainer}>
             {images.map((imageUrl, index) => (
               <View key={index} style={styles.imagePreviewWrapper}>
-                <Image 
-                  source={{ uri: imageUrl }} 
-                  style={styles.previewImage} 
-                  resizeMode="cover" 
-                  accessibilityLabel="이미지 미리보기"
-                />
+                <TouchableOpacity
+                  style={styles.previewImageTouchable}
+                  onPress={() => setSelectedImageUri(imageUrl)}
+                  activeOpacity={0.9}
+                  accessibilityRole="imagebutton"
+                  accessibilityLabel={`사진 ${index + 1} 자세히 보기`}
+                >
+                  <Image 
+                    source={{ uri: imageUrl }} 
+                    style={styles.previewImage} 
+                    resizeMode="cover" 
+                    accessibilityLabel={`사진 ${index + 1}`}
+                  />
+                </TouchableOpacity>
                 <TouchableOpacity
                   style={styles.removeImageButton}
                   onPress={() => handleRemoveImage(index)}
@@ -262,6 +304,12 @@ const CommunityPostEditScreen: React.FC<CommunityPostEditScreenProps> = ({ navig
         message="게시글이 수정되었습니다!"
         buttonText="확인"
         onClose={handleSuccessModalClose}
+      />
+
+      <FullScreenImageViewer
+        visible={!!selectedImageUri}
+        imageUri={selectedImageUri}
+        onClose={() => setSelectedImageUri(null)}
       />
       </KeyboardAvoidingView>
     </ImageBackground>

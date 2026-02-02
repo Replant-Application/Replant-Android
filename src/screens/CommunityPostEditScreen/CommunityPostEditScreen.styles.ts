@@ -75,6 +75,42 @@ export const styles = StyleSheet.create({
   inputSection: {
     marginBottom: spacing[4],
   },
+  switchRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  privateCheckboxRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  privateCheckbox: {
+    width: 18,
+    height: 18,
+    borderRadius: borderRadius.sm,
+    borderWidth: 2,
+    borderColor: colors.gray[400],
+    backgroundColor: colors.white,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: spacing[2],
+  },
+  privateCheckboxSelected: {
+    borderColor: colors.primary[600],
+    backgroundColor: colors.primary[600],
+  },
+  privateCheckmark: {
+    color: colors.white,
+    fontSize: 12,
+    fontWeight: typography.fontWeight.bold,
+    lineHeight: 14,
+  },
+  privateCheckboxLabel: {
+    ...createTextStyle('xs', {
+      color: colors.text.primary,
+      fontWeight: typography.fontWeight.medium,
+    }),
+  },
   label: {
     ...createTextStyle('sm', {
       fontWeight: typography.fontWeight.medium,
@@ -111,17 +147,36 @@ export const styles = StyleSheet.create({
       fontStyle: 'italic',
     }),
   },
-  contentInput: {
-    ...inputStyles.base(),
+  contentInputWrapper: {
     backgroundColor: colors.background.primary,
     borderWidth: 1,
     borderColor: colors.border.light,
-    borderRadius: borderRadius.md,
+    borderRadius: 8,
+    overflow: 'hidden',
+  },
+  noteLines: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
+  noteLine: {
+    height: 28,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e8e8e8',
+  },
+  contentInput: {
+    ...inputStyles.base(),
+    backgroundColor: 'transparent',
     padding: spacing[3],
+    paddingTop: spacing[2],
     fontSize: typography.fontSize.base,
     color: colors.text.primary,
-    minHeight: 150,
+    height: 154,
+    maxHeight: 300,
     textAlignVertical: 'top',
+    lineHeight: 24,
     fontFamily: Platform.select({
       ios: undefined,
       android: typography.fontFamily.regular,
@@ -153,14 +208,18 @@ export const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.gray[300],
   },
+  previewImageTouchable: {
+    width: '100%',
+    height: '100%',
+  },
   previewImage: {
     width: '100%',
     height: '100%',
   },
   addImageButton: {
     width: '100%',
-    minHeight: 80,
-    paddingVertical: spacing[3],
+    minHeight: 120,
+    paddingVertical: spacing[4],
     backgroundColor: colors.white,
     borderWidth: 1,
     borderColor: colors.border.light,

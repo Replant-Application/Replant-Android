@@ -18,7 +18,7 @@ import {
   Modal,
 } from 'react-native';
 import Slider from '@react-native-community/slider';
-import { Header, AlertModal } from '../../components/ui';
+import { Header, AlertModal, FullScreenImageViewer } from '../../components/ui';
 import { colors } from '../../utils/designTokens';
 import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types/navigation';
@@ -62,6 +62,7 @@ const VerificationPostCreateScreen: React.FC<VerificationPostCreateScreenProps> 
   } = useVerificationPostCreateScreenContainer({ navigation, route });
 
   const [showInfoMessage, setShowInfoMessage] = useState(false);
+  const [selectedImageUri, setSelectedImageUri] = useState<string | null>(null);
   const isCompletionAtOrBelow25 = completionRate <= 25;
 
   return (
@@ -207,12 +208,20 @@ const VerificationPostCreateScreen: React.FC<VerificationPostCreateScreenProps> 
             <View style={styles.imageContainer}>
               {images.map((imageUrl, index) => (
                 <View key={index} style={styles.imagePreviewWrapper}>
-                  <Image 
-                    source={{ uri: imageUrl }} 
-                    style={styles.previewImage} 
-                    resizeMode="cover" 
-                    accessibilityLabel={`인증 사진 ${index + 1}`}
-                  />
+                  <TouchableOpacity
+                    style={styles.previewImageTouchable}
+                    onPress={() => setSelectedImageUri(imageUrl)}
+                    activeOpacity={0.9}
+                    accessibilityRole="imagebutton"
+                    accessibilityLabel={`인증 사진 ${index + 1} 자세히 보기`}
+                  >
+                    <Image 
+                      source={{ uri: imageUrl }} 
+                      style={styles.previewImage} 
+                      resizeMode="cover" 
+                      accessibilityLabel={`인증 사진 ${index + 1}`}
+                    />
+                  </TouchableOpacity>
                   <TouchableOpacity
                     style={styles.removeImageButton}
                     onPress={() => handleRemoveImage(index)}
@@ -314,6 +323,12 @@ const VerificationPostCreateScreen: React.FC<VerificationPostCreateScreenProps> 
         message={errorMessage}
         buttonText="확인"
         onClose={handleErrorModalClose}
+      />
+
+      <FullScreenImageViewer
+        visible={!!selectedImageUri}
+        imageUri={selectedImageUri}
+        onClose={() => setSelectedImageUri(null)}
       />
 
       {/* 사진 추가 커스텀 모달 */}

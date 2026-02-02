@@ -3,7 +3,7 @@
  * 미션 완료 후 커뮤니티에 공유하는 화면
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -17,7 +17,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import Slider from '@react-native-community/slider';
-import { Header, AlertModal } from '../../components/ui';
+import { Header, AlertModal, FullScreenImageViewer } from '../../components/ui';
 import { colors } from '../../utils/designTokens';
 import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types/navigation';
@@ -43,6 +43,8 @@ const CommunityPostCreateScreen: React.FC<CommunityPostCreateScreenProps> = ({ n
     loading,
     showSuccessModal,
     tasteRating,
+    isPublic,
+    setIsPublic,
     showAlert,
     alertTitle,
     alertMessage,
@@ -55,6 +57,8 @@ const CommunityPostCreateScreen: React.FC<CommunityPostCreateScreenProps> = ({ n
     handleSuccessModalClose,
     handleAlertClose,
   } = useCommunityPostCreateScreenContainer({ navigation, route });
+
+  const [selectedImageUri, setSelectedImageUri] = useState<string | null>(null);
 
   const getTasteLabel = (rating: number) => {
     const labels = ['😖 별로', '😐 그저그럼', '🙂 보통', '😋 맛있음', '🤤 최고!'];
@@ -104,6 +108,26 @@ const CommunityPostCreateScreen: React.FC<CommunityPostCreateScreenProps> = ({ n
           </View>
         </View>
 
+        {/* 일반글만: 비공개 선택 (체크박스, 투두 하루종일과 동일 스타일) */}
+        {isGeneralPost && (
+          <View style={styles.inputSection}>
+            <TouchableOpacity
+              style={styles.privateCheckboxRow}
+              onPress={() => setIsPublic(!isPublic)}
+              activeOpacity={0.7}
+              accessibilityRole="checkbox"
+              accessibilityLabel="비공개로 작성"
+              accessibilityState={{ checked: !isPublic }}
+              accessibilityHint="체크하면 작성자만 볼 수 있는 비공개 글로 등록됩니다"
+            >
+              <Text style={styles.privateCheckboxLabel}>비공개로 작성</Text>
+              <View style={[styles.privateCheckbox, !isPublic && styles.privateCheckboxSelected]}>
+                {!isPublic && <Text style={styles.privateCheckmark}>✓</Text>}
+              </View>
+            </TouchableOpacity>
+          </View>
+        )}
+
         {/* 제목 입력 */}
         <View style={styles.inputSection}>
           <Text style={styles.label}>제목</Text>
@@ -132,14 +156,12 @@ const CommunityPostCreateScreen: React.FC<CommunityPostCreateScreenProps> = ({ n
               style={styles.contentInput}
               value={content}
               onChangeText={setContent}
-              placeholder={isGeneralPost
-                ? "자유롭게 이야기를 나눠보세요..."
-                : "미션을 완료한 소감이나 경험을 공유해주세요..."
-              }
+              placeholder="설명을 입력해주세요"
               placeholderTextColor={colors.text.tertiary}
               accessibilityLabel="내용"
-              accessibilityHint={isGeneralPost ? "자유롭게 이야기를 나눠보세요" : "미션을 완료한 소감이나 경험을 공유해주세요"}
+              accessibilityHint="설명을 입력해주세요"
               multiline
+              numberOfLines={7}
               textAlignVertical="top"
             />
           </View>
@@ -152,12 +174,20 @@ const CommunityPostCreateScreen: React.FC<CommunityPostCreateScreenProps> = ({ n
             <View style={styles.imageContainer}>
               {images.map((imageUrl, index) => (
                 <View key={index} style={styles.imagePreviewWrapper}>
-                  <Image 
-                    source={{ uri: imageUrl }} 
-                    style={styles.previewImage} 
-                    resizeMode="cover" 
-                    accessibilityLabel="이미지 미리보기"
-                  />
+                  <TouchableOpacity
+                    style={styles.previewImageTouchable}
+                    onPress={() => setSelectedImageUri(imageUrl)}
+                    activeOpacity={0.9}
+                    accessibilityRole="imagebutton"
+                    accessibilityLabel={`사진 ${index + 1} 자세히 보기`}
+                  >
+                    <Image 
+                      source={{ uri: imageUrl }} 
+                      style={styles.previewImage} 
+                      resizeMode="cover" 
+                      accessibilityLabel={`사진 ${index + 1}`}
+                    />
+                  </TouchableOpacity>
                   <TouchableOpacity
                     style={styles.removeImageButton}
                     onPress={() => handleRemoveImage(index)}
@@ -324,6 +354,12 @@ const CommunityPostCreateScreen: React.FC<CommunityPostCreateScreenProps> = ({ n
         message={alertMessage}
         buttonText="확인"
         onClose={handleAlertClose}
+      />
+
+      <FullScreenImageViewer
+        visible={!!selectedImageUri}
+        imageUri={selectedImageUri}
+        onClose={() => setSelectedImageUri(null)}
       />
       </KeyboardAvoidingView>
     </ImageBackground>

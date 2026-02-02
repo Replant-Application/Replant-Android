@@ -264,6 +264,10 @@ export const styles = StyleSheet.create({
     borderRadius: borderRadius.md,
     overflow: 'hidden',
   },
+  previewImageTouchable: {
+    width: '100%',
+    height: '100%',
+  },
   previewImage: {
     width: 100,
     height: 100,
