@@ -17,23 +17,31 @@ export const autoLevelupCharacter = async (
       throw new Error('캐릭터를 찾을 수 없습니다.');
     }
 
-    // 경험치 추가
-    // character.experience는 현재 레벨의 경험치 (0-99)
-    // character.total_experience는 전체 누적 경험치
-    const currentTotalExp = character.total_experience || character.experience || 0;
+    // 경험치 추가 (백엔드 Reant.java와 동일 공식)
+    // 총 누적 경험치 = 100*(level-1)*level/2 + exp(현재 레벨 진행분), 다음 레벨 필요 = level*100
+    const level = character.level ?? 1;
+    const currentExp = character.experience ?? 0;
+    const currentTotalExp =
+      character.total_experience ??
+      (level > 1 ? 100 * ((level - 1) * level / 2) : 0) + currentExp;
     const newTotalExp: number = currentTotalExp + experienceGained;
+    const oldLevel = level;
 
-    // 레벨업 계산 (100 경험치당 1레벨)
-    const newLevel: number = Math.floor(newTotalExp / 100) + 1;
-    const oldLevel: number = character.level || 1;
-    const newCurrentLevelExp = newTotalExp % 100; // 현재 레벨에서의 경험치 (0-99)
+    // 총 누적 → 레벨·현재진행분 계산 (백엔드 checkLevelUp 로직과 동일)
+    let remaining = newTotalExp;
+    let newLevel = 1;
+    while (newLevel * 100 <= remaining) {
+      remaining -= newLevel * 100;
+      newLevel += 1;
+    }
+    const newCurrentLevelExp = remaining;
 
-    // 캐릭터 업데이트
     const updatedCharacter: Character = {
       ...character,
-      experience: newCurrentLevelExp, // 현재 레벨의 경험치
+      experience: newCurrentLevelExp,
       level: newLevel,
-      total_experience: newTotalExp  // total_experience는 전체 누적 경험치
+      total_experience: newTotalExp,
+      max_experience: newLevel * 100,
     };
 
     // Character의 id는 string이므로 직접 배열을 업데이트

@@ -41,14 +41,15 @@ const CharacterCard: React.FC<CharacterCardProps> = ({
     return characterImages[levelKey as keyof typeof characterImages] || characterImages.level1;
   };
 
-  // experience는 이미 현재 레벨의 경험치 (0-99)이므로 % 100 불필요
-  const experienceProgress = character.experience || 0;
-  const nextLevelExp = 100 - experienceProgress;
+  // 백엔드(Reant.java): 다음 레벨 필요 = level * 100. 표시는 항상 레벨 기준으로 계산(옛 캐시 max_experience 무시)
+  const level = character.level ?? 1;
+  const experienceProgress = character.experience ?? 0;
+  const maxExperience = level * 100;
+  const nextLevelExp = Math.max(0, maxExperience - experienceProgress);
 
-  // 접근성 라벨 생성
   const getAccessibilityLabel = () => {
     const levelName = getLevelName(character.level || 1);
-    return `${character.name || '캐릭터'}, ${levelName}, 레벨 ${character.level || 1}, 경험치 ${experienceProgress}/100`;
+    return `${character.name || '캐릭터'}, ${levelName}, 레벨 ${character.level || 1}, 경험치 ${experienceProgress}/${maxExperience}`;
   };
 
   return (
@@ -83,14 +84,14 @@ const CharacterCard: React.FC<CharacterCardProps> = ({
         <View style={styles.progressInfo}>
           <Text style={styles.levelText}>Lv.{character.level || 1}</Text>
           <Text style={styles.expText}>
-            {experienceProgress}/100 EXP
+            {experienceProgress}/{maxExperience} EXP
           </Text>
         </View>
         <View style={styles.progressBar}>
           <View
             style={[
               styles.progressFill,
-              { width: `${experienceProgress}%` }
+              { width: `${maxExperience > 0 ? Math.min(100, (experienceProgress / maxExperience) * 100) : 0}%` }
             ]}
           />
         </View>

@@ -158,13 +158,16 @@ const TodoListScreen: React.FC<Props> = ({ navigation, route }) => {
             disabled={activeTodoLists.length > 0}
             activeOpacity={0.7}
             accessibilityRole="button"
-            accessibilityLabel="나만의 투두리스트 만들기"
+            accessibilityLabel="나만의 투두리스트 만들기. 투두리스트는 하루에 한번만 작성 가능해요"
             accessibilityState={{ disabled: activeTodoLists.length > 0 }}
             accessibilityHint={activeTodoLists.length > 0 ? '진행 중인 투두리스트가 있어 비활성화되었습니다' : undefined}
           >
-            <Text style={styles.createButtonIcon}>+</Text>
             <View style={styles.createButtonContent}>
-              <Text style={styles.createButtonTitle}>나만의 투두리스트 만들기</Text>
+              <View style={styles.createButtonTitleRow}>
+                <Text style={styles.createButtonIcon}>+</Text>
+                <Text style={styles.createButtonTitle}>나만의 투두리스트 만들기</Text>
+              </View>
+              <Text style={styles.createButtonSubtitle}>* 투두리스트는 하루에 한번만 작성 가능해요</Text>
             </View>
           </TouchableOpacity>
         )}
@@ -193,13 +196,6 @@ const TodoListScreen: React.FC<Props> = ({ navigation, route }) => {
               </Text>
             )}
           </View>
-        )}
-
-        {/* 진행중 탭: 투두리스트 하단 안내 */}
-        {activeTab === 'active' && (
-          <Text style={styles.createNotice} accessibilityRole="summary" accessibilityLabel="안내: 투두리스트는 하루에 한 번만 만들 수 있습니다.">
-            * 투두리스트는 하루에 한번만 작성 가능해요
-          </Text>
         )}
       </ScrollView>
 

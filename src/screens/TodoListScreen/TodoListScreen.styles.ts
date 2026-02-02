@@ -54,8 +54,15 @@ export const styles = StyleSheet.create({
   createButtonContent: {
     flex: 1,
     justifyContent: 'center',
+    alignItems: 'flex-start',
+  },
+  /** + 아이콘과 제목을 같은 라인에 */
+  createButtonTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   createButtonTitle: {
+    flex: 1,
     fontSize: typography.fontSize.base,
     fontFamily: Platform.select({
       ios: undefined,
@@ -66,12 +73,17 @@ export const styles = StyleSheet.create({
     includeFontPadding: false,
     lineHeight: Math.round(typography.fontSize.base * 1.35),
   },
+  /** 버튼 안 설명 (하루 1회 제한) */
   createButtonSubtitle: {
-    ...createSecondaryTextStyle('sm', {
+    marginTop: spacing[3],
+    textAlign: 'left',
+    alignSelf: 'stretch',
+    ...createSecondaryTextStyle('xs', {
       color: '#8B6F47',
     }),
+    includeFontPadding: false,
   },
-  /** 생성 버튼 아래 안내 문구 (하루 1회 제한) */
+  /** @deprecated 안내 문구는 버튼 안으로 이동 */
   createNotice: {
     marginTop: spacing[2],
     marginBottom: spacing[4],

@@ -7,7 +7,7 @@ import { formatDateKorean } from '../../utils/dateUtils';
 import { SettingsScreenProps } from '../../types/screens/settings';
 import { TERMS_OF_SERVICE, PRIVACY_POLICY, OPEN_SOURCE_LICENSE } from '../../constants/screens/settings';
 import SettingItem from './SettingItem';
-import { useSettingsScreenContainer, APP_VERSION } from './SettingsScreen.container';
+import { useSettingsScreenContainer } from './SettingsScreen.container';
 import { styles } from './SettingsScreen.styles';
 
 const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
@@ -263,11 +263,6 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
               onPress={handleSendFeedback}
             />
           </View>
-        </View>
-
-        {/* 버전 정보 (맨 밑) */}
-        <View style={styles.versionContainer}>
-          <Text style={styles.versionText}>v{APP_VERSION}</Text>
         </View>
       </ScrollView>
 

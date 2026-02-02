@@ -196,15 +196,4 @@ export const styles = StyleSheet.create({
     backgroundColor: colors.border.light,
     marginLeft: 22 + spacing[2], // icon width + icon margin (left padding 0)
   },
-  versionContainer: {
-    marginTop: spacing[2],
-    marginBottom: spacing[2],
-    paddingHorizontal: spacing[4],
-    alignItems: 'flex-start',
-  },
-  versionText: {
-    ...createTextStyle('sm', {
-      color: colors.text.tertiary,
-    }),
-  },
 });
