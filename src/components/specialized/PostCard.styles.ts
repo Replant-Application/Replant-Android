@@ -33,6 +33,11 @@ export const styles = StyleSheet.create({
     backgroundColor: colors.primary[500],
     justifyContent: 'center',
     alignItems: 'center',
+    overflow: 'hidden',
+  },
+  authorAvatarImage: {
+    width: 32,
+    height: 32,
   },
   authorAvatarText: {
     ...createTextStyle('sm', {

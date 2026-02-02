@@ -436,6 +436,7 @@ export const useCommunityScreenContainer = ({ navigation, route }: CommunityScre
             verified: isVerification ? post.status === 'APPROVED' : undefined,
             isAuthor: post.isAuthor || false,
             isPublic: post.isPublic !== false, // 백엔드: false = 비공개, null/true = 공개. 본인 비공개글에만 '비공개' 마크 표시용
+            authorReantLevel: post.userReantLevel != null ? post.userReantLevel : 1, // 작성자 캐릭터 레벨 (커뮤니티 아바타용)
             completionRate: post.completionRate,
           };
         });
