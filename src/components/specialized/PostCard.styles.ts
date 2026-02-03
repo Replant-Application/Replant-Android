@@ -48,7 +48,7 @@ export const styles = StyleSheet.create({
   authorNameContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing[1.5],
+    gap: spacing[3],
   },
   authorName: {
     ...createTextStyle('sm', {
@@ -64,7 +64,7 @@ export const styles = StyleSheet.create({
     backgroundColor: colors.primary[100],
     paddingHorizontal: spacing[2],
     paddingVertical: 2,
-    borderRadius: borderRadius.base,
+    borderRadius: borderRadius.sm,
   },
   categoryText: {
     ...createTextStyle('xs', {
@@ -76,7 +76,8 @@ export const styles = StyleSheet.create({
     backgroundColor: colors.gray[200],
     paddingHorizontal: spacing[2],
     paddingVertical: 2,
-    borderRadius: borderRadius.base,
+    borderRadius: borderRadius.sm,
+    marginLeft: -spacing[2],
   },
   privateBadgeText: {
     ...createTextStyle('xs', {

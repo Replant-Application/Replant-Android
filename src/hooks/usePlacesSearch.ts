@@ -2,30 +2,33 @@ import { useState, useCallback, useMemo } from 'react';
 import placesService, { Place } from '../services/placesService';
 import { REGIONS } from '../constants/screens/placesSearch';
 
-type PlaceFilter = 'all' | 'counseling' | 'mental_health';
-
 export const usePlacesSearch = () => {
   const [places, setPlaces] = useState<Place[]>([]);
   const [searchText, setSearchText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [selectedFilter, setSelectedFilter] = useState<PlaceFilter>('all');
-  const [selectedRegion, setSelectedRegion] = useState('all');
+  const [counselingChecked, setCounselingChecked] = useState(true);
+  const [mentalHealthChecked, setMentalHealthChecked] = useState(true);
+  const [selectedRegion, setSelectedRegion] = useState('seoul');
 
   const searchPlaces = useCallback(async (
     userLat: number,
     userLng: number,
-    filter: PlaceFilter,
-    regionId: string = 'all'
+    counseling: boolean,
+    mentalHealth: boolean,
+    regionId: string
   ) => {
     setIsLoading(true);
     try {
-      const searchTypes = filter === 'all'
-        ? ['counseling', 'mental_health', 'social_services']
-        : [filter];
+      const searchTypes: string[] = [];
+      if (counseling) searchTypes.push('counseling');
+      if (mentalHealth) searchTypes.push('mental_health');
+      if (searchTypes.length === 0) {
+        searchTypes.push('counseling', 'mental_health', 'social_services');
+      } else {
+        searchTypes.push('social_services');
+      }
 
-      const regionName = regionId === 'all'
-        ? 'all'
-        : (REGIONS.find((r) => r.id === regionId)?.location ?? '서울');
+      const regionName = REGIONS.find((r) => r.id === regionId)?.location ?? '서울';
 
       const results = await placesService.searchByUserLocation(
         userLat,
@@ -59,13 +62,19 @@ export const usePlacesSearch = () => {
     });
   }, [places, searchText, selectedRegion]);
 
+  const toggleFilter = useCallback((key: 'counseling' | 'mental_health') => {
+    if (key === 'counseling') setCounselingChecked((prev) => !prev);
+    else setMentalHealthChecked((prev) => !prev);
+  }, []);
+
   return {
     places: filteredPlaces,
     searchText,
     setSearchText,
     isLoading,
-    selectedFilter,
-    setSelectedFilter,
+    counselingChecked,
+    mentalHealthChecked,
+    toggleFilter,
     selectedRegion,
     setSelectedRegion,
     searchPlaces,

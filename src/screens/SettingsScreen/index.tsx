@@ -202,7 +202,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
             <SettingItem
               icon={require('../../assets/images/chat.png')}
               title="상담 서비스"
-              onPress={() => navigation?.navigate('CounselingSelect')}
+              onPress={() => navigation?.navigate('PlacesSearch')}
             />
           </View>
         </View>

@@ -3,7 +3,7 @@
  * 장소 검색 화면의 모든 스타일 정의
  */
 
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Platform } from 'react-native';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
 import { getOptimizedLineHeight } from '../../utils/styles/textStyles';
 import { createTextStyle, createSecondaryTextStyle } from '../../utils/styles/textStyles';
@@ -27,7 +27,7 @@ export const styles = StyleSheet.create({
     padding: spacing[4],
   },
   searchContainer: {
-    marginBottom: spacing[3],
+    marginBottom: spacing[5],
   },
   searchInput: {
     ...inputStyles.base(),
@@ -36,29 +36,43 @@ export const styles = StyleSheet.create({
     color: colors.text.primary,
     textAlignVertical: 'center',
     lineHeight: getOptimizedLineHeight(typography.fontSize.base),
-  },
-  filterContainer: {
-    marginBottom: spacing[3],
-    maxHeight: 40,
-  },
-  filterChip: {
-    paddingHorizontal: spacing[4],
-    paddingVertical: spacing[2],
-    borderRadius: borderRadius.full,
-    backgroundColor: colors.background.primary,
-    marginRight: spacing[2],
-  },
-  filterChipActive: {
-    backgroundColor: colors.primary[500],
-  },
-  filterChipText: {
-    ...createSecondaryTextStyle('sm', {
-      fontWeight: typography.fontWeight.medium,
+    fontFamily: Platform.select({
+      ios: undefined,
+      android: typography.fontFamily.regular,
     }),
   },
-  filterChipTextActive: {
-    ...createTextStyle('sm', {
-      color: colors.text.inverse,
+  filterCheckboxContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: spacing[5],
+    gap: spacing[3],
+  },
+  filterCheckboxRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing[2],
+  },
+  filterCheckbox: {
+    width: 22,
+    height: 22,
+    borderRadius: borderRadius.sm,
+    borderWidth: 2,
+    borderColor: colors.border.medium,
+    backgroundColor: colors.background.primary,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  filterCheckboxChecked: {
+    backgroundColor: colors.primary[500],
+    borderColor: colors.primary[500],
+  },
+  filterCheckboxMark: {
+    color: colors.white,
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  filterCheckboxLabel: {
+    ...createSecondaryTextStyle('sm', {
       fontWeight: typography.fontWeight.medium,
     }),
   },
@@ -105,5 +119,6 @@ export const styles = StyleSheet.create({
       marginBottom: spacing[3],
       fontWeight: typography.fontWeight.medium,
     }),
+    paddingLeft: spacing[2],
   },
 });
