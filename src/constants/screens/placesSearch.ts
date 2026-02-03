@@ -2,7 +2,7 @@
  * PlacesSearchScreen 상수 정의
  */
 
-// 지역 목록 (전체 탭 제외)
+// 지역 목록
 export const REGIONS = [
   { id: 'seoul', name: '서울', location: '서울' },
   { id: 'busan', name: '부산', location: '부산' },

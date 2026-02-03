@@ -64,6 +64,12 @@ const PlacesSearchScreen: React.FC<PlacesSearchScreenProps> = ({ navigation }) =
           }
         />
 
+        {isLoading ? (
+          <View style={styles.loadingScreen}>
+            <ActivityIndicator size="large" color={colors.primary[500]} />
+            <Text style={styles.loadingText}>검색 중...</Text>
+          </View>
+        ) : (
         <ScrollView style={styles.content}>
         {/* 검색 바 */}
         <View style={styles.searchContainer}>
@@ -129,12 +135,7 @@ const PlacesSearchScreen: React.FC<PlacesSearchScreenProps> = ({ navigation }) =
           ))}
         </ScrollView>
 
-        {isLoading ? (
-          <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color={colors.primary[500]} />
-            <Text style={styles.loadingText}>검색 중...</Text>
-          </View>
-        ) : places.length === 0 ? (
+        {places.length === 0 ? (
           <EmptyState
             iconImage={require('../../assets/images/search.png')}
             title="검색 결과가 없습니다"
@@ -149,6 +150,7 @@ const PlacesSearchScreen: React.FC<PlacesSearchScreenProps> = ({ navigation }) =
           </ScrollView>
         )}
         </ScrollView>
+        )}
       </View>
     </ImageBackground>
   );

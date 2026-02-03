@@ -3,7 +3,7 @@
  * 장소 검색 화면의 모든 스타일 정의
  */
 
-import { StyleSheet, Platform } from 'react-native';
+import { StyleSheet } from 'react-native';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
 import { getOptimizedLineHeight } from '../../utils/styles/textStyles';
 import { createTextStyle, createSecondaryTextStyle } from '../../utils/styles/textStyles';
@@ -36,10 +36,6 @@ export const styles = StyleSheet.create({
     color: colors.text.primary,
     textAlignVertical: 'center',
     lineHeight: getOptimizedLineHeight(typography.fontSize.base),
-    fontFamily: Platform.select({
-      ios: undefined,
-      android: typography.fontFamily.regular,
-    }),
   },
   filterCheckboxContainer: {
     flexDirection: 'row',
@@ -102,7 +98,7 @@ export const styles = StyleSheet.create({
       fontWeight: typography.fontWeight.medium,
     }),
   },
-  loadingContainer: {
+  loadingScreen: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
