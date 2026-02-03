@@ -210,10 +210,8 @@ export const createMissionReview = async (
   data: { content: string; rating?: number }
 ): Promise<ServiceResult<MissionReview>> => {
   const endpoint = API_CONFIG.endpoints.mission.createReview.replace(':missionId', String(missionId));
-  // rating이 없으면 기본값 5 설정
   const requestData = {
     content: data.content,
-    rating: data.rating ?? 5,
   };
   return apiClient.post<MissionReview>(endpoint, requestData);
 };

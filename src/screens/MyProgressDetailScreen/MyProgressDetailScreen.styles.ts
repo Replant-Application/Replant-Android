@@ -129,7 +129,7 @@ export const styles = StyleSheet.create({
     paddingVertical: spacing[2],
     paddingHorizontal: spacing[4],
     borderRadius: borderRadius.lg,
-    backgroundColor: colors.primary[300],
+    backgroundColor: colors.green[500],
   },
   pageButtonDisabled: {
     backgroundColor: colors.gray[200],
@@ -137,8 +137,8 @@ export const styles = StyleSheet.create({
   },
   pageButtonText: {
     ...createTextStyle('sm', {
-      fontWeight: typography.fontWeight.bold,
-      color: colors.primary[700],
+      fontWeight: typography.fontWeight.medium,
+      color: colors.text.inverse,
     }),
   },
   pageButtonTextDisabled: {

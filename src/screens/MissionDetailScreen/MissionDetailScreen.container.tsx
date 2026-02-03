@@ -96,7 +96,6 @@ export const useMissionDetailScreenContainer = ({ navigation, route }: MissionDe
   const [hasBadge, setHasBadge] = useState(false);
   const [hasWrittenReview, setHasWrittenReview] = useState(false);
   const [reviewContent, setReviewContent] = useState('');
-  const [reviewRating, setReviewRating] = useState(5);
   const [submittingReview, setSubmittingReview] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<number | null>(null);
   const [completingCustom, setCompletingCustom] = useState(false);
@@ -238,13 +237,11 @@ export const useMissionDetailScreenContainer = ({ navigation, route }: MissionDe
 
       const result = await createMissionReview(numericMissionId, {
         content: reviewContent.trim(),
-        rating: reviewRating,
       });
 
       if (result.success) {
         showSuccess('후기가 등록되었습니다.');
         setReviewContent('');
-        setReviewRating(5);
         setHasWrittenReview(true);
         // 리뷰 목록 새로고침
         await loadReviews(0, currentUserId);
@@ -260,7 +257,7 @@ export const useMissionDetailScreenContainer = ({ navigation, route }: MissionDe
     } finally {
       setSubmittingReview(false);
     }
-  }, [missionId, reviewContent, reviewRating, loadReviews, currentUserId, showError, showSuccess, handleApiError]);
+  }, [missionId, reviewContent, loadReviews, currentUserId, showError, showSuccess, handleApiError]);
 
   /**
    * 초기 데이터 로드
@@ -344,12 +341,10 @@ export const useMissionDetailScreenContainer = ({ navigation, route }: MissionDe
     hasBadge,
     hasWrittenReview,
     reviewContent,
-    reviewRating,
     submittingReview,
     returnTab,
     // Setters
     setReviewContent,
-    setReviewRating,
     // Handlers
     handleSubmitReview,
     handleRefresh,

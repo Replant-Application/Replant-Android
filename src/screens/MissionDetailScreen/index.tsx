@@ -42,11 +42,9 @@ const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({ navigation, r
     hasBadge,
     hasWrittenReview,
     reviewContent,
-    reviewRating,
     submittingReview,
     returnTab,
     setReviewContent,
-    setReviewRating,
     handleSubmitReview,
     handleRefresh,
     loadMoreReviews,
@@ -242,34 +240,6 @@ const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({ navigation, r
         {hasBadge && !hasWrittenReview && (
           <View style={styles.writeReviewSection}>
             <Text style={styles.sectionTitle}>후기 작성</Text>
-            <View style={styles.writeReviewHintContainer}>
-              <Text style={styles.writeReviewHint}>
-                미션 배지를 보유하고 계시네요!
-              </Text>
-              <Text style={styles.writeReviewHint}>
-                후기를 남겨주세요.
-              </Text>
-            </View>
-            {/* 별점 선택 */}
-            <View style={styles.ratingContainer}>
-              <View style={styles.starsContainer}>
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <TouchableOpacity
-                    key={star}
-                    onPress={() => setReviewRating(star)}
-                    activeOpacity={0.7}
-                    style={styles.starButton}
-                    accessibilityRole="button"
-                    accessibilityLabel={`별점 ${star}점`}
-                    accessibilityState={{ selected: star <= reviewRating }}
-                  >
-                    <Text style={styles.starText}>
-                      {star <= reviewRating ? '★' : '☆'}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-            </View>
             <TextInput
               style={styles.reviewInput}
               placeholder="후기를 작성해주세요..."
