@@ -96,10 +96,10 @@ export const styles = StyleSheet.create({
   authorName: {
     ...createTextStyle('sm', {
       color: colors.text.primary,
-      fontWeight: typography.fontWeight.bold,
+      fontWeight: typography.fontWeight.semibold,
       fontFamily: Platform.select({
         ios: undefined,
-        android: typography.fontFamily.bold,
+        android: typography.fontFamily.regular,
       }),
     }),
   },
@@ -153,10 +153,10 @@ export const styles = StyleSheet.create({
   date: {
     ...createTextStyle('xs', {
       color: colors.text.tertiary,
-      fontWeight: typography.fontWeight.bold,
+      fontWeight: typography.fontWeight.medium,
       fontFamily: Platform.select({
         ios: undefined,
-        android: typography.fontFamily.bold,
+        android: typography.fontFamily.regular,
       }),
     }),
     marginLeft: 'auto',

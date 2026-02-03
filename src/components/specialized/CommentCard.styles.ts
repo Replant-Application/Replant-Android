@@ -3,7 +3,7 @@
  * 댓글 카드 컴포넌트의 모든 스타일 정의
  */
 
-import { StyleSheet } from 'react-native';
+import { Platform, StyleSheet } from 'react-native';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
 import { createTextStyle, createSecondaryTextStyle } from '../../utils/styles/textStyles';
 
@@ -37,8 +37,12 @@ export const styles = StyleSheet.create({
   },
   authorName: {
     ...createTextStyle('sm', {
-      fontWeight: typography.fontWeight.normal,
+      fontWeight: typography.fontWeight.semibold,
       color: colors.text.primary,
+      fontFamily: Platform.select({
+        ios: undefined,
+        android: typography.fontFamily.regular,
+      }),
     }),
   },
   authorBadge: {
@@ -56,6 +60,11 @@ export const styles = StyleSheet.create({
   date: {
     ...createSecondaryTextStyle('xs', {
       color: colors.text.tertiary,
+      fontWeight: typography.fontWeight.medium,
+      fontFamily: Platform.select({
+        ios: undefined,
+        android: typography.fontFamily.regular,
+      }),
     }),
   },
   content: {
