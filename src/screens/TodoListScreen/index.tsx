@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import { colors } from '../../utils/designTokens';
 import { formatDateKorean } from '../../utils/dateUtils';
-import { Header, SimpleTabBar, ConfirmModal, AlertModal } from '../../components/ui';
+import { Header, ConfirmModal, AlertModal } from '../../components/ui';
 import { TodoList } from '../../types/todolist';
 import { useTodoListScreenContainer } from './TodoListScreen.container';
 import { styles } from './TodoListScreen.styles';
@@ -133,17 +133,58 @@ const TodoListScreen: React.FC<Props> = ({ navigation, route }) => {
     >
       <Header title="나의 투두리스트" showBackButton={true} navigation={navigation} />
 
-      {/* 탭 버튼 */}
+      {/* 탭 버튼 - 나의 미션/미션 도감과 동일 스타일 */}
       <View style={styles.tabContainer}>
-        <SimpleTabBar
-          tabs={[
-            { key: 'active', label: `진행중 (${activeTodoLists.length})` },
-            { key: 'completed', label: `완료 (${completedTodoLists.length})` },
-            { key: 'incomplete', label: `미완료 (${incompleteTodoLists.length})` },
-          ]}
-          activeTab={activeTab}
-          onTabChange={(key) => setActiveTab(key as 'active' | 'completed' | 'incomplete')}
-        />
+        <View style={styles.missionTabContainer}>
+          <TouchableOpacity
+            style={[styles.missionTab, activeTab === 'active' && styles.missionTabActive]}
+            onPress={() => setActiveTab('active')}
+            activeOpacity={0.7}
+            accessibilityRole="tab"
+            accessibilityLabel={activeTab === 'active' ? '진행중, 선택됨' : '진행중'}
+            accessibilityState={{ selected: activeTab === 'active' }}
+          >
+            <Text
+              style={[styles.missionTabText, activeTab === 'active' && styles.missionTabTextActive]}
+              numberOfLines={1}
+              ellipsizeMode="tail"
+            >
+              진행중 ({activeTodoLists.length})
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.missionTab, activeTab === 'completed' && styles.missionTabActive]}
+            onPress={() => setActiveTab('completed')}
+            activeOpacity={0.7}
+            accessibilityRole="tab"
+            accessibilityLabel={activeTab === 'completed' ? '완료, 선택됨' : '완료'}
+            accessibilityState={{ selected: activeTab === 'completed' }}
+          >
+            <Text
+              style={[styles.missionTabText, activeTab === 'completed' && styles.missionTabTextActive]}
+              numberOfLines={1}
+              ellipsizeMode="tail"
+            >
+              완료 ({completedTodoLists.length})
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.missionTab, activeTab === 'incomplete' && styles.missionTabActive]}
+            onPress={() => setActiveTab('incomplete')}
+            activeOpacity={0.7}
+            accessibilityRole="tab"
+            accessibilityLabel={activeTab === 'incomplete' ? '미완료, 선택됨' : '미완료'}
+            accessibilityState={{ selected: activeTab === 'incomplete' }}
+          >
+            <Text
+              style={[styles.missionTabText, activeTab === 'incomplete' && styles.missionTabTextActive]}
+              numberOfLines={1}
+              ellipsizeMode="tail"
+            >
+              미완료 ({incompleteTodoLists.length})
+            </Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       <ScrollView

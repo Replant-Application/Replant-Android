@@ -232,12 +232,6 @@ const CommunityPostDetailScreen: React.FC<CommunityPostDetailScreenProps> = ({ n
           {/* 인증글일 때만 미션 영역 표시. 일반글은 미션 제목 스타일 박스 미표시. */}
           {post.category === '인증' && (
             <View style={styles.missionInfo}>
-              <Image
-                source={require('../../assets/images/goal.png')}
-                style={styles.missionEmojiImage}
-                resizeMode="contain"
-                accessibilityLabel="미션 아이콘"
-              />
               <Text style={styles.missionTitle}>
                 {post.mission_title || '미션'}
                 {post.category === '인증' && post.completionRate !== undefined && post.completionRate !== null && (
@@ -260,7 +254,10 @@ const CommunityPostDetailScreen: React.FC<CommunityPostDetailScreenProps> = ({ n
             </View>
           )}
 
-          <Text style={styles.title}>{post.title}</Text>
+          {/* 인증글은 미션 제목을 위 초록 바에 이미 표시하므로 같은 제목을 다시 그리지 않음 */}
+          {!(post.category === '인증' && post.mission_title && post.mission_title !== 'undefined') && (
+            <Text style={styles.title}>{post.title}</Text>
+          )}
           <Text style={styles.contentText}>{post.content}</Text>
 
           {post.images && post.images.length > 0 && (

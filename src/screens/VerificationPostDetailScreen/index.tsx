@@ -140,7 +140,6 @@ const VerificationPostDetailScreen: React.FC<VerificationPostDetailScreenProps> 
           </View>
 
           <View style={styles.missionInfo}>
-            <Text style={styles.missionEmoji}>🎯</Text>
             <Text style={styles.missionTitle}>{getMissionTitle()}</Text>
             {statusBadge && (
               <View

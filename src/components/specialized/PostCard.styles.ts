@@ -206,6 +206,7 @@ export const styles = StyleSheet.create({
       color: colors.primary[700],
       fontWeight: typography.fontWeight.normal,
     }),
+    marginLeft: spacing[1],
   },
   pendingBadge: {
     flexDirection: 'row',

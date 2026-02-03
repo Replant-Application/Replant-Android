@@ -271,7 +271,7 @@ const TodoListDetailScreen: React.FC<Props> = ({ navigation, route }) => {
               />
             </View>
             <Text style={styles.progressCount}>
-              {actualCompletedCount}/{actualTotalCount} 완료
+              {actualCompletedCount} / {actualTotalCount} 완료
             </Text>
           </View>
         </View>

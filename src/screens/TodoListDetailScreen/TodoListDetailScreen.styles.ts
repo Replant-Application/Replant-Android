@@ -142,7 +142,8 @@ export const styles = StyleSheet.create({
   },
   progressCount: {
     ...createTextStyle('xs', {
-      color: colors.text.tertiary,
+      color: colors.text.primary,
+      fontWeight: typography.fontWeight.semibold,
       marginTop: spacing[1.5],
       textAlign: 'center',
     }),

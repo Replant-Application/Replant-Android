@@ -14,9 +14,53 @@ export const styles = StyleSheet.create({
     flex: 1,
   },
   tabContainer: {
-    paddingHorizontal: spacing[3],
+    paddingHorizontal: spacing[4],
     paddingTop: spacing[2],
-    paddingBottom: spacing[3],
+    paddingBottom: spacing[1],
+  },
+  /** 나의 미션/미션 도감과 동일한 탭 스타일 */
+  missionTabContainer: {
+    flexDirection: 'row',
+    backgroundColor: '#F5F5F0',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#A68B6F',
+    paddingVertical: 2.5,
+    paddingHorizontal: 3,
+    gap: 2,
+    marginBottom: spacing[2],
+  },
+  missionTab: {
+    flex: 1,
+    paddingVertical: 10,
+    paddingHorizontal: spacing[4],
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 6,
+    backgroundColor: 'transparent',
+  },
+  missionTabActive: {
+    backgroundColor: '#8B6F47',
+  },
+  missionTabText: {
+    ...createTextStyle('sm', {
+      color: colors.text.primary,
+      fontWeight: typography.fontWeight.medium,
+      fontFamily: Platform.select({
+        ios: undefined,
+        android: typography.fontFamily.regular,
+      }),
+    }),
+  },
+  missionTabTextActive: {
+    ...createTextStyle('sm', {
+      color: colors.white,
+      fontWeight: typography.fontWeight.medium,
+      fontFamily: Platform.select({
+        ios: undefined,
+        android: typography.fontFamily.regular,
+      }),
+    }),
   },
   loadingContainer: {
     ...loadingStyles.container(),

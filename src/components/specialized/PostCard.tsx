@@ -218,12 +218,6 @@ const PostCard: React.FC<PostCardProps> = ({
       <View style={styles.content}>
         {post.mission_title && post.mission_title !== 'undefined' && (
           <View style={styles.missionInfo}>
-            <Image
-              source={require('../../assets/images/goal.png')}
-              style={styles.missionEmojiImage}
-              resizeMode="contain"
-              accessibilityLabel="미션 아이콘"
-            />
             <Text style={styles.missionTitle} numberOfLines={1}>
               {post.mission_title}
               {post.category === '인증' && post.completionRate !== undefined && post.completionRate !== null && (
@@ -254,9 +248,12 @@ const PostCard: React.FC<PostCardProps> = ({
             )}
           </View>
         )}
-        <Text style={styles.title} numberOfLines={2}>
-          {post.title}
-        </Text>
+        {/* 인증글은 미션 제목을 위 초록 바에 이미 표시하므로 같은 제목을 다시 그리지 않음 */}
+        {!(post.category === '인증' && post.mission_title && post.mission_title !== 'undefined') && (
+          <Text style={styles.title} numberOfLines={2}>
+            {post.title}
+          </Text>
+        )}
         <Text style={styles.text} numberOfLines={3}>
           {post.content}
         </Text>

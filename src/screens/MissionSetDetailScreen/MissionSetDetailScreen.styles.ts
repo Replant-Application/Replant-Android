@@ -45,14 +45,12 @@ export const styles = StyleSheet.create({
   creator: {
     ...createTextStyle('sm', {
       color: colors.text.tertiary,
-      fontWeight: typography.fontWeight.bold,
     }),
   },
   metaDot: {
     fontSize: typography.fontSize.sm,
     color: colors.text.tertiary,
     marginHorizontal: spacing[1],
-    fontWeight: typography.fontWeight.bold,
   },
   missionCount: {
     ...createTextStyle('sm', {
@@ -62,7 +60,6 @@ export const styles = StyleSheet.create({
   createdAt: {
     ...createSecondaryTextStyle('sm', {
       color: colors.text.tertiary,
-      fontWeight: typography.fontWeight.bold,
     }),
   },
   statsRow: {
@@ -143,7 +140,7 @@ export const styles = StyleSheet.create({
   },
   viewPostLabel: {
     ...createTextStyle('xs', {
-      color: colors.blue[600],
+      color: colors.text.primary,
       fontWeight: typography.fontWeight.medium,
       textDecorationLine: 'underline',
     }),
