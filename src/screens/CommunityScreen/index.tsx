@@ -382,20 +382,54 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation, route }) 
         )}
       </Modal>
 
-      {/* 게시글 상세 모달 (투두리스트 상세에서 완료 미션 탭 시, 좋아요·댓글 동작) */}
+      {/* 게시글 상세 모달 (투두리스트 상세에서 완료 미션 탭 시, 좋아요·댓글 동작) - 하단 탭 바 노출 */}
       <Modal
         visible={selectedPostIdForModal != null}
         animationType="slide"
         onRequestClose={closePostModal}
       >
         {selectedPostIdForModal != null && (
-          <CommunityPostDetailScreen
-            navigation={{
-              ...navigation,
-              goBack: closePostModal,
-            } as any}
-            route={{ params: { postId: String(selectedPostIdForModal) } } as any}
-          />
+          <View style={styles.modalMissionSetDetailWrap}>
+            <View style={styles.modalMissionSetDetailContent}>
+              <CommunityPostDetailScreen
+                navigation={{
+                  ...navigation,
+                  goBack: closePostModal,
+                } as any}
+                route={{ params: { postId: String(selectedPostIdForModal) } } as any}
+              />
+            </View>
+            {/* 모달 내 하단 탭 바: 탭 누르면 모달 닫고 해당 화면으로 이동 */}
+            <View style={styles.modalTabBar}>
+              {[
+                { screen: SCREEN_NAMES.HOME, label: '홈', icon: require('../../assets/images/home.png') },
+                { screen: SCREEN_NAMES.MISSION, label: '미션', icon: require('../../assets/images/goal.png') },
+                { screen: SCREEN_NAMES.COMMUNITY, label: '커뮤니티', icon: require('../../assets/images/chat.png') },
+                { screen: SCREEN_NAMES.DIARY, label: '감정일기', icon: require('../../assets/images/books.png') },
+                { screen: SCREEN_NAMES.SETTINGS, label: '설정', icon: require('../../assets/images/settings.png') },
+              ].map(({ screen, label, icon }) => (
+                <TouchableOpacity
+                  key={screen}
+                  style={[styles.modalTab, screen === SCREEN_NAMES.COMMUNITY && styles.modalTabActive]}
+                  onPress={() => {
+                    closePostModal();
+                    closeMissionSetDetailModal();
+                    (navigation as any).navigate(screen, screen === SCREEN_NAMES.COMMUNITY ? { activeTab: 'todo-share' } : undefined);
+                  }}
+                  activeOpacity={0.7}
+                  accessibilityRole="tab"
+                  accessibilityLabel={label}
+                >
+                  <Image
+                    source={icon}
+                    style={[styles.modalTabIcon, screen === SCREEN_NAMES.COMMUNITY && styles.modalTabIconActive]}
+                    resizeMode="contain"
+                  />
+                  <Text style={[styles.modalTabLabel, screen === SCREEN_NAMES.COMMUNITY && styles.modalTabLabelActive]}>{label}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
         )}
       </Modal>
 
