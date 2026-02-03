@@ -137,7 +137,7 @@ export const styles = StyleSheet.create({
   },
   pageButtonText: {
     ...createTextStyle('sm', {
-      fontWeight: typography.fontWeight.medium,
+      fontWeight: typography.fontWeight.bold,
       color: colors.text.inverse,
     }),
   },
