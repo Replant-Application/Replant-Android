@@ -422,6 +422,8 @@ export interface UserMission {
   completedAt?: string; // 완료 날짜 (ISO string)
   verification?: MissionVerification;
   isSpontaneous?: boolean; // 돌발 미션 여부 (기상, 식사, 감성일기)
+  /** 완료된 공식 미션의 인증 게시글 ID (캘린더 등에서 게시글 모달 링크용) */
+  verificationPostId?: number | null;
 }
 
 export interface UserMissionListResponse {

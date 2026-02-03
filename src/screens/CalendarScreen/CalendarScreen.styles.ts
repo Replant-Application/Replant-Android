@@ -165,10 +165,12 @@ export const styles = StyleSheet.create({
     marginBottom: spacing[2],
     backgroundColor: colors.background.primary,
   },
-  missionIcon: {
-    width: 24,
-    height: 24,
-    marginRight: spacing[3],
+  missionNumber: {
+    ...createTitleStyle('base', {
+      color: colors.text.secondary,
+      marginRight: spacing[2],
+      minWidth: 20,
+    }),
   },
   missionContent: {
     flex: 1,

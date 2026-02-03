@@ -16,7 +16,7 @@ import {
 import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types/navigation';
 import { formatDateKorean } from '../../utils/dateUtils';
-import { Header, Loading } from '../../components/ui';
+import { Header } from '../../components/ui';
 import { useMissionSetDetailScreenContainer } from './MissionSetDetailScreen.container';
 import { styles } from './MissionSetDetailScreen.styles';
 
@@ -34,11 +34,7 @@ const MissionSetDetailScreen: React.FC<MissionSetDetailScreenProps> = ({ navigat
     handleUnlike,
   } = useMissionSetDetailScreenContainer({ navigation, route });
 
-  if (loading) {
-    return <Loading text="투두리스트를 불러오는 중..." />;
-  }
-
-  if (!missionSet) {
+  if (!missionSet && !loading) {
     return null;
   }
 
@@ -69,6 +65,7 @@ const MissionSetDetailScreen: React.FC<MissionSetDetailScreenProps> = ({ navigat
         }}
       />
 
+      {missionSet ? (
       <ScrollView
         style={styles.content}
         showsVerticalScrollIndicator={false}
@@ -206,6 +203,7 @@ const MissionSetDetailScreen: React.FC<MissionSetDetailScreenProps> = ({ navigat
 
         <View style={styles.spacer} />
       </ScrollView>
+      ) : null}
     </ImageBackground>
   );
 };

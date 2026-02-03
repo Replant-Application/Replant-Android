@@ -1,13 +1,15 @@
 import React from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Image, ImageBackground } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Image, ImageBackground, Modal, Pressable } from 'react-native';
 import { Card, Header } from '../../components/ui';
 import { formatDateYYYYMMDD } from '../../utils/dateUtils';
+import CommunityPostDetailScreen from '../CommunityPostDetailScreen';
 import { useCalendarScreenContainer } from './CalendarScreen.container';
 import { styles } from './CalendarScreen.styles';
 
 interface CalendarScreenProps {
   navigation?: {
     goBack?: () => void;
+    navigate?: (screen: string, params?: object) => void;
   };
 }
 
@@ -24,6 +26,9 @@ const CalendarScreen: React.FC<CalendarScreenProps> = ({ navigation }) => {
     selectedDayMissions,
     changeMonth,
     handleDatePress,
+    selectedPostIdForModal,
+    openPostInModal,
+    closePostModal,
   } = useCalendarScreenContainer({ navigation });
 
   const monthNames = ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'];
@@ -158,17 +163,13 @@ const CalendarScreen: React.FC<CalendarScreenProps> = ({ navigation }) => {
                     <>
                       {selectedDayMissions
                         .filter(userMission => !userMission.isSpontaneous && (userMission.mission || userMission.customMission))
-                        .map((userMission) => {
+                        .map((userMission, index) => {
                         const missionTitle = userMission.mission?.title || userMission.customMission?.title || '미션';
                         const isCompleted = userMission.status === 'COMPLETED';
-                        return (
-                          <View key={userMission.id} style={styles.missionItem}>
-                            <Image
-                              source={require('../../assets/images/goal.png')}
-                              style={styles.missionIcon}
-                              resizeMode="contain"
-                              accessibilityLabel="미션 아이콘"
-                            />
+                        const canOpenPost = isCompleted && userMission.verificationPostId != null && userMission.verificationPostId > 0;
+                        const content = (
+                          <View style={styles.missionItem}>
+                            <Text style={styles.missionNumber}>{index + 1}.</Text>
                             <View style={styles.missionContent}>
                               <View style={styles.missionTitleRow}>
                                 <Text style={styles.missionTitle}>{missionTitle}</Text>
@@ -181,6 +182,20 @@ const CalendarScreen: React.FC<CalendarScreenProps> = ({ navigation }) => {
                             </View>
                           </View>
                         );
+                        if (canOpenPost) {
+                          return (
+                            <Pressable
+                              key={userMission.id}
+                              onPress={() => openPostInModal(userMission.verificationPostId!)}
+                              style={({ pressed }) => [{ width: '100%', opacity: pressed ? 0.7 : 1 }]}
+                              accessibilityRole="button"
+                              accessibilityLabel={`${missionTitle}, 완료. 게시글 보기`}
+                            >
+                              {content}
+                            </Pressable>
+                          );
+                        }
+                        return <View key={userMission.id}>{content}</View>;
                       })}
                     </>
                   )}
@@ -197,6 +212,23 @@ const CalendarScreen: React.FC<CalendarScreenProps> = ({ navigation }) => {
           </View>
         </ScrollView>
       </View>
+
+      {/* 게시글 상세 모달 (완료 미션 탭 시) */}
+      <Modal
+        visible={selectedPostIdForModal != null}
+        animationType="slide"
+        onRequestClose={closePostModal}
+      >
+        {selectedPostIdForModal != null && (
+          <CommunityPostDetailScreen
+            navigation={{
+              ...navigation,
+              goBack: closePostModal,
+            } as any}
+            route={{ params: { postId: String(selectedPostIdForModal) } } as any}
+          />
+        )}
+      </Modal>
     </ImageBackground>
   );
 };

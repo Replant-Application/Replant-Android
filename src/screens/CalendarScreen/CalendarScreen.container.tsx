@@ -23,6 +23,7 @@ export const useCalendarScreenContainer = ({ navigation: _navigation }: Calendar
   // 백엔드에서 해당 월의 미션 가져오기 (생성된 날짜 기준)
   const [allMissions, setAllMissions] = useState<UserMission[]>([]);
   const [loadingMissions, setLoadingMissions] = useState(false);
+  const [selectedPostIdForModal, setSelectedPostIdForModal] = useState<number | null>(null);
 
   /**
    * 현재 월의 시작일과 종료일 계산
@@ -203,6 +204,13 @@ export const useCalendarScreenContainer = ({ navigation: _navigation }: Calendar
     return selectedDate ? missionsByDate[selectedDate] || [] : [];
   }, [selectedDate, missionsByDate]);
 
+  const openPostInModal = useCallback((postId: number) => {
+    setSelectedPostIdForModal(postId);
+  }, []);
+  const closePostModal = useCallback(() => {
+    setSelectedPostIdForModal(null);
+  }, []);
+
   return {
     currentMonth,
     currentYear,
@@ -213,5 +221,8 @@ export const useCalendarScreenContainer = ({ navigation: _navigation }: Calendar
     selectedDayMissions,
     changeMonth,
     handleDatePress,
+    selectedPostIdForModal,
+    openPostInModal,
+    closePostModal,
   };
 };

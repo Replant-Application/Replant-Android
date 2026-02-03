@@ -437,9 +437,9 @@ export class ApiClient {
       // 네트워크 에러인 경우 더 자세한 메시지 제공
       let errorMessage = '알 수 없는 오류가 발생했습니다.';
       if (error instanceof TypeError && error.message.includes('fetch')) {
-        errorMessage = '네트워크 연결에 실패했습니다. 인터넷 연결을 확인하거나 서버가 실행 중인지 확인해주세요.';
+        errorMessage = '네트워크 연결에 실패했습니다.\n인터넷 연결을 확인하거나 서버가 실행 중인지 확인해주세요.';
       } else if (error instanceof TypeError && error.message.includes('Network')) {
-        errorMessage = '네트워크 연결에 실패했습니다. 인터넷 연결을 확인해주세요.';
+        errorMessage = '네트워크 연결에 실패했습니다.\n인터넷 연결을 확인해주세요.';
       } else if (error instanceof Error) {
         errorMessage = error.message;
       }
