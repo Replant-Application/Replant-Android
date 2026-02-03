@@ -45,12 +45,14 @@ export const styles = StyleSheet.create({
   creator: {
     ...createTextStyle('sm', {
       color: colors.text.tertiary,
+      fontWeight: typography.fontWeight.bold,
     }),
   },
   metaDot: {
     fontSize: typography.fontSize.sm,
     color: colors.text.tertiary,
     marginHorizontal: spacing[1],
+    fontWeight: typography.fontWeight.bold,
   },
   missionCount: {
     ...createTextStyle('sm', {
@@ -60,6 +62,7 @@ export const styles = StyleSheet.create({
   createdAt: {
     ...createSecondaryTextStyle('sm', {
       color: colors.text.tertiary,
+      fontWeight: typography.fontWeight.bold,
     }),
   },
   statsRow: {
