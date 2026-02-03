@@ -547,4 +547,40 @@ export const styles = StyleSheet.create({
   shareButtonTextDisabled: {
     color: colors.text.tertiary,
   },
+  /** 모달 하단 탭 바 (투두리스트 상세 모달에서 탭 전환용) */
+  modalTabBar: {
+    flexDirection: 'row',
+    backgroundColor: colors.white,
+    borderTopLeftRadius: 12,
+    borderTopRightRadius: 12,
+    paddingBottom: Platform.OS === 'android' ? spacing[12] : spacing[5],
+    paddingTop: spacing[2],
+    paddingHorizontal: spacing[2],
+  },
+  modalTab: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: spacing[1],
+    borderRadius: 12,
+  },
+  modalTabActive: {
+    backgroundColor: colors.green[50],
+  },
+  modalTabIcon: {
+    width: 24,
+    height: 24,
+    marginBottom: 2,
+    opacity: 0.6,
+  },
+  modalTabIconActive: {
+    opacity: 1,
+  },
+  modalTabLabel: {
+    ...createSecondaryTextStyle('xs'),
+    color: colors.text.secondary,
+  },
+  modalTabLabelActive: {
+    color: colors.green[600],
+  },
 });

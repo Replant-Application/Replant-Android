@@ -5,6 +5,7 @@
 
 import React, { useEffect, useRef } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, TextInput, Image, Modal, RefreshControl, ImageBackground, ActivityIndicator, Animated } from 'react-native';
+import { SCREEN_NAMES } from '../../utils/constants';
 import { spacing } from '../../utils/designTokens';
 import { formatDateKorean } from '../../utils/dateUtils';
 import { PostCard } from '../../components/specialized';
@@ -327,7 +328,7 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation, route }) 
         </TouchableOpacity>
       )}
 
-      {/* 미션세트 상세 모달 (전체 화면 아님 - 하단 탭 바 노출) */}
+      {/* 미션세트 상세 모달 (전체 화면 아님 - 하단 탭 바 노출·터치 가능) */}
       <Modal
         visible={selectedMissionSetId != null}
         transparent={true}
@@ -336,7 +337,7 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation, route }) 
       >
         {selectedMissionSetId != null && (
           <Animated.View style={{ flex: 1, opacity: missionSetFadeAnim }}>
-            <View style={{ flex: 1, maxHeight: '88%' }}>
+            <View style={{ flex: 1 }}>
               <MissionSetDetailScreen
                 navigation={{
                   ...navigation,
@@ -344,6 +345,35 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation, route }) 
                 } as any}
                 route={{ params: { missionSetId: selectedMissionSetId } } as any}
               />
+            </View>
+            {/* 모달 내 하단 탭 바: 탭 누르면 모달 닫고 해당 화면으로 이동 */}
+            <View style={styles.modalTabBar}>
+              {[
+                { screen: SCREEN_NAMES.HOME, label: '홈', icon: require('../../assets/images/home.png') },
+                { screen: SCREEN_NAMES.MISSION, label: '미션', icon: require('../../assets/images/goal.png') },
+                { screen: SCREEN_NAMES.COMMUNITY, label: '커뮤니티', icon: require('../../assets/images/chat.png') },
+                { screen: SCREEN_NAMES.DIARY, label: '감정일기', icon: require('../../assets/images/books.png') },
+                { screen: SCREEN_NAMES.SETTINGS, label: '설정', icon: require('../../assets/images/settings.png') },
+              ].map(({ screen, label, icon }) => (
+                <TouchableOpacity
+                  key={screen}
+                  style={[styles.modalTab, screen === SCREEN_NAMES.COMMUNITY && styles.modalTabActive]}
+                  onPress={() => {
+                    closeMissionSetDetailModal();
+                    (navigation as any).navigate(screen, screen === SCREEN_NAMES.COMMUNITY ? { activeTab: 'todo-share' } : undefined);
+                  }}
+                  activeOpacity={0.7}
+                  accessibilityRole="tab"
+                  accessibilityLabel={label}
+                >
+                  <Image
+                    source={icon}
+                    style={[styles.modalTabIcon, screen === SCREEN_NAMES.COMMUNITY && styles.modalTabIconActive]}
+                    resizeMode="contain"
+                  />
+                  <Text style={[styles.modalTabLabel, screen === SCREEN_NAMES.COMMUNITY && styles.modalTabLabelActive]}>{label}</Text>
+                </TouchableOpacity>
+              ))}
             </View>
           </Animated.View>
         )}
