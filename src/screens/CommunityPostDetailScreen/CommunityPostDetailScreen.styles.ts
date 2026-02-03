@@ -347,7 +347,7 @@ export const styles = StyleSheet.create({
     color: colors.text.primary,
     minHeight: 60,
     maxHeight: 100,
-    marginBottom: spacing[1],
+    marginBottom: spacing[3],
     textAlignVertical: 'top',
     fontFamily: Platform.select({ ios: undefined, android: typography.fontFamily.regular }),
     includeFontPadding: false,

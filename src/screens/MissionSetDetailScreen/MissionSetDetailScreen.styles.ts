@@ -142,16 +142,17 @@ export const styles = StyleSheet.create({
     flexShrink: 1,
   },
   viewPostLabel: {
-    ...createTextStyle('sm', {
-      color: colors.primary[600],
+    ...createTextStyle('xs', {
+      color: colors.blue[600],
       fontWeight: typography.fontWeight.medium,
+      textDecorationLine: 'underline',
     }),
     marginLeft: spacing[2],
   },
   missionTypeBadge: {
     paddingVertical: 4,
     paddingHorizontal: spacing[2],
-    borderRadius: borderRadius.sm,
+    borderRadius: borderRadius.base,
     minWidth: 52,
     alignItems: 'center',
     justifyContent: 'center',
@@ -182,8 +183,8 @@ export const styles = StyleSheet.create({
   creatorStatusBadge: {
     paddingVertical: 4,
     paddingHorizontal: spacing[2],
-    borderRadius: borderRadius.sm,
-    minWidth: 48,
+    borderRadius: borderRadius.base,
+    minWidth: 52,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -191,7 +192,7 @@ export const styles = StyleSheet.create({
   creatorStatusBadgePlaceholder: {
     backgroundColor: 'transparent',
     borderWidth: 0,
-    minWidth: 48,
+    minWidth: 52,
   },
   creatorStatusCompleted: {
     backgroundColor: colors.primary[100],
@@ -209,7 +210,7 @@ export const styles = StyleSheet.create({
     flexShrink: 0,
   },
   creatorStatusTextCompleted: {
-    color: colors.primary[600],
+    color: colors.primary[700],
   },
   creatorStatusTextIncomplete: {
     color: colors.text.tertiary,
