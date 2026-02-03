@@ -311,22 +311,6 @@ const MissionGroupList: React.FC<MissionGroupListProps> = ({
                       </View>
                     </View>
 
-                    <View style={styles.groupMissionContent}>
-                      <View style={styles.groupMissionVerificationInfo}>
-                        {getVerificationTypeIcon(mission.verificationType) && (
-                          <Image
-                            source={getVerificationTypeIcon(mission.verificationType)!}
-                            style={styles.groupVerificationIcon}
-                            resizeMode="contain"
-                            accessibilityLabel={`${getVerificationTypeLabel(mission.verificationType)} 아이콘`}
-                          />
-                        )}
-                        <Text style={styles.groupMissionVerificationText}>
-                          {getVerificationTypeLabel(mission.verificationType)}
-                        </Text>
-                      </View>
-                    </View>
-
                     <View style={styles.groupMissionFooter}>
                       <View style={styles.groupMissionStats}>
                         <View style={styles.groupStatItem}>
