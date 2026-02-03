@@ -72,6 +72,9 @@ export const styles = StyleSheet.create({
   tabBar: {
     marginBottom: spacing[4],
   },
+  filterTabWrapper: {
+    marginBottom: spacing[4],
+  },
   content: {
     flex: 1,
   },

@@ -9,7 +9,7 @@ import { SCREEN_NAMES } from '../../utils/constants';
 import { spacing } from '../../utils/designTokens';
 import { formatDateKorean } from '../../utils/dateUtils';
 import { PostCard } from '../../components/specialized';
-import { Loading, ErrorBoundary, EmptyState, SimpleTabBar, Header, AlertModal, ConfirmModal } from '../../components/ui';
+import { Loading, ErrorBoundary, EmptyState, Header, AlertModal, ConfirmModal } from '../../components/ui';
 import { colors } from '../../utils/designTokens';
 import { CommunityScreenProps, CommunityTab, VerificationFilter } from '../../types/screens/community';
 import { FILTER_OPTIONS } from '../../constants/screens/community';
@@ -120,17 +120,42 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation, route }) 
       {/* 헤더 */}
       <Header title="커뮤니티" showBackButton={false} navigation={navigation} />
 
-      {/* 탭 */}
-      <View style={styles.tabBarContainer}>
-        <SimpleTabBar
-          tabs={[
-            { key: 'all', label: '전체 게시판' },
-            { key: 'todo-share', label: '투두리스트 공유' },
-          ]}
-          activeTab={activeTab}
-          onTabChange={(key) => setActiveTab(key as CommunityTab)}
-          style={styles.tabBar}
-        />
+      {/* 탭 - 나의 미션/미션 도감과 동일 스타일 */}
+      <View style={styles.topTabContainer}>
+        <View style={styles.missionTabContainer}>
+          <TouchableOpacity
+            style={[styles.missionTab, activeTab === 'all' && styles.missionTabActive]}
+            onPress={() => setActiveTab('all')}
+            activeOpacity={0.7}
+            accessibilityRole="tab"
+            accessibilityLabel={activeTab === 'all' ? '전체 게시판, 선택됨' : '전체 게시판'}
+            accessibilityState={{ selected: activeTab === 'all' }}
+          >
+            <Text
+              style={[styles.missionTabText, activeTab === 'all' && styles.missionTabTextActive]}
+              numberOfLines={1}
+              ellipsizeMode="tail"
+            >
+              전체 게시판
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.missionTab, activeTab === 'todo-share' && styles.missionTabActive]}
+            onPress={() => setActiveTab('todo-share')}
+            activeOpacity={0.7}
+            accessibilityRole="tab"
+            accessibilityLabel={activeTab === 'todo-share' ? '투두리스트 공유, 선택됨' : '투두리스트 공유'}
+            accessibilityState={{ selected: activeTab === 'todo-share' }}
+          >
+            <Text
+              style={[styles.missionTabText, activeTab === 'todo-share' && styles.missionTabTextActive]}
+              numberOfLines={1}
+              ellipsizeMode="tail"
+            >
+              투두리스트 공유
+            </Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       {/* 검색 및 정렬 */}

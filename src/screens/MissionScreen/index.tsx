@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, ScrollView, RefreshControl, ImageBackground, ActivityIndicator, Dimensions, FlatList, TouchableOpacity } from 'react-native';
 import { MissionCard, MissionVerificationModal, MissionProgressCard } from '../../components/specialized';
-import { Loading, ErrorBoundary, Header, EmptyState, ConfirmModal, SimpleTabBar, AlertModal } from '../../components/ui';
+import { Loading, ErrorBoundary, Header, EmptyState, ConfirmModal, AlertModal } from '../../components/ui';
 import MissionInfoModal from './MissionInfoModal';
 import MissionPagination from './MissionPagination';
 import MissionGroupList from './MissionGroupList';
@@ -200,17 +200,59 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
           />
         )}
 
-        {/* 진행중/인증대기/완료 탭 */}
-        <SimpleTabBar
-          tabs={[
-            { key: 'inProgress', label: '진행중', count: missionCounts?.inProgress || 0 },
-            { key: 'pendingVerification', label: '인증 대기', count: missionCounts?.pendingVerification || 0 },
-            { key: 'completed', label: '완료', count: missionCounts?.completed || 0 },
-          ]}
-          activeTab={selectedFilter}
-          onTabChange={handleFilterChange}
-          style={styles.tabBar}
-        />
+        {/* 진행중/인증대기/완료 탭 - 나의 미션/미션 도감과 동일 스타일 */}
+        <View style={styles.filterTabWrapper}>
+          <View style={styles.missionTabContainer}>
+            <TouchableOpacity
+              style={[styles.missionTab, selectedFilter === 'inProgress' && styles.missionTabActive]}
+              onPress={() => handleFilterChange('inProgress')}
+              activeOpacity={0.7}
+              accessibilityRole="tab"
+              accessibilityLabel={selectedFilter === 'inProgress' ? '진행중, 선택됨' : `진행중 ${missionCounts?.inProgress ?? 0}개`}
+              accessibilityState={{ selected: selectedFilter === 'inProgress' }}
+            >
+              <Text
+                style={[styles.missionTabText, selectedFilter === 'inProgress' && styles.missionTabTextActive]}
+                numberOfLines={1}
+                ellipsizeMode="tail"
+              >
+                진행중 ({missionCounts?.inProgress ?? 0})
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.missionTab, selectedFilter === 'pendingVerification' && styles.missionTabActive]}
+              onPress={() => handleFilterChange('pendingVerification')}
+              activeOpacity={0.7}
+              accessibilityRole="tab"
+              accessibilityLabel={selectedFilter === 'pendingVerification' ? '대기, 선택됨' : `대기 ${missionCounts?.pendingVerification ?? 0}개`}
+              accessibilityState={{ selected: selectedFilter === 'pendingVerification' }}
+            >
+              <Text
+                style={[styles.missionTabText, selectedFilter === 'pendingVerification' && styles.missionTabTextActive]}
+                numberOfLines={1}
+                ellipsizeMode="tail"
+              >
+                대기 ({missionCounts?.pendingVerification ?? 0})
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.missionTab, selectedFilter === 'completed' && styles.missionTabActive]}
+              onPress={() => handleFilterChange('completed')}
+              activeOpacity={0.7}
+              accessibilityRole="tab"
+              accessibilityLabel={selectedFilter === 'completed' ? '완료, 선택됨' : `완료 ${missionCounts?.completed ?? 0}개`}
+              accessibilityState={{ selected: selectedFilter === 'completed' }}
+            >
+              <Text
+                style={[styles.missionTabText, selectedFilter === 'completed' && styles.missionTabTextActive]}
+                numberOfLines={1}
+                ellipsizeMode="tail"
+              >
+                완료 ({missionCounts?.completed ?? 0})
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
 
         {/* 미션 목록 (페이지네이션) */}
         {displayedMissions.length === 0 ? (
