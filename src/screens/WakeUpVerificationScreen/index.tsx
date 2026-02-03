@@ -1,6 +1,6 @@
 /**
  * 기상 미션 인증 화면
- * 10분 이내에 인증 버튼을 눌러야 함
+ * 1시간 이내에 인증 버튼을 눌러야 함
  */
 
 import React from 'react';
@@ -139,7 +139,7 @@ const WakeUpVerificationScreen: React.FC<WakeUpVerificationScreenProps> = ({ nav
                     <View 
                       style={[
                         styles.progressFill,
-                        { width: `${(timeRemaining / 600) * 100}%` },
+                        { width: `${(timeRemaining / 3600) * 100}%` },
                         timeRemaining <= 10 && styles.progressFillWarning,
                       ]} 
                     />
@@ -149,7 +149,7 @@ const WakeUpVerificationScreen: React.FC<WakeUpVerificationScreenProps> = ({ nav
             </View>
             {isExpired && (
               <Text style={styles.expiredMessage}>
-                10분이 지나 인증할 수 없습니다.
+                1시간이 지나 인증할 수 없습니다.
               </Text>
             )}
             {timeRemaining !== null && timeRemaining <= 10 && !isExpired && (
@@ -184,7 +184,7 @@ const WakeUpVerificationScreen: React.FC<WakeUpVerificationScreenProps> = ({ nav
           {/* 안내 메시지 */}
           <View style={styles.infoContainer}>
             <Text style={styles.infoText}>
-              • 10분 이내에 인증 버튼을 눌러주세요
+              • 1시간 이내에 인증 버튼을 눌러주세요
             </Text>
           </View>
         </View>

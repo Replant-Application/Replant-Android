@@ -1,6 +1,6 @@
 /**
  * SpontaneousMissionSetupScreen 비즈니스 로직
- * 돌발 미션 설정 온보딩 화면: 기상, 취침, 식사 시간 설정
+ * 돌발 미션 설정: 일단 기상 시간만 설정 (취침·식사는 비노출)
  */
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
@@ -51,7 +51,8 @@ export const STEP_CONFIG: Record<Step, { title: string; description: string }> =
   },
 };
 
-export const STEPS: Step[] = ['wake', 'sleep', 'breakfast', 'lunch', 'dinner'];
+// 일단 기상 미션만 설정 (취침·식사 시간 스텝 비노출)
+export const STEPS: Step[] = ['wake'];
 
 export const useSpontaneousMissionSetupScreenContainer = ({
   navigation,
