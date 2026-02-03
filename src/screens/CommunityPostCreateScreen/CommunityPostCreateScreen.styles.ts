@@ -74,6 +74,7 @@ export const styles = StyleSheet.create({
   privateCheckboxRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'flex-end',
   },
   privateCheckbox: {
     width: 18,

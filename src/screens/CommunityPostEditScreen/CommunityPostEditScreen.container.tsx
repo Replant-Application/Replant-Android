@@ -181,10 +181,10 @@ export const useCommunityPostEditScreenContainer = ({
       } = {
         title: updateTitle,
         content: content.trim(),
+        images, // 인증글/일반글 모두 수정 시 사진 반영
       };
 
       if (isGeneralPost) {
-        updateData.images = images;
         updateData.isPublic = isPublic;
       }
 

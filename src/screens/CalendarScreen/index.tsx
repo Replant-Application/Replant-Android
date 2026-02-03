@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Image, ImageBackground, Modal, Pressable } from 'react-native';
 import { Card, Header } from '../../components/ui';
+import { SCREEN_NAMES } from '../../utils/constants';
 import { formatDateYYYYMMDD } from '../../utils/dateUtils';
 import CommunityPostDetailScreen from '../CommunityPostDetailScreen';
 import { useCalendarScreenContainer } from './CalendarScreen.container';
@@ -213,20 +214,53 @@ const CalendarScreen: React.FC<CalendarScreenProps> = ({ navigation }) => {
         </ScrollView>
       </View>
 
-      {/* 게시글 상세 모달 (완료 미션 탭 시) */}
+      {/* 게시글 상세 모달 (완료 미션 탭 시) - 하단 탭 바 노출 */}
       <Modal
         visible={selectedPostIdForModal != null}
         animationType="slide"
         onRequestClose={closePostModal}
       >
         {selectedPostIdForModal != null && (
-          <CommunityPostDetailScreen
-            navigation={{
-              ...navigation,
-              goBack: closePostModal,
-            } as any}
-            route={{ params: { postId: String(selectedPostIdForModal) } } as any}
-          />
+          <View style={styles.modalPostDetailWrap}>
+            <View style={styles.modalPostDetailContent}>
+              <CommunityPostDetailScreen
+                navigation={{
+                  ...navigation,
+                  goBack: closePostModal,
+                } as any}
+                route={{ params: { postId: String(selectedPostIdForModal) } } as any}
+              />
+            </View>
+            {/* 모달 내 하단 탭 바: 탭 누르면 모달 닫고 해당 화면으로 이동 */}
+            <View style={styles.modalTabBar}>
+              {[
+                { screen: SCREEN_NAMES.HOME, label: '홈', icon: require('../../assets/images/home.png') },
+                { screen: SCREEN_NAMES.MISSION, label: '미션', icon: require('../../assets/images/goal.png') },
+                { screen: SCREEN_NAMES.COMMUNITY, label: '커뮤니티', icon: require('../../assets/images/chat.png') },
+                { screen: SCREEN_NAMES.DIARY, label: '감정일기', icon: require('../../assets/images/books.png') },
+                { screen: SCREEN_NAMES.SETTINGS, label: '설정', icon: require('../../assets/images/settings.png') },
+              ].map(({ screen, label, icon }) => (
+                <TouchableOpacity
+                  key={screen}
+                  style={[styles.modalTab, screen === SCREEN_NAMES.DIARY && styles.modalTabActive]}
+                  onPress={() => {
+                    closePostModal();
+                    (navigation as any)?.navigate?.(screen, screen === SCREEN_NAMES.COMMUNITY ? { activeTab: 'todo-share' } : undefined);
+                  }}
+                  activeOpacity={0.7}
+                  accessibilityRole="tab"
+                  accessibilityLabel={label}
+                >
+                  <Image
+                    source={icon}
+                    style={[styles.modalTabIcon, screen === SCREEN_NAMES.DIARY && styles.modalTabIconActive]}
+                    resizeMode="contain"
+                  />
+                  <Text style={[styles.modalTabLabel, screen === SCREEN_NAMES.DIARY && styles.modalTabLabelActive]}>{label}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
         )}
       </Modal>
     </ImageBackground>
