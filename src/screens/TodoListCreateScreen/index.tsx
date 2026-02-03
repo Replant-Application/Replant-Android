@@ -115,12 +115,6 @@ const TodoListCreateScreen: React.FC<TodoListCreateScreenProps> = ({ navigation,
                 <View style={styles.missionMeta}>
                   <Text style={styles.missionCategory}>{getCategoryLabel(mission.category || '')}</Text>
                   <View style={styles.missionExpContainer}>
-                    <Image
-                      source={require('../../assets/images/sun.png')}
-                      style={styles.sunIcon}
-                      resizeMode="contain"
-                      accessibilityLabel="경험치 아이콘"
-                    />
                     <Text style={styles.missionExp}>{mission.expReward} EXP</Text>
                   </View>
                 </View>
@@ -305,12 +299,6 @@ const TodoListCreateScreen: React.FC<TodoListCreateScreenProps> = ({ navigation,
                     <Text style={styles.missionCategory}>{getCategoryLabel(mission.category || '')}</Text>
                     {mission.missionType !== 'CUSTOM' && (
                       <View style={styles.missionExpContainer}>
-                        <Image
-                          source={require('../../assets/images/sun.png')}
-                          style={styles.sunIcon}
-                          resizeMode="contain"
-                          accessibilityLabel="경험치 아이콘"
-                        />
                         <Text style={styles.missionExp}>{mission.expReward} EXP</Text>
                       </View>
                     )}
@@ -504,12 +492,6 @@ const TodoListCreateScreen: React.FC<TodoListCreateScreenProps> = ({ navigation,
                     <View style={styles.missionListItemMeta}>
                       <Text style={styles.missionListItemCategory}>{getCategoryLabel(mission.category || '')}</Text>
                       <View style={styles.missionListItemExpContainer}>
-                        <Image
-                          source={require('../../assets/images/sun.png')}
-                          style={styles.sunIcon}
-                          resizeMode="contain"
-                          accessibilityLabel="경험치 아이콘"
-                        />
                         <Text style={styles.missionListItemExp}>{mission.expReward} EXP</Text>
                       </View>
                     </View>
@@ -549,12 +531,6 @@ const TodoListCreateScreen: React.FC<TodoListCreateScreenProps> = ({ navigation,
                       <View style={styles.timeMissionMeta}>
                         <Text style={styles.timeMissionCategory}>{getCategoryLabel(mission.category || '')}</Text>
                         <View style={styles.timeMissionExpContainer}>
-                          <Image
-                            source={require('../../assets/images/sun.png')}
-                            style={styles.sunIcon}
-                            resizeMode="contain"
-                            accessibilityLabel="경험치 아이콘"
-                          />
                           <Text style={styles.timeMissionExp}>{mission.expReward} EXP</Text>
                         </View>
                       </View>

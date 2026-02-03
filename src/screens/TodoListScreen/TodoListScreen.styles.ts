@@ -275,7 +275,7 @@ export const styles = StyleSheet.create({
   emptyText: {
     ...emptyStateStyles.text(),
     marginBottom: spacing[2],
-    fontWeight: typography.fontWeight.bold,
+    fontWeight: typography.fontWeight.normal,
     color: colors.text.primary,
   },
   emptySubtext: {

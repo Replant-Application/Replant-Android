@@ -306,6 +306,11 @@ export const styles = StyleSheet.create({
     paddingHorizontal: spacing[3], 
     borderRadius: borderRadius.sm,
     textAlign: 'center',
+    fontFamily: Platform.select({
+      ios: undefined,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
   },
   missionExpContainer: {
     flexDirection: 'row',
@@ -554,6 +559,11 @@ export const styles = StyleSheet.create({
     paddingHorizontal: spacing[3],
     borderRadius: borderRadius.sm,
     textAlign: 'center',
+    fontFamily: Platform.select({
+      ios: undefined,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
   },
   timeMissionTime: {
     ...createTextStyle('sm', {
@@ -700,6 +710,11 @@ export const styles = StyleSheet.create({
       borderRadius: borderRadius.sm,
       textAlign: 'center',
     }),
+    fontFamily: Platform.select({
+      ios: undefined,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
   },
   missionListItemExpContainer: {
     flexDirection: 'row',
