@@ -89,20 +89,20 @@ export const styles = StyleSheet.create({
   },
   editText: {
     ...createTextStyle('xs', {
-      color: colors.primary[500],
-      fontWeight: typography.fontWeight.normal,
+      color: colors.text.secondary,
+      fontWeight: typography.fontWeight.semibold,
     }),
   },
   deleteText: {
     ...createTextStyle('xs', {
       color: colors.error,
-      fontWeight: typography.fontWeight.normal,
+      fontWeight: typography.fontWeight.semibold,
     }),
   },
   hideText: {
     ...createTextStyle('xs', {
       color: colors.text.primary,
-      fontWeight: typography.fontWeight.normal,
+      fontWeight: typography.fontWeight.semibold,
     }),
   },
   replyIcon: {
@@ -118,7 +118,7 @@ export const styles = StyleSheet.create({
   replyText: {
     ...createTextStyle('xs', {
       color: colors.text.secondary,
-      fontWeight: typography.fontWeight.normal,
+      fontWeight: typography.fontWeight.semibold,
     }),
   },
 });
