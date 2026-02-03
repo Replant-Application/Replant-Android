@@ -64,93 +64,93 @@ const PlacesSearchScreen: React.FC<PlacesSearchScreenProps> = ({ navigation }) =
           }
         />
 
-        {isLoading ? (
-          <View style={styles.loadingScreen}>
-            <ActivityIndicator size="large" color={colors.primary[500]} />
-            <Text style={styles.loadingText}>검색 중...</Text>
+        <View style={styles.content}>
+          {/* 검색 바 */}
+          <View style={styles.searchContainer}>
+            <TextInput
+              style={styles.searchInput}
+              placeholder="검색어를 입력하세요"
+              value={searchText}
+              onChangeText={handleSearchChange}
+              placeholderTextColor={colors.text.secondary}
+              accessibilityLabel="장소 검색"
+              accessibilityHint="검색어를 입력하세요"
+            />
           </View>
-        ) : (
-        <ScrollView style={styles.content}>
-        {/* 검색 바 */}
-        <View style={styles.searchContainer}>
-          <TextInput
-            style={styles.searchInput}
-            placeholder="검색어를 입력하세요"
-            value={searchText}
-            onChangeText={handleSearchChange}
-            placeholderTextColor={colors.text.secondary}
-            accessibilityLabel="장소 검색"
-            accessibilityHint="검색어를 입력하세요"
-          />
-        </View>
 
-        <View style={styles.filterCheckboxContainer}>
-          {FILTER_CHECKBOXES.map((filter) => {
-            const isChecked = filter.key === 'counseling' ? counselingChecked : mentalHealthChecked;
-            return (
+          <View style={styles.filterCheckboxContainer}>
+            {FILTER_CHECKBOXES.map((filter) => {
+              const isChecked = filter.key === 'counseling' ? counselingChecked : mentalHealthChecked;
+              return (
+                <TouchableOpacity
+                  key={filter.key}
+                  style={styles.filterCheckboxRow}
+                  onPress={() => toggleFilter(filter.key)}
+                  activeOpacity={0.7}
+                  accessibilityRole="checkbox"
+                  accessibilityLabel={filter.label}
+                  accessibilityState={{ checked: isChecked }}
+                >
+                  <View style={[styles.filterCheckbox, isChecked && styles.filterCheckboxChecked]}>
+                    {isChecked && <Text style={styles.filterCheckboxMark}>✓</Text>}
+                  </View>
+                  <Text style={styles.filterCheckboxLabel}>{filter.label}</Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            style={styles.regionContainer}
+          >
+            {REGIONS.map((region) => (
               <TouchableOpacity
-                key={filter.key}
-                style={styles.filterCheckboxRow}
-                onPress={() => toggleFilter(filter.key)}
-                activeOpacity={0.7}
-                accessibilityRole="checkbox"
-                accessibilityLabel={filter.label}
-                accessibilityState={{ checked: isChecked }}
-              >
-                <View style={[styles.filterCheckbox, isChecked && styles.filterCheckboxChecked]}>
-                  {isChecked && <Text style={styles.filterCheckboxMark}>✓</Text>}
-                </View>
-                <Text style={styles.filterCheckboxLabel}>{filter.label}</Text>
-              </TouchableOpacity>
-            );
-          })}
-        </View>
-
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          style={styles.regionContainer}
-        >
-          {REGIONS.map((region) => (
-            <TouchableOpacity
-              key={region.id}
-              style={[
-                styles.regionChip,
-                selectedRegion === region.id && styles.regionChipActive,
-              ]}
-              onPress={() => handleRegionChange(region.id)}
-              accessibilityRole="button"
-              accessibilityLabel={region.name}
-              accessibilityState={{ selected: selectedRegion === region.id }}
-            >
-              <Text
+                key={region.id}
                 style={[
-                  styles.regionChipText,
-                  selectedRegion === region.id && styles.regionChipTextActive,
+                  styles.regionChip,
+                  selectedRegion === region.id && styles.regionChipActive,
                 ]}
+                onPress={() => handleRegionChange(region.id)}
+                accessibilityRole="button"
+                accessibilityLabel={region.name}
+                accessibilityState={{ selected: selectedRegion === region.id }}
               >
-                {region.name}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
-
-        {places.length === 0 ? (
-          <EmptyState
-            iconImage={require('../../assets/images/search.png')}
-            title="검색 결과가 없습니다"
-            description="다른 필터나 지역을 선택해보세요"
-          />
-        ) : (
-          <ScrollView style={styles.placesList}>
-            <Text style={styles.resultsCount}>총 {places.length}개의 장소</Text>
-            {places.map((place) => (
-              <PlaceCard key={place.place_id} place={place} />
+                <Text
+                  style={[
+                    styles.regionChipText,
+                    selectedRegion === region.id && styles.regionChipTextActive,
+                  ]}
+                >
+                  {region.name}
+                </Text>
+              </TouchableOpacity>
             ))}
           </ScrollView>
-        )}
-        </ScrollView>
-        )}
+
+          <View style={styles.resultsArea}>
+            {isLoading ? (
+              <View style={styles.loadingCenter}>
+                <ActivityIndicator size="large" color={colors.primary[500]} />
+                <Text style={styles.loadingText}>검색 중...</Text>
+              </View>
+            ) : places.length === 0 ? (
+              <EmptyState
+                iconImage={require('../../assets/images/search.png')}
+                title="검색 결과가 없습니다"
+                description="다른 필터나 지역을 선택해보세요"
+              />
+            ) : (
+              <ScrollView style={styles.placesList}>
+                <Text style={styles.resultsCount}>총 {places.length}개의 장소</Text>
+                {places.map((place) => (
+                  <PlaceCard key={place.place_id} place={place} />
+                ))}
+              </ScrollView>
+            )}
+          </View>
+        </View>
       </View>
     </ImageBackground>
   );

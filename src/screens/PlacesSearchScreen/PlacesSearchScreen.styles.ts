@@ -98,7 +98,10 @@ export const styles = StyleSheet.create({
       fontWeight: typography.fontWeight.medium,
     }),
   },
-  loadingScreen: {
+  resultsArea: {
+    flex: 1,
+  },
+  loadingCenter: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',

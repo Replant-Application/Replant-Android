@@ -56,7 +56,6 @@ const VerificationPostCreateScreen: React.FC<VerificationPostCreateScreenProps> 
     handleAlreadyExistsModalClose,
     handleErrorModalClose,
     completionRate,
-    handleSliderChange,
     getEncouragementMessage,
     sliderRef,
     panResponder,

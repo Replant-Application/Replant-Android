@@ -11,7 +11,6 @@ import {
   deleteNotification,
   type Notification as NotificationType
 } from '../../api/notificationApi';
-import { getCurrentSpontaneousMissions } from '../../api/missionApi';
 import { getMealLogDetail } from '../../api/mealLogApi';
 import { SCREEN_NAMES } from '../../utils/constants';
 import { useSse } from '../../contexts/SseContext';
