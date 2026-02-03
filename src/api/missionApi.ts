@@ -421,7 +421,7 @@ export interface UserMission {
   status: UserMissionStatus;
   completedAt?: string; // 완료 날짜 (ISO string)
   verification?: MissionVerification;
-  isSpontaneous?: boolean; // 돌발 미션 여부 (기상, 식사, 감성일기)
+  isSpontaneous?: boolean; // 돌발 미션 여부 (현재 앱에서는 기상만 처리; 감정일기·식사는 잠시 제외)
   /** 완료된 공식 미션의 인증 게시글 ID (캘린더 등에서 게시글 모달 링크용) */
   verificationPostId?: number | null;
 }
@@ -1391,6 +1391,7 @@ export const updateSpontaneousMissionSetup = async (
 
 /**
  * 돌발 미션 타입
+ * (EMOTION_DIARY는 백엔드 타입에만 존재, 앱에서는 돌발 미션으로 잠시 미처리)
  */
 export type SpontaneousMissionType = 'WAKE_UP' | 'MEAL_BREAKFAST' | 'MEAL_LUNCH' | 'MEAL_DINNER' | 'EMOTION_DIARY';
 

@@ -28,8 +28,8 @@ export type NotificationType =
   | 'VOTE'                   // 투표
   // 돌발 미션 관련
   | 'SPONTANEOUS_WAKE_UP'    // 기상 미션
-  | 'SPONTANEOUS_MEAL'       // 식사 미션
-  | 'SPONTANEOUS_DIARY'      // 감정일기 미션
+  | 'SPONTANEOUS_MEAL'       // 식사 미션 (돌발 미션에서는 잠시 미처리)
+  | 'SPONTANEOUS_DIARY'      // 감정일기 미션 (돌발 미션에서는 잠시 미처리)
   // 기타
   | 'DIARY'                  // 다이어리
   | 'REPORT'                 // 신고

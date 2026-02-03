@@ -384,8 +384,8 @@ export const useNotificationScreenContainer = ({
       }
     }
 
-    // 돌발 미션 알림 처리
-    if (type === 'SPONTANEOUS_WAKE_UP' || type === 'SPONTANEOUS_MEAL' || type === 'SPONTANEOUS_DIARY') {
+    // 돌발 미션 알림 처리 (감정일기·식사 미션은 잠시 제외)
+    if (type === 'SPONTANEOUS_WAKE_UP') {
       console.log('[NotificationScreen] 돌발 미션 알림 클릭:', type, 'referenceType:', referenceType);
       
       if (!referenceId) {
@@ -421,81 +421,46 @@ export const useNotificationScreenContainer = ({
           } else {
             showAlertModal('알림', '이미 수행한 미션이거나 만료된 미션입니다.');
           }
-        } else if (type === 'SPONTANEOUS_MEAL') {
-          // 식사 미션 → 돌발 미션 API 사용
-          // 주의: referenceType이 "SPONTANEOUS_MISSION"으로 변경되었고, referenceId는 spontaneous_mission의 ID
-          console.log('[NotificationScreen] 식사 미션 처리, referenceType:', referenceType, 'referenceId:', referenceId);
-          
-          // 현재 진행 중인 식사 미션 조회하여 미션 정보 가져오기
-          const currentMissionsResult = await getCurrentSpontaneousMissions();
-          
-          const missionId = typeof referenceId === 'string' ? Number(referenceId) : referenceId;
-          
-          let mealMission = null;
-          if (currentMissionsResult.success && currentMissionsResult.data && currentMissionsResult.data.length > 0) {
-            mealMission = currentMissionsResult.data.find(
-              m => m.id === missionId &&
-                   (m.missionType === 'MEAL_BREAKFAST' || m.missionType === 'MEAL_LUNCH' || m.missionType === 'MEAL_DINNER')
-            );
-          }
-          
-          // 백엔드 API가 아직 구현되지 않았거나, 미션이 없거나 이미 완료된 경우
-          // 백엔드가 구현되지 않은 경우에는 referenceId만으로 진행 (하위 호환성)
-          if (!currentMissionsResult.success || !currentMissionsResult.data || currentMissionsResult.data.length === 0) {
-            console.log('[NotificationScreen] 돌발 미션 API 미구현 또는 미션 없음, referenceId로 진행:', missionId);
-            // 백엔드가 구현되지 않은 경우에도 알림으로 받은 referenceId를 사용하여 진행
-            safeNavigation.navigate(SCREEN_NAMES.COMMUNITY_POST_CREATE as any, {
-              type: 'VERIFICATION',
-              spontaneousMissionId: missionId,
-              userMissionId: missionId,
-              missionId: 'MEAL',
-              missionTitle: '식사 미션',
-              missionEmoji: '🍽️',
-            });
-            return;
-          }
-          
-          // 미션이 없거나 이미 완료된 경우
-          if (!mealMission || mealMission.status === 'COMPLETED' || !mealMission.canVerify) {
-            showAlertModal('알림', '이미 수행한 미션이거나 만료된 미션입니다.');
-            return;
-          }
-          
-          console.log('[NotificationScreen] 식사 미션 게시글 작성 화면으로 이동');
-          safeNavigation.navigate(SCREEN_NAMES.COMMUNITY_POST_CREATE as any, {
-            type: 'VERIFICATION',
-            spontaneousMissionId: missionId, // 돌발 미션 ID (spontaneous_mission의 ID)
-            userMissionId: missionId, // 하위 호환성을 위해 유지
-            missionId: String(mealMission.missionType || 'MEAL'),
-            missionTitle: mealMission.missionTypeDisplayName || '식사 미션',
-            missionEmoji: '🍽️',
-          });
-        } else if (type === 'SPONTANEOUS_DIARY') {
-          // 감성일기 미션 → 현재 진행 중인 미션 확인
-          const currentMissionsResult = await getCurrentSpontaneousMissions();
-          
-          const missionId = typeof referenceId === 'string' ? Number(referenceId) : referenceId;
-          
-          // 백엔드 API가 아직 구현되지 않은 경우 referenceId만으로 진행 (하위 호환성)
-          if (!currentMissionsResult.success || !currentMissionsResult.data || currentMissionsResult.data.length === 0) {
-            console.log('[NotificationScreen] 돌발 미션 API 미구현 또는 미션 없음, 감성일기 화면으로 이동');
-            safeNavigation.navigate(SCREEN_NAMES.DIARY as any);
-            return;
-          }
-          
-          const diaryMission = currentMissionsResult.data.find(
-            m => m.id === missionId && m.missionType === 'EMOTION_DIARY'
-          );
-          
-          // 미션이 없거나 이미 완료된 경우
-          if (!diaryMission || diaryMission.status === 'COMPLETED' || !diaryMission.canVerify) {
-            showAlertModal('알림', '이미 수행한 미션이거나 만료된 미션입니다.');
-            return;
-          }
-          
-          console.log('[NotificationScreen] 감성일기 작성 화면으로 이동');
-          safeNavigation.navigate(SCREEN_NAMES.DIARY as any);
         }
+        // [잠시 제외] 식사 미션 (SPONTANEOUS_MEAL)
+        // } else if (type === 'SPONTANEOUS_MEAL') {
+        //   // 식사 미션 → 돌발 미션 API 사용
+        //   console.log('[NotificationScreen] 식사 미션 처리, referenceType:', referenceType, 'referenceId:', referenceId);
+        //   const currentMissionsResult = await getCurrentSpontaneousMissions();
+        //   const missionId = typeof referenceId === 'string' ? Number(referenceId) : referenceId;
+        //   let mealMission = null;
+        //   if (currentMissionsResult.success && currentMissionsResult.data && currentMissionsResult.data.length > 0) {
+        //     mealMission = currentMissionsResult.data.find(
+        //       m => m.id === missionId &&
+        //            (m.missionType === 'MEAL_BREAKFAST' || m.missionType === 'MEAL_LUNCH' || m.missionType === 'MEAL_DINNER')
+        //     );
+        //   }
+        //   if (!currentMissionsResult.success || !currentMissionsResult.data || currentMissionsResult.data.length === 0) {
+        //     console.log('[NotificationScreen] 돌발 미션 API 미구현 또는 미션 없음, referenceId로 진행:', missionId);
+        //     safeNavigation.navigate(SCREEN_NAMES.COMMUNITY_POST_CREATE as any, {
+        //       type: 'VERIFICATION',
+        //       spontaneousMissionId: missionId,
+        //       userMissionId: missionId,
+        //       missionId: 'MEAL',
+        //       missionTitle: '식사 미션',
+        //       missionEmoji: '🍽️',
+        //     });
+        //     return;
+        //   }
+        //   if (!mealMission || mealMission.status === 'COMPLETED' || !mealMission.canVerify) {
+        //     showAlertModal('알림', '이미 수행한 미션이거나 만료된 미션입니다.');
+        //     return;
+        //   }
+        //   console.log('[NotificationScreen] 식사 미션 게시글 작성 화면으로 이동');
+        //   safeNavigation.navigate(SCREEN_NAMES.COMMUNITY_POST_CREATE as any, {
+        //     type: 'VERIFICATION',
+        //     spontaneousMissionId: missionId,
+        //     userMissionId: missionId,
+        //     missionId: String(mealMission.missionType || 'MEAL'),
+        //     missionTitle: mealMission.missionTypeDisplayName || '식사 미션',
+        //     missionEmoji: '🍽️',
+        //   });
+        // }
       } catch (error) {
         console.error('[NotificationScreen] ❌ 돌발 미션 알림 처리 실패:', error);
       }
