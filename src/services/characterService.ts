@@ -1,5 +1,6 @@
 import { getData, setData, getStorageKeys } from './storage';
 import { logError } from '../utils/logger';
+import { getNextLevelExp, getTotalExpToReachLevel } from '../utils/expTable';
 import { Character, ServiceResult, LevelUpResult } from '../types';
 
 // 캐릭터 자동 레벨업
@@ -17,21 +18,20 @@ export const autoLevelupCharacter = async (
       throw new Error('캐릭터를 찾을 수 없습니다.');
     }
 
-    // 경험치 추가 (백엔드 Reant.java와 동일 공식)
-    // 총 누적 경험치 = 100*(level-1)*level/2 + exp(현재 레벨 진행분), 다음 레벨 필요 = level*100
+    // 경험치 추가 (백엔드 Reant.java와 동일: 레벨별 테이블 L1→10, L2→50, L3→100, L4→200, L5→500, L6+→500)
     const level = character.level ?? 1;
     const currentExp = character.experience ?? 0;
     const currentTotalExp =
       character.total_experience ??
-      (level > 1 ? 100 * ((level - 1) * level / 2) : 0) + currentExp;
+      getTotalExpToReachLevel(level) + currentExp;
     const newTotalExp: number = currentTotalExp + experienceGained;
     const oldLevel = level;
 
     // 총 누적 → 레벨·현재진행분 계산 (백엔드 checkLevelUp 로직과 동일)
     let remaining = newTotalExp;
     let newLevel = 1;
-    while (newLevel * 100 <= remaining) {
-      remaining -= newLevel * 100;
+    while (getNextLevelExp(newLevel) <= remaining) {
+      remaining -= getNextLevelExp(newLevel);
       newLevel += 1;
     }
     const newCurrentLevelExp = remaining;
@@ -41,7 +41,7 @@ export const autoLevelupCharacter = async (
       experience: newCurrentLevelExp,
       level: newLevel,
       total_experience: newTotalExp,
-      max_experience: newLevel * 100,
+      max_experience: getNextLevelExp(newLevel),
     };
 
     // Character의 id는 string이므로 직접 배열을 업데이트

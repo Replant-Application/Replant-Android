@@ -17,6 +17,7 @@ import { getData, getStorageKeys, autoLevelupCharacter, setData } from '../servi
 import { updateCharacterName as updateCharacterNameService } from '../services/characterService';
 import { useUser } from '../contexts/UserContext';
 import { logError } from '../utils/logger';
+import { getNextLevelExp, getTotalExpToReachLevel } from '../utils/expTable';
 import { Character, UseCharacterReturn, ExperienceResult, ServiceResult, MissionCategory } from '../types';
 import { getMyReant, ReantResponse } from '../api/reantApi';
 
@@ -28,13 +29,13 @@ export const useCharacter = (): UseCharacterReturn => {
   const [error, setError] = useState<string | null>(null);
 
   // Reant 정보를 Character 형태로 변환
-  // 백엔드(Reant.java): exp = 현재 레벨 진행분, 다음 레벨 필요 = level * 100 (L1→2: 100, L2→3: 200, L3→4: 300 ...)
+  // 백엔드(Reant.java): exp = 현재 레벨 진행분, 다음 레벨 필요 = 레벨별 테이블 (L1→10, L2→50, L3→100, L4→200, L5→500, L6+→500)
   const convertReantToCharacter = useCallback((reant: ReantResponse): Character => {
     const level = reant.level ?? 1;
     const currentLevelExp = reant.exp ?? 0; // 현재 레벨에서의 진행 경험치
-    const expToReachCurrentLevel = level > 1 ? 100 * ((level - 1) * level / 2) : 0;
+    const expToReachCurrentLevel = getTotalExpToReachLevel(level);
     const totalExp = expToReachCurrentLevel + currentLevelExp; // 백엔드와 동일한 총 누적 경험치
-    const maxExperience = reant.nextLevelExp ?? level * 100; // 다음 레벨까지 필요한 경험치
+    const maxExperience = reant.nextLevelExp ?? getNextLevelExp(level); // 다음 레벨까지 필요한 경험치
 
     return {
       id: `reant_${reant.id}`,
@@ -109,11 +110,11 @@ export const useCharacter = (): UseCharacterReturn => {
         const totalExperience: number = sortedCharacters.reduce((sum, c) => {
           return sum + (c.total_experience ?? c.experience ?? 0);
         }, 0);
-        // 백엔드 레벨업 공식: 총 누적 T → 레벨 L, 현재진행분 = T - 100*(L-1)*L/2 (L은 100*(L-1)*L/2 <= T < 100*L*(L+1)/2)
+        // 백엔드 레벨업 공식: 총 누적 T → 레벨 L (레벨별 필요 경험치 테이블 사용)
         let remaining = totalExperience;
         let newLevel = 1;
-        while (newLevel * 100 <= remaining) {
-          remaining -= newLevel * 100;
+        while (getNextLevelExp(newLevel) <= remaining) {
+          remaining -= getNextLevelExp(newLevel);
           newLevel += 1;
         }
         const currentLevelExp = remaining;
@@ -128,7 +129,7 @@ export const useCharacter = (): UseCharacterReturn => {
           level: newLevel,
           experience: currentLevelExp,
           total_experience: totalExperience,
-          max_experience: newLevel * 100,
+          max_experience: getNextLevelExp(newLevel),
           unlocked: true,
           unlocked_date: new Date().toISOString(),
           category_id: 'growth',

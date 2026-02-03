@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, Image, ViewStyle } from 'react-native';
 import { styles } from './CharacterCard.styles';
+import { getNextLevelExp } from '../../utils/expTable';
 import { Character } from '../../types';
 
 interface CharacterCardProps {
@@ -41,10 +42,10 @@ const CharacterCard: React.FC<CharacterCardProps> = ({
     return characterImages[levelKey as keyof typeof characterImages] || characterImages.level1;
   };
 
-  // 백엔드(Reant.java): 다음 레벨 필요 = level * 100. 표시는 항상 레벨 기준으로 계산(옛 캐시 max_experience 무시)
+  // 백엔드(Reant.java): 다음 레벨 필요 = 레벨별 테이블 (L1→10, L2→50, L3→100, L4→200, L5→500, L6+→500)
   const level = character.level ?? 1;
   const experienceProgress = character.experience ?? 0;
-  const maxExperience = level * 100;
+  const maxExperience = getNextLevelExp(level);
   const nextLevelExp = Math.max(0, maxExperience - experienceProgress);
 
   const getAccessibilityLabel = () => {
