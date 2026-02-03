@@ -229,10 +229,8 @@ const CommunityPostDetailScreen: React.FC<CommunityPostDetailScreenProps> = ({ n
             </View>
           </View>
 
-          {/* 미션 관련 게시글(인증글 또는 mission_id/mission_title 있음)일 때만 미션 영역 표시. 일반 게시글은 미션에 국한되지 않음. */}
-          {(post.category === '인증' ||
-            (post.mission_id && post.mission_id !== 'undefined') ||
-            (post.mission_title && post.mission_title.trim() !== '')) && (
+          {/* 인증글일 때만 미션 영역 표시. 일반글은 미션 제목 스타일 박스 미표시. */}
+          {post.category === '인증' && (
             <View style={styles.missionInfo}>
               <Image
                 source={require('../../assets/images/goal.png')}
