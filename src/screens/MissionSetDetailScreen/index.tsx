@@ -137,6 +137,9 @@ const MissionSetDetailScreen: React.FC<MissionSetDetailScreenProps> = ({ navigat
                           <Text style={styles.missionTitle}>{index + 1}.</Text>
                         </View>
                         <Text style={styles.missionTitleText} numberOfLines={1}>{mission.missionTitle}</Text>
+                        {canNavigateToPost && (
+                          <Text style={styles.viewPostLabel}>게시글 보기</Text>
+                        )}
                       </View>
                       <View style={styles.missionBadgesBelow}>
                         <View

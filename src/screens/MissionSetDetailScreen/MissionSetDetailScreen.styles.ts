@@ -141,6 +141,13 @@ export const styles = StyleSheet.create({
     flex: 1,
     flexShrink: 1,
   },
+  viewPostLabel: {
+    ...createTextStyle('sm', {
+      color: colors.primary[600],
+      fontWeight: typography.fontWeight.medium,
+    }),
+    marginLeft: spacing[2],
+  },
   missionTypeBadge: {
     paddingVertical: 4,
     paddingHorizontal: spacing[2],
