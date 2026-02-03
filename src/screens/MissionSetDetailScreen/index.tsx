@@ -11,7 +11,6 @@ import {
   ImageBackground,
   TouchableOpacity,
   Image,
-  Alert,
 } from 'react-native';
 import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types/navigation';
@@ -129,26 +128,18 @@ const MissionSetDetailScreen: React.FC<MissionSetDetailScreenProps> = ({ navigat
               {missionSet.missions.map((mission, index) => (
                 <View key={mission.missionId} style={styles.missionItem}>
                   <View style={styles.missionContent}>
-                    <TouchableOpacity
-                      style={styles.missionTitleBlock}
-                      onPress={() => Alert.alert('미션 제목', mission.missionTitle)}
-                      activeOpacity={0.7}
-                      accessibilityLabel={`미션 제목, 터치하면 전체 내용 보기`}
-                      accessibilityHint="터치하면 잘린 제목 전체를 볼 수 있습니다"
-                    >
+                    <View style={styles.missionTitleBlock}>
                       <View style={styles.missionNumberPrefix}>
                         <Text style={styles.missionTitle}>{index + 1}.</Text>
                       </View>
                       <Text style={styles.missionTitleText} numberOfLines={1}>{mission.missionTitle}</Text>
-                    </TouchableOpacity>
+                    </View>
                     <View style={styles.missionBadgesBelow}>
-                      <TouchableOpacity
+                      <View
                         style={[
                           styles.missionTypeBadge,
                           mission.missionType === 'CUSTOM' ? styles.missionTypeBadgeCustom : styles.missionTypeBadgeOfficial,
                         ]}
-                        onPress={() => Alert.alert(mission.missionType === 'CUSTOM' ? '커스텀' : '공식', mission.missionType === 'CUSTOM' ? '커스텀 미션' : '공식 미션')}
-                        activeOpacity={0.7}
                       >
                         <Text style={[
                           styles.missionTypeBadgeText,
@@ -156,17 +147,13 @@ const MissionSetDetailScreen: React.FC<MissionSetDetailScreenProps> = ({ navigat
                         ]} numberOfLines={1}>
                           {mission.missionType === 'CUSTOM' ? '커스텀' : '공식'}
                         </Text>
-                      </TouchableOpacity>
+                      </View>
                       {mission.isCompletedByCreator === true ? (
-                        <TouchableOpacity
-                          style={[styles.creatorStatusBadge, styles.creatorStatusCompleted]}
-                          onPress={() => Alert.alert('완료', '완료된 미션입니다')}
-                          activeOpacity={0.7}
-                        >
+                        <View style={[styles.creatorStatusBadge, styles.creatorStatusCompleted]}>
                           <Text style={[styles.creatorStatusText, styles.creatorStatusTextCompleted]} numberOfLines={1}>
                             완료
                           </Text>
-                        </TouchableOpacity>
+                        </View>
                       ) : null}
                     </View>
                   </View>
