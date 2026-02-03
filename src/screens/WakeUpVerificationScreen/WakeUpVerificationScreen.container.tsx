@@ -246,12 +246,12 @@ export const useWakeUpVerificationScreenContainer = ({
         }
 
         if (currentResult.success && currentResult.data) {
-          const {
-            id: apiMissionId,
-            remainingSeconds: apiTimeRemaining,
-            assignedAt: apiAssignedAt,
-            expired: apiExpired,
-          } = currentResult.data;
+          const data = currentResult.data as any;
+          // 백엔드 필드: userMissionId, timeRemaining, canVerify (id/remainingSeconds 아님)
+          const apiMissionId = data.id ?? data.userMissionId;
+          const apiTimeRemaining = data.remainingSeconds ?? data.timeRemaining;
+          const apiAssignedAt = data.assignedAt;
+          const apiCanVerify = data.canVerify;
 
           if (apiMissionId) {
             console.log('[기상미션] API missionId 반영', apiMissionId, 'assignedAt=', apiAssignedAt);
@@ -261,16 +261,18 @@ export const useWakeUpVerificationScreenContainer = ({
                 id: apiMissionId,
                 missionType: 'OFFICIAL',
                 assignedAt: apiAssignedAt,
-                dueDate: currentResult.data.deadlineAt,
-                status: currentResult.data.status as any,
+                dueDate: data.deadlineAt,
+                status: data.status ?? 'ASSIGNED',
               };
               setUserMission(mockUserMission);
             }
           }
           if (apiTimeRemaining !== undefined) {
             setTimeRemaining(apiTimeRemaining);
-            setIsExpired(apiExpired || apiTimeRemaining <= 0);
-            console.log('[기상미션] 타이머 초기값 remaining=', apiTimeRemaining, 'expired=', apiExpired || apiTimeRemaining <= 0);
+            // 알림 후 12시간 이내만 인증 가능. API canVerify 또는 남은 시간으로 만료 판정
+            const expired = apiTimeRemaining <= 0 || apiCanVerify === false;
+            setIsExpired(expired);
+            console.log('[기상미션] 타이머 초기값 remaining=', apiTimeRemaining, 'canVerify=', apiCanVerify, 'expired=', expired);
           }
         } else {
           console.warn('[기상미션] API 조회 실패, 기존 userMissionId로 loadMissionData 시도 userMissionId=', userMissionId);
@@ -316,7 +318,7 @@ export const useWakeUpVerificationScreenContainer = ({
       const assignedTime = new Date(userMission.assignedAt).getTime();
       const now = Date.now();
       const elapsed = Math.floor((now - assignedTime) / 1000);
-      const remaining = 86400 - elapsed; // 1일 = 24*60*60
+      const remaining = Math.max(0, 12 * 3600 - elapsed); // 알림 후 12시간 이내만 인증 가능
       if (remaining <= 0) {
         if (!expiredLoggedRef.current) {
           expiredLoggedRef.current = true;
@@ -384,7 +386,7 @@ export const useWakeUpVerificationScreenContainer = ({
    */
   const handleVerify = useCallback(async () => {
     if (isExpired || (timeRemaining !== null && timeRemaining <= 0)) {
-      setErrorMessage('1일이 지나 인증할 수 없습니다.');
+      setErrorMessage('12시간이 지나 인증할 수 없습니다.');
       setShowErrorModal(true);
       return;
     }

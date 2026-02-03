@@ -108,7 +108,14 @@ const WakeUpVerificationScreen: React.FC<WakeUpVerificationScreenProps> = ({ nav
                             styles.digit,
                             timeRemaining <= 10 && styles.digitWarning,
                           ]}>
-                            {Math.floor(timeRemaining / 60).toString().padStart(2, '0')}
+                            {Math.floor(timeRemaining / 3600).toString().padStart(2, '0')}
+                          </Text>
+                          <Text style={styles.colon}>:</Text>
+                          <Text style={[
+                            styles.digit,
+                            timeRemaining <= 10 && styles.digitWarning,
+                          ]}>
+                            {Math.floor((timeRemaining % 3600) / 60).toString().padStart(2, '0')}
                           </Text>
                           <Text style={styles.colon}>:</Text>
                           <Text style={[
@@ -139,7 +146,7 @@ const WakeUpVerificationScreen: React.FC<WakeUpVerificationScreenProps> = ({ nav
                     <View 
                       style={[
                         styles.progressFill,
-                        { width: `${(timeRemaining / 86400) * 100}%` },
+                        { width: `${(timeRemaining / (12 * 3600)) * 100}%` },
                         timeRemaining <= 10 && styles.progressFillWarning,
                       ]} 
                     />
@@ -149,7 +156,7 @@ const WakeUpVerificationScreen: React.FC<WakeUpVerificationScreenProps> = ({ nav
             </View>
             {isExpired && (
               <Text style={styles.expiredMessage}>
-                1일이 지나 인증할 수 없습니다.
+                12시간이 지나 인증할 수 없습니다.
               </Text>
             )}
             {timeRemaining !== null && timeRemaining <= 10 && !isExpired && (
@@ -184,7 +191,7 @@ const WakeUpVerificationScreen: React.FC<WakeUpVerificationScreenProps> = ({ nav
           {/* 안내 메시지 */}
           <View style={styles.infoContainer}>
             <Text style={styles.infoText}>
-              • 1일 이내에 인증 버튼을 눌러주세요
+              • 알림 후 12시간 이내에 인증 버튼을 눌러주세요
             </Text>
           </View>
         </View>
