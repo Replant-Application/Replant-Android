@@ -327,21 +327,24 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation, route }) 
         </TouchableOpacity>
       )}
 
-      {/* 미션세트 상세 모달 (열림/닫힘 모두 페이드) */}
+      {/* 미션세트 상세 모달 (전체 화면 아님 - 하단 탭 바 노출) */}
       <Modal
         visible={selectedMissionSetId != null}
+        transparent={true}
         animationType="fade"
         onRequestClose={handleCloseMissionSetModal}
       >
         {selectedMissionSetId != null && (
           <Animated.View style={{ flex: 1, opacity: missionSetFadeAnim }}>
-            <MissionSetDetailScreen
-              navigation={{
-                ...navigation,
-                goBack: handleCloseMissionSetModal,
-              } as any}
-              route={{ params: { missionSetId: selectedMissionSetId } } as any}
-            />
+            <View style={{ flex: 1, maxHeight: '88%' }}>
+              <MissionSetDetailScreen
+                navigation={{
+                  ...navigation,
+                  goBack: handleCloseMissionSetModal,
+                } as any}
+                route={{ params: { missionSetId: selectedMissionSetId } } as any}
+              />
+            </View>
           </Animated.View>
         )}
       </Modal>

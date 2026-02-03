@@ -150,13 +150,13 @@ export const styles = StyleSheet.create({
   },
   /** 공식: 완료(녹색)와 구분되도록 파란색 계열 */
   missionTypeBadgeOfficial: {
-    backgroundColor: colors.blue[200],
+    backgroundColor: colors.blue[100],
     borderWidth: 1,
     borderColor: colors.blue[300],
   },
   /** 커스텀: 비활성 느낌 없이 구분되는 보라색 계열 */
   missionTypeBadgeCustom: {
-    backgroundColor: colors.purple[200],
+    backgroundColor: colors.purple[100],
     borderWidth: 1,
     borderColor: colors.purple[300],
   },
@@ -166,10 +166,10 @@ export const styles = StyleSheet.create({
     flexShrink: 0,
   },
   missionTypeBadgeTextOfficial: {
-    color: colors.blue[700],
+    color: colors.blue[600],
   },
   missionTypeBadgeTextCustom: {
-    color: colors.purple[700],
+    color: colors.purple[600],
   },
   creatorStatusBadge: {
     paddingVertical: 4,
@@ -186,7 +186,7 @@ export const styles = StyleSheet.create({
     minWidth: 48,
   },
   creatorStatusCompleted: {
-    backgroundColor: colors.primary[200],
+    backgroundColor: colors.primary[100],
     borderWidth: 1,
     borderColor: colors.primary[300],
   },
@@ -201,7 +201,7 @@ export const styles = StyleSheet.create({
     flexShrink: 0,
   },
   creatorStatusTextCompleted: {
-    color: colors.primary[700],
+    color: colors.primary[600],
   },
   creatorStatusTextIncomplete: {
     color: colors.text.tertiary,
