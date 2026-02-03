@@ -223,25 +223,22 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
 
       // 돌발 미션 알림 처리 (감정일기·식사 미션은 잠시 제외)
       if (type === 'SPONTANEOUS_WAKE_UP') {
-        console.log('[NotificationDropdown] 돌발 미션 알림 클릭:', type, 'referenceType:', referenceType);
+        console.log('[기상미션] 알림 클릭 referenceId=', referenceId, 'referenceType=', referenceType);
         
         if (!referenceId) {
-          console.error('[NotificationDropdown] ❌ referenceId가 없습니다.');
+          console.error('[기상미션] referenceId 없음');
           return;
         }
 
         try {
-          // 알림 타입에 따라 적절한 화면으로 이동
           if (type === 'SPONTANEOUS_WAKE_UP') {
-            // 기상 미션 → 현재 진행 중인 미션 확인
-            const currentWakeupResult = await getCurrentWakeupMission();
-            
             const missionId = typeof referenceId === 'string' ? Number(referenceId) : referenceId;
+            console.log('[기상미션] getCurrentWakeupMission 호출 missionId=', missionId);
+            const currentWakeupResult = await getCurrentWakeupMission();
+            console.log('[기상미션] API 결과 success=', currentWakeupResult.success, 'data=', currentWakeupResult.data ? { id: currentWakeupResult.data.id, canVerify: currentWakeupResult.data.canVerify, remainingSeconds: currentWakeupResult.data.remainingSeconds } : null, 'error=', currentWakeupResult.error);
             
-            // 백엔드 API가 아직 구현되지 않은 경우 referenceId만으로 진행 (하위 호환성)
             if (!currentWakeupResult.success || !currentWakeupResult.data) {
-              console.log('[NotificationDropdown] 기상 미션 API 미구현 또는 미션 없음, referenceId로 진행:', missionId);
-              // 백엔드가 구현되지 않은 경우에도 알림으로 받은 referenceId를 사용하여 진행
+              console.log('[기상미션] API 없음/실패 → referenceId로 화면 이동 missionId=', missionId);
               onNavigate(SCREEN_NAMES.WAKE_UP_VERIFICATION, {
                 userMissionId: missionId,
               });
@@ -249,14 +246,18 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
             }
             
             const wakeupMission = currentWakeupResult.data;
+            const idMatch = wakeupMission.id === missionId;
+            const notCompleted = wakeupMission.status !== 'COMPLETED';
+            const canVerify = wakeupMission.canVerify;
+            console.log('[기상미션] 판정 id일치=', idMatch, 'status=', wakeupMission.status, 'canVerify=', canVerify);
             
-            // 미션 ID가 일치하고 완료되지 않은 경우만 이동
-            if (wakeupMission.id === missionId && wakeupMission.status !== 'COMPLETED' && wakeupMission.canVerify) {
-              console.log('[NotificationDropdown] 기상 미션 인증 화면으로 이동, missionId:', missionId);
+            if (idMatch && notCompleted && canVerify) {
+              console.log('[기상미션] 인증 화면 이동 missionId=', missionId);
               onNavigate(SCREEN_NAMES.WAKE_UP_VERIFICATION, {
                 userMissionId: missionId,
               });
             } else {
+              console.warn('[기상미션] 이동 불가(이미 완료/만료) missionId=', missionId);
               showAlertModal('알림', '이미 수행한 미션이거나 만료된 미션입니다.');
             }
           }

@@ -37,6 +37,7 @@ export const useWakeUpVerificationScreenContainer = ({
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const soundRef = useRef<Audio.Sound | null>(null);
   const isPlayingFastSound = useRef<boolean>(false);
+  const expiredLoggedRef = useRef<boolean>(false);
 
   /**
    * userMissionId 추출 (우선순위: route.params > Context > AsyncStorage)
@@ -44,47 +45,36 @@ export const useWakeUpVerificationScreenContainer = ({
   useEffect(() => {
     const extractUserMissionId = async () => {
       const params = route?.params;
-      console.log('[WakeUpVerificationScreen] userMissionId 추출 시작');
-      console.log('[WakeUpVerificationScreen] route.params:', params);
-      console.log('[WakeUpVerificationScreen] Context currentWakeUpMissionId:', currentWakeUpMissionId);
+      console.log('[기상미션] userMissionId 추출 시작 route.params=', JSON.stringify(params), 'contextId=', currentWakeUpMissionId);
 
       let extractedId: number | undefined;
+      let source = '';
 
-      // 1순위: route.params에서 추출
       if (params && 'userMissionId' in params && params.userMissionId !== undefined && params.userMissionId !== null) {
         if (typeof params.userMissionId === 'string') {
           extractedId = Number(params.userMissionId);
         } else if (typeof params.userMissionId === 'number') {
           extractedId = params.userMissionId;
         }
-        console.log('[WakeUpVerificationScreen] route.params에서 추출:', extractedId);
+        source = 'route.params';
       }
-
-      // 2순위: Context에서 가져오기
       if (!extractedId && currentWakeUpMissionId) {
         extractedId = currentWakeUpMissionId;
-        console.log('[WakeUpVerificationScreen] Context에서 추출:', extractedId);
+        source = 'Context';
       }
-
-      // 3순위: AsyncStorage에서 가져오기 (Context가 아직 로드되지 않았을 수 있음)
       if (!extractedId) {
         const storedId = await getWakeUpMissionId();
         if (storedId) {
           extractedId = storedId;
-          console.log('[WakeUpVerificationScreen] AsyncStorage에서 추출:', extractedId);
+          source = 'AsyncStorage';
         }
       }
 
-      // 유효성 검사
       if (extractedId !== undefined && !isNaN(extractedId) && extractedId !== 0) {
-        console.log('[WakeUpVerificationScreen] userMissionId 설정:', extractedId);
+        console.log('[기상미션] userMissionId 확정', extractedId, '출처=', source);
         setUserMissionId(extractedId);
       } else {
-        console.error('[WakeUpVerificationScreen] ❌ userMissionId 추출 실패:', {
-          extractedId,
-          routeParams: params && 'userMissionId' in params ? params.userMissionId : undefined,
-          contextId: currentWakeUpMissionId,
-        });
+        console.warn('[기상미션] userMissionId 추출 실패 extractedId=', extractedId, 'params=', params, 'contextId=', currentWakeUpMissionId);
         setUserMissionId(undefined);
       }
     };
@@ -246,19 +236,14 @@ export const useWakeUpVerificationScreenContainer = ({
     const loadCurrentMission = async () => {
       try {
         setLoading(true);
-        console.log('[WakeUpVerificationScreen] 현재 활성화된 기상 미션 조회 시작');
+        console.log('[기상미션] API getCurrentWakeupMission 호출');
 
-        // 백엔드 API로 현재 활성화된 기상 미션 조회
         const currentResult = await getCurrentWakeupMission();
 
-        console.log('[WakeUpVerificationScreen] 현재 기상 미션 조회 결과:', {
-          success: currentResult.success,
-          hasData: !!currentResult.data,
-          error: currentResult.error,
-          missionId: currentResult.data?.id,
-          remainingSeconds: currentResult.data?.remainingSeconds,
-          canVerify: currentResult.data?.canVerify,
-        });
+        console.log('[기상미션] API 응답 success=', currentResult.success, 'hasData=', !!currentResult.data, 'error=', currentResult.error);
+        if (currentResult.data) {
+          console.log('[기상미션] API data id=', currentResult.data.id, 'assignedAt=', currentResult.data.assignedAt, 'deadlineAt=', (currentResult.data as any).deadlineAt, 'remainingSeconds=', currentResult.data.remainingSeconds, 'canVerify=', currentResult.data.canVerify, 'expired=', (currentResult.data as any).expired);
+        }
 
         if (currentResult.success && currentResult.data) {
           const {
@@ -268,12 +253,9 @@ export const useWakeUpVerificationScreenContainer = ({
             expired: apiExpired,
           } = currentResult.data;
 
-          // API에서 받은 missionId 설정 (spontaneous_mission의 ID)
           if (apiMissionId) {
-            console.log('[WakeUpVerificationScreen] API에서 missionId 받음:', apiMissionId);
+            console.log('[기상미션] API missionId 반영', apiMissionId, 'assignedAt=', apiAssignedAt);
             setUserMissionId(apiMissionId);
-
-            // assignedAt을 사용하여 UserMission 형태의 객체 생성 (타이머용)
             if (apiAssignedAt) {
               const mockUserMission: UserMission = {
                 id: apiMissionId,
@@ -285,18 +267,13 @@ export const useWakeUpVerificationScreenContainer = ({
               setUserMission(mockUserMission);
             }
           }
-
-          // API에서 받은 시간 정보는 참고용으로만 사용
-          // 실제 타이머는 userMission.assignedAt이 설정되면 useEffect에서 자동으로 시작됨
           if (apiTimeRemaining !== undefined) {
-            // 초기값만 설정 (타이머가 자동으로 업데이트함)
             setTimeRemaining(apiTimeRemaining);
             setIsExpired(apiExpired || apiTimeRemaining <= 0);
+            console.log('[기상미션] 타이머 초기값 remaining=', apiTimeRemaining, 'expired=', apiExpired || apiTimeRemaining <= 0);
           }
-          // assignedAt은 userMission에 포함되어 있으므로 타이머 useEffect가 처리함
         } else {
-          // API 조회 실패 시 기존 로직 사용 (userMissionId가 있으면)
-          console.log('[WakeUpVerificationScreen] ⚠️ 현재 기상 미션 조회 실패, 기존 로직 사용');
+          console.warn('[기상미션] API 조회 실패, 기존 userMissionId로 loadMissionData 시도 userMissionId=', userMissionId);
           if (userMissionId && userMissionId > 0) {
             await loadMissionData();
           } else {
@@ -305,7 +282,7 @@ export const useWakeUpVerificationScreenContainer = ({
           }
         }
       } catch (error) {
-        console.error('[WakeUpVerificationScreen] 현재 기상 미션 조회 예외:', error);
+        console.error('[기상미션] API 조회 예외', error);
         // 예외 발생 시 기존 로직 사용
         if (userMissionId && userMissionId > 0) {
           await loadMissionData();
@@ -338,10 +315,13 @@ export const useWakeUpVerificationScreenContainer = ({
     const updateTimer = async () => {
       const assignedTime = new Date(userMission.assignedAt).getTime();
       const now = Date.now();
-      const elapsed = Math.floor((now - assignedTime) / 1000); // 초 단위
-      const remaining = 600 - elapsed; // 10분 = 600초
-
+      const elapsed = Math.floor((now - assignedTime) / 1000);
+      const remaining = 600 - elapsed;
       if (remaining <= 0) {
+        if (!expiredLoggedRef.current) {
+          expiredLoggedRef.current = true;
+          console.log('[기상미션] 타이머 만료(1회 로그) assignedAt=', userMission.assignedAt, 'elapsed초=', elapsed);
+        }
         setIsExpired(true);
         setTimeRemaining(0);
         stopTimerSound();
@@ -411,29 +391,16 @@ export const useWakeUpVerificationScreenContainer = ({
 
     try {
       setVerifying(true);
-      // userMissionId가 있으면 전달, 없으면 백엔드에서 자동으로 찾음
-      console.log('[WakeUpVerificationScreen] 인증 요청, userMissionId:', userMissionId || '없음 (자동 조회)');
-      const result = await verifyWakeupTime(userMissionId); // userMissionId는 선택적
+      console.log('[기상미션] 인증 요청 userMissionId=', userMissionId, 'isExpired=', isExpired, 'timeRemaining=', timeRemaining);
+      const result = await verifyWakeupTime(userMissionId);
 
-      console.log('[WakeUpVerificationScreen] 인증 응답 전체:', JSON.stringify(result, null, 2));
-      console.log('[WakeUpVerificationScreen] 인증 응답 요약:', {
-        success: result.success,
-        hasData: !!result.data,
-        canVerify: result.data?.canVerify,
-        message: result.data?.message,
-        error: result.error,
-      });
+      console.log('[기상미션] 인증 응답 success=', result.success, 'error=', result.error, 'data=', result.data ? { canVerify: result.data.canVerify, message: result.data.message } : null);
 
-      // 백엔드가 성공했다면 (result.success === true) 인증 성공으로 처리
-      // canVerify는 인증 가능 여부를 나타내는 것이지, 실제 인증 성공 여부가 아닐 수 있음
       if (result.success) {
-        // result.success가 true면 백엔드에서 성공한 것으로 간주
-        // canVerify가 false여도 백엔드가 성공했다면 성공으로 처리
-        console.log('[WakeUpVerificationScreen] 백엔드 인증 성공 (result.success === true)');
+        console.log('[기상미션] 인증 성공');
         setShowSuccessModal(true);
       } else {
-        // result.success가 false면 실제 실패
-        console.error('[WakeUpVerificationScreen] ❌ API 호출 실패:', result.error);
+        console.warn('[기상미션] 인증 실패', result.error, result.data?.message);
         setErrorMessage(result.error || result.data?.message || '인증에 실패했습니다.');
         setShowErrorModal(true);
       }
