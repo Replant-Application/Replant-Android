@@ -60,20 +60,22 @@ const TodoListScreen: React.FC<Props> = ({ navigation, route }) => {
           <Text style={styles.cardTitle} numberOfLines={1}>
             {todoList.title}
           </Text>
-          <TouchableOpacity
-            style={styles.menuButton}
-            onPress={() => handleDeleteTodoList(todoList)}
-            hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
-            accessibilityRole="button"
-            accessibilityLabel="메뉴"
-            accessibilityHint="누르면 삭제할 수 있습니다"
-          >
-            <View style={styles.verticalDots}>
-              <View style={styles.verticalDot} />
-              <View style={styles.verticalDot} />
-              <View style={styles.verticalDot} />
-            </View>
-          </TouchableOpacity>
+          {activeTab === 'active' && (
+            <TouchableOpacity
+              style={styles.menuButton}
+              onPress={() => handleDeleteTodoList(todoList)}
+              hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+              accessibilityRole="button"
+              accessibilityLabel="삭제"
+              accessibilityHint="누르면 투두리스트를 삭제할 수 있습니다"
+            >
+              <View style={styles.verticalDots}>
+                <View style={styles.verticalDot} />
+                <View style={styles.verticalDot} />
+                <View style={styles.verticalDot} />
+              </View>
+            </TouchableOpacity>
+          )}
         </View>
 
         {todoList.description && (
