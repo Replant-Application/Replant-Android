@@ -14,6 +14,7 @@ import { colors } from '../../utils/designTokens';
 import { Header, AlertModal, WheelPicker } from '../../components/ui';
 import { TodoListCreateScreenProps } from '../../types/screens/todolist';
 import { HOURS, MINUTES } from '../../constants/screens/todolist';
+import { getCategoryLabel } from '../CategorySelectScreen/CategorySelectScreen.styles';
 import { useTodoListCreateScreenContainer } from './TodoListCreateScreen.container';
 import { styles } from './TodoListCreateScreen.styles';
 
@@ -106,16 +107,13 @@ const TodoListCreateScreen: React.FC<TodoListCreateScreenProps> = ({ navigation,
             <View key={mission.id} style={styles.missionCard}>
               <View style={styles.missionContent}>
                 <View style={styles.missionTitleContainer}>
-                  <View style={styles.missionNumber}>
-                    <Text style={styles.missionNumberText}>{index + 1}</Text>
-                  </View>
-                  <Text style={styles.missionTitle}>{mission.title}</Text>
+                  <Text style={styles.missionTitle}>{index + 1}. {mission.title}</Text>
                 </View>
                 <Text style={styles.missionDescription} numberOfLines={2}>
                   {mission.description}
                 </Text>
                 <View style={styles.missionMeta}>
-                  <Text style={styles.missionCategory}>{mission.category}</Text>
+                  <Text style={styles.missionCategory}>{getCategoryLabel(mission.category || '')}</Text>
                   <View style={styles.missionExpContainer}>
                     <Image
                       source={require('../../assets/images/sun.png')}
@@ -304,7 +302,7 @@ const TodoListCreateScreen: React.FC<TodoListCreateScreenProps> = ({ navigation,
                     {mission.description}
                   </Text>
                   <View style={styles.missionMeta}>
-                    <Text style={styles.missionCategory}>{mission.category}</Text>
+                    <Text style={styles.missionCategory}>{getCategoryLabel(mission.category || '')}</Text>
                     {mission.missionType !== 'CUSTOM' && (
                       <View style={styles.missionExpContainer}>
                         <Image
@@ -504,7 +502,7 @@ const TodoListCreateScreen: React.FC<TodoListCreateScreenProps> = ({ navigation,
                       {mission.description}
                     </Text>
                     <View style={styles.missionListItemMeta}>
-                      <Text style={styles.missionListItemCategory}>{mission.category}</Text>
+                      <Text style={styles.missionListItemCategory}>{getCategoryLabel(mission.category || '')}</Text>
                       <View style={styles.missionListItemExpContainer}>
                         <Image
                           source={require('../../assets/images/sun.png')}
@@ -549,7 +547,7 @@ const TodoListCreateScreen: React.FC<TodoListCreateScreenProps> = ({ navigation,
                       </Text>
                       <Text style={styles.timeMissionTitle} numberOfLines={2}>{mission.title}</Text>
                       <View style={styles.timeMissionMeta}>
-                        <Text style={styles.timeMissionCategory}>{mission.category}</Text>
+                        <Text style={styles.timeMissionCategory}>{getCategoryLabel(mission.category || '')}</Text>
                         <View style={styles.timeMissionExpContainer}>
                           <Image
                             source={require('../../assets/images/sun.png')}

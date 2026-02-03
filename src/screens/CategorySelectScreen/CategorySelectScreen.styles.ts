@@ -35,6 +35,14 @@ export const styles = StyleSheet.create({
   containerTransparent: {
     backgroundColor: 'transparent',
   },
+  headerTitle: {
+    fontSize: typography.fontSize.lg,
+    textAlign: 'center',
+  },
+  headerNoPadding: {
+    paddingHorizontal: 0,
+    paddingLeft: spacing[5],
+  },
   /** 캘린더 화면과 동일한 본문 영역 패딩 */
   content: {
     padding: spacing[5],
@@ -113,22 +121,12 @@ export const styles = StyleSheet.create({
     }),
   },
   optionSelected: {
-    borderColor: colors.primary[500],
-    backgroundColor: colors.primary[100],
+    borderColor: colors.gray[400],
+    backgroundColor: colors.gray[100],
     borderWidth: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.12,
-    shadowRadius: 4,
-    elevation: 3,
   },
   optionTextSelected: {
-    color: colors.primary[700],
-    fontWeight: typography.fontWeight.bold,
-    fontFamily: Platform.select({
-      ios: undefined,
-      android: typography.fontFamily.bold,
-    }),
+    color: colors.text.primary,
   },
   completeButton: {
     alignSelf: 'stretch',
@@ -150,7 +148,7 @@ export const styles = StyleSheet.create({
     ...createButtonTextStyle('base', { color: colors.white, fontWeight: typography.fontWeight.bold }),
     fontFamily: Platform.select({
       ios: undefined,
-      android: typography.fontFamily.bold,
+      android: typography.fontFamily.regular,
     }),
   },
   loadingOverlay: {

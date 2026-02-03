@@ -6,7 +6,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, ActivityIndicator, ImageBackground, Image, Alert } from 'react-native';
-import { Header } from '../../components/ui';
+import { Header, AlertModal } from '../../components/ui';
 import { useUser } from '../../contexts/UserContext';
 import { updateMyInfo } from '../../api/userApi';
 import type { MissionCategoryType } from '../../types';
@@ -31,6 +31,7 @@ const CategorySelectScreen: React.FC<CategorySelectScreenProps> = ({ onBack, onC
   const { user, refreshUser } = useUser();
   const [selected, setSelected] = useState<MissionCategoryType[]>([]);
   const [loading, setLoading] = useState(false);
+  const [showCompleteModal, setShowCompleteModal] = useState(false);
 
   // 기존 선택값 복원 (설정에서 들어온 경우, 서버에 저장된 값과 동기화)
   useEffect(() => {
@@ -60,7 +61,7 @@ const CategorySelectScreen: React.FC<CategorySelectScreenProps> = ({ onBack, onC
       const result = await updateMyInfo({ preferredMissionCategories: selected });
       if (result.success) {
         await refreshUser();
-        onComplete();
+        setShowCompleteModal(true);
       } else {
         Alert.alert(
           '저장 실패',
@@ -70,6 +71,11 @@ const CategorySelectScreen: React.FC<CategorySelectScreenProps> = ({ onBack, onC
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleCloseCompleteModal = () => {
+    setShowCompleteModal(false);
+    onComplete();
   };
 
   return (
@@ -83,6 +89,8 @@ const CategorySelectScreen: React.FC<CategorySelectScreenProps> = ({ onBack, onC
         title="미션 카테고리 변경"
         showBackButton={!!onBack}
         navigation={onBack ? { goBack: onBack } : undefined}
+        titleStyle={styles.headerTitle}
+        style={styles.headerNoPadding}
       />
       <View style={styles.content}>
         <Text style={styles.subtitle}>
@@ -151,6 +159,13 @@ const CategorySelectScreen: React.FC<CategorySelectScreenProps> = ({ onBack, onC
           <ActivityIndicator size="large" color={colors.primary[500]} />
         </View>
       )}
+      <AlertModal
+        visible={showCompleteModal}
+        title="선택 완료"
+        message="미션 카테고리 선택이 완료되었습니다."
+        buttonText="확인"
+        onClose={handleCloseCompleteModal}
+      />
     </ImageBackground>
   );
 };

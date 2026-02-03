@@ -4,7 +4,7 @@
  */
 
 import { StyleSheet } from 'react-native';
-import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
+import { colors, spacing, typography, borderRadius, shadows } from '../../utils/designTokens';
 import { createTextStyle, createSecondaryTextStyle } from '../../utils/styles/textStyles';
 
 export const styles = StyleSheet.create({
@@ -51,15 +51,44 @@ export const styles = StyleSheet.create({
     }),
   },
   volumeValue: {
-    ...createSecondaryTextStyle('sm', {
+    ...createSecondaryTextStyle('base', {
       fontWeight: typography.fontWeight.medium,
       minWidth: 45,
       textAlign: 'right',
     }),
   },
-  slider: {
+  /** 미션 인증글과 동일: 트랙·채움·썸 슬라이더 */
+  sliderContainer: {
+    marginBottom: spacing[1],
+  },
+  sliderTrack: {
     width: '100%',
-    height: 40,
+    height: 20,
+    backgroundColor: colors.gray[200],
+    borderRadius: borderRadius.md,
+    borderWidth: 2,
+    borderColor: colors.gray[300],
+    position: 'relative' as const,
+    marginTop: 0,
+    marginBottom: spacing[3],
+    justifyContent: 'center',
+  },
+  sliderFill: {
+    position: 'absolute' as const,
+    height: 16,
+    borderRadius: borderRadius.sm,
+    left: 0,
+    top: 0,
+  },
+  sliderThumb: {
+    position: 'absolute' as const,
+    width: 22,
+    height: 22,
+    backgroundColor: colors.white,
+    borderRadius: borderRadius.md,
+    marginLeft: -10,
+    top: -2,
+    ...shadows.lg,
   },
   divider: {
     height: 1,

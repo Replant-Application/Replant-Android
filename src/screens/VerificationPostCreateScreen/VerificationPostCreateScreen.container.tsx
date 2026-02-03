@@ -3,7 +3,8 @@
  * 인증글 작성/수정 화면: 인증글 작성, 수정, 이미지 업로드
  */
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { PanResponder, View } from 'react-native';
 import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types/navigation';
 import { createVerification, updateVerification, getVerification } from '../../api/missionApi';
@@ -68,8 +69,55 @@ export const useVerificationPostCreateScreenContainer = ({
   const [loadingData, setLoadingData] = useState(isEditMode);
   // 수정 모드에서 API로 불러온 userMissionId (수정 요청 시 백엔드 검증 통과용)
   const [loadedUserMissionId, setLoadedUserMissionId] = useState<number | null>(null);
-  // 완료 정도 슬라이더 상태 (기본값 50%, 0~100% 5% 단위)
-  const [completionRate, setCompletionRate] = useState(50);
+  // 완료 정도 슬라이더 상태 (기본값 100%, 0~100% 5% 단위)
+  const [completionRate, setCompletionRate] = useState(100);
+  const sliderRef = useRef<View>(null);
+  const isMountedRef = useRef(true);
+
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
+
+  /** 완료 정도 슬라이더 PanResponder (감정일기 슬라이더와 동일한 터치 동작) */
+  const panResponder = useMemo(
+    () =>
+      PanResponder.create({
+        onStartShouldSetPanResponder: () => true,
+        onMoveShouldSetPanResponder: (_, gestureState) =>
+          Math.abs(gestureState.dx) > Math.abs(gestureState.dy),
+        onPanResponderGrant: evt => {
+          if (!evt.nativeEvent || !sliderRef.current) return;
+          evt.persist();
+          const pageX = evt.nativeEvent.pageX;
+          if (pageX == null || isNaN(pageX)) return;
+          (sliderRef.current as any).measure((_x: number, _y: number, width: number, _height: number, sliderPageX: number) => {
+            if (!isMountedRef.current || width === 0 || sliderPageX == null || isNaN(sliderPageX)) return;
+            const touchX = pageX - sliderPageX;
+            const raw = (touchX / width) * 100;
+            const snapped = Math.round(raw / 5) * 5;
+            setCompletionRate(Math.max(0, Math.min(100, snapped)));
+          });
+        },
+        onPanResponderMove: evt => {
+          if (!evt.nativeEvent || !sliderRef.current) return;
+          evt.persist();
+          const pageX = evt.nativeEvent.pageX;
+          if (pageX == null || isNaN(pageX)) return;
+          (sliderRef.current as any).measure((_x: number, _y: number, width: number, _height: number, sliderPageX: number) => {
+            if (!isMountedRef.current || width === 0 || sliderPageX == null || isNaN(sliderPageX)) return;
+            const touchX = pageX - sliderPageX;
+            const raw = (touchX / width) * 100;
+            const snapped = Math.round(raw / 5) * 5;
+            setCompletionRate(Math.max(0, Math.min(100, snapped)));
+          });
+        },
+        onPanResponderRelease: () => {},
+      }),
+    []
+  );
 
   /**
    * 필수 파라미터 체크
@@ -452,5 +500,7 @@ export const useVerificationPostCreateScreenContainer = ({
     handleErrorModalClose,
     handleSliderChange,
     getEncouragementMessage,
+    sliderRef,
+    panResponder,
   };
 };

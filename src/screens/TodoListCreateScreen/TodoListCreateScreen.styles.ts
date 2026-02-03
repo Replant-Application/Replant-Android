@@ -302,25 +302,26 @@ export const styles = StyleSheet.create({
     fontSize: typography.fontSize.xs, 
     color: colors.blue[600], 
     backgroundColor: colors.blue[100], 
-    paddingVertical: 2, 
-    paddingHorizontal: spacing[2], 
-    borderRadius: borderRadius.sm 
+    paddingVertical: spacing[1], 
+    paddingHorizontal: spacing[3], 
+    borderRadius: borderRadius.sm,
+    textAlign: 'center',
   },
   missionExpContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing[1],
     backgroundColor: '#FFF3E0',
-    paddingVertical: 2,
-    paddingHorizontal: spacing[2],
+    paddingVertical: spacing[1],
+    paddingHorizontal: spacing[3],
     borderRadius: borderRadius.sm,
   },
   sunIcon: {
-    width: 14,
-    height: 14,
+    width: 18,
+    height: 18,
   },
   missionExp: {
-    ...createTextStyle('xs', {
+    ...createTextStyle('sm', {
       color: '#FF9800',
       fontWeight: typography.fontWeight.medium,
     }),
@@ -549,9 +550,10 @@ export const styles = StyleSheet.create({
     fontSize: typography.fontSize.xs,
     color: colors.blue[600],
     backgroundColor: colors.blue[50],
-    paddingVertical: 2,
-    paddingHorizontal: spacing[2],
+    paddingVertical: spacing[1],
+    paddingHorizontal: spacing[3],
     borderRadius: borderRadius.sm,
+    textAlign: 'center',
   },
   timeMissionTime: {
     ...createTextStyle('sm', {
@@ -564,10 +566,15 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing[1],
+    backgroundColor: '#FFF3E0',
+    paddingVertical: spacing[1],
+    paddingHorizontal: spacing[3],
+    borderRadius: borderRadius.sm,
   },
   timeMissionExp: {
-    ...createTextStyle('xs', {
-      color: colors.text.secondary,
+    ...createTextStyle('sm', {
+      color: '#FF9800',
+      fontWeight: typography.fontWeight.medium,
     }),
   },
   timeMissionRemoveButton: { 
@@ -688,9 +695,10 @@ export const styles = StyleSheet.create({
     ...createTextStyle('xs', {
       color: colors.blue[600],
       backgroundColor: colors.blue[100],
-      paddingVertical: 2,
-      paddingHorizontal: spacing[2],
+      paddingVertical: spacing[1],
+      paddingHorizontal: spacing[3],
       borderRadius: borderRadius.sm,
+      textAlign: 'center',
     }),
   },
   missionListItemExpContainer: {
@@ -698,13 +706,13 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     gap: spacing[1],
     backgroundColor: '#FFF3E0',
-    paddingVertical: 2,
-    paddingHorizontal: spacing[2],
+    paddingVertical: spacing[1],
+    paddingHorizontal: spacing[3],
     borderRadius: borderRadius.sm,
   },
   missionListItemExp: {
-    ...createTextStyle('xs', {
-      color: '#000000',
+    ...createTextStyle('sm', {
+      color: '#FF9800',
       fontWeight: typography.fontWeight.medium,
     }),
   },

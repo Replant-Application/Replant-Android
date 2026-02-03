@@ -17,7 +17,6 @@ import {
   ImageBackground,
   Modal,
 } from 'react-native';
-import Slider from '@react-native-community/slider';
 import { Header, AlertModal, FullScreenImageViewer } from '../../components/ui';
 import { colors } from '../../utils/designTokens';
 import { NavigationProp, RouteProp } from '@react-navigation/native';
@@ -59,6 +58,8 @@ const VerificationPostCreateScreen: React.FC<VerificationPostCreateScreenProps> 
     completionRate,
     handleSliderChange,
     getEncouragementMessage,
+    sliderRef,
+    panResponder,
   } = useVerificationPostCreateScreenContainer({ navigation, route });
 
   const [showInfoMessage, setShowInfoMessage] = useState(false);
@@ -112,33 +113,34 @@ const VerificationPostCreateScreen: React.FC<VerificationPostCreateScreenProps> 
           </View>
         </View>
 
-        {/* 완료 정도 슬라이더 */}
+        {/* 완료 정도 슬라이더 (감정일기와 동일한 트랙·썸·± 버튼 스타일) */}
         <View style={styles.completionSection}>
           <View style={styles.completionHeader}>
             <Text style={styles.completionHeaderLabel}>
               완료 정도 <Text style={styles.completionPercent}>({completionRate}%)</Text>
             </Text>
           </View>
-          
           <View style={styles.sliderContainer}>
-            <Slider
-              style={styles.slider}
-              minimumValue={0}
-              maximumValue={100}
-              step={5}
-              value={completionRate}
-              onValueChange={handleSliderChange}
-              minimumTrackTintColor={colors.primary[500]}
-              maximumTrackTintColor={colors.gray[300]}
-              thumbTintColor={colors.primary[700]}
+            <View
+              ref={sliderRef}
+              style={styles.sliderTrack}
+              {...panResponder.panHandlers}
+              accessible={true}
               accessibilityRole="adjustable"
-              accessibilityLabel="완료 정도"
+              accessibilityLabel="완료 정도 슬라이더. 0%부터 100%까지 5% 단위로 조절할 수 있습니다."
               accessibilityValue={{ min: 0, max: 100, now: completionRate }}
-            />
-            <View style={styles.sliderLabels}>
-              <Text style={styles.sliderLabel}>0%</Text>
-              <Text style={styles.sliderLabel}>50%</Text>
-              <Text style={styles.sliderLabel}>100%</Text>
+            >
+              <View
+                style={[
+                  styles.sliderFill,
+                  { width: `${completionRate}%`, backgroundColor: colors.primary[500] },
+                ]}
+                accessibilityElementsHidden={true}
+              />
+              <View
+                style={[styles.sliderThumb, { left: `${completionRate}%` }]}
+                accessibilityElementsHidden={true}
+              />
             </View>
           </View>
 
@@ -168,15 +170,9 @@ const VerificationPostCreateScreen: React.FC<VerificationPostCreateScreenProps> 
           </View>
           {showInfoMessage && (
             <View style={styles.infoBox}>
-              <Image
-                source={require('../../assets/images/light.png')}
-                style={styles.infoIconImage}
-                resizeMode="contain"
-                accessibilityLabel="안내 아이콘"
-              />
               <Text style={styles.infoText}>
                 인증글을 작성하면 커뮤니티에 공개됩니다.{'\n'}
-                다른 사용자들의 좋아요를 받으면 미션이 완료됩니다.
+                다른 사용자의 좋아요를 받으면 미션이 완료됩니다.
               </Text>
             </View>
           )}
