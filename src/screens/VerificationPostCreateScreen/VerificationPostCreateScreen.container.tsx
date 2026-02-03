@@ -66,6 +66,8 @@ export const useVerificationPostCreateScreenContainer = ({
   const [showAlreadyExistsModal, setShowAlreadyExistsModal] = useState(false);
   const [showPhotoOptionsModal, setShowPhotoOptionsModal] = useState(false);
   const [loadingData, setLoadingData] = useState(isEditMode);
+  // 수정 모드에서 API로 불러온 userMissionId (수정 요청 시 백엔드 검증 통과용)
+  const [loadedUserMissionId, setLoadedUserMissionId] = useState<number | null>(null);
   // 완료 정도 슬라이더 상태 (기본값 50%, 0~100% 5% 단위)
   const [completionRate, setCompletionRate] = useState(50);
 
@@ -92,6 +94,9 @@ export const useVerificationPostCreateScreenContainer = ({
         setContent(result.data.content || '');
         if (result.data.imageUrls && result.data.imageUrls.length > 0) {
           setImages(result.data.imageUrls); // 다중 이미지 지원
+        }
+        if (result.data.userMissionId != null) {
+          setLoadedUserMissionId(result.data.userMissionId);
         }
         // 기존 완료 정도 로드
         if (result.data.completionRate !== undefined) {
@@ -301,11 +306,12 @@ export const useVerificationPostCreateScreenContainer = ({
       setLoading(true);
 
       if (isEditMode) {
-        // 수정 모드
+        // 수정 모드 (백엔드 DTO 검증 통과를 위해 userMissionId 포함)
         const result = await updateVerification(verificationId, {
           content: content.trim(),
           imageUrls: images.length > 0 ? images : undefined, // 다중 이미지 배열 (있을 때만 전달)
           completionRate: completionRate,
+          userMissionId: loadedUserMissionId ?? undefined,
         });
 
         if (result.success) {
@@ -367,6 +373,7 @@ export const useVerificationPostCreateScreenContainer = ({
     verificationId,
     images,
     completionRate,
+    loadedUserMissionId,
     showError,
     todoListId,
   ]);

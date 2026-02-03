@@ -656,7 +656,7 @@ export const createVerification = async (
  */
 export const updateVerification = async (
   verificationId: number,
-  data: { content?: string; imageUrls?: string[]; completionRate?: number }
+  data: { content?: string; imageUrls?: string[]; completionRate?: number; userMissionId?: number }
 ): Promise<ServiceResult<VerificationPost>> => {
   const endpoint = API_CONFIG.endpoints.verification.update.replace(':verificationId', String(verificationId));
   return apiClient.put<VerificationPost>(endpoint, data);
