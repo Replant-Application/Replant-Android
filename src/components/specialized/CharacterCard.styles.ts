@@ -58,12 +58,14 @@ export const styles = StyleSheet.create({
   },
   levelText: {
     ...createTextStyle('sm', {
-      fontWeight: typography.fontWeight.medium,
+      fontWeight: typography.fontWeight.bold,
       color: colors.primary[500],
     }),
   },
   expText: {
-    ...createSecondaryTextStyle('sm'),
+    ...createSecondaryTextStyle('sm', {
+      fontWeight: typography.fontWeight.bold,
+    }),
   },
   progressBar: {
     height: 8,
@@ -80,6 +82,7 @@ export const styles = StyleSheet.create({
   nextLevelText: {
     ...createSecondaryTextStyle('xs', {
       textAlign: 'center',
+      fontWeight: typography.fontWeight.bold,
     }),
   },
 });
