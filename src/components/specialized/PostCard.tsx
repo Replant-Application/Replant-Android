@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, Image, ViewStyle, Alert } from 'react-native';
+import { ConfirmModal } from '../ui';
 import { styles } from './PostCard.styles';
 import { CommunityPost } from '../../types';
 import { formatTimeAgo } from '../../utils/dateUtils';
@@ -29,6 +30,7 @@ const PostCard: React.FC<PostCardProps> = ({
   style
 }) => {
   const [showMenu, setShowMenu] = useState(false);
+  const [showHideConfirmModal, setShowHideConfirmModal] = useState(false);
   
   // 본인 게시글인지 확인 (백엔드에서 제공하는 isAuthor 필드 사용)
   // 로그인한 경우에만 isAuthor가 올바르게 설정됨
@@ -69,17 +71,16 @@ const PostCard: React.FC<PostCardProps> = ({
 
   const handleHide = () => {
     setShowMenu(false);
-    Alert.alert(
-      '게시글 숨기기',
-      '이 게시글을 숨기시겠습니까? 숨긴 게시글은 목록에서 보이지 않습니다.',
-      [
-        { text: '취소', style: 'cancel' },
-        {
-          text: '숨기기',
-          onPress: () => onHide?.(post.post_id)
-        }
-      ]
-    );
+    setShowHideConfirmModal(true);
+  };
+
+  const handleHideConfirm = () => {
+    setShowHideConfirmModal(false);
+    onHide?.(post.post_id);
+  };
+
+  const handleHideCancel = () => {
+    setShowHideConfirmModal(false);
   };
   if (!post) return null;
 
@@ -104,6 +105,7 @@ const PostCard: React.FC<PostCardProps> = ({
   };
 
   return (
+    <>
     <TouchableOpacity
       style={[styles.container, style]}
       onPress={() => onPress?.(post.post_id)}
@@ -318,6 +320,17 @@ const PostCard: React.FC<PostCardProps> = ({
         </View>
       </View>
     </TouchableOpacity>
+
+    <ConfirmModal
+      visible={showHideConfirmModal}
+      title="게시글 숨기기"
+      message="게시글을 숨기시겠습니까?\n숨긴 글은 목록에 보이지 않습니다."
+      confirmText="확인"
+      cancelText="취소"
+      onConfirm={handleHideConfirm}
+      onCancel={handleHideCancel}
+    />
+    </>
   );
 };
 

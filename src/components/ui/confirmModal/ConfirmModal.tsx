@@ -38,6 +38,10 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
   confirmButtonColor = colors.error,
   image,
 }) => {
+  // 리터럴 '\n' 문자열을 실제 줄바꿈으로 변환 (AlertModal과 동일)
+  const normalizedMessage =
+    typeof message === 'string' ? message.replace(/\\n/g, '\n') : String(message ?? '');
+
   return (
     <Modal
       visible={visible}
@@ -56,7 +60,16 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
             />
           )}
           <Text style={styles.title} accessibilityRole="header">{title}</Text>
-          <Text style={styles.message}>{message}</Text>
+          <View style={styles.messageWrap}>
+            {normalizedMessage.split(/\n/).map((line, index) => (
+              <Text
+                key={index}
+                style={[styles.message, index > 0 && styles.messageLine]}
+              >
+                {line}
+              </Text>
+            ))}
+          </View>
           <View style={styles.buttonContainer}>
             <TouchableOpacity
               style={[styles.button, styles.cancelButton]}
