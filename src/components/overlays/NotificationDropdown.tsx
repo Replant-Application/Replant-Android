@@ -21,7 +21,7 @@ import {
 } from 'react-native';
 import { useOverlay } from '../../contexts/OverlayContext';
 import { getNotifications, markNotificationAsRead } from '../../api/notificationApi';
-import { getCurrentSpontaneousMissions, getCurrentWakeupMission } from '../../api/missionApi';
+import { getCurrentSpontaneousMissions } from '../../api/missionApi';
 import { getMealLogDetail } from '../../api/mealLogApi';
 import { formatTimeAgo } from '../../utils/dateUtils';
 import { SCREEN_NAMES } from '../../utils/constants';
@@ -231,36 +231,12 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
         }
 
         try {
-          if (type === 'SPONTANEOUS_WAKE_UP') {
-            const missionId = typeof referenceId === 'string' ? Number(referenceId) : referenceId;
-            console.log('[기상미션] getCurrentWakeupMission 호출 missionId=', missionId);
-            const currentWakeupResult = await getCurrentWakeupMission();
-            console.log('[기상미션] API 결과 success=', currentWakeupResult.success, 'data=', currentWakeupResult.data ? { id: currentWakeupResult.data.id, canVerify: currentWakeupResult.data.canVerify, remainingSeconds: currentWakeupResult.data.remainingSeconds } : null, 'error=', currentWakeupResult.error);
-            
-            if (!currentWakeupResult.success || !currentWakeupResult.data) {
-              console.log('[기상미션] API 없음/실패 → referenceId로 화면 이동 missionId=', missionId);
-              onNavigate(SCREEN_NAMES.WAKE_UP_VERIFICATION, {
-                userMissionId: missionId,
-              });
-              return;
-            }
-            
-            const wakeupMission = currentWakeupResult.data;
-            const idMatch = wakeupMission.id === missionId;
-            const notCompleted = wakeupMission.status !== 'COMPLETED';
-            const canVerify = wakeupMission.canVerify;
-            console.log('[기상미션] 판정 id일치=', idMatch, 'status=', wakeupMission.status, 'canVerify=', canVerify);
-            
-            if (idMatch && notCompleted && canVerify) {
-              console.log('[기상미션] 인증 화면 이동 missionId=', missionId);
-              onNavigate(SCREEN_NAMES.WAKE_UP_VERIFICATION, {
-                userMissionId: missionId,
-              });
-            } else {
-              console.warn('[기상미션] 이동 불가(이미 완료/만료) missionId=', missionId);
-              showAlertModal('알림', '이미 수행한 미션이거나 만료된 미션입니다.');
-            }
-          }
+          const missionId = typeof referenceId === 'string' ? Number(referenceId) : referenceId;
+          // 알림의 referenceId(= userMissionId)로 항상 인증 화면 이동. 이미 완료된 미션이면 화면/API에서 처리
+          console.log('[기상미션] 인증 화면 이동 userMissionId=', missionId);
+          onNavigate(SCREEN_NAMES.WAKE_UP_VERIFICATION, {
+            userMissionId: missionId,
+          });
           // [잠시 제외] 식사 미션 (SPONTANEOUS_MEAL)
           // } else if (type === 'SPONTANEOUS_MEAL') {
           //   // 식사 미션 → 돌발 미션 API 사용

@@ -11,7 +11,7 @@ import {
   deleteNotification,
   type Notification as NotificationType
 } from '../../api/notificationApi';
-import { getCurrentSpontaneousMissions, getCurrentWakeupMission } from '../../api/missionApi';
+import { getCurrentSpontaneousMissions } from '../../api/missionApi';
 import { getMealLogDetail } from '../../api/mealLogApi';
 import { SCREEN_NAMES } from '../../utils/constants';
 import { useSse } from '../../contexts/SseContext';
@@ -394,34 +394,12 @@ export const useNotificationScreenContainer = ({
       }
 
       try {
-        if (type === 'SPONTANEOUS_WAKE_UP') {
-          // 기상 미션 → 현재 진행 중인 미션 확인
-          const currentWakeupResult = await getCurrentWakeupMission();
-          
-          const missionId = typeof referenceId === 'string' ? Number(referenceId) : referenceId;
-          
-          // 백엔드 API가 아직 구현되지 않은 경우 referenceId만으로 진행 (하위 호환성)
-          if (!currentWakeupResult.success || !currentWakeupResult.data) {
-            console.log('[NotificationScreen] 기상 미션 API 미구현 또는 미션 없음, referenceId로 진행:', missionId);
-            // 백엔드가 구현되지 않은 경우에도 알림으로 받은 referenceId를 사용하여 진행
-            safeNavigation.navigate(SCREEN_NAMES.WAKE_UP_VERIFICATION as any, {
-              userMissionId: missionId,
-            });
-            return;
-          }
-          
-          const wakeupMission = currentWakeupResult.data;
-          
-          // 미션 ID가 일치하고 완료되지 않은 경우만 이동
-          if (wakeupMission.id === missionId && wakeupMission.status !== 'COMPLETED' && wakeupMission.canVerify) {
-            console.log('[NotificationScreen] 기상 미션 인증 화면으로 이동, missionId:', missionId);
-            safeNavigation.navigate(SCREEN_NAMES.WAKE_UP_VERIFICATION as any, {
-              userMissionId: missionId,
-            });
-          } else {
-            showAlertModal('알림', '이미 수행한 미션이거나 만료된 미션입니다.');
-          }
-        }
+        const missionId = typeof referenceId === 'string' ? Number(referenceId) : referenceId;
+        // 알림의 referenceId(= userMissionId)로 항상 인증 화면 이동. 이미 완료된 미션이면 화면/API에서 처리
+        console.log('[NotificationScreen] 기상 미션 인증 화면으로 이동, userMissionId:', missionId);
+        safeNavigation.navigate(SCREEN_NAMES.WAKE_UP_VERIFICATION as any, {
+          userMissionId: missionId,
+        });
         // [잠시 제외] 식사 미션 (SPONTANEOUS_MEAL)
         // } else if (type === 'SPONTANEOUS_MEAL') {
         //   // 식사 미션 → 돌발 미션 API 사용
