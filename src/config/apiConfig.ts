@@ -215,8 +215,8 @@ export const API_CONFIG = {
     spontaneousMission: {
       setup: '/spontaneous-missions/setup',
       verify: '/spontaneous-missions/:missionId/verify',
-      wakeupCurrent: '/spontaneous-missions/wakeup/current',
-      wakeupVerify: '/spontaneous-missions/wakeup/verify',
+      wakeupCurrent: '/missions/my/wakeup/current', // 백엔드 UserMissionController 경로와 일치
+      wakeupVerify: '/missions/my/wakeup/verify-time',
       current: '/spontaneous-missions/current',
       byDate: '/spontaneous-missions/date',
     },
