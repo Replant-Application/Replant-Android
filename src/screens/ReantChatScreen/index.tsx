@@ -23,10 +23,16 @@ import { sendChatMessage } from '../../api/chatApi';
 import { SCREEN_NAMES } from '../../utils/constants';
 import { styles } from './ReantChatScreen.styles';
 
-// 추천 메시지 (은둔형 외톨이 등 응원·대화 유도) — 두 개만
-const RECOMMENDED_MESSAGES = [
+// 추천 메시지 풀 (은둔형 외톨이 등 응원·대화 유도). 전송한 칩은 같은 자리에 다른 문구로 교체
+const RECOMMENDED_MESSAGES_POOL = [
   '나를 응원하는 말을 해줘',
   '오늘 하루 잘 보내고 싶어',
+  '오늘 기분이 안 좋아',
+  '할 일이 너무 많아서 힘들어',
+  '잠깐 대화할 수 있을까?',
+  '오늘 하루 어땠어?',
+  '심심해',
+  '조언이 필요해',
 ];
 
 // 시간대별 배경 이미지 결정
@@ -40,6 +46,16 @@ interface ReantChatScreenProps {
   route?: any;
 }
 
+// 현재 표시 중인 두 칩이 아닌 풀에서 랜덤 선택
+const pickReplacementChip = (currentChips: [string, string], replaceIndex: 0 | 1): string => {
+  const other = currentChips[1 - replaceIndex];
+  const candidates = RECOMMENDED_MESSAGES_POOL.filter(
+    (m) => m !== currentChips[replaceIndex] && m !== other
+  );
+  if (candidates.length === 0) return RECOMMENDED_MESSAGES_POOL[0];
+  return candidates[Math.floor(Math.random() * candidates.length)];
+};
+
 const ReantChatScreen: React.FC<ReantChatScreenProps> = ({ navigation, route: _route }) => {
   const { characters } = useCharacter();
   const currentCharacter = characters.length > 0 ? characters[0] : null;
@@ -48,8 +64,14 @@ const ReantChatScreen: React.FC<ReantChatScreenProps> = ({ navigation, route: _r
   const [currentReantMessage, setCurrentReantMessage] = useState<string>('');
   const [displayedMessage, setDisplayedMessage] = useState<string>('');
   const [backgroundType] = useState<'day' | 'night'>(getBackgroundImage());
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false); // 사용자가 메시지 전송 중일 때만 true
+  const [isWelcomeLoading, setIsWelcomeLoading] = useState(true); // 화면 진입 시 인사 메시지 로딩
   const [error, setError] = useState<string | null>(null);
+  // 표시 중인 추천 칩 두 개. 전송한 칩은 같은 자리에 다른 문구로 교체
+  const [recommendedChips, setRecommendedChips] = useState<[string, string]>(() => [
+    RECOMMENDED_MESSAGES_POOL[0],
+    RECOMMENDED_MESSAGES_POOL[1],
+  ]);
   
   // 둥둥 떠다니는 사용자 메시지
   const [floatingMessage, setFloatingMessage] = useState<string | null>(null);
@@ -82,12 +104,12 @@ const ReantChatScreen: React.FC<ReantChatScreenProps> = ({ navigation, route: _r
     });
   }, [screenFadeAnim]);
 
-  // 화면 진입 시 인사 메시지
+  // 화면 진입 시 인사 메시지 (전송 버튼 스피너는 사용자 전송 시에만 표시)
   useEffect(() => {
     const fetchWelcomeMessage = async () => {
-      setIsLoading(true);
+      setIsWelcomeLoading(true);
       const result = await sendChatMessage('안녕');
-      setIsLoading(false);
+      setIsWelcomeLoading(false);
 
       if (result.success && result.data) {
         setCurrentReantMessage(result.data.message);
@@ -156,11 +178,20 @@ const ReantChatScreen: React.FC<ReantChatScreenProps> = ({ navigation, route: _r
   }, [floatingAnim]);
 
   const handleSend = async () => {
-    if (!inputText.trim() || !currentCharacter || isLoading) return;
+    if (!inputText.trim() || !currentCharacter || isLoading || isWelcomeLoading) return;
 
     const messageText = inputText.trim();
     setInputText('');
     setError(null);
+
+    // 전송한 문구가 추천 칩 중 하나면, 그 자리를 다른 추천 문구로 교체
+    setRecommendedChips((prev) => {
+      const idx = prev.indexOf(messageText);
+      if (idx === -1) return prev;
+      const newChip = pickReplacementChip(prev, idx as 0 | 1);
+      const next: [string, string] = idx === 0 ? [newChip, prev[1]] : [prev[0], newChip];
+      return next;
+    });
 
     // 둥둥 떠다니는 메시지 표시
     showFloatingMessage(messageText);
@@ -299,7 +330,7 @@ const ReantChatScreen: React.FC<ReantChatScreenProps> = ({ navigation, route: _r
                         resizeMode="stretch"
                       >
                         <View style={styles.speechTextContainer}>
-                          {isLoading ? (
+                          {(isLoading || isWelcomeLoading) ? (
                             <View style={styles.loadingContainer}>
                               <ActivityIndicator size="small" color="#666" />
                               <Text style={styles.loadingText}>생각 중...</Text>
@@ -340,7 +371,7 @@ const ReantChatScreen: React.FC<ReantChatScreenProps> = ({ navigation, route: _r
               <Text style={styles.errorText}>⚠️ {error}</Text>
             )}
             <View style={styles.recommendedChipsContainer}>
-              {RECOMMENDED_MESSAGES.map((msg) => (
+              {recommendedChips.map((msg) => (
                 <TouchableOpacity
                   key={msg}
                   style={styles.recommendedChip}
@@ -368,14 +399,14 @@ const ReantChatScreen: React.FC<ReantChatScreenProps> = ({ navigation, route: _r
               <TouchableOpacity
                 style={[
                   styles.sendButton,
-                  (!inputText.trim() || isLoading) && styles.sendButtonDisabled,
+                  (!inputText.trim() || isLoading || isWelcomeLoading) && styles.sendButtonDisabled,
                 ]}
                 onPress={handleSend}
-                disabled={!inputText.trim() || isLoading}
+                disabled={!inputText.trim() || isLoading || isWelcomeLoading}
                 activeOpacity={0.7}
                 accessibilityRole="button"
                 accessibilityLabel="전송"
-                accessibilityState={{ disabled: !inputText.trim() || isLoading }}
+                accessibilityState={{ disabled: !inputText.trim() || isLoading || isWelcomeLoading }}
               >
                 {isLoading ? (
                   <ActivityIndicator size="small" color="#fff" />
