@@ -316,7 +316,7 @@ export const useWakeUpVerificationScreenContainer = ({
       const assignedTime = new Date(userMission.assignedAt).getTime();
       const now = Date.now();
       const elapsed = Math.floor((now - assignedTime) / 1000);
-      const remaining = 3600 - elapsed;
+      const remaining = 86400 - elapsed; // 1일 = 24*60*60
       if (remaining <= 0) {
         if (!expiredLoggedRef.current) {
           expiredLoggedRef.current = true;
@@ -384,7 +384,7 @@ export const useWakeUpVerificationScreenContainer = ({
    */
   const handleVerify = useCallback(async () => {
     if (isExpired || (timeRemaining !== null && timeRemaining <= 0)) {
-      setErrorMessage('1시간이 지나 인증할 수 없습니다.');
+      setErrorMessage('1일이 지나 인증할 수 없습니다.');
       setShowErrorModal(true);
       return;
     }

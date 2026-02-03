@@ -177,7 +177,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
             <View style={styles.divider} />
             <SettingItem
               icon={require('../../assets/images/surprised_mission.png')}
-              title="돌발 미션 설정"
+              title="기상 미션 설정"
               onPress={() => navigation?.navigate('SpontaneousMissionSetup' as any, { mode: 'edit' })}
             />
             <View style={styles.divider} />
