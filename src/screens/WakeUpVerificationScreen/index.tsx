@@ -146,7 +146,7 @@ const WakeUpVerificationScreen: React.FC<WakeUpVerificationScreenProps> = ({ nav
                     <View 
                       style={[
                         styles.progressFill,
-                        { width: `${(timeRemaining / (6 * 3600)) * 100}%` },
+                        { width: `${(timeRemaining / (10 * 60)) * 100}%` },
                         timeRemaining <= 10 && styles.progressFillWarning,
                       ]} 
                     />
@@ -156,7 +156,7 @@ const WakeUpVerificationScreen: React.FC<WakeUpVerificationScreenProps> = ({ nav
             </View>
             {isExpired && (
               <Text style={styles.expiredMessage}>
-                6시간이 지나 인증할 수 없습니다.
+                10분이 지나 인증할 수 없습니다.
               </Text>
             )}
             {timeRemaining !== null && timeRemaining <= 10 && !isExpired && (
@@ -191,7 +191,7 @@ const WakeUpVerificationScreen: React.FC<WakeUpVerificationScreenProps> = ({ nav
           {/* 안내 메시지 */}
           <View style={styles.infoContainer}>
             <Text style={styles.infoText}>
-              • 알림 후 6시간 이내에 인증 버튼을 눌러주세요
+              • 알림 후 10분 이내에 인증 버튼을 눌러주세요
             </Text>
           </View>
         </View>
