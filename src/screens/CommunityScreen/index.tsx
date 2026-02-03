@@ -11,7 +11,7 @@ import { formatDateKorean } from '../../utils/dateUtils';
 import { PostCard } from '../../components/specialized';
 import { Loading, ErrorBoundary, EmptyState, Header, AlertModal, ConfirmModal } from '../../components/ui';
 import { colors } from '../../utils/designTokens';
-import { CommunityScreenProps, CommunityTab, VerificationFilter } from '../../types/screens/community';
+import { CommunityScreenProps, VerificationFilter } from '../../types/screens/community';
 import { FILTER_OPTIONS } from '../../constants/screens/community';
 import MissionSetList from './components/MissionSetList';
 import MissionSetDetailScreen from '../MissionSetDetailScreen';

@@ -71,8 +71,8 @@ const MissionGroupList: React.FC<MissionGroupListProps> = ({
   onRefresh,
   onSortChange,
   onShowOnlyParticipatedChange,
-  getVerificationTypeLabel,
-  getVerificationTypeIcon,
+  getVerificationTypeLabel: _getVerificationTypeLabel,
+  getVerificationTypeIcon: _getVerificationTypeIcon,
   getMissionCategoryLabel,
 }) => {
   const [showSortDropdown, setShowSortDropdown] = useState(false);
