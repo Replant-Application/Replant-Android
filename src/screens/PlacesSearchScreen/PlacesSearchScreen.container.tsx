@@ -37,13 +37,13 @@ export const usePlacesSearchScreenContainer = ({
   /**
    * 위치 기반 장소 검색
    * - userLocation이 있으면 자동으로 검색
-   * - 필터 변경 시 재검색
+   * - 필터·지역 변경 시 재검색
    */
   useEffect(() => {
     if (userLocation) {
-      searchPlaces(userLocation.lat, userLocation.lng, selectedFilter);
+      searchPlaces(userLocation.lat, userLocation.lng, selectedFilter, selectedRegion);
     }
-  }, [userLocation, selectedFilter, searchPlaces]);
+  }, [userLocation, selectedFilter, selectedRegion, searchPlaces]);
 
   /**
    * 검색어 변경 핸들러

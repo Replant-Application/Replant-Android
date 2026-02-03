@@ -1,5 +1,6 @@
 import { useState, useCallback, useMemo } from 'react';
 import placesService, { Place } from '../services/placesService';
+import { REGIONS } from '../constants/screens/placesSearch';
 
 type PlaceFilter = 'all' | 'counseling' | 'mental_health';
 
@@ -13,7 +14,8 @@ export const usePlacesSearch = () => {
   const searchPlaces = useCallback(async (
     userLat: number,
     userLng: number,
-    filter: PlaceFilter
+    filter: PlaceFilter,
+    regionId: string = 'all'
   ) => {
     setIsLoading(true);
     try {
@@ -21,10 +23,15 @@ export const usePlacesSearch = () => {
         ? ['counseling', 'mental_health', 'social_services']
         : [filter];
 
+      const regionName = regionId === 'all'
+        ? 'all'
+        : (REGIONS.find((r) => r.id === regionId)?.location ?? '서울');
+
       const results = await placesService.searchByUserLocation(
         userLat,
         userLng,
-        searchTypes
+        searchTypes,
+        regionName
       );
       setPlaces(results);
     } catch (error) {
@@ -36,13 +43,17 @@ export const usePlacesSearch = () => {
   }, []);
 
   const filteredPlaces = useMemo(() => {
+    const regionLocation = selectedRegion === 'all'
+      ? null
+      : (REGIONS.find((r) => r.id === selectedRegion)?.location ?? null);
+
     return places.filter((place) => {
       const matchesSearch = searchText.trim() === '' ||
         place.name.toLowerCase().includes(searchText.toLowerCase()) ||
         place.formatted_address.toLowerCase().includes(searchText.toLowerCase());
 
-      const matchesRegion = selectedRegion === 'all' ||
-        place.formatted_address.includes(selectedRegion);
+      const matchesRegion = regionLocation === null ||
+        place.formatted_address.includes(regionLocation);
 
       return matchesSearch && matchesRegion;
     });
