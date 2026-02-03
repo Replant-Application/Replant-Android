@@ -71,7 +71,7 @@ const PlacesSearchScreen: React.FC<PlacesSearchScreenProps> = ({ navigation }) =
             placeholder="장소 이름 또는 주소로 검색"
             value={searchText}
             onChangeText={handleSearchChange}
-            placeholderTextColor={colors.text.secondary}
+            placeholderTextColor={colors.text.primary}
             accessibilityLabel="장소 검색"
             accessibilityHint="장소 이름 또는 주소로 검색"
           />

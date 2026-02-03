@@ -3,7 +3,7 @@
  * 장소 검색 화면의 모든 스타일 정의
  */
 
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Platform } from 'react-native';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
 import { getOptimizedLineHeight } from '../../utils/styles/textStyles';
 import { createTextStyle, createSecondaryTextStyle } from '../../utils/styles/textStyles';
@@ -33,9 +33,10 @@ export const styles = StyleSheet.create({
     ...inputStyles.base(),
     padding: spacing[2],
     fontSize: typography.fontSize.base,
-    color: colors.text.primary,
     textAlignVertical: 'center',
     lineHeight: getOptimizedLineHeight(typography.fontSize.base),
+    fontFamily: Platform.select({ ios: undefined, android: typography.fontFamily.regular }),
+    color: colors.text.primary,
   },
   filterContainer: {
     marginBottom: spacing[3],
