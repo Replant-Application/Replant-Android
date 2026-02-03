@@ -89,42 +89,19 @@ const CommunityPostCreateScreen: React.FC<CommunityPostCreateScreenProps> = ({ n
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
       >
-        {/* 미션 정보 표시 */}
-        <View style={styles.missionInfo}>
-          <Image
-            source={isGeneralPost
-              ? require('../../assets/images/pencil.png')
-              : require('../../assets/images/alarm.png')
-            }
-            style={styles.missionIcon}
-            resizeMode="contain"
-            accessibilityLabel={isGeneralPost ? "일반 게시글 아이콘" : "인증 게시글 아이콘"}
-          />
-          <View style={styles.missionTextContainer}>
-            <Text style={styles.missionLabel}>
-              {isGeneralPost ? '게시판' : '완료한 미션'}
-            </Text>
-            <Text style={styles.missionTitle}>{missionTitle}</Text>
-          </View>
-        </View>
-
-        {/* 일반글만: 비공개 선택 (체크박스, 투두 하루종일과 동일 스타일) */}
-        {isGeneralPost && (
-          <View style={styles.inputSection}>
-            <TouchableOpacity
-              style={styles.privateCheckboxRow}
-              onPress={() => setIsPublic(!isPublic)}
-              activeOpacity={0.7}
-              accessibilityRole="checkbox"
-              accessibilityLabel="비공개로 작성"
-              accessibilityState={{ checked: !isPublic }}
-              accessibilityHint="체크하면 작성자만 볼 수 있는 비공개 글로 등록됩니다"
-            >
-              <Text style={styles.privateCheckboxLabel}>비공개로 작성</Text>
-              <View style={[styles.privateCheckbox, !isPublic && styles.privateCheckboxSelected]}>
-                {!isPublic && <Text style={styles.privateCheckmark}>✓</Text>}
-              </View>
-            </TouchableOpacity>
+        {/* 인증글만: 미션 정보 표시 (일반글은 게시판 하나뿐이라 생략) */}
+        {!isGeneralPost && (
+          <View style={styles.missionInfo}>
+            <Image
+              source={require('../../assets/images/alarm.png')}
+              style={styles.missionIcon}
+              resizeMode="contain"
+              accessibilityLabel="인증 게시글 아이콘"
+            />
+            <View style={styles.missionTextContainer}>
+              <Text style={styles.missionLabel}>완료한 미션</Text>
+              <Text style={styles.missionTitle}>{missionTitle}</Text>
+            </View>
           </View>
         )}
 
@@ -316,6 +293,26 @@ const CommunityPostCreateScreen: React.FC<CommunityPostCreateScreenProps> = ({ n
                 <Text style={styles.sliderMaxLabel}>5</Text>
               </View>
             </View>
+          </View>
+        )}
+
+        {/* 일반글만: 비공개 선택 (등록 버튼 바로 위) */}
+        {isGeneralPost && (
+          <View style={[styles.inputSection, styles.privateSection]}>
+            <TouchableOpacity
+              style={styles.privateCheckboxRow}
+              onPress={() => setIsPublic(!isPublic)}
+              activeOpacity={0.7}
+              accessibilityRole="checkbox"
+              accessibilityLabel="비공개로 작성"
+              accessibilityState={{ checked: !isPublic }}
+              accessibilityHint="체크하면 작성자만 볼 수 있는 비공개 글로 등록됩니다"
+            >
+              <Text style={styles.privateCheckboxLabel}>비공개로 작성</Text>
+              <View style={[styles.privateCheckbox, !isPublic && styles.privateCheckboxSelected]}>
+                {!isPublic && <Text style={styles.privateCheckmark}>✓</Text>}
+              </View>
+            </TouchableOpacity>
           </View>
         )}
 

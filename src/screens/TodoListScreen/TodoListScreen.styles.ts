@@ -232,7 +232,7 @@ export const styles = StyleSheet.create({
   },
   progressFill: {
     height: '100%',
-    backgroundColor: '#8B6F47',
+    backgroundColor: '#4CAF50',
     borderRadius: borderRadius.full,
   },
   progressFillCompleted: {

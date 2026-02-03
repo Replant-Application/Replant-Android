@@ -103,6 +103,9 @@ export const styles = StyleSheet.create({
       fontWeight: typography.fontWeight.medium,
     }),
   },
+  privateSection: {
+    marginTop: spacing[2],
+  },
   label: {
     ...createTitleStyle('base', {
       color: colors.text.secondary,
@@ -137,7 +140,7 @@ export const styles = StyleSheet.create({
     bottom: 0,
   },
   noteLine: {
-    height: 28,
+    height: 36,
     borderBottomWidth: 1,
     borderBottomColor: '#e8e8e8',
   },
@@ -145,7 +148,7 @@ export const styles = StyleSheet.create({
     ...inputStyles.base(),
     backgroundColor: 'transparent',
     padding: spacing[3],
-    paddingTop: spacing[2],
+    paddingTop: spacing[3],
     fontSize: typography.fontSize.base,
     color: colors.text.primary,
     height: 154,
