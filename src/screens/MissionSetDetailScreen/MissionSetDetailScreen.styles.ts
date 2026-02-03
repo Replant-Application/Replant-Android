@@ -106,45 +106,84 @@ export const styles = StyleSheet.create({
   },
   missionItem: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     backgroundColor: colors.background.primary,
     borderRadius: borderRadius.lg,
     padding: spacing[4],
     borderWidth: 1,
     borderColor: colors.border.light,
   },
-  missionNumber: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: colors.primary[100],
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: spacing[3],
-  },
-  missionNumberText: {
-    ...createTextStyle('sm', {
-      fontWeight: typography.fontWeight.medium,
-      color: colors.primary[600],
-    }),
-  },
-  missionTitleRow: {
+  missionContent: {
     flex: 1,
+  },
+  missionTitleBlock: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 0,
+    marginBottom: spacing[2],
+  },
+  missionBadgesBelow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing[2],
+    flexWrap: 'wrap',
   },
   missionTitle: {
-    flex: 1,
     ...createBodyStyle('base'),
+    marginRight: spacing[1],
+  },
+  missionTitleText: {
+    ...createBodyStyle('base'),
+    flex: 1,
+    flexShrink: 1,
+  },
+  missionTypeBadge: {
+    paddingVertical: 4,
+    paddingHorizontal: spacing[2],
+    borderRadius: borderRadius.sm,
+    minWidth: 52,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  /** 공식: 완료(녹색)와 구분되도록 파란색 계열 */
+  missionTypeBadgeOfficial: {
+    backgroundColor: colors.blue[200],
+    borderWidth: 1,
+    borderColor: colors.blue[300],
+  },
+  /** 커스텀: 비활성 느낌 없이 구분되는 보라색 계열 */
+  missionTypeBadgeCustom: {
+    backgroundColor: colors.purple[200],
+    borderWidth: 1,
+    borderColor: colors.purple[300],
+  },
+  missionTypeBadgeText: {
+    fontSize: 12,
+    fontWeight: typography.fontWeight.bold,
+    flexShrink: 0,
+  },
+  missionTypeBadgeTextOfficial: {
+    color: colors.blue[700],
+  },
+  missionTypeBadgeTextCustom: {
+    color: colors.purple[700],
   },
   creatorStatusBadge: {
-    paddingVertical: spacing[1],
+    paddingVertical: 4,
     paddingHorizontal: spacing[2],
-    borderRadius: borderRadius.base,
+    borderRadius: borderRadius.sm,
+    minWidth: 48,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  /** 미완료 시 텍스트 없이 자리만 유지 (완료 버튼 위치 고정) */
+  creatorStatusBadgePlaceholder: {
+    backgroundColor: 'transparent',
+    borderWidth: 0,
+    minWidth: 48,
   },
   creatorStatusCompleted: {
-    backgroundColor: colors.primary[50],
+    backgroundColor: colors.primary[200],
     borderWidth: 1,
     borderColor: colors.primary[300],
   },
@@ -154,12 +193,12 @@ export const styles = StyleSheet.create({
     borderColor: colors.gray[300],
   },
   creatorStatusText: {
-    ...createTextStyle('xs', {
-      fontWeight: typography.fontWeight.medium,
-    }),
+    fontSize: 12,
+    fontWeight: typography.fontWeight.bold,
+    flexShrink: 0,
   },
   creatorStatusTextCompleted: {
-    color: colors.primary[600],
+    color: colors.primary[700],
   },
   creatorStatusTextIncomplete: {
     color: colors.text.tertiary,

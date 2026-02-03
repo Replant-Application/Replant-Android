@@ -142,6 +142,8 @@ export interface PublicMissionInfo {
   verificationType: string;
   expReward: number;
   displayOrder: number;
+  /** OFFICIAL(공식) | CUSTOM(커스텀) - 미션 타입 */
+  missionType?: string;
   /** 공유한 사용자(작성자)가 해당 미션을 완료했는지 여부 (API는 isCompleted 로 내려줄 수 있음) */
   isCompletedByCreator?: boolean;
   /** 백엔드 API 응답 필드명 - isCompletedByCreator 로 매핑해서 사용 */
