@@ -159,7 +159,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
           </View>
         )}
 
-        {/* 기능 섹션 */}
+        {/* 기능 섹션 (앱 이용 관련) */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>기능</Text>
           <View style={styles.settingsCard}>
@@ -186,7 +186,13 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
               title="미션 카테고리 변경"
               onPress={() => navigation?.navigate('CategorySelect' as any, { fromSettings: true })}
             />
-            <View style={styles.divider} />
+          </View>
+        </View>
+
+        {/* 설정 및 지원 (사운드, 상담 등) */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>설정 및 지원</Text>
+          <View style={styles.settingsCard}>
             <SettingItem
               icon={require('../../assets/images/alarm.png')}
               title="사운드"

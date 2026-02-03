@@ -184,38 +184,6 @@ const AppHeader: React.FC<AppHeaderProps> = ({ navigation }) => {
               />
               <Text style={styles.menuItemText}>미션 카테고리 변경</Text>
             </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.menuItem}
-              onPress={() => handleMenuPress('SoundSettings')}
-              activeOpacity={0.7}
-              accessibilityRole="button"
-              accessibilityLabel="사운드"
-            >
-              <Image
-                source={require('../../../assets/images/sound.png')}
-                style={styles.menuItemIcon}
-                resizeMode="contain"
-                accessibilityLabel="사운드 아이콘"
-                accessibilityElementsHidden={true}
-              />
-              <Text style={styles.menuItemText}>사운드</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.menuItem}
-              onPress={() => handleMenuPress('CounselingSelect')}
-              activeOpacity={0.7}
-              accessibilityRole="button"
-              accessibilityLabel="상담 서비스"
-            >
-              <Image
-                source={require('../../../assets/images/hospital.png')}
-                style={styles.menuItemIcon}
-                resizeMode="contain"
-                accessibilityLabel="상담 서비스 아이콘"
-                accessibilityElementsHidden={true}
-              />
-              <Text style={styles.menuItemText}>상담 서비스</Text>
-            </TouchableOpacity>
           </Animated.View>
         </TouchableOpacity>
       </Modal>

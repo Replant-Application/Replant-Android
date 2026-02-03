@@ -24,6 +24,7 @@ export const useTodoListScreenContainer = ({ navigation, route }: TodoListScreen
   const [refreshing, setRefreshing] = useState(false);
   const [activeTab, setActiveTab] = useState<'active' | 'completed' | 'incomplete'>('active');
   const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false);
+  const [showDeleteBlockedModal, setShowDeleteBlockedModal] = useState(false);
   const [todoListToDelete, setTodoListToDelete] = useState<TodoList | null>(null);
 
   /**
@@ -154,11 +155,18 @@ export const useTodoListScreenContainer = ({ navigation, route }: TodoListScreen
 
   /**
    * 삭제 확인 모달: 삭제 실행
+   * 완료된 미션이 하나라도 있으면 삭제 불가
    */
   const handleDeleteConfirm = useCallback(async () => {
     if (!todoListToDelete) return;
-    setShowDeleteConfirmModal(false);
     const target = todoListToDelete;
+    if ((target.completedCount ?? 0) > 0) {
+      setShowDeleteConfirmModal(false);
+      setTodoListToDelete(null);
+      setShowDeleteBlockedModal(true);
+      return;
+    }
+    setShowDeleteConfirmModal(false);
     setTodoListToDelete(null);
     const result = await deleteMissionSet(target.id);
     if (result.success) {
@@ -174,6 +182,13 @@ export const useTodoListScreenContainer = ({ navigation, route }: TodoListScreen
   const handleDeleteConfirmCancel = useCallback(() => {
     setShowDeleteConfirmModal(false);
     setTodoListToDelete(null);
+  }, []);
+
+  /**
+   * 삭제 불가 모달 닫기
+   */
+  const handleDeleteBlockedModalClose = useCallback(() => {
+    setShowDeleteBlockedModal(false);
   }, []);
 
   /**
@@ -201,6 +216,8 @@ export const useTodoListScreenContainer = ({ navigation, route }: TodoListScreen
     showDeleteConfirmModal,
     handleDeleteConfirm,
     handleDeleteConfirmCancel,
+    showDeleteBlockedModal,
+    handleDeleteBlockedModalClose,
     onRefresh,
   };
 };

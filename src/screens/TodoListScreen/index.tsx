@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import { colors } from '../../utils/designTokens';
 import { formatDateKorean } from '../../utils/dateUtils';
-import { Header, SimpleTabBar, ConfirmModal } from '../../components/ui';
+import { Header, SimpleTabBar, ConfirmModal, AlertModal } from '../../components/ui';
 import { TodoList } from '../../types/todolist';
 import { useTodoListScreenContainer } from './TodoListScreen.container';
 import { styles } from './TodoListScreen.styles';
@@ -38,6 +38,8 @@ const TodoListScreen: React.FC<Props> = ({ navigation, route }) => {
     showDeleteConfirmModal,
     handleDeleteConfirm,
     handleDeleteConfirmCancel,
+    showDeleteBlockedModal,
+    handleDeleteBlockedModalClose,
     onRefresh,
   } = useTodoListScreenContainer({ navigation, route });
 
@@ -211,6 +213,14 @@ const TodoListScreen: React.FC<Props> = ({ navigation, route }) => {
         onConfirm={handleDeleteConfirm}
         onCancel={handleDeleteConfirmCancel}
         confirmButtonColor={colors.error}
+      />
+      {/* 삭제 불가 AlertModal (완료된 미션이 있을 때) */}
+      <AlertModal
+        visible={showDeleteBlockedModal}
+        title="삭제 불가"
+        message="진행 이력이 있는 투두리스트는\n삭제할 수 없습니다."
+        buttonText="확인"
+        onClose={handleDeleteBlockedModalClose}
       />
     </ImageBackground>
   );
