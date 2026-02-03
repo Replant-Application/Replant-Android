@@ -269,7 +269,7 @@ export const useWakeUpVerificationScreenContainer = ({
           }
           if (apiTimeRemaining !== undefined) {
             setTimeRemaining(apiTimeRemaining);
-            // 알림 후 12시간 이내만 인증 가능. API canVerify 또는 남은 시간으로 만료 판정
+            // 알림 후 6시간 이내만 인증 가능. API canVerify 또는 남은 시간으로 만료 판정
             const expired = apiTimeRemaining <= 0 || apiCanVerify === false;
             setIsExpired(expired);
             console.log('[기상미션] 타이머 초기값 remaining=', apiTimeRemaining, 'canVerify=', apiCanVerify, 'expired=', expired);
@@ -318,7 +318,7 @@ export const useWakeUpVerificationScreenContainer = ({
       const assignedTime = new Date(userMission.assignedAt).getTime();
       const now = Date.now();
       const elapsed = Math.floor((now - assignedTime) / 1000);
-      const remaining = Math.max(0, 12 * 3600 - elapsed); // 알림 후 12시간 이내만 인증 가능
+      const remaining = Math.max(0, 6 * 3600 - elapsed); // 알림 후 6시간 이내만 인증 가능
       if (remaining <= 0) {
         if (!expiredLoggedRef.current) {
           expiredLoggedRef.current = true;
@@ -386,7 +386,7 @@ export const useWakeUpVerificationScreenContainer = ({
    */
   const handleVerify = useCallback(async () => {
     if (isExpired || (timeRemaining !== null && timeRemaining <= 0)) {
-      setErrorMessage('12시간이 지나 인증할 수 없습니다.');
+      setErrorMessage('6시간이 지나 인증할 수 없습니다.');
       setShowErrorModal(true);
       return;
     }
