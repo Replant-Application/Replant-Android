@@ -2,7 +2,7 @@
  * 커뮤니티 게시글 상세 화면
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -30,7 +30,7 @@ interface CommunityPostDetailScreenProps {
 }
 
 const CommunityPostDetailScreen: React.FC<CommunityPostDetailScreenProps> = ({ navigation, route }) => {
-  // 비즈니스 로직은 Container에서 처리
+  // 비즈니스 로직은 Container에서 처리 (훅 규칙으로 항상 먼저 호출)
   const {
     post,
     comments,
@@ -68,6 +68,18 @@ const CommunityPostDetailScreen: React.FC<CommunityPostDetailScreenProps> = ({ n
   } = useCommunityPostDetailScreenContainer({ navigation, route });
 
   const [selectedImageUri, setSelectedImageUri] = useState<string | null>(null);
+
+  // 히스토리 복원 시 params가 잠깐 바뀌어 postId가 없어지면 무한 로딩 방지: 즉시 뒤로가기
+  const postId = route.params?.postId;
+  useEffect(() => {
+    if (!postId || String(postId).trim() === '') {
+      navigation.goBack();
+    }
+  }, [postId, navigation]);
+
+  if (!postId || String(postId).trim() === '') {
+    return null;
+  }
 
   if (loading) {
     return <Loading text="게시글을 불러오는 중..." />;

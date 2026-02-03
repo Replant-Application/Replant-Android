@@ -463,7 +463,7 @@ const AppNavigator = () => {
 
     // 앱 시작 시 버전 체크
     checkAppVersion();
-  }, []);
+  }, [SHOW_UPDATE_MODAL_FEATURE]);
 
   // 플레이스토어 링크 열기
   const handleUpdate = useCallback(async () => {
@@ -635,7 +635,7 @@ const AppNavigator = () => {
     } else {
       console.log('[AppNavigator] ⚠️ 특별 처리할 알림이 아님, 무시');
     }
-  }, [lastNotification, isLoggedIn, navigate, setWakeUpMissionId]);
+  }, [lastNotification, isLoggedIn, navigate, setWakeUpMissionId, SHOW_UPDATE_MODAL_FEATURE]);
 
   // 화면 변경 시 배경음악 재생
   useEffect(() => {

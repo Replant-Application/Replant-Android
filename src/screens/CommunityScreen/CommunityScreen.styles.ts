@@ -12,6 +12,12 @@ export const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  modalMissionSetDetailWrap: {
+    flex: 1,
+  },
+  modalMissionSetDetailContent: {
+    flex: 1,
+  },
   tabBarContainer: {
     paddingHorizontal: spacing[3],
     paddingTop: spacing[2],

@@ -10,6 +10,7 @@ import {
   ScrollView,
   ImageBackground,
   TouchableOpacity,
+  Pressable,
   Image,
 } from 'react-native';
 import { NavigationProp, RouteProp } from '@react-navigation/native';
@@ -68,7 +69,11 @@ const MissionSetDetailScreen: React.FC<MissionSetDetailScreenProps> = ({ navigat
         }}
       />
 
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        style={styles.content}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+      >
         <View style={styles.headerCard}>
           <Text style={styles.title}>{missionSet.title}</Text>
 
@@ -125,40 +130,76 @@ const MissionSetDetailScreen: React.FC<MissionSetDetailScreenProps> = ({ navigat
             </View>
           ) : (
             <View style={styles.missionList}>
-              {missionSet.missions.map((mission, index) => (
-                <View key={mission.missionId} style={styles.missionItem}>
-                  <View style={styles.missionContent}>
-                    <View style={styles.missionTitleBlock}>
-                      <View style={styles.missionNumberPrefix}>
-                        <Text style={styles.missionTitle}>{index + 1}.</Text>
+              {missionSet.missions.map((mission, index) => {
+                const canNavigateToPost = mission.isCompletedByCreator === true && mission.verificationPostId != null;
+                const content = (
+                  <View style={styles.missionItem}>
+                    <View style={styles.missionContent}>
+                      <View style={styles.missionTitleBlock}>
+                        <View style={styles.missionNumberPrefix}>
+                          <Text style={styles.missionTitle}>{index + 1}.</Text>
+                        </View>
+                        <Text style={styles.missionTitleText} numberOfLines={1}>{mission.missionTitle}</Text>
                       </View>
-                      <Text style={styles.missionTitleText} numberOfLines={1}>{mission.missionTitle}</Text>
-                    </View>
-                    <View style={styles.missionBadgesBelow}>
-                      <View
-                        style={[
-                          styles.missionTypeBadge,
-                          mission.missionType === 'CUSTOM' ? styles.missionTypeBadgeCustom : styles.missionTypeBadgeOfficial,
-                        ]}
-                      >
-                        <Text style={[
-                          styles.missionTypeBadgeText,
-                          mission.missionType === 'CUSTOM' ? styles.missionTypeBadgeTextCustom : styles.missionTypeBadgeTextOfficial,
-                        ]} numberOfLines={1}>
-                          {mission.missionType === 'CUSTOM' ? '커스텀' : '공식'}
-                        </Text>
-                      </View>
-                      {mission.isCompletedByCreator === true ? (
-                        <View style={[styles.creatorStatusBadge, styles.creatorStatusCompleted]}>
-                          <Text style={[styles.creatorStatusText, styles.creatorStatusTextCompleted]} numberOfLines={1}>
-                            완료
+                      <View style={styles.missionBadgesBelow}>
+                        <View
+                          style={[
+                            styles.missionTypeBadge,
+                            mission.missionType === 'CUSTOM' ? styles.missionTypeBadgeCustom : styles.missionTypeBadgeOfficial,
+                          ]}
+                        >
+                          <Text style={[
+                            styles.missionTypeBadgeText,
+                            mission.missionType === 'CUSTOM' ? styles.missionTypeBadgeTextCustom : styles.missionTypeBadgeTextOfficial,
+                          ]} numberOfLines={1}>
+                            {mission.missionType === 'CUSTOM' ? '커스텀' : '공식'}
                           </Text>
                         </View>
-                      ) : null}
+                        {mission.isCompletedByCreator === true ? (
+                          <View style={[styles.creatorStatusBadge, styles.creatorStatusCompleted]}>
+                            <Text style={[styles.creatorStatusText, styles.creatorStatusTextCompleted]} numberOfLines={1}>
+                              완료
+                            </Text>
+                          </View>
+                        ) : null}
+                      </View>
                     </View>
                   </View>
-                </View>
-              ))}
+                );
+                if (canNavigateToPost) {
+                  return (
+                    <Pressable
+                      key={mission.missionId}
+                      onPress={() => {
+                        const nav = navigation as any;
+                        if (typeof nav.openPostInModal === 'function') {
+                          nav.openPostInModal(mission.verificationPostId!);
+                        } else if (typeof nav.navigate === 'function') {
+                          nav.navigate('CommunityPostDetail', {
+                            postId: String(mission.verificationPostId),
+                            returnScreen: route.params?.returnScreen ?? 'Community',
+                            activeTab: route.params?.activeTab ?? 'todo-share',
+                          });
+                        }
+                      }}
+                      style={({ pressed }) => [{ width: '100%', opacity: pressed ? 0.7 : 1 }]}
+                      hitSlop={{ top: 12, bottom: 12, left: 0, right: 0 }}
+                    >
+                      {content}
+                    </Pressable>
+                  );
+                }
+                return (
+                  <Pressable
+                    key={mission.missionId}
+                    onPress={() => {}}
+                    style={({ pressed }) => [{ width: '100%', opacity: pressed ? 0.7 : 1 }]}
+                    hitSlop={{ top: 12, bottom: 12, left: 0, right: 0 }}
+                  >
+                    {content}
+                  </Pressable>
+                );
+              })}
             </View>
           )}
         </View>

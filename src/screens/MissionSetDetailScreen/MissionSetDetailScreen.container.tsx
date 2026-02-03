@@ -55,6 +55,7 @@ export const useMissionSetDetailScreenContainer = ({ navigation, route }: Missio
             displayOrder: mission.displayOrder !== undefined ? mission.displayOrder : index,
             missionType: mission.missionType ?? 'OFFICIAL',
             isCompletedByCreator: mission.isCompletedByCreator ?? mission.isCompleted,
+            verificationPostId: mission.verificationPostId,
           })),
           createdAt: publicDetail.createdAt,
         };

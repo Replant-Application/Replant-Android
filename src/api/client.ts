@@ -58,6 +58,8 @@ export class ApiClient {
   private onTokenExpiredCallback: (() => void) | null = null;
 
   private tokenLoaded: boolean = false;
+  /** __DEV__에서 첫 요청 시 실제 요청 URL 로그 (어느 서버로 나가는지 확인용) */
+  private static hasLoggedFirstRequestUrl = false;
 
   constructor(baseURL: string = API_CONFIG.baseURL) {
     this.baseURL = baseURL;
@@ -230,6 +232,12 @@ export class ApiClient {
   ): Promise<ServiceResult<T>> {
     // URL 구성 (params가 있으면 query string 추가)
     let url = `${this.baseURL}${endpoint}`;
+
+    // __DEV__: 첫 API 요청 시 실제 요청이 나가는 서버 주소 로그 (한 번만)
+    if (__DEV__ && !ApiClient.hasLoggedFirstRequestUrl) {
+      ApiClient.hasLoggedFirstRequestUrl = true;
+      console.log('[API] 첫 요청 URL (현재 서버):', url);
+    }
 
     // 타임아웃 설정 (AbortController 사용). options.timeout이 있으면 사용, 없으면 전역 설정
     const timeoutMs = options.timeout ?? API_CONFIG.timeout;

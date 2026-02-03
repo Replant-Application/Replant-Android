@@ -125,6 +125,7 @@ export const styles = StyleSheet.create({
     gap: 0,
     marginBottom: spacing[2],
   },
+  missionNumberPrefix: {},
   missionBadgesBelow: {
     flexDirection: 'row',
     alignItems: 'center',

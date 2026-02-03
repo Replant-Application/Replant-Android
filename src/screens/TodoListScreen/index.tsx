@@ -41,7 +41,7 @@ const TodoListScreen: React.FC<Props> = ({ navigation, route }) => {
     onRefresh,
   } = useTodoListScreenContainer({ navigation, route });
 
-  const renderTodoListCard = (todoList: TodoList, isIncomplete: boolean = false) => {
+  const renderTodoListCard = (todoList: TodoList, _isIncomplete: boolean = false) => {
     // completedCount와 totalCount를 기반으로 진행률 직접 계산
     const progressPercent = todoList.totalCount > 0 
       ? Math.round((todoList.completedCount / todoList.totalCount) * 100)

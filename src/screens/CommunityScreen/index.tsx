@@ -15,6 +15,7 @@ import { CommunityScreenProps, CommunityTab, VerificationFilter } from '../../ty
 import { FILTER_OPTIONS } from '../../constants/screens/community';
 import MissionSetList from './components/MissionSetList';
 import MissionSetDetailScreen from '../MissionSetDetailScreen';
+import CommunityPostDetailScreen from '../CommunityPostDetailScreen';
 import { useCommunityScreenContainer } from './CommunityScreen.container';
 import { styles } from './CommunityScreen.styles';
 
@@ -76,16 +77,17 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation, route }) 
     handleShareConfirm,
     handleShareConfirmCancel,
     handleUnshareMissionSet,
-    handleTodoListLike,
-    likingMissionSetId,
     selectedMissionSetId,
     onMissionSetPress,
     closeMissionSetDetailModal,
+    selectedPostIdForModal,
+    openPostInModal,
+    closePostModal,
   } = useCommunityScreenContainer({ navigation, route });
 
   useEffect(() => {
     if (selectedMissionSetId != null) missionSetFadeAnim.setValue(1);
-  }, [selectedMissionSetId]);
+  }, [selectedMissionSetId, missionSetFadeAnim]);
 
   const handleCloseMissionSetModal = () => {
     Animated.timing(missionSetFadeAnim, {
@@ -336,12 +338,13 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation, route }) 
         onRequestClose={handleCloseMissionSetModal}
       >
         {selectedMissionSetId != null && (
-          <Animated.View style={{ flex: 1, opacity: missionSetFadeAnim }}>
-            <View style={{ flex: 1 }}>
+          <Animated.View style={[styles.modalMissionSetDetailWrap, { opacity: missionSetFadeAnim }]}>
+            <View style={styles.modalMissionSetDetailContent}>
               <MissionSetDetailScreen
                 navigation={{
                   ...navigation,
                   goBack: handleCloseMissionSetModal,
+                  openPostInModal,
                 } as any}
                 route={{ params: { missionSetId: selectedMissionSetId } } as any}
               />
@@ -376,6 +379,23 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation, route }) 
               ))}
             </View>
           </Animated.View>
+        )}
+      </Modal>
+
+      {/* 게시글 상세 모달 (투두리스트 상세에서 완료 미션 탭 시, 좋아요·댓글 동작) */}
+      <Modal
+        visible={selectedPostIdForModal != null}
+        animationType="slide"
+        onRequestClose={closePostModal}
+      >
+        {selectedPostIdForModal != null && (
+          <CommunityPostDetailScreen
+            navigation={{
+              ...navigation,
+              goBack: closePostModal,
+            } as any}
+            route={{ params: { postId: String(selectedPostIdForModal) } } as any}
+          />
         )}
       </Modal>
 

@@ -148,6 +148,8 @@ export interface PublicMissionInfo {
   isCompletedByCreator?: boolean;
   /** 백엔드 API 응답 필드명 - isCompletedByCreator 로 매핑해서 사용 */
   isCompleted?: boolean;
+  /** 작성자가 해당 미션을 완료했을 때의 인증 게시글 ID (공개 상세에서만) */
+  verificationPostId?: number;
 }
 
 export interface PublicTodoListDetail extends PublicTodoList {

@@ -25,7 +25,10 @@ const getBaseURL = (): string => {
     }
   }
   if (__DEV__) {
-    console.log('[API_CONFIG] baseURL:', url, '| @env API_BASE_URL:', API_BASE_URL || '(empty)');
+    const envValue = API_BASE_URL || '(empty)';
+    console.log('[API_CONFIG] baseURL:', url, '| @env API_BASE_URL:', envValue);
+    // 런타임에 실제 요청이 나가는 서버 주소 확인용 (앱 켤 때 한 번만)
+    console.log('[API] 현재 요청이 나가는 서버:', url);
   }
   return url;
 };

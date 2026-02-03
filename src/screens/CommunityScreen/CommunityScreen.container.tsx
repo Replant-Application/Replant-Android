@@ -89,6 +89,8 @@ export const useCommunityScreenContainer = ({ navigation, route }: CommunityScre
 
   // 미션세트 상세 모달 (투두리스트 공유 탭에서 카드 클릭 시)
   const [selectedMissionSetId, setSelectedMissionSetId] = useState<number | null>(null);
+  // 게시글 모달 (투두리스트 상세에서 완료 미션 탭 시, 커뮤니티 화면 이동 없이 모달로 표시)
+  const [selectedPostIdForModal, setSelectedPostIdForModal] = useState<number | null>(null);
 
   const errorHandlerOverrides = useMemo(
     () => ({
@@ -751,5 +753,8 @@ export const useCommunityScreenContainer = ({ navigation, route }: CommunityScre
     selectedMissionSetId,
     onMissionSetPress: setSelectedMissionSetId,
     closeMissionSetDetailModal: () => setSelectedMissionSetId(null),
+    selectedPostIdForModal,
+    openPostInModal: (postId: number) => setSelectedPostIdForModal(postId),
+    closePostModal: () => setSelectedPostIdForModal(null),
   };
 };

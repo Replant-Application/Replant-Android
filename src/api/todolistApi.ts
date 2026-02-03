@@ -30,6 +30,8 @@ export interface MissionSetMission {
   missionType?: string;
   /** 공유한 사용자(작성자)가 해당 미션을 완료했는지 여부 (공개 상세에서만 사용) */
   isCompletedByCreator?: boolean;
+  /** 작성자가 해당 미션을 완료했을 때의 인증 게시글 ID (공개 상세에서만) */
+  verificationPostId?: number;
 }
 
 export interface MissionSetSimple {
