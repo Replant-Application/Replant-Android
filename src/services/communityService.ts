@@ -569,17 +569,15 @@ export const getComments = async (
         backendComments = result.data;
       }
 
-      // 댓글과 대댓글 변환
+      // 댓글과 대댓글 변환 (답글의 답글까지 재귀적으로 포함)
       const allComments: CommunityComment[] = [];
-      backendComments.forEach(comment => {
-        allComments.push(transformBackendComment(comment, postId));
-        // 대댓글도 변환
-        if (comment.replies && comment.replies.length > 0) {
-          comment.replies.forEach(reply => {
-            allComments.push(transformBackendComment(reply, postId));
-          });
+      const pushCommentAndReplies = (c: BackendComment): void => {
+        allComments.push(transformBackendComment(c, postId));
+        if (c.replies && c.replies.length > 0) {
+          c.replies.forEach(reply => pushCommentAndReplies(reply));
         }
-      });
+      };
+      backendComments.forEach(comment => pushCommentAndReplies(comment));
 
       // 생성일 기준 정렬
       return allComments.sort((a, b) =>

@@ -69,8 +69,8 @@ const CommentCard: React.FC<CommentCardProps> = ({
 
       <View style={styles.footer}>
         <View style={styles.actions}>
-          {/* 답글 버튼 - 대댓글이 아닌 경우에만 표시 */}
-          {onReply && !isReply && (
+          {/* 답글 버튼 - 어떤 댓글이든 해당 댓글 작성자에게 답글 가능 */}
+          {onReply && (
             <TouchableOpacity
               style={styles.actionButton}
               onPress={() => onReply(comment)}

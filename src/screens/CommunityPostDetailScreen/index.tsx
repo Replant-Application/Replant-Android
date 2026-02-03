@@ -373,59 +373,65 @@ const CommunityPostDetailScreen: React.FC<CommunityPostDetailScreenProps> = ({ n
                       />
                     )}
 
-                    {/* 대댓글 (부모 댓글에 속한 댓글들) */}
-                    {comments
-                      .filter(reply => reply.parent_comment_id === parentComment.comment_id)
-                      .filter(reply => !hiddenCommentIds.includes(reply.comment_id))
-                      .map(reply => (
-                        <View key={reply.comment_id}>
-                          {editingCommentId === reply.comment_id ? (
-                            <View style={[styles.editCommentContainer, styles.replyEditContainer]}>
-                              <TextInput
-                                style={styles.editCommentInput}
-                                value={editingContent}
-                                onChangeText={setEditingContent}
-                                multiline
-                                accessibilityLabel="답글 수정"
-                                accessibilityHint="수정할 답글 내용을 입력하세요"
-                              />
-                              <View style={styles.editCommentActions}>
-                                <TouchableOpacity
-                                  style={styles.editCommentButton}
-                                  onPress={handleCancelEdit}
-                                  accessibilityRole="button"
-                                  accessibilityLabel="취소"
-                                >
-                                  <Text style={styles.editCommentButtonText}>취소</Text>
-                                </TouchableOpacity>
-                                <TouchableOpacity
-                                  style={[styles.editCommentButton, styles.editCommentButtonSave]}
-                                  onPress={handleUpdateComment}
-                                  accessibilityRole="button"
-                                  accessibilityLabel="저장"
-                                >
-                                  <Text
-                                    style={[
-                                      styles.editCommentButtonText,
-                                      styles.editCommentButtonTextSave,
-                                    ]}
-                                  >
-                                    저장
-                                  </Text>
-                                </TouchableOpacity>
-                              </View>
+                    {/* 대댓글 (답글의 답글까지 재귀 표시) */}
+                    {(() => {
+                      const renderReplies = (parentId: string): React.ReactNode =>
+                        comments
+                          .filter(reply => reply.parent_comment_id === parentId)
+                          .filter(reply => !hiddenCommentIds.includes(reply.comment_id))
+                          .map(reply => (
+                            <View key={reply.comment_id}>
+                              {editingCommentId === reply.comment_id ? (
+                                <View style={[styles.editCommentContainer, styles.replyEditContainer]}>
+                                  <TextInput
+                                    style={styles.editCommentInput}
+                                    value={editingContent}
+                                    onChangeText={setEditingContent}
+                                    multiline
+                                    accessibilityLabel="답글 수정"
+                                    accessibilityHint="수정할 답글 내용을 입력하세요"
+                                  />
+                                  <View style={styles.editCommentActions}>
+                                    <TouchableOpacity
+                                      style={styles.editCommentButton}
+                                      onPress={handleCancelEdit}
+                                      accessibilityRole="button"
+                                      accessibilityLabel="취소"
+                                    >
+                                      <Text style={styles.editCommentButtonText}>취소</Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity
+                                      style={[styles.editCommentButton, styles.editCommentButtonSave]}
+                                      onPress={handleUpdateComment}
+                                      accessibilityRole="button"
+                                      accessibilityLabel="저장"
+                                    >
+                                      <Text
+                                        style={[
+                                          styles.editCommentButtonText,
+                                          styles.editCommentButtonTextSave,
+                                        ]}
+                                      >
+                                        저장
+                                      </Text>
+                                    </TouchableOpacity>
+                                  </View>
+                                </View>
+                              ) : (
+                                <CommentCard
+                                  comment={reply}
+                                  isReply={true}
+                                  onEdit={handleEditComment}
+                                  onDelete={handleDeleteComment}
+                                  onReply={handleReplyComment}
+                                  onHide={handleHideComment}
+                                />
+                              )}
+                              {renderReplies(reply.comment_id)}
                             </View>
-                          ) : (
-                            <CommentCard
-                              comment={reply}
-                              isReply={true}
-                              onEdit={handleEditComment}
-                              onDelete={handleDeleteComment}
-                              onHide={handleHideComment}
-                            />
-                          )}
-                        </View>
-                      ))}
+                          ));
+                      return renderReplies(parentComment.comment_id);
+                    })()}
                   </View>
                 ))}
             </View>
