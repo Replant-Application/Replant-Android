@@ -196,7 +196,7 @@ const NotificationScreen: React.FC<NotificationScreenProps> = ({ navigation }) =
                 title="알림이 없습니다"
                 description={filter === 'unread'
                   ? "읽지 않은 알림이 없습니다."
-                  : "아직 받은 알림이 없어요.\n미션을 수행하면 알림을 받을 수 있어요!"
+                  : "아직 받은 알림이 없어요."
                 }
               />
             }

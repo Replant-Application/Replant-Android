@@ -20,10 +20,13 @@ const CharacterCard: React.FC<CharacterCardProps> = ({
   if (!character) return null;
 
   const getLevelName = (level: number): string => {
-    if (level >= 10) return '성숙한 나무';
-    if (level >= 7) return '자라는 나무';
-    if (level >= 4) return '새싹';
-    return '씨앗';
+    if (level >= 7) return '리앤트';
+    if (level >= 6) return '아이 리앤트';
+    if (level >= 5) return '성숙한 나무';
+    if (level >= 4) return '어린 나무';
+    if (level >= 3) return '새싹';
+    if (level >= 2) return '씨앗';
+    return '알';
   };
 
   // 캐릭터 이미지 미리 import
