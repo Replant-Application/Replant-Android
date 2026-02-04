@@ -16,4 +16,5 @@ declare module '@env' {
 
   // 외부 API 키
   export const KAKAO_MAP_API_KEY: string;
+  export const AMPLITUDE_API_KEY: string;
 }
