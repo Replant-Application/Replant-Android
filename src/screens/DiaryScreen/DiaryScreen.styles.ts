@@ -153,15 +153,12 @@ export const styles = StyleSheet.create({
     borderColor: colors.primary[400],
   },
   sliderButtonText: {
-    fontSize: 28,
-    fontFamily: Platform.select({
-      ios: undefined,
-      android: typography.fontFamily.bold,
+    ...createTextStyle('3xl', {
+      fontWeight: typography.fontWeight.bold,
+      color: colors.white,
+      textAlign: 'center',
+      fontFamily: Platform.select({ ios: undefined, android: typography.fontFamily.bold }),
     }),
-    fontWeight: '700' as const,
-    color: colors.white,
-    lineHeight: 30,
-    textAlign: 'center',
   },
   sliderValue: {
     ...createTextStyle('2xl', {
@@ -393,9 +390,10 @@ export const styles = StyleSheet.create({
     zIndex: 1,
   },
   searchClearText: {
-    fontSize: typography.fontSize.lg,
-    color: colors.white,
-    fontWeight: typography.fontWeight.medium,
+    ...createTextStyle('lg', {
+      color: colors.white,
+      fontWeight: typography.fontWeight.medium,
+    }),
   },
   listContent: {
     paddingBottom: spacing[6],
@@ -429,7 +427,7 @@ export const styles = StyleSheet.create({
     marginBottom: spacing[2],
   },
   diaryListItemEmotion: {
-    fontSize: typography.fontSize.xl,
+    ...createTextStyle('xl'),
   },
   diaryListItemDate: {
     ...createTextStyle('xs', {

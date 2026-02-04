@@ -100,10 +100,10 @@ export const styles = StyleSheet.create({
     borderColor: colors.primary[500],
   },
   checkboxCheckmark: {
-    color: colors.white,
-    fontSize: typography.fontSize.xs,
-    fontWeight: typography.fontWeight.bold,
-    lineHeight: typography.fontSize.xs,
+    ...createTextStyle('xs', {
+      fontWeight: typography.fontWeight.bold,
+      color: colors.white,
+    }),
   },
   filterCheckboxLabel: {
     ...createTextStyle('sm', {
@@ -131,10 +131,10 @@ export const styles = StyleSheet.create({
     }),
   },
   sortButtonArrow: {
-    fontSize: typography.fontSize.base,
-    color: colors.black,
-    lineHeight: typography.fontSize.base,
-    fontWeight: typography.fontWeight.medium,
+    ...createTextStyle('base', {
+      color: colors.black,
+      fontWeight: typography.fontWeight.medium,
+    }),
   },
   sortDropdown: {
     position: 'absolute',
@@ -176,10 +176,11 @@ export const styles = StyleSheet.create({
     fontWeight: typography.fontWeight.semibold,
   },
   sortDropdownCheck: {
-    fontSize: typography.fontSize.sm,
-    color: colors.primary[600],
-    fontWeight: typography.fontWeight.bold,
-    marginLeft: spacing[2],
+    ...createTextStyle('sm', {
+      color: colors.primary[600],
+      fontWeight: typography.fontWeight.bold,
+      marginLeft: spacing[2],
+    }),
   },
   serverPaginationContainer: {
     flexDirection: 'row',

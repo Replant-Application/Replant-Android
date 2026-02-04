@@ -44,9 +44,10 @@ export const styles = StyleSheet.create({
     }),
   },
   arrow: {
-    fontSize: typography.fontSize['2xl'],
-    color: '#42A5F5',
-    fontWeight: typography.fontWeight.medium,
+    ...createTextStyle('2xl', {
+      color: '#42A5F5',
+      fontWeight: typography.fontWeight.medium,
+    }),
   },
   content: {
     marginTop: spacing[2],

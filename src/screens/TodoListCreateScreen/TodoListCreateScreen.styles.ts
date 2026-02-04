@@ -222,10 +222,10 @@ export const styles = StyleSheet.create({
     borderColor: colors.primary[500],
   },
   filterCheckboxCheckmark: {
-    color: colors.white,
-    fontSize: typography.fontSize.sm,
-    fontWeight: typography.fontWeight.bold,
-    lineHeight: typography.fontSize.sm,
+    ...createTextStyle('sm', {
+      color: colors.white,
+      fontWeight: typography.fontWeight.bold,
+    }),
   },
   filterOptionLabel: {
     ...createBodyStyle('base', {
@@ -299,18 +299,14 @@ export const styles = StyleSheet.create({
     gap: spacing[2] 
   },
   missionCategory: { 
-    fontSize: typography.fontSize.xs, 
-    color: colors.blue[600], 
-    backgroundColor: colors.blue[100], 
-    paddingVertical: spacing[1], 
-    paddingHorizontal: spacing[3], 
-    borderRadius: borderRadius.sm,
-    textAlign: 'center',
-    fontFamily: Platform.select({
-      ios: undefined,
-      android: typography.fontFamily.regular,
+    ...createTextStyle('xs', { 
+      color: colors.blue[600], 
+      backgroundColor: colors.blue[100], 
+      paddingVertical: spacing[1], 
+      paddingHorizontal: spacing[3], 
+      borderRadius: borderRadius.sm,
+      textAlign: 'center',
     }),
-    includeFontPadding: false,
   },
   missionExpContainer: {
     flexDirection: 'row',
@@ -370,9 +366,10 @@ export const styles = StyleSheet.create({
     backgroundColor: colors.primary[500] 
   },
   checkmark: { 
-    color: colors.white, 
-    fontSize: 12, 
-    fontWeight: typography.fontWeight.medium 
+    ...createTextStyle('xs', { 
+      color: colors.white, 
+      fontWeight: typography.fontWeight.medium,
+    }),
   },
 
   confirmContent: { 
@@ -552,18 +549,14 @@ export const styles = StyleSheet.create({
     gap: spacing[2],
   },
   timeMissionCategory: {
-    fontSize: typography.fontSize.xs,
-    color: colors.blue[600],
-    backgroundColor: colors.blue[50],
-    paddingVertical: spacing[1],
-    paddingHorizontal: spacing[3],
-    borderRadius: borderRadius.sm,
-    textAlign: 'center',
-    fontFamily: Platform.select({
-      ios: undefined,
-      android: typography.fontFamily.regular,
+    ...createTextStyle('xs', {
+      color: colors.blue[600],
+      backgroundColor: colors.blue[50],
+      paddingVertical: spacing[1],
+      paddingHorizontal: spacing[3],
+      borderRadius: borderRadius.sm,
+      textAlign: 'center',
     }),
-    includeFontPadding: false,
   },
   timeMissionTime: {
     ...createTextStyle('sm', {
@@ -597,10 +590,10 @@ export const styles = StyleSheet.create({
     flexShrink: 0,
   },
   timeMissionRemoveText: { 
-    fontSize: 16, 
-    color: colors.gray[600], 
-    lineHeight: 18,
-    fontWeight: typography.fontWeight.semibold,
+    ...createTextStyle('base', { 
+      color: colors.gray[600], 
+      fontWeight: typography.fontWeight.semibold,
+    }),
   },
 
   missionsListSection: { 
@@ -633,10 +626,10 @@ export const styles = StyleSheet.create({
     backgroundColor: colors.primary[600],
   },
   allDayCheckmark: {
-    color: colors.white,
-    fontSize: 12,
-    fontWeight: typography.fontWeight.bold,
-    lineHeight: 14,
+    ...createTextStyle('xs', {
+      color: colors.white,
+      fontWeight: typography.fontWeight.bold,
+    }),
   },
   allDayLabel: {
     ...createTextStyle('xs', {
@@ -834,11 +827,10 @@ export const styles = StyleSheet.create({
     paddingHorizontal: spacing[2],
   },
   timeSeparatorText: {
-    fontSize: typography.fontSize['3xl'],
-    fontWeight: typography.fontWeight.bold,
-    color: colors.text.primary,
-    fontFamily: typography.fontFamily.regular,
-    includeFontPadding: false,
+    ...createTextStyle('3xl', {
+      fontWeight: typography.fontWeight.bold,
+      color: colors.text.primary,
+    }),
   },
 
   /* 드롭다운 스타일 (레거시 - 시간 모달에서 WheelPicker 사용) */
@@ -883,9 +875,10 @@ export const styles = StyleSheet.create({
     }),
   },
   dropdownArrow: { 
-    fontSize: typography.fontSize.xs, 
-    color: colors.text.secondary, 
-    marginLeft: spacing[1] 
+    ...createTextStyle('xs', { 
+      color: colors.text.secondary, 
+      marginLeft: spacing[1],
+    }),
   },
 
   dropdownList: {

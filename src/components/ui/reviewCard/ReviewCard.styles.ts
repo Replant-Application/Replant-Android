@@ -18,7 +18,7 @@ export const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'flex-start',
+    alignItems: 'center',
     marginBottom: spacing[2],
   },
   authorInfo: {
@@ -26,35 +26,51 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     gap: spacing[2],
     flex: 1,
+    minWidth: 0,
   },
-  authorImage: {
-    width: 40,
-    height: 40,
+  authorAvatar: {
+    width: 32,
+    height: 32,
     borderRadius: borderRadius.full,
-  },
-  authorImagePlaceholder: {
-    width: 40,
-    height: 40,
-    borderRadius: borderRadius.full,
-    backgroundColor: colors.primary[200],
+    backgroundColor: colors.primary[500],
     justifyContent: 'center',
     alignItems: 'center',
+    overflow: 'hidden',
   },
-  authorImageText: {
-    ...createTextStyle('base', {
-      color: colors.primary[700],
-      fontWeight: typography.fontWeight.medium,
-    }),
+  authorAvatarImage: {
+    width: 32,
+    height: 32,
+  },
+  authorNameWrap: {
+    flex: 1,
+    minWidth: 0,
+  },
+  headerRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing[2],
+    flexShrink: 0,
   },
   author: {
     ...createTextStyle('sm', {
       fontWeight: typography.fontWeight.medium,
       color: colors.text.primary,
     }),
+    flexShrink: 1,
   },
   date: {
     ...createTextStyle('xs', {
       color: colors.text.tertiary,
+    }),
+    flexShrink: 0,
+  },
+  deleteButton: {
+    paddingVertical: spacing[1],
+    paddingHorizontal: spacing[2],
+  },
+  deleteButtonText: {
+    ...createTextStyle('xs', {
+      color: colors.semantic.fg.error,
     }),
   },
   content: {

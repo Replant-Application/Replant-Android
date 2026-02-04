@@ -46,8 +46,10 @@ const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({ navigation, r
     returnTab,
     setReviewContent,
     handleSubmitReview,
+    handleDeleteReview,
     handleRefresh,
     loadMoreReviews,
+    currentUserId,
     showAlert,
     alertTitle,
     alertMessage,
@@ -167,12 +169,6 @@ const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({ navigation, r
                 </View>
                 {mission.missionType !== 'CUSTOM' && (
                   <View style={styles.missionExpContainer}>
-                    <Image
-                      source={require('../../assets/images/sun.png')}
-                      style={styles.sunIcon}
-                      resizeMode="contain"
-                      accessibilityLabel="경험치 아이콘"
-                    />
                     <Text style={styles.missionExp}>{mission.expReward} EXP</Text>
                   </View>
                 )}
@@ -213,17 +209,6 @@ const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({ navigation, r
             <Text style={styles.noBadgeTitle}>후기 작성 안내</Text>
             <Text style={styles.noBadgeDescription}>
               이 미션을 완료하고 유효한 배지를 획득하면{'\n'}후기를 작성할 수 있습니다.
-            </Text>
-          </View>
-        )}
-
-        {/* 배지가 있고 이미 후기를 작성한 경우 */}
-        {hasBadge && hasWrittenReview && (
-          <View style={styles.alreadyWrittenSection}>
-            <Text style={styles.alreadyWrittenIcon} />
-            <Text style={styles.alreadyWrittenText}>
-              이 배지로 후기를 이미 작성하셨습니다.{'\n'}
-              다시 미션을 완료하면 새 후기를 작성할 수 있어요!
             </Text>
           </View>
         )}
@@ -276,7 +261,12 @@ const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({ navigation, r
           ) : (
             <View style={styles.reviewsList}>
               {reviews.map(review => (
-                <ReviewCard key={review.id} review={review} />
+                <ReviewCard
+                  key={review.id}
+                  review={review}
+                  currentUserId={currentUserId}
+                  onDelete={handleDeleteReview}
+                />
               ))}
 
               {currentPage < totalPages - 1 && (

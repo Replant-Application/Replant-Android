@@ -66,8 +66,9 @@ export const styles = StyleSheet.create({
     }),
   },
   badgeArrow: {
-    fontSize: typography.fontSize.xl,
-    color: colors.text.tertiary,
-    marginLeft: spacing[1],
+    ...createTextStyle('xl', {
+      color: colors.text.tertiary,
+      marginLeft: spacing[1],
+    }),
   },
 });

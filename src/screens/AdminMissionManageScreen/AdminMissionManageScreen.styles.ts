@@ -249,15 +249,10 @@ export const styles = StyleSheet.create({
     borderColor: colors.primary[500],
   },
   checkmark: {
-    color: colors.text.inverse,
-    fontSize: 14,
-    fontWeight: typography.fontWeight.medium,
-    fontFamily: Platform.select({
-      ios: undefined, // iOS는 기본 시스템 폰트 사용
-      android: typography.fontFamily.regular,
+    ...createTextStyle('sm', {
+      color: colors.text.inverse,
+      fontWeight: typography.fontWeight.medium,
     }),
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(14),
   },
   checkboxLabel: {
     ...createTextStyle('base', {

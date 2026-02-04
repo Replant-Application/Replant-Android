@@ -109,14 +109,10 @@ export const styles = StyleSheet.create({
     borderColor: '#E8DDD4',
   },
   valueText: {
-    fontSize: typography.fontSize.lg,
-    fontWeight: typography.fontWeight.bold,
-    color: '#6B5344',
-    fontFamily: Platform.select({
-      ios: undefined, // iOS는 기본 시스템 폰트 사용
-      android: typography.fontFamily.regular,
+    ...createTextStyle('lg', {
+      fontWeight: typography.fontWeight.bold,
+      color: '#6B5344',
     }),
-    includeFontPadding: false,
   },
   valueTextPlaceholder: {
     ...createBodyStyle('base', {
@@ -125,8 +121,9 @@ export const styles = StyleSheet.create({
     }),
   },
   editIcon: {
-    fontSize: typography.fontSize.xl,
-    color: colors.gray[400],
+    ...createTextStyle('xl', {
+      color: colors.gray[400],
+    }),
   },
   editContainer: {
     backgroundColor: colors.gray[50],
@@ -156,14 +153,10 @@ export const styles = StyleSheet.create({
     borderColor: colors.primary[300],
   },
   timeText: {
-    fontSize: typography.fontSize['3xl'],
-    fontWeight: typography.fontWeight.bold,
-    color: colors.primary[600],
-    fontFamily: Platform.select({
-      ios: undefined, // iOS는 기본 시스템 폰트 사용
-      android: typography.fontFamily.regular,
+    ...createTextStyle('3xl', {
+      fontWeight: typography.fontWeight.bold,
+      color: colors.primary[600],
     }),
-    includeFontPadding: false,
   },
   timeRangeContainer: {
     flexDirection: 'row',
@@ -175,10 +168,11 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
   },
   timeRangeSeparator: {
-    fontSize: typography.fontSize.xl,
-    color: colors.text.secondary,
-    marginHorizontal: spacing[3],
-    marginTop: spacing[6],
+    ...createTextStyle('xl', {
+      color: colors.text.secondary,
+      marginHorizontal: spacing[3],
+      marginTop: spacing[6],
+    }),
   },
   locationInputRow: {
     flexDirection: 'row',

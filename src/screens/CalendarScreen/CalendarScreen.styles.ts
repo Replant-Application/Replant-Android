@@ -147,16 +147,13 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 3,
   },
   missionCountText: {
-    fontSize: 8,
-    color: colors.background.primary,
-    fontWeight: typography.fontWeight.bold as any,
-    fontFamily: Platform.select({
-      ios: undefined, // iOS는 기본 시스템 폰트 사용
-      android: typography.fontFamily.regular,
+    ...createTextStyle('xs', {
+      fontSize: 8,
+      color: colors.background.primary,
+      fontWeight: typography.fontWeight.bold as any,
+      lineHeight: 12,
+      textAlign: 'center',
     }),
-    includeFontPadding: false,
-    lineHeight: 12,
-    textAlign: 'center',
   },
   missionItem: {
     flexDirection: 'row',

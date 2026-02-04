@@ -134,9 +134,10 @@ export const styles = StyleSheet.create({
     }),
   },
   completionPercent: {
-    fontSize: typography.fontSize.lg,
-    fontWeight: typography.fontWeight.medium,
-    color: colors.text.primary,
+    ...createTextStyle('lg', {
+      fontWeight: typography.fontWeight.medium,
+      color: colors.text.primary,
+    }),
   },
   sliderContainer: {
     marginBottom: spacing[1],
@@ -194,9 +195,10 @@ export const styles = StyleSheet.create({
     marginBottom: spacing[2],
   },
   warningText: {
-    fontSize: typography.fontSize.xs,
-    color: colors.orange[700],
-    textAlign: 'center',
+    ...createTextStyle('xs', {
+      color: colors.orange[700],
+      textAlign: 'center',
+    }),
   },
   encouragementBox: {
     backgroundColor: colors.primary[50],
@@ -303,10 +305,10 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
   },
   removeImageText: {
-    color: colors.white,
-    fontSize: 18,
-    fontWeight: 'bold',
-    lineHeight: 20,
+    ...createTextStyle('lg', {
+      color: colors.white,
+      fontWeight: typography.fontWeight.bold,
+    }),
   },
   addPhotoButton: {
     width: '100%',

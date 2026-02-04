@@ -11,6 +11,7 @@ import {
   getCustomMission,
   getMissionReviews,
   createMissionReview,
+  deleteMissionReview,
   completeCustomMission,
   SystemMission,
   MissionReview,
@@ -260,6 +261,31 @@ export const useMissionDetailScreenContainer = ({ navigation, route }: MissionDe
   }, [missionId, reviewContent, loadReviews, currentUserId, showError, showSuccess, handleApiError]);
 
   /**
+   * 후기 삭제 (본인 작성 후기만)
+   */
+  const handleDeleteReview = useCallback(
+    async (reviewId: number) => {
+      if (!missionId) return;
+      const isCustomMission = missionId.startsWith('custom_');
+      const numericMissionId = isCustomMission ? parseInt(missionId.replace('custom_', ''), 10) : parseInt(missionId, 10);
+      if (isNaN(numericMissionId)) return;
+      try {
+        const result = await deleteMissionReview(numericMissionId, reviewId);
+        if (result.success) {
+          showSuccess('후기 삭제', '후기가 삭제되었습니다.');
+          setHasWrittenReview(false);
+          await loadReviews(0, currentUserId);
+        } else {
+          handleApiError(result, 'MissionDetailScreen.handleDeleteReview');
+        }
+      } catch (error) {
+        showError(error instanceof Error ? error : new Error('후기 삭제에 실패했습니다.'), 'MissionDetailScreen.handleDeleteReview');
+      }
+    },
+    [missionId, currentUserId, loadReviews, showSuccess, showError, handleApiError]
+  );
+
+  /**
    * 초기 데이터 로드
    */
   const loadData = useCallback(async () => {
@@ -347,9 +373,11 @@ export const useMissionDetailScreenContainer = ({ navigation, route }: MissionDe
     setReviewContent,
     // Handlers
     handleSubmitReview,
+    handleDeleteReview,
     handleRefresh,
     loadMoreReviews,
     handleCompleteCustom,
     completingCustom,
+    currentUserId,
   };
 };

@@ -65,15 +65,10 @@ export const styles = StyleSheet.create({
   },
   createButtonTitle: {
     flex: 1,
-    fontSize: typography.fontSize.base,
-    fontFamily: Platform.select({
-      ios: undefined,
-      android: typography.fontFamily.regular,
+    ...createTextStyle('base', {
+      fontWeight: typography.fontWeight.medium,
+      color: '#6B5344',
     }),
-    fontWeight: typography.fontWeight.medium,
-    color: '#6B5344',
-    includeFontPadding: false,
-    lineHeight: Math.round(typography.fontSize.base * 1.35),
   },
   /** 버튼 안 설명 (하루 1회 제한) */
   createButtonSubtitle: {

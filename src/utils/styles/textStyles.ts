@@ -97,20 +97,6 @@ export const createErrorTextStyle = (
 };
 
 /**
- * 링크 텍스트 스타일
- */
-export const createLinkTextStyle = (
-  fontSize: keyof typeof typography.fontSize = 'sm',
-  options?: Partial<TextStyle>
-): TextStyle => {
-  return createTextStyle(fontSize, {
-    color: colors.semantic.fg.brand,
-    textDecorationLine: 'underline',
-    ...options,
-  });
-};
-
-/**
  * 버튼 텍스트 스타일
  */
 export const createButtonTextStyle = (

@@ -222,9 +222,10 @@ export const styles = StyleSheet.create({
     backgroundColor: colors.gray[100],
   },
   pageArrowText: {
-    fontSize: typography.fontSize['2xl'],
-    color: colors.primary[600],
-    fontWeight: typography.fontWeight.medium,
+    ...createTextStyle('2xl', {
+      color: colors.primary[600],
+      fontWeight: typography.fontWeight.medium,
+    }),
   },
   pageArrowTextDisabled: {
     color: colors.gray[400],

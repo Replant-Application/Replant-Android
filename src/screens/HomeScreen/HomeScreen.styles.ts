@@ -277,9 +277,10 @@ export const styles = StyleSheet.create({
     ...createTitleStyle('lg'),
   },
   todoListArrow: {
-    fontSize: typography.fontSize.xl,
-    color: colors.text.secondary,
-    fontWeight: typography.fontWeight.medium,
+    ...createTextStyle('xl', {
+      color: colors.text.secondary,
+      fontWeight: typography.fontWeight.medium,
+    }),
   },
   todoListCount: {
     ...createTextStyle('sm', {

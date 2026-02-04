@@ -4,7 +4,8 @@
  */
 
 import { StyleSheet } from 'react-native';
-import { colors, spacing } from '../../../utils/designTokens';
+import { colors, spacing, typography } from '../../../utils/designTokens';
+import { createTextStyle } from '../../../utils/styles/textStyles';
 
 export const styles = StyleSheet.create({
   overlay: {
@@ -24,10 +25,10 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
   },
   closeButtonText: {
-    fontSize: 22,
-    color: colors.white,
-    fontWeight: '600',
-    lineHeight: 24,
+    ...createTextStyle('xxl', {
+      fontWeight: typography.fontWeight.semibold,
+      color: colors.white,
+    }),
   },
   imageWrapper: {
     width: '100%',

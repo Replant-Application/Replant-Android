@@ -118,9 +118,10 @@ export const styles = StyleSheet.create({
     }),
   },
   metaDot: {
-    fontSize: typography.fontSize.sm,
-    color: colors.text.tertiary,
-    marginHorizontal: spacing[2],
+    ...createTextStyle('sm', {
+      color: colors.text.tertiary,
+      marginHorizontal: spacing[2],
+    }),
   },
   missionSetFooter: {
     flexDirection: 'row',

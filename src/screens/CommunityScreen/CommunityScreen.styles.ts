@@ -199,10 +199,10 @@ export const styles = StyleSheet.create({
     borderColor: colors.primary[500],
   },
   filterCheckboxCheckmark: {
-    color: colors.white,
-    fontSize: typography.fontSize.sm,
-    fontWeight: typography.fontWeight.bold,
-    lineHeight: typography.fontSize.sm,
+    ...createTextStyle('sm', {
+      color: colors.white,
+      fontWeight: typography.fontWeight.bold,
+    }),
   },
   modalApplyButton: {
     ...buttonStyles.primary(),
@@ -291,10 +291,11 @@ export const styles = StyleSheet.create({
     tintColor: colors.white,
   },
   fabText: {
-    fontSize: 28,
-    color: colors.white,
-    fontWeight: typography.fontWeight.medium,
-    marginTop: -2,
+    ...createTextStyle('3xl', {
+      color: colors.white,
+      fontWeight: typography.fontWeight.medium,
+      marginTop: -2,
+    }),
   },
   // 투두 공유 관련 스타일
   missionSetFilterContainer: {
@@ -403,9 +404,9 @@ export const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   shareModalCloseText: {
-    fontSize: 28,
-    color: colors.text.secondary,
-    lineHeight: 28,
+    ...createTextStyle('3xl', {
+      color: colors.text.secondary,
+    }),
   },
   shareModalSubtitle: {
     ...createSecondaryTextStyle('sm', {

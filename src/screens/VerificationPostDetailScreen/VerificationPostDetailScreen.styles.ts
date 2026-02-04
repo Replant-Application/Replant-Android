@@ -39,16 +39,12 @@ export const styles = StyleSheet.create({
     height: 20,
   },
   headerTitle: {
-    fontSize: typography.fontSize['2xl'],
-    fontWeight: typography.fontWeight.normal,
-    color: colors.text.primary,
-    flex: 1,
-    textAlign: 'center',
-    fontFamily: Platform.select({
-      ios: undefined, // iOS는 기본 시스템 폰트 사용
-      android: typography.fontFamily.regular,
+    ...createTextStyle('2xl', {
+      fontWeight: typography.fontWeight.normal,
+      color: colors.text.primary,
+      flex: 1,
+      textAlign: 'center',
     }),
-    includeFontPadding: false,
   },
   headerRight: {
     width: 28,

@@ -176,6 +176,7 @@ export interface MissionReview {
   userId: number;
   userNickname: string;
   userProfileImg?: string;
+  userReantLevel?: number; // 작성자 캐릭터 레벨 (프로필 캐릭터 이미지용)
   content: string;
   rating?: number; // 1-5 별점
   createdAt: string;
@@ -214,6 +215,21 @@ export const createMissionReview = async (
     content: data.content,
   };
   return apiClient.post<MissionReview>(endpoint, requestData);
+};
+
+/**
+ * 미션 리뷰 삭제
+ * DELETE /api/missions/{missionId}/reviews/{reviewId}
+ * 본인 작성 후기만 삭제 가능
+ */
+export const deleteMissionReview = async (
+  missionId: number,
+  reviewId: number
+): Promise<ServiceResult<void>> => {
+  const endpoint = API_CONFIG.endpoints.mission.deleteReview
+    .replace(':missionId', String(missionId))
+    .replace(':reviewId', String(reviewId));
+  return apiClient.delete<void>(endpoint);
 };
 
 // ============================================

@@ -72,6 +72,7 @@ export const API_CONFIG = {
       detail: '/missions/:missionId',
       reviews: '/missions/:missionId/reviews',
       createReview: '/missions/:missionId/reviews',
+      deleteReview: '/missions/:missionId/reviews/:reviewId',
       qnaList: '/missions/:missionId/qna',
       qnaDetail: '/missions/:missionId/qna/:qnaId',
       createQuestion: '/missions/:missionId/qna',

@@ -5,7 +5,7 @@
 
 import { StyleSheet, Platform, Dimensions } from 'react-native';
 import { spacing, typography, colors } from '../../utils/designTokens';
-import { getOptimizedLineHeight } from '../../utils/styles/textStyles';
+import { createTextStyle, getOptimizedLineHeight } from '../../utils/styles/textStyles';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -66,15 +66,14 @@ export const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   pageIndicator: {
-    fontSize: typography.fontSize.sm,
-    fontFamily: typography.fontFamily.bold,
-    fontWeight: '700',
-    color: colors.white,
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
-    textShadowColor: 'rgba(0,0,0,0.5)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 2,
+    ...createTextStyle('sm', {
+      fontWeight: typography.fontWeight.bold,
+      color: colors.white,
+      fontFamily: Platform.select({ ios: undefined, android: typography.fontFamily.bold }),
+      textShadowColor: 'rgba(0,0,0,0.5)',
+      textShadowOffset: { width: 0, height: 1 },
+      textShadowRadius: 2,
+    }),
   },
   navButtonRow: {
     flexDirection: 'row',
@@ -95,11 +94,10 @@ export const styles = StyleSheet.create({
     backgroundColor: colors.primary[600],
   },
   navButtonText: {
-    fontSize: typography.fontSize.sm,
-    fontFamily: typography.fontFamily.bold,
-    fontWeight: '700',
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.sm),
+    ...createTextStyle('sm', {
+      fontWeight: typography.fontWeight.bold,
+      fontFamily: Platform.select({ ios: undefined, android: typography.fontFamily.bold }),
+    }),
   },
   navButtonTextPrev: {
     color: colors.gray[700],

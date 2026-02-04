@@ -91,9 +91,10 @@ export const styles = StyleSheet.create({
     backgroundColor: colors.primary[500],
   },
   checkmark: {
-    color: colors.white,
-    fontSize: typography.fontSize.sm,
-    fontWeight: typography.fontWeight.bold,
+    ...createTextStyle('sm', {
+      color: colors.white,
+      fontWeight: typography.fontWeight.bold,
+    }),
   },
   missionTitle: {
     flex: 1,

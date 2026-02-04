@@ -48,9 +48,10 @@ export const styles = StyleSheet.create({
     }),
   },
   metaDot: {
-    fontSize: typography.fontSize.sm,
-    color: colors.text.tertiary,
-    marginHorizontal: spacing[1],
+    ...createTextStyle('sm', {
+      color: colors.text.tertiary,
+      marginHorizontal: spacing[1],
+    }),
   },
   missionCount: {
     ...createTextStyle('sm', {
@@ -167,9 +168,10 @@ export const styles = StyleSheet.create({
     borderColor: colors.purple[300],
   },
   missionTypeBadgeText: {
-    fontSize: 12,
-    fontWeight: typography.fontWeight.bold,
-    flexShrink: 0,
+    ...createTextStyle('xs', {
+      fontWeight: typography.fontWeight.bold,
+      flexShrink: 0,
+    }),
   },
   missionTypeBadgeTextOfficial: {
     color: colors.blue[600],
@@ -202,9 +204,10 @@ export const styles = StyleSheet.create({
     borderColor: colors.gray[300],
   },
   creatorStatusText: {
-    fontSize: 12,
-    fontWeight: typography.fontWeight.bold,
-    flexShrink: 0,
+    ...createTextStyle('xs', {
+      fontWeight: typography.fontWeight.bold,
+      flexShrink: 0,
+    }),
   },
   creatorStatusTextCompleted: {
     color: colors.primary[700],

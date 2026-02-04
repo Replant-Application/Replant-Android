@@ -36,8 +36,9 @@ export const styles = StyleSheet.create({
     backgroundColor: 'transparent',
   },
   headerTitle: {
-    fontSize: typography.fontSize.lg,
-    textAlign: 'center',
+    ...createTextStyle('lg', {
+      textAlign: 'center',
+    }),
   },
   headerNoPadding: {
     paddingHorizontal: 0,
@@ -145,10 +146,9 @@ export const styles = StyleSheet.create({
     opacity: 0.7,
   },
   completeButtonText: {
-    ...createButtonTextStyle('base', { color: colors.white, fontWeight: typography.fontWeight.bold }),
-    fontFamily: Platform.select({
-      ios: undefined,
-      android: typography.fontFamily.regular,
+    ...createButtonTextStyle('base', {
+      color: colors.white,
+      fontWeight: typography.fontWeight.bold,
     }),
   },
   loadingOverlay: {

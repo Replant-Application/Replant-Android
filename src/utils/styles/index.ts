@@ -10,7 +10,6 @@ export {
   createBodyStyle,
   createSecondaryTextStyle,
   createErrorTextStyle,
-  createLinkTextStyle,
   createButtonTextStyle,
   getOptimizedLineHeight,
 } from './textStyles';

@@ -92,10 +92,10 @@ export const styles = StyleSheet.create({
     backgroundColor: colors.primary[600],
   },
   privateCheckmark: {
-    color: colors.white,
-    fontSize: 12,
-    fontWeight: typography.fontWeight.bold,
-    lineHeight: 14,
+    ...createTextStyle('xs', {
+      color: colors.white,
+      fontWeight: typography.fontWeight.bold,
+    }),
   },
   privateCheckboxLabel: {
     ...createTextStyle('xs', {
@@ -233,10 +233,10 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
   },
   removeImageText: {
-    color: colors.white,
-    fontSize: 16,
-    fontWeight: 'bold',
-    lineHeight: 18,
+    ...createTextStyle('base', {
+      color: colors.white,
+      fontWeight: typography.fontWeight.bold,
+    }),
   },
   imageSection: {
     marginBottom: spacing[4],
