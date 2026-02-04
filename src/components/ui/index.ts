@@ -13,6 +13,8 @@ export { default as PlusButton } from './plusButton';
 export { default as ErrorBoundary } from './errorBoundary';
 export { default as ProgressBar } from './progressBar';
 export { default as SectionTitle } from './sectionTitle';
+export { SectionHeader } from './sectionHeader';
+export type { SectionHeaderProps } from './sectionHeader';
 export { default as ConfirmModal } from './confirmModal';
 export { default as AlertModal } from './alertModal';
 export { default as FullScreenImageViewer } from './fullScreenImageViewer';

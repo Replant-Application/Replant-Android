@@ -6,6 +6,7 @@ import MissionInfoModal from './MissionInfoModal';
 import MissionPagination from './MissionPagination';
 import MissionGroupList from './MissionGroupList';
 import { colors, spacing } from '../../utils/designTokens';
+import { missionTabStyles } from '../../utils/styles';
 import { MissionScreenProps, MissionTab } from '../../types/screens/mission';
 import { useMissionScreenContainer } from './MissionScreen.container';
 import { styles } from './MissionScreen.styles';
@@ -99,9 +100,9 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
 
       {/* 나의 미션 / 미션 도감 탭 */}
       <View style={styles.topTabContainer}>
-        <View style={styles.missionTabContainer}>
+        <View style={missionTabStyles.container()}>
           <TouchableOpacity
-            style={[styles.missionTab, activeTab === 'myMission' && styles.missionTabActive]}
+            style={[missionTabStyles.tab(), activeTab === 'myMission' && missionTabStyles.tabActive()]}
             onPress={() => handleTabChange('myMission')}
             activeOpacity={0.7}
             accessibilityRole="tab"
@@ -109,7 +110,7 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
             accessibilityState={{ selected: activeTab === 'myMission' }}
           >
             <Text 
-              style={[styles.missionTabText, activeTab === 'myMission' && styles.missionTabTextActive]}
+              style={[missionTabStyles.tabText(), activeTab === 'myMission' && missionTabStyles.tabTextActive()]}
               numberOfLines={1}
               ellipsizeMode="tail"
             >
@@ -117,7 +118,7 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={[styles.missionTab, activeTab === 'missionGroup' && styles.missionTabActive]}
+            style={[missionTabStyles.tab(), activeTab === 'missionGroup' && missionTabStyles.tabActive()]}
             onPress={() => handleTabChange('missionGroup')}
             activeOpacity={0.7}
             accessibilityRole="tab"
@@ -125,7 +126,7 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
             accessibilityState={{ selected: activeTab === 'missionGroup' }}
           >
             <Text 
-              style={[styles.missionTabText, activeTab === 'missionGroup' && styles.missionTabTextActive]}
+              style={[missionTabStyles.tabText(), activeTab === 'missionGroup' && missionTabStyles.tabTextActive()]}
               numberOfLines={1}
               ellipsizeMode="tail"
             >
@@ -202,9 +203,9 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
 
         {/* 진행중/인증대기/완료 탭 - 나의 미션/미션 도감과 동일 스타일 */}
         <View style={styles.filterTabWrapper}>
-          <View style={styles.missionTabContainer}>
+          <View style={missionTabStyles.container()}>
             <TouchableOpacity
-              style={[styles.missionTab, selectedFilter === 'inProgress' && styles.missionTabActive]}
+              style={[missionTabStyles.tab(), selectedFilter === 'inProgress' && missionTabStyles.tabActive()]}
               onPress={() => handleFilterChange('inProgress')}
               activeOpacity={0.7}
               accessibilityRole="tab"
@@ -212,7 +213,7 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
               accessibilityState={{ selected: selectedFilter === 'inProgress' }}
             >
               <Text
-                style={[styles.missionTabText, selectedFilter === 'inProgress' && styles.missionTabTextActive]}
+                style={[missionTabStyles.tabText(), selectedFilter === 'inProgress' && missionTabStyles.tabTextActive()]}
                 numberOfLines={1}
                 ellipsizeMode="tail"
               >
@@ -220,7 +221,7 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
-              style={[styles.missionTab, selectedFilter === 'pendingVerification' && styles.missionTabActive]}
+              style={[missionTabStyles.tab(), selectedFilter === 'pendingVerification' && missionTabStyles.tabActive()]}
               onPress={() => handleFilterChange('pendingVerification')}
               activeOpacity={0.7}
               accessibilityRole="tab"
@@ -228,7 +229,7 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
               accessibilityState={{ selected: selectedFilter === 'pendingVerification' }}
             >
               <Text
-                style={[styles.missionTabText, selectedFilter === 'pendingVerification' && styles.missionTabTextActive]}
+                style={[missionTabStyles.tabText(), selectedFilter === 'pendingVerification' && missionTabStyles.tabTextActive()]}
                 numberOfLines={1}
                 ellipsizeMode="tail"
               >
@@ -236,7 +237,7 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
-              style={[styles.missionTab, selectedFilter === 'completed' && styles.missionTabActive]}
+              style={[missionTabStyles.tab(), selectedFilter === 'completed' && missionTabStyles.tabActive()]}
               onPress={() => handleFilterChange('completed')}
               activeOpacity={0.7}
               accessibilityRole="tab"
@@ -244,7 +245,7 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
               accessibilityState={{ selected: selectedFilter === 'completed' }}
             >
               <Text
-                style={[styles.missionTabText, selectedFilter === 'completed' && styles.missionTabTextActive]}
+                style={[missionTabStyles.tabText(), selectedFilter === 'completed' && missionTabStyles.tabTextActive()]}
                 numberOfLines={1}
                 ellipsizeMode="tail"
               >
@@ -338,9 +339,9 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
         <>
           {/* 공식/커스텀 미션 탭 */}
           <View style={styles.groupTabContainer}>
-            <View style={styles.missionTabContainer}>
+            <View style={missionTabStyles.container()}>
               <TouchableOpacity
-                style={[styles.missionTab, missionGroupTab === 'official' && styles.missionTabActive]}
+                style={[missionTabStyles.tab(), missionGroupTab === 'official' && missionTabStyles.tabActive()]}
                 onPress={() => handleMissionGroupTabChange('official')}
                 activeOpacity={0.7}
                 accessibilityRole="tab"
@@ -348,7 +349,7 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
                 accessibilityState={{ selected: missionGroupTab === 'official' }}
               >
                 <Text 
-                  style={[styles.missionTabText, missionGroupTab === 'official' && styles.missionTabTextActive]}
+                  style={[missionTabStyles.tabText(), missionGroupTab === 'official' && missionTabStyles.tabTextActive()]}
                   numberOfLines={1}
                   ellipsizeMode="tail"
                 >
@@ -356,7 +357,7 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={[styles.missionTab, missionGroupTab === 'custom' && styles.missionTabActive]}
+                style={[missionTabStyles.tab(), missionGroupTab === 'custom' && missionTabStyles.tabActive()]}
                 onPress={() => handleMissionGroupTabChange('custom')}
                 activeOpacity={0.7}
                 accessibilityRole="tab"
@@ -364,7 +365,7 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
                 accessibilityState={{ selected: missionGroupTab === 'custom' }}
               >
                 <Text 
-                  style={[styles.missionTabText, missionGroupTab === 'custom' && styles.missionTabTextActive]}
+                  style={[missionTabStyles.tabText(), missionGroupTab === 'custom' && missionTabStyles.tabTextActive()]}
                   numberOfLines={1}
                   ellipsizeMode="tail"
                 >

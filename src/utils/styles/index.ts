@@ -32,6 +32,7 @@ export {
   dropdownStyles,
   checkboxStyles,
   tabBarStyles,
+  missionTabStyles,
   filterBarStyles,
   badgeStyles,
   missionItemStyles,

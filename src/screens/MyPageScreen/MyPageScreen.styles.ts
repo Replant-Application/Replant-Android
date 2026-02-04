@@ -5,7 +5,7 @@
 
 import { StyleSheet } from 'react-native';
 import { colors, spacing, typography, borderRadius, shadows, layout } from '../../utils/designTokens';
-import { createTextStyle, createTitleStyle } from '../../utils/styles/textStyles';
+import { createTextStyle } from '../../utils/styles/textStyles';
 
 export const styles = StyleSheet.create({
   container: {
@@ -18,19 +18,6 @@ export const styles = StyleSheet.create({
     paddingHorizontal: layout.globalGutterLarge,
     paddingVertical: layout.globalGutterLarge,
     paddingBottom: spacing[20],
-  },
-  sectionHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: spacing[4],
-    gap: spacing[2],
-  },
-  sectionIcon: {
-    width: 25,
-    height: 25,
-  },
-  sectionTitle: {
-    ...createTitleStyle('lg'),
   },
   characterCard: {
     backgroundColor: colors.background.primary,

@@ -9,8 +9,9 @@ import {
   ImageBackground,
   Image,
 } from 'react-native';
-import { colors } from '../../utils/designTokens';
+import { colors, spacing } from '../../utils/designTokens';
 import { formatDateKorean } from '../../utils/dateUtils';
+import { missionTabStyles } from '../../utils/styles';
 import { Header, ConfirmModal, AlertModal } from '../../components/ui';
 import { TodoList } from '../../types/todolist';
 import { useTodoListScreenContainer } from './TodoListScreen.container';
@@ -135,9 +136,9 @@ const TodoListScreen: React.FC<Props> = ({ navigation, route }) => {
 
       {/* 탭 버튼 - 나의 미션/미션 도감과 동일 스타일 */}
       <View style={styles.tabContainer}>
-        <View style={styles.missionTabContainer}>
+        <View style={[missionTabStyles.container(), { marginBottom: spacing[2] }]}>
           <TouchableOpacity
-            style={[styles.missionTab, activeTab === 'active' && styles.missionTabActive]}
+            style={[missionTabStyles.tab(), activeTab === 'active' && missionTabStyles.tabActive()]}
             onPress={() => setActiveTab('active')}
             activeOpacity={0.7}
             accessibilityRole="tab"
@@ -145,7 +146,7 @@ const TodoListScreen: React.FC<Props> = ({ navigation, route }) => {
             accessibilityState={{ selected: activeTab === 'active' }}
           >
             <Text
-              style={[styles.missionTabText, activeTab === 'active' && styles.missionTabTextActive]}
+              style={[missionTabStyles.tabText(), activeTab === 'active' && missionTabStyles.tabTextActive()]}
               numberOfLines={1}
               ellipsizeMode="tail"
             >
@@ -153,7 +154,7 @@ const TodoListScreen: React.FC<Props> = ({ navigation, route }) => {
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={[styles.missionTab, activeTab === 'completed' && styles.missionTabActive]}
+            style={[missionTabStyles.tab(), activeTab === 'completed' && missionTabStyles.tabActive()]}
             onPress={() => setActiveTab('completed')}
             activeOpacity={0.7}
             accessibilityRole="tab"
@@ -161,7 +162,7 @@ const TodoListScreen: React.FC<Props> = ({ navigation, route }) => {
             accessibilityState={{ selected: activeTab === 'completed' }}
           >
             <Text
-              style={[styles.missionTabText, activeTab === 'completed' && styles.missionTabTextActive]}
+              style={[missionTabStyles.tabText(), activeTab === 'completed' && missionTabStyles.tabTextActive()]}
               numberOfLines={1}
               ellipsizeMode="tail"
             >
@@ -169,7 +170,7 @@ const TodoListScreen: React.FC<Props> = ({ navigation, route }) => {
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={[styles.missionTab, activeTab === 'incomplete' && styles.missionTabActive]}
+            style={[missionTabStyles.tab(), activeTab === 'incomplete' && missionTabStyles.tabActive()]}
             onPress={() => setActiveTab('incomplete')}
             activeOpacity={0.7}
             accessibilityRole="tab"
@@ -177,7 +178,7 @@ const TodoListScreen: React.FC<Props> = ({ navigation, route }) => {
             accessibilityState={{ selected: activeTab === 'incomplete' }}
           >
             <Text
-              style={[styles.missionTabText, activeTab === 'incomplete' && styles.missionTabTextActive]}
+              style={[missionTabStyles.tabText(), activeTab === 'incomplete' && missionTabStyles.tabTextActive()]}
               numberOfLines={1}
               ellipsizeMode="tail"
             >

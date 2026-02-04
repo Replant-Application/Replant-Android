@@ -4,7 +4,7 @@ import { NavigationProp } from '@react-navigation/native';
 import { useUserProfile } from '../../hooks/useUserProfile';
 import { useCharacter } from '../../hooks/useCharacter';
 import { CharacterCard } from '../../components/specialized';
-import { Loading, ErrorBoundary, Header } from '../../components/ui';
+import { Loading, ErrorBoundary, Header, SectionHeader } from '../../components/ui';
 import { colors } from '../../utils/designTokens';
 import { RootStackParamList } from '../../types/navigation';
 import { styles } from './MyPageScreen.styles';
@@ -83,15 +83,11 @@ const MyPageScreen: React.FC<MyPageScreenProps> = ({ navigation }) => {
           {/* 캐릭터 섹션 */}
           {currentCharacter && (
             <View style={styles.characterCard}>
-              <View style={styles.sectionHeader}>
-                <Image
-                  source={require('../../assets/images/clover.png')}
-                  style={styles.sectionIcon}
-                  resizeMode="contain"
-                  accessibilityLabel="캐릭터 아이콘"
-                />
-                <Text style={styles.sectionTitle}>나의 캐릭터</Text>
-              </View>
+              <SectionHeader
+                title="나의 캐릭터"
+                iconSource={require('../../assets/images/clover.png')}
+                accessibilityLabel="캐릭터 아이콘"
+              />
               <CharacterCard
                 character={currentCharacter}
                 onPress={() => {}}
@@ -102,15 +98,11 @@ const MyPageScreen: React.FC<MyPageScreenProps> = ({ navigation }) => {
 
           {/* 통계 섹션 */}
           <View style={styles.statsCard}>
-            <View style={styles.sectionHeader}>
-              <Image
-                source={require('../../assets/images/search.png')}
-                style={styles.sectionIcon}
-                resizeMode="contain"
-                accessibilityLabel="통계 아이콘"
-              />
-              <Text style={styles.sectionTitle}>통계</Text>
-            </View>
+            <SectionHeader
+              title="통계"
+              iconSource={require('../../assets/images/search.png')}
+              accessibilityLabel="통계 아이콘"
+            />
             <View style={styles.statsContainer}>
               {statsData.map((stat, index) => {
                 // 각 항목별 목표치 대비 진행률 계산 (최대 100%)

@@ -17,6 +17,7 @@ import MissionSetList from './components/MissionSetList';
 import MissionSetDetailScreen from '../MissionSetDetailScreen';
 import CommunityPostDetailScreen from '../CommunityPostDetailScreen';
 import { useCommunityScreenContainer } from './CommunityScreen.container';
+import { missionTabStyles } from '../../utils/styles';
 import { styles } from './CommunityScreen.styles';
 
 const FADE_DURATION = 150;
@@ -124,9 +125,9 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation, route }) 
 
       {/* 탭 - 나의 미션/미션 도감과 동일 스타일 */}
       <View style={styles.topTabContainer}>
-        <View style={styles.missionTabContainer}>
+        <View style={missionTabStyles.container()}>
           <TouchableOpacity
-            style={[styles.missionTab, activeTab === 'all' && styles.missionTabActive]}
+            style={[missionTabStyles.tab(), activeTab === 'all' && missionTabStyles.tabActive()]}
             onPress={() => setActiveTab('all')}
             activeOpacity={0.7}
             accessibilityRole="tab"
@@ -134,7 +135,7 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation, route }) 
             accessibilityState={{ selected: activeTab === 'all' }}
           >
             <Text
-              style={[styles.missionTabText, activeTab === 'all' && styles.missionTabTextActive]}
+              style={[missionTabStyles.tabText(), activeTab === 'all' && missionTabStyles.tabTextActive()]}
               numberOfLines={1}
               ellipsizeMode="tail"
             >
@@ -142,7 +143,7 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation, route }) 
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={[styles.missionTab, activeTab === 'todo-share' && styles.missionTabActive]}
+            style={[missionTabStyles.tab(), activeTab === 'todo-share' && missionTabStyles.tabActive()]}
             onPress={() => setActiveTab('todo-share')}
             activeOpacity={0.7}
             accessibilityRole="tab"
@@ -150,7 +151,7 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation, route }) 
             accessibilityState={{ selected: activeTab === 'todo-share' }}
           >
             <Text
-              style={[styles.missionTabText, activeTab === 'todo-share' && styles.missionTabTextActive]}
+              style={[missionTabStyles.tabText(), activeTab === 'todo-share' && missionTabStyles.tabTextActive()]}
               numberOfLines={1}
               ellipsizeMode="tail"
             >
