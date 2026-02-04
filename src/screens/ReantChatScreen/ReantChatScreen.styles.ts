@@ -24,10 +24,10 @@ export const styles = StyleSheet.create({
     flex: 1,
     paddingTop: Platform.OS === 'ios' ? 120 : 90,
   },
-  // 1. 대화 종료하기 버튼 (상단) - 홈스크린 스타일 적용
+  // 1. 대화 종료하기 버튼 (상단) - 대화 시작하기와 동일한 위치
   topButtonContainer: {
     position: 'absolute',
-    top: Platform.OS === 'ios' ? 50 : 30,
+    top: Platform.OS === 'ios' ? 100 : 70,
     left: 0,
     right: 0,
     alignItems: 'center',
@@ -61,13 +61,12 @@ export const styles = StyleSheet.create({
   // 2-3. 말풍선 + 리앤트 캐릭터 영역
   heroSection: {
     flex: 1,
-    justifyContent: 'flex-start',
+    justifyContent: 'center',
     alignItems: 'center',
-    paddingTop: spacing[2],
   },
   characterImageContainer: {
-    width: SCREEN_WIDTH * 0.8,
-    height: SCREEN_WIDTH * 0.8,
+    width: SCREEN_WIDTH * 0.55,
+    height: SCREEN_WIDTH * 0.55,
     justifyContent: 'center',
     alignItems: 'center',
     position: 'absolute',

@@ -14,6 +14,7 @@ import {
   ImageBackground,
   Image,
   Animated,
+  Easing,
   ActivityIndicator,
 } from 'react-native';
 import FastImage from 'react-native-fast-image';
@@ -170,7 +171,8 @@ const ReantChatScreen: React.FC<ReantChatScreenProps> = ({ navigation, route: _r
     
     Animated.timing(floatingAnim, {
       toValue: 1,
-      duration: 2000,
+      duration: 3500,
+      easing: Easing.out(Easing.cubic),
       useNativeDriver: true,
     }).start(() => {
       setFloatingMessage(null);
@@ -278,7 +280,7 @@ const ReantChatScreen: React.FC<ReantChatScreenProps> = ({ navigation, route: _r
                       {
                         translateY: floatingAnim.interpolate({
                           inputRange: [0, 1],
-                          outputRange: [50, -100],
+                          outputRange: [50, -220],
                         }),
                       },
                       {

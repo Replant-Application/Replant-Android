@@ -62,7 +62,7 @@ export const styles = StyleSheet.create({
   },
   speechBubble: {
     position: 'absolute',
-    top: '32%',
+    top: '26%',
     left: '50%',
     transform: [{ translateX: -(SCREEN_WIDTH * 0.94) / 2 }],
     width: SCREEN_WIDTH * 0.94,
