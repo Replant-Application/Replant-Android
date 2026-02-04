@@ -15,6 +15,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
   const {
     user,
     currentCharacter,
+    APP_VERSION,
     showNicknameForm,
     newNickname,
     showLogoutModal,
@@ -269,6 +270,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
               onPress={handleSendFeedback}
             />
           </View>
+          <Text style={styles.versionText}>{APP_VERSION}</Text>
         </View>
       </ScrollView>
 

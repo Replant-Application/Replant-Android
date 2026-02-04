@@ -30,6 +30,13 @@ export const styles = StyleSheet.create({
   sectionBeforeVersion: {
     marginBottom: spacing[2],
   },
+  /** 고객지원 카드 아래 앱 버전 표시 (1.0.14 형식) */
+  versionText: {
+    ...createSecondaryTextStyle('sm'),
+    textAlign: 'center',
+    marginTop: spacing[3],
+    paddingHorizontal: spacing[2],
+  },
   sectionTitle: {
     ...createTitleStyle('lg', {
       fontWeight: typography.fontWeight.medium,
