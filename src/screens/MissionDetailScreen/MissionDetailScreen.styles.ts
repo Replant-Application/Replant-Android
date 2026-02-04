@@ -123,23 +123,6 @@ export const styles = StyleSheet.create({
       color: colors.text.tertiary,
     }),
   },
-  verificationInfo: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: spacing[4],
-    paddingTop: spacing[3],
-    borderTopWidth: 1,
-    borderTopColor: colors.border.light,
-  },
-  verificationLabel: {
-    ...createSecondaryTextStyle('sm'),
-  },
-  verificationValue: {
-    ...createTextStyle('sm', {
-      fontWeight: typography.fontWeight.medium,
-    }),
-  },
   completeCustomButton: {
     flexDirection: 'row',
     alignItems: 'center',

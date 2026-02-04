@@ -198,14 +198,6 @@ const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({ navigation, r
               <Text style={styles.statLabel}>배지 유효기간</Text>
             </View>
           </View>
-
-          {/* 인증 방식 표시 (커스텀 미션이 아닐 때만) - 모든 미션 커뮤니티 인증 통일 */}
-          {mission.missionType !== 'CUSTOM' && (
-            <View style={styles.verificationInfo}>
-              <Text style={styles.verificationLabel}>인증 방식</Text>
-              <Text style={styles.verificationValue}>커뮤니티 인증</Text>
-            </View>
-          )}
         </View>
 
         {/* 후기 작성 섹션 */}
