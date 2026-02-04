@@ -221,19 +221,6 @@ export const styles = StyleSheet.create({
       textAlign: 'center',
     }),
   },
-  /** 게시글 종류·정렬·인증 상태 라벨 (내가 쓴 게시글만 보기와 동일 스타일) */
-  modalSectionTitle: {
-    ...createTextStyle('base', {
-      color: colors.text.primary,
-      fontWeight: typography.fontWeight.medium,
-      marginTop: spacing[3],
-      marginBottom: spacing[4],
-      fontFamily: Platform.select({
-        ios: undefined,
-        android: typography.fontFamily.regular,
-      }),
-    }),
-  },
   filterOption: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -245,11 +232,6 @@ export const styles = StyleSheet.create({
     backgroundColor: colors.white,
     borderWidth: 1,
     borderColor: colors.border.light,
-  },
-  filterOptionRow: {
-    flexDirection: 'row',
-    gap: spacing[2],
-    marginBottom: spacing[1],
   },
   filterOptionLabel: {
     ...createTextStyle('base', {
@@ -288,38 +270,6 @@ export const styles = StyleSheet.create({
     fontSize: typography.fontSize.sm,
     fontWeight: typography.fontWeight.bold,
     lineHeight: typography.fontSize.sm,
-  },
-  filterOptionHorizontal: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: spacing[3],
-    paddingHorizontal: spacing[2],
-    borderRadius: borderRadius.lg,
-    backgroundColor: colors.background.secondary,
-    borderWidth: 1.5,
-    borderColor: colors.border.light,
-    minHeight: 32,
-  },
-  filterOptionActive: {
-    backgroundColor: colors.primary[500],
-    borderColor: colors.primary[500],
-    borderWidth: 1.5,
-  },
-  /** 필터 옵션 버튼 텍스트 (sm으로 작게) */
-  filterOptionText: {
-    ...createButtonTextStyle('sm', { color: colors.text.primary }),
-  },
-  filterOptionTextActive: {
-    ...createButtonTextStyle('sm'),
-  },
-  filterOptionCheck: {
-    ...createTextStyle('xs', {
-      color: colors.white,
-      fontWeight: typography.fontWeight.bold,
-      marginLeft: spacing[2],
-    }),
   },
   modalApplyButton: {
     ...buttonStyles.primary(),

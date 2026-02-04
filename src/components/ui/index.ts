@@ -21,6 +21,8 @@ export { TabBar } from './tabBar';
 export type { TabItem, TabBarProps } from './tabBar';
 export { FilterBar } from './filterBar';
 export type { FilterItem, FilterBarProps } from './filterBar';
+export { FilterOptionSection } from './filterOptionSection';
+export type { FilterOptionSectionProps, FilterOptionItem } from './filterOptionSection';
 export { default as CircularProgressBar } from './circularProgressBar';
 export { default as MissionProgressCard } from './missionProgressCard';
 export { SimpleTabBar } from './simpleTabBar';

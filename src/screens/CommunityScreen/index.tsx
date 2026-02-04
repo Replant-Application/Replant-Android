@@ -9,9 +9,9 @@ import { SCREEN_NAMES } from '../../utils/constants';
 import { spacing } from '../../utils/designTokens';
 import { formatDateKorean } from '../../utils/dateUtils';
 import { PostCard } from '../../components/specialized';
-import { Loading, ErrorBoundary, EmptyState, Header, AlertModal, ConfirmModal } from '../../components/ui';
+import { Loading, ErrorBoundary, EmptyState, Header, AlertModal, ConfirmModal, FilterOptionSection } from '../../components/ui';
 import { colors } from '../../utils/designTokens';
-import { CommunityScreenProps, VerificationFilter, PostTypeFilter } from '../../types/screens/community';
+import { CommunityScreenProps, VerificationFilter, PostTypeFilter, PostFilter } from '../../types/screens/community';
 import { FILTER_OPTIONS } from '../../constants/screens/community';
 import MissionSetList from './components/MissionSetList';
 import MissionSetDetailScreen from '../MissionSetDetailScreen';
@@ -478,107 +478,39 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation, route }) 
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle} accessibilityRole="header">필터 선택</Text>
 
-            {/* 게시글 종류 (맨 위) */}
-            <Text style={styles.modalSectionTitle}>게시글 종류</Text>
-            <View style={styles.filterOptionRow}>
-              {[
-                { key: 'all' as PostTypeFilter, label: '전체' },
-                { key: 'certified' as PostTypeFilter, label: '인증' },
-                { key: 'general' as PostTypeFilter, label: '일반' },
-              ].map((option) => (
-                <TouchableOpacity
-                  key={option.key}
-                  style={[
-                    styles.filterOptionHorizontal,
-                    postTypeFilter === option.key && styles.filterOptionActive,
-                  ]}
-                  onPress={() => setPostTypeFilter(option.key)}
-                  activeOpacity={0.7}
-                  accessibilityRole="button"
-                  accessibilityLabel={option.label}
-                  accessibilityState={{ selected: postTypeFilter === option.key }}
-                >
-                  <Text
-                    style={[
-                      styles.filterOptionText,
-                      postTypeFilter === option.key && styles.filterOptionTextActive,
-                    ]}
-                  >
-                    {option.label}
-                  </Text>
-                  {postTypeFilter === option.key && (
-                    <Text style={styles.filterOptionCheck} accessibilityElementsHidden={true}>✓</Text>
-                  )}
-                </TouchableOpacity>
-              ))}
-            </View>
+            <FilterOptionSection
+              title="게시글 종류"
+              options={[
+                { key: 'all', label: '전체' },
+                { key: 'certified', label: '인증' },
+                { key: 'general', label: '일반' },
+              ]}
+              selected={postTypeFilter}
+              onSelect={(key) => setPostTypeFilter(key as PostTypeFilter)}
+              showCheckmark={true}
+            />
 
-            {/* 정렬 옵션 */}
-            <Text style={[styles.modalSectionTitle, { marginTop: spacing[5] }]}>정렬</Text>
-            <View style={styles.filterOptionRow}>
-              {FILTER_OPTIONS.map((option) => (
-                <TouchableOpacity
-                  key={option.value}
-                  style={[
-                    styles.filterOptionHorizontal,
-                    filter === option.value && styles.filterOptionActive,
-                  ]}
-                  onPress={() => {
-                    setFilter(option.value);
-                  }}
-                  activeOpacity={0.7}
-                  accessibilityRole="button"
-                  accessibilityLabel={option.label}
-                  accessibilityState={{ selected: filter === option.value }}
-                >
-                  <Text
-                    style={[
-                      styles.filterOptionText,
-                      filter === option.value && styles.filterOptionTextActive,
-                    ]}
-                  >
-                    {option.label}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
+            <FilterOptionSection
+              title="정렬"
+              options={FILTER_OPTIONS.map((o) => ({ key: o.value, label: o.label }))}
+              selected={filter}
+              onSelect={(key) => setFilter(key as PostFilter)}
+              showCheckmark={false}
+              sectionTitleStyle={{ marginTop: spacing[5] }}
+            />
 
-            {/* 인증 상태 */}
-            <Text style={[styles.modalSectionTitle, { marginTop: spacing[5] }]}>인증 상태</Text>
-            <View style={styles.filterOptionRow}>
-              {[
+            <FilterOptionSection
+              title="인증 상태"
+              options={[
                 { key: 'all', label: '전체' },
                 { key: 'pending', label: '대기' },
                 { key: 'approved', label: '완료' },
-              ].map((option) => (
-                <TouchableOpacity
-                  key={option.key}
-                  style={[
-                    styles.filterOptionHorizontal,
-                    verificationFilter === option.key && styles.filterOptionActive,
-                  ]}
-                  onPress={() => {
-                    setVerificationFilter(option.key as VerificationFilter);
-                  }}
-                  activeOpacity={0.7}
-                  accessibilityRole="button"
-                  accessibilityLabel={option.label}
-                  accessibilityState={{ selected: verificationFilter === option.key }}
-                >
-                  <Text
-                    style={[
-                      styles.filterOptionText,
-                      verificationFilter === option.key && styles.filterOptionTextActive,
-                    ]}
-                  >
-                    {option.label}
-                  </Text>
-                  {verificationFilter === option.key && (
-                    <Text style={styles.filterOptionCheck} accessibilityElementsHidden={true}>✓</Text>
-                  )}
-                </TouchableOpacity>
-              ))}
-            </View>
+              ]}
+              selected={verificationFilter}
+              onSelect={(key) => setVerificationFilter(key as VerificationFilter)}
+              showCheckmark={true}
+              sectionTitleStyle={{ marginTop: spacing[5] }}
+            />
 
             {/* 내가 쓴 게시글만 보기 */}
             <TouchableOpacity
