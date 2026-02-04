@@ -6,23 +6,23 @@
 import { Platform } from 'react-native';
 import { API_BASE_URL, API_TIMEOUT } from '@env';
 
+// .env 미주입 시(릴리즈 빌드 등) 사용할 프로덕션 기본 URL (실기기/에뮬 모두 동일)
+const PRODUCTION_API_BASE_URL =
+  'http://ec2-43-202-76-241.ap-northeast-2.compute.amazonaws.com:8080/api';
+
 // 백엔드 기본 URL 설정
 const getBaseURL = (): string => {
   let url: string;
   if (API_BASE_URL && API_BASE_URL.trim()) {
-    // 환경변수에 localhost가 포함되어 있고 Android인 경우 자동 변환
+    // 환경변수에 localhost가 포함되어 있고 Android인 경우 자동 변환 (에뮬레이터용)
     if (Platform.OS === 'android' && API_BASE_URL.includes('localhost')) {
       url = API_BASE_URL.replace('localhost', '10.0.2.2');
     } else {
       url = API_BASE_URL;
     }
   } else {
-    // 기본값: Platform에 따라 자동 설정
-    if (Platform.OS === 'android') {
-      url = 'http://10.0.2.2:8080/api';
-    } else {
-      url = 'http://localhost:8080/api';
-    }
+    // 기본값: .env가 없을 때 프로덕션 URL 사용 (실기기/릴리즈 빌드 대응)
+    url = PRODUCTION_API_BASE_URL;
   }
   if (__DEV__) {
     const envValue = API_BASE_URL || '(empty)';
