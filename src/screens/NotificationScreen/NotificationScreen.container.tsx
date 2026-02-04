@@ -347,8 +347,14 @@ export const useNotificationScreenContainer = ({
     setShowDeleteConfirmModal(false);
     const ids = Array.from(selectedIds);
     if (ids.length === 0) return;
+    const filtered =
+      filter === 'unread'
+        ? notifications.filter(n => !n.isRead)
+        : notifications;
+    const allSelected =
+      filtered.length > 0 && filtered.every(n => selectedIds.has(n.id));
     try {
-      if (isAllSelected) {
+      if (allSelected) {
         const result = await deleteAllNotifications();
         if (result.success) {
           setNotifications([]);
@@ -369,10 +375,10 @@ export const useNotificationScreenContainer = ({
         }
       }
     } catch (error) {
-      setNotifications(prev => (isAllSelected ? [] : prev.filter(n => !selectedIds.has(n.id))));
+      setNotifications(prev => (allSelected ? [] : prev.filter(n => !selectedIds.has(n.id))));
       setSelectedIds(new Set());
     }
-  }, [selectedIds, isAllSelected, overlayContext]);
+  }, [selectedIds, filter, notifications, overlayContext]);
 
   const handleCancelDeleteSelected = useCallback(() => {
     setShowDeleteConfirmModal(false);

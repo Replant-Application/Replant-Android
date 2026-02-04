@@ -74,48 +74,6 @@ export const styles = StyleSheet.create({
       }),
     }),
   },
-  /** 게시글 종류 (전체 / 인증 / 일반) 상단 선택 */
-  postTypeRow: {
-    flexDirection: 'row',
-    paddingHorizontal: spacing[4],
-    paddingTop: spacing[2],
-    paddingBottom: spacing[2],
-    gap: spacing[2],
-  },
-  postTypeTab: {
-    flex: 1,
-    paddingVertical: 8,
-    paddingHorizontal: spacing[3],
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 8,
-    backgroundColor: '#F5F5F0',
-    borderWidth: 1,
-    borderColor: '#A68B6F',
-  },
-  postTypeTabActive: {
-    backgroundColor: '#8B6F47',
-  },
-  postTypeTabText: {
-    ...createTextStyle('sm', {
-      color: colors.text.primary,
-      fontWeight: typography.fontWeight.medium,
-      fontFamily: Platform.select({
-        ios: undefined,
-        android: typography.fontFamily.regular,
-      }),
-    }),
-  },
-  postTypeTabTextActive: {
-    ...createTextStyle('sm', {
-      color: colors.white,
-      fontWeight: typography.fontWeight.medium,
-      fontFamily: Platform.select({
-        ios: undefined,
-        android: typography.fontFamily.regular,
-      }),
-    }),
-  },
   filterContainer: {
     paddingHorizontal: spacing[4],
     paddingTop: spacing[2],

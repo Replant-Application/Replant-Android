@@ -32,35 +32,6 @@ export const styles = StyleSheet.create({
   sectionTitle: {
     ...createTitleStyle('lg'),
   },
-  profileCard: {
-    backgroundColor: colors.background.primary,
-    borderRadius: borderRadius.xl,
-    padding: spacing[5],
-    marginBottom: spacing[6],
-    borderWidth: 1,
-    borderColor: colors.brandAccent,
-    ...shadows.lg,
-  },
-  profileInfo: {
-    gap: spacing[3],
-  },
-  profileRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: spacing[2],
-  },
-  profileLabel: {
-    ...createSecondaryTextStyle('base', {
-      fontWeight: typography.fontWeight.medium,
-    }),
-  },
-  profileValue: {
-    ...createTextStyle('base', {
-      fontWeight: typography.fontWeight.medium,
-      color: colors.text.primary,
-    }),
-  },
   characterCard: {
     backgroundColor: colors.background.primary,
     borderRadius: borderRadius.xl,
