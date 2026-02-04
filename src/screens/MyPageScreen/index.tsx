@@ -7,7 +7,6 @@ import { CharacterCard } from '../../components/specialized';
 import { Loading, ErrorBoundary, Header } from '../../components/ui';
 import { colors } from '../../utils/designTokens';
 import { RootStackParamList } from '../../types/navigation';
-import { formatDateKorean } from '../../utils/dateUtils';
 import { styles } from './MyPageScreen.styles';
 
 interface MyPageScreenProps {
@@ -81,29 +80,6 @@ const MyPageScreen: React.FC<MyPageScreenProps> = ({ navigation }) => {
       <ScrollView style={styles.scrollView}>
         <Header title="마이페이지" navigation={navigation} />
         <View style={styles.content}>
-          {/* 프로필 섹션 */}
-          <View style={styles.profileCard}>
-            <View style={styles.sectionHeader}>
-              <Image
-                source={require('../../assets/images/boy.png')}
-                style={styles.sectionIcon}
-                resizeMode="contain"
-                accessibilityLabel="프로필 아이콘"
-              />
-              <Text style={styles.sectionTitle}>프로필</Text>
-            </View>
-            <View style={styles.profileInfo}>
-              <View style={styles.profileRow}>
-                <Text style={styles.profileLabel}>닉네임</Text>
-                <Text style={styles.profileValue}>{profile.nickname}</Text>
-              </View>
-              <View style={styles.profileRow}>
-                <Text style={styles.profileLabel}>가입일</Text>
-                <Text style={styles.profileValue}>{formatDateKorean(profile.createdAt)}</Text>
-              </View>
-            </View>
-          </View>
-
           {/* 캐릭터 섹션 */}
           {currentCharacter && (
             <View style={styles.characterCard}>
