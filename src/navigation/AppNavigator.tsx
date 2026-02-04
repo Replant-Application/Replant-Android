@@ -396,8 +396,8 @@ const AppNavigator = () => {
     };
   }, []);
 
-  // 업데이트 모달 기능 비활성화 (오류 대응, 재활성화 시 true로 변경)
-  const SHOW_UPDATE_MODAL_FEATURE = false;
+  // 업데이트 모달 기능 (선택 업데이트만 사용, 강제 업데이트 미사용)
+  const SHOW_UPDATE_MODAL_FEATURE = true;
 
   // 앱 버전 체크 (앱 시작 시 한 번만)
   useEffect(() => {
@@ -409,14 +409,9 @@ const AppNavigator = () => {
         console.log('[AppNavigator] 버전 체크 결과:', result);
         
         if (result) {
-          // 강제 업데이트는 항상 표시
-          if (result.isRequired) {
-            console.log('[AppNavigator] 강제 업데이트 모달 표시');
-            setUpdateInfo(result);
-            setUpdateModalVisible(true);
-            return;
-          }
-          
+          // 강제 업데이트는 현재 미사용 — 선택 업데이트만 표시
+          if (result.isRequired) return;
+
           // 선택 업데이트는 "나중에"를 누른 경우 일정 기간 동안 표시하지 않음
           if (result.isRecommended) {
             try {
@@ -540,11 +535,8 @@ const AppNavigator = () => {
         storeUrl: data.storeUrl || 'https://play.google.com/store/apps/details?id=com.anonymous.replantmobileapp',
       };
 
-      if (updateResult.isRequired) {
-        setUpdateInfo(updateResult);
-        setUpdateModalVisible(true);
-        return;
-      }
+      // 강제 업데이트는 현재 미사용 — 선택 업데이트만 표시
+      if (updateResult.isRequired) return;
 
       // 선택 업데이트: 24h 디스미스 체크 (checkUpdateRequired와 동일 정책)
       (async () => {
