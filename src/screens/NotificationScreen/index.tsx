@@ -13,7 +13,7 @@ import {
   ImageBackground,
 } from 'react-native';
 import { type Notification as NotificationType } from '../../api/notificationApi';
-import { Loading, EmptyState, Header, AlertModal } from '../../components/ui';
+import { Loading, EmptyState, Header, AlertModal, ConfirmModal } from '../../components/ui';
 import { colors } from '../../utils/designTokens';
 import { NotificationScreenProps } from '../../types/screens/notification';
 import SwipeableNotificationItem from './SwipeableNotificationItem';
@@ -28,6 +28,10 @@ const NotificationScreen: React.FC<NotificationScreenProps> = ({ navigation }) =
     refreshing,
     filter,
     unreadCount,
+    selectedIds,
+    isAllSelected,
+    isSelectionModeActive,
+    showDeleteConfirmModal,
     showAlert,
     alertTitle,
     alertMessage,
@@ -35,28 +39,43 @@ const NotificationScreen: React.FC<NotificationScreenProps> = ({ navigation }) =
     handleFilterChange,
     handleMarkAllAsRead,
     handleDeleteNotification,
+    handleToggleSelect,
+    handleSelectAll,
+    handleExitSelectionMode,
+    handleDeleteSelected,
+    handleConfirmDeleteSelected,
+    handleCancelDeleteSelected,
     handleNotificationPress,
     handleAlertClose,
     keyExtractor,
   } = useNotificationScreenContainer({ navigation });
 
+  /** 선택 모드 여부: 롱프레스로 진입 후, 취소 버튼으로만 종료 */
+  const isSelectionMode = isSelectionModeActive;
+
   /**
    * 알림 아이템 렌더링
+   * 선택 모드일 때는 클릭 시 해당 알림으로 이동하지 않고 선택/해제만 함
    */
   const renderNotification = useCallback(({ item }: { item: NotificationType }) => {
     try {
       return (
-        <SwipeableNotificationItem 
+        <SwipeableNotificationItem
           item={item}
-          onPress={handleNotificationPress}
-          onDelete={handleDeleteNotification}
+          selected={selectedIds.has(item.id)}
+          onPress={
+            isSelectionMode
+              ? () => handleToggleSelect(item.id)
+              : () => handleNotificationPress(item)
+          }
+          onLongPress={() => handleToggleSelect(item.id)}
         />
       );
     } catch (error) {
       console.error('[NotificationScreen] 알림 아이템 렌더링 실패:', error);
       return null;
     }
-  }, [handleNotificationPress, handleDeleteNotification]);
+  }, [selectedIds, isSelectionMode, handleNotificationPress, handleToggleSelect]);
 
   if (loading && notifications.length === 0) {
     return <Loading text="알림을 불러오는 중..." />;
@@ -117,6 +136,45 @@ const NotificationScreen: React.FC<NotificationScreenProps> = ({ navigation }) =
           </TouchableOpacity>
         </View>
 
+        {/* 선택 바: 롱프레스로 진입, 취소로만 종료 (전체 해제해도 바 유지) */}
+        {notifications.length > 0 && isSelectionModeActive && (
+          <View style={styles.selectionBar}>
+            <TouchableOpacity
+              style={styles.selectAllRow}
+              onPress={() => handleSelectAll(notifications)}
+              accessibilityRole="checkbox"
+              accessibilityLabel={isAllSelected ? '전체 선택 해제' : '전체 선택'}
+              accessibilityState={{ checked: isAllSelected }}
+            >
+              <View style={[styles.checkbox, isAllSelected && styles.checkboxChecked]}>
+                {isAllSelected && <Text style={styles.checkboxCheckmark}>✓</Text>}
+              </View>
+              <Text style={styles.selectAllText}>전체 선택</Text>
+            </TouchableOpacity>
+            <View style={styles.selectionBarRight}>
+              <TouchableOpacity
+                style={[styles.deleteButton, selectedIds.size === 0 && styles.deleteButtonDisabled]}
+                onPress={handleDeleteSelected}
+                disabled={selectedIds.size === 0}
+                accessibilityRole="button"
+                accessibilityLabel="선택한 항목 삭제"
+              >
+                <Text style={[styles.deleteButtonText, selectedIds.size === 0 && styles.deleteButtonTextDisabled]}>
+                  삭제
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.cancelButton}
+                onPress={handleExitSelectionMode}
+                accessibilityRole="button"
+                accessibilityLabel="선택 모드 취소"
+              >
+                <Text style={styles.cancelButtonText}>취소</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
+
         {/* 알림 목록 */}
         <View style={styles.listWrapper}>
           <FlatList
@@ -145,6 +203,18 @@ const NotificationScreen: React.FC<NotificationScreenProps> = ({ navigation }) =
           />
         </View>
       </View>
+
+      {/* 선택 삭제 확인 모달 */}
+      <ConfirmModal
+        visible={showDeleteConfirmModal}
+        title="알림 삭제"
+        message={`선택한 ${selectedIds.size}개 알림을 삭제하시겠습니까?`}
+        confirmText="삭제"
+        cancelText="취소"
+        onConfirm={handleConfirmDeleteSelected}
+        onCancel={handleCancelDeleteSelected}
+        confirmButtonColor={colors.error[500]}
+      />
 
       {/* 오류 모달 */}
       <AlertModal

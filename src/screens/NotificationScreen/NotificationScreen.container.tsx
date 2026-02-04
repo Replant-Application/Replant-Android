@@ -29,7 +29,10 @@ export const useNotificationScreenContainer = ({
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [filter, setFilter] = useState<'all' | 'unread'>('all');
-  
+  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
+  const [isSelectionModeActive, setIsSelectionModeActive] = useState(false);
+  const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false);
+
   // AlertModal 상태
   const [showAlert, setShowAlert] = useState(false);
   const [alertTitle, setAlertTitle] = useState('');
@@ -276,23 +279,90 @@ export const useNotificationScreenContainer = ({
   }, []);
 
   /**
-   * 알림 삭제
+   * 알림 삭제 (단일)
    */
   const handleDeleteNotification = useCallback(async (notificationId: number) => {
     try {
-      console.log('[NotificationScreen] 알림 삭제 시도:', notificationId);
       const result = await deleteNotification(notificationId);
       if (result.success) {
         setNotifications(prev => prev.filter(n => n.id !== notificationId));
-        console.log('[NotificationScreen] 알림 삭제 성공');
+        setSelectedIds(prev => { const next = new Set(prev); next.delete(notificationId); return next; });
       } else {
-        console.error('[NotificationScreen] 알림 삭제 실패:', result.error);
         setNotifications(prev => prev.filter(n => n.id !== notificationId));
       }
     } catch (error) {
-      console.error('[NotificationScreen] 알림 삭제 예외:', error);
       setNotifications(prev => prev.filter(n => n.id !== notificationId));
     }
+  }, []);
+
+  /**
+   * 롱프레스 → 선택 토글 (선택 시 선택 모드 진입)
+   */
+  const handleToggleSelect = useCallback((id: number) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else {
+        next.add(id);
+        setIsSelectionModeActive(true);
+      }
+      return next;
+    });
+  }, []);
+
+  /**
+   * 전체 선택 / 전체 해제 (해제해도 선택 모드는 유지)
+   */
+  const handleSelectAll = useCallback((currentList: NotificationType[]) => {
+    if (currentList.length === 0) return;
+    setSelectedIds(prev => {
+      const allIds = new Set(currentList.map(n => n.id));
+      const isAllSelected = allIds.size === prev.size && currentList.every(n => prev.has(n.id));
+      return isAllSelected ? new Set<number>() : allIds;
+    });
+    // 선택만 취소, isSelectionModeActive는 바꾸지 않음
+  }, []);
+
+  /**
+   * 선택 모드 종료 (선택 바 숨김)
+   */
+  const handleExitSelectionMode = useCallback(() => {
+    setIsSelectionModeActive(false);
+    setSelectedIds(new Set());
+  }, []);
+
+  /**
+   * 선택 삭제 확인 모달 열기
+   */
+  const handleDeleteSelected = useCallback(() => {
+    setShowDeleteConfirmModal(true);
+  }, []);
+
+  /**
+   * 선택한 알림 일괄 삭제
+   */
+  const handleConfirmDeleteSelected = useCallback(async () => {
+    setShowDeleteConfirmModal(false);
+    const ids = Array.from(selectedIds);
+    if (ids.length === 0) return;
+    try {
+      await Promise.all(ids.map(id => deleteNotification(id)));
+      setNotifications(prev => prev.filter(n => !selectedIds.has(n.id)));
+      setSelectedIds(new Set());
+      if (overlayContext?.setUnreadNotificationCount) {
+        const result = await getNotifications({ size: 1 });
+        if (result.success && result.data != null) {
+          overlayContext.setUnreadNotificationCount(result.data.unreadCount ?? 0);
+        }
+      }
+    } catch (error) {
+      setNotifications(prev => prev.filter(n => !selectedIds.has(n.id)));
+      setSelectedIds(new Set());
+    }
+  }, [selectedIds, overlayContext]);
+
+  const handleCancelDeleteSelected = useCallback(() => {
+    setShowDeleteConfirmModal(false);
   }, []);
 
   /**
@@ -535,13 +605,20 @@ export const useNotificationScreenContainer = ({
     return `temp_${item.createdAt || Date.now()}_${index}`;
   }, []);
 
+  const isAllSelected =
+    filteredNotifications.length > 0 &&
+    filteredNotifications.every(n => selectedIds.has(n.id));
+
   return {
     notifications: filteredNotifications,
     loading,
     refreshing,
     filter,
     unreadCount,
-    // AlertModal 상태
+    selectedIds,
+    isAllSelected,
+    isSelectionModeActive,
+    showDeleteConfirmModal,
     showAlert,
     alertTitle,
     alertMessage,
@@ -550,6 +627,12 @@ export const useNotificationScreenContainer = ({
     handleMarkAsRead,
     handleMarkAllAsRead,
     handleDeleteNotification,
+    handleToggleSelect,
+    handleSelectAll,
+    handleExitSelectionMode,
+    handleDeleteSelected,
+    handleConfirmDeleteSelected,
+    handleCancelDeleteSelected,
     handleNotificationPress,
     handleAlertClose,
     keyExtractor,

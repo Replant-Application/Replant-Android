@@ -22,6 +22,10 @@ export const styles = StyleSheet.create({
     borderLeftWidth: 2,
     borderRightWidth: 2,
   },
+  notificationCardSelected: {
+    backgroundColor: colors.primary[100],
+    borderColor: colors.gray[900],
+  },
   cardTouchable: {
     flex: 1,
   },

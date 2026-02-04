@@ -12,6 +12,7 @@ export interface NotificationScreenProps {
 
 export interface SwipeableNotificationItemProps {
   item: NotificationType;
+  selected?: boolean;
   onPress: (notification: NotificationType) => void;
-  onDelete: (notificationId: number) => void;
+  onLongPress: () => void;
 }
