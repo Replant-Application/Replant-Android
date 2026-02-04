@@ -255,7 +255,10 @@ const ReantChatScreen: React.FC<ReantChatScreenProps> = ({ navigation, route: _r
             accessibilityLabel="대화 종료하기"
             accessibilityHint="홈으로 돌아갑니다"
           >
-            <Text style={styles.endChatButtonText}>← 대화 종료하기</Text>
+            <View style={styles.endChatButtonRow}>
+              <Text style={styles.endChatButtonArrow}>← </Text>
+              <Text style={styles.endChatButtonText}>대화 종료하기</Text>
+            </View>
           </TouchableOpacity>
         </View>
 

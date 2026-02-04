@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, ScrollView, ImageBackground, Image } from 'react-native';
+import { View, Text, ScrollView, ImageBackground } from 'react-native';
 import { NavigationProp } from '@react-navigation/native';
 import { useUserProfile } from '../../hooks/useUserProfile';
 import { useCharacter } from '../../hooks/useCharacter';

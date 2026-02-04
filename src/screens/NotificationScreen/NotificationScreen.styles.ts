@@ -94,9 +94,10 @@ export const styles = StyleSheet.create({
     borderColor: colors.primary[500],
   },
   checkboxCheckmark: {
-    color: colors.white,
-    fontSize: 14,
-    fontWeight: '700',
+    ...createTextStyle('sm', {
+      fontWeight: typography.fontWeight.bold,
+      color: colors.white,
+    }),
   },
   selectAllText: {
     ...createTextStyle('sm', {

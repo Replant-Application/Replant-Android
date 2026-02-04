@@ -5,9 +5,9 @@ import {
   TouchableOpacity,
   Image,
 } from 'react-native';
-import { SwipeableNotificationItemProps } from '../../types/screens/notification';
+import { NotificationListItemProps } from '../../types/screens/notification';
 import { formatTimeAgo } from '../../utils/dateUtils';
-import { styles } from './SwipeableNotificationItem.styles';
+import { styles } from './NotificationListItem.styles';
 
 /** 두 문장 이상일 때 문장 끝(. ! ?) 뒤에 줄바꿈 삽입 */
 function contentWithLineBreaks(content: string): string {
@@ -15,7 +15,7 @@ function contentWithLineBreaks(content: string): string {
   return content.replace(/([.!?])\s+/g, '$1\n').trim();
 }
 
-const SwipeableNotificationItem: React.FC<SwipeableNotificationItemProps> = ({
+const NotificationListItem: React.FC<NotificationListItemProps> = ({
   item,
   selected = false,
   onPress,
@@ -63,4 +63,4 @@ const SwipeableNotificationItem: React.FC<SwipeableNotificationItemProps> = ({
   );
 };
 
-export default SwipeableNotificationItem;
+export default NotificationListItem;

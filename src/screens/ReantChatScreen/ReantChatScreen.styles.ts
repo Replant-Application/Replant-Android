@@ -52,6 +52,16 @@ export const styles = StyleSheet.create({
       },
     }),
   },
+  endChatButtonArrow: {
+    ...createTextStyle('sm', {
+      fontWeight: typography.fontWeight.semibold,
+      color: colors.text.primary,
+    }),
+  },
+  endChatButtonRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
   endChatButtonText: {
     ...createTextStyle('sm', {
       fontWeight: typography.fontWeight.semibold,

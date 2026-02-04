@@ -16,7 +16,7 @@ import { type Notification as NotificationType } from '../../api/notificationApi
 import { Loading, EmptyState, Header, AlertModal, ConfirmModal } from '../../components/ui';
 import { colors } from '../../utils/designTokens';
 import { NotificationScreenProps } from '../../types/screens/notification';
-import SwipeableNotificationItem from './SwipeableNotificationItem';
+import NotificationListItem from './NotificationListItem';
 import { useNotificationScreenContainer } from './NotificationScreen.container';
 import { styles } from './NotificationScreen.styles';
 
@@ -59,7 +59,7 @@ const NotificationScreen: React.FC<NotificationScreenProps> = ({ navigation }) =
   const renderNotification = useCallback(({ item }: { item: NotificationType }) => {
     try {
       return (
-        <SwipeableNotificationItem
+        <NotificationListItem
           item={item}
           selected={selectedIds.has(item.id)}
           onPress={

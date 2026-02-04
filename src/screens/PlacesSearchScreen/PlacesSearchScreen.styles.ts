@@ -5,7 +5,6 @@
 
 import { StyleSheet } from 'react-native';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
-import { getOptimizedLineHeight } from '../../utils/styles/textStyles';
 import { createTextStyle, createSecondaryTextStyle } from '../../utils/styles/textStyles';
 import { inputStyles } from '../../utils/styles/commonStyles';
 
@@ -32,10 +31,11 @@ export const styles = StyleSheet.create({
   searchInput: {
     ...inputStyles.base(),
     padding: spacing[2],
-    fontSize: typography.fontSize.base,
+    ...createSecondaryTextStyle('sm', {
+      fontWeight: typography.fontWeight.medium,
+    }),
     color: colors.text.primary,
     textAlignVertical: 'center',
-    lineHeight: getOptimizedLineHeight(typography.fontSize.base),
   },
   filterCheckboxContainer: {
     flexDirection: 'row',
@@ -63,9 +63,10 @@ export const styles = StyleSheet.create({
     borderColor: colors.primary[500],
   },
   filterCheckboxMark: {
-    color: colors.white,
-    fontSize: 14,
-    fontWeight: '700',
+    ...createTextStyle('sm', {
+      fontWeight: typography.fontWeight.bold,
+      color: colors.white,
+    }),
   },
   filterCheckboxLabel: {
     ...createSecondaryTextStyle('sm', {

@@ -1,6 +1,6 @@
 /**
- * SwipeableNotificationItem 스타일
- * 스와이프 가능한 알림 아이템 컴포넌트의 모든 스타일 정의
+ * NotificationListItem 스타일
+ * 알림 아이템 컴포넌트의 모든 스타일 정의
  */
 
 import { StyleSheet } from 'react-native';
