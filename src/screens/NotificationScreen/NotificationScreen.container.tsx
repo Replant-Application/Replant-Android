@@ -9,6 +9,7 @@ import {
   markNotificationAsRead, 
   markAllNotificationsAsRead, 
   deleteNotification,
+  deleteAllNotifications,
   type Notification as NotificationType
 } from '../../api/notificationApi';
 import { getMealLogDetail } from '../../api/mealLogApi';
@@ -340,26 +341,38 @@ export const useNotificationScreenContainer = ({
 
   /**
    * 선택한 알림 일괄 삭제
+   * 전체 선택 상태면 DELETE /api/notifications/all 호출 (안 보이는 것까지 전부 삭제)
    */
   const handleConfirmDeleteSelected = useCallback(async () => {
     setShowDeleteConfirmModal(false);
     const ids = Array.from(selectedIds);
     if (ids.length === 0) return;
     try {
-      await Promise.all(ids.map(id => deleteNotification(id)));
-      setNotifications(prev => prev.filter(n => !selectedIds.has(n.id)));
-      setSelectedIds(new Set());
-      if (overlayContext?.setUnreadNotificationCount) {
-        const result = await getNotifications({ size: 1 });
-        if (result.success && result.data != null) {
-          overlayContext.setUnreadNotificationCount(result.data.unreadCount ?? 0);
+      if (isAllSelected) {
+        const result = await deleteAllNotifications();
+        if (result.success) {
+          setNotifications([]);
+          setSelectedIds(new Set());
+          if (overlayContext?.setUnreadNotificationCount) {
+            overlayContext.setUnreadNotificationCount(0);
+          }
+        }
+      } else {
+        await Promise.all(ids.map(id => deleteNotification(id)));
+        setNotifications(prev => prev.filter(n => !selectedIds.has(n.id)));
+        setSelectedIds(new Set());
+        if (overlayContext?.setUnreadNotificationCount) {
+          const result = await getNotifications({ size: 1 });
+          if (result.success && result.data != null) {
+            overlayContext.setUnreadNotificationCount(result.data.unreadCount ?? 0);
+          }
         }
       }
     } catch (error) {
-      setNotifications(prev => prev.filter(n => !selectedIds.has(n.id)));
+      setNotifications(prev => (isAllSelected ? [] : prev.filter(n => !selectedIds.has(n.id))));
       setSelectedIds(new Set());
     }
-  }, [selectedIds, overlayContext]);
+  }, [selectedIds, isAllSelected, overlayContext]);
 
   const handleCancelDeleteSelected = useCallback(() => {
     setShowDeleteConfirmModal(false);

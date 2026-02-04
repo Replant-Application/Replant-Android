@@ -140,6 +140,19 @@ export const deleteNotification = async (
 };
 
 /**
+ * 전체 알림 삭제 (해당 사용자의 모든 알림, 화면에 안 보이는 것 포함)
+ * DELETE /api/notifications/all
+ * 인증 필요
+ */
+export const deleteAllNotifications = async (): Promise<
+  ServiceResult<{ deletedCount: number; message: string }>
+> => {
+  return apiClient.delete<{ deletedCount: number; message: string }>(
+    API_CONFIG.endpoints.notification.deleteAll
+  );
+};
+
+/**
  * FCM 토큰 등록
  * POST /api/notifications/fcm/token
  * 인증 필요

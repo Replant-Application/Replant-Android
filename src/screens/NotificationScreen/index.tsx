@@ -208,7 +208,11 @@ const NotificationScreen: React.FC<NotificationScreenProps> = ({ navigation }) =
       <ConfirmModal
         visible={showDeleteConfirmModal}
         title="알림 삭제"
-        message={`선택한 ${selectedIds.size}개 알림을 삭제하시겠습니까?`}
+        message={
+          isAllSelected
+            ? '모든 알림을 삭제하시겠습니까?'
+            : `선택한 ${selectedIds.size}개 알림을 삭제하시겠습니까?`
+        }
         confirmText="삭제"
         cancelText="취소"
         onConfirm={handleConfirmDeleteSelected}

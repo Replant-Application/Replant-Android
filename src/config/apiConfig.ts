@@ -172,6 +172,7 @@ export const API_CONFIG = {
       read: '/notifications/:notificationId/read',
       readAll: '/notifications/read-all',
       delete: '/notifications/:notificationId',
+      deleteAll: '/notifications/all',
       registerFcmToken: '/notifications/fcm/token',
     },
 
