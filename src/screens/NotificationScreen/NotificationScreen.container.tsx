@@ -281,20 +281,27 @@ export const useNotificationScreenContainer = ({
 
   /**
    * 알림 삭제 (단일)
+   * 삭제한 알림이 미읽음이면 배지 카운트 -1
    */
   const handleDeleteNotification = useCallback(async (notificationId: number) => {
+    const deletedNotification = notifications.find(n => n.id === notificationId);
+    const wasUnread = deletedNotification ? !deletedNotification.isRead : false;
+
     try {
       const result = await deleteNotification(notificationId);
       if (result.success) {
         setNotifications(prev => prev.filter(n => n.id !== notificationId));
         setSelectedIds(prev => { const next = new Set(prev); next.delete(notificationId); return next; });
+        if (wasUnread && overlayContext?.setUnreadNotificationCount) {
+          overlayContext.setUnreadNotificationCount((prev: number) => Math.max(0, prev - 1));
+        }
       } else {
         setNotifications(prev => prev.filter(n => n.id !== notificationId));
       }
     } catch (error) {
       setNotifications(prev => prev.filter(n => n.id !== notificationId));
     }
-  }, []);
+  }, [notifications, overlayContext]);
 
   /**
    * 롱프레스 → 선택 토글 (선택 시 선택 모드 진입)
