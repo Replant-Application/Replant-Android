@@ -38,7 +38,6 @@ const NotificationScreen: React.FC<NotificationScreenProps> = ({ navigation }) =
     handleRefresh,
     handleFilterChange,
     handleMarkAllAsRead,
-    handleDeleteNotification,
     handleToggleSelect,
     handleSelectAll,
     handleExitSelectionMode,
