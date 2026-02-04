@@ -2,7 +2,7 @@
     "expo":  {
                  "name":  "ReplantMobileApp",
                  "slug":  "replant-mobile-app",
-                 "version":  "1.0.13",
+                 "version":  "1.0.14",
                  "orientation":  "portrait",
                  "userInterfaceStyle": "light",
                  "icon":  "./logo/1024.png",
@@ -18,7 +18,7 @@
                                                       "foregroundImage":  "./logo/play_store_512.png",
                                                       "backgroundColor":  "#ffffff"
                                                   },
-                                 "versionCode":  113
+                                 "versionCode":  114
                              },
                  "ios":  {
                              "bundleIdentifier":  "com.anonymous.replantmobileapp",
