@@ -85,30 +85,6 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     marginTop: spacing[2],
   },
-  chip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.primary[100],
-    borderRadius: borderRadius.full,
-    paddingHorizontal: spacing[3],
-    paddingVertical: spacing[1.5],
-    borderWidth: 1,
-    borderColor: colors.primary[500],
-    gap: spacing[1],
-  },
-  chipText: {
-    ...createTextStyle('xs', {
-      color: colors.primary[700],
-      fontWeight: typography.fontWeight.medium,
-    }),
-  },
-  chipClose: {
-    ...createTextStyle('base', {
-      color: colors.primary[700],
-      fontWeight: typography.fontWeight.medium,
-      lineHeight: 16,
-    }),
-  },
   searchIcon: {
     width: 16,
     height: 16,

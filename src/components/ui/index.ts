@@ -25,6 +25,8 @@ export { FilterBar } from './filterBar';
 export type { FilterItem, FilterBarProps } from './filterBar';
 export { FilterOptionSection } from './filterOptionSection';
 export type { FilterOptionSectionProps, FilterOptionItem } from './filterOptionSection';
+export { RemovableChip } from './removableChip';
+export type { RemovableChipProps } from './removableChip';
 export { default as CircularProgressBar } from './circularProgressBar';
 export { default as MissionProgressCard } from './missionProgressCard';
 export { SimpleTabBar } from './simpleTabBar';

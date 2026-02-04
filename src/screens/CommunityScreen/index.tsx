@@ -9,7 +9,7 @@ import { SCREEN_NAMES } from '../../utils/constants';
 import { spacing } from '../../utils/designTokens';
 import { formatDateKorean } from '../../utils/dateUtils';
 import { PostCard } from '../../components/specialized';
-import { Loading, ErrorBoundary, EmptyState, Header, AlertModal, ConfirmModal, FilterOptionSection } from '../../components/ui';
+import { Loading, ErrorBoundary, EmptyState, Header, AlertModal, ConfirmModal, FilterOptionSection, RemovableChip } from '../../components/ui';
 import { colors } from '../../utils/designTokens';
 import { CommunityScreenProps, VerificationFilter, PostTypeFilter, PostFilter } from '../../types/screens/community';
 import { FILTER_OPTIONS } from '../../constants/screens/community';
@@ -208,21 +208,14 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation, route }) 
               </TouchableOpacity>
             </View>
 
-            {/* 인증 상태 칩 (선택된 경우에만 표시, 게시글 종류는 상단에서 선택) */}
+            {/* 인증 상태 칩 (선택된 경우에만 표시) */}
             {verificationFilter !== 'all' && (
               <View style={styles.chipContainer}>
-                <TouchableOpacity
-                  style={styles.chip}
-                  onPress={() => setVerificationFilter('all')}
-                  activeOpacity={0.7}
-                  accessibilityRole="button"
+                <RemovableChip
+                  label={verificationFilter === 'pending' ? '인증대기' : '인증완료'}
+                  onRemove={() => setVerificationFilter('all')}
                   accessibilityLabel={`${verificationFilter === 'pending' ? '인증대기' : '인증완료'} 필터 제거`}
-                >
-                  <Text style={styles.chipText}>
-                    {verificationFilter === 'pending' ? '인증대기' : '인증완료'}
-                  </Text>
-                  <Text style={styles.chipClose} accessibilityElementsHidden={true}>×</Text>
-                </TouchableOpacity>
+                />
               </View>
             )}
           </View>
