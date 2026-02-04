@@ -77,12 +77,6 @@ export const styles = StyleSheet.create({
       marginBottom: spacing[2],
     }),
   },
-  missionType: {
-    ...createSecondaryTextStyle('sm', {
-      textAlign: 'center',
-      marginBottom: spacing[3],
-    }),
-  },
   divider: {
     height: 1,
     backgroundColor: colors.border.light,

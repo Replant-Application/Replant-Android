@@ -15,7 +15,6 @@ const BadgeDetailScreen: React.FC<BadgeDetailScreenProps> = ({ navigation, route
   const { badge } = route.params;
 
   const missionTitle = badge.mission?.title || badge.customMission?.title || '미션';
-  const missionType = badge.missionType === 'CUSTOM' ? '커스텀 미션' : '일반 미션';
   // 만료일 비교 (배열 형식 날짜 처리)
   const expiresAtDate = badge.expiresAt ? new Date(normalizeDate(badge.expiresAt)) : null;
   const isExpired = badge.isExpired || (expiresAtDate && !isNaN(expiresAtDate.getTime()) && expiresAtDate < new Date());
@@ -69,7 +68,6 @@ const BadgeDetailScreen: React.FC<BadgeDetailScreenProps> = ({ navigation, route
         {/* 배지 정보 */}
         <View style={styles.infoCard}>
           <Text style={styles.badgeTitle}>{missionTitle}</Text>
-          <Text style={styles.missionType}>{missionType}</Text>
 
           <View style={styles.divider} />
 
