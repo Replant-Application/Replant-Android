@@ -11,9 +11,15 @@ export interface FormatTimeAgoOptions {
   longFormat?: boolean;
 }
 
+/** 타임존 정보가 없는 ISO 로컬 문자열인지 확인 (예: 2026-02-04T13:27:00) */
+const isLocalIsoString = (s: string): boolean =>
+  /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2})?(\.\d+)?$/i.test(s.trim()) &&
+  !/[Z+-]\d{2}:?\d{2}$/i.test(s.trim());
+
 /**
  * 날짜를 ISO 8601 문자열로 변환
  * 배열 형태 [year, month, day, hour, minute, second, nanosecond]를 처리
+ * 서버에서 타임존 없이 오는 문자열(Java LocalDateTime)은 UTC로 해석해 9시간 차이 방지
  */
 export const normalizeDate = (date: string | number[] | null | undefined): string => {
   if (!date) return '';
@@ -34,8 +40,14 @@ export const normalizeDate = (date: string | number[] | null | undefined): strin
     return `${year}-${monthStr}-${dayStr}T${hourStr}:${minuteStr}:${secondStr}`;
   }
   
-  // 이미 문자열인 경우 그대로 반환
-  return String(date);
+  const str = String(date).trim();
+  // 서버(Spring LocalDateTime)가 타임존 없이 보낸 경우 → Asia/Seoul(KST)로 해석
+  // 백엔드 server.timezone=Asia/Seoul 이므로 no-Z = KST. Z 없이 두면 브라우저가 로컬로 해석해 9시간 차이 발생
+  if (isLocalIsoString(str)) {
+    const base = str.replace(/Z$/i, '').replace(/\+\d{2}:?\d{2}$/i, '');
+    return base.includes('+') || base.endsWith('Z') ? str : `${base}+09:00`;
+  }
+  return str;
 };
 
 /**

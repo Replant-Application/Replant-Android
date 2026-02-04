@@ -121,22 +121,12 @@ export const useNotificationScreenContainer = ({
           // 백엔드 알림과 임시 알림 병합
           const merged = [...sortedNotifications, ...tempNotifications];
           
-          // ID 기준으로 중복 제거
-          const seenIds = new Set<number>();
-          const seenKeys = new Set<string>();
+          // (title, content) 기준 중복 제거: 같은 알림이 SSE·API 양쪽에서 오거나 타임존 차이로 두 건으로 오면 하나만 표시
+          const seenKey = new Set<string>();
           const final = merged.filter(notification => {
-            if (notification.id) {
-              if (seenIds.has(notification.id)) {
-                return false;
-              }
-              seenIds.add(notification.id);
-              return true;
-            }
             const key = `${notification.title}_${notification.content}`;
-            if (seenKeys.has(key)) {
-              return false;
-            }
-            seenKeys.add(key);
+            if (seenKey.has(key)) return false;
+            seenKey.add(key);
             return true;
           });
           
