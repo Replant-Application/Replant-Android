@@ -74,6 +74,48 @@ export const styles = StyleSheet.create({
       }),
     }),
   },
+  /** 게시글 종류 (전체 / 인증 / 일반) 상단 선택 */
+  postTypeRow: {
+    flexDirection: 'row',
+    paddingHorizontal: spacing[4],
+    paddingTop: spacing[2],
+    paddingBottom: spacing[2],
+    gap: spacing[2],
+  },
+  postTypeTab: {
+    flex: 1,
+    paddingVertical: 8,
+    paddingHorizontal: spacing[3],
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 8,
+    backgroundColor: '#F5F5F0',
+    borderWidth: 1,
+    borderColor: '#A68B6F',
+  },
+  postTypeTabActive: {
+    backgroundColor: '#8B6F47',
+  },
+  postTypeTabText: {
+    ...createTextStyle('sm', {
+      color: colors.text.primary,
+      fontWeight: typography.fontWeight.medium,
+      fontFamily: Platform.select({
+        ios: undefined,
+        android: typography.fontFamily.regular,
+      }),
+    }),
+  },
+  postTypeTabTextActive: {
+    ...createTextStyle('sm', {
+      color: colors.white,
+      fontWeight: typography.fontWeight.medium,
+      fontFamily: Platform.select({
+        ios: undefined,
+        android: typography.fontFamily.regular,
+      }),
+    }),
+  },
   filterContainer: {
     paddingHorizontal: spacing[4],
     paddingTop: spacing[2],
@@ -221,11 +263,11 @@ export const styles = StyleSheet.create({
       textAlign: 'center',
     }),
   },
-  /** '필터 선택' 제목과 동일한 커스텀 폰트(Neo-Regular) 적용 */
+  /** 게시글 종류·정렬·인증 상태 라벨 (내가 쓴 게시글만 보기와 동일 스타일) */
   modalSectionTitle: {
-    ...createTextStyle('sm', {
-      fontWeight: typography.fontWeight.bold,
-      color: colors.text.secondary,
+    ...createTextStyle('base', {
+      color: colors.text.primary,
+      fontWeight: typography.fontWeight.medium,
       marginTop: spacing[3],
       marginBottom: spacing[4],
       fontFamily: Platform.select({
@@ -307,22 +349,12 @@ export const styles = StyleSheet.create({
     borderColor: colors.primary[500],
     borderWidth: 1.5,
   },
-  /** 최신순/인기순/전체 등 - '필터 선택'과 동일한 커스텀 폰트(Neo-Regular) 항상 적용 */
+  /** 필터 옵션 버튼 텍스트 (sm으로 작게) */
   filterOptionText: {
-    fontSize: typography.fontSize.xs,
-    fontWeight: typography.fontWeight.bold,
-    color: colors.text.primary,
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
-    fontFamily: Platform.select({ ios: undefined, android: typography.fontFamily.regular }),
+    ...createButtonTextStyle('sm', { color: colors.text.primary }),
   },
   filterOptionTextActive: {
-    fontSize: typography.fontSize.xs,
-    fontWeight: typography.fontWeight.bold,
-    color: colors.white,
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize.xs),
-    fontFamily: Platform.select({ ios: undefined, android: typography.fontFamily.regular }),
+    ...createButtonTextStyle('sm'),
   },
   filterOptionCheck: {
     ...createTextStyle('xs', {

@@ -601,6 +601,14 @@ export const useNotificationScreenContainer = ({
       : notifications;
   }, [notifications, filter]);
 
+  /** 전체 선택 여부 (handleConfirmDeleteSelected 등에서 사용) */
+  const isAllSelected = useMemo(
+    () =>
+      filteredNotifications.length > 0 &&
+      filteredNotifications.every(n => selectedIds.has(n.id)),
+    [filteredNotifications, selectedIds]
+  );
+
   /**
    * 읽지 않은 알림 개수
    */
@@ -617,10 +625,6 @@ export const useNotificationScreenContainer = ({
     }
     return `temp_${item.createdAt || Date.now()}_${index}`;
   }, []);
-
-  const isAllSelected =
-    filteredNotifications.length > 0 &&
-    filteredNotifications.every(n => selectedIds.has(n.id));
 
   return {
     notifications: filteredNotifications,

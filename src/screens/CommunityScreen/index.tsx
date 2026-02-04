@@ -11,7 +11,7 @@ import { formatDateKorean } from '../../utils/dateUtils';
 import { PostCard } from '../../components/specialized';
 import { Loading, ErrorBoundary, EmptyState, Header, AlertModal, ConfirmModal } from '../../components/ui';
 import { colors } from '../../utils/designTokens';
-import { CommunityScreenProps, VerificationFilter } from '../../types/screens/community';
+import { CommunityScreenProps, VerificationFilter, PostTypeFilter } from '../../types/screens/community';
 import { FILTER_OPTIONS } from '../../constants/screens/community';
 import MissionSetList from './components/MissionSetList';
 import MissionSetDetailScreen from '../MissionSetDetailScreen';
@@ -37,6 +37,7 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation, route }) 
     showFilterModal,
     refreshing,
     verificationFilter,
+    postTypeFilter,
     onlyMyPosts,
     showAlert,
     alertTitle,
@@ -53,6 +54,7 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation, route }) 
     setActiveTab,
     setShowFilterModal,
     setVerificationFilter,
+    setPostTypeFilter,
     setOnlyMyPosts,
     setMissionSetSearchQuery,
     setMissionSetSortBy,
@@ -158,74 +160,73 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation, route }) 
         </View>
       </View>
 
-      {/* 검색 및 정렬 */}
+      {/* 검색, 필터, 게시글 목록 (전체 게시판일 때만) */}
       {activeTab === 'all' && (
-        <View style={styles.filterContainer}>
-          {/* 검색창과 필터 버튼 */}
-          <View style={styles.searchRow}>
-            <View style={styles.searchContainer}>
-              <Image
-                source={require('../../assets/images/search.png')}
-                style={styles.searchIcon}
-                resizeMode="contain"
-                accessibilityLabel="검색 아이콘"
-                accessibilityElementsHidden={true}
-              />
-              <TextInput
-                style={styles.searchInput}
-                value={searchQuery}
-                onChangeText={setSearchQuery}
-                placeholder="게시글 검색..."
-                placeholderTextColor={colors.text.tertiary}
-                accessibilityLabel="게시글 검색"
-                accessibilityHint="게시글을 검색하려면 입력하세요"
-                allowFontScaling={true}
-              />
-            </View>
-            <TouchableOpacity
-              style={styles.filterButton}
-              onPress={() => setShowFilterModal(true)}
-              activeOpacity={0.7}
-              accessibilityRole="button"
-              accessibilityLabel="필터"
-              accessibilityHint="게시글 필터 옵션 열기"
-              accessibilityState={{ selected: verificationFilter !== 'all' || filter !== 'all' || onlyMyPosts }}
-            >
-              <Image
-                source={require('../../assets/images/filter.png')}
-                style={styles.filterIcon}
-                resizeMode="contain"
-                accessibilityLabel="필터 아이콘"
-                accessibilityElementsHidden={true}
-              />
-              {(verificationFilter !== 'all' || filter !== 'all' || onlyMyPosts) && (
-                <View style={styles.filterBadge} accessibilityElementsHidden={true} />
-              )}
-            </TouchableOpacity>
-          </View>
-
-          {/* 인증 필터 칩 (선택된 경우에만 표시) */}
-          {verificationFilter !== 'all' && (
-            <View style={styles.chipContainer}>
+        <>
+          <View style={styles.filterContainer}>
+            {/* 검색창과 필터 버튼 */}
+            <View style={styles.searchRow}>
+              <View style={styles.searchContainer}>
+                <Image
+                  source={require('../../assets/images/search.png')}
+                  style={styles.searchIcon}
+                  resizeMode="contain"
+                  accessibilityLabel="검색 아이콘"
+                  accessibilityElementsHidden={true}
+                />
+                <TextInput
+                  style={styles.searchInput}
+                  value={searchQuery}
+                  onChangeText={setSearchQuery}
+                  placeholder="게시글 검색..."
+                  placeholderTextColor={colors.text.tertiary}
+                  accessibilityLabel="게시글 검색"
+                  accessibilityHint="게시글을 검색하려면 입력하세요"
+                  allowFontScaling={true}
+                />
+              </View>
               <TouchableOpacity
-                style={styles.chip}
-                onPress={() => setVerificationFilter('all')}
+                style={styles.filterButton}
+                onPress={() => setShowFilterModal(true)}
                 activeOpacity={0.7}
                 accessibilityRole="button"
-                accessibilityLabel={`${verificationFilter === 'pending' ? '인증대기' : '인증완료'} 필터 제거`}
+                accessibilityLabel="필터"
+                accessibilityHint="게시글 필터 옵션 열기"
+                accessibilityState={{ selected: verificationFilter !== 'all' || filter !== 'latest' || onlyMyPosts }}
               >
-                <Text style={styles.chipText}>
-                  {verificationFilter === 'pending' ? '인증대기' : '인증완료'}
-                </Text>
-                <Text style={styles.chipClose} accessibilityElementsHidden={true}>×</Text>
+                <Image
+                  source={require('../../assets/images/filter.png')}
+                  style={styles.filterIcon}
+                  resizeMode="contain"
+                  accessibilityLabel="필터 아이콘"
+                  accessibilityElementsHidden={true}
+                />
+                {(verificationFilter !== 'all' || filter !== 'latest' || onlyMyPosts) && (
+                  <View style={styles.filterBadge} accessibilityElementsHidden={true} />
+                )}
               </TouchableOpacity>
             </View>
-          )}
-        </View>
-      )}
 
-      {activeTab === 'all' && (
-      <ScrollView
+            {/* 인증 상태 칩 (선택된 경우에만 표시, 게시글 종류는 상단에서 선택) */}
+            {verificationFilter !== 'all' && (
+              <View style={styles.chipContainer}>
+                <TouchableOpacity
+                  style={styles.chip}
+                  onPress={() => setVerificationFilter('all')}
+                  activeOpacity={0.7}
+                  accessibilityRole="button"
+                  accessibilityLabel={`${verificationFilter === 'pending' ? '인증대기' : '인증완료'} 필터 제거`}
+                >
+                  <Text style={styles.chipText}>
+                    {verificationFilter === 'pending' ? '인증대기' : '인증완료'}
+                  </Text>
+                  <Text style={styles.chipClose} accessibilityElementsHidden={true}>×</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+          </View>
+
+          <ScrollView
         style={styles.content}
         refreshControl={
           <RefreshControl
@@ -294,7 +295,8 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation, route }) 
             )}
           </>
         )}
-      </ScrollView>
+          </ScrollView>
+        </>
       )}
 
       {/* 투두 공유 탭 콘텐츠 */}
@@ -475,9 +477,44 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation, route }) 
           />
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle} accessibilityRole="header">필터 선택</Text>
-            
+
+            {/* 게시글 종류 (맨 위) */}
+            <Text style={styles.modalSectionTitle}>게시글 종류</Text>
+            <View style={styles.filterOptionRow}>
+              {[
+                { key: 'all' as PostTypeFilter, label: '전체' },
+                { key: 'certified' as PostTypeFilter, label: '인증' },
+                { key: 'general' as PostTypeFilter, label: '일반' },
+              ].map((option) => (
+                <TouchableOpacity
+                  key={option.key}
+                  style={[
+                    styles.filterOptionHorizontal,
+                    postTypeFilter === option.key && styles.filterOptionActive,
+                  ]}
+                  onPress={() => setPostTypeFilter(option.key)}
+                  activeOpacity={0.7}
+                  accessibilityRole="button"
+                  accessibilityLabel={option.label}
+                  accessibilityState={{ selected: postTypeFilter === option.key }}
+                >
+                  <Text
+                    style={[
+                      styles.filterOptionText,
+                      postTypeFilter === option.key && styles.filterOptionTextActive,
+                    ]}
+                  >
+                    {option.label}
+                  </Text>
+                  {postTypeFilter === option.key && (
+                    <Text style={styles.filterOptionCheck} accessibilityElementsHidden={true}>✓</Text>
+                  )}
+                </TouchableOpacity>
+              ))}
+            </View>
+
             {/* 정렬 옵션 */}
-            <Text style={styles.modalSectionTitle}>정렬</Text>
+            <Text style={[styles.modalSectionTitle, { marginTop: spacing[5] }]}>정렬</Text>
             <View style={styles.filterOptionRow}>
               {FILTER_OPTIONS.map((option) => (
                 <TouchableOpacity
@@ -502,14 +539,11 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation, route }) 
                   >
                     {option.label}
                   </Text>
-                  {filter === option.value && (
-                    <Text style={styles.filterOptionCheck} accessibilityElementsHidden={true}>✓</Text>
-                  )}
                 </TouchableOpacity>
               ))}
             </View>
 
-            {/* 인증 상태 필터 */}
+            {/* 인증 상태 */}
             <Text style={[styles.modalSectionTitle, { marginTop: spacing[5] }]}>인증 상태</Text>
             <View style={styles.filterOptionRow}>
               {[
@@ -623,9 +657,6 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation, route }) 
                   >
                     {option.label}
                   </Text>
-                  {missionSetSortBy === option.value && (
-                    <Text style={styles.filterOptionCheck} accessibilityElementsHidden={true}>✓</Text>
-                  )}
                 </TouchableOpacity>
               ))}
             </View>

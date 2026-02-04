@@ -179,8 +179,10 @@ export const filterTodayAndYesterdayActiveTodoLists = (
  * 날짜가 오늘 또는 어제인지 확인 (createdAt 기준)
  */
 export const isTodayOrYesterday = (createdAt: string | number | number[] | undefined): boolean => {
-  if (!createdAt) return false;
-  const normalizedDate = normalizeDate(createdAt);
+  if (createdAt === undefined || createdAt === null) return false;
+  const normalizedDate = normalizeDate(
+    typeof createdAt === 'number' ? String(createdAt) : createdAt
+  );
   if (!normalizedDate) return false;
   const createdDate = new Date(normalizedDate);
   if (isNaN(createdDate.getTime())) return false;
