@@ -192,14 +192,12 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
           />
         }
       >
-        {/* 진행률 카드 */}
-        {totalMissions > 0 && (
-          <MissionProgressCard
-            completedMissions={completedMissions}
-            totalMissions={totalMissions}
-            onBadgePress={() => navigation.navigate('MyProgressDetail' as any)}
-          />
-        )}
+        {/* 진행률 카드 - 미션이 없어도 나의 진행률 표시 */}
+        <MissionProgressCard
+          completedMissions={completedMissions}
+          totalMissions={totalMissions}
+          onBadgePress={() => navigation.navigate('MyProgressDetail' as any)}
+        />
 
         {/* 진행중/인증대기/완료 탭 - 나의 미션/미션 도감과 동일 스타일 */}
         <View style={styles.filterTabWrapper}>

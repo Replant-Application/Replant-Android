@@ -20,7 +20,7 @@ import {
   Image,
 } from 'react-native';
 import { useOverlay } from '../../contexts/OverlayContext';
-import { getNotifications, markNotificationAsRead } from '../../api/notificationApi';
+import { getNotifications, markNotificationAsRead, markAllNotificationsAsRead } from '../../api/notificationApi';
 import { getMealLogDetail } from '../../api/mealLogApi';
 import { formatTimeAgo } from '../../utils/dateUtils';
 import { SCREEN_NAMES } from '../../utils/constants';
@@ -328,6 +328,21 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
     onViewAll?.();
   };
 
+  // 전체 읽음 처리
+  const handleMarkAllRead = useCallback(async () => {
+    const unreadCount = notifications.filter(n => !n.isRead).length;
+    if (unreadCount === 0) return;
+    try {
+      const result = await markAllNotificationsAsRead();
+      if (result.success) {
+        setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
+        setUnreadNotificationCount(0);
+      }
+    } catch (error) {
+      console.error('전체 읽음 처리 실패:', error);
+    }
+  }, [notifications, setUnreadNotificationCount]);
+
   if (!isVisible) return null;
 
   return (
@@ -347,13 +362,26 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
           >
             {/* 헤더 */}
             <View style={styles.header}>
-              <Text style={styles.headerTitle}>알림</Text>
+              <View style={styles.headerLeft}>
+                <Text style={styles.headerTitle}>알림</Text>
+                {notifications.filter(n => !n.isRead).length > 0 && (
+                  <View style={styles.unreadBadge}>
+                    <Text style={styles.unreadBadgeText}>
+                      {notifications.filter(n => !n.isRead).length}
+                    </Text>
+                  </View>
+                )}
+              </View>
               {notifications.filter(n => !n.isRead).length > 0 && (
-                <View style={styles.unreadBadge}>
-                  <Text style={styles.unreadBadgeText}>
-                    {notifications.filter(n => !n.isRead).length}
-                  </Text>
-                </View>
+                <TouchableOpacity
+                  style={styles.readAllButton}
+                  onPress={handleMarkAllRead}
+                  activeOpacity={0.7}
+                  accessibilityRole="button"
+                  accessibilityLabel="모든 알림 읽음 처리"
+                >
+                  <Text style={styles.readAllButtonText}>읽음</Text>
+                </TouchableOpacity>
               )}
             </View>
 

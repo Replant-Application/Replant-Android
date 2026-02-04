@@ -37,8 +37,25 @@ export const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: colors.border.light,
   },
+  headerLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing[2],
+  },
   headerTitle: {
     ...createTitleStyle('lg'),
+  },
+  readAllButton: {
+    paddingVertical: spacing[2],
+    paddingHorizontal: spacing[3],
+    borderRadius: borderRadius.base,
+    backgroundColor: colors.primary[100],
+  },
+  readAllButtonText: {
+    ...createTextStyle('sm', {
+      fontWeight: typography.fontWeight.medium,
+      color: colors.primary[700],
+    }),
   },
   unreadBadge: {
     backgroundColor: colors.error,
