@@ -135,7 +135,8 @@ export const deleteNotification = async (
     ':notificationId',
     String(notificationId)
   );
-  return apiClient.delete<{ message: string }>(endpoint);
+  // 404 = 이미 삭제된 알림 → 콘솔 에러 없이 성공처럼 처리 (목록에서 제거)
+  return apiClient.delete<{ message: string }>(endpoint, { silentErrors: [404] });
 };
 
 /**

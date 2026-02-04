@@ -491,9 +491,13 @@ export class ApiClient {
 
   /**
    * DELETE 요청
+   * @param options.silentErrors - 특정 HTTP 상태 코드에 대해 에러 로깅 억제 (예: [404] 이미 삭제된 리소스)
    */
-  async delete<T>(endpoint: string): Promise<ServiceResult<T>> {
-    return this.request<T>(endpoint, { method: 'DELETE' });
+  async delete<T>(
+    endpoint: string,
+    options?: Pick<ApiRequestOptions, 'timeout' | 'silentErrors'>
+  ): Promise<ServiceResult<T>> {
+    return this.request<T>(endpoint, { method: 'DELETE', ...options });
   }
 
   /**
