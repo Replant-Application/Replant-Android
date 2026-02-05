@@ -5,7 +5,7 @@
 
 import { StyleSheet, Platform, Dimensions } from 'react-native';
 import { spacing, typography, colors } from '../../utils/designTokens';
-import { createTextStyle, getOptimizedLineHeight } from '../../utils/styles/textStyles';
+import { createTextStyle } from '../../utils/styles/textStyles';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 

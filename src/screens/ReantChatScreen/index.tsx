@@ -13,7 +13,6 @@ import {
   Platform,
   Image,
   Animated,
-  Easing,
   ActivityIndicator,
   Alert,
   Modal,
@@ -93,7 +92,8 @@ interface ReantChatScreenProps {
   route?: any;
 }
 
-// 현재 표시 중인 두 칩이 아닌 풀에서 랜덤 선택
+// 현재 표시 중인 두 칩이 아닌 풀에서 랜덤 선택 (추후 추천 칩 로테이션에 사용 가능)
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const pickReplacementChip = (currentChips: [string, string], replaceIndex: 0 | 1): string => {
   const other = currentChips[1 - replaceIndex];
   const candidates = RECOMMENDED_MESSAGES_POOL.filter(
@@ -117,7 +117,7 @@ const ReantChatScreen: React.FC<ReantChatScreenProps> = ({ navigation, route: _r
   const voiceCommittedRef = useRef(''); // 음성으로 확정된 텍스트 (입력창에 반영)
   const listRef = useRef<FlatList>(null);
   // 표시 중인 추천 칩 두 개
-  const [recommendedChips, setRecommendedChips] = useState<[string, string]>(() => [
+  const [recommendedChips, _setRecommendedChips] = useState<[string, string]>(() => [
     RECOMMENDED_MESSAGES_POOL[0],
     RECOMMENDED_MESSAGES_POOL[1],
   ]);
@@ -212,7 +212,6 @@ const ReantChatScreen: React.FC<ReantChatScreenProps> = ({ navigation, route: _r
     });
   }, [screenFadeAnim]);
 
-<<<<<<< HEAD
   // 메시지 목록 → 날짜 구분 포함 리스트 데이터
   const listData = useMemo((): ListItem[] => {
     const out: ListItem[] = [];
@@ -381,7 +380,6 @@ const ReantChatScreen: React.FC<ReantChatScreenProps> = ({ navigation, route: _r
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
         >
-<<<<<<< HEAD
           {/* 메시지 리스트 */}
           <FlatList
             ref={listRef}
