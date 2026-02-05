@@ -46,7 +46,6 @@ export interface MemberDetail extends Member {
     name: string;
     level: number;
     exp: number;
-    stage: 'EGG' | 'BABY' | 'ADULT';
   };
   statistics: {
     totalMissions: number;

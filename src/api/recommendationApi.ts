@@ -21,7 +21,6 @@ export interface Recommendation {
     reant?: {
       name: string;
       level: number;
-      stage: 'EGG' | 'BABY' | 'ADULT';
     };
   };
   mission: {

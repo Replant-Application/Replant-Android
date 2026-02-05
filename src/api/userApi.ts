@@ -83,7 +83,6 @@ export interface UserProfileResponse {
   reant?: {
     name: string;
     level: number;
-    stage: 'EGG' | 'BABY' | 'ADULT';
   };
 }
 

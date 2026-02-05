@@ -10,15 +10,12 @@ import { ServiceResult } from '../types';
 // 타입 정의
 // ============================================
 
-export type ReantStage = 'EGG' | 'BABY' | 'TEEN' | 'ADULT';
-
 export interface ReantResponse {
   id: number;
   name: string;
   level: number;
   exp: number;
   nextLevelExp?: number;
-  stage: ReantStage;
   maxLevel: number;
   mood: number;
   health: number;
@@ -26,19 +23,6 @@ export interface ReantResponse {
   appearance?: Record<string, any>;
   createdAt: string;
   updatedAt: string;
-}
-
-export interface ReantStatusResponse {
-  id: number;
-  name: string;
-  level: number;
-  exp: number;
-  stage: ReantStage;
-  mood: number;
-  health: number;
-  hunger: number;
-  nextLevelExp: number;
-  expProgress: number; // 현재 레벨 진행률 (0-100%)
 }
 
 export interface ReantUpdateRequest {
@@ -66,12 +50,4 @@ export const updateReant = async (
   data: ReantUpdateRequest
 ): Promise<ServiceResult<ReantResponse>> => {
   return apiClient.put<ReantResponse>('/reant', data);
-};
-
-/**
- * 펫 상태 조회
- * GET /api/reant/status
- */
-export const getReantStatus = async (): Promise<ServiceResult<ReantStatusResponse>> => {
-  return apiClient.get<ReantStatusResponse>('/reant/status');
 };

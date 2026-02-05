@@ -19,9 +19,8 @@ const CharacterCard: React.FC<CharacterCardProps> = ({
 }) => {
   if (!character) return null;
 
+  // 레벨별 이름 통일: 1=알, 2=씨앗, 3=새싹, 4=어린 나무, 5+=성숙한 나무
   const getLevelName = (level: number): string => {
-    if (level >= 7) return '리앤트';
-    if (level >= 6) return '아이 리앤트';
     if (level >= 5) return '성숙한 나무';
     if (level >= 4) return '어린 나무';
     if (level >= 3) return '새싹';
@@ -29,19 +28,17 @@ const CharacterCard: React.FC<CharacterCardProps> = ({
     return '알';
   };
 
-  // 캐릭터 이미지 미리 import
+  // 캐릭터 이미지 (레벨 5 이상은 모두 레벨 5 이미지 사용)
   const characterImages = {
     level1: require('../../assets/images/characters/level1/default.gif'),
     level2: require('../../assets/images/characters/level2/default.gif'),
     level3: require('../../assets/images/characters/level3/default.gif'),
     level4: require('../../assets/images/characters/level4/default.gif'),
     level5: require('../../assets/images/characters/level5/default.gif'),
-    level6: require('../../assets/images/characters/level6/default.gif'),
   };
 
-  // 캐릭터 이미지 경로 생성
   const getCharacterImage = (level: number) => {
-    const levelKey = `level${Math.min(level, 6)}`;
+    const levelKey = `level${Math.min(level, 5)}`;
     return characterImages[levelKey as keyof typeof characterImages] || characterImages.level1;
   };
 

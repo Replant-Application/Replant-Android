@@ -158,15 +158,6 @@ export const API_CONFIG = {
       reject: '/recommendations/:recommendationId/reject',
     },
 
-    // 채팅 (Chat)
-    chat: {
-      rooms: '/chat/rooms',
-      roomDetail: '/chat/rooms/:roomId',
-      messages: '/chat/rooms/:roomId/messages',
-      sendMessage: '/chat/rooms/:roomId/messages',
-      readMessages: '/chat/rooms/:roomId/messages/read',
-    },
-
     // 알림 (Notification)
     notification: {
       list: '/notifications',

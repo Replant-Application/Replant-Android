@@ -229,16 +229,6 @@ export const shareTodoList = async (
   return apiClient.put<TodoList>(`/todolists/${todoListId}/share`);
 };
 
-/**
- * 투두리스트 공유 해제 (비공개로 전환)
- * PUT /api/todolists/{todoListId}/unshare
- */
-export const unshareTodoList = async (
-  todoListId: number
-): Promise<ServiceResult<TodoList>> => {
-  return apiClient.put<TodoList>(`/todolists/${todoListId}/unshare`);
-};
-
 // ============================================
 // 공개 투두리스트 API (기존 미션세트 기능 대체)
 // ============================================
