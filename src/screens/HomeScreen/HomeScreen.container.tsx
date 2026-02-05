@@ -77,8 +77,9 @@ export const useHomeScreenContainer = ({ navigation, route }: HomeScreenContaine
   // 히어로 섹션 접힘 상태
   const [_isHeroCollapsed, setIsHeroCollapsed] = useState(false);
 
-  // 진화 모달 상태
+  // 진화 모달 상태 (모달에 표시할 레벨을 열 때 고정하여 알 이미지 오류 방지)
   const [showEvolutionModal, setShowEvolutionModal] = useState(false);
+  const [evolutionModalLevel, setEvolutionModalLevel] = useState<number | null>(null);
   const [previousLevel, setPreviousLevel] = useState<number | null>(null);
   const [lastSeenLevel, setLastSeenLevel] = useState<number | null>(null);
   const evolutionFadeAnim = useRef(new Animated.Value(0)).current;
@@ -131,7 +132,8 @@ export const useHomeScreenContainer = ({ navigation, route }: HomeScreenContaine
       const sessionLevelUp = previousLevel !== null && currentLevel > previousLevel;
 
       if (shouldShowEvolution || sessionLevelUp) {
-        // 진화 모달 표시
+        // 진화 모달 표시 시 이 시점의 레벨을 고정 (모달에서 알 이미지 대신 해당 레벨 이미지 표시)
+        setEvolutionModalLevel(currentLevel);
         setShowEvolutionModal(true);
         Animated.timing(evolutionFadeAnim, {
           toValue: 1,
@@ -442,6 +444,7 @@ export const useHomeScreenContainer = ({ navigation, route }: HomeScreenContaine
       useNativeDriver: true,
     }).start(async () => {
       setShowEvolutionModal(false);
+      setEvolutionModalLevel(null);
       
       // 모달을 닫을 때 현재 레벨을 저장 (다음 앱 시작 시 비교용)
       if (currentCharacter && currentCharacter.level && currentNickname) {
@@ -555,6 +558,7 @@ export const useHomeScreenContainer = ({ navigation, route }: HomeScreenContaine
     panResponder,
     // Evolution Modal
     showEvolutionModal,
+    evolutionModalLevel,
     evolutionFadeAnim,
     // Handlers
     loadData,

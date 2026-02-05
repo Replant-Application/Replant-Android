@@ -66,56 +66,12 @@ export interface TodoListCreateRequest {
 }
 
 // ============================================
-// 챌린지 타입
-// ============================================
-
-export type ChallengeStatus = 'ACTIVE' | 'COMPLETED' | 'FAILED';
-
-export interface ChallengeMission {
-  id: number;
-  title: string;
-  description: string;
-  category: string;
-  verificationType: string;
-  expReward: number;
-  challengeDays: number;
-}
-
-export interface Challenge {
-  id: number;
-  missionId: number;
-  missionTitle: string;
-  missionDescription: string;
-  status: ChallengeStatus;
-  currentStreak: number;
-  totalCompletedDays: number;
-  durationDays: number;
-  progressRate: number;
-  remainingDays: number;
-  todayCompleted: boolean;
-  startDate: string;
-  endDate: string;
-  mission?: ChallengeMission;
-  lastCompletedDate?: string;
-  createdAt?: string;
-}
-
-export interface ChallengeStartRequest {
-  missionId: number;
-  durationDays?: number;
-}
-
-// ============================================
 // API 응답 타입
 // ============================================
 
 export interface CanCreateResponse {
   canCreate: boolean;
   activeTodoListCount: number;
-}
-
-export interface ChallengeCountResponse {
-  count: number;
 }
 
 // ============================================

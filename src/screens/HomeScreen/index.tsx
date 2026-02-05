@@ -41,6 +41,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
     MAX_HERO_HEIGHT,
     panResponder,
     showEvolutionModal,
+    evolutionModalLevel,
     loadData,
     handleCharacterPress,
     handleEvolutionModalClose,
@@ -176,10 +177,11 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
           )}
         </Animated.View>
 
-        {/* 진화 모달 */}
+        {/* 진화 모달: 레벨 5 이후는 모두 레벨 5 템플릿 사용 (이름·설명·이미지 동일) */}
         {(() => {
-          const currentLevel = currentCharacter?.level || 1;
-          const levelInfo = (characterTemplates as any[]).find(t => t.level === currentLevel) || characterTemplates[0];
+          const currentLevel = evolutionModalLevel ?? currentCharacter?.level ?? 1;
+          const templateLevel = Math.min(currentLevel, 5);
+          const levelInfo = (characterTemplates as any[]).find(t => t.level === templateLevel) || characterTemplates[0];
           const levelName = levelInfo?.name || '캐릭터';
           const levelDescription = levelInfo?.description || '';
           
