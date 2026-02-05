@@ -42,7 +42,7 @@ export const styles = StyleSheet.create({
   tabTextActive: {
     ...createTextStyle('sm', {
       color: colors.black,
-      fontWeight: typography.fontWeight.bold,
+      fontWeight: typography.fontWeight.medium,
       fontFamily: Platform.select({
         ios: undefined,
         android: typography.fontFamily.regular,
@@ -58,7 +58,7 @@ export const styles = StyleSheet.create({
   },
   tabCountActive: {
     ...createTextStyle('sm', {
-      fontWeight: typography.fontWeight.bold,
+      fontWeight: typography.fontWeight.medium,
       color: colors.black,
       marginLeft: spacing[1],
       fontFamily: Platform.select({

@@ -63,12 +63,14 @@ export const styles = StyleSheet.create({
   },
   textInput: {
     ...inputStyles.base(),
+    ...createTextStyle('sm', {
+      color: colors.white,
+      fontWeight: typography.fontWeight.medium,
+    }),
     backgroundColor: colors.gray[900],
     borderRadius: borderRadius.lg,
     padding: spacing[3],
     height: 37,
-    fontSize: typography.fontSize.sm,
-    color: colors.white,
     borderWidth: 1,
     borderColor: colors.gray[700],
   },

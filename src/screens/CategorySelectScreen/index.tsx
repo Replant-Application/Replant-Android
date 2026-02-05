@@ -5,7 +5,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, ActivityIndicator, ImageBackground, Image, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, ActivityIndicator, ImageBackground, Image, Alert, ScrollView } from 'react-native';
 import { Header } from '../../components/ui';
 import { useUser } from '../../contexts/UserContext';
 import { updateMyInfo } from '../../api/userApi';
@@ -84,7 +84,12 @@ const CategorySelectScreen: React.FC<CategorySelectScreenProps> = ({ onBack, onC
         showBackButton={!!onBack}
         navigation={onBack ? { goBack: onBack } : undefined}
       />
-      <View style={styles.content}>
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+      >
         <Text style={styles.subtitle}>
           해당 분야의 미션이 매일 추천돼요.
         </Text>
@@ -101,11 +106,15 @@ const CategorySelectScreen: React.FC<CategorySelectScreenProps> = ({ onBack, onC
                     disabled={loading}
                     accessibilityRole="button"
                     accessibilityLabel={`${getCategoryLabel(key)} 카테고리 ${isSelected ? '해제' : '선택'}`}
+                    activeOpacity={0.7}
                   >
                     {icon != null && (
                       <Image source={icon} style={styles.categoryButtonIcon} resizeMode="contain" />
                     )}
-                    <Text style={[styles.categoryButtonText, isSelected && styles.optionTextSelected]}>
+                    <Text
+                      style={[styles.categoryButtonText, isSelected && styles.optionTextSelected]}
+                      numberOfLines={1}
+                    >
                       {getCategoryLabel(key)}
                     </Text>
                   </TouchableOpacity>
@@ -145,7 +154,7 @@ const CategorySelectScreen: React.FC<CategorySelectScreenProps> = ({ onBack, onC
             선택 완료 ({selected.length}개)
           </Text>
         </TouchableOpacity>
-      </View>
+      </ScrollView>
       {loading && (
         <View style={styles.loadingOverlay}>
           <ActivityIndicator size="large" color={colors.primary[500]} />

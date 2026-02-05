@@ -1,4 +1,4 @@
-﻿{
+{
     "expo":  {
                  "name":  "ReplantMobileApp",
                  "slug":  "replant-mobile-app",
@@ -23,6 +23,7 @@
                          },
                  "main":  "index.js",
                  "plugins":  [
+                                 "expo-speech-recognition",
                                  [
                                      "expo-font",
                                      {

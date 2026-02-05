@@ -35,55 +35,64 @@ export const styles = StyleSheet.create({
   containerTransparent: {
     backgroundColor: 'transparent',
   },
-  /** 캘린더 화면과 동일한 본문 영역 패딩 */
+  scrollView: {
+    flex: 1,
+  },
+  /** 본문 영역: 좌우 여백 늘려 가운데 콘텐츠 너비 축소, 하단 여백으로 밑 버튼이 잘 보이도록 */
   content: {
-    padding: spacing[5],
+    paddingHorizontal: spacing[6],
+    paddingTop: spacing[5],
+    paddingBottom: spacing[8],
   },
   subtitle: {
     ...createTextStyle('sm', {
       color: colors.text.secondary,
       textAlign: 'center',
-      marginBottom: spacing[4],
+      marginBottom: spacing[3],
     }),
   },
-  /** 카테고리 영역 카드 (연한 배경 + 둥근 모서리) */
+  /** 카테고리 영역 카드 - 중간 간격 줄임 */
   categoryCard: {
     backgroundColor: 'rgba(255, 255, 255, 0.7)',
     borderRadius: borderRadius.xl,
-    padding: spacing[4],
-    marginBottom: spacing[4],
+    padding: spacing[6],
+    marginBottom: spacing[1],
     borderWidth: 1,
     borderColor: colors.border.light,
   },
-  /** 2열 그리드 */
+  /** 2열 그리드 - 행/열 간격 줄여서 중간 덜 벌어지게 */
   list: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: spacing[3],
+    gap: spacing[4],
+    justifyContent: 'space-between',
   },
-  /** 그리드 한 칸 (50% - gap 고려) */
+  /** 그리드 한 칸: 둥근 정사각형, 높이 더 낮춤 (가로 42%) */
   categoryButtonWrap: {
-    width: '47%',
+    width: '42%',
+    aspectRatio: 1,
   },
+  /** 둥근모서리 정사각형 버튼 */
   categoryButton: {
-    flexDirection: 'row',
+    flex: 1,
+    flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: colors.white,
-    paddingVertical: spacing[4],
-    paddingHorizontal: spacing[3],
     borderRadius: borderRadius.xl,
-    borderWidth: 2,
-    borderColor: colors.border.light,
+    paddingVertical: spacing[1],
+    paddingHorizontal: spacing[3],
     gap: spacing[2],
   },
+  /** 아이콘 */
   categoryButtonIcon: {
-    width: 24,
-    height: 24,
+    width: 40,
+    height: 40,
+    flexShrink: 0,
   },
   selectAllSection: {
-    marginTop: spacing[4],
-    paddingTop: spacing[4],
+    marginTop: spacing[5],
+    paddingTop: spacing[3],
     borderTopWidth: 1,
     borderTopColor: colors.border.light,
   },
@@ -93,11 +102,9 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: colors.white,
-    paddingVertical: spacing[3],
+    paddingVertical: spacing[2],
     paddingHorizontal: spacing[3],
     borderRadius: borderRadius.xl,
-    borderWidth: 2,
-    borderColor: colors.border.light,
   },
   selectAllButtonDisabled: {
     opacity: 0.6,
@@ -113,17 +120,12 @@ export const styles = StyleSheet.create({
     }),
   },
   optionSelected: {
-    borderColor: colors.primary[500],
-    backgroundColor: colors.primary[50],
+    backgroundColor: colors.primary[100],
     borderWidth: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 4,
-    elevation: 2,
+    borderColor: colors.primary[400],
   },
   optionTextSelected: {
-    color: colors.primary[600],
+    color: colors.primary[700],
     fontWeight: typography.fontWeight.semibold,
   },
   completeButton: {

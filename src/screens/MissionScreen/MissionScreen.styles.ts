@@ -34,8 +34,9 @@ export const styles = StyleSheet.create({
   },
   missionTab: {
     flex: 1,
-    paddingVertical: 10,
-    paddingHorizontal: spacing[4],
+    minWidth: 0,
+    paddingVertical: spacing[2],
+    paddingHorizontal: spacing[3],
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 6,
@@ -70,7 +71,7 @@ export const styles = StyleSheet.create({
     }),
   },
   tabBar: {
-    marginBottom: spacing[4],
+    marginBottom: spacing[3],
   },
   content: {
     flex: 1,
@@ -88,9 +89,9 @@ export const styles = StyleSheet.create({
     width: SCREEN_WIDTH - spacing[8],
     gap: spacing[1],
   },
-  // 미션 도감 관련 스타일
+  // 미션 도감 관련 스타일 (상단 탭과 동일한 좌우 패딩으로 너비 일치)
   groupTabContainer: {
-    paddingHorizontal: spacing[3],
+    paddingHorizontal: spacing[4],
     paddingTop: spacing[1],
     paddingBottom: 0,
   },

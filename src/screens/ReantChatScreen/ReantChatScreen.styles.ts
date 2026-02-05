@@ -6,10 +6,10 @@ import { StyleSheet, Dimensions, Platform } from 'react-native';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
 import { createTextStyle, createSecondaryTextStyle } from '../../utils/styles/textStyles';
 
-const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
-// 말풍선 가로 폭 (middle 기준, 홈스크린과 동일하게)
-const SPEECH_BUBBLE_WIDTH = SCREEN_WIDTH * 0.88;
+// 연한 연두색 배경 (primary 50: 아주 연한 녹색)
+const CHAT_BACKGROUND = colors.primary[50];
 
 export const styles = StyleSheet.create({
   container: {
@@ -19,198 +19,206 @@ export const styles = StyleSheet.create({
     flex: 1,
     width: '100%',
     height: '100%',
+    backgroundColor: CHAT_BACKGROUND,
   },
   keyboardAvoidingView: {
     flex: 1,
-    paddingTop: Platform.OS === 'ios' ? 120 : 90,
   },
-  // 1. 대화 종료하기 버튼 (상단) - 홈스크린 스타일 적용
-  topButtonContainer: {
-    position: 'absolute',
-    top: Platform.OS === 'ios' ? 50 : 30,
-    left: 0,
-    right: 0,
+  // 채팅 헤더: 뒤로가기 + 캐릭터 이름
+  chatHeader: {
+    flexDirection: 'row',
     alignItems: 'center',
-    zIndex: 100,
+    justifyContent: 'space-between',
+    paddingHorizontal: spacing[3],
+    paddingVertical: spacing[3],
+    paddingTop: Platform.OS === 'ios' ? 50 : spacing[4],
+    backgroundColor: 'transparent',
   },
-  endChatButton: {
-    backgroundColor: colors.overlay.white.heavy,
-    paddingVertical: spacing[2],
-    paddingHorizontal: spacing[4],
-    borderRadius: borderRadius.full,
-    borderWidth: 2,
-    borderColor: colors.brandAccent,
-    ...Platform.select({
-      ios: {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.15,
-        shadowRadius: 4,
-      },
-      android: {
-        elevation: 4,
-      },
-    }),
+  chatHeaderBack: {
+    width: 44,
+    height: 44,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  endChatButtonText: {
-    ...createTextStyle('sm', {
+  chatHeaderBackIcon: {
+    width: 24,
+    height: 24,
+  },
+  chatHeaderTitle: {
+    ...createTextStyle('base', {
       fontWeight: typography.fontWeight.semibold,
       color: colors.text.primary,
     }),
   },
-  // 2-3. 말풍선 + 리앤트 캐릭터 영역
-  heroSection: {
+  chatHeaderRight: {
+    width: 44,
+    height: 44,
+  },
+  messageList: {
     flex: 1,
+  },
+  messageListContent: {
+    paddingHorizontal: spacing[4],
+    paddingTop: spacing[3],
+    paddingBottom: 200,
+  },
+  dateSeparator: {
+    alignItems: 'center',
+    marginVertical: spacing[4],
+  },
+  dateSeparatorBubble: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing[2],
+    backgroundColor: colors.white,
+    paddingVertical: spacing[2],
+    paddingHorizontal: spacing[4],
+    borderRadius: borderRadius.lg,
+    borderWidth: 1,
+    borderColor: colors.primary[200],
+  },
+  dateSeparatorIcon: {
+    fontSize: 14,
+  },
+  dateSeparatorText: {
+    ...createTextStyle('xs', {
+      color: colors.primary[700],
+      fontWeight: typography.fontWeight.medium,
+    }),
+  },
+  userMessageRow: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    alignItems: 'flex-end',
+    marginBottom: spacing[2],
+  },
+  userMessageColumn: {
+    alignItems: 'flex-end',
+  },
+  userBubble: {
+    backgroundColor: colors.primary[500],
+    borderRadius: borderRadius.xl,
+    paddingHorizontal: spacing[4],
+    paddingVertical: spacing[3],
+    maxWidth: SCREEN_WIDTH * 0.75,
+  },
+  userBubbleText: {
+    ...createTextStyle('sm', {
+      color: colors.white,
+      fontWeight: typography.fontWeight.normal,
+    }),
+  },
+  userMessageTime: {
+    ...createTextStyle('xs', {
+      color: colors.text.secondary,
+    }),
+    marginTop: spacing[1],
+  },
+  assistantMessageRow: {
+    flexDirection: 'row',
     justifyContent: 'flex-start',
-    alignItems: 'center',
-    paddingTop: spacing[2],
+    alignItems: 'flex-start',
+    marginBottom: spacing[2],
   },
-  characterImageContainer: {
-    width: SCREEN_WIDTH * 0.8,
-    height: SCREEN_WIDTH * 0.8,
-    justifyContent: 'center',
-    alignItems: 'center',
-    position: 'absolute',
-    bottom: 0,
-    alignSelf: 'center',
+  assistantAvatar: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    overflow: 'hidden',
+    marginRight: spacing[2],
   },
-  characterImage: {
+  assistantAvatarImage: {
     width: '100%',
     height: '100%',
   },
-  speechBubble: {
-    alignItems: 'center',
-    zIndex: 10,
-    marginBottom: spacing[1],
+  assistantBubbles: {
+    maxWidth: SCREEN_WIDTH * 0.75,
   },
-  // 3분할 말풍선 컨테이너 - 텍스트에 맞게 자동 조절
-  speechBubbleContainer: {
-    width: SPEECH_BUBBLE_WIDTH,
-    alignItems: 'center',
-  },
-  speechBubbleTop: {
-    width: SPEECH_BUBBLE_WIDTH,
-    height: 12,
-  },
-  speechBubbleMiddle: {
-    width: SPEECH_BUBBLE_WIDTH,
-    minHeight: 40,
-    paddingHorizontal: spacing[5],
-    paddingVertical: spacing[2],
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  speechBubbleBottom: {
-    width: SPEECH_BUBBLE_WIDTH,
-    height: 28,
-  },
-  // 기존 단일 이미지용 (홈스크린에서 사용)
-  speechBubbleImage: {
-    width: '100%',
-    minHeight: 70,
-    paddingHorizontal: spacing[6],
-    paddingVertical: spacing[5],
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  speechTextContainer: {
-    width: '100%',
-    minWidth: 0,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  speechText: {
-    ...createTextStyle('sm', {
-      fontWeight: typography.fontWeight.normal,
-      textAlign: 'center',
-      color: colors.text.primary,
-      width: '100%',
+  assistantName: {
+    ...createTextStyle('xs', {
+      color: colors.text.secondary,
+      fontWeight: typography.fontWeight.medium,
+      marginBottom: spacing[1],
     }),
   },
-  loadingContainer: {
+  assistantBubble: {
+    backgroundColor: colors.white,
+    borderRadius: borderRadius.xl,
+    paddingHorizontal: spacing[4],
+    paddingVertical: spacing[3],
+    borderWidth: 1,
+    borderColor: colors.gray[200],
+    alignSelf: 'flex-start',
+  },
+  assistantBubbleText: {
+    ...createTextStyle('sm', {
+      color: colors.text.primary,
+      fontWeight: typography.fontWeight.normal,
+    }),
+  },
+  assistantTime: {
+    ...createTextStyle('xs', {
+      color: colors.text.secondary,
+      marginTop: spacing[1],
+    }),
+  },
+  loadingRow: {
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+    marginBottom: spacing[2],
+  },
+  loadingBubble: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
     gap: spacing[2],
+    backgroundColor: colors.white,
+    borderRadius: borderRadius.xl,
+    paddingHorizontal: spacing[4],
+    paddingVertical: spacing[3],
+    borderWidth: 1,
+    borderColor: colors.gray[200],
+    alignSelf: 'flex-start',
   },
   loadingText: {
     ...createTextStyle('sm', {
-      fontWeight: typography.fontWeight.normal,
       color: colors.text.secondary,
+      fontWeight: typography.fontWeight.normal,
     }),
   },
-  // 둥둥 떠다니는 사용자 메시지
-  floatingMessageContainer: {
-    position: 'absolute',
-    bottom: SCREEN_HEIGHT * 0.25,
-    left: 0,
-    right: 0,
-    alignItems: 'center',
-    zIndex: 20,
-  },
-  floatingMessageBubble: {
-    backgroundColor: colors.primary[500],
-    borderRadius: borderRadius.xl,
-    paddingHorizontal: spacing[5],
-    paddingVertical: spacing[3],
-    maxWidth: SCREEN_WIDTH * 0.7,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 4,
-    elevation: 4,
-  },
-  floatingMessageText: {
-    ...createTextStyle('sm', {
-      color: colors.white,
-      fontWeight: typography.fontWeight.medium,
-      textAlign: 'center',
-    }),
-  },
-  // 추천 메시지 칩 (입력창 위)
+  // 추천 메시지 칩 (입력창 위) - 가로 배치
   recommendedChipsContainer: {
-    flexDirection: 'column',
+    flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: spacing[2],
-    marginBottom: spacing[3],
+    marginBottom: spacing[2],
   },
   recommendedChip: {
-    alignSelf: 'stretch',
-    backgroundColor: colors.background.secondary,
+    backgroundColor: colors.primary[100],
     borderRadius: borderRadius.full,
-    paddingVertical: spacing[2],
-    paddingHorizontal: spacing[4],
+    paddingVertical: spacing[1],
+    paddingHorizontal: spacing[3],
     borderWidth: 1,
-    borderColor: colors.border.light,
+    borderColor: colors.primary[200],
     alignItems: 'center',
     justifyContent: 'center',
   },
   recommendedChipText: {
     ...createTextStyle('xs', {
-      color: colors.text.secondary,
+      color: colors.primary[700],
       fontWeight: typography.fontWeight.medium,
     }),
   },
-  // 4. 하단 입력창 - 둥근 모서리 + 키보드 반응형
+  // 4. 하단 입력창 - 앱 톤 + 키보드 반응형 (박스 그림자 없음)
   inputContainer: {
-    marginHorizontal: spacing[3],
-    marginBottom: spacing[3],
-    paddingHorizontal: spacing[4],
-    paddingVertical: spacing[3],
-    backgroundColor: colors.overlay.white.heavy,
+    marginHorizontal: spacing[4],
+    marginBottom: spacing[4],
+    paddingHorizontal: spacing[3],
+    paddingVertical: spacing[2],
+    backgroundColor: colors.white,
     borderRadius: borderRadius.xl,
-    borderWidth: 2,
-    borderColor: colors.brandAccent,
-    ...Platform.select({
-      ios: {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.15,
-        shadowRadius: 4,
-      },
-      android: {
-        elevation: 4,
-      },
-    }),
+    borderWidth: 1,
+    borderColor: colors.primary[200],
   },
   errorText: {
     ...createSecondaryTextStyle('xs', {
@@ -222,37 +230,101 @@ export const styles = StyleSheet.create({
   inputRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: spacing[2],
   },
   input: {
     flex: 1,
-    backgroundColor: colors.background.secondary,
-    borderRadius: borderRadius.lg,
-    paddingHorizontal: spacing[4],
-    paddingVertical: spacing[3],
-    minHeight: 44,
-    maxHeight: 100,
+    backgroundColor: colors.gray[50],
+    borderRadius: borderRadius.full,
+    paddingHorizontal: spacing[2],
+    paddingVertical: spacing[1],
+    minHeight: 38,
+    maxHeight: 88,
     ...createTextStyle('sm', {
       fontWeight: typography.fontWeight.normal,
       color: colors.text.primary,
     }),
-    marginRight: spacing[2],
+    borderWidth: 0,
   },
-  sendButton: {
-    backgroundColor: colors.primary[500],
-    borderRadius: borderRadius.lg,
-    paddingHorizontal: spacing[5],
-    paddingVertical: spacing[3],
+  voiceButton: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: colors.white,
+    borderWidth: 1,
+    borderColor: colors.primary[400],
     justifyContent: 'center',
     alignItems: 'center',
-    minWidth: 60,
-    minHeight: 44,
+  },
+  voiceButtonActive: {
+    backgroundColor: colors.white,
+    borderColor: colors.primary[500],
+  },
+  voiceButtonIcon: {
+    width: 20,
+    height: 20,
+  },
+  sendButton: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: colors.primary[500],
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   sendButtonDisabled: {
     backgroundColor: colors.gray[300],
   },
   sendButtonText: {
+    fontSize: 18,
+    lineHeight: 22,
+    color: colors.white,
+    fontWeight: typography.fontWeight.semibold,
+  },
+  // 녹음 중 모달
+  recordingModalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  recordingModalContent: {
+    backgroundColor: colors.white,
+    borderRadius: borderRadius.xl,
+    paddingVertical: spacing[6],
+    paddingHorizontal: spacing[8],
+    alignItems: 'center',
+    minWidth: 200,
+  },
+  recordingModalIcon: {
+    width: 64,
+    height: 64,
+    marginBottom: spacing[3],
+  },
+  recordingModalText: {
+    ...createTextStyle('lg', {
+      color: colors.text.primary,
+      fontWeight: typography.fontWeight.semibold,
+    }),
+    marginBottom: spacing[2],
+  },
+  recordingModalHint: {
     ...createTextStyle('sm', {
-      color: colors.white,
+      color: colors.text.secondary,
+    }),
+  },
+  recordingModalCancelButton: {
+    marginTop: spacing[4],
+    paddingVertical: spacing[2],
+    paddingHorizontal: spacing[5],
+    borderRadius: borderRadius.lg,
+    backgroundColor: colors.gray[200],
+    minWidth: 120,
+    alignItems: 'center',
+  },
+  recordingModalCancelButtonText: {
+    ...createTextStyle('base', {
+      color: colors.text.primary,
       fontWeight: typography.fontWeight.medium,
     }),
   },

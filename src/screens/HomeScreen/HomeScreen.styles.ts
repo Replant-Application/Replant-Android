@@ -302,7 +302,7 @@ export const styles = StyleSheet.create({
   },
   createTodoListButtonText: {
     ...createButtonTextStyle('base', {
-      fontWeight: typography.fontWeight.bold,
+      fontWeight: typography.fontWeight.medium,
       fontFamily: Platform.select({
         ios: undefined,
         android: typography.fontFamily.regular,
