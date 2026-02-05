@@ -212,7 +212,6 @@ const ReantChatScreen: React.FC<ReantChatScreenProps> = ({ navigation, route: _r
     });
   }, [screenFadeAnim]);
 
-<<<<<<< HEAD
   // 메시지 목록 → 날짜 구분 포함 리스트 데이터
   const listData = useMemo((): ListItem[] => {
     const out: ListItem[] = [];
@@ -381,7 +380,6 @@ const ReantChatScreen: React.FC<ReantChatScreenProps> = ({ navigation, route: _r
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
         >
-<<<<<<< HEAD
           {/* 메시지 리스트 */}
           <FlatList
             ref={listRef}
