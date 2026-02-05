@@ -4,10 +4,11 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-import { getActiveTodoLists, getTodoLists, canCreateNewTodoList } from '../../api/todolistApi';
+import { Alert } from 'react-native';
+import { getActiveTodoLists, getTodoLists, canCreateNewTodoList, deleteMissionSet } from '../../api/todolistApi';
 import { TodoList, CanCreateResponse } from '../../types/todolist';
 import { SCREEN_NAMES } from '../../utils/constants';
-import { filterTodayActiveTodoLists } from '../../utils/todolistUtils';
+import { filterTodayAndYesterdayActiveTodoLists } from '../../utils/todolistUtils';
 
 interface TodoListScreenContainerProps {
   navigation: any;
@@ -22,6 +23,9 @@ export const useTodoListScreenContainer = ({ navigation, route }: TodoListScreen
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [activeTab, setActiveTab] = useState<'active' | 'completed' | 'incomplete'>('active');
+  const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false);
+  const [showDeleteBlockedModal, setShowDeleteBlockedModal] = useState(false);
+  const [todoListToDelete, setTodoListToDelete] = useState<TodoList | null>(null);
 
   /**
    * 데이터 로드
@@ -37,11 +41,10 @@ export const useTodoListScreenContainer = ({ navigation, route }: TodoListScreen
       if (activeResult.success && activeResult.data) {
         const allActiveLists = Array.isArray(activeResult.data) ? activeResult.data : [];
 
-        // 오늘 날짜인 투두리스트만 "진행중"에 표시
-        // 과거 날짜의 미완료 투두리스트는 제외
-        const todayActiveLists = filterTodayActiveTodoLists(allActiveLists, 'TodoListScreen');
+        // 오늘·어제 날짜인 투두리스트만 "진행중"에 표시
+        const todayOrYesterdayActiveLists = filterTodayAndYesterdayActiveTodoLists(allActiveLists, 'TodoListScreen');
 
-        setActiveTodoLists(todayActiveLists);
+        setActiveTodoLists(todayOrYesterdayActiveLists);
       } else {
         console.error('[TodoListScreen] activeResult 실패:', activeResult.error);
       }
@@ -49,20 +52,22 @@ export const useTodoListScreenContainer = ({ navigation, route }: TodoListScreen
       if (allResult.success && allResult.data) {
         const today = new Date();
         today.setHours(0, 0, 0, 0);
+        const yesterday = new Date(today);
+        yesterday.setDate(yesterday.getDate() - 1);
 
         // 완료된 투두리스트만 "완료" 탭에 표시
         const completed = allResult.data.content.filter(todo => todo.status === 'COMPLETED' || todo.status === 'ARCHIVED');
         setCompletedTodoLists(completed);
 
-        // 과거 날짜의 미완료 투두리스트는 별도로 분리
+        // 어제 이전 날짜의 미완료 투두리스트만 "미완료"에 표시 (오늘·어제는 "진행중"에만)
         const incomplete = allResult.data.content.filter(todo => {
           if (!todo.createdAt) return false;
           const createdDate = new Date(todo.createdAt);
           createdDate.setHours(0, 0, 0, 0);
-          const isPastDate = createdDate.getTime() < today.getTime();
+          const isBeforeYesterday = createdDate.getTime() < yesterday.getTime();
           const isNotCompleted = todo.status === 'ACTIVE' && todo.completedCount < todo.totalCount;
 
-          return isPastDate && isNotCompleted;
+          return isBeforeYesterday && isNotCompleted;
         });
         setIncompleteTodoLists(incomplete);
       }
@@ -142,6 +147,52 @@ export const useTodoListScreenContainer = ({ navigation, route }: TodoListScreen
   );
 
   /**
+   * 투두리스트 삭제 확인 모달 열기 (⋯ 메뉴에서 호출)
+   */
+  const handleDeleteTodoList = useCallback((todoList: TodoList) => {
+    setTodoListToDelete(todoList);
+    setShowDeleteConfirmModal(true);
+  }, []);
+
+  /**
+   * 삭제 확인 모달: 삭제 실행
+   * 완료된 미션이 하나라도 있으면 삭제 불가
+   */
+  const handleDeleteConfirm = useCallback(async () => {
+    if (!todoListToDelete) return;
+    const target = todoListToDelete;
+    if ((target.completedCount ?? 0) > 0) {
+      setShowDeleteConfirmModal(false);
+      setTodoListToDelete(null);
+      setShowDeleteBlockedModal(true);
+      return;
+    }
+    setShowDeleteConfirmModal(false);
+    setTodoListToDelete(null);
+    const result = await deleteMissionSet(target.id);
+    if (result.success) {
+      loadData();
+    } else {
+      Alert.alert('오류', result.error || '삭제에 실패했습니다.');
+    }
+  }, [todoListToDelete, loadData]);
+
+  /**
+   * 삭제 확인 모달: 취소
+   */
+  const handleDeleteConfirmCancel = useCallback(() => {
+    setShowDeleteConfirmModal(false);
+    setTodoListToDelete(null);
+  }, []);
+
+  /**
+   * 삭제 불가 모달 닫기
+   */
+  const handleDeleteBlockedModalClose = useCallback(() => {
+    setShowDeleteBlockedModal(false);
+  }, []);
+
+  /**
    * 현재 탭에 따른 목록 반환
    */
   const currentList = activeTab === 'active' ? activeTodoLists : activeTab === 'completed' ? completedTodoLists : incompleteTodoLists;
@@ -162,6 +213,12 @@ export const useTodoListScreenContainer = ({ navigation, route }: TodoListScreen
     // Handlers
     handleCreateTodoList,
     handleTodoListPress,
+    handleDeleteTodoList,
+    showDeleteConfirmModal,
+    handleDeleteConfirm,
+    handleDeleteConfirmCancel,
+    showDeleteBlockedModal,
+    handleDeleteBlockedModalClose,
     onRefresh,
   };
 };

@@ -38,6 +38,15 @@ export const styles = StyleSheet.create({
   scrollView: {
     flex: 1,
   },
+  headerTitle: {
+    ...createTextStyle('lg', {
+      textAlign: 'center',
+    }),
+  },
+  headerNoPadding: {
+    paddingHorizontal: 0,
+    paddingLeft: spacing[5],
+  },
   /** 본문 영역: 좌우 여백 늘려 가운데 콘텐츠 너비 축소, 하단 여백으로 밑 버튼이 잘 보이도록 */
   content: {
     paddingHorizontal: spacing[6],
@@ -91,10 +100,10 @@ export const styles = StyleSheet.create({
     flexShrink: 0,
   },
   selectAllSection: {
-    marginTop: spacing[5],
-    paddingTop: spacing[3],
-    borderTopWidth: 1,
-    borderTopColor: colors.border.light,
+    marginTop: spacing[4],
+    paddingTop: spacing[4],
+    borderTopWidth: 2,
+    borderTopColor: colors.border.medium,
   },
   selectAllButton: {
     alignSelf: 'stretch',
@@ -131,8 +140,8 @@ export const styles = StyleSheet.create({
   completeButton: {
     alignSelf: 'stretch',
     marginTop: spacing[3],
-    backgroundColor: colors.primary[500],
-    borderColor: colors.primary[500],
+    backgroundColor: colors.primary[600],
+    borderColor: colors.primary[600],
     paddingVertical: spacing[3],
     paddingHorizontal: spacing[3],
     borderRadius: borderRadius.lg,
@@ -145,10 +154,9 @@ export const styles = StyleSheet.create({
     opacity: 0.7,
   },
   completeButtonText: {
-    ...createButtonTextStyle('base', { color: colors.white }),
-    fontFamily: Platform.select({
-      ios: undefined,
-      android: typography.fontFamily.regular,
+    ...createButtonTextStyle('base', {
+      color: colors.white,
+      fontWeight: typography.fontWeight.bold,
     }),
   },
   loadingOverlay: {

@@ -46,11 +46,11 @@ export const styles = StyleSheet.create({
     flexShrink: 0,
   },
   modalCloseButtonText: {
-    fontSize: 20,
-    color: colors.text.secondary,
-    fontWeight: typography.fontWeight.semibold,
-    lineHeight: 20,
-    textAlign: 'center',
+    ...createTextStyle('xl', {
+      fontWeight: typography.fontWeight.semibold,
+      color: colors.text.secondary,
+      textAlign: 'center',
+    }),
   },
   modalContent: {
     maxHeight: 400,

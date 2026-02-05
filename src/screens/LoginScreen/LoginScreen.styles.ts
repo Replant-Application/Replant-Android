@@ -61,16 +61,11 @@ export const styles = StyleSheet.create({
     height: RESPONSIVE_LOGO_SIZE,
   },
   title: {
-    fontSize: typography.fontSize['2xl'],
-    fontWeight: typography.fontWeight.normal,
-    color: colors.text.primary,
-    textAlign: 'center',
-    fontFamily: Platform.select({
-      ios: undefined, // iOS는 기본 시스템 폰트 사용
-      android: typography.fontFamily.regular, // Android는 커스텀 폰트 사용
+    ...createTextStyle('2xl', {
+      fontWeight: typography.fontWeight.normal,
+      color: colors.text.primary,
+      textAlign: 'center',
     }),
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize['2xl']),
   },
   inputContainer: {
     marginBottom: RESPONSIVE_INPUT_MARGIN,
@@ -115,9 +110,10 @@ export const styles = StyleSheet.create({
     backgroundColor: colors.primary[700], // WCAG AA 대비율 개선
   },
   checkmark: {
-    color: colors.text.inverse,
-    fontSize: 12,
-    fontWeight: typography.fontWeight.medium,
+    ...createTextStyle('xs', {
+      color: colors.text.inverse,
+      fontWeight: typography.fontWeight.medium,
+    }),
   },
   checkboxLabel: {
     ...createTextStyle('sm', {
@@ -212,9 +208,10 @@ export const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   socialIconText: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#ffffff',
+    ...createTextStyle('lg', {
+      fontWeight: typography.fontWeight.bold,
+      color: '#ffffff',
+    }),
   },
   socialIconImage: {
     width: RESPONSIVE_SOCIAL_IMAGE_SIZE,

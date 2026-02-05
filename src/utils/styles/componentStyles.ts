@@ -3,7 +3,7 @@
  * 특정 컴포넌트에서 사용되는 스타일 패턴
  */
 
-import { ViewStyle, TextStyle, ImageStyle } from 'react-native';
+import { ViewStyle, TextStyle, ImageStyle, Platform } from 'react-native';
 import { colors, spacing, typography, borderRadius } from '../designTokens';
 import { createTextStyle } from './textStyles';
 
@@ -355,6 +355,55 @@ export const missionItemStyles = {
     justifyContent: 'center',
     alignItems: 'center',
     marginLeft: spacing[2],
+  }),
+};
+
+/**
+ * 미션/커뮤니티/투두리스트 등에서 쓰는 상단 탭 스타일 (베이지/브라운 테마)
+ * CommunityScreen, TodoListScreen, MissionScreen에서 공통 사용
+ */
+export const missionTabStyles = {
+  container: (): ViewStyle => ({
+    flexDirection: 'row',
+    backgroundColor: '#F5F5F0',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#A68B6F',
+    paddingVertical: 2.5,
+    paddingHorizontal: 3,
+    gap: 2,
+  }),
+  tab: (): ViewStyle => ({
+    flex: 1,
+    paddingVertical: 10,
+    paddingHorizontal: spacing[4],
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 6,
+    backgroundColor: 'transparent',
+  }),
+  tabActive: (): ViewStyle => ({
+    backgroundColor: '#8B6F47',
+  }),
+  tabText: (): TextStyle => ({
+    ...createTextStyle('sm', {
+      color: colors.text.primary,
+      fontWeight: typography.fontWeight.medium,
+      fontFamily: Platform.select({
+        ios: undefined,
+        android: typography.fontFamily.regular,
+      }),
+    }),
+  }),
+  tabTextActive: (): TextStyle => ({
+    ...createTextStyle('sm', {
+      color: colors.white,
+      fontWeight: typography.fontWeight.medium,
+      fontFamily: Platform.select({
+        ios: undefined,
+        android: typography.fontFamily.regular,
+      }),
+    }),
   }),
 };
 

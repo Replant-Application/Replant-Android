@@ -1,13 +1,14 @@
 {
   "project_info": {
-    "project_number": "766624618718",
-    "project_id": "replant-application",
-    "storage_bucket": "replant-application.firebasestorage.app"
+    "project_number": "790088481651",
+    "firebase_url": "https://replant-771e5-default-rtdb.firebaseio.com",
+    "project_id": "replant-771e5",
+    "storage_bucket": "replant-771e5.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:766624618718:android:a01ccc646e74cf29de8a4f",
+        "mobilesdk_app_id": "1:790088481651:android:94a6e7fb199435a4776306",
         "android_client_info": {
           "package_name": "com.anonymous.replantmobileapp"
         }
@@ -15,7 +16,45 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyA4iSmo-p41oC5hx04gNAq_xPalYVKl5SQ"
+          "current_key": "AIzaSyCUofu_tTtcjffXOYGgSArLGrobzcfV0YA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:790088481651:android:22fbbc6f6a23a53e776306",
+        "android_client_info": {
+          "package_name": "com.example.replant_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCUofu_tTtcjffXOYGgSArLGrobzcfV0YA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:790088481651:android:7a832177f7919136776306",
+        "android_client_info": {
+          "package_name": "com.replantmobileapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCUofu_tTtcjffXOYGgSArLGrobzcfV0YA"
         }
       ],
       "services": {

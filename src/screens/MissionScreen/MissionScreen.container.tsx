@@ -558,7 +558,7 @@ export const useMissionScreenContainer = ({
     async (_page: number = 0) => {
       try {
         setGroupLoading(true);
-        console.log('[MissionScreen] 미션 도감 로딩 시작... (탭:', missionGroupTab, ', 정렬:', missionSortBy, ')');
+        console.log('[MissionScreen] 미션 도감 로딩 시작... (탭:', missionGroupTab, ')');
 
         let loadedGroupMissions: UnifiedMission[] = [];
 
@@ -661,7 +661,7 @@ export const useMissionScreenContainer = ({
         setGroupLoading(false);
       }
     },
-    [missionGroupTab, missionSortBy, handleApiError, showError]
+    [missionGroupTab, handleApiError, showError]
   );
 
   /**

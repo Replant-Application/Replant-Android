@@ -28,8 +28,8 @@ export type NotificationType =
   | 'VOTE'                   // 투표
   // 돌발 미션 관련
   | 'SPONTANEOUS_WAKE_UP'    // 기상 미션
-  | 'SPONTANEOUS_MEAL'       // 식사 미션
-  | 'SPONTANEOUS_DIARY'      // 감정일기 미션
+  | 'SPONTANEOUS_MEAL'       // 식사 미션 (돌발 미션에서는 잠시 미처리)
+  | 'SPONTANEOUS_DIARY'      // 감정일기 미션 (돌발 미션에서는 잠시 미처리)
   // 기타
   | 'DIARY'                  // 다이어리
   | 'REPORT'                 // 신고
@@ -135,7 +135,21 @@ export const deleteNotification = async (
     ':notificationId',
     String(notificationId)
   );
-  return apiClient.delete<{ message: string }>(endpoint);
+  // 404 = 이미 삭제된 알림 → 콘솔 에러 없이 성공처럼 처리 (목록에서 제거)
+  return apiClient.delete<{ message: string }>(endpoint, { silentErrors: [404] });
+};
+
+/**
+ * 전체 알림 삭제 (해당 사용자의 모든 알림, 화면에 안 보이는 것 포함)
+ * DELETE /api/notifications/all
+ * 인증 필요
+ */
+export const deleteAllNotifications = async (): Promise<
+  ServiceResult<{ deletedCount: number; message: string }>
+> => {
+  return apiClient.delete<{ deletedCount: number; message: string }>(
+    API_CONFIG.endpoints.notification.deleteAll
+  );
 };
 
 /**

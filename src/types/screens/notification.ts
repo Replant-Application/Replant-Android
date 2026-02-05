@@ -10,8 +10,9 @@ export interface NotificationScreenProps {
   navigation: NavigationProp<RootStackParamList>;
 }
 
-export interface SwipeableNotificationItemProps {
+export interface NotificationListItemProps {
   item: NotificationType;
+  selected?: boolean;
   onPress: (notification: NotificationType) => void;
-  onDelete: (notificationId: number) => void;
+  onLongPress: () => void;
 }

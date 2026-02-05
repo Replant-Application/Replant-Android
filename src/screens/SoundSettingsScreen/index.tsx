@@ -1,6 +1,5 @@
-import React from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Image, ImageBackground } from 'react-native';
-import Slider from '@react-native-community/slider';
+import React, { useRef, useMemo, useEffect } from 'react';
+import { View, Text, ScrollView, TouchableOpacity, Image, ImageBackground, PanResponder } from 'react-native';
 import { Header } from '../../components/ui';
 import { colors } from '../../utils/designTokens';
 import { SoundSettingsScreenProps } from '../../types/screens/settings';
@@ -8,7 +7,6 @@ import { useSoundSettingsScreenContainer } from './SoundSettingsScreen.container
 import { styles } from './SoundSettingsScreen.styles';
 
 const SoundSettingsScreen: React.FC<SoundSettingsScreenProps> = ({ navigation }) => {
-  // 비즈니스 로직은 Container에서 처리
   const {
     settings,
     handleEffectMuteToggle,
@@ -17,6 +15,68 @@ const SoundSettingsScreen: React.FC<SoundSettingsScreenProps> = ({ navigation })
     handleBackgroundVolumeChange,
     handleResetWithSound,
   } = useSoundSettingsScreenContainer();
+
+  const effectSliderRef = useRef<View>(null);
+  const backgroundSliderRef = useRef<View>(null);
+  const isMountedRef = useRef(true);
+
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => { isMountedRef.current = false; };
+  }, []);
+
+  const updateVolumeFromTouch = (
+    sliderRef: React.RefObject<View>,
+    pageX: number,
+    onValue: (v: number) => void
+  ) => {
+    if (!sliderRef.current || pageX == null || isNaN(pageX)) return;
+    (sliderRef.current as any).measure((_x: number, _y: number, width: number, _height: number, sliderPageX: number) => {
+      if (!isMountedRef.current || width === 0 || sliderPageX == null || isNaN(sliderPageX)) return;
+      const touchX = pageX - sliderPageX;
+      const raw = touchX / width;
+      const value = Math.round(raw * 100) / 100;
+      onValue(Math.max(0, Math.min(1, value)));
+    });
+  };
+
+  const effectPanResponder = useMemo(
+    () =>
+      PanResponder.create({
+        onStartShouldSetPanResponder: () => true,
+        onMoveShouldSetPanResponder: (_, gestureState) =>
+          Math.abs(gestureState.dx) > Math.abs(gestureState.dy),
+        onPanResponderGrant: (evt) => {
+          const pageX = evt.nativeEvent?.pageX;
+          if (pageX != null) updateVolumeFromTouch(effectSliderRef, pageX, handleEffectVolumeChange);
+        },
+        onPanResponderMove: (evt) => {
+          const pageX = evt.nativeEvent?.pageX;
+          if (pageX != null) updateVolumeFromTouch(effectSliderRef, pageX, handleEffectVolumeChange);
+        },
+        onPanResponderRelease: () => {},
+      }),
+    [handleEffectVolumeChange]
+  );
+
+  const backgroundPanResponder = useMemo(
+    () =>
+      PanResponder.create({
+        onStartShouldSetPanResponder: () => true,
+        onMoveShouldSetPanResponder: (_, gestureState) =>
+          Math.abs(gestureState.dx) > Math.abs(gestureState.dy),
+        onPanResponderGrant: (evt) => {
+          const pageX = evt.nativeEvent?.pageX;
+          if (pageX != null) updateVolumeFromTouch(backgroundSliderRef, pageX, handleBackgroundVolumeChange);
+        },
+        onPanResponderMove: (evt) => {
+          const pageX = evt.nativeEvent?.pageX;
+          if (pageX != null) updateVolumeFromTouch(backgroundSliderRef, pageX, handleBackgroundVolumeChange);
+        },
+        onPanResponderRelease: () => {},
+      }),
+    [handleBackgroundVolumeChange]
+  );
 
   return (
     <ImageBackground
@@ -58,22 +118,31 @@ const SoundSettingsScreen: React.FC<SoundSettingsScreenProps> = ({ navigation })
                 />
               </TouchableOpacity>
               <Text style={styles.volumeLabel}>효과음</Text>
-              <Text style={styles.volumeValue}>{Math.round(settings.effectVolume * 100)}%</Text>
+              <Text style={styles.volumeValue}>{Math.round(settings.effectVolume * 100)} %</Text>
             </View>
-            <Slider
-              style={styles.slider}
-              minimumValue={0}
-              maximumValue={1}
-              value={settings.effectVolume}
-              onValueChange={handleEffectVolumeChange}
-              minimumTrackTintColor={colors.primary[500]}
-              maximumTrackTintColor={colors.border.light}
-              thumbTintColor={colors.primary[500]}
-              step={0.01}
-              accessibilityRole="adjustable"
-              accessibilityLabel="효과음 볼륨"
-              accessibilityValue={{ min: 0, max: 100, now: Math.round(settings.effectVolume * 100) }}
-            />
+            <View style={styles.sliderContainer}>
+              <View
+                ref={effectSliderRef}
+                style={styles.sliderTrack}
+                {...effectPanResponder.panHandlers}
+                accessible={true}
+                accessibilityRole="adjustable"
+                accessibilityLabel="효과음 볼륨"
+                accessibilityValue={{ min: 0, max: 100, now: Math.round(settings.effectVolume * 100) }}
+              >
+                <View
+                  style={[
+                    styles.sliderFill,
+                    { width: `${settings.effectVolume * 100}%`, backgroundColor: colors.primary[500] },
+                  ]}
+                  accessibilityElementsHidden={true}
+                />
+                <View
+                  style={[styles.sliderThumb, { left: `${settings.effectVolume * 100}%` }]}
+                  accessibilityElementsHidden={true}
+                />
+              </View>
+            </View>
           </View>
 
           <View style={styles.divider} />
@@ -100,22 +169,31 @@ const SoundSettingsScreen: React.FC<SoundSettingsScreenProps> = ({ navigation })
                 />
               </TouchableOpacity>
               <Text style={styles.volumeLabel}>배경소리</Text>
-              <Text style={styles.volumeValue}>{Math.round(settings.backgroundVolume * 100)}%</Text>
+              <Text style={styles.volumeValue}>{Math.round(settings.backgroundVolume * 100)} %</Text>
             </View>
-            <Slider
-              style={styles.slider}
-              minimumValue={0}
-              maximumValue={1}
-              value={settings.backgroundVolume}
-              onValueChange={handleBackgroundVolumeChange}
-              minimumTrackTintColor={colors.primary[500]}
-              maximumTrackTintColor={colors.border.light}
-              thumbTintColor={colors.primary[500]}
-              step={0.01}
-              accessibilityRole="adjustable"
-              accessibilityLabel="배경음 볼륨"
-              accessibilityValue={{ min: 0, max: 100, now: Math.round(settings.backgroundVolume * 100) }}
-            />
+            <View style={styles.sliderContainer}>
+              <View
+                ref={backgroundSliderRef}
+                style={styles.sliderTrack}
+                {...backgroundPanResponder.panHandlers}
+                accessible={true}
+                accessibilityRole="adjustable"
+                accessibilityLabel="배경음 볼륨"
+                accessibilityValue={{ min: 0, max: 100, now: Math.round(settings.backgroundVolume * 100) }}
+              >
+                <View
+                  style={[
+                    styles.sliderFill,
+                    { width: `${settings.backgroundVolume * 100}%`, backgroundColor: colors.primary[500] },
+                  ]}
+                  accessibilityElementsHidden={true}
+                />
+                <View
+                  style={[styles.sliderThumb, { left: `${settings.backgroundVolume * 100}%` }]}
+                  accessibilityElementsHidden={true}
+                />
+              </View>
+            </View>
           </View>
         </View>
 

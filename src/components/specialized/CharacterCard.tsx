@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, Image, ViewStyle } from 'react-native';
 import { styles } from './CharacterCard.styles';
+import { getNextLevelExp } from '../../utils/expTable';
 import { Character } from '../../types';
 
 interface CharacterCardProps {
@@ -19,10 +20,13 @@ const CharacterCard: React.FC<CharacterCardProps> = ({
   if (!character) return null;
 
   const getLevelName = (level: number): string => {
-    if (level >= 10) return '성숙한 나무';
-    if (level >= 7) return '자라는 나무';
-    if (level >= 4) return '새싹';
-    return '씨앗';
+    if (level >= 7) return '리앤트';
+    if (level >= 6) return '아이 리앤트';
+    if (level >= 5) return '성숙한 나무';
+    if (level >= 4) return '어린 나무';
+    if (level >= 3) return '새싹';
+    if (level >= 2) return '씨앗';
+    return '알';
   };
 
   // 캐릭터 이미지 미리 import
@@ -41,14 +45,15 @@ const CharacterCard: React.FC<CharacterCardProps> = ({
     return characterImages[levelKey as keyof typeof characterImages] || characterImages.level1;
   };
 
-  // experience는 이미 현재 레벨의 경험치 (0-99)이므로 % 100 불필요
-  const experienceProgress = character.experience || 0;
-  const nextLevelExp = 100 - experienceProgress;
+  // 백엔드(Reant.java): 다음 레벨 필요 = 레벨별 테이블 (L1→10, L2→50, L3→100, L4→200, L5→500, L6+→500)
+  const level = character.level ?? 1;
+  const experienceProgress = character.experience ?? 0;
+  const maxExperience = getNextLevelExp(level);
+  const nextLevelExp = Math.max(0, maxExperience - experienceProgress);
 
-  // 접근성 라벨 생성
   const getAccessibilityLabel = () => {
     const levelName = getLevelName(character.level || 1);
-    return `${character.name || '캐릭터'}, ${levelName}, 레벨 ${character.level || 1}, 경험치 ${experienceProgress}/100`;
+    return `${character.name || '캐릭터'}, ${levelName}, 레벨 ${character.level || 1}, 경험치 ${experienceProgress}/${maxExperience}`;
   };
 
   return (
@@ -83,14 +88,14 @@ const CharacterCard: React.FC<CharacterCardProps> = ({
         <View style={styles.progressInfo}>
           <Text style={styles.levelText}>Lv.{character.level || 1}</Text>
           <Text style={styles.expText}>
-            {experienceProgress}/100 EXP
+            {experienceProgress}/{maxExperience} EXP
           </Text>
         </View>
         <View style={styles.progressBar}>
           <View
             style={[
               styles.progressFill,
-              { width: `${experienceProgress}%` }
+              { width: `${maxExperience > 0 ? Math.min(100, (experienceProgress / maxExperience) * 100) : 0}%` }
             ]}
           />
         </View>

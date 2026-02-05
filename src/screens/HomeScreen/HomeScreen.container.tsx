@@ -8,8 +8,7 @@ import { Animated, PanResponder, Dimensions } from 'react-native';
 import { useCharacter } from '../../hooks/useCharacter';
 import { getBackgroundImage } from './HomeScreen.utils';
 import { getActiveTodoLists, getTodoListDetail } from '../../api/todolistApi';
-import { normalizeDate } from '../../utils/dateUtils';
-import { filterTodayActiveTodoLists } from '../../utils/todolistUtils';
+import { filterTodayAndYesterdayActiveTodoLists, isTodayOrYesterday } from '../../utils/todolistUtils';
 import { TodoList, TodoMission } from '../../types/todolist';
 import { NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types/navigation';
@@ -53,16 +52,16 @@ export const useHomeScreenContainer = ({ navigation, route }: HomeScreenContaine
   // 안내 메시지 목록 (10개)
   const guidanceMessages = useMemo(
     () => [
-      '안녕! 나랑 대화하려면 나를 터치해줘~',
-      '오늘 하루는 어땠어?',
+      '안녕! 나 터치해서 대화해줘~',
+      '오늘 하루 어땠어?',
       '심심하면 말 걸어줘요~',
-      '무슨 생각해? 나한테 얘기해봐!',
-      '오늘도 수고했어! 힘내~',
-      '나 여기 있어~ 언제든 불러줘!',
+      '무슨 생각해? 얘기해봐!',
+      '오늘도 수고! 힘내~',
+      '나 여기 있어~ 불러줘!',
       '같이 이야기할래?',
       '뭐 하고 있어? 궁금해~',
-      '나를 눌러서 대화를 시작해봐!',
-      '오늘 기분은 어때?',
+      '나 눌러서 대화해봐!',
+      '오늘 기분 어때?',
     ],
     []
   );
@@ -192,35 +191,21 @@ export const useHomeScreenContainer = ({ navigation, route }: HomeScreenContaine
         const todoListResult = await getActiveTodoLists();
         
         if (todoListResult?.success && Array.isArray(todoListResult.data)) {
-          // 오늘 날짜인 투두리스트만 "진행중"에 표시 (TodoListScreen과 동일한 로직)
-          // 과거 날짜의 미완료 투두리스트는 제외
-          const filteredTodoLists = filterTodayActiveTodoLists(todoListResult.data, 'HomeScreen');
+          // 오늘·어제 날짜인 투두리스트만 "진행중"에 표시
+          const filteredTodoLists = filterTodayAndYesterdayActiveTodoLists(todoListResult.data, 'HomeScreen');
 
-          // 완료된 투두리스트도 포함 (오늘 날짜이고 완료된 것)
-          const today = new Date();
-          const todayYear = today.getFullYear();
-          const todayMonth = today.getMonth();
-          const todayDate = today.getDate();
-          
-          const completedTodayLists = todoListResult.data.filter(todoList => {
+          // 완료된 투두리스트도 포함 (오늘 또는 어제 날짜이고 완료된 것)
+          const completedTodayOrYesterdayLists = todoListResult.data.filter(todoList => {
             if (!todoList.createdAt) return false;
-            const normalizedDate = normalizeDate(todoList.createdAt);
-            if (!normalizedDate) return false;
-            const createdDate = new Date(normalizedDate);
-            if (isNaN(createdDate.getTime())) return false;
-            
-            const isToday = createdDate.getFullYear() === todayYear &&
-                           createdDate.getMonth() === todayMonth &&
-                           createdDate.getDate() === todayDate;
-            const isCompleted = todoList.completedCount > 0 && 
+            if (!isTodayOrYesterday(todoList.createdAt)) return false;
+            const isCompleted = todoList.completedCount > 0 &&
                               todoList.completedCount === todoList.totalCount;
-            
-            return isToday && isCompleted;
+            return isCompleted;
           });
 
           // 완료된 투두리스트를 필터링된 목록에 추가 (중복 제거)
           const allTodoLists = [...filteredTodoLists];
-          completedTodayLists.forEach(completedList => {
+          completedTodayOrYesterdayLists.forEach(completedList => {
             if (!allTodoLists.find(tl => tl.id === completedList.id)) {
               allTodoLists.push(completedList);
             }
@@ -281,29 +266,11 @@ export const useHomeScreenContainer = ({ navigation, route }: HomeScreenContaine
                   : todoListDetail.completedCount > 0 &&
                     todoListDetail.completedCount === todoListDetail.totalCount;
 
-                // 투두리스트가 오늘 생성되었는지 확인
-                const isTodayCreated = (() => {
-                  if (!todoListDetail.createdAt) return false;
-                  
-                  // 날짜 정규화 (배열 형태 처리)
-                  const normalizedDate = normalizeDate(todoListDetail.createdAt);
-                  if (!normalizedDate) return false;
-                  
-                  const createdDate = new Date(normalizedDate);
-                  if (isNaN(createdDate.getTime())) {
-                    return false;
-                  }
-                  
-                  const checkDate = new Date();
-                  return (
-                    createdDate.getFullYear() === checkDate.getFullYear() &&
-                    createdDate.getMonth() === checkDate.getMonth() &&
-                    createdDate.getDate() === checkDate.getDate()
-                  );
-                })();
+                // 투두리스트가 오늘 또는 어제 생성되었는지 확인
+                const isTodayOrYesterdayCreated = isTodayOrYesterday(todoListDetail.createdAt);
 
-                // 모든 미션이 완료되었고 오늘 생성된 투두리스트인 경우 완료 상태 저장
-                if (allMissionsCompleted && isTodayCreated) {
+                // 모든 미션이 완료되었고 오늘/어제 생성된 투두리스트인 경우 완료 상태 저장
+                if (allMissionsCompleted && isTodayOrYesterdayCreated) {
                   setCompletedTodoList(todoListDetail);
                   break; // 하나만 표시
                 }

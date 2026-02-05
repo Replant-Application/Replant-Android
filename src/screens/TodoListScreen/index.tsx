@@ -9,9 +9,10 @@ import {
   ImageBackground,
   Image,
 } from 'react-native';
-import { colors } from '../../utils/designTokens';
+import { colors, spacing } from '../../utils/designTokens';
 import { formatDateKorean } from '../../utils/dateUtils';
-import { Header, SimpleTabBar } from '../../components/ui';
+import { missionTabStyles } from '../../utils/styles';
+import { Header, ConfirmModal, AlertModal } from '../../components/ui';
 import { TodoList } from '../../types/todolist';
 import { useTodoListScreenContainer } from './TodoListScreen.container';
 import { styles } from './TodoListScreen.styles';
@@ -34,20 +35,20 @@ const TodoListScreen: React.FC<Props> = ({ navigation, route }) => {
     setActiveTab,
     handleCreateTodoList,
     handleTodoListPress,
+    handleDeleteTodoList,
+    showDeleteConfirmModal,
+    handleDeleteConfirm,
+    handleDeleteConfirmCancel,
+    showDeleteBlockedModal,
+    handleDeleteBlockedModalClose,
     onRefresh,
   } = useTodoListScreenContainer({ navigation, route });
 
-  const renderTodoListCard = (todoList: TodoList, isIncomplete: boolean = false) => {
+  const renderTodoListCard = (todoList: TodoList, _isIncomplete: boolean = false) => {
     // completedCount와 totalCount를 기반으로 진행률 직접 계산
     const progressPercent = todoList.totalCount > 0 
       ? Math.round((todoList.completedCount / todoList.totalCount) * 100)
       : 0;
-
-    // 과거 날짜의 미완료 투두리스트는 "미완료"로 표시
-    const statusText = isIncomplete 
-      ? '미완료'
-      : (todoList.status === 'ACTIVE' ? '진행중' :
-         todoList.status === 'COMPLETED' ? '완료' : '보관됨');
 
     return (
       <TouchableOpacity
@@ -56,27 +57,28 @@ const TodoListScreen: React.FC<Props> = ({ navigation, route }) => {
         onPress={() => handleTodoListPress(todoList)}
         activeOpacity={0.7}
         accessibilityRole="button"
-        accessibilityLabel={`${todoList.title}, ${statusText}, ${progressPercent}%`}
+        accessibilityLabel={`${todoList.title}, ${progressPercent}%`}
       >
         <View style={styles.cardHeader}>
           <Text style={styles.cardTitle} numberOfLines={1}>
             {todoList.title}
           </Text>
-          <View style={[
-            styles.statusBadge,
-            todoList.status === 'COMPLETED' && styles.statusBadgeCompleted,
-            todoList.status === 'ARCHIVED' && styles.statusBadgeArchived,
-            isIncomplete && styles.statusBadgeIncomplete,
-          ]}>
-            <Text style={[
-              styles.statusBadgeText,
-              todoList.status === 'COMPLETED' && styles.statusBadgeTextCompleted,
-              todoList.status === 'ARCHIVED' && styles.statusBadgeTextArchived,
-              isIncomplete && styles.statusBadgeTextIncomplete,
-            ]}>
-              {statusText}
-            </Text>
-          </View>
+          {activeTab === 'active' && (
+            <TouchableOpacity
+              style={styles.menuButton}
+              onPress={() => handleDeleteTodoList(todoList)}
+              hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+              accessibilityRole="button"
+              accessibilityLabel="삭제"
+              accessibilityHint="누르면 투두리스트를 삭제할 수 있습니다"
+            >
+              <View style={styles.verticalDots}>
+                <View style={styles.verticalDot} />
+                <View style={styles.verticalDot} />
+                <View style={styles.verticalDot} />
+              </View>
+            </TouchableOpacity>
+          )}
         </View>
 
         {todoList.description && (
@@ -132,17 +134,58 @@ const TodoListScreen: React.FC<Props> = ({ navigation, route }) => {
     >
       <Header title="나의 투두리스트" showBackButton={true} navigation={navigation} />
 
-      {/* 탭 버튼 */}
+      {/* 탭 버튼 - 나의 미션/미션 도감과 동일 스타일 */}
       <View style={styles.tabContainer}>
-        <SimpleTabBar
-          tabs={[
-            { key: 'active', label: `진행중 (${activeTodoLists.length})` },
-            { key: 'completed', label: `완료 (${completedTodoLists.length})` },
-            { key: 'incomplete', label: `미완료 (${incompleteTodoLists.length})` },
-          ]}
-          activeTab={activeTab}
-          onTabChange={(key) => setActiveTab(key as 'active' | 'completed' | 'incomplete')}
-        />
+        <View style={[missionTabStyles.container(), { marginBottom: spacing[2] }]}>
+          <TouchableOpacity
+            style={[missionTabStyles.tab(), activeTab === 'active' && missionTabStyles.tabActive()]}
+            onPress={() => setActiveTab('active')}
+            activeOpacity={0.7}
+            accessibilityRole="tab"
+            accessibilityLabel={activeTab === 'active' ? '진행중, 선택됨' : '진행중'}
+            accessibilityState={{ selected: activeTab === 'active' }}
+          >
+            <Text
+              style={[missionTabStyles.tabText(), activeTab === 'active' && missionTabStyles.tabTextActive()]}
+              numberOfLines={1}
+              ellipsizeMode="tail"
+            >
+              진행중 ({activeTodoLists.length})
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[missionTabStyles.tab(), activeTab === 'completed' && missionTabStyles.tabActive()]}
+            onPress={() => setActiveTab('completed')}
+            activeOpacity={0.7}
+            accessibilityRole="tab"
+            accessibilityLabel={activeTab === 'completed' ? '완료, 선택됨' : '완료'}
+            accessibilityState={{ selected: activeTab === 'completed' }}
+          >
+            <Text
+              style={[missionTabStyles.tabText(), activeTab === 'completed' && missionTabStyles.tabTextActive()]}
+              numberOfLines={1}
+              ellipsizeMode="tail"
+            >
+              완료 ({completedTodoLists.length})
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[missionTabStyles.tab(), activeTab === 'incomplete' && missionTabStyles.tabActive()]}
+            onPress={() => setActiveTab('incomplete')}
+            activeOpacity={0.7}
+            accessibilityRole="tab"
+            accessibilityLabel={activeTab === 'incomplete' ? '미완료, 선택됨' : '미완료'}
+            accessibilityState={{ selected: activeTab === 'incomplete' }}
+          >
+            <Text
+              style={[missionTabStyles.tabText(), activeTab === 'incomplete' && missionTabStyles.tabTextActive()]}
+              numberOfLines={1}
+              ellipsizeMode="tail"
+            >
+              미완료 ({incompleteTodoLists.length})
+            </Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       <ScrollView
@@ -161,13 +204,16 @@ const TodoListScreen: React.FC<Props> = ({ navigation, route }) => {
             disabled={activeTodoLists.length > 0}
             activeOpacity={0.7}
             accessibilityRole="button"
-            accessibilityLabel="나만의 투두리스트 만들기"
+            accessibilityLabel="나만의 투두리스트 만들기. 투두리스트는 하루에 한번만 작성 가능해요"
             accessibilityState={{ disabled: activeTodoLists.length > 0 }}
             accessibilityHint={activeTodoLists.length > 0 ? '진행 중인 투두리스트가 있어 비활성화되었습니다' : undefined}
           >
-            <Text style={styles.createButtonIcon}>+</Text>
             <View style={styles.createButtonContent}>
-              <Text style={styles.createButtonTitle}>나만의 투두리스트 만들기</Text>
+              <View style={styles.createButtonTitleRow}>
+                <Text style={styles.createButtonIcon}>+</Text>
+                <Text style={styles.createButtonTitle}>나만의 투두리스트 만들기</Text>
+              </View>
+              <Text style={styles.createButtonSubtitle}>* 투두리스트는 하루에 한번만 작성 가능해요</Text>
             </View>
           </TouchableOpacity>
         )}
@@ -197,14 +243,27 @@ const TodoListScreen: React.FC<Props> = ({ navigation, route }) => {
             )}
           </View>
         )}
-
-        {/* 진행중 탭: 투두리스트 하단 안내 */}
-        {activeTab === 'active' && (
-          <Text style={styles.createNotice} accessibilityRole="summary" accessibilityLabel="안내: 투두리스트는 하루에 한 번만 만들 수 있습니다.">
-            * 투두리스트는 하루에 한번만 작성 가능해요
-          </Text>
-        )}
       </ScrollView>
+
+      {/* 투두리스트 삭제 확인 ConfirmModal */}
+      <ConfirmModal
+        visible={showDeleteConfirmModal}
+        title="투두리스트 삭제"
+        message="이 투두리스트를 삭제하시겠습니까?"
+        confirmText="삭제"
+        cancelText="취소"
+        onConfirm={handleDeleteConfirm}
+        onCancel={handleDeleteConfirmCancel}
+        confirmButtonColor={colors.error}
+      />
+      {/* 삭제 불가 AlertModal (완료된 미션이 있을 때) */}
+      <AlertModal
+        visible={showDeleteBlockedModal}
+        title="삭제 불가"
+        message="진행 이력이 있는 투두리스트는\n삭제할 수 없습니다."
+        buttonText="확인"
+        onClose={handleDeleteBlockedModalClose}
+      />
     </ImageBackground>
   );
 };

@@ -25,12 +25,16 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
 
         if (remoteMessage.data.isNotEmpty()) {
             Log.d(TAG, "Message data payload: ${remoteMessage.data}")
-            handleDataMessage(remoteMessage.data)
-        }
-
-        remoteMessage.notification?.let {
-            Log.d(TAG, "Message Notification Body: ${it.body}")
-            sendNotification(it.title ?: "Replant", it.body ?: "")
+            val title = remoteMessage.data["title"] ?: remoteMessage.notification?.title ?: "Replant"
+            val body = remoteMessage.data["body"] ?: remoteMessage.notification?.body ?: ""
+            val dataWithMessageId = remoteMessage.data.toMutableMap()
+            remoteMessage.messageId?.let { dataWithMessageId["google.message_id"] = it }
+            handleDataMessage(dataWithMessageId, title, body)
+        } else {
+            remoteMessage.notification?.let {
+                Log.d(TAG, "Message Notification Body: ${it.body}")
+                sendNotification(it.title ?: "Replant", it.body ?: "", emptyMap())
+            }
         }
     }
 
@@ -38,15 +42,17 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         Log.d(TAG, "Refreshed token: $token")
     }
 
-    private fun handleDataMessage(data: Map<String, String>) {
-        val title = data["title"] ?: "Replant"
-        val body = data["body"] ?: ""
-        sendNotification(title, body)
+    private fun handleDataMessage(data: Map<String, String>, title: String, body: String) {
+        sendNotification(title, body, data)
     }
 
-    private fun sendNotification(title: String, messageBody: String) {
+    private fun sendNotification(title: String, messageBody: String, data: Map<String, String> = emptyMap()) {
         val intent = Intent(this, MainActivity::class.java).apply {
-            addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+            addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+            // FCM data 전달: 알림 탭 시 getInitialNotification() 및 기상 미션 userMissionId 화면 이동
+            data.forEach { (key, value) ->
+                putExtra(key, value)
+            }
         }
 
         val pendingIntent = PendingIntent.getActivity(

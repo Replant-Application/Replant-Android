@@ -12,6 +12,12 @@ export const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  modalMissionSetDetailWrap: {
+    flex: 1,
+  },
+  modalMissionSetDetailContent: {
+    flex: 1,
+  },
   tabBarContainer: {
     paddingHorizontal: spacing[3],
     paddingTop: spacing[2],
@@ -20,9 +26,14 @@ export const styles = StyleSheet.create({
   tabBar: {
     marginBottom: 0,
   },
+  topTabContainer: {
+    paddingHorizontal: spacing[4],
+    paddingTop: spacing[2],
+    paddingBottom: spacing[4],
+  },
   filterContainer: {
     paddingHorizontal: spacing[4],
-    paddingTop: spacing[1],
+    paddingTop: spacing[2],
     paddingBottom: spacing[3],
   },
   searchRow: {
@@ -73,30 +84,6 @@ export const styles = StyleSheet.create({
   chipContainer: {
     flexDirection: 'row',
     marginTop: spacing[2],
-  },
-  chip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.primary[100],
-    borderRadius: borderRadius.full,
-    paddingHorizontal: spacing[3],
-    paddingVertical: spacing[1.5],
-    borderWidth: 1,
-    borderColor: colors.primary[500],
-    gap: spacing[1],
-  },
-  chipText: {
-    ...createTextStyle('xs', {
-      color: colors.primary[700],
-      fontWeight: typography.fontWeight.medium,
-    }),
-  },
-  chipClose: {
-    ...createTextStyle('base', {
-      color: colors.primary[700],
-      fontWeight: typography.fontWeight.medium,
-      lineHeight: 16,
-    }),
   },
   searchIcon: {
     width: 16,
@@ -167,14 +154,6 @@ export const styles = StyleSheet.create({
       textAlign: 'center',
     }),
   },
-  modalSectionTitle: {
-    ...createTextStyle('sm', {
-      fontWeight: typography.fontWeight.bold,
-      color: colors.text.secondary,
-      marginTop: spacing[3],
-      marginBottom: spacing[2],
-    }),
-  },
   filterOption: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -187,11 +166,6 @@ export const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border.light,
   },
-  filterOptionRow: {
-    flexDirection: 'row',
-    gap: spacing[2],
-    marginBottom: spacing[1],
-  },
   filterOptionLabel: {
     ...createTextStyle('base', {
       color: colors.text.primary,
@@ -203,47 +177,38 @@ export const styles = StyleSheet.create({
     }),
     flex: 1,
   },
-  filterOptionHorizontal: {
-    flex: 1,
+  filterCheckboxRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: spacing[1],
-    paddingHorizontal: spacing[2],
-    borderRadius: borderRadius.lg,
-    backgroundColor: colors.background.secondary,
-    borderWidth: 1.5,
-    borderColor: colors.border.light,
-    minHeight: 32,
+    justifyContent: 'space-between',
+    paddingVertical: spacing[2],
+    gap: spacing[3],
   },
-  filterOptionActive: {
+  filterCheckboxBox: {
+    width: 22,
+    height: 22,
+    borderRadius: borderRadius.sm,
+    borderWidth: 2,
+    borderColor: colors.gray[400],
+    backgroundColor: colors.white,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  filterCheckboxBoxChecked: {
     backgroundColor: colors.primary[500],
     borderColor: colors.primary[500],
-    borderWidth: 1.5,
   },
-  filterOptionText: {
-    ...createTextStyle('xs', {
-      fontWeight: typography.fontWeight.medium,
-      color: colors.text.primary,
-    }),
-  },
-  filterOptionTextActive: {
-    ...createTextStyle('xs', {
-      color: colors.white,
-      fontWeight: typography.fontWeight.semibold,
-    }),
-  },
-  filterOptionCheck: {
-    ...createTextStyle('xs', {
+  filterCheckboxCheckmark: {
+    ...createTextStyle('sm', {
       color: colors.white,
       fontWeight: typography.fontWeight.bold,
-      marginLeft: spacing[2],
     }),
   },
   modalApplyButton: {
     ...buttonStyles.primary(),
     marginTop: spacing[4],
-    paddingVertical: spacing[1],
+    paddingVertical: spacing[2],
+    minHeight: 44,
     borderRadius: borderRadius.lg,
   },
   modalApplyButtonText: {
@@ -326,10 +291,11 @@ export const styles = StyleSheet.create({
     tintColor: colors.white,
   },
   fabText: {
-    fontSize: 28,
-    color: colors.white,
-    fontWeight: typography.fontWeight.medium,
-    marginTop: -2,
+    ...createTextStyle('3xl', {
+      color: colors.white,
+      fontWeight: typography.fontWeight.medium,
+      marginTop: -2,
+    }),
   },
   // 투두 공유 관련 스타일
   missionSetFilterContainer: {
@@ -438,9 +404,9 @@ export const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   shareModalCloseText: {
-    fontSize: 28,
-    color: colors.text.secondary,
-    lineHeight: 28,
+    ...createTextStyle('3xl', {
+      color: colors.text.secondary,
+    }),
   },
   shareModalSubtitle: {
     ...createSecondaryTextStyle('sm', {
@@ -508,5 +474,41 @@ export const styles = StyleSheet.create({
   },
   shareButtonTextDisabled: {
     color: colors.text.tertiary,
+  },
+  /** 모달 하단 탭 바 (투두리스트 상세 모달에서 탭 전환용) */
+  modalTabBar: {
+    flexDirection: 'row',
+    backgroundColor: colors.white,
+    borderTopLeftRadius: 12,
+    borderTopRightRadius: 12,
+    paddingBottom: Platform.OS === 'android' ? spacing[12] : spacing[5],
+    paddingTop: spacing[2],
+    paddingHorizontal: spacing[2],
+  },
+  modalTab: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: spacing[1],
+    borderRadius: 12,
+  },
+  modalTabActive: {
+    backgroundColor: colors.green[50],
+  },
+  modalTabIcon: {
+    width: 24,
+    height: 24,
+    marginBottom: 2,
+    opacity: 0.6,
+  },
+  modalTabIconActive: {
+    opacity: 1,
+  },
+  modalTabLabel: {
+    ...createSecondaryTextStyle('xs'),
+    color: colors.text.secondary,
+  },
+  modalTabLabelActive: {
+    color: colors.green[600],
   },
 });

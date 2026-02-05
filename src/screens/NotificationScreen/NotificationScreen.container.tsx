@@ -9,9 +9,9 @@ import {
   markNotificationAsRead, 
   markAllNotificationsAsRead, 
   deleteNotification,
+  deleteAllNotifications,
   type Notification as NotificationType
 } from '../../api/notificationApi';
-import { getCurrentSpontaneousMissions, getCurrentWakeupMission } from '../../api/missionApi';
 import { getMealLogDetail } from '../../api/mealLogApi';
 import { SCREEN_NAMES } from '../../utils/constants';
 import { useSse } from '../../contexts/SseContext';
@@ -30,7 +30,10 @@ export const useNotificationScreenContainer = ({
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [filter, setFilter] = useState<'all' | 'unread'>('all');
-  
+  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
+  const [isSelectionModeActive, setIsSelectionModeActive] = useState(false);
+  const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false);
+
   // AlertModal 상태
   const [showAlert, setShowAlert] = useState(false);
   const [alertTitle, setAlertTitle] = useState('');
@@ -122,22 +125,12 @@ export const useNotificationScreenContainer = ({
           // 백엔드 알림과 임시 알림 병합
           const merged = [...sortedNotifications, ...tempNotifications];
           
-          // ID 기준으로 중복 제거
-          const seenIds = new Set<number>();
-          const seenKeys = new Set<string>();
+          // (title, content) 기준 중복 제거: 같은 알림이 SSE·API 양쪽에서 오거나 타임존 차이로 두 건으로 오면 하나만 표시
+          const seenKey = new Set<string>();
           const final = merged.filter(notification => {
-            if (notification.id) {
-              if (seenIds.has(notification.id)) {
-                return false;
-              }
-              seenIds.add(notification.id);
-              return true;
-            }
             const key = `${notification.title}_${notification.content}`;
-            if (seenKeys.has(key)) {
-              return false;
-            }
-            seenKeys.add(key);
+            if (seenKey.has(key)) return false;
+            seenKey.add(key);
             return true;
           });
           
@@ -287,23 +280,115 @@ export const useNotificationScreenContainer = ({
   }, []);
 
   /**
-   * 알림 삭제
+   * 알림 삭제 (단일)
+   * 삭제한 알림이 미읽음이면 배지 카운트 -1
    */
   const handleDeleteNotification = useCallback(async (notificationId: number) => {
+    const deletedNotification = notifications.find(n => n.id === notificationId);
+    const wasUnread = deletedNotification ? !deletedNotification.isRead : false;
+
     try {
-      console.log('[NotificationScreen] 알림 삭제 시도:', notificationId);
       const result = await deleteNotification(notificationId);
       if (result.success) {
         setNotifications(prev => prev.filter(n => n.id !== notificationId));
-        console.log('[NotificationScreen] 알림 삭제 성공');
+        setSelectedIds(prev => { const next = new Set(prev); next.delete(notificationId); return next; });
+        if (wasUnread && overlayContext?.setUnreadNotificationCount) {
+          overlayContext.setUnreadNotificationCount((prev: number) => Math.max(0, prev - 1));
+        }
       } else {
-        console.error('[NotificationScreen] 알림 삭제 실패:', result.error);
         setNotifications(prev => prev.filter(n => n.id !== notificationId));
       }
     } catch (error) {
-      console.error('[NotificationScreen] 알림 삭제 예외:', error);
       setNotifications(prev => prev.filter(n => n.id !== notificationId));
     }
+  }, [notifications, overlayContext]);
+
+  /**
+   * 롱프레스 → 선택 토글 (선택 시 선택 모드 진입)
+   */
+  const handleToggleSelect = useCallback((id: number) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else {
+        next.add(id);
+        setIsSelectionModeActive(true);
+      }
+      return next;
+    });
+  }, []);
+
+  /**
+   * 전체 선택 / 전체 해제 (해제해도 선택 모드는 유지)
+   */
+  const handleSelectAll = useCallback((currentList: NotificationType[]) => {
+    if (currentList.length === 0) return;
+    setSelectedIds(prev => {
+      const allIds = new Set(currentList.map(n => n.id));
+      const isAllSelected = allIds.size === prev.size && currentList.every(n => prev.has(n.id));
+      return isAllSelected ? new Set<number>() : allIds;
+    });
+    // 선택만 취소, isSelectionModeActive는 바꾸지 않음
+  }, []);
+
+  /**
+   * 선택 모드 종료 (선택 바 숨김)
+   */
+  const handleExitSelectionMode = useCallback(() => {
+    setIsSelectionModeActive(false);
+    setSelectedIds(new Set());
+  }, []);
+
+  /**
+   * 선택 삭제 확인 모달 열기
+   */
+  const handleDeleteSelected = useCallback(() => {
+    setShowDeleteConfirmModal(true);
+  }, []);
+
+  /**
+   * 선택한 알림 일괄 삭제
+   * 전체 선택 상태면 DELETE /api/notifications/all 호출 (안 보이는 것까지 전부 삭제)
+   */
+  const handleConfirmDeleteSelected = useCallback(async () => {
+    setShowDeleteConfirmModal(false);
+    const ids = Array.from(selectedIds);
+    if (ids.length === 0) return;
+    const filtered =
+      filter === 'unread'
+        ? notifications.filter(n => !n.isRead)
+        : notifications;
+    const allSelected =
+      filtered.length > 0 && filtered.every(n => selectedIds.has(n.id));
+    try {
+      if (allSelected) {
+        const result = await deleteAllNotifications();
+        if (result.success) {
+          setNotifications([]);
+          setSelectedIds(new Set());
+          if (overlayContext?.setUnreadNotificationCount) {
+            overlayContext.setUnreadNotificationCount(0);
+          }
+        }
+      } else {
+        await Promise.all(ids.map(id => deleteNotification(id)));
+        setNotifications(prev => prev.filter(n => !selectedIds.has(n.id)));
+        setSelectedIds(new Set());
+        if (overlayContext?.setUnreadNotificationCount) {
+          const result = await getNotifications({ size: 1 });
+          if (result.success && result.data != null) {
+            overlayContext.setUnreadNotificationCount(result.data.unreadCount ?? 0);
+          }
+        }
+      }
+    } catch (error) {
+      setNotifications(prev => (allSelected ? [] : prev.filter(n => !selectedIds.has(n.id))));
+      setSelectedIds(new Set());
+    }
+  }, [selectedIds, filter, notifications, overlayContext]);
+
+  const handleCancelDeleteSelected = useCallback(() => {
+    setShowDeleteConfirmModal(false);
   }, []);
 
   /**
@@ -384,8 +469,8 @@ export const useNotificationScreenContainer = ({
       }
     }
 
-    // 돌발 미션 알림 처리
-    if (type === 'SPONTANEOUS_WAKE_UP' || type === 'SPONTANEOUS_MEAL' || type === 'SPONTANEOUS_DIARY') {
+    // 돌발 미션 알림 처리 (감정일기·식사 미션은 잠시 제외)
+    if (type === 'SPONTANEOUS_WAKE_UP') {
       console.log('[NotificationScreen] 돌발 미션 알림 클릭:', type, 'referenceType:', referenceType);
       
       if (!referenceId) {
@@ -394,108 +479,51 @@ export const useNotificationScreenContainer = ({
       }
 
       try {
-        if (type === 'SPONTANEOUS_WAKE_UP') {
-          // 기상 미션 → 현재 진행 중인 미션 확인
-          const currentWakeupResult = await getCurrentWakeupMission();
-          
-          const missionId = typeof referenceId === 'string' ? Number(referenceId) : referenceId;
-          
-          // 백엔드 API가 아직 구현되지 않은 경우 referenceId만으로 진행 (하위 호환성)
-          if (!currentWakeupResult.success || !currentWakeupResult.data) {
-            console.log('[NotificationScreen] 기상 미션 API 미구현 또는 미션 없음, referenceId로 진행:', missionId);
-            // 백엔드가 구현되지 않은 경우에도 알림으로 받은 referenceId를 사용하여 진행
-            safeNavigation.navigate(SCREEN_NAMES.WAKE_UP_VERIFICATION as any, {
-              userMissionId: missionId,
-            });
-            return;
-          }
-          
-          const wakeupMission = currentWakeupResult.data;
-          
-          // 미션 ID가 일치하고 완료되지 않은 경우만 이동
-          if (wakeupMission.id === missionId && wakeupMission.status !== 'COMPLETED' && wakeupMission.canVerify) {
-            console.log('[NotificationScreen] 기상 미션 인증 화면으로 이동, missionId:', missionId);
-            safeNavigation.navigate(SCREEN_NAMES.WAKE_UP_VERIFICATION as any, {
-              userMissionId: missionId,
-            });
-          } else {
-            showAlertModal('알림', '이미 수행한 미션이거나 만료된 미션입니다.');
-          }
-        } else if (type === 'SPONTANEOUS_MEAL') {
-          // 식사 미션 → 돌발 미션 API 사용
-          // 주의: referenceType이 "SPONTANEOUS_MISSION"으로 변경되었고, referenceId는 spontaneous_mission의 ID
-          console.log('[NotificationScreen] 식사 미션 처리, referenceType:', referenceType, 'referenceId:', referenceId);
-          
-          // 현재 진행 중인 식사 미션 조회하여 미션 정보 가져오기
-          const currentMissionsResult = await getCurrentSpontaneousMissions();
-          
-          const missionId = typeof referenceId === 'string' ? Number(referenceId) : referenceId;
-          
-          let mealMission = null;
-          if (currentMissionsResult.success && currentMissionsResult.data && currentMissionsResult.data.length > 0) {
-            mealMission = currentMissionsResult.data.find(
-              m => m.id === missionId &&
-                   (m.missionType === 'MEAL_BREAKFAST' || m.missionType === 'MEAL_LUNCH' || m.missionType === 'MEAL_DINNER')
-            );
-          }
-          
-          // 백엔드 API가 아직 구현되지 않았거나, 미션이 없거나 이미 완료된 경우
-          // 백엔드가 구현되지 않은 경우에는 referenceId만으로 진행 (하위 호환성)
-          if (!currentMissionsResult.success || !currentMissionsResult.data || currentMissionsResult.data.length === 0) {
-            console.log('[NotificationScreen] 돌발 미션 API 미구현 또는 미션 없음, referenceId로 진행:', missionId);
-            // 백엔드가 구현되지 않은 경우에도 알림으로 받은 referenceId를 사용하여 진행
-            safeNavigation.navigate(SCREEN_NAMES.COMMUNITY_POST_CREATE as any, {
-              type: 'VERIFICATION',
-              spontaneousMissionId: missionId,
-              userMissionId: missionId,
-              missionId: 'MEAL',
-              missionTitle: '식사 미션',
-              missionEmoji: '🍽️',
-            });
-            return;
-          }
-          
-          // 미션이 없거나 이미 완료된 경우
-          if (!mealMission || mealMission.status === 'COMPLETED' || !mealMission.canVerify) {
-            showAlertModal('알림', '이미 수행한 미션이거나 만료된 미션입니다.');
-            return;
-          }
-          
-          console.log('[NotificationScreen] 식사 미션 게시글 작성 화면으로 이동');
-          safeNavigation.navigate(SCREEN_NAMES.COMMUNITY_POST_CREATE as any, {
-            type: 'VERIFICATION',
-            spontaneousMissionId: missionId, // 돌발 미션 ID (spontaneous_mission의 ID)
-            userMissionId: missionId, // 하위 호환성을 위해 유지
-            missionId: String(mealMission.missionType || 'MEAL'),
-            missionTitle: mealMission.missionTypeDisplayName || '식사 미션',
-            missionEmoji: '🍽️',
-          });
-        } else if (type === 'SPONTANEOUS_DIARY') {
-          // 감성일기 미션 → 현재 진행 중인 미션 확인
-          const currentMissionsResult = await getCurrentSpontaneousMissions();
-          
-          const missionId = typeof referenceId === 'string' ? Number(referenceId) : referenceId;
-          
-          // 백엔드 API가 아직 구현되지 않은 경우 referenceId만으로 진행 (하위 호환성)
-          if (!currentMissionsResult.success || !currentMissionsResult.data || currentMissionsResult.data.length === 0) {
-            console.log('[NotificationScreen] 돌발 미션 API 미구현 또는 미션 없음, 감성일기 화면으로 이동');
-            safeNavigation.navigate(SCREEN_NAMES.DIARY as any);
-            return;
-          }
-          
-          const diaryMission = currentMissionsResult.data.find(
-            m => m.id === missionId && m.missionType === 'EMOTION_DIARY'
-          );
-          
-          // 미션이 없거나 이미 완료된 경우
-          if (!diaryMission || diaryMission.status === 'COMPLETED' || !diaryMission.canVerify) {
-            showAlertModal('알림', '이미 수행한 미션이거나 만료된 미션입니다.');
-            return;
-          }
-          
-          console.log('[NotificationScreen] 감성일기 작성 화면으로 이동');
-          safeNavigation.navigate(SCREEN_NAMES.DIARY as any);
-        }
+        const missionId = typeof referenceId === 'string' ? Number(referenceId) : referenceId;
+        // 알림의 referenceId(= userMissionId)로 항상 인증 화면 이동. 이미 완료된 미션이면 화면/API에서 처리
+        console.log('[NotificationScreen] 기상 미션 인증 화면으로 이동, userMissionId:', missionId);
+        safeNavigation.navigate(SCREEN_NAMES.WAKE_UP_VERIFICATION as any, {
+          userMissionId: missionId,
+        });
+        // [잠시 제외] 식사 미션 (SPONTANEOUS_MEAL)
+        // } else if (type === 'SPONTANEOUS_MEAL') {
+        //   // 식사 미션 → 돌발 미션 API 사용
+        //   console.log('[NotificationScreen] 식사 미션 처리, referenceType:', referenceType, 'referenceId:', referenceId);
+        //   const currentMissionsResult = await getCurrentSpontaneousMissions();
+        //   const missionId = typeof referenceId === 'string' ? Number(referenceId) : referenceId;
+        //   let mealMission = null;
+        //   if (currentMissionsResult.success && currentMissionsResult.data && currentMissionsResult.data.length > 0) {
+        //     mealMission = currentMissionsResult.data.find(
+        //       m => m.id === missionId &&
+        //            (m.missionType === 'MEAL_BREAKFAST' || m.missionType === 'MEAL_LUNCH' || m.missionType === 'MEAL_DINNER')
+        //     );
+        //   }
+        //   if (!currentMissionsResult.success || !currentMissionsResult.data || currentMissionsResult.data.length === 0) {
+        //     console.log('[NotificationScreen] 돌발 미션 API 미구현 또는 미션 없음, referenceId로 진행:', missionId);
+        //     safeNavigation.navigate(SCREEN_NAMES.COMMUNITY_POST_CREATE as any, {
+        //       type: 'VERIFICATION',
+        //       spontaneousMissionId: missionId,
+        //       userMissionId: missionId,
+        //       missionId: 'MEAL',
+        //       missionTitle: '식사 미션',
+        //       missionEmoji: '🍽️',
+        //     });
+        //     return;
+        //   }
+        //   if (!mealMission || mealMission.status === 'COMPLETED' || !mealMission.canVerify) {
+        //     showAlertModal('알림', '이미 수행한 미션이거나 만료된 미션입니다.');
+        //     return;
+        //   }
+        //   console.log('[NotificationScreen] 식사 미션 게시글 작성 화면으로 이동');
+        //   safeNavigation.navigate(SCREEN_NAMES.COMMUNITY_POST_CREATE as any, {
+        //     type: 'VERIFICATION',
+        //     spontaneousMissionId: missionId,
+        //     userMissionId: missionId,
+        //     missionId: String(mealMission.missionType || 'MEAL'),
+        //     missionTitle: mealMission.missionTypeDisplayName || '식사 미션',
+        //     missionEmoji: '🍽️',
+        //   });
+        // }
       } catch (error) {
         console.error('[NotificationScreen] ❌ 돌발 미션 알림 처리 실패:', error);
       }
@@ -586,6 +614,14 @@ export const useNotificationScreenContainer = ({
       : notifications;
   }, [notifications, filter]);
 
+  /** 전체 선택 여부 (handleConfirmDeleteSelected 등에서 사용) */
+  const isAllSelected = useMemo(
+    () =>
+      filteredNotifications.length > 0 &&
+      filteredNotifications.every(n => selectedIds.has(n.id)),
+    [filteredNotifications, selectedIds]
+  );
+
   /**
    * 읽지 않은 알림 개수
    */
@@ -609,7 +645,10 @@ export const useNotificationScreenContainer = ({
     refreshing,
     filter,
     unreadCount,
-    // AlertModal 상태
+    selectedIds,
+    isAllSelected,
+    isSelectionModeActive,
+    showDeleteConfirmModal,
     showAlert,
     alertTitle,
     alertMessage,
@@ -618,6 +657,12 @@ export const useNotificationScreenContainer = ({
     handleMarkAsRead,
     handleMarkAllAsRead,
     handleDeleteNotification,
+    handleToggleSelect,
+    handleSelectAll,
+    handleExitSelectionMode,
+    handleDeleteSelected,
+    handleConfirmDeleteSelected,
+    handleCancelDeleteSelected,
     handleNotificationPress,
     handleAlertClose,
     keyExtractor,

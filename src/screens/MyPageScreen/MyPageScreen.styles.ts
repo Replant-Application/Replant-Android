@@ -5,7 +5,7 @@
 
 import { StyleSheet } from 'react-native';
 import { colors, spacing, typography, borderRadius, shadows, layout } from '../../utils/designTokens';
-import { createTextStyle, createTitleStyle, createSecondaryTextStyle } from '../../utils/styles/textStyles';
+import { createTextStyle } from '../../utils/styles/textStyles';
 
 export const styles = StyleSheet.create({
   container: {
@@ -18,48 +18,6 @@ export const styles = StyleSheet.create({
     paddingHorizontal: layout.globalGutterLarge,
     paddingVertical: layout.globalGutterLarge,
     paddingBottom: spacing[20],
-  },
-  sectionHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: spacing[4],
-    gap: spacing[2],
-  },
-  sectionIcon: {
-    width: 25,
-    height: 25,
-  },
-  sectionTitle: {
-    ...createTitleStyle('lg'),
-  },
-  profileCard: {
-    backgroundColor: colors.background.primary,
-    borderRadius: borderRadius.xl,
-    padding: spacing[5],
-    marginBottom: spacing[6],
-    borderWidth: 1,
-    borderColor: colors.brandAccent,
-    ...shadows.lg,
-  },
-  profileInfo: {
-    gap: spacing[3],
-  },
-  profileRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: spacing[2],
-  },
-  profileLabel: {
-    ...createSecondaryTextStyle('base', {
-      fontWeight: typography.fontWeight.medium,
-    }),
-  },
-  profileValue: {
-    ...createTextStyle('base', {
-      fontWeight: typography.fontWeight.medium,
-      color: colors.text.primary,
-    }),
   },
   characterCard: {
     backgroundColor: colors.background.primary,

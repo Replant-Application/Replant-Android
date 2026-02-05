@@ -14,7 +14,7 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: spacing[5],
     paddingTop: spacing[12],
-    paddingBottom: spacing[5],
+    paddingBottom: spacing[3],
     backgroundColor: 'transparent',
   },
   headerWithBorder: {

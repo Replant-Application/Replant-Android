@@ -66,7 +66,9 @@ const Header: React.FC<HeaderProps> = ({
 
       {title && (
         <View style={styles.centerSection}>
-          <Text style={[styles.title, titleStyle]}>{title}</Text>
+          <Text style={[styles.title, titleStyle]} numberOfLines={1} ellipsizeMode="tail">
+            {title}
+          </Text>
         </View>
       )}
 

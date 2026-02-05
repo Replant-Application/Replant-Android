@@ -31,12 +31,17 @@ export const styles = StyleSheet.create({
       textAlign: 'center',
     }),
   },
+  messageWrap: {
+    marginBottom: spacing[6],
+  },
   message: {
     ...createTextStyle('base', {
       color: colors.gray[300],
-      marginBottom: spacing[6],
       textAlign: 'center',
     }),
+  },
+  messageLine: {
+    marginTop: spacing[2],
   },
   buttonContainer: {
     flexDirection: 'row',

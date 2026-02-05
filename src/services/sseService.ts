@@ -3,9 +3,8 @@
  * react-native-sse를 사용한 실시간 알림 수신
  */
 
-import { Platform } from 'react-native';
 import EventSource, { EventSourceListener } from 'react-native-sse';
-import { API_BASE_URL } from '@env';
+import { API_CONFIG } from '../config/apiConfig';
 import { getAccessToken } from '../utils/tokenStorage';
 import { Notification } from '../api/notificationApi';
 
@@ -92,14 +91,10 @@ class SSEService {
       // 기존 연결이 있으면 종료
       this.disconnect();
 
-      // SSE 엔드포인트 URL 생성
-      let baseUrl = API_BASE_URL || 'http://localhost:8080/api';
-      // Android 에뮬레이터에서 localhost를 10.0.2.2로 변환
-      if (Platform.OS === 'android' && baseUrl.includes('localhost')) {
-        baseUrl = baseUrl.replace('localhost', '10.0.2.2');
-      }
+      // SSE 엔드포인트 URL 생성 (apiConfig와 동일한 baseURL 사용)
+      const baseUrl = API_CONFIG.baseURL;
       // /api를 제거하고 /sse/connect 추가 (SSE는 별도 경로)
-      const sseUrl = baseUrl.replace('/api', '') + '/sse/connect';
+      const sseUrl = baseUrl.replace(/\/api\/?$/, '') + '/sse/connect';
 
       console.log('[SSE] 연결 시도:', sseUrl);
 

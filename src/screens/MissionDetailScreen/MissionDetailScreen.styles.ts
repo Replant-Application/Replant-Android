@@ -82,16 +82,11 @@ export const styles = StyleSheet.create({
   missionExpContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing[1],
     backgroundColor: colors.blue[100],
     paddingHorizontal: spacing[2],
     paddingVertical: spacing[1],
     borderRadius: borderRadius.sm,
     minHeight: 28, // 모든 배지 높이 통일
-  },
-  sunIcon: {
-    width: 16,
-    height: 16,
   },
   missionExp: {
     ...createTextStyle('sm', {
@@ -121,23 +116,6 @@ export const styles = StyleSheet.create({
   statLabel: {
     ...createTextStyle('xs', {
       color: colors.text.tertiary,
-    }),
-  },
-  verificationInfo: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: spacing[4],
-    paddingTop: spacing[3],
-    borderTopWidth: 1,
-    borderTopColor: colors.border.light,
-  },
-  verificationLabel: {
-    ...createSecondaryTextStyle('sm'),
-  },
-  verificationValue: {
-    ...createTextStyle('sm', {
-      fontWeight: typography.fontWeight.medium,
     }),
   },
   completeCustomButton: {
@@ -217,8 +195,9 @@ export const styles = StyleSheet.create({
     marginTop: 2,
   },
   ratingStarDisplay: {
-    fontSize: 12,
-    color: colors.warning,
+    ...createTextStyle('xs', {
+      color: colors.warning,
+    }),
   },
   reviewDate: {
     ...createTextStyle('xs', {
@@ -266,25 +245,6 @@ export const styles = StyleSheet.create({
       textAlign: 'center',
     }),
   },
-  // 이미 후기 작성 완료 섹션
-  alreadyWrittenSection: {
-    backgroundColor: 'rgba(232, 245, 233, 0.95)',
-    borderRadius: borderRadius.xl,
-    padding: spacing[4],
-    marginBottom: spacing[4],
-    alignItems: 'center',
-    borderWidth: 2,
-    borderColor: '#4CAF50',
-  },
-  alreadyWrittenIcon: {
-    fontSize: 32,
-    marginBottom: spacing[2],
-  },
-  alreadyWrittenText: {
-    ...createSecondaryTextStyle('sm', {
-      textAlign: 'center',
-    }),
-  },
   // 후기 작성 섹션 스타일
   writeReviewSection: {
     backgroundColor: 'rgba(255, 255, 255, 0.95)',
@@ -322,8 +282,9 @@ export const styles = StyleSheet.create({
     padding: spacing[1],
   },
   starText: {
-    fontSize: 20,
-    color: colors.warning,
+    ...createTextStyle('xl', {
+      color: colors.warning,
+    }),
   },
   ratingValue: {
     ...createSecondaryTextStyle('sm', {
@@ -332,8 +293,12 @@ export const styles = StyleSheet.create({
   },
   reviewInput: {
     ...inputStyles.base(),
+    ...createTextStyle('base', {
+      color: colors.text.primary,
+      textAlign: 'left',
+      textAlignVertical: 'top',
+    }),
     backgroundColor: colors.background.secondary,
-    color: colors.text.primary,
     minHeight: 100,
     marginBottom: spacing[3],
     borderWidth: 1,

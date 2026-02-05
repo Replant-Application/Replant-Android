@@ -46,6 +46,7 @@ export const useCommunityPostCreateScreenContainer = ({
   const [loading, setLoading] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [tasteRating, setTasteRating] = useState(3); // 맛 평가 1-5
+  const [isPublic, setIsPublic] = useState(true); // 일반글만: 공개(true) / 비공개(false)
   
   // AlertModal 상태
   const [showAlert, setShowAlert] = useState(false);
@@ -172,6 +173,7 @@ export const useCommunityPostCreateScreenContainer = ({
           content: content.trim(),
           images: photoUrl ? [photoUrl, ...images] : images,
           category: postType,
+          isPublic,
         };
         result = await createPost(postData);
         console.log('[CommunityPostCreateScreen] 일반 게시글 작성 완료:', result.success);
@@ -286,6 +288,7 @@ export const useCommunityPostCreateScreenContainer = ({
     tasteRating,
     postType,
     createPost,
+    isPublic,
   ]);
 
   /**
@@ -311,6 +314,8 @@ export const useCommunityPostCreateScreenContainer = ({
     loading,
     showSuccessModal,
     tasteRating,
+    isPublic,
+    setIsPublic,
     // AlertModal 상태
     showAlert,
     alertTitle,

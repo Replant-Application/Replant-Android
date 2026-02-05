@@ -3,7 +3,7 @@
  * 커뮤니티 게시글 카드 컴포넌트의 모든 스타일 정의
  */
 
-import { StyleSheet } from 'react-native';
+import { Platform, StyleSheet } from 'react-native';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
 import { createTextStyle, createSecondaryTextStyle } from '../../utils/styles/textStyles';
 import { cardStyles } from '../../utils/styles/commonStyles';
@@ -33,6 +33,11 @@ export const styles = StyleSheet.create({
     backgroundColor: colors.primary[500],
     justifyContent: 'center',
     alignItems: 'center',
+    overflow: 'hidden',
+  },
+  authorAvatarImage: {
+    width: 32,
+    height: 32,
   },
   authorAvatarText: {
     ...createTextStyle('sm', {
@@ -43,19 +48,23 @@ export const styles = StyleSheet.create({
   authorNameContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing[1.5],
+    gap: spacing[3],
   },
   authorName: {
     ...createTextStyle('sm', {
-      fontWeight: typography.fontWeight.normal,
+      fontWeight: typography.fontWeight.semibold,
       color: colors.text.primary,
+      fontFamily: Platform.select({
+        ios: undefined,
+        android: typography.fontFamily.regular,
+      }),
     }),
   },
   categoryBadge: {
     backgroundColor: colors.primary[100],
     paddingHorizontal: spacing[2],
     paddingVertical: 2,
-    borderRadius: borderRadius.base,
+    borderRadius: borderRadius.sm,
   },
   categoryText: {
     ...createTextStyle('xs', {
@@ -63,9 +72,27 @@ export const styles = StyleSheet.create({
       fontWeight: typography.fontWeight.normal,
     }),
   },
+  privateBadge: {
+    backgroundColor: colors.gray[200],
+    paddingHorizontal: spacing[2],
+    paddingVertical: 2,
+    borderRadius: borderRadius.sm,
+    marginLeft: -spacing[2],
+  },
+  privateBadgeText: {
+    ...createTextStyle('xs', {
+      color: colors.text.secondary,
+      fontWeight: typography.fontWeight.normal,
+    }),
+  },
   date: {
     ...createSecondaryTextStyle('xs', {
       color: colors.text.tertiary,
+      fontWeight: typography.fontWeight.medium,
+      fontFamily: Platform.select({
+        ios: undefined,
+        android: typography.fontFamily.regular,
+      }),
     }),
   },
   headerRight: {
@@ -180,6 +207,7 @@ export const styles = StyleSheet.create({
       color: colors.primary[700],
       fontWeight: typography.fontWeight.normal,
     }),
+    marginLeft: spacing[1],
   },
   pendingBadge: {
     flexDirection: 'row',

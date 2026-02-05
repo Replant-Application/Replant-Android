@@ -17,6 +17,7 @@ export interface ReantResponse {
   name: string;
   level: number;
   exp: number;
+  nextLevelExp?: number;
   stage: ReantStage;
   maxLevel: number;
   mood: number;

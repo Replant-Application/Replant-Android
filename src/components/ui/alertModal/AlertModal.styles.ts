@@ -4,7 +4,7 @@
  */
 
 import { StyleSheet } from 'react-native';
-import { colors, spacing, borderRadius } from '../../../utils/designTokens';
+import { colors, spacing, borderRadius, typography } from '../../../utils/designTokens';
 import { createTextStyle, createTitleStyle, createButtonTextStyle } from '../../../utils/styles/textStyles';
 import { modalStyles, buttonStyles } from '../../../utils/styles/commonStyles';
 
@@ -29,10 +29,10 @@ export const styles = StyleSheet.create({
     zIndex: 10,
   },
   closeButtonText: {
-    fontSize: 18,
-    color: colors.white,
-    fontWeight: '600',
-    lineHeight: 20,
+    ...createTextStyle('lg', {
+      fontWeight: typography.fontWeight.semibold,
+      color: colors.white,
+    }),
   },
   titleContainer: {
     flexDirection: 'row',

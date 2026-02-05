@@ -17,6 +17,7 @@ import { getData, getStorageKeys, autoLevelupCharacter, setData } from '../servi
 import { updateCharacterName as updateCharacterNameService } from '../services/characterService';
 import { useUser } from '../contexts/UserContext';
 import { logError } from '../utils/logger';
+import { getNextLevelExp, getTotalExpToReachLevel } from '../utils/expTable';
 import { Character, UseCharacterReturn, ExperienceResult, ServiceResult, MissionCategory } from '../types';
 import { getMyReant, ReantResponse } from '../api/reantApi';
 
@@ -28,18 +29,14 @@ export const useCharacter = (): UseCharacterReturn => {
   const [error, setError] = useState<string | null>(null);
 
   // Reant 정보를 Character 형태로 변환
+  // 백엔드(Reant.java): exp = 현재 레벨 진행분, 다음 레벨 필요 = 레벨별 테이블 (L1→10, L2→50, L3→100, L4→200, L5→500, L6+→500)
   const convertReantToCharacter = useCallback((reant: ReantResponse): Character => {
-    // 백엔드의 exp는 전체 누적 경험치
-    // experience는 현재 레벨의 경험치 (0-99)
-    // total_experience는 전체 누적 경험치
-    const totalExp = reant.exp;
-    const currentLevelExp = totalExp % 100; // 현재 레벨에서의 경험치
-    // 백엔드 레벨을 신뢰하지 않고, 항상 total_experience 기반으로 레벨 계산
-    // 경험치 0-99 = 레벨 1, 100-199 = 레벨 2, 200-299 = 레벨 3, ...
-    const calculatedLevel = Math.floor(totalExp / 100) + 1;
-    // 백엔드 레벨과 계산된 레벨 중 더 높은 값을 사용 (백엔드가 업데이트 안 된 경우 대비)
-    const level = Math.max(reant.level || 1, calculatedLevel);
-    
+    const level = reant.level ?? 1;
+    const currentLevelExp = reant.exp ?? 0; // 현재 레벨에서의 진행 경험치
+    const expToReachCurrentLevel = getTotalExpToReachLevel(level);
+    const totalExp = expToReachCurrentLevel + currentLevelExp; // 백엔드와 동일한 총 누적 경험치
+    const maxExperience = reant.nextLevelExp ?? getNextLevelExp(level); // 다음 레벨까지 필요한 경험치
+
     return {
       id: `reant_${reant.id}`,
       character_id: `reant_${reant.id}`,
@@ -47,10 +44,10 @@ export const useCharacter = (): UseCharacterReturn => {
       title: '성장하는 동반자',
       description: '성장 여정을 함께해요',
       emoji: '🌱',
-      level: level,
-      experience: currentLevelExp, // 현재 레벨의 경험치 (0-99)
-      total_experience: totalExp, // 전체 누적 경험치
-      max_experience: 100, // 다음 레벨까지 필요한 경험치 (항상 100)
+      level,
+      experience: currentLevelExp,
+      total_experience: totalExp,
+      max_experience: maxExperience,
       unlocked: true,
       unlocked_date: reant.createdAt,
       category_id: 'growth',
@@ -111,10 +108,16 @@ export const useCharacter = (): UseCharacterReturn => {
       if (sortedCharacters.length !== 1 || hasNonGrowthCategory) {
         // total_experience를 우선 사용, 없으면 experience를 사용
         const totalExperience: number = sortedCharacters.reduce((sum, c) => {
-          return sum + (c.total_experience || c.experience || 0);
+          return sum + (c.total_experience ?? c.experience ?? 0);
         }, 0);
-        const newLevel: number = Math.floor(totalExperience / 100) + 1;
-        const currentLevelExp = totalExperience % 100; // 현재 레벨의 경험치
+        // 백엔드 레벨업 공식: 총 누적 T → 레벨 L (레벨별 필요 경험치 테이블 사용)
+        let remaining = totalExperience;
+        let newLevel = 1;
+        while (getNextLevelExp(newLevel) <= remaining) {
+          remaining -= getNextLevelExp(newLevel);
+          newLevel += 1;
+        }
+        const currentLevelExp = remaining;
         const now = Date.now();
         const unifiedCharacter: Character = {
           id: `character_${now}_growth`,
@@ -124,9 +127,9 @@ export const useCharacter = (): UseCharacterReturn => {
           description: sortedCharacters[0]?.description || '성장 여정을 함께해요',
           emoji: sortedCharacters[0]?.emoji || '🌱',
           level: newLevel,
-          experience: currentLevelExp, // 현재 레벨의 경험치 (0-99)
-          total_experience: totalExperience, // 전체 누적 경험치
-          max_experience: 100,
+          experience: currentLevelExp,
+          total_experience: totalExperience,
+          max_experience: getNextLevelExp(newLevel),
           unlocked: true,
           unlocked_date: new Date().toISOString(),
           category_id: 'growth',

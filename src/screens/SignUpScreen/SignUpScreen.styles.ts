@@ -276,8 +276,9 @@ export const styles = StyleSheet.create({
     color: colors.gray[400],
   },
   dropdownArrow: {
-    fontSize: 12,
-    color: colors.gray[400],
+    ...createTextStyle('xs', {
+      color: colors.gray[400],
+    }),
   },
   dropdownList: {
     marginTop: spacing[1],

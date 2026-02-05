@@ -4,7 +4,7 @@
  */
 
 import { StyleSheet } from 'react-native';
-import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
+import { colors, spacing, typography, borderRadius, shadows } from '../../utils/designTokens';
 import { createTextStyle, createTitleStyle, createButtonTextStyle } from '../../utils/styles/textStyles';
 import { inputStyles, modalStyles } from '../../utils/styles/commonStyles';
 
@@ -134,32 +134,51 @@ export const styles = StyleSheet.create({
     }),
   },
   completionPercent: {
-    fontSize: typography.fontSize.lg,
-    fontWeight: typography.fontWeight.medium,
-    color: colors.primary[600],
+    ...createTextStyle('lg', {
+      fontWeight: typography.fontWeight.medium,
+      color: colors.text.primary,
+    }),
   },
   sliderContainer: {
+    marginBottom: spacing[1],
+  },
+  /** 감정일기와 동일: 트랙(배경) */
+  sliderTrack: {
+    width: '100%',
+    height: 20,
+    backgroundColor: colors.overlay?.light ?? colors.gray[200],
+    borderRadius: borderRadius.md,
+    borderWidth: 2,
+    borderColor: colors.overlay?.white?.light ?? colors.gray[300],
+    position: 'relative' as const,
+    marginTop: 0,
+    marginBottom: spacing[3],
+    justifyContent: 'center',
+  },
+  /** 감정일기와 동일: 채워진 구간 (초록) */
+  sliderFill: {
+    position: 'absolute' as const,
+    height: 16,
+    borderRadius: borderRadius.sm,
+    left: 0,
+    top: 0,
+  },
+  /** 감정일기와 동일: 흰색 원형 썸 */
+  sliderThumb: {
+    position: 'absolute' as const,
+    width: 22,
+    height: 22,
     backgroundColor: colors.white,
     borderRadius: borderRadius.md,
-    paddingVertical: spacing[4],
-    paddingHorizontal: spacing[5],
-    borderWidth: 1,
-    borderColor: colors.primary[200],
-    marginBottom: spacing[1],
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.08,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  slider: {
-    width: '100%',
-    height: 40,
+    marginLeft: -10,
+    top: -2,
+    ...shadows.lg,
   },
   sliderLabels: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: spacing[2],
+    alignItems: 'center',
+    marginTop: spacing[0],
   },
   sliderLabel: {
     ...createTextStyle('sm', {
@@ -176,9 +195,10 @@ export const styles = StyleSheet.create({
     marginBottom: spacing[2],
   },
   warningText: {
-    fontSize: typography.fontSize.xs,
-    color: colors.orange[700],
-    textAlign: 'center',
+    ...createTextStyle('xs', {
+      color: colors.orange[700],
+      textAlign: 'center',
+    }),
   },
   encouragementBox: {
     backgroundColor: colors.primary[50],
@@ -225,9 +245,9 @@ export const styles = StyleSheet.create({
     left: -24,
     right: 0,
     bottom: 0,
-    paddingLeft: spacing[6],
-    paddingTop: spacing[5],
-    paddingBottom: spacing[4],
+    paddingLeft: spacing[3],
+    paddingTop: spacing[2],
+    paddingBottom: spacing[3],
   },
   notebookLine: {
     height: 24,
@@ -244,8 +264,8 @@ export const styles = StyleSheet.create({
     ...createTextStyle('sm', { color: colors.text.primary }),
     backgroundColor: 'transparent',
     padding: spacing[4],
-    paddingTop: spacing[5],
-    paddingLeft: spacing[6],
+    paddingTop: spacing[2],
+    paddingLeft: spacing[3],
     minHeight: 200,
     textAlignVertical: 'top',
   },
@@ -264,6 +284,10 @@ export const styles = StyleSheet.create({
     borderRadius: borderRadius.md,
     overflow: 'hidden',
   },
+  previewImageTouchable: {
+    width: '100%',
+    height: '100%',
+  },
   previewImage: {
     width: 100,
     height: 100,
@@ -281,10 +305,10 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
   },
   removeImageText: {
-    color: colors.white,
-    fontSize: 18,
-    fontWeight: 'bold',
-    lineHeight: 20,
+    ...createTextStyle('lg', {
+      color: colors.white,
+      fontWeight: typography.fontWeight.bold,
+    }),
   },
   addPhotoButton: {
     width: '100%',

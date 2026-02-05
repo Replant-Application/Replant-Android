@@ -1,7 +1,6 @@
 /**
- * 돌발 미션 설정 온보딩 화면
- * 신규 가입자의 기상, 취침, 식사 시간을 설정합니다.
- * 스텝별로 하나씩 입력하는 온보딩 형식
+ * 돌발 미션 설정 화면 (기상 미션만)
+ * 기상 시간만 설정합니다. 취침·식사 시간은 일단 비노출.
  */
 
 import React from 'react';
@@ -89,7 +88,7 @@ const SpontaneousMissionSetupScreen: React.FC<SpontaneousMissionSetupScreenProps
         keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
       >
         <Header
-          title="돌발 미션 설정"
+          title="기상 미션 설정"
           navigation={safeNavigation}
           showBorder={false}
           showBackButton={isEditMode}

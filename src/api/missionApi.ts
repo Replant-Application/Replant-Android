@@ -176,6 +176,7 @@ export interface MissionReview {
   userId: number;
   userNickname: string;
   userProfileImg?: string;
+  userReantLevel?: number; // 작성자 캐릭터 레벨 (프로필 캐릭터 이미지용)
   content: string;
   rating?: number; // 1-5 별점
   createdAt: string;
@@ -210,12 +211,25 @@ export const createMissionReview = async (
   data: { content: string; rating?: number }
 ): Promise<ServiceResult<MissionReview>> => {
   const endpoint = API_CONFIG.endpoints.mission.createReview.replace(':missionId', String(missionId));
-  // rating이 없으면 기본값 5 설정
   const requestData = {
     content: data.content,
-    rating: data.rating ?? 5,
   };
   return apiClient.post<MissionReview>(endpoint, requestData);
+};
+
+/**
+ * 미션 리뷰 삭제
+ * DELETE /api/missions/{missionId}/reviews/{reviewId}
+ * 본인 작성 후기만 삭제 가능
+ */
+export const deleteMissionReview = async (
+  missionId: number,
+  reviewId: number
+): Promise<ServiceResult<void>> => {
+  const endpoint = API_CONFIG.endpoints.mission.deleteReview
+    .replace(':missionId', String(missionId))
+    .replace(':reviewId', String(reviewId));
+  return apiClient.delete<void>(endpoint);
 };
 
 // ============================================
@@ -423,7 +437,9 @@ export interface UserMission {
   status: UserMissionStatus;
   completedAt?: string; // 완료 날짜 (ISO string)
   verification?: MissionVerification;
-  isSpontaneous?: boolean; // 돌발 미션 여부 (기상, 식사, 감성일기)
+  isSpontaneous?: boolean; // 돌발 미션 여부 (현재 앱에서는 기상만 처리; 감정일기·식사는 잠시 제외)
+  /** 완료된 공식 미션의 인증 게시글 ID (캘린더 등에서 게시글 모달 링크용) */
+  verificationPostId?: number | null;
 }
 
 export interface UserMissionListResponse {
@@ -656,7 +672,7 @@ export const createVerification = async (
  */
 export const updateVerification = async (
   verificationId: number,
-  data: { content?: string; imageUrls?: string[]; completionRate?: number }
+  data: { content?: string; imageUrls?: string[]; completionRate?: number; userMissionId?: number }
 ): Promise<ServiceResult<VerificationPost>> => {
   const endpoint = API_CONFIG.endpoints.verification.update.replace(':verificationId', String(verificationId));
   return apiClient.put<VerificationPost>(endpoint, data);
@@ -1391,6 +1407,7 @@ export const updateSpontaneousMissionSetup = async (
 
 /**
  * 돌발 미션 타입
+ * (EMOTION_DIARY는 백엔드 타입에만 존재, 앱에서는 돌발 미션으로 잠시 미처리)
  */
 export type SpontaneousMissionType = 'WAKE_UP' | 'MEAL_BREAKFAST' | 'MEAL_LUNCH' | 'MEAL_DINNER' | 'EMOTION_DIARY';
 

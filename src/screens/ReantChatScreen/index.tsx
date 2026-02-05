@@ -13,6 +13,7 @@ import {
   Platform,
   Image,
   Animated,
+  Easing,
   ActivityIndicator,
   Alert,
   Modal,
@@ -44,10 +45,16 @@ const PaperPlaneIcon: React.FC<{ size?: number; color?: string }> = ({
   </Svg>
 );
 
-// 추천 메시지 (은둔형 외톨이 등 응원·대화 유도) — 두 개만
-const RECOMMENDED_MESSAGES = [
+// 추천 메시지 풀 (은둔형 외톨이 등 응원·대화 유도)
+const RECOMMENDED_MESSAGES_POOL = [
   '나를 응원하는 말을 해줘',
   '오늘 하루 잘 보내고 싶어',
+  '오늘 기분이 안 좋아',
+  '할 일이 너무 많아서 힘들어',
+  '잠깐 대화할 수 있을까?',
+  '오늘 하루 어땠어?',
+  '심심해',
+  '조언이 필요해',
 ];
 
 // 날짜 포맷: "2026년 2월 2일 월요일"
@@ -86,6 +93,16 @@ interface ReantChatScreenProps {
   route?: any;
 }
 
+// 현재 표시 중인 두 칩이 아닌 풀에서 랜덤 선택
+const pickReplacementChip = (currentChips: [string, string], replaceIndex: 0 | 1): string => {
+  const other = currentChips[1 - replaceIndex];
+  const candidates = RECOMMENDED_MESSAGES_POOL.filter(
+    (m) => m !== currentChips[replaceIndex] && m !== other
+  );
+  if (candidates.length === 0) return RECOMMENDED_MESSAGES_POOL[0];
+  return candidates[Math.floor(Math.random() * candidates.length)];
+};
+
 const ReantChatScreen: React.FC<ReantChatScreenProps> = ({ navigation, route: _route }) => {
   const { characters } = useCharacter();
   const currentCharacter = characters.length > 0 ? characters[0] : null;
@@ -99,6 +116,11 @@ const ReantChatScreen: React.FC<ReantChatScreenProps> = ({ navigation, route: _r
   const [voiceAvailable, setVoiceAvailable] = useState(false);
   const voiceCommittedRef = useRef(''); // 음성으로 확정된 텍스트 (입력창에 반영)
   const listRef = useRef<FlatList>(null);
+  // 표시 중인 추천 칩 두 개
+  const [recommendedChips, setRecommendedChips] = useState<[string, string]>(() => [
+    RECOMMENDED_MESSAGES_POOL[0],
+    RECOMMENDED_MESSAGES_POOL[1],
+  ]);
 
   // 음성 인식 사용 가능 여부
   useEffect(() => {
@@ -190,6 +212,7 @@ const ReantChatScreen: React.FC<ReantChatScreenProps> = ({ navigation, route: _r
     });
   }, [screenFadeAnim]);
 
+<<<<<<< HEAD
   // 메시지 목록 → 날짜 구분 포함 리스트 데이터
   const listData = useMemo((): ListItem[] => {
     const out: ListItem[] = [];
@@ -358,6 +381,7 @@ const ReantChatScreen: React.FC<ReantChatScreenProps> = ({ navigation, route: _r
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
         >
+<<<<<<< HEAD
           {/* 메시지 리스트 */}
           <FlatList
             ref={listRef}
@@ -392,7 +416,7 @@ const ReantChatScreen: React.FC<ReantChatScreenProps> = ({ navigation, route: _r
               <Text style={styles.errorText}>⚠️ {error}</Text>
             ) : null}
             <View style={styles.recommendedChipsContainer}>
-              {RECOMMENDED_MESSAGES.map((msg) => (
+              {recommendedChips.map((msg) => (
                 <TouchableOpacity
                   key={msg}
                   style={styles.recommendedChip}

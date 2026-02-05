@@ -4,7 +4,7 @@
  */
 
 import { StyleSheet } from 'react-native';
-import { colors, spacing, typography, borderRadius, shadows } from '../../../utils/designTokens';
+import { colors, spacing, typography, borderRadius } from '../../../utils/designTokens';
 import { createTextStyle } from '../../../utils/styles/textStyles';
 
 export const styles = StyleSheet.create({
@@ -23,61 +23,6 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing[1],
-  },
-  menuButton: {
-    width: 52,
-    height: 52,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  menuIcon: {
-    width: 36,
-    height: 36,
-  },
-  menuOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'flex-end',
-    alignItems: 'flex-end',
-  },
-  menuBar: {
-    position: 'absolute',
-    top: spacing[16],
-    right: 0,
-    width: 280,
-    backgroundColor: colors.background.primary,
-    borderTopLeftRadius: borderRadius.xl,
-    borderBottomLeftRadius: borderRadius.xl,
-    borderLeftWidth: 3,
-    borderTopWidth: 3,
-    borderBottomWidth: 3,
-    borderColor: '#D4A574',
-    paddingTop: spacing[4],
-    paddingBottom: spacing[3],
-    paddingHorizontal: spacing[4],
-    ...shadows.lg,
-  },
-  menuItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: spacing[2],
-    paddingHorizontal: spacing[3],
-    borderRadius: borderRadius.md,
-    marginBottom: spacing[1],
-    backgroundColor: '#FFF8E7',
-    borderWidth: 1,
-    borderColor: '#D4A574',
-  },
-  menuItemIcon: {
-    width: 24,
-    height: 24,
-    marginRight: spacing[3],
-  },
-  menuItemText: {
-    ...createTextStyle('base', {
-      fontWeight: typography.fontWeight.medium,
-      color: colors.text.primary,
-    }),
   },
   iconButton: {
     position: 'relative',

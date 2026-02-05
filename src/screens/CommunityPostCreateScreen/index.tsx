@@ -3,7 +3,7 @@
  * 미션 완료 후 커뮤니티에 공유하는 화면
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -17,7 +17,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import Slider from '@react-native-community/slider';
-import { Header, AlertModal } from '../../components/ui';
+import { Header, AlertModal, FullScreenImageViewer } from '../../components/ui';
 import { colors } from '../../utils/designTokens';
 import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types/navigation';
@@ -43,6 +43,8 @@ const CommunityPostCreateScreen: React.FC<CommunityPostCreateScreenProps> = ({ n
     loading,
     showSuccessModal,
     tasteRating,
+    isPublic,
+    setIsPublic,
     showAlert,
     alertTitle,
     alertMessage,
@@ -55,6 +57,8 @@ const CommunityPostCreateScreen: React.FC<CommunityPostCreateScreenProps> = ({ n
     handleSuccessModalClose,
     handleAlertClose,
   } = useCommunityPostCreateScreenContainer({ navigation, route });
+
+  const [selectedImageUri, setSelectedImageUri] = useState<string | null>(null);
 
   const getTasteLabel = (rating: number) => {
     const labels = ['😖 별로', '😐 그저그럼', '🙂 보통', '😋 맛있음', '🤤 최고!'];
@@ -85,24 +89,21 @@ const CommunityPostCreateScreen: React.FC<CommunityPostCreateScreenProps> = ({ n
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
       >
-        {/* 미션 정보 표시 */}
-        <View style={styles.missionInfo}>
-          <Image
-            source={isGeneralPost
-              ? require('../../assets/images/pencil.png')
-              : require('../../assets/images/alarm.png')
-            }
-            style={styles.missionIcon}
-            resizeMode="contain"
-            accessibilityLabel={isGeneralPost ? "일반 게시글 아이콘" : "인증 게시글 아이콘"}
-          />
-          <View style={styles.missionTextContainer}>
-            <Text style={styles.missionLabel}>
-              {isGeneralPost ? '게시판' : '완료한 미션'}
-            </Text>
-            <Text style={styles.missionTitle}>{missionTitle}</Text>
+        {/* 인증글만: 미션 정보 표시 (일반글은 게시판 하나뿐이라 생략) */}
+        {!isGeneralPost && (
+          <View style={styles.missionInfo}>
+            <Image
+              source={require('../../assets/images/alarm.png')}
+              style={styles.missionIcon}
+              resizeMode="contain"
+              accessibilityLabel="인증 게시글 아이콘"
+            />
+            <View style={styles.missionTextContainer}>
+              <Text style={styles.missionLabel}>완료한 미션</Text>
+              <Text style={styles.missionTitle}>{missionTitle}</Text>
+            </View>
           </View>
-        </View>
+        )}
 
         {/* 제목 입력 */}
         <View style={styles.inputSection}>
@@ -132,14 +133,12 @@ const CommunityPostCreateScreen: React.FC<CommunityPostCreateScreenProps> = ({ n
               style={styles.contentInput}
               value={content}
               onChangeText={setContent}
-              placeholder={isGeneralPost
-                ? "자유롭게 이야기를 나눠보세요..."
-                : "미션을 완료한 소감이나 경험을 공유해주세요..."
-              }
+              placeholder="설명을 입력해주세요"
               placeholderTextColor={colors.text.tertiary}
               accessibilityLabel="내용"
-              accessibilityHint={isGeneralPost ? "자유롭게 이야기를 나눠보세요" : "미션을 완료한 소감이나 경험을 공유해주세요"}
+              accessibilityHint="설명을 입력해주세요"
               multiline
+              numberOfLines={7}
               textAlignVertical="top"
             />
           </View>
@@ -152,12 +151,20 @@ const CommunityPostCreateScreen: React.FC<CommunityPostCreateScreenProps> = ({ n
             <View style={styles.imageContainer}>
               {images.map((imageUrl, index) => (
                 <View key={index} style={styles.imagePreviewWrapper}>
-                  <Image 
-                    source={{ uri: imageUrl }} 
-                    style={styles.previewImage} 
-                    resizeMode="cover" 
-                    accessibilityLabel="이미지 미리보기"
-                  />
+                  <TouchableOpacity
+                    style={styles.previewImageTouchable}
+                    onPress={() => setSelectedImageUri(imageUrl)}
+                    activeOpacity={0.9}
+                    accessibilityRole="imagebutton"
+                    accessibilityLabel={`사진 ${index + 1} 자세히 보기`}
+                  >
+                    <Image 
+                      source={{ uri: imageUrl }} 
+                      style={styles.previewImage} 
+                      resizeMode="cover" 
+                      accessibilityLabel={`사진 ${index + 1}`}
+                    />
+                  </TouchableOpacity>
                   <TouchableOpacity
                     style={styles.removeImageButton}
                     onPress={() => handleRemoveImage(index)}
@@ -289,6 +296,26 @@ const CommunityPostCreateScreen: React.FC<CommunityPostCreateScreenProps> = ({ n
           </View>
         )}
 
+        {/* 일반글만: 비공개 선택 (등록 버튼 바로 위) */}
+        {isGeneralPost && (
+          <View style={[styles.inputSection, styles.privateSection]}>
+            <TouchableOpacity
+              style={styles.privateCheckboxRow}
+              onPress={() => setIsPublic(!isPublic)}
+              activeOpacity={0.7}
+              accessibilityRole="checkbox"
+              accessibilityLabel="비공개로 작성"
+              accessibilityState={{ checked: !isPublic }}
+              accessibilityHint="체크하면 작성자만 볼 수 있는 비공개 글로 등록됩니다"
+            >
+              <Text style={styles.privateCheckboxLabel}>비공개로 작성</Text>
+              <View style={[styles.privateCheckbox, !isPublic && styles.privateCheckboxSelected]}>
+                {!isPublic && <Text style={styles.privateCheckmark}>✓</Text>}
+              </View>
+            </TouchableOpacity>
+          </View>
+        )}
+
         {/* 작성 버튼 */}
         <TouchableOpacity
           style={[
@@ -324,6 +351,12 @@ const CommunityPostCreateScreen: React.FC<CommunityPostCreateScreenProps> = ({ n
         message={alertMessage}
         buttonText="확인"
         onClose={handleAlertClose}
+      />
+
+      <FullScreenImageViewer
+        visible={!!selectedImageUri}
+        imageUri={selectedImageUri}
+        onClose={() => setSelectedImageUri(null)}
       />
       </KeyboardAvoidingView>
     </ImageBackground>

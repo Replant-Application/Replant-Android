@@ -10,7 +10,6 @@ export {
   createBodyStyle,
   createSecondaryTextStyle,
   createErrorTextStyle,
-  createLinkTextStyle,
   createButtonTextStyle,
   getOptimizedLineHeight,
 } from './textStyles';
@@ -32,6 +31,7 @@ export {
   dropdownStyles,
   checkboxStyles,
   tabBarStyles,
+  missionTabStyles,
   filterBarStyles,
   badgeStyles,
   missionItemStyles,

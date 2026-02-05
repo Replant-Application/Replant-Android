@@ -9,12 +9,12 @@ import {
   ImageBackground,
   Image,
   Modal,
-  Switch,
 } from 'react-native';
 import { colors } from '../../utils/designTokens';
 import { Header, AlertModal, WheelPicker } from '../../components/ui';
 import { TodoListCreateScreenProps } from '../../types/screens/todolist';
 import { HOURS, MINUTES } from '../../constants/screens/todolist';
+import { getCategoryLabel } from '../CategorySelectScreen/CategorySelectScreen.styles';
 import { useTodoListCreateScreenContainer } from './TodoListCreateScreen.container';
 import { styles } from './TodoListCreateScreen.styles';
 
@@ -107,23 +107,14 @@ const TodoListCreateScreen: React.FC<TodoListCreateScreenProps> = ({ navigation,
             <View key={mission.id} style={styles.missionCard}>
               <View style={styles.missionContent}>
                 <View style={styles.missionTitleContainer}>
-                  <View style={styles.missionNumber}>
-                    <Text style={styles.missionNumberText}>{index + 1}</Text>
-                  </View>
-                  <Text style={styles.missionTitle}>{mission.title}</Text>
+                  <Text style={styles.missionTitle}>{index + 1}. {mission.title}</Text>
                 </View>
                 <Text style={styles.missionDescription} numberOfLines={2}>
                   {mission.description}
                 </Text>
                 <View style={styles.missionMeta}>
-                  <Text style={styles.missionCategory}>{mission.category}</Text>
+                  <Text style={styles.missionCategory}>{getCategoryLabel(mission.category || '')}</Text>
                   <View style={styles.missionExpContainer}>
-                    <Image
-                      source={require('../../assets/images/sun.png')}
-                      style={styles.sunIcon}
-                      resizeMode="contain"
-                      accessibilityLabel="경험치 아이콘"
-                    />
                     <Text style={styles.missionExp}>{mission.expReward} EXP</Text>
                   </View>
                 </View>
@@ -305,15 +296,9 @@ const TodoListCreateScreen: React.FC<TodoListCreateScreenProps> = ({ navigation,
                     {mission.description}
                   </Text>
                   <View style={styles.missionMeta}>
-                    <Text style={styles.missionCategory}>{mission.category}</Text>
+                    <Text style={styles.missionCategory}>{getCategoryLabel(mission.category || '')}</Text>
                     {mission.missionType !== 'CUSTOM' && (
                       <View style={styles.missionExpContainer}>
-                        <Image
-                          source={require('../../assets/images/sun.png')}
-                          style={styles.sunIcon}
-                          resizeMode="contain"
-                          accessibilityLabel="경험치 아이콘"
-                        />
                         <Text style={styles.missionExp}>{mission.expReward} EXP</Text>
                       </View>
                     )}
@@ -375,17 +360,21 @@ const TodoListCreateScreen: React.FC<TodoListCreateScreenProps> = ({ navigation,
                   <Text style={styles.filterModalClose}>✕</Text>
                 </TouchableOpacity>
               </View>
-              <View style={styles.filterOptionRow}>
+              <TouchableOpacity
+                style={styles.filterCheckboxRow}
+                onPress={() => setOnlyMyMissions(!onlyMyMissions)}
+                activeOpacity={0.7}
+                accessibilityRole="checkbox"
+                accessibilityLabel="내가 만든 미션만 보기"
+                accessibilityState={{ checked: onlyMyMissions }}
+              >
                 <Text style={styles.filterOptionLabel}>내가 만든 미션만 보기</Text>
-                <Switch
-                  value={onlyMyMissions}
-                  onValueChange={setOnlyMyMissions}
-                  trackColor={{ false: colors.gray[300], true: colors.primary[400] }}
-                  thumbColor={colors.overlay.white.heavy}
-                  accessibilityLabel="내가 만든 미션만 보기"
-                  accessibilityState={{ checked: onlyMyMissions }}
-                />
-              </View>
+                <View style={[styles.filterCheckboxBox, onlyMyMissions && styles.filterCheckboxBoxChecked]}>
+                  {onlyMyMissions && (
+                    <Text style={styles.filterCheckboxCheckmark}>✓</Text>
+                  )}
+                </View>
+              </TouchableOpacity>
             </View>
           </TouchableOpacity>
         </TouchableOpacity>
@@ -501,14 +490,8 @@ const TodoListCreateScreen: React.FC<TodoListCreateScreenProps> = ({ navigation,
                       {mission.description}
                     </Text>
                     <View style={styles.missionListItemMeta}>
-                      <Text style={styles.missionListItemCategory}>{mission.category}</Text>
+                      <Text style={styles.missionListItemCategory}>{getCategoryLabel(mission.category || '')}</Text>
                       <View style={styles.missionListItemExpContainer}>
-                        <Image
-                          source={require('../../assets/images/sun.png')}
-                          style={styles.sunIcon}
-                          resizeMode="contain"
-                          accessibilityLabel="경험치 아이콘"
-                        />
                         <Text style={styles.missionListItemExp}>{mission.expReward} EXP</Text>
                       </View>
                     </View>
@@ -546,14 +529,8 @@ const TodoListCreateScreen: React.FC<TodoListCreateScreenProps> = ({ navigation,
                       </Text>
                       <Text style={styles.timeMissionTitle} numberOfLines={2}>{mission.title}</Text>
                       <View style={styles.timeMissionMeta}>
-                        <Text style={styles.timeMissionCategory}>{mission.category}</Text>
+                        <Text style={styles.timeMissionCategory}>{getCategoryLabel(mission.category || '')}</Text>
                         <View style={styles.timeMissionExpContainer}>
-                          <Image
-                            source={require('../../assets/images/sun.png')}
-                            style={styles.sunIcon}
-                            resizeMode="contain"
-                            accessibilityLabel="경험치 아이콘"
-                          />
                           <Text style={styles.timeMissionExp}>{mission.expReward} EXP</Text>
                         </View>
                       </View>

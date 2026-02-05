@@ -4,7 +4,7 @@
  */
 
 import { StyleSheet } from 'react-native';
-import { colors, spacing, typography, borderRadius, shadows } from '../../utils/designTokens';
+import { colors, spacing, borderRadius, shadows } from '../../utils/designTokens';
 import { createTextStyle, createSecondaryTextStyle, createTitleStyle } from '../../utils/styles/textStyles';
 import { cardStyles } from '../../utils/styles/commonStyles';
 
@@ -58,7 +58,6 @@ export const styles = StyleSheet.create({
   },
   levelText: {
     ...createTextStyle('sm', {
-      fontWeight: typography.fontWeight.medium,
       color: colors.primary[500],
     }),
   },

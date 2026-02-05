@@ -7,7 +7,7 @@ import { formatDateKorean } from '../../utils/dateUtils';
 import { SettingsScreenProps } from '../../types/screens/settings';
 import { TERMS_OF_SERVICE, PRIVACY_POLICY, OPEN_SOURCE_LICENSE } from '../../constants/screens/settings';
 import SettingItem from './SettingItem';
-import { useSettingsScreenContainer, APP_VERSION } from './SettingsScreen.container';
+import { useSettingsScreenContainer } from './SettingsScreen.container';
 import { styles } from './SettingsScreen.styles';
 
 const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
@@ -15,6 +15,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
   const {
     user,
     currentCharacter,
+    APP_VERSION,
     showNicknameForm,
     newNickname,
     showLogoutModal,
@@ -159,7 +160,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
           </View>
         )}
 
-        {/* 기능 섹션 */}
+        {/* 기능 섹션 (앱 이용 관련) */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>기능</Text>
           <View style={styles.settingsCard}>
@@ -177,16 +178,22 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
             <View style={styles.divider} />
             <SettingItem
               icon={require('../../assets/images/surprised_mission.png')}
-              title="돌발 미션 설정"
+              title="기상 미션 설정"
               onPress={() => navigation?.navigate('SpontaneousMissionSetup' as any, { mode: 'edit' })}
             />
             <View style={styles.divider} />
             <SettingItem
-              icon={require('../../assets/images/calendar.png')}
+              icon={require('../../assets/images/goal.png')}
               title="미션 카테고리 변경"
               onPress={() => navigation?.navigate('CategorySelect' as any, { fromSettings: true })}
             />
-            <View style={styles.divider} />
+          </View>
+        </View>
+
+        {/* 설정 및 지원 (사운드, 상담 등) */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>설정 및 지원</Text>
+          <View style={styles.settingsCard}>
             <SettingItem
               icon={require('../../assets/images/alarm.png')}
               title="사운드"
@@ -196,7 +203,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
             <SettingItem
               icon={require('../../assets/images/chat.png')}
               title="상담 서비스"
-              onPress={() => navigation?.navigate('CounselingSelect')}
+              onPress={() => navigation?.navigate('PlacesSearch')}
             />
           </View>
         </View>
@@ -263,11 +270,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
               onPress={handleSendFeedback}
             />
           </View>
-        </View>
-
-        {/* 버전 정보 (맨 밑) */}
-        <View style={styles.versionContainer}>
-          <Text style={styles.versionText}>v{APP_VERSION}</Text>
+          <Text style={styles.versionText}>{APP_VERSION}</Text>
         </View>
       </ScrollView>
 

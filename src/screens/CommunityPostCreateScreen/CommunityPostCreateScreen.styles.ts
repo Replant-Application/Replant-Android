@@ -3,7 +3,7 @@
  * 커뮤니티 게시글 작성 화면의 모든 스타일 정의
  */
 
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Platform } from 'react-native';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
 import { createTextStyle, createTitleStyle, createButtonTextStyle } from '../../utils/styles/textStyles';
 import { inputStyles } from '../../utils/styles/commonStyles';
@@ -66,6 +66,46 @@ export const styles = StyleSheet.create({
   inputSection: {
     marginBottom: spacing[4],
   },
+  switchRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  privateCheckboxRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+  },
+  privateCheckbox: {
+    width: 18,
+    height: 18,
+    borderRadius: borderRadius.sm,
+    borderWidth: 2,
+    borderColor: colors.gray[400],
+    backgroundColor: colors.white,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: spacing[2],
+  },
+  privateCheckboxSelected: {
+    borderColor: colors.primary[600],
+    backgroundColor: colors.primary[600],
+  },
+  privateCheckmark: {
+    ...createTextStyle('xs', {
+      color: colors.white,
+      fontWeight: typography.fontWeight.bold,
+    }),
+  },
+  privateCheckboxLabel: {
+    ...createTextStyle('xs', {
+      color: colors.text.primary,
+      fontWeight: typography.fontWeight.medium,
+    }),
+  },
+  privateSection: {
+    marginTop: spacing[2],
+  },
   label: {
     ...createTitleStyle('base', {
       color: colors.text.secondary,
@@ -100,7 +140,7 @@ export const styles = StyleSheet.create({
     bottom: 0,
   },
   noteLine: {
-    height: 28,
+    height: 36,
     borderBottomWidth: 1,
     borderBottomColor: '#e8e8e8',
   },
@@ -108,14 +148,15 @@ export const styles = StyleSheet.create({
     ...inputStyles.base(),
     backgroundColor: 'transparent',
     padding: spacing[3],
-    paddingTop: spacing[2],
+    paddingTop: spacing[3],
     fontSize: typography.fontSize.base,
     color: colors.text.primary,
-    minHeight: 168,
+    height: 154,
     maxHeight: 300,
     textAlignVertical: 'top',
-    lineHeight: 28,
+    lineHeight: 24,
     fontFamily: typography.fontFamily.regular,
+    ...(Platform.OS === 'android' && { includeFontPadding: false }),
   },
   mealPhotoContainer: {
     backgroundColor: colors.background.primary,
@@ -139,6 +180,10 @@ export const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.gray[300],
   },
+  previewImageTouchable: {
+    width: '100%',
+    height: '100%',
+  },
   addImageButtonSmall: {
     width: 80,
     height: 80,
@@ -151,7 +196,7 @@ export const styles = StyleSheet.create({
   },
   addImageButton: {
     width: '100%',
-    height: 100,
+    minHeight: 120,
     backgroundColor: colors.white,
     borderWidth: 1,
     borderColor: colors.border.light,
@@ -188,10 +233,10 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
   },
   removeImageText: {
-    color: colors.white,
-    fontSize: 16,
-    fontWeight: 'bold',
-    lineHeight: 18,
+    ...createTextStyle('base', {
+      color: colors.white,
+      fontWeight: typography.fontWeight.bold,
+    }),
   },
   imageSection: {
     marginBottom: spacing[4],

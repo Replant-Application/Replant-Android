@@ -7,6 +7,7 @@ import { getMissionHistory } from '../api/missionApi';
 import { getMyBadges } from '../api/badgeApi';
 import { getMyReant } from '../api/reantApi';
 import { getDiaryStats } from '../api/diaryApi';
+import { getTotalExpToReachLevel } from '../utils/expTable';
 
 // 카테고리별 캐릭터 설명
 const getCategoryDescription = (categoryId: string): string => {
@@ -131,8 +132,8 @@ export const getUserProfile = async (nickname: string): Promise<ServiceResult<Us
       const reantResult = await getMyReant();
       if (reantResult.success && reantResult.data) {
         const { level, exp } = reantResult.data;
-        // 레벨 1→2: 100, 2→3: 200, ... (level-1)→level: (level-1)*100 → 누적 = 100 * (1+2+...+(level-1)) = 100 * (level-1)*level/2
-        const expToReachCurrentLevel = level > 1 ? 100 * ((level - 1) * level / 2) : 0;
+        // 레벨별 필요 경험치 테이블: L1→10, L2→50, L3→100, L4→200, L5→500, L6+→500
+        const expToReachCurrentLevel = getTotalExpToReachLevel(level);
         totalExperience = expToReachCurrentLevel + exp;
       } else {
         // API 실패 시 로컬 스토리지 사용 (폴백)

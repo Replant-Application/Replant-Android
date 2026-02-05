@@ -1,6 +1,6 @@
 {
   "name": "ReplantMobileApp",
-  "version": "0.0.41",
+  "version": "1.0.19",
   "private": true,
   "scripts": {
     "android": "expo run:android",
@@ -67,6 +67,7 @@
     "node": ">=20"
   },
   "overrides": {
-    "fast-xml-parser": ">=5.3.4"
+    "fast-xml-parser": ">=5.3.4",
+    "@isaacs/brace-expansion": ">=5.0.1"
   }
 }

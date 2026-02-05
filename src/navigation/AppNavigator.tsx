@@ -396,23 +396,22 @@ const AppNavigator = () => {
     };
   }, []);
 
+  // 업데이트 모달 기능 (선택 업데이트만 사용, 강제 업데이트 미사용)
+  const SHOW_UPDATE_MODAL_FEATURE = true;
+
   // 앱 버전 체크 (앱 시작 시 한 번만)
   useEffect(() => {
     const checkAppVersion = async () => {
+      if (!SHOW_UPDATE_MODAL_FEATURE) return;
       try {
         console.log('[AppNavigator] 버전 체크 시작');
         const result = await checkUpdateRequired();
         console.log('[AppNavigator] 버전 체크 결과:', result);
         
         if (result) {
-          // 강제 업데이트는 항상 표시
-          if (result.isRequired) {
-            console.log('[AppNavigator] 강제 업데이트 모달 표시');
-            setUpdateInfo(result);
-            setUpdateModalVisible(true);
-            return;
-          }
-          
+          // 강제 업데이트는 현재 미사용 — 선택 업데이트만 표시
+          if (result.isRequired) return;
+
           // 선택 업데이트는 "나중에"를 누른 경우 일정 기간 동안 표시하지 않음
           if (result.isRecommended) {
             try {
@@ -459,7 +458,7 @@ const AppNavigator = () => {
 
     // 앱 시작 시 버전 체크
     checkAppVersion();
-  }, []);
+  }, [SHOW_UPDATE_MODAL_FEATURE]);
 
   // 플레이스토어 링크 열기
   const handleUpdate = useCallback(async () => {
@@ -524,8 +523,10 @@ const AppNavigator = () => {
     const title = lastNotification.title || '';
     const content = lastNotification.content || '';
 
-    // 업데이트 알림 처리 (APP_UPDATE) - 로그인 무관 (버전 체크 API와 정책 통일)
+    // 업데이트 알림 처리 (APP_UPDATE) - 기능 비활성화 시 모달 미표시
     if (type === 'APP_UPDATE') {
+      processedNotificationIdRef.current = notificationId || null;
+      if (!SHOW_UPDATE_MODAL_FEATURE) return;
       const data = lastNotification;
       const updateResult = {
         isRequired: data.isRequired === true || data.isRequired === 'true',
@@ -534,12 +535,8 @@ const AppNavigator = () => {
         storeUrl: data.storeUrl || 'https://play.google.com/store/apps/details?id=com.anonymous.replantmobileapp',
       };
 
-      if (updateResult.isRequired) {
-        setUpdateInfo(updateResult);
-        setUpdateModalVisible(true);
-        processedNotificationIdRef.current = notificationId || null;
-        return;
-      }
+      // 강제 업데이트는 현재 미사용 — 선택 업데이트만 표시
+      if (updateResult.isRequired) return;
 
       // 선택 업데이트: 24h 디스미스 체크 (checkUpdateRequired와 동일 정책)
       (async () => {
@@ -550,7 +547,6 @@ const AppNavigator = () => {
             const dismissedTime = parseInt(dismissedAt, 10);
             const hoursSinceDismissed = (Date.now() - dismissedTime) / (1000 * 60 * 60);
             if (hoursSinceDismissed < 24) {
-              processedNotificationIdRef.current = notificationId || null;
               return;
             }
             await AsyncStorage.removeItem(dismissedKey);
@@ -631,7 +627,7 @@ const AppNavigator = () => {
     } else {
       console.log('[AppNavigator] ⚠️ 특별 처리할 알림이 아님, 무시');
     }
-  }, [lastNotification, isLoggedIn, navigate, setWakeUpMissionId]);
+  }, [lastNotification, isLoggedIn, navigate, setWakeUpMissionId, SHOW_UPDATE_MODAL_FEATURE]);
 
   // 화면 변경 시 배경음악 재생
   useEffect(() => {

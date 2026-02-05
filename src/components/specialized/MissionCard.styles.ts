@@ -98,6 +98,7 @@ export const styles = StyleSheet.create({
       color: colors.green[500],
       fontWeight: typography.fontWeight.medium,
     }),
+    marginLeft: spacing[1],
   },
   pendingBadge: {
     flexDirection: 'row',
@@ -251,6 +252,9 @@ export const styles = StyleSheet.create({
   },
   uncompleteButton: {
     backgroundColor: colors.gray[300],
+    paddingHorizontal: spacing[3],
+    paddingVertical: spacing[1.5],
+    minHeight: 32,
   },
   viewButton: {
     backgroundColor: colors.primary[100],
@@ -266,7 +270,10 @@ export const styles = StyleSheet.create({
     color: colors.primary[500],
   },
   uncompleteText: {
-    color: colors.text.secondary,
+    ...createTextStyle('xs', {
+      color: colors.text.secondary,
+      fontWeight: typography.fontWeight.medium,
+    }),
   },
   viewText: {
     color: colors.primary[500],

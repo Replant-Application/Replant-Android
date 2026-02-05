@@ -147,16 +147,13 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 3,
   },
   missionCountText: {
-    fontSize: 8,
-    color: colors.background.primary,
-    fontWeight: typography.fontWeight.bold as any,
-    fontFamily: Platform.select({
-      ios: undefined, // iOS는 기본 시스템 폰트 사용
-      android: typography.fontFamily.regular,
+    ...createTextStyle('xs', {
+      fontSize: 8,
+      color: colors.background.primary,
+      fontWeight: typography.fontWeight.bold as any,
+      lineHeight: 12,
+      textAlign: 'center',
     }),
-    includeFontPadding: false,
-    lineHeight: 12,
-    textAlign: 'center',
   },
   missionItem: {
     flexDirection: 'row',
@@ -165,10 +162,12 @@ export const styles = StyleSheet.create({
     marginBottom: spacing[2],
     backgroundColor: colors.background.primary,
   },
-  missionIcon: {
-    width: 24,
-    height: 24,
-    marginRight: spacing[3],
+  missionNumber: {
+    ...createTitleStyle('base', {
+      color: colors.text.secondary,
+      marginRight: spacing[2],
+      minWidth: 20,
+    }),
   },
   missionContent: {
     flex: 1,
@@ -200,5 +199,47 @@ export const styles = StyleSheet.create({
       textAlign: 'center',
       padding: spacing[6],
     }),
+  },
+  /** 게시글 모달 래퍼·하단 탭 바 (캘린더에서 게시글 보기 시) */
+  modalPostDetailWrap: {
+    flex: 1,
+  },
+  modalPostDetailContent: {
+    flex: 1,
+  },
+  modalTabBar: {
+    flexDirection: 'row',
+    backgroundColor: colors.white,
+    borderTopLeftRadius: 12,
+    borderTopRightRadius: 12,
+    paddingBottom: Platform.OS === 'android' ? spacing[12] : spacing[5],
+    paddingTop: spacing[2],
+    paddingHorizontal: spacing[2],
+  },
+  modalTab: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: spacing[1],
+    borderRadius: 12,
+  },
+  modalTabActive: {
+    backgroundColor: colors.green[50],
+  },
+  modalTabIcon: {
+    width: 24,
+    height: 24,
+    marginBottom: 2,
+    opacity: 0.6,
+  },
+  modalTabIconActive: {
+    opacity: 1,
+  },
+  modalTabLabel: {
+    ...createSecondaryTextStyle('xs'),
+    color: colors.text.secondary,
+  },
+  modalTabLabelActive: {
+    color: colors.green[600],
   },
 });

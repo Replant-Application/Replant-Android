@@ -32,6 +32,25 @@ export const styles = StyleSheet.create({
     }),
     includeFontPadding: false,
   },
+  privateAccessContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: spacing[6],
+  },
+  privateAccessTitle: {
+    ...createTextStyle('xl', {
+      fontWeight: typography.fontWeight.semibold,
+      color: colors.text.primary,
+      marginBottom: spacing[2],
+    }),
+  },
+  privateAccessMessage: {
+    ...createBodyStyle('base', {
+      color: colors.text.secondary,
+      textAlign: 'center',
+    }),
+  },
   postContainer: {
     marginBottom: spacing[5],
     ...shadows.sm,
@@ -56,6 +75,11 @@ export const styles = StyleSheet.create({
     backgroundColor: colors.primary[500],
     justifyContent: 'center',
     alignItems: 'center',
+    overflow: 'hidden',
+  },
+  authorAvatarImage: {
+    width: 32,
+    height: 32,
   },
   authorAvatarText: {
     ...createTextStyle('sm', {
@@ -72,10 +96,10 @@ export const styles = StyleSheet.create({
   authorName: {
     ...createTextStyle('sm', {
       color: colors.text.primary,
-      fontWeight: typography.fontWeight.bold,
+      fontWeight: typography.fontWeight.semibold,
       fontFamily: Platform.select({
         ios: undefined,
-        android: typography.fontFamily.bold,
+        android: typography.fontFamily.regular,
       }),
     }),
   },
@@ -119,19 +143,20 @@ export const styles = StyleSheet.create({
   postActionText: {
     ...createTextStyle('xs', {
       color: colors.text.secondary,
-      fontWeight: typography.fontWeight.normal,
+      fontWeight: typography.fontWeight.semibold,
     }),
   },
   postActionTextDelete: {
     color: colors.error,
+    fontWeight: typography.fontWeight.semibold,
   },
   date: {
     ...createTextStyle('xs', {
       color: colors.text.tertiary,
-      fontWeight: typography.fontWeight.bold,
+      fontWeight: typography.fontWeight.medium,
       fontFamily: Platform.select({
         ios: undefined,
-        android: typography.fontFamily.bold,
+        android: typography.fontFamily.regular,
       }),
     }),
     marginLeft: 'auto',
@@ -180,6 +205,7 @@ export const styles = StyleSheet.create({
       color: colors.primary[700],
       fontWeight: typography.fontWeight.normal,
     }),
+    marginLeft: spacing[1],
   },
   pendingBadge: {
     flexDirection: 'row',
@@ -321,28 +347,33 @@ export const styles = StyleSheet.create({
     fontSize: typography.fontSize.sm,
     color: colors.text.primary,
     minHeight: 60,
-    marginBottom: spacing[1],
+    maxHeight: 100,
+    marginBottom: spacing[3],
     textAlignVertical: 'top',
+    fontFamily: Platform.select({ ios: undefined, android: typography.fontFamily.regular }),
+    includeFontPadding: false,
   },
   editCommentActions: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
-    gap: spacing[2],
+    gap: spacing[3],
   },
   editCommentButton: {
     paddingHorizontal: spacing[2],
     paddingVertical: spacing[1],
+    minHeight: 32,
     borderRadius: borderRadius.base,
-    backgroundColor: colors.white,
+    backgroundColor: colors.gray[200],
     borderWidth: 1,
-    borderColor: colors.border.light,
+    borderColor: colors.gray[400],
   },
   editCommentButtonSave: {
-    backgroundColor: colors.primary[500],
-    borderColor: colors.primary[500],
+    backgroundColor: colors.primary[600],
+    borderWidth: 1,
+    borderColor: colors.primary[700],
   },
   editCommentButtonText: {
-    ...createTextStyle('xs', {
+    ...createTextStyle('sm', {
       color: colors.text.secondary,
       fontWeight: typography.fontWeight.normal,
     }),

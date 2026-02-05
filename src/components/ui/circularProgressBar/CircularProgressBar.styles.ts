@@ -59,7 +59,7 @@ export const styles = StyleSheet.create({
   },
   percentage: {
     ...createTextStyle('xs', {
-      fontWeight: typography.fontWeight.normal,
+      fontWeight: typography.fontWeight.bold,
       color: colors.primary[500],
     }),
   },

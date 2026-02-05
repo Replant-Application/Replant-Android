@@ -142,7 +142,8 @@ export const styles = StyleSheet.create({
   },
   progressCount: {
     ...createTextStyle('xs', {
-      color: colors.text.tertiary,
+      color: colors.text.primary,
+      fontWeight: typography.fontWeight.semibold,
       marginTop: spacing[1.5],
       textAlign: 'center',
     }),
@@ -241,10 +242,11 @@ export const styles = StyleSheet.create({
     marginLeft: spacing[2],
   },
   verifiedIcon: {
-    fontSize: typography.fontSize.xs,
-    color: '#4CAF50',
-    marginRight: spacing[0.5],
-    fontWeight: typography.fontWeight.bold,
+    ...createTextStyle('xs', {
+      color: '#4CAF50',
+      marginRight: spacing[0.5],
+      fontWeight: typography.fontWeight.bold,
+    }),
   },
   verifiedText: {
     ...createTextStyle('xs', {

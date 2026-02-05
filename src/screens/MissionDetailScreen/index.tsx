@@ -42,14 +42,14 @@ const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({ navigation, r
     hasBadge,
     hasWrittenReview,
     reviewContent,
-    reviewRating,
     submittingReview,
     returnTab,
     setReviewContent,
-    setReviewRating,
     handleSubmitReview,
+    handleDeleteReview,
     handleRefresh,
     loadMoreReviews,
+    currentUserId,
     showAlert,
     alertTitle,
     alertMessage,
@@ -169,12 +169,6 @@ const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({ navigation, r
                 </View>
                 {mission.missionType !== 'CUSTOM' && (
                   <View style={styles.missionExpContainer}>
-                    <Image
-                      source={require('../../assets/images/sun.png')}
-                      style={styles.sunIcon}
-                      resizeMode="contain"
-                      accessibilityLabel="경험치 아이콘"
-                    />
                     <Text style={styles.missionExp}>{mission.expReward} EXP</Text>
                   </View>
                 )}
@@ -200,14 +194,6 @@ const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({ navigation, r
               <Text style={styles.statLabel}>배지 유효기간</Text>
             </View>
           </View>
-
-          {/* 인증 방식 표시 (커스텀 미션이 아닐 때만) - 모든 미션 커뮤니티 인증 통일 */}
-          {mission.missionType !== 'CUSTOM' && (
-            <View style={styles.verificationInfo}>
-              <Text style={styles.verificationLabel}>인증 방식</Text>
-              <Text style={styles.verificationValue}>커뮤니티 인증</Text>
-            </View>
-          )}
         </View>
 
         {/* 후기 작성 섹션 */}
@@ -227,49 +213,10 @@ const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({ navigation, r
           </View>
         )}
 
-        {/* 배지가 있고 이미 후기를 작성한 경우 */}
-        {hasBadge && hasWrittenReview && (
-          <View style={styles.alreadyWrittenSection}>
-            <Text style={styles.alreadyWrittenIcon} />
-            <Text style={styles.alreadyWrittenText}>
-              이 배지로 후기를 이미 작성하셨습니다.{'\n'}
-              다시 미션을 완료하면 새 후기를 작성할 수 있어요!
-            </Text>
-          </View>
-        )}
-
         {/* 배지가 있고 후기를 작성하지 않은 경우 */}
         {hasBadge && !hasWrittenReview && (
           <View style={styles.writeReviewSection}>
             <Text style={styles.sectionTitle}>후기 작성</Text>
-            <View style={styles.writeReviewHintContainer}>
-              <Text style={styles.writeReviewHint}>
-                미션 배지를 보유하고 계시네요!
-              </Text>
-              <Text style={styles.writeReviewHint}>
-                후기를 남겨주세요.
-              </Text>
-            </View>
-            {/* 별점 선택 */}
-            <View style={styles.ratingContainer}>
-              <View style={styles.starsContainer}>
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <TouchableOpacity
-                    key={star}
-                    onPress={() => setReviewRating(star)}
-                    activeOpacity={0.7}
-                    style={styles.starButton}
-                    accessibilityRole="button"
-                    accessibilityLabel={`별점 ${star}점`}
-                    accessibilityState={{ selected: star <= reviewRating }}
-                  >
-                    <Text style={styles.starText}>
-                      {star <= reviewRating ? '★' : '☆'}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-            </View>
             <TextInput
               style={styles.reviewInput}
               placeholder="후기를 작성해주세요..."
@@ -314,7 +261,12 @@ const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({ navigation, r
           ) : (
             <View style={styles.reviewsList}>
               {reviews.map(review => (
-                <ReviewCard key={review.id} review={review} />
+                <ReviewCard
+                  key={review.id}
+                  review={review}
+                  currentUserId={currentUserId}
+                  onDelete={handleDeleteReview}
+                />
               ))}
 
               {currentPage < totalPages - 1 && (

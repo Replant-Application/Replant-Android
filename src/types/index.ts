@@ -272,6 +272,8 @@ export interface CommunityPost {
   verified?: boolean; // 인증 완료 여부 (false일 때만 수정/삭제 가능)
   status?: string; // 인증 상태 (PENDING, APPROVED) - VERIFICATION 타입일 때만
   completionRate?: number; // 완료 정도 (0-100) - VERIFICATION 타입일 때만
+  isPublic?: boolean; // 공개 여부 (일반 게시글만, false = 비공개)
+  authorReantLevel?: number; // 작성자 리앤트 레벨 (캐릭터 이미지 표시용, 없으면 1)
 }
 
 export interface CommunityComment {
@@ -298,6 +300,7 @@ export interface CommunityPostData {
   images?: string[]; // 미션 인증 사진
   tags?: string[];
   category?: string;
+  isPublic?: boolean; // 공개 여부 (일반 게시글만, false = 비공개)
 }
 
 // Hooks 반환 타입

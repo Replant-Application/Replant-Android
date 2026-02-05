@@ -12,6 +12,9 @@ export const styles = StyleSheet.create({
   container: {
     ...cardStyles.base(),
     ...shadows.base,
+    paddingVertical: spacing[4],
+    paddingHorizontal: spacing[4],
+    marginBottom: spacing[2],
   },
   header: {
     flexDirection: 'row',
@@ -91,10 +94,12 @@ export const styles = StyleSheet.create({
   },
   button: {
     flex: 1,
-    ...buttonStyles.primary(),
-    paddingVertical: spacing[2],
+    ...buttonStyles.secondary(),
+    paddingVertical: spacing[1],
+    paddingHorizontal: spacing[2],
+    minHeight: 36,
   },
   buttonText: {
-    ...createButtonTextStyle('sm'),
+    ...createButtonTextStyle('sm', { color: colors.text.primary }),
   },
 });

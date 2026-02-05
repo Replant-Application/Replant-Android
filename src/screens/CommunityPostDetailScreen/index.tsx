@@ -2,7 +2,7 @@
  * 커뮤니티 게시글 상세 화면
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -18,6 +18,7 @@ import { CommentCard } from '../../components/specialized';
 import { Loading, ErrorBoundary, EmptyState, Header, Card, AlertModal, ConfirmModal, FullScreenImageViewer } from '../../components/ui';
 import { colors } from '../../utils/designTokens';
 import { formatDateKorean } from '../../utils/dateUtils';
+import { getCharacterImageStatic } from '../../utils/characterUtils';
 import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types/navigation';
 import { useCommunityPostDetailScreenContainer } from './CommunityPostDetailScreen.container';
@@ -29,7 +30,7 @@ interface CommunityPostDetailScreenProps {
 }
 
 const CommunityPostDetailScreen: React.FC<CommunityPostDetailScreenProps> = ({ navigation, route }) => {
-  // 비즈니스 로직은 Container에서 처리
+  // 비즈니스 로직은 Container에서 처리 (훅 규칙으로 항상 먼저 호출)
   const {
     post,
     comments,
@@ -68,12 +69,56 @@ const CommunityPostDetailScreen: React.FC<CommunityPostDetailScreenProps> = ({ n
 
   const [selectedImageUri, setSelectedImageUri] = useState<string | null>(null);
 
+  // 히스토리 복원 시 params가 잠깐 바뀌어 postId가 없어지면 무한 로딩 방지: 즉시 뒤로가기
+  const postId = route.params?.postId;
+  useEffect(() => {
+    if (!postId || String(postId).trim() === '') {
+      navigation.goBack();
+    }
+  }, [postId, navigation]);
+
+  if (!postId || String(postId).trim() === '') {
+    return null;
+  }
+
   if (loading) {
     return <Loading text="게시글을 불러오는 중..." />;
   }
 
   if (error || !post) {
-    return <ErrorBoundary error={error || '게시글을 찾을 수 없습니다.'} />;
+    const displayError = error || '게시글을 찾을 수 없습니다.';
+    const isPrivateAccess =
+      typeof displayError === 'string' &&
+      (displayError.includes('비공개') ||
+        /403|접근|forbidden/i.test(displayError));
+
+    if (isPrivateAccess) {
+      return (
+        <ImageBackground
+          source={require('../../assets/images/background.png')}
+          style={styles.backgroundImage}
+          resizeMode="cover"
+          accessibilityElementsHidden={true}
+        >
+          <View style={styles.container}>
+            <Header
+              title="게시글"
+              navigation={navigation}
+              showBorder={false}
+              titleStyle={styles.headerTitle}
+            />
+            <View style={styles.privateAccessContainer}>
+              <Text style={styles.privateAccessTitle}>비공개 글입니다</Text>
+              <Text style={styles.privateAccessMessage}>
+                작성자만 볼 수 있는 글입니다.
+              </Text>
+            </View>
+          </View>
+        </ImageBackground>
+      );
+    }
+
+    return <ErrorBoundary error={displayError} />;
   }
 
   return (
@@ -157,9 +202,18 @@ const CommunityPostDetailScreen: React.FC<CommunityPostDetailScreenProps> = ({ n
           <View style={styles.postHeader}>
             <View style={styles.authorInfo}>
               <View style={styles.authorAvatar}>
-                <Text style={styles.authorAvatarText}>
-                  {post.author_nickname?.charAt(0)?.toUpperCase() || '?'}
-                </Text>
+                {post.authorReantLevel != null && post.authorReantLevel >= 1 ? (
+                  <Image
+                    source={getCharacterImageStatic(Math.min(post.authorReantLevel, 6))}
+                    style={styles.authorAvatarImage}
+                    resizeMode="contain"
+                    accessibilityLabel={`${post.author_nickname || '작성자'} 캐릭터`}
+                  />
+                ) : (
+                  <Text style={styles.authorAvatarText}>
+                    {post.author_nickname?.charAt(0)?.toUpperCase() || '?'}
+                  </Text>
+                )}
               </View>
               <View style={styles.authorNameContainer}>
                 <Text style={styles.authorName}>{post.author_nickname || '알 수 없음'}</Text>
@@ -175,36 +229,35 @@ const CommunityPostDetailScreen: React.FC<CommunityPostDetailScreenProps> = ({ n
             </View>
           </View>
 
-          <View style={styles.missionInfo}>
-            <Image
-              source={require('../../assets/images/goal.png')}
-              style={styles.missionEmojiImage}
-              resizeMode="contain"
-              accessibilityLabel="미션 아이콘"
-            />
-            <Text style={styles.missionTitle}>
-              {post.mission_title || '미션'}
-              {post.category === '인증' && post.completionRate !== undefined && post.completionRate !== null && (
-                ` (${post.completionRate}%)`
+          {/* 인증글일 때만 미션 영역 표시. 일반글은 미션 제목 스타일 박스 미표시. */}
+          {post.category === '인증' && (
+            <View style={styles.missionInfo}>
+              <Text style={styles.missionTitle}>
+                {post.mission_title || '미션'}
+                {post.category === '인증' && post.completionRate !== undefined && post.completionRate !== null && (
+                  ` (${post.completionRate}%)`
+                )}
+              </Text>
+              {post.category === '인증' && (
+                post.verified === true ? (
+                  <View style={styles.verifiedBadge}>
+                    <Text style={styles.verifiedIcon}>✓</Text>
+                    <Text style={styles.verifiedText}>인증완료</Text>
+                  </View>
+                ) : post.verified === false ? (
+                  <View style={styles.pendingBadge}>
+                    <Text style={styles.pendingIcon}>⏳</Text>
+                    <Text style={styles.pendingText}>인증대기</Text>
+                  </View>
+                ) : null
               )}
-            </Text>
-            {/* 인증 상태 배지 - 인증 게시글(category === '인증')일 때만 표시 */}
-            {post.category === '인증' && (
-              post.verified === true ? (
-                <View style={styles.verifiedBadge}>
-                  <Text style={styles.verifiedIcon}>✓</Text>
-                  <Text style={styles.verifiedText}>인증완료</Text>
-                </View>
-              ) : post.verified === false ? (
-                <View style={styles.pendingBadge}>
-                  <Text style={styles.pendingIcon}>⏳</Text>
-                  <Text style={styles.pendingText}>인증대기</Text>
-                </View>
-              ) : null
-            )}
-          </View>
+            </View>
+          )}
 
-          <Text style={styles.title}>{post.title}</Text>
+          {/* 인증글은 미션 제목을 위 초록 바에 이미 표시하므로 같은 제목을 다시 그리지 않음 */}
+          {!(post.category === '인증' && post.mission_title && post.mission_title !== 'undefined') && (
+            <Text style={styles.title}>{post.title}</Text>
+          )}
           <Text style={styles.contentText}>{post.content}</Text>
 
           {post.images && post.images.length > 0 && (
@@ -317,59 +370,65 @@ const CommunityPostDetailScreen: React.FC<CommunityPostDetailScreenProps> = ({ n
                       />
                     )}
 
-                    {/* 대댓글 (부모 댓글에 속한 댓글들) */}
-                    {comments
-                      .filter(reply => reply.parent_comment_id === parentComment.comment_id)
-                      .filter(reply => !hiddenCommentIds.includes(reply.comment_id))
-                      .map(reply => (
-                        <View key={reply.comment_id}>
-                          {editingCommentId === reply.comment_id ? (
-                            <View style={[styles.editCommentContainer, styles.replyEditContainer]}>
-                              <TextInput
-                                style={styles.editCommentInput}
-                                value={editingContent}
-                                onChangeText={setEditingContent}
-                                multiline
-                                accessibilityLabel="답글 수정"
-                                accessibilityHint="수정할 답글 내용을 입력하세요"
-                              />
-                              <View style={styles.editCommentActions}>
-                                <TouchableOpacity
-                                  style={styles.editCommentButton}
-                                  onPress={handleCancelEdit}
-                                  accessibilityRole="button"
-                                  accessibilityLabel="취소"
-                                >
-                                  <Text style={styles.editCommentButtonText}>취소</Text>
-                                </TouchableOpacity>
-                                <TouchableOpacity
-                                  style={[styles.editCommentButton, styles.editCommentButtonSave]}
-                                  onPress={handleUpdateComment}
-                                  accessibilityRole="button"
-                                  accessibilityLabel="저장"
-                                >
-                                  <Text
-                                    style={[
-                                      styles.editCommentButtonText,
-                                      styles.editCommentButtonTextSave,
-                                    ]}
-                                  >
-                                    저장
-                                  </Text>
-                                </TouchableOpacity>
-                              </View>
+                    {/* 대댓글 (답글의 답글까지 재귀 표시) */}
+                    {(() => {
+                      const renderReplies = (parentId: string): React.ReactNode =>
+                        comments
+                          .filter(reply => reply.parent_comment_id === parentId)
+                          .filter(reply => !hiddenCommentIds.includes(reply.comment_id))
+                          .map(reply => (
+                            <View key={reply.comment_id}>
+                              {editingCommentId === reply.comment_id ? (
+                                <View style={[styles.editCommentContainer, styles.replyEditContainer]}>
+                                  <TextInput
+                                    style={styles.editCommentInput}
+                                    value={editingContent}
+                                    onChangeText={setEditingContent}
+                                    multiline
+                                    accessibilityLabel="답글 수정"
+                                    accessibilityHint="수정할 답글 내용을 입력하세요"
+                                  />
+                                  <View style={styles.editCommentActions}>
+                                    <TouchableOpacity
+                                      style={styles.editCommentButton}
+                                      onPress={handleCancelEdit}
+                                      accessibilityRole="button"
+                                      accessibilityLabel="취소"
+                                    >
+                                      <Text style={styles.editCommentButtonText}>취소</Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity
+                                      style={[styles.editCommentButton, styles.editCommentButtonSave]}
+                                      onPress={handleUpdateComment}
+                                      accessibilityRole="button"
+                                      accessibilityLabel="저장"
+                                    >
+                                      <Text
+                                        style={[
+                                          styles.editCommentButtonText,
+                                          styles.editCommentButtonTextSave,
+                                        ]}
+                                      >
+                                        저장
+                                      </Text>
+                                    </TouchableOpacity>
+                                  </View>
+                                </View>
+                              ) : (
+                                <CommentCard
+                                  comment={reply}
+                                  isReply={true}
+                                  onEdit={handleEditComment}
+                                  onDelete={handleDeleteComment}
+                                  onReply={handleReplyComment}
+                                  onHide={handleHideComment}
+                                />
+                              )}
+                              {renderReplies(reply.comment_id)}
                             </View>
-                          ) : (
-                            <CommentCard
-                              comment={reply}
-                              isReply={true}
-                              onEdit={handleEditComment}
-                              onDelete={handleDeleteComment}
-                              onHide={handleHideComment}
-                            />
-                          )}
-                        </View>
-                      ))}
+                          ));
+                      return renderReplies(parentComment.comment_id);
+                    })()}
                   </View>
                 ))}
             </View>

@@ -14,9 +14,9 @@ export const styles = StyleSheet.create({
     flex: 1,
   },
   tabContainer: {
-    paddingHorizontal: spacing[3],
+    paddingHorizontal: spacing[4],
     paddingTop: spacing[2],
-    paddingBottom: spacing[3],
+    paddingBottom: spacing[1],
   },
   loadingContainer: {
     ...loadingStyles.container(),
@@ -33,8 +33,10 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: 'rgba(255, 255, 255, 0.95)',
     borderRadius: borderRadius.base,
-    padding: spacing[4],
-    marginBottom: spacing[4],
+    paddingTop: spacing[2],
+    paddingBottom: spacing[4],
+    paddingHorizontal: spacing[4],
+    marginBottom: spacing[3],
     borderWidth: 2,
     borderColor: '#D4A574',
     borderStyle: 'dashed',
@@ -54,24 +56,31 @@ export const styles = StyleSheet.create({
   createButtonContent: {
     flex: 1,
     justifyContent: 'center',
+    alignItems: 'flex-start',
+  },
+  /** + 아이콘과 제목을 같은 라인에 */
+  createButtonTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   createButtonTitle: {
-    fontSize: typography.fontSize.base,
-    fontFamily: Platform.select({
-      ios: undefined,
-      android: typography.fontFamily.regular,
+    flex: 1,
+    ...createTextStyle('base', {
+      fontWeight: typography.fontWeight.medium,
+      color: '#6B5344',
     }),
-    fontWeight: typography.fontWeight.medium,
-    color: '#6B5344',
-    includeFontPadding: false,
-    lineHeight: Math.round(typography.fontSize.base * 1.35),
   },
+  /** 버튼 안 설명 (하루 1회 제한) */
   createButtonSubtitle: {
-    ...createSecondaryTextStyle('sm', {
+    marginTop: spacing[3],
+    textAlign: 'left',
+    alignSelf: 'stretch',
+    ...createSecondaryTextStyle('xs', {
       color: '#8B6F47',
     }),
+    includeFontPadding: false,
   },
-  /** 생성 버튼 아래 안내 문구 (하루 1회 제한) */
+  /** @deprecated 안내 문구는 버튼 안으로 이동 */
   createNotice: {
     marginTop: spacing[2],
     marginBottom: spacing[4],
@@ -87,18 +96,44 @@ export const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: '#D4A574',
   },
+  /** 제목과 ⋯ 버튼이 같은 가로선에 오도록 상단 정렬 + 동일 줄높이 */
   cardHeader: {
     flexDirection: 'row',
+    flexWrap: 'nowrap',
     justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     marginBottom: spacing[2],
   },
   cardTitle: {
     ...createBodyStyle('base', {
       fontWeight: typography.fontWeight.medium,
       flex: 1,
+      minWidth: 0,
       marginRight: spacing[2],
+      lineHeight: 24,
     }),
+  },
+  menuButton: {
+    flexShrink: 0,
+    width: 32,
+    height: 24,
+    marginRight: -spacing[2],
+    marginTop: -2,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  /** 세로로 쌓인 점 세 개 (⋮) */
+  verticalDots: {
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    height: 14,
+  },
+  verticalDot: {
+    width: 4,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: colors.text.secondary,
   },
   statusBadge: {
     paddingVertical: spacing[1],
@@ -150,7 +185,7 @@ export const styles = StyleSheet.create({
   },
   progressFill: {
     height: '100%',
-    backgroundColor: '#8B6F47',
+    backgroundColor: '#4CAF50',
     borderRadius: borderRadius.full,
   },
   progressFillCompleted: {
@@ -182,7 +217,8 @@ export const styles = StyleSheet.create({
   },
   emptyContainer: {
     ...emptyStateStyles.container(),
-    paddingVertical: spacing[12],
+    paddingTop: spacing[6],
+    paddingBottom: spacing[12],
   },
   emptyIcon: {
     width: 48,
@@ -192,9 +228,13 @@ export const styles = StyleSheet.create({
   emptyText: {
     ...emptyStateStyles.text(),
     marginBottom: spacing[2],
+    fontWeight: typography.fontWeight.normal,
+    color: colors.text.primary,
   },
   emptySubtext: {
     ...emptyStateStyles.subtext(),
+    fontWeight: typography.fontWeight.medium,
+    color: colors.text.secondary,
   },
   infoContainer: {
     backgroundColor: 'rgba(255, 255, 255, 0.9)',

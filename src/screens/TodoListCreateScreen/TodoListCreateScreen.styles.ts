@@ -200,6 +200,33 @@ export const styles = StyleSheet.create({
     paddingVertical: spacing[3],
     gap: spacing[4],
   },
+  filterCheckboxRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: spacing[3],
+    gap: spacing[3],
+  },
+  filterCheckboxBox: {
+    width: 22,
+    height: 22,
+    borderRadius: borderRadius.sm,
+    borderWidth: 2,
+    borderColor: colors.gray[400],
+    backgroundColor: colors.white,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  filterCheckboxBoxChecked: {
+    backgroundColor: colors.primary[500],
+    borderColor: colors.primary[500],
+  },
+  filterCheckboxCheckmark: {
+    ...createTextStyle('sm', {
+      color: colors.white,
+      fontWeight: typography.fontWeight.bold,
+    }),
+  },
   filterOptionLabel: {
     ...createBodyStyle('base', {
       fontWeight: typography.fontWeight.medium,
@@ -272,28 +299,30 @@ export const styles = StyleSheet.create({
     gap: spacing[2] 
   },
   missionCategory: { 
-    fontSize: typography.fontSize.xs, 
-    color: colors.blue[600], 
-    backgroundColor: colors.blue[100], 
-    paddingVertical: 2, 
-    paddingHorizontal: spacing[2], 
-    borderRadius: borderRadius.sm 
+    ...createTextStyle('xs', { 
+      color: colors.blue[600], 
+      backgroundColor: colors.blue[100], 
+      paddingVertical: spacing[1], 
+      paddingHorizontal: spacing[3], 
+      borderRadius: borderRadius.sm,
+      textAlign: 'center',
+    }),
   },
   missionExpContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing[1],
     backgroundColor: '#FFF3E0',
-    paddingVertical: 2,
-    paddingHorizontal: spacing[2],
+    paddingVertical: spacing[1],
+    paddingHorizontal: spacing[3],
     borderRadius: borderRadius.sm,
   },
   sunIcon: {
-    width: 14,
-    height: 14,
+    width: 18,
+    height: 18,
   },
   missionExp: {
-    ...createTextStyle('xs', {
+    ...createTextStyle('sm', {
       color: '#FF9800',
       fontWeight: typography.fontWeight.medium,
     }),
@@ -337,9 +366,10 @@ export const styles = StyleSheet.create({
     backgroundColor: colors.primary[500] 
   },
   checkmark: { 
-    color: colors.white, 
-    fontSize: 12, 
-    fontWeight: typography.fontWeight.medium 
+    ...createTextStyle('xs', { 
+      color: colors.white, 
+      fontWeight: typography.fontWeight.medium,
+    }),
   },
 
   confirmContent: { 
@@ -353,6 +383,7 @@ export const styles = StyleSheet.create({
       fontWeight: typography.fontWeight.medium,
       marginBottom: spacing[2],
       fontFamily: typography.fontFamily.regular,
+      color: colors.text.primary,
     }),
   },
   textInput: {
@@ -408,12 +439,12 @@ export const styles = StyleSheet.create({
   createMissionButton: { 
     backgroundColor: colors.primary[700], 
     borderRadius: borderRadius.md, 
-    paddingVertical: spacing[1], 
+    paddingVertical: spacing[2], 
     paddingHorizontal: spacing[4], 
     alignItems: 'center', 
     justifyContent: 'center', 
     marginBottom: spacing[3], 
-    minHeight: 36 
+    minHeight: 44 
   },
   createMissionButtonText: {
     ...createButtonTextStyle('base'),
@@ -509,6 +540,7 @@ export const styles = StyleSheet.create({
       fontWeight: typography.fontWeight.medium,
       marginTop: spacing[1],
       marginBottom: spacing[2],
+      color: colors.text.primary,
     }),
   },
   timeMissionMeta: {
@@ -517,12 +549,14 @@ export const styles = StyleSheet.create({
     gap: spacing[2],
   },
   timeMissionCategory: {
-    fontSize: typography.fontSize.xs,
-    color: colors.blue[600],
-    backgroundColor: colors.blue[50],
-    paddingVertical: 2,
-    paddingHorizontal: spacing[2],
-    borderRadius: borderRadius.sm,
+    ...createTextStyle('xs', {
+      color: colors.blue[600],
+      backgroundColor: colors.blue[50],
+      paddingVertical: spacing[1],
+      paddingHorizontal: spacing[3],
+      borderRadius: borderRadius.sm,
+      textAlign: 'center',
+    }),
   },
   timeMissionTime: {
     ...createTextStyle('sm', {
@@ -535,10 +569,15 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing[1],
+    backgroundColor: '#FFF3E0',
+    paddingVertical: spacing[1],
+    paddingHorizontal: spacing[3],
+    borderRadius: borderRadius.sm,
   },
   timeMissionExp: {
-    ...createTextStyle('xs', {
-      color: colors.text.secondary,
+    ...createTextStyle('sm', {
+      color: '#FF9800',
+      fontWeight: typography.fontWeight.medium,
     }),
   },
   timeMissionRemoveButton: { 
@@ -551,10 +590,10 @@ export const styles = StyleSheet.create({
     flexShrink: 0,
   },
   timeMissionRemoveText: { 
-    fontSize: 16, 
-    color: colors.gray[600], 
-    lineHeight: 18,
-    fontWeight: typography.fontWeight.semibold,
+    ...createTextStyle('base', { 
+      color: colors.gray[600], 
+      fontWeight: typography.fontWeight.semibold,
+    }),
   },
 
   missionsListSection: { 
@@ -587,10 +626,10 @@ export const styles = StyleSheet.create({
     backgroundColor: colors.primary[600],
   },
   allDayCheckmark: {
-    color: colors.white,
-    fontSize: 12,
-    fontWeight: typography.fontWeight.bold,
-    lineHeight: 14,
+    ...createTextStyle('xs', {
+      color: colors.white,
+      fontWeight: typography.fontWeight.bold,
+    }),
   },
   allDayLabel: {
     ...createTextStyle('xs', {
@@ -659,23 +698,29 @@ export const styles = StyleSheet.create({
     ...createTextStyle('xs', {
       color: colors.blue[600],
       backgroundColor: colors.blue[100],
-      paddingVertical: 2,
-      paddingHorizontal: spacing[2],
+      paddingVertical: spacing[1],
+      paddingHorizontal: spacing[3],
       borderRadius: borderRadius.sm,
+      textAlign: 'center',
     }),
+    fontFamily: Platform.select({
+      ios: undefined,
+      android: typography.fontFamily.regular,
+    }),
+    includeFontPadding: false,
   },
   missionListItemExpContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing[1],
     backgroundColor: '#FFF3E0',
-    paddingVertical: 2,
-    paddingHorizontal: spacing[2],
+    paddingVertical: spacing[1],
+    paddingHorizontal: spacing[3],
     borderRadius: borderRadius.sm,
   },
   missionListItemExp: {
-    ...createTextStyle('xs', {
-      color: '#000000',
+    ...createTextStyle('sm', {
+      color: '#FF9800',
       fontWeight: typography.fontWeight.medium,
     }),
   },
@@ -782,11 +827,10 @@ export const styles = StyleSheet.create({
     paddingHorizontal: spacing[2],
   },
   timeSeparatorText: {
-    fontSize: typography.fontSize['3xl'],
-    fontWeight: typography.fontWeight.bold,
-    color: colors.text.primary,
-    fontFamily: typography.fontFamily.regular,
-    includeFontPadding: false,
+    ...createTextStyle('3xl', {
+      fontWeight: typography.fontWeight.bold,
+      color: colors.text.primary,
+    }),
   },
 
   /* 드롭다운 스타일 (레거시 - 시간 모달에서 WheelPicker 사용) */
@@ -831,9 +875,10 @@ export const styles = StyleSheet.create({
     }),
   },
   dropdownArrow: { 
-    fontSize: typography.fontSize.xs, 
-    color: colors.text.secondary, 
-    marginLeft: spacing[1] 
+    ...createTextStyle('xs', { 
+      color: colors.text.secondary, 
+      marginLeft: spacing[1],
+    }),
   },
 
   dropdownList: {

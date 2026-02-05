@@ -33,7 +33,10 @@ export const useCommunityPost = (postId: string): UseCommunityPostReturn => {
 
   // 게시글 로드
   const loadPost = useCallback(async (): Promise<void> => {
-    if (!currentNickname || !postId) return;
+    if (!currentNickname || !postId) {
+      setLoading(false);
+      return;
+    }
 
     try {
       setLoading(true);

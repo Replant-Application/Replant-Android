@@ -71,17 +71,12 @@ export const styles = StyleSheet.create({
     marginTop: spacing[2],
   },
   stepTitle: {
-    fontSize: typography.fontSize['2xl'],
-    fontWeight: typography.fontWeight.medium,
-    color: colors.text.primary,
-    marginBottom: spacing[2],
-    textAlign: 'center',
-    fontFamily: Platform.select({
-      ios: undefined, // iOS는 기본 시스템 폰트 사용
-      android: typography.fontFamily.regular,
+    ...createTextStyle('2xl', {
+      fontWeight: typography.fontWeight.medium,
+      color: colors.text.primary,
+      marginBottom: spacing[2],
+      textAlign: 'center',
     }),
-    includeFontPadding: false,
-    lineHeight: getOptimizedLineHeight(typography.fontSize['2xl']),
   },
   stepDescription: {
     ...createBodyStyle('base', {
@@ -109,14 +104,10 @@ export const styles = StyleSheet.create({
     paddingHorizontal: spacing[2],
   },
   timeSeparatorText: {
-    fontSize: typography.fontSize['3xl'],
-    fontWeight: typography.fontWeight.bold,
-    color: colors.text.primary,
-    fontFamily: Platform.select({
-      ios: undefined, // iOS는 기본 시스템 폰트 사용
-      android: typography.fontFamily.regular,
+    ...createTextStyle('3xl', {
+      fontWeight: typography.fontWeight.bold,
+      color: colors.text.primary,
     }),
-    includeFontPadding: false,
   },
   wheelPickerContainer: {
     height: 250,
@@ -147,15 +138,11 @@ export const styles = StyleSheet.create({
     height: 50,
   },
   wheelPickerItemText: {
-    fontSize: typography.fontSize['2xl'],
-    fontWeight: typography.fontWeight.medium,
-    color: colors.text.primary,
-    fontFamily: Platform.select({
-      ios: undefined, // iOS는 기본 시스템 폰트 사용
-      android: typography.fontFamily.regular,
+    ...createTextStyle('2xl', {
+      fontWeight: typography.fontWeight.medium,
+      color: colors.text.primary,
+      textAlign: 'center',
     }),
-    includeFontPadding: false,
-    textAlign: 'center',
   },
   timePickerWrapper: {
     width: '100%',
@@ -190,9 +177,10 @@ export const styles = StyleSheet.create({
     }),
   },
   dropdownArrow: {
-    fontSize: typography.fontSize.xs,
-    color: colors.text.tertiary,
-    marginLeft: spacing[2],
+    ...createTextStyle('xs', {
+      color: colors.text.tertiary,
+      marginLeft: spacing[2],
+    }),
   },
   dropdownList: {
     position: 'absolute',

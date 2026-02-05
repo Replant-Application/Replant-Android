@@ -39,16 +39,12 @@ export const styles = StyleSheet.create({
     height: 20,
   },
   headerTitle: {
-    fontSize: typography.fontSize['2xl'],
-    fontWeight: typography.fontWeight.normal,
-    color: colors.text.primary,
-    flex: 1,
-    textAlign: 'center',
-    fontFamily: Platform.select({
-      ios: undefined, // iOS는 기본 시스템 폰트 사용
-      android: typography.fontFamily.regular,
+    ...createTextStyle('2xl', {
+      fontWeight: typography.fontWeight.normal,
+      color: colors.text.primary,
+      flex: 1,
+      textAlign: 'center',
     }),
-    includeFontPadding: false,
   },
   headerRight: {
     width: 28,
@@ -101,10 +97,10 @@ export const styles = StyleSheet.create({
   },
   authorName: {
     ...createTextStyle('sm', {
-      fontWeight: typography.fontWeight.bold,
+      fontWeight: typography.fontWeight.semibold,
       fontFamily: Platform.select({
         ios: undefined,
-        android: typography.fontFamily.bold,
+        android: typography.fontFamily.regular,
       }),
     }),
   },
@@ -120,10 +116,10 @@ export const styles = StyleSheet.create({
   date: {
     ...createTextStyle('xs', {
       color: colors.text.tertiary,
-      fontWeight: typography.fontWeight.bold,
+      fontWeight: typography.fontWeight.medium,
       fontFamily: Platform.select({
         ios: undefined,
-        android: typography.fontFamily.bold,
+        android: typography.fontFamily.regular,
       }),
     }),
   },
@@ -273,11 +269,12 @@ export const styles = StyleSheet.create({
   actionText: {
     ...createTextStyle('sm', {
       color: colors.text.secondary,
-      fontWeight: typography.fontWeight.normal,
+      fontWeight: typography.fontWeight.semibold,
     }),
   },
   deleteText: {
     color: colors.error,
+    fontWeight: typography.fontWeight.semibold,
   },
   commentsSection: {
     marginTop: spacing[2],
@@ -306,27 +303,32 @@ export const styles = StyleSheet.create({
     fontSize: typography.fontSize.sm,
     color: colors.text.primary,
     minHeight: 60,
-    marginBottom: spacing[1],
+    maxHeight: 100,
+    marginBottom: spacing[3],
+    fontFamily: Platform.select({ ios: undefined, android: typography.fontFamily.regular }),
+    includeFontPadding: false,
   },
   editCommentActions: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
-    gap: spacing[2],
+    gap: spacing[3],
   },
   editCommentButton: {
     paddingHorizontal: spacing[2],
     paddingVertical: spacing[1],
+    minHeight: 32,
     borderRadius: borderRadius.base,
-    backgroundColor: colors.white,
+    backgroundColor: colors.gray[200],
     borderWidth: 1,
-    borderColor: colors.border.light,
+    borderColor: colors.gray[400],
   },
   editCommentButtonSave: {
-    backgroundColor: colors.primary[500],
-    borderColor: colors.primary[500],
+    backgroundColor: colors.primary[600],
+    borderWidth: 1,
+    borderColor: colors.primary[700],
   },
   editCommentButtonText: {
-    ...createTextStyle('xs', {
+    ...createTextStyle('sm', {
       color: colors.text.secondary,
       fontWeight: typography.fontWeight.normal,
     }),

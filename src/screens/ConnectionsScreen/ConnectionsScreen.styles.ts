@@ -165,6 +165,6 @@ export const styles = StyleSheet.create({
     }),
   },
   backButtonText: {
-    fontSize: 24,
+    ...createTextStyle('2xl'),
   },
 });

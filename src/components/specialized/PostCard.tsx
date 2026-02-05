@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, Image, ViewStyle, Alert } from 'react-native';
+import { ConfirmModal } from '../ui';
 import { styles } from './PostCard.styles';
 import { CommunityPost } from '../../types';
 import { formatTimeAgo } from '../../utils/dateUtils';
+import { getCharacterImageStatic } from '../../utils/characterUtils';
 
 interface PostCardProps {
   post: CommunityPost;
@@ -28,6 +30,7 @@ const PostCard: React.FC<PostCardProps> = ({
   style
 }) => {
   const [showMenu, setShowMenu] = useState(false);
+  const [showHideConfirmModal, setShowHideConfirmModal] = useState(false);
   
   // 본인 게시글인지 확인 (백엔드에서 제공하는 isAuthor 필드 사용)
   // 로그인한 경우에만 isAuthor가 올바르게 설정됨
@@ -68,17 +71,16 @@ const PostCard: React.FC<PostCardProps> = ({
 
   const handleHide = () => {
     setShowMenu(false);
-    Alert.alert(
-      '게시글 숨기기',
-      '이 게시글을 숨기시겠습니까? 숨긴 게시글은 목록에서 보이지 않습니다.',
-      [
-        { text: '취소', style: 'cancel' },
-        {
-          text: '숨기기',
-          onPress: () => onHide?.(post.post_id)
-        }
-      ]
-    );
+    setShowHideConfirmModal(true);
+  };
+
+  const handleHideConfirm = () => {
+    setShowHideConfirmModal(false);
+    onHide?.(post.post_id);
+  };
+
+  const handleHideCancel = () => {
+    setShowHideConfirmModal(false);
   };
   if (!post) return null;
 
@@ -103,6 +105,7 @@ const PostCard: React.FC<PostCardProps> = ({
   };
 
   return (
+    <>
     <TouchableOpacity
       style={[styles.container, style]}
       onPress={() => onPress?.(post.post_id)}
@@ -113,15 +116,29 @@ const PostCard: React.FC<PostCardProps> = ({
       <View style={styles.header}>
         <View style={styles.authorInfo}>
           <View style={styles.authorAvatar}>
-            <Text style={styles.authorAvatarText}>
-              {(post.author_nickname || '익').charAt(0).toUpperCase()}
-            </Text>
+            {post.authorReantLevel != null && post.authorReantLevel >= 1 ? (
+              <Image
+                source={getCharacterImageStatic(Math.min(post.authorReantLevel, 6))}
+                style={styles.authorAvatarImage}
+                resizeMode="contain"
+                accessibilityLabel={`${post.author_nickname || '작성자'} 캐릭터`}
+              />
+            ) : (
+              <Text style={styles.authorAvatarText}>
+                {(post.author_nickname || '익').charAt(0).toUpperCase()}
+              </Text>
+            )}
           </View>
           <View style={styles.authorNameContainer}>
             <Text style={styles.authorName}>{post.author_nickname || '익명'}</Text>
             {post.category && (
               <View style={styles.categoryBadge}>
                 <Text style={styles.categoryText}>{post.category}</Text>
+              </View>
+            )}
+            {isOwnPost && post.isPublic === false && (
+              <View style={styles.privateBadge}>
+                <Text style={styles.privateBadgeText}>비공개</Text>
               </View>
             )}
           </View>
@@ -203,12 +220,6 @@ const PostCard: React.FC<PostCardProps> = ({
       <View style={styles.content}>
         {post.mission_title && post.mission_title !== 'undefined' && (
           <View style={styles.missionInfo}>
-            <Image
-              source={require('../../assets/images/goal.png')}
-              style={styles.missionEmojiImage}
-              resizeMode="contain"
-              accessibilityLabel="미션 아이콘"
-            />
             <Text style={styles.missionTitle} numberOfLines={1}>
               {post.mission_title}
               {post.category === '인증' && post.completionRate !== undefined && post.completionRate !== null && (
@@ -239,9 +250,12 @@ const PostCard: React.FC<PostCardProps> = ({
             )}
           </View>
         )}
-        <Text style={styles.title} numberOfLines={2}>
-          {post.title}
-        </Text>
+        {/* 인증글은 미션 제목을 위 초록 바에 이미 표시하므로 같은 제목을 다시 그리지 않음 */}
+        {!(post.category === '인증' && post.mission_title && post.mission_title !== 'undefined') && (
+          <Text style={styles.title} numberOfLines={2}>
+            {post.title}
+          </Text>
+        )}
         <Text style={styles.text} numberOfLines={3}>
           {post.content}
         </Text>
@@ -306,6 +320,17 @@ const PostCard: React.FC<PostCardProps> = ({
         </View>
       </View>
     </TouchableOpacity>
+
+    <ConfirmModal
+      visible={showHideConfirmModal}
+      title="게시글 숨기기"
+      message="게시글을 숨기시겠습니까?\n숨긴 글은 목록에 보이지 않습니다."
+      confirmText="확인"
+      cancelText="취소"
+      onConfirm={handleHideConfirm}
+      onCancel={handleHideCancel}
+    />
+    </>
   );
 };
 

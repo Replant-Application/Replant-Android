@@ -58,6 +58,8 @@ export class ApiClient {
   private onTokenExpiredCallback: (() => void) | null = null;
 
   private tokenLoaded: boolean = false;
+  /** __DEV__에서 첫 요청 시 실제 요청 URL 로그 (어느 서버로 나가는지 확인용) */
+  private static hasLoggedFirstRequestUrl = false;
 
   constructor(baseURL: string = API_CONFIG.baseURL) {
     this.baseURL = baseURL;
@@ -230,6 +232,12 @@ export class ApiClient {
   ): Promise<ServiceResult<T>> {
     // URL 구성 (params가 있으면 query string 추가)
     let url = `${this.baseURL}${endpoint}`;
+
+    // __DEV__: 첫 API 요청 시 실제 요청이 나가는 서버 주소 로그 (한 번만)
+    if (__DEV__ && !ApiClient.hasLoggedFirstRequestUrl) {
+      ApiClient.hasLoggedFirstRequestUrl = true;
+      console.log('[API] 첫 요청 URL (현재 서버):', url);
+    }
 
     // 타임아웃 설정 (AbortController 사용). options.timeout이 있으면 사용, 없으면 전역 설정
     const timeoutMs = options.timeout ?? API_CONFIG.timeout;
@@ -429,9 +437,9 @@ export class ApiClient {
       // 네트워크 에러인 경우 더 자세한 메시지 제공
       let errorMessage = '알 수 없는 오류가 발생했습니다.';
       if (error instanceof TypeError && error.message.includes('fetch')) {
-        errorMessage = '네트워크 연결에 실패했습니다. 인터넷 연결을 확인하거나 서버가 실행 중인지 확인해주세요.';
+        errorMessage = '네트워크 연결에 실패했습니다.\n인터넷 연결을 확인하거나 서버가 실행 중인지 확인해주세요.';
       } else if (error instanceof TypeError && error.message.includes('Network')) {
-        errorMessage = '네트워크 연결에 실패했습니다. 인터넷 연결을 확인해주세요.';
+        errorMessage = '네트워크 연결에 실패했습니다.\n인터넷 연결을 확인해주세요.';
       } else if (error instanceof Error) {
         errorMessage = error.message;
       }
@@ -483,9 +491,13 @@ export class ApiClient {
 
   /**
    * DELETE 요청
+   * @param options.silentErrors - 특정 HTTP 상태 코드에 대해 에러 로깅 억제 (예: [404] 이미 삭제된 리소스)
    */
-  async delete<T>(endpoint: string): Promise<ServiceResult<T>> {
-    return this.request<T>(endpoint, { method: 'DELETE' });
+  async delete<T>(
+    endpoint: string,
+    options?: Pick<ApiRequestOptions, 'timeout' | 'silentErrors'>
+  ): Promise<ServiceResult<T>> {
+    return this.request<T>(endpoint, { method: 'DELETE', ...options });
   }
 
   /**

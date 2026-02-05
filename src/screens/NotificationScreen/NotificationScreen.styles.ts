@@ -60,6 +60,75 @@ export const styles = StyleSheet.create({
       fontWeight: typography.fontWeight.bold,
     }),
   },
+  selectionBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginLeft: spacing[5],
+    marginRight: spacing[2],
+    marginTop: spacing[3],
+    paddingVertical: spacing[2],
+    paddingHorizontal: spacing[3],
+  },
+  selectionBarRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing[2],
+  },
+  selectAllRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing[2],
+  },
+  checkbox: {
+    width: 22,
+    height: 22,
+    borderRadius: 4,
+    borderWidth: 2,
+    borderColor: colors.gray[400],
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  checkboxChecked: {
+    backgroundColor: colors.primary[500],
+    borderColor: colors.primary[500],
+  },
+  checkboxCheckmark: {
+    ...createTextStyle('sm', {
+      fontWeight: typography.fontWeight.bold,
+      color: colors.white,
+    }),
+  },
+  selectAllText: {
+    ...createTextStyle('sm', {
+      color: colors.text.primary,
+      fontWeight: typography.fontWeight.medium,
+    }),
+  },
+  deleteButton: {
+    paddingVertical: spacing[2],
+    paddingHorizontal: spacing[4],
+  },
+  deleteButtonDisabled: {},
+  deleteButtonText: {
+    ...createTextStyle('sm', {
+      color: colors.text.primary,
+      fontWeight: typography.fontWeight.medium,
+    }),
+  },
+  deleteButtonTextDisabled: {
+    color: colors.gray[500],
+  },
+  cancelButton: {
+    paddingVertical: spacing[2],
+    paddingHorizontal: spacing[3],
+  },
+  cancelButtonText: {
+    ...createTextStyle('sm', {
+      color: colors.gray[600],
+      fontWeight: typography.fontWeight.medium,
+    }),
+  },
   listWrapper: {
     flex: 1,
     position: 'relative',

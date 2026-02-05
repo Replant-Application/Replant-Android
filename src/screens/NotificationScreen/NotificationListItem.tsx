@@ -5,12 +5,9 @@ import {
   TouchableOpacity,
   Image,
 } from 'react-native';
-import { SwipeableNotificationItemProps } from '../../types/screens/notification';
-import { colors } from '../../utils/designTokens';
+import { NotificationListItemProps } from '../../types/screens/notification';
 import { formatTimeAgo } from '../../utils/dateUtils';
-import { ConfirmModal } from '../../components/ui';
-import { useSwipeableNotificationItemContainer } from './SwipeableNotificationItem.container';
-import { styles } from './SwipeableNotificationItem.styles';
+import { styles } from './NotificationListItem.styles';
 
 /** 두 문장 이상일 때 문장 끝(. ! ?) 뒤에 줄바꿈 삽입 */
 function contentWithLineBreaks(content: string): string {
@@ -18,37 +15,27 @@ function contentWithLineBreaks(content: string): string {
   return content.replace(/([.!?])\s+/g, '$1\n').trim();
 }
 
-const SwipeableNotificationItem: React.FC<SwipeableNotificationItemProps> = ({ 
-  item, 
-  onPress, 
-  onDelete 
+const NotificationListItem: React.FC<NotificationListItemProps> = ({
+  item,
+  selected = false,
+  onPress,
+  onLongPress,
 }) => {
-  const {
-    isDeleting,
-    showDeleteModal,
-    handleLongPress,
-    handleConfirmDelete,
-    handleCancelDelete,
-  } = useSwipeableNotificationItemContainer({ item, onDelete });
-
-  if (isDeleting) {
-    return null;
-  }
-
   return (
     <View style={styles.itemContainer}>
       <View
         style={[
           styles.notificationCard,
           !item.isRead && styles.unreadCard,
+          selected && styles.notificationCardSelected,
         ]}
       >
         <TouchableOpacity
           onPress={() => onPress(item)}
-          onLongPress={handleLongPress}
+          onLongPress={onLongPress}
           activeOpacity={0.7}
           style={styles.cardTouchable}
-          accessibilityLabel={`${item.title}. 길게 누르면 삭제`}
+          accessibilityLabel={`${item.title}. 길게 누르면 선택`}
         >
           <View style={styles.contentContainer}>
             <Image
@@ -72,19 +59,8 @@ const SwipeableNotificationItem: React.FC<SwipeableNotificationItemProps> = ({
           </View>
         </TouchableOpacity>
       </View>
-
-      <ConfirmModal
-        visible={showDeleteModal}
-        title="알림 삭제"
-        message="이 알림을 삭제하시겠습니까?"
-        confirmText="삭제"
-        cancelText="취소"
-        onConfirm={handleConfirmDelete}
-        onCancel={handleCancelDelete}
-        confirmButtonColor={colors.error[500]}
-      />
     </View>
   );
 };
 
-export default SwipeableNotificationItem;
+export default NotificationListItem;

@@ -1,13 +1,12 @@
 import React from 'react';
-import { View, Text, ScrollView, ImageBackground, Image } from 'react-native';
+import { View, Text, ScrollView, ImageBackground } from 'react-native';
 import { NavigationProp } from '@react-navigation/native';
 import { useUserProfile } from '../../hooks/useUserProfile';
 import { useCharacter } from '../../hooks/useCharacter';
 import { CharacterCard } from '../../components/specialized';
-import { Loading, ErrorBoundary, Header } from '../../components/ui';
+import { Loading, ErrorBoundary, Header, SectionHeader } from '../../components/ui';
 import { colors } from '../../utils/designTokens';
 import { RootStackParamList } from '../../types/navigation';
-import { formatDateKorean } from '../../utils/dateUtils';
 import { styles } from './MyPageScreen.styles';
 
 interface MyPageScreenProps {
@@ -81,41 +80,14 @@ const MyPageScreen: React.FC<MyPageScreenProps> = ({ navigation }) => {
       <ScrollView style={styles.scrollView}>
         <Header title="마이페이지" navigation={navigation} />
         <View style={styles.content}>
-          {/* 프로필 섹션 */}
-          <View style={styles.profileCard}>
-            <View style={styles.sectionHeader}>
-              <Image
-                source={require('../../assets/images/boy.png')}
-                style={styles.sectionIcon}
-                resizeMode="contain"
-                accessibilityLabel="프로필 아이콘"
-              />
-              <Text style={styles.sectionTitle}>프로필</Text>
-            </View>
-            <View style={styles.profileInfo}>
-              <View style={styles.profileRow}>
-                <Text style={styles.profileLabel}>닉네임</Text>
-                <Text style={styles.profileValue}>{profile.nickname}</Text>
-              </View>
-              <View style={styles.profileRow}>
-                <Text style={styles.profileLabel}>가입일</Text>
-                <Text style={styles.profileValue}>{formatDateKorean(profile.createdAt)}</Text>
-              </View>
-            </View>
-          </View>
-
           {/* 캐릭터 섹션 */}
           {currentCharacter && (
             <View style={styles.characterCard}>
-              <View style={styles.sectionHeader}>
-                <Image
-                  source={require('../../assets/images/clover.png')}
-                  style={styles.sectionIcon}
-                  resizeMode="contain"
-                  accessibilityLabel="캐릭터 아이콘"
-                />
-                <Text style={styles.sectionTitle}>나의 캐릭터</Text>
-              </View>
+              <SectionHeader
+                title="나의 캐릭터"
+                iconSource={require('../../assets/images/clover.png')}
+                accessibilityLabel="캐릭터 아이콘"
+              />
               <CharacterCard
                 character={currentCharacter}
                 onPress={() => {}}
@@ -126,15 +98,11 @@ const MyPageScreen: React.FC<MyPageScreenProps> = ({ navigation }) => {
 
           {/* 통계 섹션 */}
           <View style={styles.statsCard}>
-            <View style={styles.sectionHeader}>
-              <Image
-                source={require('../../assets/images/search.png')}
-                style={styles.sectionIcon}
-                resizeMode="contain"
-                accessibilityLabel="통계 아이콘"
-              />
-              <Text style={styles.sectionTitle}>통계</Text>
-            </View>
+            <SectionHeader
+              title="통계"
+              iconSource={require('../../assets/images/search.png')}
+              accessibilityLabel="통계 아이콘"
+            />
             <View style={styles.statsContainer}>
               {statsData.map((stat, index) => {
                 // 각 항목별 목표치 대비 진행률 계산 (최대 100%)

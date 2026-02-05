@@ -62,7 +62,7 @@ export const styles = StyleSheet.create({
   },
   speechBubble: {
     position: 'absolute',
-    top: '32%',
+    top: '26%',
     left: '50%',
     transform: [{ translateX: -(SCREEN_WIDTH * 0.94) / 2 }],
     width: SCREEN_WIDTH * 0.94,
@@ -277,9 +277,10 @@ export const styles = StyleSheet.create({
     ...createTitleStyle('lg'),
   },
   todoListArrow: {
-    fontSize: typography.fontSize.xl,
-    color: colors.text.secondary,
-    fontWeight: typography.fontWeight.medium,
+    ...createTextStyle('xl', {
+      color: colors.text.secondary,
+      fontWeight: typography.fontWeight.medium,
+    }),
   },
   todoListCount: {
     ...createTextStyle('sm', {

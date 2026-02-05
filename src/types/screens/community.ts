@@ -14,7 +14,10 @@ export type CommunityTab = 'all' | 'todo-share';
 
 export type VerificationFilter = 'all' | 'pending' | 'approved';
 
-export type PostFilter = 'all' | 'popular';
+/** 게시글 종류: 전체 / 인증글만 / 일반글만 */
+export type PostTypeFilter = 'all' | 'certified' | 'general';
+
+export type PostFilter = 'latest' | 'likes' | 'comments';
 
 export interface FilterOption {
   value: PostFilter;

@@ -30,6 +30,13 @@ export const styles = StyleSheet.create({
   sectionBeforeVersion: {
     marginBottom: spacing[2],
   },
+  /** 고객지원 카드 아래 앱 버전 표시 (1.0.14 형식) */
+  versionText: {
+    ...createSecondaryTextStyle('sm'),
+    textAlign: 'center',
+    marginTop: spacing[3],
+    paddingHorizontal: spacing[2],
+  },
   sectionTitle: {
     ...createTitleStyle('lg', {
       fontWeight: typography.fontWeight.medium,
@@ -195,16 +202,5 @@ export const styles = StyleSheet.create({
     height: 1,
     backgroundColor: colors.border.light,
     marginLeft: 22 + spacing[2], // icon width + icon margin (left padding 0)
-  },
-  versionContainer: {
-    marginTop: spacing[2],
-    marginBottom: spacing[2],
-    paddingHorizontal: spacing[4],
-    alignItems: 'flex-start',
-  },
-  versionText: {
-    ...createTextStyle('sm', {
-      color: colors.text.tertiary,
-    }),
   },
 });

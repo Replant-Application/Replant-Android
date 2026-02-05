@@ -47,6 +47,7 @@ export const styles = StyleSheet.create({
   },
   sectionTitle: {
     ...createTitleStyle('lg', {
+      color: colors.text.primary,
       fontWeight: typography.fontWeight.medium,
     }),
   },
@@ -104,6 +105,7 @@ export const styles = StyleSheet.create({
   },
   badgeTitle: {
     ...createTextStyle('xs', {
+      color: colors.text.primary,
       fontWeight: typography.fontWeight.medium,
       textAlign: 'center',
       marginBottom: spacing[1],
@@ -127,20 +129,23 @@ export const styles = StyleSheet.create({
     paddingVertical: spacing[2],
     paddingHorizontal: spacing[4],
     borderRadius: borderRadius.lg,
-    backgroundColor: colors.primary[100],
+    backgroundColor: colors.green[500],
   },
   pageButtonDisabled: {
-    backgroundColor: colors.gray[100],
-    opacity: 0.7,
+    backgroundColor: colors.gray[200],
+    opacity: 0.8,
   },
   pageButtonText: {
     ...createTextStyle('sm', {
       fontWeight: typography.fontWeight.medium,
-      color: colors.primary[600],
+      color: colors.text.inverse,
     }),
   },
   pageButtonTextDisabled: {
-    color: colors.gray[400],
+    ...createTextStyle('sm', {
+      fontWeight: typography.fontWeight.medium,
+      color: colors.gray[500],
+    }),
   },
   pageIndicatorText: {
     ...createTextStyle('sm', {
@@ -217,9 +222,10 @@ export const styles = StyleSheet.create({
     backgroundColor: colors.gray[100],
   },
   pageArrowText: {
-    fontSize: typography.fontSize['2xl'],
-    color: colors.primary[600],
-    fontWeight: typography.fontWeight.medium,
+    ...createTextStyle('2xl', {
+      color: colors.primary[600],
+      fontWeight: typography.fontWeight.medium,
+    }),
   },
   pageArrowTextDisabled: {
     color: colors.gray[400],

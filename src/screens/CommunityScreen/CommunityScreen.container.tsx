@@ -20,7 +20,7 @@ import {
 import { getPosts as getPostsApi } from '../../api/communityApi';
 import { toggleLike as toggleLikeService } from '../../services/communityService';
 import { useUser } from '../../contexts/UserContext';
-import { CommunityScreenProps, CommunityTab, VerificationFilter } from '../../types/screens/community';
+import { CommunityScreenProps, CommunityTab, VerificationFilter, PostTypeFilter, PostFilter } from '../../types/screens/community';
 
 const DEBUG_COMMUNITY_LOADING = false; // 커뮤니티 로딩 디버깅 (원인 파악 후 false로)
 
@@ -53,7 +53,7 @@ export const useCommunityScreenContainer = ({ navigation, route }: CommunityScre
   };
 
   const [searchQuery, setSearchQuery] = useState('');
-  const [filter, setFilter] = useState<'all' | 'popular'>('all');
+  const [filter, setFilter] = useState<PostFilter>('latest');
   const [activeTab, setActiveTab] = useState<CommunityTab>(getInitialActiveTab());
   const [showFilterModal, setShowFilterModal] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -69,9 +69,11 @@ export const useCommunityScreenContainer = ({ navigation, route }: CommunityScre
     }
   }, [activeTab]);
 
-  // 인증 필터 상태
+  // 인증 필터 상태 (인증 상태: 전체/대기/완료)
   const [verificationFilter, setVerificationFilter] = useState<VerificationFilter>('all');
-  
+  // 게시글 종류 필터 (전체/인증글만/일반글만)
+  const [postTypeFilter, setPostTypeFilter] = useState<PostTypeFilter>('all');
+
   // 내가 쓴 게시글만 보기 필터
   const [onlyMyPosts, setOnlyMyPosts] = useState<boolean>(false);
 
@@ -89,6 +91,8 @@ export const useCommunityScreenContainer = ({ navigation, route }: CommunityScre
 
   // 미션세트 상세 모달 (투두리스트 공유 탭에서 카드 클릭 시)
   const [selectedMissionSetId, setSelectedMissionSetId] = useState<number | null>(null);
+  // 게시글 모달 (투두리스트 상세에서 완료 미션 탭 시, 커뮤니티 화면 이동 없이 모달로 표시)
+  const [selectedPostIdForModal, setSelectedPostIdForModal] = useState<number | null>(null);
 
   const errorHandlerOverrides = useMemo(
     () => ({
@@ -435,6 +439,8 @@ export const useCommunityScreenContainer = ({ navigation, route }: CommunityScre
             is_scrapped: false, // 스크랩은 로컬에서 관리
             verified: isVerification ? post.status === 'APPROVED' : undefined,
             isAuthor: post.isAuthor || false,
+            isPublic: post.isPublic !== false, // 백엔드: false = 비공개, null/true = 공개. 본인 비공개글에만 '비공개' 마크 표시용
+            authorReantLevel: post.userReantLevel != null ? post.userReantLevel : 1, // 작성자 캐릭터 레벨 (커뮤니티 아바타용)
             completionRate: post.completionRate,
           };
         });
@@ -519,7 +525,14 @@ export const useCommunityScreenContainer = ({ navigation, route }: CommunityScre
       allPosts = allPosts.filter(post => post.isAuthor === true);
     }
 
-    // 인증 필터 적용 (category가 '인증'인 게시글만 필터링)
+    // 게시글 종류 필터 (전체 / 인증글만 / 일반글만)
+    if (postTypeFilter === 'certified') {
+      allPosts = allPosts.filter(post => post.category === '인증' && post.verified === true);
+    } else if (postTypeFilter === 'general') {
+      allPosts = allPosts.filter(post => post.category !== '인증');
+    }
+
+    // 인증 상태 필터 (전체 / 대기 / 완료)
     if (verificationFilter === 'pending') {
       allPosts = allPosts.filter(post => post.category === '인증' && post.verified === false);
     } else if (verificationFilter === 'approved') {
@@ -537,25 +550,21 @@ export const useCommunityScreenContainer = ({ navigation, route }: CommunityScre
       );
     }
 
-    // 필터링
-    if (filter === 'popular') {
-      // 인기 게시글: 좋아요 + 댓글 수가 높은 순으로 정렬
-      allPosts = [...allPosts].sort((a, b) => {
-        const aScore = (a.like_count || 0) + (a.comment_count || 0);
-        const bScore = (b.like_count || 0) + (b.comment_count || 0);
-        return bScore - aScore;
-      });
-    } else {
-      // 전체: 최신순으로 정렬
+    // 정렬
+    if (filter === 'latest') {
       allPosts = [...allPosts].sort((a, b) => {
         const dateA = a.created_at ? new Date(a.created_at).getTime() : 0;
         const dateB = b.created_at ? new Date(b.created_at).getTime() : 0;
         return dateB - dateA;
       });
+    } else if (filter === 'likes') {
+      allPosts = [...allPosts].sort((a, b) => (b.like_count || 0) - (a.like_count || 0));
+    } else if (filter === 'comments') {
+      allPosts = [...allPosts].sort((a, b) => (b.comment_count || 0) - (a.comment_count || 0));
     }
 
     return allPosts;
-  }, [posts, debouncedSearchQuery, filter, verificationFilter, hiddenPostIds, onlyMyPosts]);
+  }, [posts, debouncedSearchQuery, filter, verificationFilter, postTypeFilter, hiddenPostIds, onlyMyPosts]);
 
   /**
    * 게시글 숨기기 처리
@@ -697,6 +706,7 @@ export const useCommunityScreenContainer = ({ navigation, route }: CommunityScre
     showFilterModal,
     refreshing,
     verificationFilter,
+    postTypeFilter,
     onlyMyPosts,
     hiddenPostIds,
     showAlert,
@@ -715,6 +725,7 @@ export const useCommunityScreenContainer = ({ navigation, route }: CommunityScre
     setActiveTab,
     setShowFilterModal,
     setVerificationFilter,
+    setPostTypeFilter,
     setOnlyMyPosts,
     setMissionSetSearchQuery,
     setMissionSetSortBy,
@@ -749,5 +760,8 @@ export const useCommunityScreenContainer = ({ navigation, route }: CommunityScre
     selectedMissionSetId,
     onMissionSetPress: setSelectedMissionSetId,
     closeMissionSetDetailModal: () => setSelectedMissionSetId(null),
+    selectedPostIdForModal,
+    openPostInModal: (postId: number) => setSelectedPostIdForModal(postId),
+    closePostModal: () => setSelectedPostIdForModal(null),
   };
 };

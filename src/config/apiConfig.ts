@@ -6,26 +6,29 @@
 import { Platform } from 'react-native';
 import { API_BASE_URL, API_TIMEOUT } from '@env';
 
+// .env 미주입 시(릴리즈 빌드 등) 사용할 프로덕션 기본 URL (실기기/에뮬 모두 동일)
+const PRODUCTION_API_BASE_URL =
+  'http://ec2-43-202-76-241.ap-northeast-2.compute.amazonaws.com:8080/api';
+
 // 백엔드 기본 URL 설정
 const getBaseURL = (): string => {
   let url: string;
   if (API_BASE_URL && API_BASE_URL.trim()) {
-    // 환경변수에 localhost가 포함되어 있고 Android인 경우 자동 변환
+    // 환경변수에 localhost가 포함되어 있고 Android인 경우 자동 변환 (에뮬레이터용)
     if (Platform.OS === 'android' && API_BASE_URL.includes('localhost')) {
       url = API_BASE_URL.replace('localhost', '10.0.2.2');
     } else {
       url = API_BASE_URL;
     }
   } else {
-    // 기본값: Platform에 따라 자동 설정
-    if (Platform.OS === 'android') {
-      url = 'http://10.0.2.2:8080/api';
-    } else {
-      url = 'http://localhost:8080/api';
-    }
+    // 기본값: .env가 없을 때 프로덕션 URL 사용 (실기기/릴리즈 빌드 대응)
+    url = PRODUCTION_API_BASE_URL;
   }
   if (__DEV__) {
-    console.log('[API_CONFIG] baseURL:', url, '| @env API_BASE_URL:', API_BASE_URL || '(empty)');
+    const envValue = API_BASE_URL || '(empty)';
+    console.log('[API_CONFIG] baseURL:', url, '| @env API_BASE_URL:', envValue);
+    // 런타임에 실제 요청이 나가는 서버 주소 확인용 (앱 켤 때 한 번만)
+    console.log('[API] 현재 요청이 나가는 서버:', url);
   }
   return url;
 };
@@ -69,6 +72,7 @@ export const API_CONFIG = {
       detail: '/missions/:missionId',
       reviews: '/missions/:missionId/reviews',
       createReview: '/missions/:missionId/reviews',
+      deleteReview: '/missions/:missionId/reviews/:reviewId',
       qnaList: '/missions/:missionId/qna',
       qnaDetail: '/missions/:missionId/qna/:qnaId',
       createQuestion: '/missions/:missionId/qna',
@@ -169,6 +173,7 @@ export const API_CONFIG = {
       read: '/notifications/:notificationId/read',
       readAll: '/notifications/read-all',
       delete: '/notifications/:notificationId',
+      deleteAll: '/notifications/all',
       registerFcmToken: '/notifications/fcm/token',
     },
 
@@ -212,8 +217,8 @@ export const API_CONFIG = {
     spontaneousMission: {
       setup: '/spontaneous-missions/setup',
       verify: '/spontaneous-missions/:missionId/verify',
-      wakeupCurrent: '/spontaneous-missions/wakeup/current',
-      wakeupVerify: '/spontaneous-missions/wakeup/verify',
+      wakeupCurrent: '/missions/my/wakeup/current', // 백엔드 UserMissionController 경로와 일치
+      wakeupVerify: '/missions/my/wakeup/verify-time',
       current: '/spontaneous-missions/current',
       byDate: '/spontaneous-missions/date',
     },

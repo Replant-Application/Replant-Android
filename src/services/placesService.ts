@@ -117,16 +117,18 @@ class PlacesService {
   async searchByUserLocation(
     userLat: number,
     userLng: number,
-    searchTypes: string[] = ['counseling', 'mental_health', 'social_services']
+    searchTypes: string[] = ['counseling', 'mental_health', 'social_services'],
+    region: string = '서울'
   ): Promise<Place[]> {
+    const location = region && region !== 'all' ? region : '서울';
+
     if (!HAS_API_KEY) {
       console.log('카카오맵 API 키가 설정되지 않았습니다. 샘플 데이터를 반환합니다.');
-      return this.getSamplePlaces(userLat, userLng);
+      return this.getSamplePlaces(userLat, userLng, location);
     }
 
     try {
       const allResults: Place[] = [];
-      const location = '서울';
 
       for (const type of searchTypes) {
         let places: Place[] = [];
@@ -154,7 +156,7 @@ class PlacesService {
       return this.sortByDistance(uniqueResults, userLat, userLng);
     } catch (error) {
       console.error('사용자 위치 기반 검색 오류:', error);
-      return this.getSamplePlaces(userLat, userLng);
+      return this.getSamplePlaces(userLat, userLng, location);
     }
   }
 
@@ -205,7 +207,7 @@ class PlacesService {
     return deg * (Math.PI/180);
   }
 
-  private getSamplePlaces(userLat: number, userLng: number): Place[] {
+  private getSamplePlaces(userLat: number, userLng: number, region: string = '서울'): Place[] {
     const samplePlaces: Place[] = [
       {
         place_id: 'sample_1',
@@ -349,7 +351,11 @@ class PlacesService {
       }
     ];
 
-    return this.sortByDistance(samplePlaces, userLat, userLng);
+    const byRegion =
+      region && region !== 'all'
+        ? samplePlaces.filter((p) => p.formatted_address.includes(region))
+        : samplePlaces;
+    return this.sortByDistance(byRegion, userLat, userLng);
   }
 }
 

@@ -1,6 +1,6 @@
 /**
  * SpontaneousMissionSetupScreen 비즈니스 로직
- * 돌발 미션 설정 온보딩 화면: 기상, 취침, 식사 시간 설정
+ * 돌발 미션 설정: 일단 기상 시간만 설정 (취침·식사는 비노출)
  */
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
@@ -51,7 +51,8 @@ export const STEP_CONFIG: Record<Step, { title: string; description: string }> =
   },
 };
 
-export const STEPS: Step[] = ['wake', 'sleep', 'breakfast', 'lunch', 'dinner'];
+// 일단 기상 미션만 설정 (취침·식사 시간 스텝 비노출)
+export const STEPS: Step[] = ['wake'];
 
 export const useSpontaneousMissionSetupScreenContainer = ({
   navigation,
@@ -237,33 +238,29 @@ export const useSpontaneousMissionSetupScreenContainer = ({
             const data = result.data;
             console.log('[SpontaneousMissionSetupScreen] 받은 설정 데이터:', data);
 
-            // 시간 데이터가 유효한지 확인 (빈 문자열이나 null도 체크)
-            const hasAllTimeFields =
+            // 기상 시간만 필수, 나머지는 있으면 로드 (일단 기상 미션만 설정하므로)
+            const hasWakeTime =
               data.wakeTime &&
-              data.sleepTime &&
-              data.breakfastTime &&
-              data.lunchTime &&
-              data.dinnerTime &&
               typeof data.wakeTime === 'string' &&
-              typeof data.sleepTime === 'string' &&
-              typeof data.breakfastTime === 'string' &&
-              typeof data.lunchTime === 'string' &&
-              typeof data.dinnerTime === 'string' &&
-              data.wakeTime.trim() !== '' &&
-              data.sleepTime.trim() !== '' &&
-              data.breakfastTime.trim() !== '' &&
-              data.lunchTime.trim() !== '' &&
-              data.dinnerTime.trim() !== '';
+              data.wakeTime.trim() !== '';
 
-            if (hasAllTimeFields) {
+            if (hasWakeTime) {
               setWakeTime(parse24Hour(data.wakeTime));
-              setSleepTime(parse24Hour(data.sleepTime));
-              setBreakfastTime(parse24Hour(data.breakfastTime));
-              setLunchTime(parse24Hour(data.lunchTime));
-              setDinnerTime(parse24Hour(data.dinnerTime));
+              if (data.sleepTime && typeof data.sleepTime === 'string' && data.sleepTime.trim() !== '') {
+                setSleepTime(parse24Hour(data.sleepTime));
+              }
+              if (data.breakfastTime && typeof data.breakfastTime === 'string' && data.breakfastTime.trim() !== '') {
+                setBreakfastTime(parse24Hour(data.breakfastTime));
+              }
+              if (data.lunchTime && typeof data.lunchTime === 'string' && data.lunchTime.trim() !== '') {
+                setLunchTime(parse24Hour(data.lunchTime));
+              }
+              if (data.dinnerTime && typeof data.dinnerTime === 'string' && data.dinnerTime.trim() !== '') {
+                setDinnerTime(parse24Hour(data.dinnerTime));
+              }
               console.log('[SpontaneousMissionSetupScreen] 설정 로드 완료');
             } else {
-              console.warn('[SpontaneousMissionSetupScreen] ⚠️ 설정 데이터가 불완전함');
+              console.warn('[SpontaneousMissionSetupScreen] ⚠️ 기상 시간 없음');
               setCurrentStep(0);
             }
           } else {

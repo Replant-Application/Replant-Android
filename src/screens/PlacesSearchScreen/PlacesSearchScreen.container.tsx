@@ -20,8 +20,9 @@ export const usePlacesSearchScreenContainer = ({
     searchText,
     setSearchText,
     isLoading,
-    selectedFilter,
-    setSelectedFilter,
+    counselingChecked,
+    mentalHealthChecked,
+    toggleFilter,
     selectedRegion,
     setSelectedRegion,
     searchPlaces,
@@ -37,26 +38,19 @@ export const usePlacesSearchScreenContainer = ({
   /**
    * 위치 기반 장소 검색
    * - userLocation이 있으면 자동으로 검색
-   * - 필터 변경 시 재검색
+   * - 필터·지역 변경 시 재검색
    */
   useEffect(() => {
     if (userLocation) {
-      searchPlaces(userLocation.lat, userLocation.lng, selectedFilter);
+      searchPlaces(userLocation.lat, userLocation.lng, counselingChecked, mentalHealthChecked, selectedRegion);
     }
-  }, [userLocation, selectedFilter, searchPlaces]);
+  }, [userLocation, counselingChecked, mentalHealthChecked, selectedRegion, searchPlaces]);
 
   /**
    * 검색어 변경 핸들러
    */
   const handleSearchChange = (text: string) => {
     setSearchText(text);
-  };
-
-  /**
-   * 필터 변경 핸들러
-   */
-  const handleFilterChange = (filter: 'all' | 'counseling' | 'mental_health') => {
-    setSelectedFilter(filter);
   };
 
   /**
@@ -77,10 +71,11 @@ export const usePlacesSearchScreenContainer = ({
     places,
     searchText,
     isLoading,
-    selectedFilter,
+    counselingChecked,
+    mentalHealthChecked,
+    toggleFilter,
     selectedRegion,
     handleSearchChange,
-    handleFilterChange,
     handleRegionChange,
     handleGoBack,
   };
