@@ -92,8 +92,7 @@ interface ReantChatScreenProps {
   route?: any;
 }
 
-// 현재 표시 중인 두 칩이 아닌 풀에서 랜덤 선택 (추후 추천 칩 로테이션에 사용 가능)
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+// 현재 표시 중인 두 칩이 아닌 풀에서 랜덤 선택 (클릭한 칩을 다른 예시로 교체)
 const pickReplacementChip = (currentChips: [string, string], replaceIndex: 0 | 1): string => {
   const other = currentChips[1 - replaceIndex];
   const candidates = RECOMMENDED_MESSAGES_POOL.filter(
@@ -116,8 +115,8 @@ const ReantChatScreen: React.FC<ReantChatScreenProps> = ({ navigation, route: _r
   const [voiceAvailable, setVoiceAvailable] = useState(false);
   const voiceCommittedRef = useRef(''); // 음성으로 확정된 텍스트 (입력창에 반영)
   const listRef = useRef<FlatList>(null);
-  // 표시 중인 추천 칩 두 개
-  const [recommendedChips, _setRecommendedChips] = useState<[string, string]>(() => [
+  // 표시 중인 추천 칩 두 개 (클릭 시 해당 칩만 다른 예시로 교체)
+  const [recommendedChips, setRecommendedChips] = useState<[string, string]>(() => [
     RECOMMENDED_MESSAGES_POOL[0],
     RECOMMENDED_MESSAGES_POOL[1],
   ]);
@@ -414,11 +413,18 @@ const ReantChatScreen: React.FC<ReantChatScreenProps> = ({ navigation, route: _r
               <Text style={styles.errorText}>⚠️ {error}</Text>
             ) : null}
             <View style={styles.recommendedChipsContainer}>
-              {recommendedChips.map((msg) => (
+              {recommendedChips.map((msg, index) => (
                 <TouchableOpacity
-                  key={msg}
+                  key={`${msg}-${index}`}
                   style={styles.recommendedChip}
-                  onPress={() => setInputText(msg)}
+                  onPress={() => {
+                    setInputText(msg);
+                    setRecommendedChips((prev) => {
+                      const next = [...prev] as [string, string];
+                      next[index] = pickReplacementChip(prev, index as 0 | 1);
+                      return next;
+                    });
+                  }}
                   activeOpacity={0.7}
                   accessibilityRole="button"
                   accessibilityLabel={`추천 메시지: ${msg}`}
