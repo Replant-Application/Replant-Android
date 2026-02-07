@@ -359,6 +359,7 @@ const ReantChatScreen: React.FC<ReantChatScreenProps> = ({ navigation, route: _r
             style={styles.chatHeaderBack}
             onPress={handleClose}
             activeOpacity={0.7}
+            hitSlop={{ top: 16, bottom: 16, left: 16, right: 16 }}
             accessibilityRole="button"
             accessibilityLabel="대화 종료"
             accessibilityHint="홈으로 돌아갑니다"
@@ -473,11 +474,7 @@ const ReantChatScreen: React.FC<ReantChatScreenProps> = ({ navigation, route: _r
                 accessibilityLabel="전송"
                 accessibilityState={{ disabled: !inputText.trim() || isLoading }}
               >
-                {isLoading ? (
-                  <ActivityIndicator size="small" color="#fff" />
-                ) : (
-                  <PaperPlaneIcon size={22} color={colors.white} />
-                )}
+                <PaperPlaneIcon size={22} color={colors.white} />
               </TouchableOpacity>
             </View>
           </View>

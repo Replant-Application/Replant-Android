@@ -35,8 +35,10 @@ export const styles = StyleSheet.create({
     backgroundColor: 'transparent',
   },
   chatHeaderBack: {
-    width: 44,
-    height: 44,
+    minWidth: 48,
+    minHeight: 48,
+    paddingHorizontal: spacing[2],
+    paddingVertical: spacing[2],
     justifyContent: 'center',
     alignItems: 'center',
   },
