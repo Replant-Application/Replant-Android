@@ -8,7 +8,7 @@ import { API_BASE_URL, API_TIMEOUT } from '@env';
 
 // .env 미주입 시(릴리즈 빌드 등) 사용할 프로덕션 기본 URL (실기기/에뮬 모두 동일)
 const PRODUCTION_API_BASE_URL =
-  'http://ec2-43-202-76-241.ap-northeast-2.compute.amazonaws.com:8080/api';
+  'http://ec2-15-165-38-6.ap-northeast-2.compute.amazonaws.com:8080/api';
 
 // 백엔드 기본 URL 설정
 const getBaseURL = (): string => {
