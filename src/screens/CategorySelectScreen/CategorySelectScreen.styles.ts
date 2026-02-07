@@ -6,6 +6,7 @@
 import { StyleSheet, Platform } from 'react-native';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
 import { createTextStyle, createButtonTextStyle } from '../../utils/styles/textStyles';
+import { buttonStyles } from '../../utils/styles/commonStyles';
 
 const CATEGORY_LABELS: Record<string, string> = {
   DAILY_LIFE: '일상',
@@ -133,24 +134,14 @@ export const styles = StyleSheet.create({
   completeButton: {
     alignSelf: 'stretch',
     marginTop: s[4],
-    backgroundColor: colors.primary[600],
-    borderColor: colors.primary[600],
-    paddingVertical: s[3],
-    paddingHorizontal: s[3],
-    borderRadius: br.lg,
-    borderWidth: 1,
-    alignItems: 'center',
+    ...buttonStyles.primary(),
   },
   completeButtonDisabled: {
     backgroundColor: colors.border.light,
-    borderColor: colors.border.light,
     opacity: 0.7,
   },
   completeButtonText: {
-    ...createButtonTextStyle('base', {
-      color: colors.white,
-      fontWeight: typography.fontWeight.bold,
-    }),
+    ...createButtonTextStyle('base'),
   },
   loadingOverlay: {
     ...StyleSheet.absoluteFillObject,
