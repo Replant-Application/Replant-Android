@@ -131,6 +131,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
                       source={require('../../assets/images/conversation.png')}
                       style={styles.speechBubbleImage}
                       resizeMode="stretch"
+                      accessibilityElementsHidden={true}
                     >
                       <View style={styles.speechTextContainer}>
                         <Text style={styles.speechText}>

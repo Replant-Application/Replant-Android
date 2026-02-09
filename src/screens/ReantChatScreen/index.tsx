@@ -328,6 +328,7 @@ const ReantChatScreen: React.FC<ReantChatScreenProps> = ({ navigation, route: _r
               source={getCharacterImage(currentCharacter?.level ?? 1, 'happy')}
               style={styles.assistantAvatarImage}
               resizeMode={FastImage.resizeMode.contain}
+              accessibilityLabel={`${characterName ?? '리얼트'} 아바타`}
             />
           </View>
           <View style={styles.assistantBubbles}>
@@ -397,6 +398,7 @@ const ReantChatScreen: React.FC<ReantChatScreenProps> = ({ navigation, route: _r
                       source={getCharacterImage(currentCharacter?.level ?? 1, 'happy')}
                       style={styles.assistantAvatarImage}
                       resizeMode={FastImage.resizeMode.contain}
+                      accessibilityLabel="리얼트 아바타"
                     />
                   </View>
                   <View style={styles.loadingBubble}>
