@@ -55,10 +55,20 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: spacing[4],
   },
-  userIcon: {
+  /** 프로필(캐릭터) 이미지 감싸는 뷰 - 테두리 없음 */
+  userIconWrapper: {
     width: 48,
     height: 48,
     marginRight: spacing[3],
+    borderWidth: 0,
+    borderRadius: 0,
+    overflow: 'hidden',
+    backgroundColor: 'transparent',
+  },
+  userIcon: {
+    width: 48,
+    height: 48,
+    borderWidth: 0,
   },
   userDetails: {
     flex: 1,

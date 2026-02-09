@@ -64,12 +64,14 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
           <View style={styles.userCard}>
             <View style={styles.userInfo}>
               {currentCharacter && (
-                <Image
-                  source={getCharacterImageStatic(currentCharacter.level || 1)}
-                  style={styles.userIcon}
-                  resizeMode="contain"
-                  accessibilityLabel={`${currentCharacter.name || '캐릭터'} 이미지`}
-                />
+                <View style={styles.userIconWrapper}>
+                  <Image
+                    source={getCharacterImageStatic(currentCharacter.level || 1)}
+                    style={styles.userIcon}
+                    resizeMode="contain"
+                    accessibilityLabel={`${currentCharacter.name || '캐릭터'} 이미지`}
+                  />
+                </View>
               )}
               <View style={styles.userDetails}>
                 <Text style={styles.userName}>{user?.nickname || '사용자'}</Text>
