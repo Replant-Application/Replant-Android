@@ -12,22 +12,34 @@ const PRODUCTION_API_BASE_URL =
 
 // 백엔드 기본 URL 설정
 const getBaseURL = (): string => {
+  const raw = typeof API_BASE_URL !== 'undefined' ? API_BASE_URL : undefined;
+  const isEmpty =
+    raw === undefined ||
+    raw === null ||
+    (typeof raw === 'string' && !raw.trim());
+  const source = isEmpty ? 'PRODUCTION (fallback)' : '.env (API_BASE_URL)';
+
   let url: string;
-  if (API_BASE_URL && API_BASE_URL.trim()) {
+  if (!isEmpty && raw && raw.trim()) {
     // 환경변수에 localhost가 포함되어 있고 Android인 경우 자동 변환 (에뮬레이터용)
-    if (Platform.OS === 'android' && API_BASE_URL.includes('localhost')) {
-      url = API_BASE_URL.replace('localhost', '10.0.2.2');
+    if (Platform.OS === 'android' && raw.includes('localhost')) {
+      url = raw.replace('localhost', '10.0.2.2');
     } else {
-      url = API_BASE_URL;
+      url = raw.trim();
     }
   } else {
     // 기본값: .env가 없을 때 프로덕션 URL 사용 (실기기/릴리즈 빌드 대응)
     url = PRODUCTION_API_BASE_URL;
   }
+
   if (__DEV__) {
-    const envValue = API_BASE_URL || '(empty)';
-    console.log('[API_CONFIG] baseURL:', url, '| @env API_BASE_URL:', envValue);
-    // 런타임에 실제 요청이 나가는 서버 주소 확인용 (앱 켤 때 한 번만)
+    console.log('[API_CONFIG] @env API_BASE_URL:', {
+      raw: raw ?? '(undefined)',
+      type: typeof raw,
+      isEmpty,
+      source,
+    });
+    console.log('[API_CONFIG] 최종 baseURL:', url);
     console.log('[API] 현재 요청이 나가는 서버:', url);
   }
   return url;
