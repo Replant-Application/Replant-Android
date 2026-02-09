@@ -50,12 +50,14 @@ export const checkVersion = async (
     const data = await response.json();
     
     // 백엔드 응답 형식에 맞게 변환 (data 필드에서 추출)
+    // Jackson: boolean getter isRequired() → "required", 일부 설정은 "isRequired"도 사용
     if (data.data) {
+      const raw = data.data as Record<string, unknown>;
       return {
         success: true,
         data: {
-          isRequired: data.data.required || false,
-          isRecommended: data.data.recommended || false,
+          isRequired: raw.required ?? raw.isRequired ?? false,
+          isRecommended: raw.recommended ?? raw.isRecommended ?? false,
           message: data.data.message || '',
           storeUrl: data.data.storeUrl || '',
           minVersion: data.data.minVersion || '',
