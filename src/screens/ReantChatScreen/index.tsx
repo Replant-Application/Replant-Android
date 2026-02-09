@@ -23,7 +23,7 @@ import {
   ExpoSpeechRecognitionModule,
   useSpeechRecognitionEvent,
 } from 'expo-speech-recognition';
-import { getCharacterImage } from '../../utils/characterUtils';
+import { getCharacterImageStatic } from '../../utils/characterUtils';
 import { useCharacter } from '../../hooks/useCharacter';
 import { sendChatMessage } from '../../api/chatApi';
 import { SCREEN_NAMES } from '../../utils/constants';
@@ -325,7 +325,7 @@ const ReantChatScreen: React.FC<ReantChatScreenProps> = ({ navigation, route: _r
         <View style={styles.assistantMessageRow}>
           <View style={styles.assistantAvatar}>
             <FastImage
-              source={getCharacterImage(currentCharacter?.level ?? 1, 'happy')}
+              source={getCharacterImageStatic(currentCharacter?.level ?? 1)}
               style={styles.assistantAvatarImage}
               resizeMode={FastImage.resizeMode.contain}
               accessibilityLabel={`${characterName ?? '리얼트'} 아바타`}
@@ -395,7 +395,7 @@ const ReantChatScreen: React.FC<ReantChatScreenProps> = ({ navigation, route: _r
                 <View style={styles.loadingRow}>
                   <View style={styles.assistantAvatar}>
                     <FastImage
-                      source={getCharacterImage(currentCharacter?.level ?? 1, 'happy')}
+                      source={getCharacterImageStatic(currentCharacter?.level ?? 1)}
                       style={styles.assistantAvatarImage}
                       resizeMode={FastImage.resizeMode.contain}
                       accessibilityLabel="리얼트 아바타"
