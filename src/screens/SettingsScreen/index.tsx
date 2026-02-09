@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity, ScrollView, Image, TextInput, ImageBackground } from 'react-native';
 import { Header, ConfirmModal, AlertModal } from '../../components/ui';
 import { colors } from '../../utils/designTokens';
-import { getCharacterImage } from '../../utils/characterUtils';
+import { getCharacterImageStatic } from '../../utils/characterUtils';
 import { formatDateKorean } from '../../utils/dateUtils';
 import { SettingsScreenProps } from '../../types/screens/settings';
 import { TERMS_OF_SERVICE, PRIVACY_POLICY, OPEN_SOURCE_LICENSE } from '../../constants/screens/settings';
@@ -65,7 +65,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
             <View style={styles.userInfo}>
               {currentCharacter && (
                 <Image
-                  source={getCharacterImage(currentCharacter.level || 1, 'default')}
+                  source={getCharacterImageStatic(currentCharacter.level || 1)}
                   style={styles.userIcon}
                   resizeMode="contain"
                   accessibilityLabel={`${currentCharacter.name || '캐릭터'} 이미지`}
