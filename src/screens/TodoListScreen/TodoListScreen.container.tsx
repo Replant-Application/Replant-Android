@@ -197,9 +197,26 @@ export const useTodoListScreenContainer = ({ navigation, route }: TodoListScreen
    */
   const currentList = activeTab === 'active' ? activeTodoLists : activeTab === 'completed' ? completedTodoLists : incompleteTodoLists;
 
+  /**
+   * 오늘 생성된 투두리스트가 있는지 (버튼 비활성화용. 어제 만든 건 무관)
+   */
+  const hasTodoListCreatedToday = (() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const isCreatedToday = (createdAt: string | undefined) => {
+      if (!createdAt) return false;
+      const d = new Date(createdAt);
+      d.setHours(0, 0, 0, 0);
+      return d.getTime() === today.getTime();
+    };
+    const allRelevant = [...activeTodoLists, ...completedTodoLists];
+    return allRelevant.some(t => isCreatedToday(t.createdAt));
+  })();
+
   return {
     // Data
     activeTodoLists,
+    hasTodoListCreatedToday,
     completedTodoLists,
     incompleteTodoLists,
     canCreate,

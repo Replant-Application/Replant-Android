@@ -26,6 +26,7 @@ const TodoListScreen: React.FC<Props> = ({ navigation, route }) => {
   // 비즈니스 로직은 Container에서 처리
   const {
     activeTodoLists,
+    hasTodoListCreatedToday,
     completedTodoLists,
     incompleteTodoLists,
     currentList,
@@ -199,14 +200,14 @@ const TodoListScreen: React.FC<Props> = ({ navigation, route }) => {
         {/* 새 투두리스트 생성 버튼 */}
         {activeTab === 'active' && (
           <TouchableOpacity
-            style={[styles.createButton, activeTodoLists.length > 0 && styles.createButtonDisabled]}
+            style={[styles.createButton, hasTodoListCreatedToday && styles.createButtonDisabled]}
             onPress={handleCreateTodoList}
-            disabled={activeTodoLists.length > 0}
+            disabled={hasTodoListCreatedToday}
             activeOpacity={0.7}
             accessibilityRole="button"
             accessibilityLabel="나만의 투두리스트 만들기. 투두리스트는 하루에 한번만 작성 가능해요"
-            accessibilityState={{ disabled: activeTodoLists.length > 0 }}
-            accessibilityHint={activeTodoLists.length > 0 ? '진행 중인 투두리스트가 있어 비활성화되었습니다' : undefined}
+            accessibilityState={{ disabled: hasTodoListCreatedToday }}
+            accessibilityHint={hasTodoListCreatedToday ? '오늘 이미 투두리스트를 만들어 비활성화되었습니다' : undefined}
           >
             <View style={styles.createButtonContent}>
               <View style={styles.createButtonTitleRow}>
