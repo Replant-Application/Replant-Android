@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, Image, ViewStyle } from 'react-native';
 import { styles } from './CharacterCard.styles';
 import { getNextLevelExp } from '../../utils/expTable';
 import { Character } from '../../types';
+import { getCharacterImage } from '../../utils/characterUtils';
 
 interface CharacterCardProps {
   character: Character;
@@ -28,19 +29,7 @@ const CharacterCard: React.FC<CharacterCardProps> = ({
     return '알';
   };
 
-  // 캐릭터 이미지 (레벨 5 이상은 모두 레벨 5 이미지 사용)
-  const characterImages = {
-    level1: require('../../assets/images/characters/level1/default.gif'),
-    level2: require('../../assets/images/characters/level2/default.gif'),
-    level3: require('../../assets/images/characters/level3/default.gif'),
-    level4: require('../../assets/images/characters/level4/default.gif'),
-    level5: require('../../assets/images/characters/level5/default.gif'),
-  };
-
-  const getCharacterImage = (level: number) => {
-    const levelKey = `level${Math.min(level, 5)}`;
-    return characterImages[levelKey as keyof typeof characterImages] || characterImages.level1;
-  };
+  // 캐릭터 이미지는 characterUtils의 getCharacterImage 함수 사용
 
   // 백엔드(Reant.java): 다음 레벨 필요 = 레벨별 테이블 (L1→10, L2→50, L3→100, L4→200, L5→500, L6+→500)
   const level = character.level ?? 1;
@@ -69,7 +58,7 @@ const CharacterCard: React.FC<CharacterCardProps> = ({
       <View style={styles.header}>
         <View style={styles.characterImageContainer}>
           <Image
-            source={getCharacterImage(character.level || 1)}
+            source={getCharacterImage(character.level || 1, 'default')}
             style={styles.characterImage}
             resizeMode="contain"
             accessibilityLabel={`${character.name || '캐릭터'} 이미지, ${getLevelName(character.level || 1)}`}

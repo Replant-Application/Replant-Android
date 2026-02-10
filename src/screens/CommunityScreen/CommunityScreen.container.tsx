@@ -8,6 +8,7 @@ import { useErrorHandler } from '../../hooks/useErrorHandler';
 import { CommunityPost } from '../../types';
 import { logError } from '../../utils/logger';
 import { getHiddenPosts, hidePost } from '../../utils/hiddenContentStorage';
+import { convertImageUrlsToCloudFront } from '../../utils/imageUtils';
 import {
   getPublicTodoLists,
   searchPublicTodoLists,
@@ -433,7 +434,7 @@ export const useCommunityScreenContainer = ({ navigation, route }: CommunityScre
             like_count: post.likeCount || 0,
             comment_count: post.commentCount || 0,
             scrap_count: 0,
-            images: post.imageUrls || [],
+            images: convertImageUrlsToCloudFront(post.imageUrls || []),
             category: isVerification ? '인증' : '일반',
             is_liked: post.isLiked || false,
             is_scrapped: false, // 스크랩은 로컬에서 관리
