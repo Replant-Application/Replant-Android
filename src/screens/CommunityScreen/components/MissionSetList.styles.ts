@@ -174,7 +174,6 @@ export const styles = StyleSheet.create({
   deleteIcon: {
     width: 14,
     height: 14,
-    tintColor: colors.red[600],
   },
   deleteText: {
     ...createTextStyle('xs', {
