@@ -1,1 +1,42 @@
-{"expo":{"name":"ReplantMobileApp","slug":"replant-mobile-app","version":"1.0.25","orientation":"portrait","userInterfaceStyle":"light","icon":"./logo/1024.png","splash":{"image":"./logo/1024.png","resizeMode":"contain","backgroundColor":"#ffffff"},"android":{"package":"com.anonymous.replantmobileapp","userInterfaceStyle":"light","adaptiveIcon":{"foregroundImage":"./logo/play_store_512.png","backgroundColor":"#ffffff"},"versionCode":125},"ios":{"bundleIdentifier":"com.anonymous.replantmobileapp","userInterfaceStyle":"light"},"main":"index.js","plugins":["expo-speech-recognition",["expo-font",{"fonts":["./src/assets/fonts/Neo-Regular.ttf","./src/assets/fonts/Maplestory Bold.ttf","./src/assets/fonts/Maplestory Light.ttf"]}]]}}
+{
+  "expo": {
+    "name": "ReplantMobileApp",
+    "slug": "replant-mobile-app",
+    "version": "1.0.26",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "icon": "./logo/1024.png",
+    "splash": {
+      "image": "./logo/1024.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "android": {
+      "package": "com.anonymous.replantmobileapp",
+      "userInterfaceStyle": "light",
+      "adaptiveIcon": {
+        "foregroundImage": "./logo/play_store_512.png",
+        "backgroundColor": "#ffffff"
+      },
+      "versionCode": 126
+    },
+    "ios": {
+      "bundleIdentifier": "com.anonymous.replantmobileapp",
+      "userInterfaceStyle": "light"
+    },
+    "main": "index.js",
+    "plugins": [
+      "expo-speech-recognition",
+      [
+        "expo-font",
+        {
+          "fonts": [
+            "./src/assets/fonts/Neo-Regular.ttf",
+            "./src/assets/fonts/Maplestory Bold.ttf",
+            "./src/assets/fonts/Maplestory Light.ttf"
+          ]
+        }
+      ]
+    ]
+  }
+}
