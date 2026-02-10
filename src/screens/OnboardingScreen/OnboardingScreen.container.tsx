@@ -76,15 +76,13 @@ export const useOnboardingScreenContainer = ({
     }
   };
 
-  // 다음 슬라이드로 이동 (스와이프 대체). 마지막이면 시작하기
+  // 다음 슬라이드로 이동 (스와이프 대체)
   const goToNext = () => {
     if (currentIndex < slidesLength - 1) {
       flatListRef.current?.scrollToOffset({
         offset: (currentIndex + 1) * SCREEN_WIDTH,
         animated: true,
       });
-    } else {
-      handleStart();
     }
   };
 

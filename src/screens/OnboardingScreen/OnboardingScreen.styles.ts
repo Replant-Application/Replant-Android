@@ -5,7 +5,7 @@
 
 import { StyleSheet, Platform, Dimensions } from 'react-native';
 import { spacing, typography, colors } from '../../utils/designTokens';
-import { createTextStyle } from '../../utils/styles/textStyles';
+import { createTextStyle, getOptimizedLineHeight } from '../../utils/styles/textStyles';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -14,95 +14,132 @@ export const styles = StyleSheet.create({
     flex: 1,
     width: SCREEN_WIDTH,
     height: SCREEN_HEIGHT,
-    backgroundColor: colors.white,
+    backgroundColor: colors.gray[900], // 어두운 배경
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  imageBackground: {
-    flex: 1,
-    width: '100%',
-    height: '100%',
-    pointerEvents: 'box-none',
-  },
-  transparentFlatList: {
-    flex: 1,
-    backgroundColor: 'transparent',
   },
   skipButton: {
     position: 'absolute',
     top: Platform.OS === 'ios' ? 40 + spacing[2] : 30 + spacing[2],
     right: spacing[3],
-    zIndex: 1000, // ImageBackground 위에 표시되도록 높은 zIndex 설정
-    elevation: 10, // Android에서도 위에 표시되도록
+    zIndex: 1000,
+    elevation: 10,
     paddingVertical: spacing[2],
     paddingHorizontal: spacing[4],
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'transparent', // 배경 투명
+    backgroundColor: 'transparent',
+  },
+  flatList: {
+    flex: 1,
+    width: '100%',
   },
   slideContainer: {
     width: SCREEN_WIDTH,
     flex: 1,
-    paddingHorizontal: 0,
-    paddingTop: 0,
-    paddingBottom: 0,
-    backgroundColor: 'transparent',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: spacing[4],
+    paddingTop: spacing[8],
+    paddingBottom: spacing[4],
   },
-  navContainer: {
+  slideImage: {
+    width: '100%',
+    maxWidth: SCREEN_WIDTH * 0.95,
+    maxHeight: SCREEN_HEIGHT * 0.5,
+  },
+  textContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: spacing[6],
+    paddingTop: spacing[20],
+    paddingBottom: spacing[20],
+    marginTop: -spacing[12],
+  },
+  emoji: {
+    fontSize: 32,
+    marginBottom: spacing[2],
+  },
+  slideText: {
+    ...createTextStyle('lg', {
+      fontWeight: typography.fontWeight.medium,
+      color: colors.white,
+      fontFamily: Platform.select({ ios: undefined, android: typography.fontFamily.regular }),
+      textAlign: 'center',
+      lineHeight: getOptimizedLineHeight(typography.fontSize.lg) * 1.2,
+    }),
+  },
+  paginationContainer: {
     position: 'absolute',
-    bottom: Platform.OS === 'ios' ? 80 : 66,
+    bottom: Platform.OS === 'ios' ? 120 : 100,
     left: 0,
     right: 0,
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: spacing[6],
-  },
-  pageIndicatorWrapper: {
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    paddingHorizontal: spacing[3],
-    paddingVertical: spacing[1],
-    borderRadius: 12,
     justifyContent: 'center',
+    gap: spacing[2],
+    paddingVertical: spacing[10],
+    zIndex: 200,
+    elevation: 10,
   },
-  pageIndicator: {
-    ...createTextStyle('sm', {
-      fontWeight: typography.fontWeight.bold,
-      color: colors.white,
-      fontFamily: Platform.select({ ios: undefined, android: typography.fontFamily.bold }),
-      textShadowColor: 'rgba(0,0,0,0.5)',
-      textShadowOffset: { width: 0, height: 1 },
-      textShadowRadius: 2,
-    }),
+  paginationDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: colors.gray[400],
   },
-  navButtonRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing[3],
+  paginationDotActive: {
+    backgroundColor: colors.white,
+    width: 8,
+    height: 8,
   },
-  navButton: {
-    paddingVertical: spacing[2],
-    paddingHorizontal: spacing[4],
-    borderRadius: 8,
-    minHeight: 44,
-    justifyContent: 'center',
-  },
-  navButtonPrev: {
-    backgroundColor: 'rgba(0,0,0,0.15)',
-  },
-  navButtonNext: {
+  startButton: {
+    position: 'absolute',
+    bottom: Platform.OS === 'ios' ? 50 : 60,
+    left: '5%',
+    right: '5%',
+    width: '90%',
+    maxWidth: SCREEN_WIDTH - spacing[8],
     backgroundColor: colors.primary[600],
-  },
-  navButtonText: {
-    ...createTextStyle('sm', {
-      fontWeight: typography.fontWeight.bold,
-      fontFamily: Platform.select({ ios: undefined, android: typography.fontFamily.bold }),
+    paddingVertical: spacing[4],
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 200,
+    elevation: 10,
+    ...Platform.select({
+      ios: {
+        shadowColor: colors.primary[600],
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 8,
+      },
+      android: {
+        elevation: 4,
+      },
     }),
   },
-  navButtonTextPrev: {
-    color: colors.gray[700],
+  startButtonText: {
+    ...createTextStyle('base', {
+      fontWeight: typography.fontWeight.medium,
+      color: colors.white,
+      fontFamily: Platform.select({ ios: undefined, android: typography.fontFamily.regular }),
+    }),
   },
-  navButtonTextNext: {
-    color: colors.white,
+  leftTouchArea: {
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    bottom: 0,
+    width: SCREEN_WIDTH / 2,
+    zIndex: 100,
+  },
+  rightTouchArea: {
+    position: 'absolute',
+    right: 0,
+    top: 0,
+    bottom: 0,
+    width: SCREEN_WIDTH / 2,
+    zIndex: 100,
   },
 });
