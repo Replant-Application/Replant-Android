@@ -273,13 +273,13 @@ export const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: colors.primary[500], // 더 부드러운 초록색
+    backgroundColor: colors.primary[400], // 필터 옵션과 통일
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 2,
-    borderColor: colors.primary[600], // 테두리 추가
+    borderWidth: 1,
+    borderColor: colors.primary[400], // 필터 옵션과 통일
     elevation: 4,
-    shadowColor: colors.primary[500],
+    shadowColor: colors.primary[400],
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 6,
@@ -516,5 +516,42 @@ export const styles = StyleSheet.create({
   },
   modalTabLabelActive: {
     color: colors.green[600],
+  },
+  // 투두리스트 공유 필터 모달 스타일
+  filterOptionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing[3],
+    marginBottom: spacing[4],
+  },
+  filterOptionHorizontal: {
+    paddingVertical: spacing[2],
+    paddingHorizontal: spacing[4],
+    borderRadius: borderRadius.full, // 둥근 모서리 배지 스타일
+    borderWidth: 1,
+    borderColor: colors.gray[300],
+    backgroundColor: colors.white,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minWidth: 100,
+  },
+  filterOptionActive: {
+    borderColor: colors.primary[400],
+    backgroundColor: colors.primary[50],
+  },
+  filterOptionText: {
+    ...createTextStyle('base', {
+      color: colors.text.secondary,
+      fontWeight: typography.fontWeight.medium,
+      fontFamily: Platform.select({
+        ios: undefined,
+        android: typography.fontFamily.regular,
+      }),
+    }),
+  },
+  filterOptionTextActive: {
+    color: colors.primary[600],
+    fontWeight: typography.fontWeight.semibold,
   },
 });

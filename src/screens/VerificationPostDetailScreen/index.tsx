@@ -13,6 +13,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   RefreshControl,
+  Modal,
 } from 'react-native';
 import { CommentCard } from '../../components/specialized';
 import { Loading, ErrorBoundary, EmptyState, AlertModal, FullScreenImageViewer } from '../../components/ui';
@@ -376,6 +377,23 @@ const VerificationPostDetailScreen: React.FC<VerificationPostDetailScreenProps> 
           </View>
         )}
         <View style={styles.commentInputContainer}>
+          {voiceAvailable && (
+            <TouchableOpacity
+              style={[styles.voiceButton, isListening && styles.voiceButtonActive]}
+              onPress={handleVoicePress}
+              activeOpacity={0.7}
+              accessibilityRole="button"
+              accessibilityLabel={isListening ? '음성 입력 중지' : '녹음하여 말하기'}
+              accessibilityState={{ selected: isListening }}
+            >
+              <Image
+                source={require('../../assets/images/record.png')}
+                style={styles.voiceButtonIcon}
+                resizeMode="contain"
+                accessibilityLabel={isListening ? '녹음 중' : '녹음'}
+              />
+            </TouchableOpacity>
+          )}
           <TextInput
             style={styles.commentInput}
             value={commentContent}
@@ -410,6 +428,36 @@ const VerificationPostDetailScreen: React.FC<VerificationPostDetailScreenProps> 
         imageUri={selectedImageUri}
         onClose={() => setSelectedImageUri(null)}
       />
+      
+      {/* 녹음 중 모달 */}
+      <Modal
+        visible={isListening}
+        transparent
+        animationType="fade"
+        statusBarTranslucent
+      >
+        <View style={styles.recordingModalOverlay}>
+          <View style={styles.recordingModalContent}>
+            <Image
+              source={require('../../assets/images/recording.png')}
+              style={styles.recordingModalIcon}
+              resizeMode="contain"
+              accessibilityLabel="녹음 중"
+            />
+            <Text style={styles.recordingModalText}>녹음중입니다</Text>
+            <Text style={styles.recordingModalHint}>다시 누르면 녹음이 끝나요</Text>
+            <TouchableOpacity
+              style={styles.recordingModalCancelButton}
+              onPress={handleVoiceCancel}
+              activeOpacity={0.7}
+              accessibilityRole="button"
+              accessibilityLabel="녹음 취소"
+            >
+              <Text style={styles.recordingModalCancelButtonText}>취소</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </KeyboardAvoidingView>
   );
 };

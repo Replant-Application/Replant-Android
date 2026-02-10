@@ -74,6 +74,14 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
     handleMissionSortChange,
     showOnlyParticipated,
     handleShowOnlyParticipatedChange,
+    searchQuery,
+    handleSearchQueryChange,
+    titleOnly,
+    handleTitleOnlyToggle,
+    selectedCategory,
+    handleCategoryFilterChange,
+    selectedDifficulty,
+    handleDifficultyFilterChange,
     getVerificationTypeLabel,
     getVerificationTypeIcon,
     getMissionCategoryLabel,
@@ -389,6 +397,14 @@ const MissionScreen: React.FC<MissionScreenProps> = ({ navigation, route }) => {
               refreshing={refreshing}
               sortBy={missionSortBy}
               showOnlyParticipated={showOnlyParticipated}
+              searchQuery={searchQuery}
+              onSearchQueryChange={handleSearchQueryChange}
+              titleOnly={titleOnly}
+              onTitleOnlyToggle={handleTitleOnlyToggle}
+              selectedCategory={selectedCategory}
+              onCategoryFilterChange={handleCategoryFilterChange}
+              selectedDifficulty={selectedDifficulty}
+              onDifficultyFilterChange={handleDifficultyFilterChange}
               onMissionSelect={(mission) => setSelectedGroupMission(mission)}
               onServerPageChange={handleClientPageChange}
               onNavigateToCreate={() => navigation.navigate('CustomMissionCreate' as any)}

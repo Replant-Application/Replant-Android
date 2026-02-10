@@ -60,10 +60,22 @@ const TodoListDetailScreen: React.FC<Props> = ({ navigation, route }) => {
     const isCompleting = completingMissionId === mission.missionId;
     const canComplete = !mission.isCompleted && todoList?.status === 'ACTIVE';
     const isCustomMission = mission.missionType === 'CUSTOM' || mission.missionSource === 'CUSTOM_SELECTED';
-    const canUncomplete = mission.isCompleted && isCustomMission && todoList?.status === 'ACTIVE';
+    // 공유된 투두리스트의 미션은 소유자가 아니면 취소할 수 없음
+    const canUncomplete = mission.isCompleted && isCustomMission && isOwner && todoList?.status === 'ACTIVE';
     const handlePress = () => {
-      if (canComplete) handleCompleteMission(mission);
-      else if (canUncomplete) handleUncompleteMission(mission);
+      // 공식 미션이 완료된 경우 아무 동작도 하지 않음 (에러 메시지 표시 안 함)
+      if (mission.isCompleted && !isCustomMission) {
+        return;
+      }
+      // 공유된 투두리스트의 미션은 소유자가 아니면 취소할 수 없음
+      if (mission.isCompleted && isCustomMission && !isOwner) {
+        return;
+      }
+      if (canComplete) {
+        handleCompleteMission(mission);
+      } else if (canUncomplete) {
+        handleUncompleteMission(mission);
+      }
     };
 
     return (

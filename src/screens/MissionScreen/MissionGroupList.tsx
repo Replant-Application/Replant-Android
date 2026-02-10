@@ -4,11 +4,12 @@
  */
 
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, Image, ScrollView, RefreshControl } from 'react-native';
-import { colors } from '../../utils/designTokens';
+import { View, Text, TouchableOpacity, Image, ScrollView, RefreshControl, TextInput, Modal } from 'react-native';
+import { colors, spacing, borderRadius, typography } from '../../utils/designTokens';
 import { EmptyState } from '../../components/ui';
 import { MissionCategory } from '../../api/missionApi';
 import { styles } from './MissionGroupList.styles';
+import { createTextStyle, createTitleStyle, createBodyStyle } from '../../utils/styles/textStyles';
 
 // 미션 도감용 통합 미션 타입
 interface UnifiedMission {
@@ -44,6 +45,14 @@ interface MissionGroupListProps {
   refreshing?: boolean;
   sortBy?: 'default' | 'participants' | 'exp' | 'difficulty';
   showOnlyParticipated?: boolean; // 내가 참여한 미션만 보기 (공식 미션 전용)
+  searchQuery?: string;
+  onSearchQueryChange?: (query: string) => void;
+  titleOnly?: boolean;
+  onTitleOnlyToggle?: (value: boolean) => void;
+  selectedCategory?: MissionCategory | null;
+  onCategoryFilterChange?: (category: MissionCategory | null) => void;
+  selectedDifficulty?: 'EASY' | 'MEDIUM' | 'HARD' | null;
+  onDifficultyFilterChange?: (difficulty: 'EASY' | 'MEDIUM' | 'HARD' | null) => void;
   onMissionSelect: (mission: UnifiedMission | null) => void;
   onServerPageChange: (page: number) => void;
   onNavigateToCreate: () => void;
@@ -65,6 +74,14 @@ const MissionGroupList: React.FC<MissionGroupListProps> = ({
   refreshing = false,
   sortBy = 'default',
   showOnlyParticipated = false,
+  searchQuery = '',
+  onSearchQueryChange,
+  titleOnly = false,
+  onTitleOnlyToggle,
+  selectedCategory = null,
+  onCategoryFilterChange,
+  selectedDifficulty = null,
+  onDifficultyFilterChange,
   onMissionSelect,
   onServerPageChange,
   onNavigateToCreate,
@@ -75,7 +92,7 @@ const MissionGroupList: React.FC<MissionGroupListProps> = ({
   getVerificationTypeIcon: _getVerificationTypeIcon,
   getMissionCategoryLabel,
 }) => {
-  const [showSortDropdown, setShowSortDropdown] = useState(false);
+  const [showFilterModal, setShowFilterModal] = useState(false);
 
   return (
     <View style={styles.container}>
@@ -93,17 +110,70 @@ const MissionGroupList: React.FC<MissionGroupListProps> = ({
           ) : undefined
         }
         onScrollBeginDrag={() => {
-          // 스크롤 시작 시 드롭다운 닫기
-          if (showSortDropdown) {
-            setShowSortDropdown(false);
+          // 스크롤 시작 시 모달 닫기
+          if (showFilterModal) {
+            setShowFilterModal(false);
           }
         }}
       >
-      {/* 필터 및 정렬 컨트롤 (같은 가로 라인) */}
-      {missions.length > 0 && (
-        <View style={styles.filterSortRow}>
-          {/* 공식 미션: "참여한 미션" 체크박스 */}
-          {missionGroupTab === 'official' ? (
+      {/* 검색창과 필터 버튼 - 커스텀 미션 탭에서만 표시, 항상 표시 */}
+      {missionGroupTab === 'custom' && (
+        <View style={styles.searchRow}>
+          <View style={styles.searchInputWrapper}>
+            <Image
+              source={require('../../assets/images/search.png')}
+              style={styles.searchIcon}
+              resizeMode="contain"
+              accessibilityLabel="검색 아이콘"
+            />
+            <TextInput
+              style={styles.searchInput}
+              placeholder="미션 검색..."
+              placeholderTextColor={colors.gray[400]}
+              value={searchQuery}
+              onChangeText={onSearchQueryChange}
+              returnKeyType="search"
+              accessibilityLabel="미션 검색 입력"
+            />
+            {searchQuery.length > 0 && (
+              <TouchableOpacity
+                onPress={() => onSearchQueryChange?.('')}
+                style={styles.searchClearButton}
+                accessibilityLabel="검색어 지우기"
+              >
+                <Text style={styles.searchClearText}>✕</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+          <TouchableOpacity
+            style={[
+              styles.filterButton,
+              (selectedCategory || selectedDifficulty || sortBy !== 'default') && styles.filterButtonActive
+            ]}
+            onPress={() => setShowFilterModal(true)}
+            activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel="필터"
+            accessibilityHint="필터 옵션 열기"
+            accessibilityState={{ selected: !!(selectedCategory || selectedDifficulty || sortBy !== 'default') }}
+          >
+            <Image
+              source={require('../../assets/images/filter.png')}
+              style={styles.filterIcon}
+              resizeMode="contain"
+              accessibilityLabel="필터 아이콘"
+            />
+            {(selectedCategory || selectedDifficulty || sortBy !== 'default') && (
+              <View style={styles.filterBadge} />
+            )}
+          </TouchableOpacity>
+        </View>
+      )}
+
+      {/* 공식 미션: 체크박스와 필터 버튼 */}
+      {missionGroupTab === 'official' && (
+        <View style={styles.officialFilterRow}>
+          {missions.length > 0 && (
             <TouchableOpacity
               style={styles.filterCheckbox}
               onPress={() => onShowOnlyParticipatedChange?.(!showOnlyParticipated)}
@@ -119,141 +189,29 @@ const MissionGroupList: React.FC<MissionGroupListProps> = ({
               </View>
               <Text style={styles.filterCheckboxLabel}>잠금 해제된 미션만 보기</Text>
             </TouchableOpacity>
-          ) : (
-            <View style={styles.filterCheckboxPlaceholder} />
           )}
-
-          {/* 정렬 버튼 */}
-          <View style={styles.sortButtonWrapper}>
-            <TouchableOpacity
-              style={styles.sortButton}
-              onPress={() => setShowSortDropdown(!showSortDropdown)}
-              activeOpacity={0.7}
-              accessibilityRole="button"
-              accessibilityLabel="정렬 옵션"
-            >
-              <Text style={styles.sortButtonText}>
-                {sortBy === 'participants' ? '참여순' : 
-                 (sortBy === 'exp' && missionGroupTab === 'official') ? 'EXP순' : 
-                 sortBy === 'difficulty' ? '난이도순' : '기본순'}
-              </Text>
-              <Text style={styles.sortButtonArrow}>↑↓</Text>
-            </TouchableOpacity>
-          
-          {/* 드롭다운 메뉴 */}
-          {showSortDropdown && (
-            <View style={styles.sortDropdown}>
-              <TouchableOpacity
-                style={[
-                  styles.sortDropdownItem,
-                  sortBy === 'default' && styles.sortDropdownItemSelected,
-                ]}
-                onPress={() => {
-                  onSortChange?.('default');
-                  setShowSortDropdown(false);
-                }}
-                activeOpacity={0.7}
-                accessibilityRole="button"
-                accessibilityLabel={sortBy === 'default' ? '기본순, 선택됨' : '기본순으로 정렬'}
-                accessibilityState={{ selected: sortBy === 'default' }}
-              >
-                <Text
-                  style={[
-                    styles.sortDropdownItemText,
-                    sortBy === 'default' && styles.sortDropdownItemTextSelected,
-                  ]}
-                >
-                  기본순
-                </Text>
-                {sortBy === 'default' && (
-                  <Text style={styles.sortDropdownCheck}>✓</Text>
-                )}
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[
-                  styles.sortDropdownItem,
-                  sortBy === 'participants' && styles.sortDropdownItemSelected,
-                ]}
-                onPress={() => {
-                  onSortChange?.('participants');
-                  setShowSortDropdown(false);
-                }}
-                activeOpacity={0.7}
-                accessibilityRole="button"
-                accessibilityLabel={sortBy === 'participants' ? '참여순, 선택됨' : '참여순으로 정렬'}
-                accessibilityState={{ selected: sortBy === 'participants' }}
-              >
-                <Text
-                  style={[
-                    styles.sortDropdownItemText,
-                    sortBy === 'participants' && styles.sortDropdownItemTextSelected,
-                  ]}
-                >
-                  참여순
-                </Text>
-                {sortBy === 'participants' && (
-                  <Text style={styles.sortDropdownCheck}>✓</Text>
-                )}
-              </TouchableOpacity>
-              {missionGroupTab === 'official' && (
-                <TouchableOpacity
-                  style={[
-                    styles.sortDropdownItem,
-                    sortBy === 'exp' && styles.sortDropdownItemSelected,
-                  ]}
-                  onPress={() => {
-                    onSortChange?.('exp');
-                    setShowSortDropdown(false);
-                  }}
-                  activeOpacity={0.7}
-                  accessibilityRole="button"
-                  accessibilityLabel={sortBy === 'exp' ? 'EXP순, 선택됨' : 'EXP순으로 정렬'}
-                  accessibilityState={{ selected: sortBy === 'exp' }}
-                >
-                  <Text
-                    style={[
-                      styles.sortDropdownItemText,
-                      sortBy === 'exp' && styles.sortDropdownItemTextSelected,
-                    ]}
-                  >
-                    EXP순
-                  </Text>
-                  {sortBy === 'exp' && (
-                    <Text style={styles.sortDropdownCheck}>✓</Text>
-                  )}
-                </TouchableOpacity>
-              )}
-              {missionGroupTab === 'official' && (
-                <TouchableOpacity
-                  style={[
-                    styles.sortDropdownItem,
-                    sortBy === 'difficulty' && styles.sortDropdownItemSelected,
-                  ]}
-                  onPress={() => {
-                    onSortChange?.('difficulty');
-                    setShowSortDropdown(false);
-                  }}
-                  activeOpacity={0.7}
-                  accessibilityRole="button"
-                  accessibilityLabel={sortBy === 'difficulty' ? '난이도순, 선택됨' : '난이도순으로 정렬'}
-                  accessibilityState={{ selected: sortBy === 'difficulty' }}
-                >
-                  <Text
-                    style={[
-                      styles.sortDropdownItemText,
-                      sortBy === 'difficulty' && styles.sortDropdownItemTextSelected,
-                    ]}
-                  >
-                    난이도순
-                  </Text>
-                  {sortBy === 'difficulty' && (
-                    <Text style={styles.sortDropdownCheck}>✓</Text>
-                  )}
-                </TouchableOpacity>
-              )}
-            </View>
-          )}
-          </View>
+          <TouchableOpacity
+            style={[
+              styles.filterButton,
+              (showOnlyParticipated || sortBy !== 'default') && styles.filterButtonActive
+            ]}
+            onPress={() => setShowFilterModal(true)}
+            activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel="필터"
+            accessibilityHint="필터 옵션 열기"
+            accessibilityState={{ selected: !!(showOnlyParticipated || sortBy !== 'default') }}
+          >
+            <Image
+              source={require('../../assets/images/filter.png')}
+              style={styles.filterIcon}
+              resizeMode="contain"
+              accessibilityLabel="필터 아이콘"
+            />
+            {(showOnlyParticipated || sortBy !== 'default') && (
+              <View style={styles.filterBadge} />
+            )}
+          </TouchableOpacity>
         </View>
       )}
 
@@ -427,6 +385,274 @@ const MissionGroupList: React.FC<MissionGroupListProps> = ({
           />
         </TouchableOpacity>
       )}
+
+      {/* 필터 모달 */}
+      <Modal
+        visible={showFilterModal}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setShowFilterModal(false)}
+      >
+        <TouchableOpacity
+          style={styles.modalOverlay}
+          activeOpacity={1}
+          onPress={() => setShowFilterModal(false)}
+          accessibilityRole="button"
+          accessibilityLabel="필터 모달 닫기"
+        >
+          <TouchableOpacity
+            activeOpacity={1}
+            onPress={(e) => e.stopPropagation()}
+            accessibilityRole="none"
+          >
+            <View style={styles.filterModalContent}>
+              <View style={styles.filterModalHeader}>
+                <Text style={styles.filterModalTitle}>필터</Text>
+                <TouchableOpacity
+                  onPress={() => setShowFilterModal(false)}
+                  activeOpacity={0.7}
+                  accessibilityRole="button"
+                  accessibilityLabel="필터 모달 닫기"
+                >
+                  <Text style={styles.filterModalClose}>✕</Text>
+                </TouchableOpacity>
+              </View>
+
+              {/* 정렬 옵션 */}
+              <View style={styles.filterSection}>
+                <Text style={styles.filterSectionTitle}>정렬</Text>
+                <View style={styles.filterOptionsRow}>
+                  <TouchableOpacity
+                    style={[
+                      styles.filterOption,
+                      sortBy === 'default' && styles.filterOptionActive,
+                    ]}
+                    onPress={() => onSortChange?.('default')}
+                    activeOpacity={0.7}
+                    accessibilityRole="button"
+                    accessibilityLabel={sortBy === 'default' ? '기본순, 선택됨' : '기본순으로 정렬'}
+                    accessibilityState={{ selected: sortBy === 'default' }}
+                  >
+                    <Text
+                      style={[
+                        styles.filterOptionText,
+                        sortBy === 'default' && styles.filterOptionTextActive,
+                      ]}
+                    >
+                      기본순
+                    </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[
+                      styles.filterOption,
+                      sortBy === 'participants' && styles.filterOptionActive,
+                    ]}
+                    onPress={() => onSortChange?.('participants')}
+                    activeOpacity={0.7}
+                    accessibilityRole="button"
+                    accessibilityLabel={sortBy === 'participants' ? '참여순, 선택됨' : '참여순으로 정렬'}
+                    accessibilityState={{ selected: sortBy === 'participants' }}
+                  >
+                    <Text
+                      style={[
+                        styles.filterOptionText,
+                        sortBy === 'participants' && styles.filterOptionTextActive,
+                      ]}
+                    >
+                      참여순
+                    </Text>
+                  </TouchableOpacity>
+                  {missionGroupTab === 'official' && (
+                    <TouchableOpacity
+                      style={[
+                        styles.filterOption,
+                        sortBy === 'exp' && styles.filterOptionActive,
+                      ]}
+                      onPress={() => onSortChange?.('exp')}
+                      activeOpacity={0.7}
+                      accessibilityRole="button"
+                      accessibilityLabel={sortBy === 'exp' ? 'EXP순, 선택됨' : 'EXP순으로 정렬'}
+                      accessibilityState={{ selected: sortBy === 'exp' }}
+                    >
+                      <Text
+                        style={[
+                          styles.filterOptionText,
+                          sortBy === 'exp' && styles.filterOptionTextActive,
+                        ]}
+                      >
+                        EXP순
+                      </Text>
+                    </TouchableOpacity>
+                  )}
+                  {missionGroupTab === 'official' && (
+                    <TouchableOpacity
+                      style={[
+                        styles.filterOption,
+                        sortBy === 'difficulty' && styles.filterOptionActive,
+                      ]}
+                      onPress={() => onSortChange?.('difficulty')}
+                      activeOpacity={0.7}
+                      accessibilityRole="button"
+                      accessibilityLabel={sortBy === 'difficulty' ? '난이도순, 선택됨' : '난이도순으로 정렬'}
+                      accessibilityState={{ selected: sortBy === 'difficulty' }}
+                    >
+                      <Text
+                        style={[
+                          styles.filterOptionText,
+                          sortBy === 'difficulty' && styles.filterOptionTextActive,
+                        ]}
+                      >
+                        난이도순
+                      </Text>
+                    </TouchableOpacity>
+                  )}
+                </View>
+              </View>
+
+              {/* 커스텀 미션만: 카테고리 필터 */}
+              {missionGroupTab === 'custom' && (
+                <View style={styles.filterSection}>
+                  <Text style={styles.filterSectionTitle}>카테고리</Text>
+                  <View style={styles.filterOptionsRow}>
+                    <TouchableOpacity
+                      style={[
+                        styles.filterOption,
+                        selectedCategory === null && styles.filterOptionActive,
+                      ]}
+                      onPress={() => onCategoryFilterChange?.(null)}
+                      activeOpacity={0.7}
+                      accessibilityRole="button"
+                      accessibilityLabel="전체 카테고리"
+                      accessibilityState={{ selected: selectedCategory === null }}
+                    >
+                      <Text
+                        style={[
+                          styles.filterOptionText,
+                          selectedCategory === null && styles.filterOptionTextActive,
+                        ]}
+                      >
+                        전체
+                      </Text>
+                    </TouchableOpacity>
+                    {(['DAILY_LIFE', 'GROWTH', 'EXERCISE', 'STUDY', 'HEALTH', 'RELATIONSHIP'] as MissionCategory[]).map((category) => (
+                      <TouchableOpacity
+                        key={category}
+                        style={[
+                          styles.filterOption,
+                          selectedCategory === category && styles.filterOptionActive,
+                        ]}
+                        onPress={() => onCategoryFilterChange?.(category)}
+                        activeOpacity={0.7}
+                        accessibilityRole="button"
+                        accessibilityLabel={getMissionCategoryLabel(category)}
+                        accessibilityState={{ selected: selectedCategory === category }}
+                      >
+                        <Text
+                          style={[
+                            styles.filterOptionText,
+                            selectedCategory === category && styles.filterOptionTextActive,
+                          ]}
+                        >
+                          {getMissionCategoryLabel(category)}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                </View>
+              )}
+
+              {/* 커스텀 미션만: 난이도 필터 */}
+              {missionGroupTab === 'custom' && (
+                <View style={styles.filterSection}>
+                  <Text style={styles.filterSectionTitle}>난이도</Text>
+                  <View style={styles.filterOptionsRow}>
+                    <TouchableOpacity
+                      style={[
+                        styles.filterOption,
+                        selectedDifficulty === null && styles.filterOptionActive,
+                      ]}
+                      onPress={() => onDifficultyFilterChange?.(null)}
+                      activeOpacity={0.7}
+                      accessibilityRole="button"
+                      accessibilityLabel="전체 난이도"
+                      accessibilityState={{ selected: selectedDifficulty === null }}
+                    >
+                      <Text
+                        style={[
+                          styles.filterOptionText,
+                          selectedDifficulty === null && styles.filterOptionTextActive,
+                        ]}
+                      >
+                        전체
+                      </Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={[
+                        styles.filterOption,
+                        selectedDifficulty === 'EASY' && styles.filterOptionActive,
+                      ]}
+                      onPress={() => onDifficultyFilterChange?.('EASY')}
+                      activeOpacity={0.7}
+                      accessibilityRole="button"
+                      accessibilityLabel="쉬움"
+                      accessibilityState={{ selected: selectedDifficulty === 'EASY' }}
+                    >
+                      <Text
+                        style={[
+                          styles.filterOptionText,
+                          selectedDifficulty === 'EASY' && styles.filterOptionTextActive,
+                        ]}
+                      >
+                        쉬움
+                      </Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={[
+                        styles.filterOption,
+                        selectedDifficulty === 'MEDIUM' && styles.filterOptionActive,
+                      ]}
+                      onPress={() => onDifficultyFilterChange?.('MEDIUM')}
+                      activeOpacity={0.7}
+                      accessibilityRole="button"
+                      accessibilityLabel="보통"
+                      accessibilityState={{ selected: selectedDifficulty === 'MEDIUM' }}
+                    >
+                      <Text
+                        style={[
+                          styles.filterOptionText,
+                          selectedDifficulty === 'MEDIUM' && styles.filterOptionTextActive,
+                        ]}
+                      >
+                        보통
+                      </Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={[
+                        styles.filterOption,
+                        selectedDifficulty === 'HARD' && styles.filterOptionActive,
+                      ]}
+                      onPress={() => onDifficultyFilterChange?.('HARD')}
+                      activeOpacity={0.7}
+                      accessibilityRole="button"
+                      accessibilityLabel="어려움"
+                      accessibilityState={{ selected: selectedDifficulty === 'HARD' }}
+                    >
+                      <Text
+                        style={[
+                          styles.filterOptionText,
+                          selectedDifficulty === 'HARD' && styles.filterOptionTextActive,
+                        ]}
+                      >
+                        어려움
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              )}
+            </View>
+          </TouchableOpacity>
+        </TouchableOpacity>
+      </Modal>
     </View>
   );
 };

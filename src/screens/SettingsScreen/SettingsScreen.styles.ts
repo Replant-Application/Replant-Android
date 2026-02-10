@@ -3,7 +3,7 @@
  * 설정 화면의 모든 스타일 정의
  */
 
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Platform } from 'react-native';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
 import { createTextStyle, createTitleStyle, createBodyStyle, createSecondaryTextStyle, createButtonTextStyle } from '../../utils/styles/textStyles';
 import { inputStyles, cardStyles } from '../../utils/styles/commonStyles';
@@ -105,14 +105,42 @@ export const styles = StyleSheet.create({
     height: 48,
     justifyContent: 'center',
   },
+  textInputRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing[2],
+  },
   textInput: {
     ...inputStyles.base(),
+    flex: 1,
     padding: spacing[3],
     fontSize: typography.fontSize.base,
     color: colors.text.primary,
     textAlignVertical: 'center',
     height: 48,
     paddingVertical: 0,
+    fontFamily: typography.fontFamily.regular,
+    fontWeight: typography.fontWeight.medium,
+    ...(Platform.OS === 'android' && { includeFontPadding: false }),
+  },
+  voiceButton: {
+    width: 48,
+    height: 48,
+    borderRadius: borderRadius.lg,
+    backgroundColor: '#8B6F47',
+    borderWidth: 1,
+    borderColor: '#D4A574',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  voiceButtonActive: {
+    backgroundColor: '#8B6F47',
+    borderColor: colors.primary[500],
+  },
+  voiceButtonIcon: {
+    width: 24,
+    height: 24,
+    tintColor: colors.white,
   },
   nicknameActions: {
     flexDirection: 'row',

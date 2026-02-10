@@ -125,7 +125,7 @@ const CommunityPostCreateScreen: React.FC<CommunityPostCreateScreenProps> = ({ n
           <View style={styles.contentInputWrapper}>
             {/* 노트 줄 배경 */}
             <View style={styles.noteLines}>
-              {[...Array(6)].map((_, i) => (
+              {[...Array(5)].map((_, i) => (
                 <View key={i} style={styles.noteLine} />
               ))}
             </View>

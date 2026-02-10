@@ -400,4 +400,69 @@ export const styles = StyleSheet.create({
   submitButtonText: {
     ...createButtonTextStyle('sm'),
   },
+  voiceButton: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: colors.white,
+    borderWidth: 1,
+    borderColor: colors.primary[400],
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  voiceButtonActive: {
+    backgroundColor: colors.white,
+    borderColor: colors.primary[500],
+  },
+  voiceButtonIcon: {
+    width: 20,
+    height: 20,
+  },
+  // 녹음 중 모달
+  recordingModalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  recordingModalContent: {
+    backgroundColor: colors.white,
+    borderRadius: borderRadius.xl,
+    paddingVertical: spacing[6],
+    paddingHorizontal: spacing[8],
+    alignItems: 'center',
+    minWidth: 200,
+  },
+  recordingModalIcon: {
+    width: 64,
+    height: 64,
+    marginBottom: spacing[3],
+  },
+  recordingModalText: {
+    ...createTextStyle('lg', {
+      color: colors.text.primary,
+      fontWeight: typography.fontWeight.semibold,
+    }),
+    marginBottom: spacing[2],
+  },
+  recordingModalHint: {
+    ...createTextStyle('sm', {
+      color: colors.text.secondary,
+    }),
+  },
+  recordingModalCancelButton: {
+    marginTop: spacing[4],
+    paddingVertical: spacing[2],
+    paddingHorizontal: spacing[5],
+    borderRadius: borderRadius.lg,
+    backgroundColor: colors.gray[200],
+    minWidth: 120,
+    alignItems: 'center',
+  },
+  recordingModalCancelButtonText: {
+    ...createTextStyle('base', {
+      color: colors.text.primary,
+      fontWeight: typography.fontWeight.medium,
+    }),
+  },
 });

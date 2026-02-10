@@ -62,15 +62,15 @@ export const styles = StyleSheet.create({
   },
   speechBubble: {
     position: 'absolute',
-    top: '26%',
+    top: '22%',
     left: '50%',
-    transform: [{ translateX: -(SCREEN_WIDTH * 0.94) / 2 }],
+    transform: [{ translateX: -(SCREEN_WIDTH * 0.94) / 2 + 10 }],
     width: SCREEN_WIDTH * 0.94,
     alignSelf: 'center',
   },
   speechBubbleImage: {
     width: '100%',
-    minHeight: 120,
+    minHeight: 130,
     paddingHorizontal: spacing[2],
     paddingTop: spacing[1],
     paddingBottom: spacing[2],

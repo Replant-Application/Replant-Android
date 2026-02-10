@@ -142,37 +142,37 @@ export const styles = StyleSheet.create({
   sliderContainer: {
     marginBottom: spacing[1],
   },
-  /** 감정일기와 동일: 트랙(배경) */
+  /** 슬라이더 트랙(배경) */
   sliderTrack: {
     width: '100%',
-    height: 20,
-    backgroundColor: colors.overlay?.light ?? colors.gray[200],
-    borderRadius: borderRadius.md,
-    borderWidth: 2,
-    borderColor: colors.overlay?.white?.light ?? colors.gray[300],
+    height: 8,
+    backgroundColor: colors.gray[200],
+    borderRadius: borderRadius.full,
     position: 'relative' as const,
     marginTop: 0,
     marginBottom: spacing[3],
     justifyContent: 'center',
   },
-  /** 감정일기와 동일: 채워진 구간 (초록) */
+  /** 채워진 구간 (초록) */
   sliderFill: {
     position: 'absolute' as const,
-    height: 16,
-    borderRadius: borderRadius.sm,
+    height: 8,
+    borderRadius: borderRadius.full,
     left: 0,
     top: 0,
   },
-  /** 감정일기와 동일: 흰색 원형 썸 */
+  /** 슬라이더 썸 */
   sliderThumb: {
     position: 'absolute' as const,
-    width: 22,
-    height: 22,
+    width: 18,
+    height: 18,
     backgroundColor: colors.white,
-    borderRadius: borderRadius.md,
-    marginLeft: -10,
-    top: -2,
-    ...shadows.lg,
+    borderRadius: borderRadius.full,
+    marginLeft: -9,
+    top: -5,
+    borderWidth: 2,
+    borderColor: colors.primary[500],
+    ...shadows.md,
   },
   sliderLabels: {
     flexDirection: 'row',
@@ -314,7 +314,7 @@ export const styles = StyleSheet.create({
   },
   addPhotoButton: {
     width: '100%',
-    height: 100,
+    height: 160,
     backgroundColor: colors.white,
     borderWidth: 1,
     borderColor: colors.border.light,
@@ -322,7 +322,7 @@ export const styles = StyleSheet.create({
     borderRadius: borderRadius.base,
     justifyContent: 'center',
     alignItems: 'center',
-    gap: spacing[1],
+    gap: spacing[2],
   },
   addPhotoButtonWithImages: {
     marginTop: spacing[2],
@@ -341,8 +341,6 @@ export const styles = StyleSheet.create({
   buttonContainer: {
     padding: spacing[4],
     paddingBottom: spacing[6],
-    borderTopWidth: 1,
-    borderTopColor: '#D4A574',
   },
   buttonBackground: {
     borderRadius: borderRadius.base,

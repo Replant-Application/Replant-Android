@@ -5,7 +5,7 @@
 
 import { StyleSheet, Platform } from 'react-native';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
-import { createTextStyle, createTitleStyle, createSecondaryTextStyle, createButtonTextStyle } from '../../utils/styles/textStyles';
+import { createTextStyle, createTitleStyle, createSecondaryTextStyle, createButtonTextStyle, createBodyStyle } from '../../utils/styles/textStyles';
 import { buttonStyles, cardStyles } from '../../utils/styles/commonStyles';
 
 export const styles = StyleSheet.create({
@@ -20,6 +20,235 @@ export const styles = StyleSheet.create({
     paddingTop: spacing[2],
     paddingBottom: spacing[20],
   },
+  searchRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing[2],
+    marginBottom: spacing[3],
+  },
+  searchInputWrapper: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.white,
+    borderRadius: borderRadius.lg,
+    borderWidth: 1,
+    borderColor: '#D4A574',
+    paddingHorizontal: spacing[3],
+    paddingVertical: spacing[2],
+    gap: spacing[2],
+    minHeight: 36,
+  },
+  searchIcon: {
+    width: 18,
+    height: 18,
+    tintColor: colors.gray[500],
+  },
+  searchInput: {
+    flex: 1,
+    ...createTextStyle('sm', {
+      color: colors.text.primary,
+      padding: 0,
+    }),
+  },
+  searchClearButton: {
+    width: 20,
+    height: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  searchClearText: {
+    ...createTextStyle('sm', {
+      color: colors.gray[500],
+      fontWeight: typography.fontWeight.bold,
+    }),
+  },
+  titleOnlyToggle: {
+    alignSelf: 'flex-start',
+    paddingVertical: spacing[1],
+    paddingHorizontal: spacing[3],
+    borderRadius: borderRadius.full,
+    borderWidth: 1,
+    borderColor: colors.gray[300],
+    backgroundColor: colors.white,
+  },
+  titleOnlyToggleActive: {
+    borderColor: colors.primary[400],
+    backgroundColor: colors.primary[50],
+  },
+  titleOnlyToggleText: {
+    ...createTextStyle('sm', {
+      color: colors.text.secondary,
+      fontWeight: typography.fontWeight.medium,
+    }),
+  },
+  titleOnlyToggleTextActive: {
+    color: colors.primary[600],
+    fontWeight: typography.fontWeight.semibold,
+  },
+  filterButton: {
+    backgroundColor: '#8B6F47',
+    borderRadius: borderRadius.lg,
+    paddingHorizontal: spacing[3],
+    paddingVertical: spacing[3],
+    width: 48,
+    height: 48,
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative',
+    borderWidth: 1,
+    borderColor: '#D4A574',
+  },
+  filterButtonActive: {
+    backgroundColor: '#8B6F47',
+  },
+  filterIcon: {
+    width: 24,
+    height: 24,
+    tintColor: colors.white,
+  },
+  filterBadge: {
+    position: 'absolute',
+    top: 4,
+    right: 4,
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: colors.error,
+    borderWidth: 2,
+    borderColor: colors.white,
+  },
+  filterButtonText: {
+    ...createTextStyle('sm', {
+      color: colors.text.secondary,
+      fontWeight: typography.fontWeight.medium,
+    }),
+  },
+  filterButtonTextActive: {
+    color: colors.primary[600],
+    fontWeight: typography.fontWeight.semibold,
+  },
+  filterBadge: {
+    position: 'absolute',
+    top: -4,
+    right: -4,
+    minWidth: 18,
+    height: 18,
+    borderRadius: 9,
+    backgroundColor: colors.primary[500],
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: spacing[1],
+  },
+  filterBadgeText: {
+    ...createTextStyle('xs', {
+      color: colors.white,
+      fontWeight: typography.fontWeight.bold,
+    }),
+  },
+  filterDropdown: {
+    position: 'absolute',
+    top: '100%',
+    left: 0,
+    marginTop: spacing[1],
+    backgroundColor: colors.white,
+    borderRadius: borderRadius.lg,
+    borderWidth: 1,
+    borderColor: colors.gray[300],
+    minWidth: 200,
+    maxWidth: '100%',
+    padding: spacing[3],
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+    zIndex: 1000,
+  },
+  filterSection: {
+    marginBottom: spacing[4],
+  },
+  filterSectionTitle: {
+    ...createBodyStyle('base', {
+      fontWeight: typography.fontWeight.semibold,
+      color: colors.text.primary,
+      marginBottom: spacing[2],
+    }),
+  },
+  filterOptionsRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing[2],
+  },
+  filterOption: {
+    paddingVertical: spacing[1],
+    paddingHorizontal: spacing[3],
+    borderRadius: borderRadius.full,
+    borderWidth: 1,
+    borderColor: colors.gray[300],
+    backgroundColor: colors.white,
+  },
+  filterOptionActive: {
+    borderColor: colors.primary[400],
+    backgroundColor: colors.primary[50],
+  },
+  filterOptionText: {
+    ...createTextStyle('sm', {
+      color: colors.text.secondary,
+      fontWeight: typography.fontWeight.medium,
+    }),
+  },
+  filterOptionTextActive: {
+    color: colors.primary[600],
+    fontWeight: typography.fontWeight.semibold,
+  },
+  // 필터 모달
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  filterModalContent: {
+    backgroundColor: colors.white,
+    borderRadius: borderRadius.xl,
+    padding: spacing[5],
+    width: '85%',
+    maxWidth: 400,
+  },
+  filterModalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: spacing[4],
+  },
+  filterModalTitle: {
+    ...createTitleStyle('lg', {
+      fontWeight: typography.fontWeight.medium,
+      fontFamily: typography.fontFamily.regular,
+    }),
+  },
+  filterModalClose: {
+    ...createTextStyle('xl', {
+      color: colors.text.secondary,
+      fontWeight: typography.fontWeight.bold,
+    }),
+  },
+  filterSection: {
+    marginBottom: spacing[4],
+  },
+  filterSectionTitle: {
+    ...createBodyStyle('base', {
+      fontWeight: typography.fontWeight.semibold,
+      color: colors.text.primary,
+      marginBottom: spacing[2],
+    }),
+  },
+  filterOptionsRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing[2],
+  },
   fab: {
     position: 'absolute',
     bottom: 50,
@@ -27,11 +256,11 @@ export const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: colors.primary[700],
+    backgroundColor: colors.primary[400], // 연두색
     alignItems: 'center',
     justifyContent: 'center',
     elevation: 8,
-    shadowColor: '#000',
+    shadowColor: colors.primary[400],
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 4,
@@ -68,8 +297,19 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    gap: spacing[2],
     marginBottom: spacing[3],
     marginTop: spacing[1],
+    width: '100%',
+  },
+  filterSortRowWithSearch: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: spacing[2],
+    marginBottom: spacing[3],
+    marginTop: spacing[1],
+    width: '100%',
   },
   filterCheckboxWrapper: {
     flexDirection: 'row',
@@ -84,6 +324,7 @@ export const styles = StyleSheet.create({
   },
   filterCheckboxPlaceholder: {
     flex: 1,
+    minWidth: 0,
   },
   checkbox: {
     width: 20,
@@ -112,17 +353,17 @@ export const styles = StyleSheet.create({
   },
   sortButtonWrapper: {
     flexDirection: 'row',
-    justifyContent: 'flex-end',
     position: 'relative',
     zIndex: 10,
+    flexShrink: 1,
   },
   sortButton: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing[1],
-    paddingVertical: spacing[4],
-    paddingHorizontal: spacing[3],
-    minHeight: 48,
+    paddingVertical: spacing[2],
+    paddingHorizontal: spacing[2],
+    minHeight: 36,
   },
   sortButtonText: {
     ...createTextStyle('sm', {
@@ -321,6 +562,46 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing[2],
+  },
+  officialFilterRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: spacing[2],
+    marginBottom: spacing[3],
+  },
+  filterCheckboxRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: spacing[3],
+    gap: spacing[3],
+  },
+  filterCheckboxBox: {
+    width: 22,
+    height: 22,
+    borderRadius: borderRadius.sm,
+    borderWidth: 2,
+    borderColor: colors.gray[400],
+    backgroundColor: colors.white,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  filterCheckboxBoxChecked: {
+    backgroundColor: colors.primary[500],
+    borderColor: colors.primary[500],
+  },
+  filterCheckboxCheckmark: {
+    ...createTextStyle('sm', {
+      color: colors.white,
+      fontWeight: typography.fontWeight.bold,
+    }),
+  },
+  filterOptionLabel: {
+    ...createBodyStyle('base', {
+      fontWeight: typography.fontWeight.medium,
+      color: colors.text.primary,
+    }),
   },
   groupStatIcon: {
     width: 16,

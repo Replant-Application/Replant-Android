@@ -108,6 +108,7 @@ export const API_CONFIG = {
       create: '/missions/custom',
       update: '/missions/custom/:customMissionId',
       delete: '/missions/custom/:customMissionId',
+      search: '/missions/custom/search',
     },
 
     // 내 미션 (UserMission)

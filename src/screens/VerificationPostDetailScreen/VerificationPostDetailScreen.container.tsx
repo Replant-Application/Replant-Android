@@ -3,10 +3,14 @@
  * 인증글 상세 화면: 인증글 조회, 투표, 댓글 CRUD, 게시글 삭제
  */
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { Alert } from 'react-native';
 import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types/navigation';
+import {
+  ExpoSpeechRecognitionModule,
+  useSpeechRecognitionEvent,
+} from 'expo-speech-recognition';
 import {
   getVerification,
   getVerificationComments,
@@ -46,6 +50,11 @@ export const useVerificationPostDetailScreenContainer = ({
   const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
   const [editingContent, setEditingContent] = useState('');
   const [replyingToComment, setReplyingToComment] = useState<{ id: string; nickname: string } | null>(null);
+  
+  // 음성 녹음 관련 상태
+  const [isListening, setIsListening] = useState(false);
+  const [voiceAvailable, setVoiceAvailable] = useState(false);
+  const voiceCommittedRef = useRef(''); // 음성으로 확정된 텍스트
 
   // 오류/성공/알림용 AlertModal (showAlertModal API 오류 + useErrorHandler)
   const [showAlert, setShowAlert] = useState(false);
@@ -155,6 +164,88 @@ export const useVerificationPostDetailScreenContainer = ({
 
     return unsubscribe;
   }, [navigation, loadPost]);
+
+  /**
+   * 음성 인식 사용 가능 여부 확인
+   */
+  useEffect(() => {
+    const check = async () => {
+      try {
+        const available = ExpoSpeechRecognitionModule?.isRecognitionAvailable?.() ?? false;
+        setVoiceAvailable(available);
+      } catch {
+        setVoiceAvailable(false);
+      }
+    };
+    check();
+  }, []);
+
+  /**
+   * 음성 인식 이벤트 핸들러
+   */
+  useSpeechRecognitionEvent('start', () => setIsListening(true));
+  useSpeechRecognitionEvent('end', () => setIsListening(false));
+  useSpeechRecognitionEvent('result', (event: { results: Array<{ transcript?: string }>; isFinal?: boolean }) => {
+    const transcript = event.results?.[0]?.transcript?.trim();
+    if (!transcript) return;
+    const isFinal = event.isFinal === true;
+    if (isFinal) {
+      voiceCommittedRef.current = voiceCommittedRef.current
+        ? `${voiceCommittedRef.current} ${transcript}`
+        : transcript;
+      setCommentContent(voiceCommittedRef.current);
+    } else {
+      // 말하는 동안 실시간으로 입력창에 보여줌
+      setCommentContent(
+        voiceCommittedRef.current
+          ? `${voiceCommittedRef.current} ${transcript}`
+          : transcript
+      );
+    }
+  });
+  useSpeechRecognitionEvent('error', (event: { error?: string; message?: string }) => {
+    setIsListening(false);
+    if (event.error && event.error !== 'aborted' && event.error !== 'no-speech') {
+      Alert.alert('음성 인식', event.message || '음성 인식 중 문제가 발생했어요.');
+    }
+  });
+
+  /**
+   * 음성 입력 버튼 핸들러
+   */
+  const handleVoicePress = useCallback(async () => {
+    if (!voiceAvailable) {
+      Alert.alert('음성 입력', '이 기기에서는 음성 인식을 사용할 수 없어요.');
+      return;
+    }
+    try {
+      if (isListening) {
+        ExpoSpeechRecognitionModule.stop();
+        return;
+      }
+      const result = await ExpoSpeechRecognitionModule.requestPermissionsAsync();
+      if (!result.granted) {
+        Alert.alert('마이크 권한', '음성 입력을 쓰려면 마이크 권한이 필요해요.');
+        return;
+      }
+      voiceCommittedRef.current = commentContent; // 녹음 시작 시점의 입력값 유지 (이어쓰기)
+      ExpoSpeechRecognitionModule.start({
+        lang: 'ko-KR',
+        interimResults: true,
+        continuous: false,
+      });
+    } catch (e) {
+      Alert.alert('음성 입력', '음성 인식을 시작할 수 없어요.');
+    }
+  }, [voiceAvailable, isListening, commentContent]);
+
+  /**
+   * 음성 입력 취소 핸들러
+   */
+  const handleVoiceCancel = useCallback(() => {
+    ExpoSpeechRecognitionModule.abort();
+    setCommentContent(voiceCommittedRef.current);
+  }, []);
 
   /**
    * 새로고침
@@ -485,5 +576,10 @@ export const useVerificationPostDetailScreenContainer = ({
     getMissionTitle,
     // User context
     currentUserId,
+    // 음성 입력
+    voiceAvailable,
+    isListening,
+    handleVoicePress,
+    handleVoiceCancel,
   };
 };

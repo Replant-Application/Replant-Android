@@ -16,7 +16,10 @@ import {
   getMissionCollection,
   completeCustomMission,
   uncompleteCustomMission,
+  searchCustomMissions,
   MissionCategory,
+  WorryType,
+  DifficultyLevel,
 } from '../../api/missionApi';
 import { logError } from '../../utils/logger';
 import { MissionScreenProps, MissionFilter, MissionTab } from '../../types/screens/mission';
@@ -167,6 +170,10 @@ export const useMissionScreenContainer = ({
   const [currentClientPage, setCurrentClientPage] = useState(0); // 클라이언트 사이드 페이지 (0부터 시작)
   const [missionSortBy, setMissionSortBy] = useState<'default' | 'participants' | 'exp' | 'difficulty'>('default'); // 정렬 옵션
   const [showOnlyParticipated, setShowOnlyParticipated] = useState(false); // 내가 참여한 미션만 보기 (공식 미션 전용)
+  const [searchQuery, setSearchQuery] = useState<string>(''); // 검색어
+  const [selectedCategory, setSelectedCategory] = useState<MissionCategory | null>(null); // 카테고리 필터
+  const [selectedDifficulty, setSelectedDifficulty] = useState<'EASY' | 'MEDIUM' | 'HARD' | null>(null); // 난이도 필터
+  const [titleOnly, setTitleOnly] = useState<boolean>(false); // 제목만 검색 여부
 
   // 현재 사용자 ID (커스텀 미션 수정 권한 확인용)
   const [currentUserId, setCurrentUserId] = useState<number | null>(null);
@@ -603,12 +610,48 @@ export const useMissionScreenContainer = ({
         // 모든 미션을 한 번에 받아옴 (서버 정렬 없이, 프론트에서 정렬)
         const loadSize = 1000; // 충분히 큰 값으로 설정하여 모든 미션을 받아옴
 
-        // 커스텀 미션 탭일 때: 모든 커스텀 미션 조회
+        // 커스텀 미션 탭일 때: 검색어나 필터가 있으면 searchCustomMissions 사용, 없으면 getCustomMissions 사용
         if (missionGroupTab === 'custom') {
-          const customMissionsResult = await getCustomMissions({
-            page: 0,
-            size: loadSize,
-          });
+          let customMissionsResult;
+          
+          // 검색어나 필터가 있으면 검색 API 사용
+          // 검색어가 있으면 무조건 검색 API 사용 (빈 문자열이어도 검색어로 처리)
+          if (searchQuery.trim() || selectedCategory || selectedDifficulty) {
+            const searchParams: any = {
+              page: 0,
+              size: loadSize,
+            };
+            
+            // 검색어가 있으면 keyword 파라미터 추가 (빈 문자열이 아닐 때만)
+            if (searchQuery.trim()) {
+              searchParams.keyword = searchQuery.trim();
+              searchParams.titleOnly = titleOnly;
+            }
+            
+            if (selectedCategory) {
+              // WorryType으로 변환 (카테고리와 WorryType이 일치한다고 가정)
+              searchParams.worryType = selectedCategory as WorryType;
+            }
+            
+            if (selectedDifficulty) {
+              searchParams.difficultyLevel = selectedDifficulty as DifficultyLevel;
+            }
+            
+            console.log('[MissionScreen] 커스텀 미션 검색 API 호출:', searchParams);
+            customMissionsResult = await searchCustomMissions(searchParams);
+            console.log('[MissionScreen] 커스텀 미션 검색 결과:', {
+              success: customMissionsResult.success,
+              count: customMissionsResult.data?.content.length || 0,
+              missions: customMissionsResult.data?.content.map(m => m.title) || [],
+            });
+          } else {
+            // 검색어나 필터가 없으면 일반 목록 조회
+            console.log('[MissionScreen] 커스텀 미션 일반 목록 조회');
+            customMissionsResult = await getCustomMissions({
+              page: 0,
+              size: loadSize,
+            });
+          }
 
           if (!customMissionsResult.success || !customMissionsResult.data) {
             console.error('[MissionScreen] 커스텀 미션 API 실패:', customMissionsResult.error);
@@ -766,6 +809,39 @@ export const useMissionScreenContainer = ({
 
     let filtered = [...groupMissions];
 
+    // 검색어 필터링 (공식 미션은 프론트엔드에서, 커스텀 미션도 서버 필터링이 불완전할 수 있으므로 프론트엔드에서도 필터링)
+    if (searchQuery.trim()) {
+      const query = searchQuery.trim().toLowerCase();
+      filtered = filtered.filter(m => {
+        if (titleOnly) {
+          return m.title.toLowerCase().includes(query);
+        } else {
+          return m.title.toLowerCase().includes(query) || 
+                 (m.description && m.description.toLowerCase().includes(query));
+        }
+      });
+    }
+
+    // 카테고리 필터링 (공식 미션은 프론트엔드에서, 커스텀 미션도 서버 필터링이 불완전할 수 있으므로 프론트엔드에서도 필터링)
+    if (selectedCategory) {
+      if (missionGroupTab === 'official') {
+        filtered = filtered.filter(m => m.category === selectedCategory);
+      } else {
+        // 커스텀 미션도 프론트엔드에서 필터링 (서버 필터링이 불완전할 수 있음)
+        filtered = filtered.filter(m => m.category === selectedCategory);
+      }
+    }
+
+    // 난이도 필터링 (공식 미션은 프론트엔드에서, 커스텀 미션도 서버 필터링이 불완전할 수 있으므로 프론트엔드에서도 필터링)
+    if (selectedDifficulty) {
+      if (missionGroupTab === 'official') {
+        filtered = filtered.filter(m => m.difficultyLevel === selectedDifficulty);
+      } else {
+        // 커스텀 미션도 프론트엔드에서 필터링 (서버 필터링이 불완전할 수 있음)
+        filtered = filtered.filter(m => m.difficultyLevel === selectedDifficulty);
+      }
+    }
+
     // 공식 미션에서 "내가 참여한 미션만 보기" 체크 시 필터링
     if (missionGroupTab === 'official' && showOnlyParticipated) {
       // 참여한 미션만 필터링 (isAttempted === true)
@@ -841,7 +917,7 @@ export const useMissionScreenContainer = ({
     }
     
     return sorted;
-  }, [groupMissions, missionSortBy, getDifficultyOrder, missionGroupTab, showOnlyParticipated]);
+  }, [groupMissions, missionSortBy, getDifficultyOrder, missionGroupTab, showOnlyParticipated, searchQuery, titleOnly, selectedCategory, selectedDifficulty]);
 
   /**
    * 클라이언트 사이드 페이지네이션 계산
@@ -894,6 +970,28 @@ export const useMissionScreenContainer = ({
       setCurrentClientPage(0);
     }
   }, [missionSortBy, showOnlyParticipated, activeTab]);
+
+  /**
+   * 필터 변경 시 미션 목록 재로드 (검색어는 handleSearchQueryChange에서 디바운싱 처리)
+   */
+  useEffect(() => {
+    if (activeTab === 'missionGroup') {
+      console.log('[MissionScreen] 필터 변경 감지:', {
+        titleOnly,
+        selectedCategory,
+        selectedDifficulty,
+        missionGroupTab,
+      });
+      // 커스텀 미션은 필터가 변경되면 서버에서 재로드 (검색어는 제외 - 디바운싱 처리)
+      if (missionGroupTab === 'custom') {
+        loadGroupMissions(0);
+      }
+      // 공식 미션은 프론트엔드 필터링이므로 페이지만 초기화
+      else {
+        setCurrentClientPage(0);
+      }
+    }
+  }, [titleOnly, selectedCategory, selectedDifficulty, missionGroupTab, activeTab, loadGroupMissions]);
 
   /**
    * 탭 변경 시 미션 도감 로드 (초기 로드만)
@@ -1095,6 +1193,47 @@ export const useMissionScreenContainer = ({
     setShowOnlyParticipated(value);
   }, []);
 
+  /**
+   * 검색어 변경 핸들러 (디바운싱 적용)
+   */
+  const searchDebounceRef = useRef<NodeJS.Timeout | null>(null);
+  const handleSearchQueryChange = useCallback((query: string) => {
+    // 즉시 UI 업데이트
+    setSearchQuery(query);
+    
+    // 디바운싱: 500ms 후에 API 호출
+    if (searchDebounceRef.current) {
+      clearTimeout(searchDebounceRef.current);
+    }
+    
+    searchDebounceRef.current = setTimeout(() => {
+      if (activeTab === 'missionGroup' && missionGroupTab === 'custom') {
+        loadGroupMissions(0);
+      }
+    }, 500);
+  }, [activeTab, missionGroupTab, loadGroupMissions]);
+
+  /**
+   * 제목만 검색 토글 핸들러
+   */
+  const handleTitleOnlyToggle = useCallback((value: boolean) => {
+    setTitleOnly(value);
+  }, []);
+
+  /**
+   * 카테고리 필터 변경 핸들러
+   */
+  const handleCategoryFilterChange = useCallback((category: MissionCategory | null) => {
+    setSelectedCategory(category);
+  }, []);
+
+  /**
+   * 난이도 필터 변경 핸들러
+   */
+  const handleDifficultyFilterChange = useCallback((difficulty: 'EASY' | 'MEDIUM' | 'HARD' | null) => {
+    setSelectedDifficulty(difficulty);
+  }, []);
+
   return {
     // Mission data
     missions,
@@ -1137,6 +1276,14 @@ export const useMissionScreenContainer = ({
     handleMissionSortChange,
     showOnlyParticipated,
     handleShowOnlyParticipatedChange,
+    searchQuery,
+    handleSearchQueryChange,
+    titleOnly,
+    handleTitleOnlyToggle,
+    selectedCategory,
+    handleCategoryFilterChange,
+    selectedDifficulty,
+    handleDifficultyFilterChange,
     // Pagination
     currentMissionPage,
     totalMissionPages,

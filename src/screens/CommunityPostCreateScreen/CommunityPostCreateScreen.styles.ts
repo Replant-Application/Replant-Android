@@ -39,7 +39,7 @@ export const styles = StyleSheet.create({
     padding: spacing[3],
     backgroundColor: colors.primary[50],
     borderRadius: borderRadius.md,
-    marginBottom: spacing[4],
+    marginBottom: spacing[3],
   },
   missionIcon: {
     width: 32,
@@ -74,7 +74,8 @@ export const styles = StyleSheet.create({
   privateCheckboxRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'flex-end',
+    justifyContent: 'space-between',
+    width: '100%',
   },
   privateCheckbox: {
     width: 18,
@@ -105,11 +106,12 @@ export const styles = StyleSheet.create({
   },
   privateSection: {
     marginTop: spacing[2],
+    paddingHorizontal: spacing[1],
   },
   label: {
     ...createTitleStyle('base', {
       color: colors.text.secondary,
-      marginBottom: spacing[2],
+      marginBottom: spacing[1],
       fontFamily: typography.fontFamily.regular,
     }),
   },
@@ -118,12 +120,13 @@ export const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border.light,
     borderRadius: 8,
-    paddingHorizontal: spacing[3],
+    paddingHorizontal: spacing[4],
+    paddingVertical: spacing[3],
     fontSize: typography.fontSize.base,
     color: colors.text.primary,
     fontFamily: typography.fontFamily.regular,
     includeFontPadding: false,
-    height: 44,
+    minHeight: 48,
   },
   contentInputWrapper: {
     backgroundColor: colors.background.primary,
@@ -140,21 +143,21 @@ export const styles = StyleSheet.create({
     bottom: 0,
   },
   noteLine: {
-    height: 36,
+    height: 32,
     borderBottomWidth: 1,
     borderBottomColor: '#e8e8e8',
   },
   contentInput: {
     ...inputStyles.base(),
     backgroundColor: 'transparent',
-    padding: spacing[3],
-    paddingTop: spacing[3],
+    paddingHorizontal: spacing[4],
+    paddingVertical: spacing[3],
     fontSize: typography.fontSize.base,
     color: colors.text.primary,
-    height: 154,
+    minHeight: 140,
     maxHeight: 300,
     textAlignVertical: 'top',
-    lineHeight: 34, // noteLine의 높이(36)와 일치시켜 줄 간격에 맞춤
+    lineHeight: 30, // noteLine의 높이(32)와 일치시켜 줄 간격에 맞춤
     fontFamily: typography.fontFamily.regular,
     ...(Platform.OS === 'android' && { includeFontPadding: false }),
   },
@@ -163,7 +166,7 @@ export const styles = StyleSheet.create({
     borderRadius: 8,
     borderWidth: 1,
     borderColor: colors.border.light,
-    padding: spacing[3],
+    padding: spacing[4],
   },
   imageContainer: {
     flexDirection: 'row',
@@ -196,7 +199,8 @@ export const styles = StyleSheet.create({
   },
   addImageButton: {
     width: '100%',
-    minHeight: 120,
+    minHeight: 180,
+    paddingVertical: spacing[5],
     backgroundColor: colors.white,
     borderWidth: 1,
     borderColor: colors.border.light,
@@ -204,7 +208,7 @@ export const styles = StyleSheet.create({
     borderRadius: borderRadius.base,
     justifyContent: 'center',
     alignItems: 'center',
-    gap: spacing[1],
+    gap: spacing[2],
   },
   addImageIcon: {
     width: 32,
@@ -239,7 +243,7 @@ export const styles = StyleSheet.create({
     }),
   },
   imageSection: {
-    marginBottom: spacing[4],
+    marginBottom: spacing[3],
   },
   previewImage: {
     width: '100%',
@@ -298,7 +302,7 @@ export const styles = StyleSheet.create({
     paddingVertical: spacing[3],
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: spacing[2],
+    marginTop: spacing[1],
   },
   submitButtonDisabled: {
     backgroundColor: colors.gray[300],

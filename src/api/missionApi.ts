@@ -422,6 +422,54 @@ export const deleteCustomMission = async (
   return apiClient.delete(endpoint);
 };
 
+/**
+ * 커스텀 미션 검색
+ * GET /api/missions/custom/search
+ * @param keyword 검색 키워드 (optional)
+ * @param titleOnly true면 제목만 검색, false 또는 미지정시 제목과 설명 모두 검색
+ * @param worryType 고민 타입 필터 (optional)
+ * @param difficultyLevel 난이도 필터 (optional)
+ */
+export const searchCustomMissions = async (params?: {
+  keyword?: string;
+  titleOnly?: boolean;
+  worryType?: WorryType;
+  difficultyLevel?: DifficultyLevel;
+  page?: number;
+  size?: number;
+}): Promise<ServiceResult<MissionListResponse>> => {
+  const queryParams: Record<string, any> = {};
+  
+  if (params?.keyword) {
+    queryParams.keyword = params.keyword;
+  }
+  
+  if (params?.titleOnly !== undefined) {
+    queryParams.titleOnly = params.titleOnly;
+  }
+  
+  if (params?.worryType) {
+    queryParams.worryType = params.worryType;
+  }
+  
+  if (params?.difficultyLevel) {
+    queryParams.difficultyLevel = params.difficultyLevel;
+  }
+  
+  if (params?.page !== undefined) {
+    queryParams.page = params.page;
+  }
+  
+  if (params?.size !== undefined) {
+    queryParams.size = params.size;
+  }
+  
+  return apiClient.get<MissionListResponse>(
+    API_CONFIG.endpoints.customMission.search,
+    Object.keys(queryParams).length > 0 ? queryParams : undefined
+  );
+};
+
 // ============================================
 // 내 미션 (UserMission)
 // ============================================
