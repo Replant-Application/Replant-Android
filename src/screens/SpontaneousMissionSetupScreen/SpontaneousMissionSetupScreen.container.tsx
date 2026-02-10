@@ -20,7 +20,7 @@ interface SpontaneousMissionSetupScreenContainerProps {
   route: RouteProp<RootStackParamList, 'SpontaneousMissionSetup'>;
 }
 
-export type Step = 'wake' | 'sleep' | 'breakfast' | 'lunch' | 'dinner';
+export type Step = 'wake';
 
 export interface TimeState {
   period: 'AM' | 'PM';
@@ -33,25 +33,8 @@ export const STEP_CONFIG: Record<Step, { title: string; description: string }> =
     title: '기상 시간을 알려주세요',
     description: '평소에 일어나는 시간을 설정해주세요.',
   },
-  sleep: {
-    title: '취침 시간을 알려주세요',
-    description: '평소에 잠드는 시간을 설정해주세요.',
-  },
-  breakfast: {
-    title: '아침 식사 시간을 알려주세요',
-    description: '평소에 아침 식사를 하는 시간을 설정해주세요.',
-  },
-  lunch: {
-    title: '점심 식사 시간을 알려주세요',
-    description: '평소에 점심 식사를 하는 시간을 설정해주세요.',
-  },
-  dinner: {
-    title: '저녁 식사 시간을 알려주세요',
-    description: '평소에 저녁 식사를 하는 시간을 설정해주세요.',
-  },
 };
 
-// 일단 기상 미션만 설정 (취침·식사 시간 스텝 비노출)
 export const STEPS: Step[] = ['wake'];
 
 export const useSpontaneousMissionSetupScreenContainer = ({
@@ -74,10 +57,6 @@ export const useSpontaneousMissionSetupScreenContainer = ({
   // currentStep이 유효한 범위 내에 있는지 확인
   const safeCurrentStep = Math.max(0, Math.min(currentStep, STEPS.length - 1));
   const [wakeTime, setWakeTime] = useState<TimeState>({ period: 'AM', hour: 7, minute: 0 });
-  const [sleepTime, setSleepTime] = useState<TimeState>({ period: 'PM', hour: 10, minute: 0 });
-  const [breakfastTime, setBreakfastTime] = useState<TimeState>({ period: 'AM', hour: 8, minute: 0 });
-  const [lunchTime, setLunchTime] = useState<TimeState>({ period: 'PM', hour: 12, minute: 30 });
-  const [dinnerTime, setDinnerTime] = useState<TimeState>({ period: 'PM', hour: 7, minute: 0 });
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(isEditMode);
   const [alertModal, setAlertModal] = useState<{
@@ -118,64 +97,15 @@ export const useSpontaneousMissionSetupScreenContainer = ({
    * 현재 스텝의 시간 상태 가져오기
    */
   const getCurrentTime = useCallback((): TimeState => {
-    try {
-      switch (currentStepKey) {
-        case 'wake':
-          return wakeTime || { period: 'AM', hour: 7, minute: 0 };
-        case 'sleep':
-          return sleepTime || { period: 'PM', hour: 10, minute: 0 };
-        case 'breakfast':
-          return breakfastTime || { period: 'AM', hour: 8, minute: 0 };
-        case 'lunch':
-          return lunchTime || { period: 'PM', hour: 12, minute: 30 };
-        case 'dinner':
-          return dinnerTime || { period: 'PM', hour: 7, minute: 0 };
-        default:
-          console.warn('[SpontaneousMissionSetupScreen] 알 수 없는 currentStepKey:', currentStepKey);
-          return { period: 'AM', hour: 7, minute: 0 };
-      }
-    } catch (error) {
-      logError('getCurrentTime 실패', error as Error);
-      return { period: 'AM', hour: 7, minute: 0 };
-    }
-  }, [currentStepKey, wakeTime, sleepTime, breakfastTime, lunchTime, dinnerTime]);
+    return wakeTime || { period: 'AM', hour: 7, minute: 0 };
+  }, [wakeTime]);
 
   /**
    * 현재 스텝의 시간 상태 설정하기
    */
-  const setCurrentTime = useCallback(
-    (time: TimeState) => {
-      try {
-        if (!time || typeof time !== 'object') {
-          logError('setCurrentTime: 유효하지 않은 time 값', new Error(`time: ${JSON.stringify(time)}`));
-          return;
-        }
-
-        switch (currentStepKey) {
-          case 'wake':
-            setWakeTime(time);
-            break;
-          case 'sleep':
-            setSleepTime(time);
-            break;
-          case 'breakfast':
-            setBreakfastTime(time);
-            break;
-          case 'lunch':
-            setLunchTime(time);
-            break;
-          case 'dinner':
-            setDinnerTime(time);
-            break;
-          default:
-            logError('setCurrentTime: 알 수 없는 currentStepKey', new Error(`currentStepKey: ${currentStepKey}`));
-        }
-      } catch (error) {
-        logError('setCurrentTime 실패', error as Error);
-      }
-    },
-    [currentStepKey]
-  );
+  const setCurrentTime = useCallback((time: TimeState) => {
+    if (time && typeof time === 'object') setWakeTime(time);
+  }, []);
 
   /**
    * 24시간 형식으로 변환
@@ -238,7 +168,6 @@ export const useSpontaneousMissionSetupScreenContainer = ({
             const data = result.data;
             console.log('[SpontaneousMissionSetupScreen] 받은 설정 데이터:', data);
 
-            // 기상 시간만 필수, 나머지는 있으면 로드 (일단 기상 미션만 설정하므로)
             const hasWakeTime =
               data.wakeTime &&
               typeof data.wakeTime === 'string' &&
@@ -246,18 +175,6 @@ export const useSpontaneousMissionSetupScreenContainer = ({
 
             if (hasWakeTime) {
               setWakeTime(parse24Hour(data.wakeTime));
-              if (data.sleepTime && typeof data.sleepTime === 'string' && data.sleepTime.trim() !== '') {
-                setSleepTime(parse24Hour(data.sleepTime));
-              }
-              if (data.breakfastTime && typeof data.breakfastTime === 'string' && data.breakfastTime.trim() !== '') {
-                setBreakfastTime(parse24Hour(data.breakfastTime));
-              }
-              if (data.lunchTime && typeof data.lunchTime === 'string' && data.lunchTime.trim() !== '') {
-                setLunchTime(parse24Hour(data.lunchTime));
-              }
-              if (data.dinnerTime && typeof data.dinnerTime === 'string' && data.dinnerTime.trim() !== '') {
-                setDinnerTime(parse24Hour(data.dinnerTime));
-              }
               console.log('[SpontaneousMissionSetupScreen] 설정 로드 완료');
             } else {
               console.warn('[SpontaneousMissionSetupScreen] ⚠️ 기상 시간 없음');
@@ -339,11 +256,7 @@ export const useSpontaneousMissionSetupScreenContainer = ({
       setLoading(true);
 
       const requestData = {
-        sleepTime: convertTo24Hour(sleepTime.period, sleepTime.hour, sleepTime.minute),
         wakeTime: convertTo24Hour(wakeTime.period, wakeTime.hour, wakeTime.minute),
-        breakfastTime: convertTo24Hour(breakfastTime.period, breakfastTime.hour, breakfastTime.minute),
-        lunchTime: convertTo24Hour(lunchTime.period, lunchTime.hour, lunchTime.minute),
-        dinnerTime: convertTo24Hour(dinnerTime.period, dinnerTime.hour, dinnerTime.minute),
       };
 
       const result = isEditMode
@@ -413,16 +326,7 @@ export const useSpontaneousMissionSetupScreenContainer = ({
     } finally {
       setLoading(false);
     }
-  }, [
-    isEditMode,
-    sleepTime,
-    wakeTime,
-    breakfastTime,
-    lunchTime,
-    dinnerTime,
-    convertTo24Hour,
-    safeNavigation,
-  ]);
+  }, [isEditMode, wakeTime, convertTo24Hour, safeNavigation]);
 
   /**
    * 다음 스텝으로 이동
@@ -499,10 +403,6 @@ export const useSpontaneousMissionSetupScreenContainer = ({
     stepConfig,
     currentTime,
     wakeTime,
-    sleepTime,
-    breakfastTime,
-    lunchTime,
-    dinnerTime,
     loading,
     initialLoading,
     alertModal,

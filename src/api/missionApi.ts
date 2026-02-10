@@ -1354,20 +1354,12 @@ export const getMissionsByRange = async (
 // ============================================
 
 export interface SpontaneousMissionSetupRequest {
-  sleepTime: string; // "HH:mm" 형식
-  wakeTime: string; // "HH:mm" 형식
-  breakfastTime: string; // "HH:mm" 형식
-  lunchTime: string; // "HH:mm" 형식
-  dinnerTime: string; // "HH:mm" 형식
+  wakeTime: string; // "HH:mm" 형식 (기상만)
 }
 
 export interface SpontaneousMissionSetupResponse {
   isSpontaneousMissionSetupCompleted: boolean;
-  sleepTime: string;
   wakeTime: string;
-  breakfastTime: string;
-  lunchTime: string;
-  dinnerTime: string;
 }
 
 /**

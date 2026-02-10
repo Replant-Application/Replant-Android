@@ -328,17 +328,17 @@ export const styles = StyleSheet.create({
     }),
   },
   rerollButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: 26,
+    height: 26,
+    borderRadius: 13,
     backgroundColor: colors.gray[100],
     justifyContent: 'center',
     alignItems: 'center',
     marginLeft: spacing[2],
   },
   rerollButtonIcon: {
-    width: 30,
-    height: 30,
+    width: 20,
+    height: 20,
   },
 
   selectableMissionCard: { 

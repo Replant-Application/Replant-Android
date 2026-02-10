@@ -283,15 +283,8 @@ const AppNavigator = () => {
           // 백엔드 API에서 돌발 미션 설정 조회
           const result = await getSpontaneousMissionSetup();
           
-          // 신규 가입자 판단: DB에 설정이 없으면 신규 가입자
-          // 설정이 있다는 것 = wakeTime, sleepTime, breakfastTime, lunchTime, dinnerTime 중 하나라도 있으면 기존 사용자
-          const hasSetupData = result.success && result.data && (
-            result.data.wakeTime || 
-            result.data.sleepTime || 
-            result.data.breakfastTime || 
-            result.data.lunchTime || 
-            result.data.dinnerTime
-          );
+          // 신규 가입자 판단: 기상 시간 설정이 없으면 신규 가입자
+          const hasSetupData = result.success && result.data && !!result.data.wakeTime;
           
           if (!hasSetupData) {
             // DB에 설정이 없으면 신규 가입자 - 설문 화면으로 이동
@@ -937,13 +930,7 @@ const AppNavigator = () => {
               }
               try {
                 const result = await getSpontaneousMissionSetup();
-                const hasSetupData = result.success && result.data && (
-                  result.data.wakeTime ||
-                  result.data.sleepTime ||
-                  result.data.breakfastTime ||
-                  result.data.lunchTime ||
-                  result.data.dinnerTime
-                );
+                const hasSetupData = result.success && result.data && !!result.data.wakeTime;
                 setCurrentScreen(hasSetupData ? SCREEN_NAMES.HOME : SCREEN_NAMES.SPONTANEOUS_MISSION_SETUP);
               } catch {
                 setCurrentScreen(SCREEN_NAMES.HOME);

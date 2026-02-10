@@ -117,7 +117,12 @@ const CategorySelectScreen: React.FC<CategorySelectScreenProps> = ({ onBack, onC
                     activeOpacity={0.7}
                   >
                     {icon != null && (
-                      <Image source={icon} style={styles.categoryButtonIcon} resizeMode="contain" />
+                      <Image
+                        source={icon}
+                        style={styles.categoryButtonIcon}
+                        resizeMode="contain"
+                        accessibilityLabel={`${getCategoryLabel(key)} 아이콘`}
+                      />
                     )}
                     <Text
                       style={[styles.categoryButtonText, isSelected && styles.optionTextSelected]}

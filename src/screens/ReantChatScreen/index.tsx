@@ -23,7 +23,7 @@ import {
   ExpoSpeechRecognitionModule,
   useSpeechRecognitionEvent,
 } from 'expo-speech-recognition';
-import { getCharacterImage } from '../../utils/characterUtils';
+import { getCharacterImageStatic } from '../../utils/characterUtils';
 import { useCharacter } from '../../hooks/useCharacter';
 import { sendChatMessage } from '../../api/chatApi';
 import { SCREEN_NAMES } from '../../utils/constants';
@@ -92,8 +92,7 @@ interface ReantChatScreenProps {
   route?: any;
 }
 
-// 현재 표시 중인 두 칩이 아닌 풀에서 랜덤 선택 (추후 추천 칩 로테이션에 사용 가능)
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+// 현재 표시 중인 두 칩이 아닌 풀에서 랜덤 선택 (클릭한 칩을 다른 예시로 교체)
 const pickReplacementChip = (currentChips: [string, string], replaceIndex: 0 | 1): string => {
   const other = currentChips[1 - replaceIndex];
   const candidates = RECOMMENDED_MESSAGES_POOL.filter(
@@ -116,8 +115,8 @@ const ReantChatScreen: React.FC<ReantChatScreenProps> = ({ navigation, route: _r
   const [voiceAvailable, setVoiceAvailable] = useState(false);
   const voiceCommittedRef = useRef(''); // 음성으로 확정된 텍스트 (입력창에 반영)
   const listRef = useRef<FlatList>(null);
-  // 표시 중인 추천 칩 두 개
-  const [recommendedChips, _setRecommendedChips] = useState<[string, string]>(() => [
+  // 표시 중인 추천 칩 두 개 (클릭 시 해당 칩만 다른 예시로 교체)
+  const [recommendedChips, setRecommendedChips] = useState<[string, string]>(() => [
     RECOMMENDED_MESSAGES_POOL[0],
     RECOMMENDED_MESSAGES_POOL[1],
   ]);
@@ -326,9 +325,10 @@ const ReantChatScreen: React.FC<ReantChatScreenProps> = ({ navigation, route: _r
         <View style={styles.assistantMessageRow}>
           <View style={styles.assistantAvatar}>
             <FastImage
-              source={getCharacterImage(currentCharacter?.level ?? 1, 'happy')}
+              source={getCharacterImageStatic(currentCharacter?.level ?? 1)}
               style={styles.assistantAvatarImage}
               resizeMode={FastImage.resizeMode.contain}
+              accessibilityLabel={`${characterName ?? '리얼트'} 아바타`}
             />
           </View>
           <View style={styles.assistantBubbles}>
@@ -360,6 +360,7 @@ const ReantChatScreen: React.FC<ReantChatScreenProps> = ({ navigation, route: _r
             style={styles.chatHeaderBack}
             onPress={handleClose}
             activeOpacity={0.7}
+            hitSlop={{ top: 16, bottom: 16, left: 16, right: 16 }}
             accessibilityRole="button"
             accessibilityLabel="대화 종료"
             accessibilityHint="홈으로 돌아갑니다"
@@ -394,9 +395,10 @@ const ReantChatScreen: React.FC<ReantChatScreenProps> = ({ navigation, route: _r
                 <View style={styles.loadingRow}>
                   <View style={styles.assistantAvatar}>
                     <FastImage
-                      source={getCharacterImage(currentCharacter?.level ?? 1, 'happy')}
+                      source={getCharacterImageStatic(currentCharacter?.level ?? 1)}
                       style={styles.assistantAvatarImage}
                       resizeMode={FastImage.resizeMode.contain}
+                      accessibilityLabel="리얼트 아바타"
                     />
                   </View>
                   <View style={styles.loadingBubble}>
@@ -414,11 +416,18 @@ const ReantChatScreen: React.FC<ReantChatScreenProps> = ({ navigation, route: _r
               <Text style={styles.errorText}>⚠️ {error}</Text>
             ) : null}
             <View style={styles.recommendedChipsContainer}>
-              {recommendedChips.map((msg) => (
+              {recommendedChips.map((msg, index) => (
                 <TouchableOpacity
-                  key={msg}
+                  key={`${msg}-${index}`}
                   style={styles.recommendedChip}
-                  onPress={() => setInputText(msg)}
+                  onPress={() => {
+                    setInputText(msg);
+                    setRecommendedChips((prev) => {
+                      const next = [...prev] as [string, string];
+                      next[index] = pickReplacementChip(prev, index as 0 | 1);
+                      return next;
+                    });
+                  }}
                   activeOpacity={0.7}
                   accessibilityRole="button"
                   accessibilityLabel={`추천 메시지: ${msg}`}
@@ -467,11 +476,7 @@ const ReantChatScreen: React.FC<ReantChatScreenProps> = ({ navigation, route: _r
                 accessibilityLabel="전송"
                 accessibilityState={{ disabled: !inputText.trim() || isLoading }}
               >
-                {isLoading ? (
-                  <ActivityIndicator size="small" color="#fff" />
-                ) : (
-                  <PaperPlaneIcon size={22} color={colors.white} />
-                )}
+                <PaperPlaneIcon size={22} color={colors.white} />
               </TouchableOpacity>
             </View>
           </View>
