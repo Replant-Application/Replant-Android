@@ -189,6 +189,10 @@ export const useMission = (
         assigned: allMissions.filter(m => m.status === 'ASSIGNED').length,
         expired: allMissions.filter(m => m.status === 'EXPIRED').length,
         failed: allMissions.filter(m => m.status === 'FAILED').length,
+        // 커스텀 미션 상태 상세 로그
+        customMissions: allMissions
+          .filter(m => m.is_custom)
+          .map(m => ({ id: m.mission_id, status: m.status, completed: m.completed })),
       });
 
       // 정렬

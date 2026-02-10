@@ -40,6 +40,8 @@ export interface MissionSetSimple {
   description?: string;
   creatorId: number;
   creatorNickname: string;
+  creatorReantLevel?: number; // 작성자 리앤트 레벨 (캐릭터 이미지 표시용)
+  creatorProfileImg?: string; // 작성자 프로필 이미지 URL
   isPublic: boolean;
   missionCount: number;
   likeCount: number;

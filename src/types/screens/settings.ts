@@ -19,4 +19,5 @@ export interface SettingItemProps {
   onPress: () => void;
   showArrow?: boolean;
   danger?: boolean;
+  isLast?: boolean; // 마지막 아이템 여부 (하단 경계선 제거용)
 }

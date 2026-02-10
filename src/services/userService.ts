@@ -2,10 +2,9 @@ import { getData, setData, getStorageKeys } from './storage';
 import { logError } from '../utils/logger';
 import { ServiceResult, Character, UserProfile, UserInfoUpdateData, CalendarEvent, CalendarEventData, User, Diary, CommunityPost } from '../types';
 import { generateUserCharacterName } from '../utils/characterNameGenerator';
-import { getMyInfo } from '../api/userApi';
-import { getMissionHistory } from '../api/missionApi';
+import { getMyInfo, getMyStats } from '../api/userApi';
 import { getMyBadges } from '../api/badgeApi';
-import { getMyReant } from '../api/reantApi';
+import { getMyReantCached } from '../utils/reantApiCache';
 import { getDiaryStats } from '../api/diaryApi';
 import { getTotalExpToReachLevel } from '../utils/expTable';
 
@@ -103,33 +102,42 @@ export const getUserProfile = async (nickname: string): Promise<ServiceResult<Us
     // 1. 백엔드 API에서 사용자 기본 정보 가져오기
     const userInfoResult = await getMyInfo();
 
-    // 2. 백엔드 API에서 배지 정보 가져오기
+    // 2. 백엔드 API에서 배지 정보 가져오기 (통계 API에서 badgesCount를 가져오므로 여기서는 선택적)
     const badgesResult = await getMyBadges();
 
     // 로컬 캐릭터 정보 로드 (폴백용)
     const characters: Character[] = await getData(storageKeys.CHARACTERS) || [];
     const character = characters.length > 0 ? characters[0] : null;
 
-    // 3. 완료한 미션 수 계산 (미션 이력 API 사용 - 모든 완료된 미션 포함)
+    // 3. 사용자 통계 조회 (통계 전용 API 사용 - 대량 조회 대신)
     let completedMissions = 0;
+    let postCount = 0;
+    let diaryCount = 0;
+    let badgeCount = 0;
     try {
-      const historyResult = await getMissionHistory({ page: 0, size: 1000 });
-      if (historyResult.success && historyResult.data) {
-        completedMissions = historyResult.data.content.filter(
-          m => m.status === 'COMPLETED'
-        ).length;
+      const statsResult = await getMyStats();
+      if (statsResult.success && statsResult.data) {
+        // 백엔드 응답 필드명 매핑: completedMissionsCount, postsCount, diariesCount, badgesCount
+        completedMissions = statsResult.data.completedMissionsCount || 0;
+        postCount = statsResult.data.postsCount || 0;
+        diaryCount = statsResult.data.diariesCount || 0;
+        badgeCount = statsResult.data.badgesCount || 0;
       }
-    } catch (missionError) {
+    } catch (statsError) {
       // 에러 발생 시 로컬 스토리지 사용 (폴백)
-      console.log('미션 이력 조회 실패, 로컬 스토리지 사용:', missionError);
+      console.log('사용자 통계 조회 실패, 로컬 스토리지 사용:', statsError);
       completedMissions = 0;
+      postCount = 0;
+      diaryCount = 0;
+      badgeCount = 0;
     }
 
     // 4. 총 경험치 계산 (Reant API 사용 - 백엔드 DB와 동기화)
     // 백엔드 reant.exp는 "현재 레벨 경험치"만 저장 → 전체 누적은 (레벨업 소모 누적 + exp)로 계산
+    // 캐시된 API 호출 재사용 (useCharacter와 동일한 캐시 사용)
     let totalExperience = 0;
     try {
-      const reantResult = await getMyReant();
+      const reantResult = await getMyReantCached();
       if (reantResult.success && reantResult.data) {
         const { level, exp } = reantResult.data;
         // 레벨별 필요 경험치 테이블: L1→10, L2→50, L3→100, L4→200, L5→500, L6+→500
@@ -149,22 +157,16 @@ export const getUserProfile = async (nickname: string): Promise<ServiceResult<Us
       }
     }
 
-    // 5. 작성한 다이어리 수 계산 (다이어리 통계 API 사용 - 백엔드 DB와 동기화)
-    let diaryCount = 0;
-    try {
-      const diaryStatsResult = await getDiaryStats();
-      if (diaryStatsResult.success && diaryStatsResult.data) {
-        diaryCount = diaryStatsResult.data.totalCount; // 백엔드의 실제 count
-      } else {
-        // API 실패 시 로컬 스토리지 사용 (폴백)
+    // 5. 다이어리 수는 이미 통계 API에서 가져왔으므로 여기서는 처리하지 않음
+    // (위의 getMyStats()에서 diariesCount를 가져옴)
+    // 폴백: 통계 API 실패 시에만 로컬 스토리지 사용
+    if (diaryCount === 0) {
+      try {
         const diaries: Diary[] = await getData(storageKeys.DIARIES) || [];
         diaryCount = diaries.length;
+      } catch (diaryError) {
+        console.log('다이어리 로컬 스토리지 조회 실패:', diaryError);
       }
-    } catch (diaryError) {
-      // 에러 발생 시 로컬 스토리지에서 가져오기 (폴백)
-      console.log('다이어리 통계 조회 실패, 로컬 스토리지 사용:', diaryError);
-      const diaries: Diary[] = await getData(storageKeys.DIARIES) || [];
-      diaryCount = diaries.length;
     }
 
     // 프로필 닉네임 및 사용자 ID 가져오기
@@ -175,29 +177,11 @@ export const getUserProfile = async (nickname: string): Promise<ServiceResult<Us
       ? userInfoResult.data.id
       : null;
 
-    // 커뮤니티 게시글 통계 (백엔드 API에서 가져오기 - userId 기반)
-    let postCount = 0;
-    try {
-      // 백엔드 API에서 게시글 목록 가져오기
-      const { getPosts } = await import('../api/communityApi');
-      const postsResult = await getPosts({ page: 0, size: 1000 }); // 충분히 큰 사이즈로 모든 게시글 가져오기
-      
-      if (postsResult.success && postsResult.data) {
-        // 사용자 ID로 필터링 (닉네임이 변경되어도 정확하게 확인 가능)
-        if (profileUserId !== null && profileUserId !== undefined) {
-          const userPosts = postsResult.data.content.filter(
-            p => p.userId === profileUserId
-          );
-          postCount = userPosts.length;
-        } else {
-          // userId가 없는 경우에만 닉네임으로 fallback (레거시 지원)
-          const userPosts = postsResult.data.content.filter(
-            p => p.userNickname === profileNickname || p.userNickname === nickname
-          );
-          postCount = userPosts.length;
-        }
-      } else {
-        // 백엔드 실패 시 로컬 스토리지에서 가져오기 (폴백)
+    // 게시글 수는 이미 통계 API에서 가져왔으므로 여기서는 처리하지 않음
+    // (위의 getMyStats()에서 postsCount를 가져옴)
+    // 폴백: 통계 API 실패 시에만 로컬 스토리지 사용
+    if (postCount === 0) {
+      try {
         const posts: CommunityPost[] = await getData(storageKeys.COMMUNITY_POSTS) || [];
         if (profileUserId !== null && profileUserId !== undefined) {
           const userPosts = posts.filter(p => 
@@ -205,29 +189,20 @@ export const getUserProfile = async (nickname: string): Promise<ServiceResult<Us
           );
           postCount = userPosts.length;
         } else {
-          // userId가 없는 경우에만 닉네임으로 fallback
           const userPosts = posts.filter(p => p.author_nickname === nickname);
           postCount = userPosts.length;
         }
-      }
-    } catch (postError) {
-      // 에러 발생 시 로컬 스토리지에서 가져오기 (폴백)
-      console.log('백엔드 게시글 조회 실패, 로컬 스토리지 사용:', postError);
-      const posts: CommunityPost[] = await getData(storageKeys.COMMUNITY_POSTS) || [];
-      if (profileUserId !== null && profileUserId !== undefined) {
-        const userPosts = posts.filter(p => 
-          p.author_id !== undefined && Number(p.author_id) === profileUserId
-        );
-        postCount = userPosts.length;
-      } else {
-        // userId가 없는 경우에만 닉네임으로 fallback
-        const userPosts = posts.filter(p => p.author_nickname === nickname);
-        postCount = userPosts.length;
+      } catch (postError) {
+        console.log('게시글 로컬 스토리지 조회 실패:', postError);
       }
     }
 
-    // 배지 수 계산
-    const badgeCount = badgesResult.success && badgesResult.data ? badgesResult.data.badges?.length || 0 : 0;
+    // 배지 수는 이미 통계 API에서 가져왔으므로 여기서는 처리하지 않음
+    // (위의 getMyStats()에서 badgesCount를 가져옴)
+    // 폴백: 통계 API 실패 시에만 배지 API 사용
+    if (badgeCount === 0) {
+      badgeCount = badgesResult.success && badgesResult.data ? badgesResult.data.badges?.length || 0 : 0;
+    }
 
     // 프로필 생성
     const profileCreatedAt = userInfoResult.success && userInfoResult.data

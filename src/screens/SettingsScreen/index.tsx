@@ -157,6 +157,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
                 icon={require('../../assets/images/notes.png')}
                 title="전체 유저 목록"
                 onPress={() => navigation?.navigate('AdminUserList')}
+                isLast={true}
               />
             </View>
           </View>
@@ -188,6 +189,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
               icon={require('../../assets/images/goal.png')}
               title="미션 카테고리 변경"
               onPress={() => navigation?.navigate('CategorySelect' as any, { fromSettings: true })}
+              isLast={true}
             />
           </View>
         </View>
@@ -206,6 +208,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
               icon={require('../../assets/images/chat.png')}
               title="상담 서비스"
               onPress={() => navigation?.navigate('PlacesSearch')}
+              isLast={true}
             />
           </View>
         </View>
@@ -230,6 +233,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
               icon={require('../../assets/images/books.png')}
               title="오픈소스 라이선스"
               onPress={() => openInfoScreen('오픈소스 라이선스', OPEN_SOURCE_LICENSE)}
+              isLast={true}
             />
           </View>
         </View>
@@ -258,6 +262,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
               onPress={handleOpenWithdrawalModal}
               showArrow={true}
               danger={true}
+              isLast={true}
             />
           </View>
         </View>
@@ -270,6 +275,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
               icon={require('../../assets/images/siren.png')}
               title="불편신고 및 개선 요청"
               onPress={handleSendFeedback}
+              isLast={true}
             />
           </View>
           <Text style={styles.versionText}>{APP_VERSION}</Text>

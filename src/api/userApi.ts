@@ -140,3 +140,25 @@ export const restoreMyAccount = async (): Promise<ServiceResult<void>> => {
   return apiClient.post<void>(API_CONFIG.endpoints.user.restoreMe);
 };
 
+/**
+ * 사용자 통계 조회 응답
+ * 백엔드 응답 필드명: completedMissionsCount, postsCount, diariesCount, badgesCount, approvedVerificationsCount
+ */
+export interface UserStatsResponse {
+  completedMissionsCount: number; // 완료한 미션 수 (돌발 미션 제외)
+  postsCount: number; // 작성한 게시글 수 (GENERAL 타입만)
+  diariesCount: number; // 작성한 다이어리 수
+  badgesCount: number; // 획득한 배지 수
+  approvedVerificationsCount?: number; // 승인된 인증글 수 (선택적)
+  // totalExperience는 Reant API에서 가져오므로 여기서는 제외
+}
+
+/**
+ * 사용자 통계 조회
+ * GET /api/users/me/stats
+ * 통계만 필요한 경우 대량 조회 대신 이 API 사용
+ */
+export const getMyStats = async (): Promise<ServiceResult<UserStatsResponse>> => {
+  return apiClient.get<UserStatsResponse>(API_CONFIG.endpoints.user.stats);
+};
+

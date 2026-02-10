@@ -3,7 +3,7 @@
  * 미션 도감 화면의 모든 스타일 정의
  */
 
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Platform } from 'react-native';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
 import { createTextStyle, createTitleStyle, createBodyStyle, createSecondaryTextStyle, createButtonTextStyle } from '../../utils/styles/textStyles';
 import { buttonStyles, inputStyles, modalStyles, cardStyles } from '../../utils/styles/commonStyles';
@@ -56,6 +56,11 @@ export const styles = StyleSheet.create({
     ...createSecondaryTextStyle('sm', {
       textAlign: 'center',
       marginBottom: spacing[4],
+      fontWeight: typography.fontWeight.medium,
+      fontFamily: Platform.select({
+        ios: undefined,
+        android: typography.fontFamily.regular,
+      }),
     }),
   },
   sectionTitle: {

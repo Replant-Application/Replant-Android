@@ -79,7 +79,11 @@ export const styles = StyleSheet.create({
     ...createSecondaryTextStyle('xs', {
       color: colors.text.tertiary,
       marginTop: spacing[1],
-      fontStyle: 'italic',
+      fontWeight: typography.fontWeight.medium,
+      fontFamily: Platform.select({
+        ios: undefined,
+        android: typography.fontFamily.regular,
+      }),
     }),
   },
   footer: {

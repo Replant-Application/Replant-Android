@@ -375,6 +375,7 @@ interface CreateCommentResponse {
   parentId?: number;
   isAuthor?: boolean; // 본인 댓글 여부 (백엔드에서 제공, userId 기반)
   createdAt: string;
+  updatedAt?: string; // 수정 시간 (댓글 수정 시 포함)
 }
 
 /**
@@ -447,17 +448,27 @@ export const updateComment = async (
     });
 
     if (result.success && result.data) {
-      // 백엔드 응답을 프론트엔드 형식으로 변환
+      // 백엔드 응답을 프론트엔드 형식으로 변환 (isAuthor 포함)
       const comment: CommunityComment = {
         id: result.data.id.toString(),
         comment_id: result.data.id.toString(),
         post_id: postId || '',
         content: result.data.content,
         author: result.data.userId.toString(),
+        author_id: result.data.userId.toString(),
+        userId: result.data.userId,
         author_nickname: result.data.userNickname,
         created_at: normalizeDate(result.data.createdAt), // 정규화된 날짜 문자열 (배열 형태 처리됨)
+        updated_at: result.data.updatedAt ? normalizeDate(result.data.updatedAt) : undefined, // 수정 시간
         parent_comment_id: result.data.parentId?.toString(),
+        isAuthor: result.data.isAuthor, // 백엔드에서 제공하는 본인 댓글 여부 (필수)
       };
+      
+      // 디버깅: isAuthor 필드 확인
+      if (result.data.isAuthor === undefined) {
+        console.warn('[updateComment] 백엔드 응답에 isAuthor 필드가 없습니다:', result.data);
+      }
+      
       return {
         success: true,
         data: comment

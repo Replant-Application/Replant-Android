@@ -120,6 +120,24 @@ const TodoListDetailScreen: React.FC<Props> = ({ navigation, route }) => {
               {mission.description}
             </Text>
           )}
+          <View style={styles.missionBadges}>
+            <View style={[
+              styles.missionBadge,
+              isCustomMission ? styles.missionBadgeCustom : styles.missionBadgeOfficial
+            ]}>
+              <Text style={[
+                styles.missionBadgeText,
+                isCustomMission ? styles.missionBadgeTextCustom : styles.missionBadgeTextOfficial
+              ]}>
+                {isCustomMission ? '커스텀' : '공식'}
+              </Text>
+            </View>
+            {mission.isCompleted && (
+              <View style={styles.missionBadgeCompleted}>
+                <Text style={styles.missionBadgeTextCompleted}>완료</Text>
+              </View>
+            )}
+          </View>
         </View>
       </TouchableOpacity>
     );

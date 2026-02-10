@@ -172,8 +172,23 @@ export const useCommunityPost = (postId: string): UseCommunityPostReturn => {
 
         if (result.success && result.data) {
           // 로컬 상태 업데이트
+          // 백엔드 응답에 isAuthor가 포함되어 있으면 사용, 없으면 기존 값 유지
           setComments(prev =>
-            prev.map(c => (c.comment_id === commentId ? result.data! : c))
+            prev.map(c => {
+              if (c.comment_id === commentId) {
+                const updatedComment = result.data!;
+                // 백엔드 응답에 isAuthor가 없으면 기존 값 유지 (안전장치)
+                if (updatedComment.isAuthor === undefined) {
+                  console.warn('[updateComment] 백엔드 응답에 isAuthor가 없어 기존 값 유지:', {
+                    commentId,
+                    existingIsAuthor: c.isAuthor,
+                  });
+                  return { ...updatedComment, isAuthor: c.isAuthor };
+                }
+                return updatedComment;
+              }
+              return c;
+            })
           );
         }
 

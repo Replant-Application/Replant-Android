@@ -3,7 +3,7 @@
  * 투두리스트 상세 화면의 모든 스타일 정의
  */
 
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Platform } from 'react-native';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
 import { createTextStyle, createTitleStyle, createBodyStyle, createSecondaryTextStyle } from '../../utils/styles/textStyles';
 import { emptyStateStyles, cardStyles } from '../../utils/styles/commonStyles';
@@ -40,11 +40,12 @@ export const styles = StyleSheet.create({
     paddingBottom: 120,
   },
   infoCard: {
-    ...cardStyles.base(),
-    backgroundColor: 'rgba(255, 255, 255, 0.95)',
-    borderWidth: 2,
-    borderColor: '#D4A574',
+    backgroundColor: colors.white,
+    borderRadius: borderRadius.md,
+    padding: spacing[5],
     marginBottom: spacing[4],
+    borderWidth: 1,
+    borderColor: colors.gray[200],
   },
   infoHeader: {
     flexDirection: 'row',
@@ -60,7 +61,7 @@ export const styles = StyleSheet.create({
   deleteButton: {
     paddingVertical: spacing[1],
     paddingHorizontal: spacing[3],
-    borderRadius: borderRadius.base,
+    borderRadius: borderRadius.sm,
     backgroundColor: colors.primary[50],
     borderWidth: 1,
     borderColor: colors.primary[300],
@@ -69,18 +70,27 @@ export const styles = StyleSheet.create({
     ...createTextStyle('sm', {
       color: colors.primary[600],
       fontWeight: typography.fontWeight.medium,
+      fontFamily: Platform.select({
+        ios: undefined,
+        android: typography.fontFamily.regular,
+      }),
     }),
   },
   infoTitle: {
     ...createTitleStyle('lg', {
       flex: 1,
       marginRight: spacing[2],
+      fontWeight: typography.fontWeight.medium,
+      fontFamily: Platform.select({
+        ios: undefined,
+        android: typography.fontFamily.regular,
+      }),
     }),
   },
   statusBadge: {
     paddingVertical: spacing[1],
-    paddingHorizontal: spacing[4],
-    borderRadius: borderRadius.base,
+    paddingHorizontal: spacing[3],
+    borderRadius: borderRadius.sm,
     backgroundColor: colors.primary[500],
   },
   statusBadgeCompleted: {
@@ -93,6 +103,10 @@ export const styles = StyleSheet.create({
     ...createTextStyle('xs', {
       fontWeight: typography.fontWeight.medium,
       color: colors.white,
+      fontFamily: Platform.select({
+        ios: undefined,
+        android: typography.fontFamily.regular,
+      }),
     }),
   },
   statusBadgeTextCompleted: {
@@ -107,7 +121,10 @@ export const styles = StyleSheet.create({
     }),
   },
   progressSection: {
-    marginTop: spacing[2],
+    marginTop: spacing[4],
+    paddingTop: spacing[4],
+    borderTopWidth: 1,
+    borderTopColor: colors.gray[100],
   },
   progressHeader: {
     flexDirection: 'row',
@@ -119,23 +136,32 @@ export const styles = StyleSheet.create({
     ...createTextStyle('sm', {
       color: colors.text.secondary,
       fontWeight: typography.fontWeight.medium,
+      fontFamily: Platform.select({
+        ios: undefined,
+        android: typography.fontFamily.regular,
+      }),
     }),
   },
   progressValue: {
     ...createTitleStyle('lg', {
       color: colors.primary[600],
+      fontWeight: typography.fontWeight.medium,
+      fontFamily: Platform.select({
+        ios: undefined,
+        android: typography.fontFamily.regular,
+      }),
     }),
   },
   progressBar: {
-    height: 12,
+    height: 8,
     backgroundColor: colors.gray[200],
-    borderRadius: borderRadius.full,
+    borderRadius: borderRadius.sm,
     overflow: 'hidden',
   },
   progressFill: {
     height: '100%',
     backgroundColor: colors.primary[500],
-    borderRadius: borderRadius.full,
+    borderRadius: borderRadius.sm,
   },
   progressFillCompleted: {
     backgroundColor: '#4CAF50',
@@ -143,9 +169,13 @@ export const styles = StyleSheet.create({
   progressCount: {
     ...createTextStyle('xs', {
       color: colors.text.primary,
-      fontWeight: typography.fontWeight.semibold,
-      marginTop: spacing[1.5],
+      fontWeight: typography.fontWeight.medium,
+      marginTop: spacing[2],
       textAlign: 'center',
+      fontFamily: Platform.select({
+        ios: undefined,
+        android: typography.fontFamily.regular,
+      }),
     }),
   },
   createNewButton: {
@@ -167,19 +197,21 @@ export const styles = StyleSheet.create({
   },
   missionSection: {
     backgroundColor: colors.white,
-    borderRadius: borderRadius.base,
+    borderRadius: borderRadius.md,
     padding: spacing[4],
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    borderWidth: 1,
+    borderColor: colors.gray[200],
   },
   missionItem: {
     flexDirection: 'row',
     alignItems: 'flex-start',
     paddingVertical: spacing[4],
     paddingHorizontal: spacing[3],
+    backgroundColor: colors.gray[50],
+    borderRadius: borderRadius.sm,
+    marginBottom: spacing[2],
+    borderWidth: 1,
+    borderColor: colors.gray[100],
   },
   missionItemCompleted: {
     opacity: 0.6,
@@ -187,13 +219,14 @@ export const styles = StyleSheet.create({
   missionDivider: {
     height: 1,
     backgroundColor: colors.gray[200],
-    marginLeft: spacing[11],
-    marginRight: spacing[3],
+    marginLeft: 0,
+    marginRight: 0,
+    marginVertical: spacing[1],
   },
   missionCheckbox: {
     width: 20,
     height: 20,
-    borderRadius: borderRadius.base,
+    borderRadius: borderRadius.sm,
     borderWidth: 2,
     borderColor: colors.gray[400],
     justifyContent: 'center',
@@ -223,6 +256,10 @@ export const styles = StyleSheet.create({
     ...createBodyStyle('base', {
       fontWeight: typography.fontWeight.medium,
       flex: 1,
+      fontFamily: Platform.select({
+        ios: undefined,
+        android: typography.fontFamily.regular,
+      }),
     }),
   },
   missionTitleCompleted: {
@@ -230,7 +267,60 @@ export const styles = StyleSheet.create({
     textDecorationLine: 'line-through',
   },
   missionDescription: {
-    ...createSecondaryTextStyle('sm'),
+    ...createSecondaryTextStyle('sm', {
+      fontFamily: Platform.select({
+        ios: undefined,
+        android: typography.fontFamily.regular,
+      }),
+      fontWeight: typography.fontWeight.medium,
+    }),
+  },
+  missionBadges: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing[2],
+    marginTop: spacing[2],
+  },
+  missionBadge: {
+    paddingVertical: spacing[1],
+    paddingHorizontal: spacing[2],
+    borderRadius: borderRadius.full, // 둥근 모서리로 통일
+    borderWidth: 1,
+    backgroundColor: colors.white,
+  },
+  missionBadgeOfficial: {
+    borderColor: colors.blue[400],
+  },
+  missionBadgeCustom: {
+    borderColor: colors.purple[400],
+  },
+  missionBadgeCompleted: {
+    borderColor: colors.green[400],
+  },
+  missionBadgeText: {
+    ...createTextStyle('xs', {
+      fontWeight: typography.fontWeight.medium,
+      fontFamily: Platform.select({
+        ios: undefined,
+        android: typography.fontFamily.regular,
+      }),
+    }),
+  },
+  missionBadgeTextOfficial: {
+    color: colors.blue[600],
+  },
+  missionBadgeTextCustom: {
+    color: colors.purple[600],
+  },
+  missionBadgeTextCompleted: {
+    ...createTextStyle('xs', {
+      fontWeight: typography.fontWeight.medium,
+      color: colors.green[600],
+      fontFamily: Platform.select({
+        ios: undefined,
+        android: typography.fontFamily.regular,
+      }),
+    }),
   },
   verifiedBadge: {
     flexDirection: 'row',

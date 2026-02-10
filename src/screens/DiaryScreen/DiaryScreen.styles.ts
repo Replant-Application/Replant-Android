@@ -35,7 +35,14 @@ export const styles = StyleSheet.create({
     maxHeight: SCREEN_HEIGHT * 0.8,
     ...shadows.lg,
   },
+  questionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: spacing[2],
+  },
   modalQuestion: {
+    flex: 1,
     paddingVertical: spacing[2],
     paddingHorizontal: spacing[4],
     ...createTextStyle('xl', {
@@ -129,36 +136,55 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    gap: spacing[4],
-    marginTop: spacing[4],
+    gap: spacing[5],
+    marginTop: spacing[2],
   },
   sliderButton: {
-    width: 48,
-    minHeight: 48,
-    paddingVertical: spacing[1],
-    borderRadius: 24,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 0,
+    borderWidth: 3,
     ...shadows.sm,
   },
   sliderButtonMinus: {
-    backgroundColor: colors.red[500],
-    borderWidth: 1.5,
+    backgroundColor: colors.white,
     borderColor: colors.red[400],
   },
   sliderButtonPlus: {
-    backgroundColor: colors.primary[500],
-    borderWidth: 1.5,
-    borderColor: colors.primary[400],
+    backgroundColor: colors.white,
+    borderColor: colors.primary[500],
   },
   sliderButtonText: {
-    ...createTextStyle('3xl', {
-      fontWeight: typography.fontWeight.bold,
-      color: colors.white,
+    ...createTextStyle('xl', {
+      fontWeight: typography.fontWeight.semibold,
+      color: colors.text.primary,
       textAlign: 'center',
-      fontFamily: Platform.select({ ios: undefined, android: typography.fontFamily.bold }),
+      fontFamily: Platform.select({ ios: undefined, android: typography.fontFamily.regular }),
     }),
+  },
+  sliderButtonTextMinus: {
+    ...createTextStyle('3xl', {
+      fontWeight: typography.fontWeight.semibold,
+      color: colors.red[500],
+      textAlign: 'center',
+      textAlignVertical: 'center',
+      includeFontPadding: false,
+      fontFamily: Platform.select({ ios: undefined, android: typography.fontFamily.regular }),
+    }),
+    marginTop: Platform.select({ ios: 0, android: -2 }),
+  },
+  sliderButtonTextPlus: {
+    ...createTextStyle('3xl', {
+      fontWeight: typography.fontWeight.semibold,
+      color: colors.primary[500],
+      textAlign: 'center',
+      textAlignVertical: 'center',
+      includeFontPadding: false,
+      fontFamily: Platform.select({ ios: undefined, android: typography.fontFamily.regular }),
+    }),
+    marginTop: Platform.select({ ios: 0, android: -2 }),
   },
   sliderValue: {
     ...createTextStyle('2xl', {
@@ -206,11 +232,83 @@ export const styles = StyleSheet.create({
     paddingHorizontal: spacing[4],
     paddingVertical: spacing[4],
     height: 260,
-    ...createTextStyle('base', {
+    borderWidth: 1,
+    borderColor: colors.gray[700],
+    fontSize: typography.fontSize.base,
+    color: '#FFFFFF', // 명시적으로 흰색 지정
+    fontWeight: typography.fontWeight.medium,
+    fontFamily: Platform.select({
+      ios: undefined,
+      android: typography.fontFamily.regular,
+    }),
+    textAlignVertical: 'top',
+    includeFontPadding: false, // Android 폰트 패딩 제거
+  },
+  voiceButton: {
+    width: 37,
+    height: 37,
+    borderRadius: borderRadius.lg,
+    backgroundColor: colors.gray[800],
+    borderWidth: 1,
+    borderColor: colors.gray[600],
+    justifyContent: 'center',
+    alignItems: 'center',
+    flexShrink: 0,
+  },
+  voiceButtonActive: {
+    backgroundColor: colors.gray[700],
+    borderColor: colors.primary[500],
+  },
+  voiceButtonIcon: {
+    width: 20,
+    height: 20,
+    tintColor: colors.white,
+  },
+  // 녹음 중 모달
+  recordingModalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  recordingModalContent: {
+    backgroundColor: colors.gray[900],
+    borderRadius: borderRadius.xl,
+    paddingVertical: spacing[6],
+    paddingHorizontal: spacing[8],
+    alignItems: 'center',
+    minWidth: 200,
+    borderWidth: 1,
+    borderColor: colors.gray[700],
+  },
+  recordingModalIcon: {
+    width: 64,
+    height: 64,
+    marginBottom: spacing[3],
+  },
+  recordingModalText: {
+    ...createTextStyle('lg', {
       color: colors.white,
-      borderWidth: 1,
-      borderColor: colors.gray[700],
-      textAlignVertical: 'top',
+      fontWeight: typography.fontWeight.semibold,
+    }),
+    marginBottom: spacing[2],
+  },
+  recordingModalHint: {
+    ...createTextStyle('sm', {
+      color: colors.gray[400],
+    }),
+  },
+  recordingModalCancelButton: {
+    marginTop: spacing[4],
+    paddingVertical: spacing[2],
+    paddingHorizontal: spacing[4],
+    borderRadius: borderRadius.md,
+    backgroundColor: colors.gray[700],
+  },
+  recordingModalCancelButtonText: {
+    ...createTextStyle('sm', {
+      color: colors.white,
+      fontWeight: typography.fontWeight.medium,
     }),
   },
   cancelButton: {

@@ -67,10 +67,10 @@ export const styles = StyleSheet.create({
     ...createSecondaryTextStyle('sm', {
       textAlign: 'center',
       marginTop: spacing[2],
-      fontWeight: typography.fontWeight.bold,
+      fontWeight: typography.fontWeight.medium,
       fontFamily: Platform.select({
         ios: undefined,
-        android: typography.fontFamily.bold,
+        android: typography.fontFamily.regular,
       }),
     }),
   },

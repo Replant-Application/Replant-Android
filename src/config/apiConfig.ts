@@ -74,6 +74,7 @@ export const API_CONFIG = {
       deleteMe: '/users/me', // 회원 탈퇴
       restoreMe: '/users/me/restore', // 계정 복구
       getUser: '/users/:userId',
+      stats: '/users/me/stats', // 사용자 통계
     },
 
     // 시스템 미션 (Mission)

@@ -61,14 +61,16 @@ export const styles = StyleSheet.create({
     height: 48,
     marginRight: spacing[3],
     borderWidth: 0,
+    borderColor: 'transparent',
     borderRadius: 0,
-    overflow: 'hidden',
+    overflow: 'visible',
     backgroundColor: 'transparent',
   },
   userIcon: {
     width: 48,
     height: 48,
     borderWidth: 0,
+    borderColor: 'transparent',
   },
   userDetails: {
     flex: 1,
@@ -211,6 +213,7 @@ export const styles = StyleSheet.create({
   divider: {
     height: 1,
     backgroundColor: colors.border.light,
-    marginLeft: 22 + spacing[2], // icon width + icon margin (left padding 0)
+    marginLeft: 0, // 전체 너비로 표시
+    marginRight: 0,
   },
 });

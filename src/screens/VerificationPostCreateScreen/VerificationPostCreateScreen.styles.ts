@@ -268,6 +268,8 @@ export const styles = StyleSheet.create({
     paddingLeft: spacing[3],
     minHeight: 200,
     textAlignVertical: 'top',
+    lineHeight: 24, // notebookLine의 높이(24)와 일치시켜 줄 간격에 맞춤
+    includeFontPadding: false, // Android 폰트 패딩 제거
   },
   photoSection: {
     marginBottom: spacing[4],

@@ -8,10 +8,15 @@ const SettingItem: React.FC<SettingItemProps> = ({
   title, 
   onPress, 
   showArrow = true,
-  danger = false 
+  danger = false,
+  isLast = false
 }) => (
   <TouchableOpacity
-    style={[styles.settingItem, danger && styles.settingItemDanger]}
+    style={[
+      styles.settingItem, 
+      danger && styles.settingItemDanger,
+      isLast && styles.settingItemLast
+    ]}
     onPress={onPress}
     activeOpacity={0.7}
     accessibilityRole="button"

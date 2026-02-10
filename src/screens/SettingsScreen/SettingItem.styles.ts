@@ -21,6 +21,9 @@ export const styles = StyleSheet.create({
   settingItemDanger: {
     borderBottomColor: colors.red[50],
   },
+  settingItemLast: {
+    borderBottomWidth: 0, // 마지막 아이템은 하단 경계선 제거
+  },
   settingItemLeft: {
     flexDirection: 'row',
     alignItems: 'center',

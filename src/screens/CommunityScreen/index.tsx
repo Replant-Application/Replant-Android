@@ -481,7 +481,7 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation, route }) 
               ]}
               selected={postTypeFilter}
               onSelect={(key) => setPostTypeFilter(key as PostTypeFilter)}
-              showCheckmark={true}
+              showCheckmark={false}
             />
 
             <FilterOptionSection
@@ -502,7 +502,7 @@ const CommunityScreen: React.FC<CommunityScreenProps> = ({ navigation, route }) 
               ]}
               selected={verificationFilter}
               onSelect={(key) => setVerificationFilter(key as VerificationFilter)}
-              showCheckmark={true}
+              showCheckmark={false}
               sectionTitleStyle={{ marginTop: spacing[5] }}
             />
 

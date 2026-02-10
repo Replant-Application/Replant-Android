@@ -258,6 +258,10 @@ export const styles = StyleSheet.create({
     ...createTextStyle('sm', {
       color: colors.text.primary,
       fontWeight: typography.fontWeight.medium,
+      fontFamily: Platform.select({
+        ios: undefined,
+        android: typography.fontFamily.regular,
+      }),
     }),
     minWidth: 60,
     textAlign: 'center',
@@ -269,14 +273,16 @@ export const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: colors.primary[700],
+    backgroundColor: colors.primary[500], // 더 부드러운 초록색
     alignItems: 'center',
     justifyContent: 'center',
-    elevation: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
+    borderWidth: 2,
+    borderColor: colors.primary[600], // 테두리 추가
+    elevation: 4,
+    shadowColor: colors.primary[500],
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
     zIndex: 100,
   },
   fabIcon: {
@@ -286,8 +292,8 @@ export const styles = StyleSheet.create({
     lineHeight: 32,
   },
   fabIconImage: {
-    width: 24,
-    height: 24,
+    width: 22,
+    height: 22,
     tintColor: colors.white,
   },
   fabText: {

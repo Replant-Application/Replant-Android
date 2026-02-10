@@ -154,7 +154,7 @@ export const styles = StyleSheet.create({
     height: 154,
     maxHeight: 300,
     textAlignVertical: 'top',
-    lineHeight: 24,
+    lineHeight: 34, // noteLine의 높이(36)와 일치시켜 줄 간격에 맞춤
     fontFamily: typography.fontFamily.regular,
     ...(Platform.OS === 'android' && { includeFontPadding: false }),
   },

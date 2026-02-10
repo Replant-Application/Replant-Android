@@ -315,9 +315,28 @@ export class ApiClient {
       // 응답 처리
       let data: any = null;
       const contentType = response.headers.get('content-type');
-
-      if (contentType && contentType.includes('application/json')) {
-        data = await response.json();
+      
+      // 204 No Content 또는 빈 응답 처리
+      if (response.status === 204 || response.headers.get('content-length') === '0') {
+        data = null;
+      } else if (contentType && contentType.includes('application/json')) {
+        // JSON 응답인 경우, 빈 본문 처리
+        try {
+          const text = await response.text();
+          if (text && text.trim()) {
+            data = JSON.parse(text);
+          } else {
+            data = null;
+          }
+        } catch (parseError) {
+          // JSON 파싱 실패 시 빈 응답으로 처리
+          console.warn('[API Client] JSON 파싱 실패 (빈 응답일 수 있음):', {
+            url,
+            status: response.status,
+            error: parseError instanceof Error ? parseError.message : String(parseError),
+          });
+          data = null;
+        }
       } else {
         const text = await response.text();
         if (text) {
@@ -332,6 +351,18 @@ export class ApiClient {
       // 성공 응답
       if (response.ok) {
         clearTimeout(timeoutId);
+        
+        // 디버깅: cancel-custom API 응답 로깅
+        if (url.includes('cancel-custom')) {
+          console.log('[API Client] cancel-custom 응답:', {
+            status: response.status,
+            contentType,
+            data,
+            hasData: !!data,
+            dataType: typeof data,
+          });
+        }
+        
         // 백엔드가 { data: {...}, message: "...", code: ... } 형태로 응답하는 경우
         // data 필드를 추출하여 반환
         if (data && typeof data === 'object' && 'data' in data) {
@@ -533,9 +564,28 @@ export class ApiClient {
       // 응답 처리
       let data: any = null;
       const contentType = response.headers.get('content-type');
-
-      if (contentType && contentType.includes('application/json')) {
-        data = await response.json();
+      
+      // 204 No Content 또는 빈 응답 처리
+      if (response.status === 204 || response.headers.get('content-length') === '0') {
+        data = null;
+      } else if (contentType && contentType.includes('application/json')) {
+        // JSON 응답인 경우, 빈 본문 처리
+        try {
+          const text = await response.text();
+          if (text && text.trim()) {
+            data = JSON.parse(text);
+          } else {
+            data = null;
+          }
+        } catch (parseError) {
+          // JSON 파싱 실패 시 빈 응답으로 처리
+          console.warn('[API Client] JSON 파싱 실패 (빈 응답일 수 있음):', {
+            url,
+            status: response.status,
+            error: parseError instanceof Error ? parseError.message : String(parseError),
+          });
+          data = null;
+        }
       } else {
         const text = await response.text();
         if (text) {

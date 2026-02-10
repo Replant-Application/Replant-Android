@@ -533,21 +533,59 @@ export const useMissionScreenContainer = ({
         return;
       }
       try {
+        console.log('[handleMissionUncomplete] 인증 취소 시작:', { missionId, numericId });
         const result = await uncompleteCustomMission(numericId);
+        console.log('[handleMissionUncomplete] API 응답:', {
+          success: result.success,
+          data: result.data,
+          error: result.error,
+        });
+        
         if (result.success) {
+          // API 응답에서 상태 확인
+          if (result.data) {
+            console.log('[handleMissionUncomplete] 응답 데이터 상태:', {
+              status: result.data.status,
+              id: result.data.id,
+              missionId: result.data.missionId,
+            });
+          } else {
+            console.warn('[handleMissionUncomplete] 응답 데이터가 없습니다 (빈 응답일 수 있음)');
+          }
+          
           showSuccess('인증이 취소되었어요.');
+          
+          // 미션 목록 다시 로드
           await loadMissions();
+          
+          // 로드 후 미션 상태 확인
+          const updatedMission = missions.find(m => 
+            m.mission_id === missionId || 
+            (m.is_custom && m.user_mission_id === numericId)
+          );
+          console.log('[handleMissionUncomplete] 로드 후 미션 상태:', {
+            found: !!updatedMission,
+            status: updatedMission?.status,
+            completed: updatedMission?.completed,
+          });
+          
+          // 인증 취소 후에는 진행중 상태로 변경되므로, 필터를 "진행중"으로 변경
+          // (현재 필터가 "완료" 탭에 있으면 진행중 미션이 보이지 않기 때문)
+          if (selectedFilter === 'completed') {
+            setSelectedFilter('inProgress');
+          }
         } else {
           handleApiError(result, 'MissionScreen.handleMissionUncomplete');
         }
       } catch (uncompleteError) {
+        console.error('[handleMissionUncomplete] 에러:', uncompleteError);
         showError(
           uncompleteError instanceof Error ? uncompleteError : new Error('미션 완료 취소에 실패했습니다.'),
           'MissionScreen.handleMissionUncomplete'
         );
       }
     },
-    [loadMissions, showSuccess, showError, handleApiError]
+    [loadMissions, showSuccess, showError, handleApiError, selectedFilter, missions]
   );
 
   /**

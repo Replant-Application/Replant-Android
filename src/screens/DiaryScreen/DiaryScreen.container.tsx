@@ -4,13 +4,17 @@
  */
 
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
-import { Animated, PanResponder, AccessibilityInfo } from 'react-native';
+import { Animated, PanResponder, AccessibilityInfo, Alert } from 'react-native';
 import { useDiary } from '../../hooks/useDiary';
 import { useCharacter } from '../../hooks/useCharacter';
 import { SimpleDiaryData, Diary } from '../../types';
 import { formatDateYYYYMMDD } from '../../utils/dateUtils';
 import { DiaryStep } from '../../types/screens/diary';
 import { playButtonSound } from '../../utils/soundUtils';
+import {
+  ExpoSpeechRecognitionModule,
+  useSpeechRecognitionEvent,
+} from 'expo-speech-recognition';
 
 // 기분 값에 따른 그라데이션 색상 계산 (0: 연한 빨강 → 100: 진한 초록)
 const getMoodColor = (value: number): string => {
@@ -62,10 +66,88 @@ export const useDiaryScreenContainer = () => {
   const [alertTitle, setAlertTitle] = useState('');
   const [alertMessage, setAlertMessage] = useState('');
 
+  // 음성 녹음 관련 상태
+  const [isListening, setIsListening] = useState(false);
+  const [voiceAvailable, setVoiceAvailable] = useState(false);
+  const voiceCommittedRef = useRef(''); // 음성으로 확정된 텍스트
+
   const speechBubbleAnim = useRef(new Animated.Value(0)).current;
   const currentCharacter = characters.length > 0 ? characters[0] : null;
   const sliderRef = useRef<any>(null);
   const isMountedRef = useRef(true);
+
+  // 음성 인식 사용 가능 여부 확인
+  useEffect(() => {
+    const check = async () => {
+      try {
+        const available = ExpoSpeechRecognitionModule?.isRecognitionAvailable?.() ?? false;
+        setVoiceAvailable(available);
+      } catch {
+        setVoiceAvailable(false);
+      }
+    };
+    check();
+  }, []);
+
+  useSpeechRecognitionEvent('start', () => setIsListening(true));
+  useSpeechRecognitionEvent('end', () => setIsListening(false));
+
+  useSpeechRecognitionEvent('result', (event: { results: Array<{ transcript?: string }>; isFinal?: boolean }) => {
+    const transcript = event.results?.[0]?.transcript?.trim();
+    if (!transcript) return;
+    const isFinal = event.isFinal === true;
+    if (isFinal) {
+      voiceCommittedRef.current = voiceCommittedRef.current
+        ? `${voiceCommittedRef.current} ${transcript}`
+        : transcript;
+      setExpressionText(voiceCommittedRef.current);
+    } else {
+      // 말하는 동안 실시간으로 입력창에 보여줌
+      setExpressionText(
+        voiceCommittedRef.current
+          ? `${voiceCommittedRef.current} ${transcript}`
+          : transcript
+      );
+    }
+  });
+
+  useSpeechRecognitionEvent('error', (event: { error?: string; message?: string }) => {
+    setIsListening(false);
+    if (event.error && event.error !== 'aborted' && event.error !== 'no-speech') {
+      Alert.alert('음성 인식', event.message || '음성 인식 중 문제가 발생했어요.');
+    }
+  });
+
+  const handleVoicePress = useCallback(async () => {
+    if (!voiceAvailable) {
+      Alert.alert('음성 입력', '이 기기에서는 음성 인식을 사용할 수 없어요.');
+      return;
+    }
+    try {
+      if (isListening) {
+        ExpoSpeechRecognitionModule.stop();
+        return;
+      }
+      const result = await ExpoSpeechRecognitionModule.requestPermissionsAsync();
+      if (!result.granted) {
+        Alert.alert('마이크 권한', '음성 입력을 쓰려면 마이크 권한이 필요해요.');
+        return;
+      }
+      voiceCommittedRef.current = expressionText; // 녹음 시작 시점의 입력값 유지 (이어쓰기)
+      ExpoSpeechRecognitionModule.start({
+        lang: 'ko-KR',
+        interimResults: true,
+        continuous: false,
+      });
+    } catch (e) {
+      Alert.alert('음성 입력', '음성 인식을 시작할 수 없어요.');
+    }
+  }, [voiceAvailable, isListening, expressionText]);
+
+  const handleVoiceCancel = useCallback(() => {
+    ExpoSpeechRecognitionModule.abort();
+    setExpressionText(voiceCommittedRef.current);
+  }, []);
 
   /**
    * 마운트 상태 관리
@@ -194,7 +276,7 @@ export const useDiaryScreenContainer = () => {
       case 'factors':
         return '감정에 영향을 준 요인을 선택해주세요';
       case 'expression':
-        return '오늘 하루를 되돌아보면서 느낀 점을 자세히 적어볼까요?';
+        return '오늘 하루를 되돌아보면서  느낀점을 자세히 적어볼까요?';
       case 'confirm':
         return '오늘의 감정일기가 작성됐어요!';
       default:
@@ -515,6 +597,11 @@ export const useDiaryScreenContainer = () => {
     speechBubbleAnim,
     sliderRef,
     panResponder,
+    // 음성 녹음
+    isListening,
+    voiceAvailable,
+    handleVoicePress,
+    handleVoiceCancel,
     // Handlers
     handleNext,
     handleBack,

@@ -9,7 +9,8 @@ import {
   Image,
   FlatList,
   RefreshControl,
-  Animated
+  Animated,
+  Modal
 } from 'react-native';
 import { Loading, ErrorBoundary, ConfirmModal, AlertModal } from '../../components/ui';
 import { colors } from '../../utils/designTokens';
@@ -69,6 +70,10 @@ const DiaryScreen: React.FC = () => {
     setSearchDate,
     getMoodColor,
     getStepMessage,
+    isListening,
+    voiceAvailable,
+    handleVoicePress,
+    handleVoiceCancel,
   } = useDiaryScreenContainer();
 
   if (loading) {
@@ -429,13 +434,32 @@ const DiaryScreen: React.FC = () => {
         ]}
       >
         {/* 질문 - 스크린 리더가 단계별 안내를 읽을 수 있도록 */}
-        <Text
-          style={[styles.modalQuestion, currentStep === 'confirm' && styles.modalQuestionCenter]}
-          accessibilityRole="header"
-          accessibilityLabel={currentStep === 'mood' ? '현재 기분이 어떤가요? 슬라이더로 0에서 100 사이 점수를 선택하세요. 왼쪽은 매우 좋지 않음, 오른쪽은 매우 좋음입니다.' : undefined}
-        >
-          {getStepMessage()}
-        </Text>
+        <View style={styles.questionRow}>
+          <Text
+            style={[styles.modalQuestion, currentStep === 'confirm' && styles.modalQuestionCenter]}
+            accessibilityRole="header"
+            accessibilityLabel={currentStep === 'mood' ? '현재 기분이 어떤가요? 슬라이더로 0에서 100 사이 점수를 선택하세요. 왼쪽은 매우 좋지 않음, 오른쪽은 매우 좋음입니다.' : undefined}
+          >
+            {getStepMessage()}
+          </Text>
+          {currentStep === 'expression' && voiceAvailable && (
+            <TouchableOpacity
+              style={[styles.voiceButton, isListening && styles.voiceButtonActive]}
+              onPress={handleVoicePress}
+              activeOpacity={0.7}
+              accessibilityRole="button"
+              accessibilityLabel={isListening ? '음성 입력 중지' : '녹음하여 말하기'}
+              accessibilityState={{ selected: isListening }}
+            >
+              <Image
+                source={require('../../assets/images/record.png')}
+                style={styles.voiceButtonIcon}
+                resizeMode="contain"
+                accessibilityLabel={isListening ? '녹음 중' : '녹음'}
+              />
+            </TouchableOpacity>
+          )}
+        </View>
 
         {/* 단계별 컨텐츠 */}
         <View style={
@@ -481,22 +505,22 @@ const DiaryScreen: React.FC = () => {
                 <TouchableOpacity
                   style={[styles.sliderButton, styles.sliderButtonMinus]}
                   onPress={adjustMoodDown}
-                  activeOpacity={0.85}
+                  activeOpacity={0.7}
                   accessibilityRole="button"
                   accessibilityLabel="기분 10점 낮추기"
                   accessibilityHint="탭하면 기분 점수가 10 낮아집니다"
                 >
-                  <Text style={styles.sliderButtonText} accessibilityElementsHidden={true}>−</Text>
+                  <Text style={styles.sliderButtonTextMinus} accessibilityElementsHidden={true}>−</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={[styles.sliderButton, styles.sliderButtonPlus]}
                   onPress={adjustMoodUp}
-                  activeOpacity={0.85}
+                  activeOpacity={0.7}
                   accessibilityRole="button"
                   accessibilityLabel="기분 10점 높이기"
                   accessibilityHint="탭하면 기분 점수가 10 올라갑니다"
                 >
-                  <Text style={styles.sliderButtonText} accessibilityElementsHidden={true}>+</Text>
+                  <Text style={styles.sliderButtonTextPlus} accessibilityElementsHidden={true}>+</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -523,7 +547,7 @@ const DiaryScreen: React.FC = () => {
           {currentStep === 'expression' && (
             <View style={styles.inputContainer}>
               <TextInput
-                style={styles.textInput}
+                style={[styles.textInput, { color: '#FFFFFF' }]}
                 value={expressionText}
                 onChangeText={setExpressionText}
                 placeholder="직접 입력하기"
@@ -534,6 +558,7 @@ const DiaryScreen: React.FC = () => {
                 textContentType="none"
                 accessibilityLabel="감정 표현 직접 입력"
                 accessibilityHint="감정을 직접 입력하세요. 자동완성 기능이 비활성화되어 있습니다"
+                selectionColor={colors.primary[500]}
               />
             </View>
           )}
@@ -618,6 +643,36 @@ const DiaryScreen: React.FC = () => {
         message={alertMessage}
         onClose={handleAlertClose}
       />
+
+      {/* 녹음 중 모달 */}
+      <Modal
+        visible={isListening}
+        transparent
+        animationType="fade"
+        statusBarTranslucent
+      >
+        <View style={styles.recordingModalOverlay}>
+          <View style={styles.recordingModalContent}>
+            <Image
+              source={require('../../assets/images/recording.png')}
+              style={styles.recordingModalIcon}
+              resizeMode="contain"
+              accessibilityLabel="녹음 중"
+            />
+            <Text style={styles.recordingModalText}>녹음중입니다</Text>
+            <Text style={styles.recordingModalHint}>다시 누르면 녹음이 끝나요</Text>
+            <TouchableOpacity
+              style={styles.recordingModalCancelButton}
+              onPress={handleVoiceCancel}
+              activeOpacity={0.7}
+              accessibilityRole="button"
+              accessibilityLabel="녹음 취소"
+            >
+              <Text style={styles.recordingModalCancelButtonText}>취소</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </ImageBackground>
   );
 };

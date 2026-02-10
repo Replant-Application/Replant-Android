@@ -12,14 +12,15 @@
  * @returns {Function} selectCharacter - 캐릭터 선택
  */
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { getData, getStorageKeys, autoLevelupCharacter, setData } from '../services';
 import { updateCharacterName as updateCharacterNameService } from '../services/characterService';
 import { useUser } from '../contexts/UserContext';
 import { logError } from '../utils/logger';
 import { getNextLevelExp, getTotalExpToReachLevel } from '../utils/expTable';
 import { Character, UseCharacterReturn, ExperienceResult, ServiceResult, MissionCategory } from '../types';
-import { getMyReant, ReantResponse } from '../api/reantApi';
+import { ReantResponse } from '../api/reantApi';
+import { getMyReantCached, invalidateReantCache } from '../utils/reantApiCache';
 
 export const useCharacter = (): UseCharacterReturn => {
   const { currentNickname } = useUser();
@@ -27,6 +28,7 @@ export const useCharacter = (): UseCharacterReturn => {
   const [selectedCharacter, setSelectedCharacter] = useState<Character | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const isLoadingRef = useRef<boolean>(false); // 중복 호출 방지용
 
   // Reant 정보를 Character 형태로 변환
   // 백엔드(Reant.java): exp = 현재 레벨 진행분, 다음 레벨 필요 = 레벨별 테이블 (L1→10, L2→50, L3→100, L4→200, L5→500, L6+→500)
@@ -61,12 +63,18 @@ export const useCharacter = (): UseCharacterReturn => {
   const loadCharacters = useCallback(async (): Promise<void> => {
     if (!currentNickname) return;
 
+    // 이미 로딩 중이면 중복 호출 방지
+    if (isLoadingRef.current) {
+      return;
+    }
+
     try {
+      isLoadingRef.current = true;
       setLoading(true);
       setError(null);
 
-      // 백엔드에서 Reant 정보 가져오기 시도
-      const reantResult = await getMyReant();
+      // 캐시된 API 호출 재사용
+      const reantResult = await getMyReantCached();
 
       if (reantResult.success && reantResult.data) {
         // 백엔드 Reant 정보를 Character 형태로 변환
@@ -156,12 +164,14 @@ export const useCharacter = (): UseCharacterReturn => {
 
       // 모든 설정이 완료된 후 로딩 종료
       setLoading(false);
+      isLoadingRef.current = false;
     } catch (loadError) {
       logError('캐릭터 로드 실패', loadError as Error, { currentNickname });
       setError((loadError as Error).message);
       setLoading(false);
+      isLoadingRef.current = false;
     }
-  }, [currentNickname, convertReantToCharacter, selectedCharacter]);
+  }, [currentNickname, convertReantToCharacter]); // selectedCharacter 의존성 제거
 
   // 초기 로드 (currentNickname이 변경될 때만)
   useEffect(() => {
@@ -189,7 +199,9 @@ export const useCharacter = (): UseCharacterReturn => {
       const oldLevel = character.level;
 
       // 백엔드에서 최신 Reant 정보 가져오기 (미션 완료 API에서 이미 경험치가 지급됨)
-      const reantResult = await getMyReant();
+      // 캐시 무시하고 최신 데이터 가져오기 (경험치 추가 후이므로)
+      invalidateReantCache();
+      const reantResult = await getMyReantCached(true);
 
       if (reantResult.success && reantResult.data) {
         const updatedCharacter = convertReantToCharacter(reantResult.data);

@@ -3,7 +3,7 @@
  * 미션세트 상세 화면의 모든 스타일 정의
  */
 
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Platform } from 'react-native';
 import { colors, spacing, typography, borderRadius } from '../../utils/designTokens';
 import { getOptimizedLineHeight } from '../../utils/styles/textStyles';
 import { createTextStyle, createTitleStyle, createBodyStyle, createSecondaryTextStyle } from '../../utils/styles/textStyles';
@@ -18,23 +18,32 @@ export const styles = StyleSheet.create({
     padding: spacing[4],
   },
   headerCard: {
-    ...cardStyles.base(),
-    backgroundColor: colors.background.primary,
-    borderRadius: borderRadius.lg,
+    backgroundColor: colors.white,
+    borderRadius: borderRadius.md,
+    padding: spacing[5],
     marginBottom: spacing[4],
     borderWidth: 1,
-    borderColor: colors.border.light,
+    borderColor: colors.gray[200],
   },
   title: {
     ...createTitleStyle('lg', {
-      fontWeight: typography.fontWeight.semibold,
+      fontWeight: typography.fontWeight.medium,
       marginBottom: spacing[2],
+      fontFamily: Platform.select({
+        ios: undefined,
+        android: typography.fontFamily.regular,
+      }),
     }),
   },
   description: {
     ...createSecondaryTextStyle('base', {
       marginBottom: spacing[3],
       lineHeight: getOptimizedLineHeight(typography.fontSize.base) * 1.4,
+      fontFamily: Platform.select({
+        ios: undefined,
+        android: typography.fontFamily.regular,
+      }),
+      fontWeight: typography.fontWeight.medium,
     }),
   },
   metaRow: {
@@ -45,30 +54,50 @@ export const styles = StyleSheet.create({
   creator: {
     ...createTextStyle('sm', {
       color: colors.text.tertiary,
+      fontFamily: Platform.select({
+        ios: undefined,
+        android: typography.fontFamily.regular,
+      }),
+      fontWeight: typography.fontWeight.medium,
     }),
   },
   metaDot: {
     ...createTextStyle('sm', {
       color: colors.text.tertiary,
       marginHorizontal: spacing[1],
+      fontFamily: Platform.select({
+        ios: undefined,
+        android: typography.fontFamily.regular,
+      }),
     }),
   },
   missionCount: {
     ...createTextStyle('sm', {
       color: colors.text.tertiary,
+      fontFamily: Platform.select({
+        ios: undefined,
+        android: typography.fontFamily.regular,
+      }),
+      fontWeight: typography.fontWeight.medium,
     }),
   },
   createdAt: {
     ...createSecondaryTextStyle('sm', {
       color: colors.text.tertiary,
+      fontFamily: Platform.select({
+        ios: undefined,
+        android: typography.fontFamily.regular,
+      }),
+      fontWeight: typography.fontWeight.medium,
     }),
   },
   statsRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingTop: spacing[1],
+    paddingTop: spacing[4],
+    marginTop: spacing[4],
     borderTopWidth: 1,
-    borderTopColor: colors.border.light,
+    borderTopColor: colors.gray[100],
   },
   likeContainer: {
     flexDirection: 'row',
@@ -89,17 +118,32 @@ export const styles = StyleSheet.create({
   likeCount: {
     ...createTextStyle('sm', {
       color: colors.text.tertiary,
+      fontFamily: Platform.select({
+        ios: undefined,
+        android: typography.fontFamily.regular,
+      }),
+      fontWeight: typography.fontWeight.medium,
     }),
   },
   likeCountActive: {
     color: colors.primary[600],
   },
   missionSection: {
+    backgroundColor: colors.white,
+    borderRadius: borderRadius.md,
+    padding: spacing[4],
+    borderWidth: 1,
+    borderColor: colors.gray[200],
     marginBottom: spacing[4],
   },
   sectionTitle: {
     ...createTitleStyle('lg', {
       marginBottom: spacing[3],
+      fontFamily: Platform.select({
+        ios: undefined,
+        android: typography.fontFamily.regular,
+      }),
+      fontWeight: typography.fontWeight.medium,
     }),
   },
   missionList: {
@@ -108,11 +152,13 @@ export const styles = StyleSheet.create({
   missionItem: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    backgroundColor: colors.background.primary,
-    borderRadius: borderRadius.lg,
-    padding: spacing[4],
+    backgroundColor: colors.gray[50],
+    borderRadius: borderRadius.sm,
+    paddingVertical: spacing[4],
+    paddingHorizontal: spacing[3],
     borderWidth: 1,
-    borderColor: colors.border.light,
+    borderColor: colors.gray[100],
+    marginBottom: spacing[2],
   },
   missionContent: {
     flex: 1,
@@ -131,11 +177,23 @@ export const styles = StyleSheet.create({
     flexWrap: 'wrap',
   },
   missionTitle: {
-    ...createBodyStyle('base'),
+    ...createBodyStyle('base', {
+      fontFamily: Platform.select({
+        ios: undefined,
+        android: typography.fontFamily.regular,
+      }),
+      fontWeight: typography.fontWeight.medium,
+    }),
     marginRight: spacing[1],
   },
   missionTitleText: {
-    ...createBodyStyle('base'),
+    ...createBodyStyle('base', {
+      fontFamily: Platform.select({
+        ios: undefined,
+        android: typography.fontFamily.regular,
+      }),
+      fontWeight: typography.fontWeight.medium,
+    }),
     flex: 1,
     flexShrink: 1,
   },
@@ -144,33 +202,38 @@ export const styles = StyleSheet.create({
       color: colors.text.primary,
       fontWeight: typography.fontWeight.medium,
       textDecorationLine: 'underline',
+      fontFamily: Platform.select({
+        ios: undefined,
+        android: typography.fontFamily.regular,
+      }),
     }),
     marginLeft: spacing[2],
   },
   missionTypeBadge: {
-    paddingVertical: 4,
+    paddingVertical: spacing[1],
     paddingHorizontal: spacing[2],
-    borderRadius: borderRadius.base,
-    minWidth: 52,
+    borderRadius: borderRadius.full, // 둥근 모서리로 통일
     alignItems: 'center',
     justifyContent: 'center',
+    borderWidth: 1,
+    backgroundColor: colors.white,
   },
   /** 공식: 완료(녹색)와 구분되도록 파란색 계열 */
   missionTypeBadgeOfficial: {
-    backgroundColor: colors.blue[100],
-    borderWidth: 1,
-    borderColor: colors.blue[300],
+    borderColor: colors.blue[400],
   },
   /** 커스텀: 비활성 느낌 없이 구분되는 보라색 계열 */
   missionTypeBadgeCustom: {
-    backgroundColor: colors.purple[100],
-    borderWidth: 1,
-    borderColor: colors.purple[300],
+    borderColor: colors.purple[400],
   },
   missionTypeBadgeText: {
     ...createTextStyle('xs', {
-      fontWeight: typography.fontWeight.bold,
+      fontWeight: typography.fontWeight.medium,
       flexShrink: 0,
+      fontFamily: Platform.select({
+        ios: undefined,
+        android: typography.fontFamily.regular,
+      }),
     }),
   },
   missionTypeBadgeTextOfficial: {
@@ -180,23 +243,21 @@ export const styles = StyleSheet.create({
     color: colors.purple[600],
   },
   creatorStatusBadge: {
-    paddingVertical: 4,
+    paddingVertical: spacing[1],
     paddingHorizontal: spacing[2],
-    borderRadius: borderRadius.base,
-    minWidth: 52,
+    borderRadius: borderRadius.full, // 둥근 모서리로 통일
     alignItems: 'center',
     justifyContent: 'center',
+    borderWidth: 1,
+    backgroundColor: colors.white,
   },
   /** 미완료 시 텍스트 없이 자리만 유지 (완료 버튼 위치 고정) */
   creatorStatusBadgePlaceholder: {
     backgroundColor: 'transparent',
     borderWidth: 0,
-    minWidth: 52,
   },
   creatorStatusCompleted: {
-    backgroundColor: colors.primary[100],
-    borderWidth: 1,
-    borderColor: colors.primary[300],
+    borderColor: colors.green[400],
   },
   creatorStatusIncomplete: {
     backgroundColor: colors.gray[100],
@@ -205,12 +266,16 @@ export const styles = StyleSheet.create({
   },
   creatorStatusText: {
     ...createTextStyle('xs', {
-      fontWeight: typography.fontWeight.bold,
+      fontWeight: typography.fontWeight.medium,
       flexShrink: 0,
+      fontFamily: Platform.select({
+        ios: undefined,
+        android: typography.fontFamily.regular,
+      }),
     }),
   },
   creatorStatusTextCompleted: {
-    color: colors.primary[700],
+    color: colors.green[600],
   },
   creatorStatusTextIncomplete: {
     color: colors.text.tertiary,
