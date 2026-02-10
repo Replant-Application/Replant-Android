@@ -204,8 +204,8 @@ export const useCommunityScreenContainer = ({ navigation, route }: CommunityScre
           creatorProfileImg: todo.creatorProfileImg ?? todo.userProfileImg ?? undefined,
           isPublic: true,
           missionCount: todo.missionCount || todo.totalCount || 0,
-          likeCount: todo.likeCount ?? 0,
-          isLiked: todo.isLiked ?? false,
+          likeCount: todo.likeCount ?? todo.like_count ?? 0,
+          isLiked: todo.isLiked ?? todo.is_liked ?? false,
           createdAt: todo.createdAt,
         }));
         setMissionSets(transformed);
@@ -259,8 +259,8 @@ export const useCommunityScreenContainer = ({ navigation, route }: CommunityScre
           creatorProfileImg: todo.creatorProfileImg ?? todo.userProfileImg ?? undefined,
           isPublic: publicTodoListIds.has(todo.id),
           missionCount: todo.totalCount || 0,
-          likeCount: todo.likeCount ?? 0,
-          isLiked: todo.isLiked ?? false,
+          likeCount: todo.likeCount ?? todo.like_count ?? 0,
+          isLiked: todo.isLiked ?? todo.is_liked ?? false,
           createdAt: todo.createdAt,
         }));
         
