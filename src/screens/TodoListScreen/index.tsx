@@ -41,6 +41,7 @@ const TodoListScreen: React.FC<Props> = ({ navigation, route }) => {
     handleDeleteConfirm,
     handleDeleteConfirmCancel,
     showDeleteBlockedModal,
+    deleteBlockedMessage,
     handleDeleteBlockedModalClose,
     onRefresh,
   } = useTodoListScreenContainer({ navigation, route });
@@ -257,11 +258,11 @@ const TodoListScreen: React.FC<Props> = ({ navigation, route }) => {
         onCancel={handleDeleteConfirmCancel}
         confirmButtonColor={colors.error}
       />
-      {/* 삭제 불가 AlertModal (완료된 미션이 있을 때) */}
+      {/* 삭제 불가 AlertModal (진행 이력 있음 / 진행 중 삭제 불가) */}
       <AlertModal
         visible={showDeleteBlockedModal}
         title="삭제 불가"
-        message="진행 이력이 있는 투두리스트는\n삭제할 수 없습니다."
+        message={deleteBlockedMessage || '이 투두리스트는 삭제할 수 없습니다.'}
         buttonText="확인"
         onClose={handleDeleteBlockedModalClose}
       />

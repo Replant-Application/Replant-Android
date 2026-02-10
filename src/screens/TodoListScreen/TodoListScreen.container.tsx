@@ -4,7 +4,6 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-import { Alert } from 'react-native';
 import { getActiveTodoLists, getTodoLists, canCreateNewTodoList, deleteMissionSet } from '../../api/todolistApi';
 import { TodoList, CanCreateResponse } from '../../types/todolist';
 import { SCREEN_NAMES } from '../../utils/constants';
@@ -25,6 +24,7 @@ export const useTodoListScreenContainer = ({ navigation, route }: TodoListScreen
   const [activeTab, setActiveTab] = useState<'active' | 'completed' | 'incomplete'>('active');
   const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false);
   const [showDeleteBlockedModal, setShowDeleteBlockedModal] = useState(false);
+  const [deleteBlockedMessage, setDeleteBlockedMessage] = useState<string>('');
   const [todoListToDelete, setTodoListToDelete] = useState<TodoList | null>(null);
 
   /**
@@ -164,6 +164,7 @@ export const useTodoListScreenContainer = ({ navigation, route }: TodoListScreen
     if ((target.completedCount ?? 0) > 0) {
       setShowDeleteConfirmModal(false);
       setTodoListToDelete(null);
+      setDeleteBlockedMessage('진행 이력이 있는 투두리스트는\n삭제할 수 없습니다.');
       setShowDeleteBlockedModal(true);
       return;
     }
@@ -173,7 +174,8 @@ export const useTodoListScreenContainer = ({ navigation, route }: TodoListScreen
     if (result.success) {
       loadData();
     } else {
-      Alert.alert('오류', result.error || '삭제에 실패했습니다.');
+      setDeleteBlockedMessage('진행 중 투두리스트는 삭제할 수 없습니다.');
+      setShowDeleteBlockedModal(true);
     }
   }, [todoListToDelete, loadData]);
 
@@ -190,6 +192,7 @@ export const useTodoListScreenContainer = ({ navigation, route }: TodoListScreen
    */
   const handleDeleteBlockedModalClose = useCallback(() => {
     setShowDeleteBlockedModal(false);
+    setDeleteBlockedMessage('');
   }, []);
 
   /**
@@ -235,6 +238,7 @@ export const useTodoListScreenContainer = ({ navigation, route }: TodoListScreen
     handleDeleteConfirm,
     handleDeleteConfirmCancel,
     showDeleteBlockedModal,
+    deleteBlockedMessage,
     handleDeleteBlockedModalClose,
     onRefresh,
   };
